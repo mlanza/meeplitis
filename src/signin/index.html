@@ -57,12 +57,11 @@
     } else {
       document.getElementById("signin-section").style.display = "block";
     }
-    document.addEventListener('DOMContentLoaded', function (event) {
-      const signInForm = document.querySelector('#signin');
-      document.querySelector('#signin').onsubmit = signInSubmitted.bind(signInForm);
-      const signOutButton = document.querySelector('#signout-button')
-      document.querySelector('#signout-button').onclick = signOutSubmitted.bind(signOutButton)
-    });
+
+    const signInForm = document.querySelector('#signin');
+    document.querySelector('#signin').onsubmit = signInSubmitted.bind(signInForm);
+    const signOutButton = document.querySelector('#signout-button')
+    document.querySelector('#signout-button').onclick = signOutSubmitted.bind(signOutButton)
 
     function signInSubmitted(event){
       event.preventDefault();

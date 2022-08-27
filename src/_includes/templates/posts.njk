@@ -1,0 +1,13 @@
+<ul class="posts">
+{% for post in posts %}
+<li><details{% if post.data.summary %} open="open"{% endif %}><summary><a href="{{ post.data.url }}">{{ post.data.title }}</a></summary>
+{% if post.data.summary %}<p>{{ post.data.summary }}</p>{% endif %}
+<ul class='tags'>
+  {% for tag in post.data.tags %}
+  <li><a href="/tags/{{ tag }}">{{ tag }}</a></li>
+  {% endfor %}
+</ul>
+</details>
+</li>
+{% endfor %}
+</ul>

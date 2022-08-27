@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Your Move</title>
+    <link rel="icon" type="image/x-icon" href="./favicon.ico">
+  </head>
+  <body>
+  </body>
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    function toJSON(resp){
+      return resp.json();
+    }
+
+    function see(label){
+      return function(...args){
+        return console.log(label, ...args);
+      }
+    }
+
+    const config = await fetch("https://your-move-config.mlanza.workers.dev", {
+      mode: "cors",
+      headers: {
+        "accept": "application/json",
+        "content-type": "application/json; charset=UTF-8"
+      }
+    }).then(toJSON);
+
+    const SUPABASE_URL = config["supabase-url"];
+    const SUPABASE_KEY = config["supabase-key"];
+    const options = {
+      schema: 'public',
+      headers: { 'x-my-custom-header': 'your-move' },
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
+    }
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, options);
+    console.log('supabase', supabase);
+
+    function data(resp){
+      return resp.data;
+    }
+
+    if (supabase.auth.currentUser) {
+      supabase
+        .from("tables")
+        .select()
+        .then(see("select:supabase:tables"));
+
+      supabase
+        .from("moves")
+        .select()
+        .then(see("select:supabase:moves"));
+
+      const sub = supabase
+        .from("tables")
+        .on("*", see("subscribe:supabase:tables"))
+        .subscribe();
+
+      const mode = "cors";
+      const headers = {
+        "accept": "application/json",
+        "content-type": "application/json; charset=UTF-8",
+        "authorization": `Bearer ${supabase.auth?.currentSession?.access_token}`.trim(),
+        "apikey": SUPABASE_KEY
+      };
+      fetch("https://your-move-oh-hell.mlanza.workers.dev", {
+        mode,
+        headers
+      }).then(toJSON).then(see("get:workers:moves:oh-hell"));
+
+      fetch("https://your-move-oh-hell.mlanza.workers.dev", {
+        method: "POST",
+        mode,
+        headers,
+        body: JSON.stringify({
+          command: "start"
+        })
+      }).then(see("post:workers:moves:oh-hell"));
+
+      fetch("https://your-move-oh-hell.mlanza.workers.dev", {
+        method: "PATCH",
+        mode,
+        headers,
+        body: JSON.stringify({
+          command: "start"
+        })
+      }).then(see("patch:workers:moves:oh-hell"));
+
+
+      fetch(`${SUPABASE_URL}/rest/v1/tables?select=*`, {headers}).then(toJSON).then(see("get:supabase:tables"));
+
+    }
+  </script>
+</html>

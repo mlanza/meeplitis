@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Your Move</title>
+    <link rel="icon" type="image/x-icon" href="./favicon.ico">
+  </head>
+  <body>
+    <div id='signin-section' style="display: none;">
+      <form id='signin'>
+          <h3>Sign In</h3>
+          <label>Email</label><input type='email' name='email' />
+          <label>Password</label><input type='password' name='password' />
+          <input type='submit'>
+      </form>
+  </div>
+  <div id='signout-section' style="display: none;">
+    <h3>Sign Out</h3>
+    <button id='signout-button'>Sign Out</button>
+  </div>
+  </body>
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+    const config = await fetch("https://your-move-config.mlanza.workers.dev", {
+      mode: "cors",
+      headers: {
+        "accept": "application/json",
+        "content-type": "application/json; charset=UTF-8"
+      }
+    }).then(toJSON);
+
+    const SUPABASE_URL = config["supabase-url"];
+    const SUPABASE_KEY = config["supabase-key"];
+    const options = {
+      schema: 'public',
+      headers: { 'x-my-custom-header': 'your-move' },
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
+    }
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, options);
+    console.log('supabase', supabase);
+
+    if (supabase.auth.currentUser) {
+      document.getElementById("signout-section").style.display = "block";
+    } else {
+      document.getElementById("signin-section").style.display = "block";
+    }
+    document.addEventListener('DOMContentLoaded', function (event) {
+      const signInForm = document.querySelector('#signin');
+      document.querySelector('#signin').onsubmit = signInSubmitted.bind(signInForm);
+      const signOutButton = document.querySelector('#signout-button')
+      document.querySelector('#signout-button').onclick = signOutSubmitted.bind(signOutButton)
+    });
+
+    function signInSubmitted(event){
+      event.preventDefault();
+      debugger;
+      const email = event.target[0].value
+      const password = event.target[1].value
+      supabase.auth
+        .signIn({ email, password })
+        .then(setToken)
+        .catch((err) => {
+          alert(err.response.text);
+        });
+    }
+
+    function signOutSubmitted(event){
+      event.preventDefault()
+      supabase.auth
+        .signOut().then(function(){
+          location.href = "/";
+        });
+    }
+
+    function setToken(response) {
+      if (response.user.confirmation_sent_at && !response?.session?.access_token) {
+        alert('Confirmation Email Sent')
+      } else {
+        console.log("resp", response);
+      }
+      location.href = "/";
+    }
+  </script>
+</html>

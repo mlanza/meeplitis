@@ -1,0 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Mountains+of+Christmas&family=Dokdo&family=Racing+Sans+One&family=Bangers&family=Irish+Grover&display=swap');
+
+body {
+  background-image: url(./images/connected.jpg);
+  background-repeat: repeat;
+  background-color: white;
+  color: #454344;
+  padding: 2em 0 4em;
+  margin: 0;
+  text-align: center;
+  min-height: 100%;
+  font-size: 1.2em;
+}
+header,
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-family: "Bangers";
+  font-family: "Dokdo";
+  font-family: "Irish Grover";
+  font-family: "Mountains of Christmas";
+  font-family: "Racing Sans One";
+  font-style: italic;
+}
+header {
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 1em;
+}
+#sitename {
+  color: #36454f;
+  color: #454344;
+  font-size: 3em;
+  font-weight: normal;
+  padding: 0;
+  margin: 0;
+  text-decoration: none;
+  background-image: url(./images/meeple.png);
+  background-repeat: no-repeat;
+  background-position: left;
+  background-size: 2em;
+  line-height: 3em;
+  -webkit-text-stroke: 1px white;
+  margin: 0 auto;
+  width: 6em;
+
+}

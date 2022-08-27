@@ -1,0 +1,5 @@
+---
+layout: layouts/post.njk
+---
+{% set posts = search.pages("'" + tag + "'") %}
+{% include "templates/posts.njk" %}

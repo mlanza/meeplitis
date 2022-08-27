@@ -1,0 +1,9 @@
+layout: layouts/post.njk
+language: en
+site:
+  title: Your Move
+  description: Play turn-based games
+author:
+  name: Mario T. Lanza
+  email: mario@doesideas.com
+  url: https://doesideas.com/about-me/

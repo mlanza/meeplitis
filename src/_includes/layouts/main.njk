@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="{{ language }}">
+  <head>
+    <meta charset="utf-8">
+    <title>{{ title }} | {{ site.title }}</title>
+    <meta name="author" content="{{ author.name }}">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" type="text/css" href="/index.css">
+  {% for url in stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ url }}">
+  {% endfor %}
+  </head>
+  <body{% if slug %} id="{{slug}}"{% endif %}>
+    <main>
+      {{ content | safe }}
+    </main>
+  </body>
+</html>

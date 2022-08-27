@@ -1,0 +1,8 @@
+---
+  layout: layouts/main.njk
+---
+<header>
+  <h1>{{ title }}</h1>
+  {% if teaser %}<p>{{ teaser }}</p>{% endif %}
+</header>
+{{ content | safe }}

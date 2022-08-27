@@ -51,9 +51,9 @@
         .then(see("select:supabase:tables"));
 
       supabase
-        .from("moves")
+        .from("events")
         .select()
-        .then(see("select:supabase:moves"));
+        .then(see("select:supabase:events"));
 
       const sub = supabase
         .from("tables")
@@ -70,7 +70,7 @@
       fetch("https://your-move-oh-hell.mlanza.workers.dev", {
         mode,
         headers
-      }).then(toJSON).then(see("get:workers:moves:oh-hell"));
+      }).then(toJSON).then(see("get:workers:events:oh-hell"));
 
       fetch("https://your-move-oh-hell.mlanza.workers.dev", {
         method: "POST",
@@ -79,7 +79,7 @@
         body: JSON.stringify({
           command: "start"
         })
-      }).then(see("post:workers:moves:oh-hell"));
+      }).then(see("post:workers:events:oh-hell"));
 
       fetch("https://your-move-oh-hell.mlanza.workers.dev", {
         method: "PATCH",
@@ -88,7 +88,7 @@
         body: JSON.stringify({
           command: "start"
         })
-      }).then(see("patch:workers:moves:oh-hell"));
+      }).then(see("patch:workers:events:oh-hell"));
 
 
       fetch(`${SUPABASE_URL}/rest/v1/tables?select=*`, {headers}).then(toJSON).then(see("get:supabase:tables"));

@@ -18,7 +18,7 @@ CREATE TYPE table_status AS ENUM ('open', 'closed', 'started', 'finished', 'aban
 -- finished - the game has concluded
 -- abandoned - the game was not concluded before time ran out
 
-CREATE TYPE move_status AS ENUM ('tentative', 'readied', 'confirmed', 'reversed', 'redacted'); -- redacted is an action for admins (e.g. GM)
+CREATE TYPE event_status AS ENUM ('tentative', 'readied', 'confirmed', 'reversed', 'redacted'); -- redacted is an action for admins (e.g. GM)
 -- tentative - contemplating move
 -- readied - only used in simultaneous action selection games, can be reversed while not everyone is ready
 -- confirmed - the move was executed
@@ -31,7 +31,6 @@ CREATE TABLE games (
     id varchar(4) not null default generate_uid(4) primary key,
     title text not null,
     slug text,
-    bggid smallint,
     created_at timestamp not null default now());
 
 ALTER TABLE games ENABLE ROW LEVEL SECURITY;
@@ -84,39 +83,28 @@ ALTER TABLE seats ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Seats are viewable by everyone."
   ON seats FOR SELECT USING (true);
 
-CREATE TABLE starts (
-    table_id varchar(11) references tables(id) not null primary key,
-    details jsonb not null, -- the game state before any moves are made
-    created_at timestamp not null default now());
-
-ALTER TABLE starts ENABLE ROW LEVEL SECURITY;
-
-CREATE TABLE moves(
-    table_id varchar(11) not null,
-    seat_id varchar(3) not null,
+CREATE TABLE events(
+    table_id varchar(11) references tables(id) not null,
     id varchar(5) not null default generate_uid(5),
+    seq bigserial not null, -- guarantees move order
+    seat_id varchar(3),
     event varchar(15) not null, -- determines whether move and prior moves are automatically commited or not
     details jsonb not null,
-    seq bigserial not null, -- guarantees move order
-    status move_status default 'tentative',
+    status event_status default 'tentative',
     created_at timestamp not null default now(),
     confirmed_at timestamp,
-    CONSTRAINT fk_moves_seats
-      FOREIGN KEY (table_id, seat_id)
-      REFERENCES seats(table_id, id),
-    PRIMARY KEY (table_id, seat_id, id));
+    PRIMARY KEY (table_id, id));
 
-ALTER TABLE moves ENABLE ROW LEVEL SECURITY;
+ALTER TABLE events ENABLE ROW LEVEL SECURITY;
 
-INSERT INTO games (id, title, slug, bggid)
-    VALUES ('8Mj1', 'Mexica', 'mexica', 2955);
+INSERT INTO games (id, title, slug)
+    VALUES ('8Mj1', 'Mexica', 'mexica');
 INSERT INTO tables (id, game_id, created_by)
     VALUES ('823Wonk34yU', '8Mj1', '5e6b12f5-f24c-4fd3-8812-f537778dc5c2');
 INSERT INTO seats (table_id, id, player_id, seq)
     VALUES ('823Wonk34yU', 'Hj3', '5e6b12f5-f24c-4fd3-8812-f537778dc5c2', 1),
            ('823Wonk34yU', '4jh', 'c8619345-0c1a-44c4-bdfe-e6e1de11c6bd', 2);
-INSERT INTO starts (table_id, details)
-    VALUES ('823Wonk34yU', '{"deck": []}');
-INSERT INTO moves (table_id, seat_id, event, details)
-    VALUES ('823Wonk34yU', 'Hj3', 'draw', '{"cards": 1}'),
+INSERT INTO events (table_id, seat_id, event, details)
+    VALUES ('823Wonk34yU', null, 'start', '{"deck": []}'),
+           ('823Wonk34yU', 'Hj3', 'draw', '{"cards": 1}'),
            ('823Wonk34yU', '4jh', 'draw', '{"cards": 2}');

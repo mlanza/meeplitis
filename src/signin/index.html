@@ -21,6 +21,17 @@
   </body>
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    function toJSON(resp){
+      return resp.json();
+    }
+
+    function see(label){
+      return function(...args){
+        return console.log(label, ...args);
+      }
+    }
+
     const config = await fetch("https://your-move-config.mlanza.workers.dev", {
       mode: "cors",
       headers: {

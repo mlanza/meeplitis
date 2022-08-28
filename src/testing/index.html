@@ -69,13 +69,11 @@
         "apikey": SUPABASE_KEY
       };
       fetch(worker, {
-        mode,
         headers
       }).then(toJSON).then(see("get:workers:events:oh-hell"));
 
       fetch(worker, {
         method: "POST",
-        mode,
         headers,
         body: JSON.stringify({
           command: "start"
@@ -84,7 +82,6 @@
 
       fetch(worker, {
         method: "PATCH",
-        mode,
         headers,
         body: JSON.stringify({
           command: "start"

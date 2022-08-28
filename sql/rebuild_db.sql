@@ -92,6 +92,9 @@ CREATE TABLE events(
     status event_status default 'tentative',
     created_at timestamp not null default now(),
     confirmed_at timestamp,
+    CONSTRAINT fk_events_seats
+      FOREIGN KEY(table_id, seat_id)
+	  REFERENCES seats(table_id, id),
     PRIMARY KEY (table_id, id));
 
 ALTER TABLE events ENABLE ROW LEVEL SECURITY;

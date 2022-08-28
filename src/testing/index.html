@@ -60,19 +60,20 @@
         .on("*", see("subscribe:supabase:tables"))
         .subscribe();
 
-      const mode = "cors";
+      const worker = "https://oh-hell.workers.yourmove.cc";
+      const mode = "no-cors";
       const headers = {
         "accept": "application/json",
         "content-type": "application/json; charset=UTF-8",
         "authorization": `Bearer ${supabase.auth?.currentSession?.access_token}`.trim(),
         "apikey": SUPABASE_KEY
       };
-      fetch("https://your-move-oh-hell.mlanza.workers.dev", {
+      fetch(worker, {
         mode,
         headers
       }).then(toJSON).then(see("get:workers:events:oh-hell"));
 
-      fetch("https://your-move-oh-hell.mlanza.workers.dev", {
+      fetch(worker, {
         method: "POST",
         mode,
         headers,
@@ -81,7 +82,7 @@
         })
       }).then(see("post:workers:events:oh-hell"));
 
-      fetch("https://your-move-oh-hell.mlanza.workers.dev", {
+      fetch(worker, {
         method: "PATCH",
         mode,
         headers,
@@ -90,9 +91,7 @@
         })
       }).then(see("patch:workers:events:oh-hell"));
 
-
       fetch(`${SUPABASE_URL}/rest/v1/tables?select=*`, {headers}).then(toJSON).then(see("get:supabase:tables"));
-
     }
   </script>
 </html>

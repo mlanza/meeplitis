@@ -32,7 +32,7 @@
       }
     }
 
-    const config = await fetch("https://your-move-config.mlanza.workers.dev", {
+    const {supabaseUrl, supabaseKey, options} = await fetch("https://config.workers.yourmove.cc", {
       mode: "cors",
       headers: {
         "accept": "application/json",
@@ -40,16 +40,7 @@
       }
     }).then(toJSON);
 
-    const SUPABASE_URL = config["supabase-url"];
-    const SUPABASE_KEY = config["supabase-key"];
-    const options = {
-      schema: 'public',
-      headers: { 'x-my-custom-header': 'your-move' },
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true,
-    }
-    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, options);
+    const supabase = createClient(supabaseUrl, supabaseKey, options);
     console.log('supabase', supabase);
 
     if (supabase.auth.currentUser) {

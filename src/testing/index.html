@@ -20,7 +20,7 @@
       }
     }
 
-    const config = await fetch("https://config.workers.yourmove.cc", {
+    const {supabaseUrl, supabaseKey, options} = await fetch("https://config.workers.yourmove.cc", {
       mode: "cors",
       headers: {
         "accept": "application/json",
@@ -28,16 +28,7 @@
       }
     }).then(toJSON);
 
-    const SUPABASE_URL = config["supabase-url"];
-    const SUPABASE_KEY = config["supabase-key"];
-    const options = {
-      schema: 'public',
-      headers: { 'x-my-custom-header': 'your-move' },
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true,
-    }
-    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, options);
+    const supabase = createClient(supabaseUrl, supabaseUrl, options);
     console.log('supabase', supabase);
 
     function data(resp){
@@ -65,7 +56,7 @@
         "accept": "application/json",
         "content-type": "application/json; charset=UTF-8",
         "authorization": `Bearer ${supabase.auth?.currentSession?.access_token}`.trim(),
-        "apikey": SUPABASE_KEY
+        "apikey": supabaseKey
       };
       fetch(worker, {
         headers
@@ -87,7 +78,7 @@
         })
       }).then(see("patch:workers:events:oh-hell"));
 
-      fetch(`${SUPABASE_URL}/rest/v1/tables?select=*`, {headers}).then(toJSON).then(see("get:supabase:tables"));
+      fetch(`${supabaseUrl}/rest/v1/tables?select=*`, {headers}).then(toJSON).then(see("get:supabase:tables"));
     }
   </script>
 </html>

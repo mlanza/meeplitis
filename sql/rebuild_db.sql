@@ -1,13 +1,12 @@
 -- TODO define indexes
 -- TODO define proc for committing move
 
-DROP TABLE moves;
+DROP TABLE events;
 DROP TABLE seats;
-DROP TABLE starts;
 DROP TABLE tables;
 DROP TABLE games;
 
-DROP TYPE move_status;
+DROP TYPE event_status;
 DROP TYPE table_status;
 DROP TYPE seating_mode;
 
@@ -98,13 +97,13 @@ CREATE TABLE events(
 ALTER TABLE events ENABLE ROW LEVEL SECURITY;
 
 INSERT INTO games (id, title, slug)
-    VALUES ('8Mj1', 'Mexica', 'mexica');
+    VALUES ('8Mj1', 'Oh Hell', 'oh-hell');
 INSERT INTO tables (id, game_id, created_by)
     VALUES ('823Wonk34yU', '8Mj1', '5e6b12f5-f24c-4fd3-8812-f537778dc5c2');
 INSERT INTO seats (table_id, id, player_id, seq)
     VALUES ('823Wonk34yU', 'Hj3', '5e6b12f5-f24c-4fd3-8812-f537778dc5c2', 1),
            ('823Wonk34yU', '4jh', 'c8619345-0c1a-44c4-bdfe-e6e1de11c6bd', 2);
-INSERT INTO events (table_id, seat_id, event, details)
-    VALUES ('823Wonk34yU', null, 'start', '{"deck": []}'),
-           ('823Wonk34yU', 'Hj3', 'draw', '{"cards": 1}'),
-           ('823Wonk34yU', '4jh', 'draw', '{"cards": 2}');
+INSERT INTO events (table_id, seat_id, event, details, status, confirmed_at)
+    VALUES ('823Wonk34yU', null, 'start', '{"deck": []}', 'confirmed', now()),
+           ('823Wonk34yU', 'Hj3', 'draw', '{"cards": 1}', 'confirmed', now()),
+           ('823Wonk34yU', '4jh', 'draw', '{"cards": 2}', 'confirmed', now());

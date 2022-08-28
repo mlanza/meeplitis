@@ -28,7 +28,7 @@
       }
     }).then(toJSON);
 
-    const supabase = createClient(supabaseUrl, supabaseUrl, options);
+    const supabase = createClient(supabaseUrl, supabaseKey, options);
     console.log('supabase', supabase);
 
     function data(resp){

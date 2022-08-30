@@ -49,7 +49,7 @@ export function ohHell(seated, config, events = [], state = null){
 
 function start(self){
   const cards = _.shuffle(deck());
-  const details = {deck: cards, round: 0, deal: [1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1], readies: 0};
+  const details = {deck: cards, round: 0, deal: [1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1]};
   return ohHell(self.seated, self.config, _.append(self.events, {type: "start", details, status: "confirmed"}), details);
 }
 
@@ -69,32 +69,46 @@ export function bid(seat, tricks){
   }
 }
 
+//commit everything prior to the last confirmed event
+function commit(self){
+  const _events = _.chain(self.events,
+    _.reverse,
+    _.reduce(function({events, confirmed}, event){
+      const _confirmed = confirmed || event.status === "confirmed",
+            _events = _.append(events, _confirmed && event.status !== "confirmed" ? _.assoc(event, "status", "confirmed") : event);
+      return {events: _events, confirmed: _confirmed};
+    }, {events: [], confirmed: false}, _),
+    _.get(_, "events"),
+    _.reverse,
+    _.toArray);
+  return ohHell(self.seated, self.config, _events, self.state);
+}
+
 function step(self, event){
   //TODO implement all state reductions
   const {type, details} = event;
-  const status = {"bid": "readied", "deal": "confirmed", "start": "confirmed"}[event.type] || "tentative";
-  let events = _.append(self.events, Object.assign(event, {status}));
-  let state = null;
   switch(event.type) {
     case "start":
-      state = event[details];
-      break;
+      return _.chain(ohHell(self.seated, self.config, _.append(self.events, Object.assign(event, {status: "confirmed"})), event[details]));
+
+    case "deal":
+      return _.chain(ohHell(self.seated, self.config, _.append(self.events, Object.assign(event, {status: "confirmed"})), self.state));
 
     case "bid":
-      state = self.state;
+      const s = _.count(self.seated) - 1;
       const tail = _.chain(
-        events,
-        _.last(_.count(self.seated), _));
-      const ready = _.every(
-        _.and(
-          _.pipe(_.get(_, "type"), _.eq(_, "bid")),
-          _.pipe(_.get(_, "status"), _.eq(_, "readied"))), tail) && _.count(tail) === _.count(self.seated);
-      if (ready) {
-        events = _.toArray(_.concat(_.take(_.count(events) - _.count(tail)), _.map(_.assoc(_, "status", "confirmed"), tail)));
-      }
-      break;
+        self.events,
+        _.last(s, _));
+      return _.chain(
+        ohHell(self.seated, self.config,
+          _.append(self.events,
+            _.assoc(event, "status",
+              _.every(
+                _.and(
+                  _.pipe(_.get(_, "type"), _.eq(_, "bid")),
+                  _.pipe(_.get(_, "status"), _.eq(_, "readied"))), tail) && _.count(tail) === s ? "confirmed" : "readied")), self.state),
+        commit);
   }
-  return _.chain(ohHell(self.seated, self.config, events, state), _.see("step"));
 
 }
 

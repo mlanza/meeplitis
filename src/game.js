@@ -24,7 +24,6 @@ export function deal(deck, hands, cards){
         return [card, hand];
       }, _, _.cycle(_.range(hands))),
       _.reduce(function(memo, [card, hand]){
-        _.log("memo", memo, "card", card, "hand", hand);
         return _.update(memo, hand, _.conj(_, card));
       }, Array.from(_.repeat(hands, [])), _))
   ];

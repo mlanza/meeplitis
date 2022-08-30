@@ -72,7 +72,7 @@ export function bid(seat, tricks){
 function step(self, event){
   //TODO implement all state reductions
   const {type, details} = event;
-  const status = {"bid": "readied", "deal": "confirmed", "start": "confirmed"}[event.type] || "tenative";
+  const status = {"bid": "readied", "deal": "confirmed", "start": "confirmed"}[event.type] || "tentative";
   let events = _.append(self.events, Object.assign(event, {status}));
   let state = null;
   switch(event.type) {

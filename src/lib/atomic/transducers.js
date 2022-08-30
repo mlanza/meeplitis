@@ -17,7 +17,7 @@ function last(n) {
     return _.overload(rf, function (memo) {
       let acc = memo;
 
-      for (var x of prior) {
+      for (let x of prior) {
         acc = rf(acc, x);
       }
 
@@ -240,7 +240,7 @@ function hist(limit) {
 
       revised.unshift(value);
 
-      if (history.length > limit) {
+      if (revised.length > limit) {
         revised.pop();
       }
 

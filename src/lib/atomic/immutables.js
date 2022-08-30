@@ -5,14 +5,18 @@ import { Map, List, Set, OrderedMap, OrderedSet } from '../immutable.js';
 export { List, OrderedMap, OrderedSet } from '../immutable.js';
 
 function map(obj) {
-  return _.ako(obj, Map) ? obj : new Map(obj);
+  return _.ako(obj, Map) ? obj : _.reduce(function (memo, [key, value]) {
+    return memo.set(key, value);
+  }, new Map(), obj);
 }
 
 function list(obj) {
-  return _.ako(obj, List) ? obj : new List(obj);
+  return _.ako(coll, List) ? coll : _.reduce(function (memo, value) {
+    return memo.add(value);
+  }, new List(), coll || []);
 }
 
-function equiv$1(self, other) {
+function equiv$2(self, other) {
   return self.equals(other);
 }
 
@@ -32,7 +36,7 @@ function contains$1(self, idx) {
   return self.has(idx);
 }
 
-function conj$1(self, value) {
+function conj$2(self, value) {
   return self.push(value);
 }
 
@@ -78,7 +82,7 @@ function merge$2(self, other) {
 }
 
 var behave$2 = _.does(_.iterable, _.keying("List"), _.implement(_.IEquiv, {
-  equiv: equiv$1
+  equiv: equiv$2
 }), _.implement(_.IInclusive, {
   includes: includes$1
 }), _.implement(_.IAssociative, {
@@ -101,7 +105,7 @@ var behave$2 = _.does(_.iterable, _.keying("List"), _.implement(_.IEquiv, {
 }), _.implement(_.ICounted, {
   count: count$2
 }), _.implement(_.ICollection, {
-  conj: conj$1
+  conj: conj$2
 }), _.implement(_.ISeq, {
   first: first$2,
   rest: rest$2
@@ -111,6 +115,10 @@ behave$2(List);
 
 function assoc(self, key, value) {
   return self.set(key, value);
+}
+
+function conj$1(self, [key, value]) {
+  return assoc(self, key, value);
 }
 
 function contains(self, key) {
@@ -134,7 +142,7 @@ function vals(self) {
 }
 
 function dissoc(self, key) {
-  return self.remove(self, key);
+  return self.remove(key);
 }
 
 function reducekv(self, f, init) {
@@ -163,8 +171,14 @@ function next$1(self) {
   return _.seq(rest$1(self));
 }
 
+function equiv$1(self, other) {
+  return self.equals(other);
+}
+
 var behave$1 = _.does(_.iterable, _.keying("Map"), _.implement(_.IKVReducible, {
   reducekv
+}), _.implement(_.IEquiv, {
+  equiv: equiv$1
 }), _.implement(_.IMergable, {
   merge: merge$1
 }), _.implement(_.INext, {
@@ -184,6 +198,8 @@ var behave$1 = _.does(_.iterable, _.keying("Map"), _.implement(_.IKVReducible, {
   count: count$1
 }), _.implement(_.ILookup, {
   lookup
+}), _.implement(_.ICollection, {
+  conj: conj$1
 }), _.implement(_.IAssociative, {
   assoc,
   contains
@@ -192,7 +208,9 @@ var behave$1 = _.does(_.iterable, _.keying("Map"), _.implement(_.IKVReducible, {
 behave$1(Map);
 
 function set(coll) {
-  return coll ? new Set(_.toArray(coll)) : new Set();
+  return _.reduce(function (memo, value) {
+    return memo.add(value);
+  }, new Set(), coll || []);
 }
 function emptySet() {
   return new Set();
@@ -280,13 +298,13 @@ function merge(self, other) {
 }
 
 function equiv(self, other) {
-  return _.count(_.union(self, other)) === count(self);
+  return self.equals(other);
 }
 
 var behave = _.does(_.iterable, _.keying("Set"), _.implement(mut.IPersistent, {
   persistent
 }), _.implement(_.ISequential), _.implement(_.IEquiv, {
-  equiv: equiv
+  equiv
 }), _.implement(_.IAssociative, {
   contains: includes
 }), _.implement(_.IMergable, {
@@ -320,13 +338,17 @@ var behave = _.does(_.iterable, _.keying("Set"), _.implement(mut.IPersistent, {
 behave(Set);
 
 function orderedMap(obj) {
-  return _.ako(obj, OrderedMap) ? obj : new OrderedMap(obj);
+  return _.ako(obj, OrderedMap) ? obj : _.reduce(function (memo, [key, value]) {
+    return memo.set(key, value);
+  }, new OrderedMap(), obj);
 }
 
 behave$1(OrderedMap);
 
 function orderedSet(coll) {
-  return _.ako(coll, OrderedSet) ? coll : new OrderedSet(_.toArray(coll));
+  return _.reduce(function (memo, value) {
+    return memo.add(value);
+  }, new OrderedSet(), coll || []);
 }
 function emptyOrderedSet() {
   return new OrderedSet();

@@ -166,6 +166,7 @@ function pipe2(source, xform) {
       pub$3(memo, value);
       return memo;
     }));
+    let unsub = _.noop;
     const sink = observer(function (value) {
       const memo = step(obs, value);
 
@@ -174,13 +175,13 @@ function pipe2(source, xform) {
       }
     }, function (error) {
       err$3(obs, error);
-      unsub && unsub();
+      unsub();
     }, function () {
       step(obs);
       complete$3(obs);
-      unsub && unsub();
+      unsub();
     });
-    const unsub = sub$4(source, sink); //might complete before returning `unsub` fn
+    unsub = sub$4(source, sink); //might complete before returning `unsub` fn
 
     if (closed$3(sink)) {
       unsub();
@@ -397,7 +398,7 @@ const hist$1 = _.overload(null, (_hist = hist2, function hist2(_argPlaceholder6)
 
 function fromCollection(coll) {
   return observable(function (observer) {
-    for (var item of coll) {
+    for (let item of coll) {
       pub$3(observer, item);
 
       if (closed$3(observer)) {

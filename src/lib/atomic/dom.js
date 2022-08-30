@@ -877,7 +877,7 @@ const parent = _.comp(_.parent, seq$1);
 
 const parents = _.comp(_.parents, seq$1);
 
-const contents = _.comp(_.contents, seq$1);
+const contents = _.comp(IContent.contents, seq$1);
 
 function sel(self, selector) {
   var _matches, _$filter, _ref, _selector, _matches2;
@@ -1482,7 +1482,7 @@ _.extend(_.ICoercible, {
   toFragment: null
 });
 
-const toFragment = _.toFragment;
+const toFragment = _.ICoercible.toFragment;
 
 (function () {
   function embeddables(self, doc) {
@@ -1544,4 +1544,21 @@ _.ICoercible.addMethod([SpaceSeparated, Array], _.comp(Array.from, _.seq));
 
 _.ICoercible.addMethod([NestedAttrs, Object], _.deref);
 
-export { Attrs, IContent, IEmbeddable, IHideable, IHtml, IMountable, ISelectable, IText, IValue, InvalidHostElementError, NestedAttrs, Props, SpaceSeparated, addClass, addStyle, assert, attr, attrs, behave, behaviors, checkbox, classes, click, contents$2 as contents, depressed, element, elementns, embed, embeddables$2 as embeddables, enable, focus, fragment, hasClass, hash, hide$1 as hide, hover, html$1 as html, input, isElement, isHTMLDocument, isMountable, isVisible, markup, matches, mount, mounts, nestedAttrs, option, prop, props, ready, removeAttr, removeClass, removeStyle, replaceWith, sel$2 as sel, sel1$1 as sel1, select, show$1 as show, spaceSep, style, tag, tags, text$2 as text, textbox, toFragment, toggle$1 as toggle, toggleClass, value$2 as value, wrap };
+function stylesheet2(href, document) {
+  if (!sel1$1(`link[href='${href}']`, document)) {
+    const stylesheet = element(document, "link", {
+      type: "text/css",
+      rel: "stylesheet",
+      href
+    });
+    mut.append(document.body, stylesheet);
+  }
+}
+
+function stylesheet1(href) {
+  stylesheet2(href, document);
+}
+
+const stylesheet = _.overload(null, stylesheet1, stylesheet2);
+
+export { Attrs, IContent, IEmbeddable, IHideable, IHtml, IMountable, ISelectable, IText, IValue, InvalidHostElementError, NestedAttrs, Props, SpaceSeparated, addClass, addStyle, assert, attr, attrs, behave, behaviors, checkbox, classes, click, contents$2 as contents, depressed, element, elementns, embed, embeddables$2 as embeddables, enable, focus, fragment, hasClass, hash, hide$1 as hide, hover, html$1 as html, input, isElement, isHTMLDocument, isMountable, isVisible, markup, matches, mount, mounts, nestedAttrs, option, prop, props, ready, removeAttr, removeClass, removeStyle, replaceWith, sel$2 as sel, sel1$1 as sel1, select, show$1 as show, spaceSep, style, stylesheet, tag, tags, text$2 as text, textbox, toFragment, toggle$1 as toggle, toggleClass, value$2 as value, wrap };

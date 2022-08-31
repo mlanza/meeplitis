@@ -85,13 +85,11 @@ CREATE POLICY "Seats are viewable by everyone."
 CREATE TABLE events(
     table_id varchar(11) references tables(id) not null,
     id varchar(5) not null default generate_uid(5),
-    seq bigserial not null, -- guarantees move order
+    seq bigserial not null, -- guarantees order
     seat_id varchar(3),
-    event varchar(15) not null, -- determines whether move and prior moves are automatically commited or not
+    event varchar(15) not null,
     details jsonb not null,
-    status event_status default 'tentative',
     created_at timestamp not null default now(),
-    confirmed_at timestamp,
     CONSTRAINT fk_events_seats
       FOREIGN KEY(table_id, seat_id)
 	  REFERENCES seats(table_id, id),
@@ -106,7 +104,7 @@ INSERT INTO tables (id, game_id, created_by)
 INSERT INTO seats (table_id, id, player_id, seq)
     VALUES ('823Wonk34yU', 'Hj3', '5e6b12f5-f24c-4fd3-8812-f537778dc5c2', 1),
            ('823Wonk34yU', '4jh', 'c8619345-0c1a-44c4-bdfe-e6e1de11c6bd', 2);
-INSERT INTO events (table_id, seat_id, event, details, status, confirmed_at)
-    VALUES ('823Wonk34yU', null, 'start', '{"deck": []}', 'confirmed', now()),
-           ('823Wonk34yU', 'Hj3', 'draw', '{"cards": 1}', 'confirmed', now()),
-           ('823Wonk34yU', '4jh', 'draw', '{"cards": 2}', 'confirmed', now());
+INSERT INTO events (table_id, seat_id, event, details)
+    VALUES ('823Wonk34yU', null, 'start', '{"deck": []}'),
+           ('823Wonk34yU', 'Hj3', 'draw', '{"cards": 1}'),
+           ('823Wonk34yU', '4jh', 'draw', '{"cards": 2}');

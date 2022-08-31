@@ -892,16 +892,16 @@ const IHashable = protocol({
   hash: null
 });
 
-function equiv$a(x, y) {
+function equiv$b(x, y) {
   return x === y;
 }
 
 const IEquiv = protocol({
-  equiv: equiv$a
+  equiv: equiv$b
 });
 
 const cache = Symbol("hashcode");
-function hash$3(self) {
+function hash$4(self) {
   const hash = satisfies(IHashable, "hash", self) || T.immhash;
 
   if (typeof self === "object") {
@@ -924,7 +924,7 @@ function isValueObject(self) {
 }
 
 function addMethod(self, key, handler) {
-  const hashcode = hash$3(key);
+  const hashcode = hash$4(key);
   const potentials = self.methods[hashcode] ||= [];
   potentials.push([key, handler]);
   return self;
@@ -1405,7 +1405,7 @@ function reduced$1(value) {
 function kin(self, other) {
   return is(other, self.constructor);
 }
-function equiv$9(self, other) {
+function equiv$a(self, other) {
   return self === other || IEquiv.equiv(self, other);
 }
 
@@ -1416,7 +1416,7 @@ function alike2(self, other) {
 function alike3(self, other, keys) {
   //same parts? structural equality?
   return reduce$e(function (memo, key) {
-    return memo ? equiv$9(self[key], other[key]) : reduced$1(memo);
+    return memo ? equiv$a(self[key], other[key]) : reduced$1(memo);
   }, true, keys);
 }
 
@@ -1432,10 +1432,10 @@ function equivalent() {
 }
 
 function eqN(...args) {
-  return everyPair(equiv$9, args);
+  return everyPair(equiv$a, args);
 }
 
-const eq = overload(constantly(true), constantly(true), equiv$9, eqN);
+const eq = overload(constantly(true), constantly(true), equiv$a, eqN);
 const notEq = complement(eq);
 
 function reduce$d(self, f, init) {
@@ -1447,11 +1447,11 @@ function append$6(self, x) {
 }
 
 const prepend$5 = append$6;
-function equiv$8(xs, ys) {
-  return !!satisfies(ISequential$1, xs) === !!satisfies(ISequential$1, ys) && count$b(xs) === count$b(ys) && equiv$9(first$d(xs), first$d(ys)) && equiv$9(next$a(xs), next$a(ys));
+function equiv$9(xs, ys) {
+  return !!satisfies(ISequential$1, xs) === !!satisfies(ISequential$1, ys) && count$b(xs) === count$b(ys) && equiv$a(first$d(xs), first$d(ys)) && equiv$a(next$a(xs), next$a(ys));
 }
 const iequiv = implement(IEquiv, {
-  equiv: equiv$8
+  equiv: equiv$9
 });
 var behave$G = does(iequiv, keying("EmptyList"), implement(ISequential$1), implement(IPrependable, {
   prepend: prepend$5
@@ -1507,7 +1507,7 @@ function ltN(...args) {
 }
 
 const lt = overload(constantly(false), constantly(true), lt2, ltN);
-const lte2 = or(lt2, equiv$9);
+const lte2 = or(lt2, equiv$a);
 
 function lteN(...args) {
   return everyPair(lte2, args);
@@ -1524,7 +1524,7 @@ function gtN(...args) {
 }
 
 const gt = overload(constantly(false), constantly(true), gt2, gtN);
-const gte2 = or(equiv$9, gt2);
+const gte2 = or(equiv$a, gt2);
 
 function gteN(...args) {
   return everyPair(gte2, args);
@@ -1794,7 +1794,7 @@ function reduce$c(self, f, init) {
   return init;
 }
 
-function equiv$7(self, other) {
+function equiv$8(self, other) {
   return null == other;
 }
 
@@ -1810,12 +1810,12 @@ function merge$3(self, ...xs) {
   return count$b(xs) ? merge$4.apply(null, Array.from(xs)) : null;
 }
 
-function hash$2(self) {
+function hash$3(self) {
   return immhash(null);
 }
 
 var behave$D = does(keying("Nil"), implement(IHashable, {
-  hash: hash$2
+  hash: hash$3
 }), implement(IClonable, {
   clone: identity
 }), implement(ICompactible, {
@@ -1835,7 +1835,7 @@ var behave$D = does(keying("Nil"), implement(IHashable, {
 }), implement(IOtherwise, {
   otherwise: otherwise$5
 }), implement(IEquiv, {
-  equiv: equiv$7
+  equiv: equiv$8
 }), implement(ILookup, {
   lookup: identity
 }), implement(IInclusive, {
@@ -2458,7 +2458,7 @@ function dedupe1(coll) {
 }
 
 function dedupe2(f, coll) {
-  return dedupe3(f, equiv$9, coll);
+  return dedupe3(f, equiv$a, coll);
 }
 
 function dedupe3(f, equiv, coll) {
@@ -3090,9 +3090,9 @@ function dissoc$4(self, key) {
   });
 }
 
-function equiv$6(self, other) {
+function equiv$7(self, other) {
   return count$b(self) === count$b(other) && reducekv$8(self, function (memo, key, value) {
-    return memo ? equiv$9(get(other, key), value) : reduced$1(memo);
+    return memo ? equiv$a(get(other, key), value) : reduced$1(memo);
   }, true);
 }
 
@@ -3135,7 +3135,7 @@ var behave$B = does(emptyable, implement(IReducible, {
 }), implement(IKVReducible, {
   reducekv: reducekv$8
 }), implement(IEquiv, {
-  equiv: equiv$6
+  equiv: equiv$7
 }), implement(ICoercible, {
   coerce
 }), implement(IEmptyableCollection, {
@@ -3257,7 +3257,7 @@ function revSeq(coll, idx) {
 function hashSeq(hs) {
   return reduce$e(function (h1, h2) {
     return 3 * h1 + h2;
-  }, 0, map(hash$3, hs));
+  }, 0, map(hash$4, hs));
 }
 function hashKeyed(self) {
   return reduce$e(function (memo, key) {
@@ -3944,7 +3944,7 @@ var p$4 = /*#__PURE__*/Object.freeze({
   gt: gt,
   gte: gte,
   kin: kin,
-  equiv: equiv$9,
+  equiv: equiv$a,
   alike: alike,
   equivalent: equivalent,
   eq: eq,
@@ -4384,7 +4384,7 @@ function clone$1(self) {
   return new Date(self.valueOf());
 }
 
-function equiv$5(self, other) {
+function equiv$6(self, other) {
   return other != null && deref$9(self) === deref$b(other);
 }
 
@@ -4409,12 +4409,12 @@ function deref$9(self) {
   return self.valueOf();
 }
 
-function hash$1(self) {
+function hash$2(self) {
   return self.valueOf();
 }
 
 var behave$t = does(keying("Date"), implement(IHashable, {
-  hash: hash$1
+  hash: hash$2
 }), implement(IAddable, {
   add: add$1
 }), implement(IDeref, {
@@ -4429,7 +4429,7 @@ var behave$t = does(keying("Date"), implement(IHashable, {
 }), implement(IKVReducible, {
   reducekv: reducekv$2
 }), implement(IEquiv, {
-  equiv: equiv$5
+  equiv: equiv$6
 }), implement(IMap, {
   keys: keys$5,
   vals: vals$2
@@ -4512,18 +4512,18 @@ function guid0() {
 
 const guid = overload(guid0, guid1);
 
-function equiv$4(self, other) {
+function equiv$5(self, other) {
   return kin(self, other) && self.id === other.id;
 }
 
-function hash(self) {
-  return hash$3(self.id);
+function hash$1(self) {
+  return hash$4(self.id);
 }
 
 var behave$q = does(keying("GUID"), implement(IHashable, {
-  hash
+  hash: hash$1
 }), implement(IEquiv, {
-  equiv: equiv$4
+  equiv: equiv$5
 }));
 
 behave$q(GUID);
@@ -4831,7 +4831,7 @@ var p$2 = /*#__PURE__*/Object.freeze({
   divide: divide$2,
   empty: empty$1,
   kin: kin,
-  equiv: equiv$9,
+  equiv: equiv$a,
   alike: alike,
   equivalent: equivalent,
   eq: eq,
@@ -4843,7 +4843,7 @@ var p$2 = /*#__PURE__*/Object.freeze({
   fmap: fmap$b,
   thrush: thrush,
   pipeline: pipeline,
-  hash: hash$3,
+  hash: hash$4,
   isValueObject: isValueObject,
   downward: downward,
   upward: upward,
@@ -5419,11 +5419,11 @@ behave$h(Mutable);
 
 function invoke$1(self, ...args) {
   const key = self.dispatch.apply(this, args);
-  const hashcode = hash$3(key);
+  const hashcode = hash$4(key);
   const potentials = self.methods[hashcode];
 
   const f = some$1(function ([k, h]) {
-    return equiv$9(k, key) ? h : null;
+    return equiv$a(k, key) ? h : null;
   }, potentials) || self.fallback || function () {
     throw new Error("Unable to locate appropriate method.");
   };
@@ -5467,7 +5467,7 @@ var p = /*#__PURE__*/Object.freeze({
   gt: gt,
   gte: gte,
   kin: kin,
-  equiv: equiv$9,
+  equiv: equiv$a,
   alike: alike,
   equivalent: equivalent,
   eq: eq,
@@ -5629,7 +5629,7 @@ function omit(self, entry) {
 
 function compare$2(self, other) {
   //assume like keys, otherwise use your own comparator!
-  return equiv$9(self, other) ? 0 : descriptive$1(other) ? reduce$e(function (memo, key) {
+  return equiv$a(self, other) ? 0 : descriptive$1(other) ? reduce$e(function (memo, key) {
     return memo == 0 ? compare$6(get(self, key), get(other, key)) : reduced$1(memo);
   }, 0, keys$b(self)) : -1;
 }
@@ -5642,9 +5642,9 @@ function conj$1(self, entry) {
   return result;
 }
 
-function equiv$3(self, other) {
+function equiv$4(self, other) {
   return self === other ? true : descriptive$1(other) && count$b(keys$b(self)) === count$b(keys$b(other)) && reduce$e(function (memo, key) {
-    return memo ? equiv$9(get(self, key), get(other, key)) : reduced$1(memo);
+    return memo ? equiv$a(get(self, key), get(other, key)) : reduced$1(memo);
   }, true, keys$b(self));
 }
 
@@ -5748,7 +5748,7 @@ var behave$e = does(keying("Object"), implement(IHashable, {
 }), implement(ICompactible, {
   compact
 }), implement(IEquiv, {
-  equiv: equiv$3
+  equiv: equiv$4
 }), implement(IFind, {
   find
 }), implement(IOmissible, {
@@ -5909,8 +5909,8 @@ function includes$2(self, dt) {
   return dt != null && (self.start == null || compare$6(dt, self.start) >= 0) && (self.end == null || compare$6(dt, self.end) < 0);
 }
 
-function equiv$2(self, other) {
-  return other != null && equiv$9(self.start, other.start) && equiv$9(self.end, other.end);
+function equiv$3(self, other) {
+  return other != null && equiv$a(self.start, other.start) && equiv$a(self.end, other.end);
 }
 
 function compare$1(self, other) {
@@ -5934,7 +5934,7 @@ var behave$c = does(emptyable, keying("Period"), implement(ISplittable, {
   start,
   end
 }), implement(IEquiv, {
-  equiv: equiv$2
+  equiv: equiv$3
 }));
 
 behave$c(Period);
@@ -5976,12 +5976,12 @@ function otherwise$1(self, other) {
   });
 }
 
-function equiv$1(self, other) {
+function equiv$2(self, other) {
   return self === other; //regardless of its result, every promise is distinct
 }
 
 var behave$b = does(keying("Promise"), implement(IEquiv, {
-  equiv: equiv$1
+  equiv: equiv$2
 }), implement(IOtherwise, {
   otherwise: otherwise$1
 }), implement(IForkable, {
@@ -5996,7 +5996,7 @@ Object.assign(behaviors, {
 behave$b(Promise);
 
 function seq$1(self) {
-  return equiv$9(self.start, self.end) || self.step == null && self.direction == null && self.start == null && self.end == null ? null : self;
+  return equiv$a(self.start, self.end) || self.step == null && self.direction == null && self.start == null && self.end == null ? null : self;
 }
 
 function first$1(self) {
@@ -6013,8 +6013,8 @@ function next$1(self) {
   return self.end == null || compare$6(stepped, self.end) * self.direction < 0 ? new self.constructor(stepped, self.end, self.step, self.direction) : null;
 }
 
-function equiv(self, other) {
-  return kin(self, other) ? alike(self, other) : equiv$8(self, other);
+function equiv$1(self, other) {
+  return kin(self, other) ? alike(self, other) : equiv$9(self, other);
 }
 
 function reduce$1(self, f, init) {
@@ -6107,7 +6107,7 @@ var behave$a = does(iterable, emptyable, keying("Range"), implement(ISequential$
   first: first$1,
   rest: rest$1
 }), implement(IEquiv, {
-  equiv
+  equiv: equiv$1
 }));
 
 behave$a(Range);
@@ -6368,6 +6368,8 @@ var behave$5 = does(iindexed, keying("String"), implement(ISplittable, {
   empty: emptyString
 }), implement(IFn, {
   invoke: lookup
+}), implement(IIndexed, {
+  nth: lookup
 }), implement(ILookup, {
   lookup
 }), implement(ISeqable, {
@@ -6436,8 +6438,15 @@ var behave$4 = does(keying("Task"), implement(IFlatMappable, {
 
 behave$4(Task);
 
-function UID(id) {
+function pluck(coll) {
+  return nth$6(coll, randInt(count$b(coll)));
+}
+function uident(len) {
+  return join("", repeatedly(len, partial(pluck, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")));
+}
+function UID(id, context) {
   this.id = id;
+  this.context = context; //optionally, the qualifying context in which the id is unique
 }
 UID.prototype[Symbol.toStringTag] = "UID";
 
@@ -6446,18 +6455,28 @@ UID.prototype.toString = function () {
 };
 
 function uid0() {
-  const head = Math.random() * 46656 | 0,
-        tail = Math.random() * 46656 | 0;
-  return uid1(("000" + head.toString(36)).slice(-3) + ("000" + tail.toString(36)).slice(-3));
+  return uid(uident(5));
 }
 
-function uid1(id) {
-  return new UID(id);
+function uid2(id, context = null) {
+  return new UID(id, context);
 }
 
-const uid = overload(uid0, uid1);
+const uid = overload(uid0, uid2, uid2);
 
-var behave$3 = does(behave$q, keying("UID"));
+function equiv(self, other) {
+  return equiv$a(self.id, other.id) && equiv$a(self.context, other.context);
+}
+
+function hash(self) {
+  return hash$4(self.id + "/" + (self.context || ""));
+}
+
+var behave$3 = does(implement(IEquiv, {
+  equiv
+}), implement(IHashable, {
+  hash
+}), keying("UID"));
 
 behave$3(UID);
 
@@ -6572,7 +6591,7 @@ function addProp(obj, key, value) {
 }
 
 function equals(other) {
-  return equiv$9(this, other);
+  return equiv$a(this, other);
 }
 
 addProp(Object.prototype, "equals", equals);
@@ -6988,4 +7007,4 @@ ICoercible.addMethod([String, Array], function (self) {
   return self.split("");
 });
 
-export { Benchmark, Concatenated, Duration, EmptyList, GUID, IAddable, IAppendable, IAssociative, IBlankable, IBounded, IClonable, ICoercible, ICollection, ICompactible, IComparable, ICounted, IDeref, IDisposable, IDivisible, IEmptyableCollection, IEquiv, IFind, IFlatMappable, IFn, IForkable, IFunctor, IHashable, IHierarchy, IIdentifiable, IInclusive, IIndexed, IInsertable, IInversive, IKVReducible, ILogger, ILookup, IMap, IMapEntry, IMergable, IMultipliable, INamable, INext, IOmissible, IOtherwise, IPath, IPrependable, IReducible, IResettable, IReversible, IRevertible, ISend, ISeq, ISeqable, ISequential$1 as ISequential, ISet, ISplittable, ISwappable, ITemplate, Indexed, IndexedSeq, Journal, Just, LazySeq, Left, Lens, List, Members, Multimap, Multimethod, Mutable, Nil, Nothing, Okay, Period, PostconditionError, PreconditionError, Protocol, ProtocolLookupError, Range, Recurrence, Reduced, RevSeq, Right, Router, Task, UID, Verified, Volatile, absorb, add$3 as add, addMethod, addRoute, after, ako, alike, all, also, ancestors, and, annually, any, append$1 as append, apply, applying, arity, array, asLeaves, asc, assoc$9 as assoc, assocIn, assume, attach, average$1 as average, awaits, before, behave, behaves, behaviors, benchmark, best, between, binary, blank$2 as blank, blot, bool, boolean, both, braid, branch, butlast, called, camelToDashed, chain, children$1 as children, clamp, cleanly, clockHour, clone$4 as clone, closest$2 as closest, coalesce, coerce$1 as coerce, collapse, comp, compact$1 as compact, compare$6 as compare, compile, complement, concat, concatenated, cond, config, conj$8 as conj, cons, constantly, construct, constructs, contains$9 as contains, count$b as count, countBy, curry, cycle, date, day, days, dec, deconstruct, dedupe, defaults, deferring, deref$b as deref, desc, descendants$1 as descendants, descriptive$1 as descriptive, detach, detect, difference, directed, disj, dispose, dissoc$5 as dissoc, divide$2 as divide, doall, does, doing, dorun, doseq, dotimes, doto, dow, downward, drop, dropLast, dropWhile, duration, each, eachIndexed, eachkv, eachvk, edit, either, elapsed, empty$1 as empty, emptyArray, emptyList, emptyObject, emptyPeriod, emptyRange, emptyRecurrence, emptyString, end$2 as end, endsWith, entries, eod, eom, eoy, eq, equiv$9 as equiv, equivalent, error, every, everyPair, everyPred, excludes, execute, expands, extend, factory, farg, fill$2 as fill, filled, filter, filtera, find$1 as find, first$d as first, flatMap$3 as flatMap, flatten, flip, float, fluent, flush$1 as flush, fmap$b as fmap, fmt, fnil, fold, folding, foldkv, fork$5 as fork, forward, forwardTo, fromQueryString, generate, get, getIn, groupBy, gt, gte, guard, guid, handle, hash$3 as hash, hour, hours, identifier, identity, idx$3 as idx, impart, implement, inc, include, includes$9 as includes, inclusive, index, indexOf, indexed, indexedSeq, initial, inside, int, integers, interleave, interleaved, interpose, intersection, into, inventory, inverse$1 as inverse, invokable, invoke$3 as invoke, invokes, is, isArray, isBlank, isBoolean, isDate, isDistinct, isEmpty, isError, isEven, isFalse, isFloat, isFunction, isIdentical, isInt, isInteger, isNaN, isNative, isNeg, isNil, isNumber, isObject, isOdd, isPos, isPromise, isReduced, isRegExp, isSome, isString, isSymbol, isTrue, isValueObject, isZero, iterable, iterate$1 as iterate, join, journal, juxt, juxtVals, keep, keepIndexed, key$3 as key, keyed, keying, keys$b as keys, kin, labelLogger, last, lazyIterable, lazySeq, least, leaves, left, lens, list, log, lowerCase, lpad, lt, lte, ltrim, map, mapArgs, mapIndexed, mapKeys, mapSome, mapVals, mapa, mapcat, mapkv, mapvk, max, maxKey, maybe, mdow, measure, members, memoize, merge$4 as merge, mergeWith, metaLogger, midnight, millisecond, milliseconds, min, minKey, minute, minutes, mod, month, monthDays, months, most$1 as most, mult$2 as mult, multi, multimap, multimethod, mutable, mutate, name, nary, negatives, next$a as next, nextSibling$2 as nextSibling, nextSiblings$2 as nextSiblings, nil, noon, noop, not, notAny, notEmpty, notEq, notEvery, notSome, nothing, nth$6 as nth, nullary, num, number, numeric, obj, object, okay, omit$3 as omit, once, only, opt, or, otherwise$4 as otherwise, overlap, overload, parent$1 as parent, parents$2 as parents, parsedo, partial, partition, partitionAll, partitionAll1, partitionAll2, partitionAll3, partitionBy, partly, patch, path$1 as path, peek, period, period1, pipe, pipeline, placeholder, plug, pm, positives, posn, post, pre, prepend$2 as prepend, prevSibling$2 as prevSibling, prevSiblings$2 as prevSiblings, promise, prop, protocol, quarter, quaternary, race, rand, randInt, randNth, range, rdow, reFind, reFindAll, reGroups, reMatches, rePattern, reSeq, readable, realize, realized, record, recurrence, recurrence1, recurs, redo$1 as redo, redoable$1 as redoable, reduce$e as reduce, reduced$1 as reduced, reducekv$a as reducekv, reducekv2, reducekv3, reducing, reifiable, remove, removeKeys, repeat, repeatedly, replace, reset$1 as reset, rest$d as rest, revSeq, reverse$4 as reverse, rewrite, right, root$2 as root, router, rpad, rtrim, satisfies, scan, scanKey, second, seconds, see, seek, selectKeys, send, seq$a as seq, sequential, series, severityLogger, shuffle, siblings$2 as siblings, signature, signatureHead, slice, sod, som, some$1 as some, someFn, sort, sortBy, soy, specify, splice, split$2 as split, splitAt, splitWith, spread, start$2 as start, startsWith, steps, str, subj, subs, subset, subsumes, subtract, sum, superset, swap$1 as swap, take, takeLast, takeNth, takeWhile, task, tee, template, ternary, test, thrush, tick, time, titleCase, toArray, toDuration, toObject, toPromise, toQueryString, toggles, transduce, transpose, treeSeq, trim, type, uid, unary, unbind, unconj$1 as unconj, undo$1 as undo, undoable$1 as undoable, unfork, union, unique, unite, unpartly, unreduced, unspecify, unspread, untick, update, updateIn, upperCase, upward, val$2 as val, vals$5 as vals, verified, volatile, vreset, vswap, weekday, weekend, weeks, when, withIndex, writable, yank, year, years, zeros, zip };
+export { Benchmark, Concatenated, Duration, EmptyList, GUID, IAddable, IAppendable, IAssociative, IBlankable, IBounded, IClonable, ICoercible, ICollection, ICompactible, IComparable, ICounted, IDeref, IDisposable, IDivisible, IEmptyableCollection, IEquiv, IFind, IFlatMappable, IFn, IForkable, IFunctor, IHashable, IHierarchy, IIdentifiable, IInclusive, IIndexed, IInsertable, IInversive, IKVReducible, ILogger, ILookup, IMap, IMapEntry, IMergable, IMultipliable, INamable, INext, IOmissible, IOtherwise, IPath, IPrependable, IReducible, IResettable, IReversible, IRevertible, ISend, ISeq, ISeqable, ISequential$1 as ISequential, ISet, ISplittable, ISwappable, ITemplate, Indexed, IndexedSeq, Journal, Just, LazySeq, Left, Lens, List, Members, Multimap, Multimethod, Mutable, Nil, Nothing, Okay, Period, PostconditionError, PreconditionError, Protocol, ProtocolLookupError, Range, Recurrence, Reduced, RevSeq, Right, Router, Task, UID, Verified, Volatile, absorb, add$3 as add, addMethod, addRoute, after, ako, alike, all, also, ancestors, and, annually, any, append$1 as append, apply, applying, arity, array, asLeaves, asc, assoc$9 as assoc, assocIn, assume, attach, average$1 as average, awaits, before, behave, behaves, behaviors, benchmark, best, between, binary, blank$2 as blank, blot, bool, boolean, both, braid, branch, butlast, called, camelToDashed, chain, children$1 as children, clamp, cleanly, clockHour, clone$4 as clone, closest$2 as closest, coalesce, coerce$1 as coerce, collapse, comp, compact$1 as compact, compare$6 as compare, compile, complement, concat, concatenated, cond, config, conj$8 as conj, cons, constantly, construct, constructs, contains$9 as contains, count$b as count, countBy, curry, cycle, date, day, days, dec, deconstruct, dedupe, defaults, deferring, deref$b as deref, desc, descendants$1 as descendants, descriptive$1 as descriptive, detach, detect, difference, directed, disj, dispose, dissoc$5 as dissoc, divide$2 as divide, doall, does, doing, dorun, doseq, dotimes, doto, dow, downward, drop, dropLast, dropWhile, duration, each, eachIndexed, eachkv, eachvk, edit, either, elapsed, empty$1 as empty, emptyArray, emptyList, emptyObject, emptyPeriod, emptyRange, emptyRecurrence, emptyString, end$2 as end, endsWith, entries, eod, eom, eoy, eq, equiv$a as equiv, equivalent, error, every, everyPair, everyPred, excludes, execute, expands, extend, factory, farg, fill$2 as fill, filled, filter, filtera, find$1 as find, first$d as first, flatMap$3 as flatMap, flatten, flip, float, fluent, flush$1 as flush, fmap$b as fmap, fmt, fnil, fold, folding, foldkv, fork$5 as fork, forward, forwardTo, fromQueryString, generate, get, getIn, groupBy, gt, gte, guard, guid, handle, hash$4 as hash, hour, hours, identifier, identity, idx$3 as idx, impart, implement, inc, include, includes$9 as includes, inclusive, index, indexOf, indexed, indexedSeq, initial, inside, int, integers, interleave, interleaved, interpose, intersection, into, inventory, inverse$1 as inverse, invokable, invoke$3 as invoke, invokes, is, isArray, isBlank, isBoolean, isDate, isDistinct, isEmpty, isError, isEven, isFalse, isFloat, isFunction, isIdentical, isInt, isInteger, isNaN, isNative, isNeg, isNil, isNumber, isObject, isOdd, isPos, isPromise, isReduced, isRegExp, isSome, isString, isSymbol, isTrue, isValueObject, isZero, iterable, iterate$1 as iterate, join, journal, juxt, juxtVals, keep, keepIndexed, key$3 as key, keyed, keying, keys$b as keys, kin, labelLogger, last, lazyIterable, lazySeq, least, leaves, left, lens, list, log, lowerCase, lpad, lt, lte, ltrim, map, mapArgs, mapIndexed, mapKeys, mapSome, mapVals, mapa, mapcat, mapkv, mapvk, max, maxKey, maybe, mdow, measure, members, memoize, merge$4 as merge, mergeWith, metaLogger, midnight, millisecond, milliseconds, min, minKey, minute, minutes, mod, month, monthDays, months, most$1 as most, mult$2 as mult, multi, multimap, multimethod, mutable, mutate, name, nary, negatives, next$a as next, nextSibling$2 as nextSibling, nextSiblings$2 as nextSiblings, nil, noon, noop, not, notAny, notEmpty, notEq, notEvery, notSome, nothing, nth$6 as nth, nullary, num, number, numeric, obj, object, okay, omit$3 as omit, once, only, opt, or, otherwise$4 as otherwise, overlap, overload, parent$1 as parent, parents$2 as parents, parsedo, partial, partition, partitionAll, partitionAll1, partitionAll2, partitionAll3, partitionBy, partly, patch, path$1 as path, peek, period, period1, pipe, pipeline, placeholder, pluck, plug, pm, positives, posn, post, pre, prepend$2 as prepend, prevSibling$2 as prevSibling, prevSiblings$2 as prevSiblings, promise, prop, protocol, quarter, quaternary, race, rand, randInt, randNth, range, rdow, reFind, reFindAll, reGroups, reMatches, rePattern, reSeq, readable, realize, realized, record, recurrence, recurrence1, recurs, redo$1 as redo, redoable$1 as redoable, reduce$e as reduce, reduced$1 as reduced, reducekv$a as reducekv, reducekv2, reducekv3, reducing, reifiable, remove, removeKeys, repeat, repeatedly, replace, reset$1 as reset, rest$d as rest, revSeq, reverse$4 as reverse, rewrite, right, root$2 as root, router, rpad, rtrim, satisfies, scan, scanKey, second, seconds, see, seek, selectKeys, send, seq$a as seq, sequential, series, severityLogger, shuffle, siblings$2 as siblings, signature, signatureHead, slice, sod, som, some$1 as some, someFn, sort, sortBy, soy, specify, splice, split$2 as split, splitAt, splitWith, spread, start$2 as start, startsWith, steps, str, subj, subs, subset, subsumes, subtract, sum, superset, swap$1 as swap, take, takeLast, takeNth, takeWhile, task, tee, template, ternary, test, thrush, tick, time, titleCase, toArray, toDuration, toObject, toPromise, toQueryString, toggles, transduce, transpose, treeSeq, trim, type, uid, uident, unary, unbind, unconj$1 as unconj, undo$1 as undo, undoable$1 as undoable, unfork, union, unique, unite, unpartly, unreduced, unspecify, unspread, untick, update, updateIn, upperCase, upward, val$2 as val, vals$5 as vals, verified, volatile, vreset, vswap, weekday, weekend, weeks, when, withIndex, writable, yank, year, years, zeros, zip };

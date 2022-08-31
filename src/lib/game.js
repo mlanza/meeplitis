@@ -30,13 +30,3 @@ export function deal(deck, hands, cards){
       }, Array.from(_.repeat(hands, [])), _))
   ];
 }
-
-export function generateUID(len){
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  const max = _.count(chars) - 1;
-  const id = [];
-  while (id.length < len) {
-    id.push(chars[_.randInt(max)]);
-  }
-  return _.join("", id);
-}

@@ -10,10 +10,14 @@ export const state = _.chain(
   oh.bid(1, 0),
   oh.bid(2, 0),
   oh.bid(3, 1),
-  oh.bid(1, null),
-  oh.play({rank: 10, suit: "♥️"}), //TODO for this to work we have to verify we hold this card
-  oh.commit(0),
-  _.see("state"));
+  function(self){
+    const card = self.state.seated[0].hand[0];
+    return oh.play(card)(self);
+  },
+  //oh.bid(1, null),
+  //oh.play({rank: 10, suit: "♥️"}), //TODO for this to work we have to verify we hold this card
+  //oh.commit(0),
+  _.log);
 
 Object.assign(window, {_, oh, g});
 

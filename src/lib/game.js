@@ -14,6 +14,11 @@ export const execute = _.overload(null, null, function(self, command){
 export const commit = IGame.commit;
 export const finish = IGame.finish;
 
+export function status(self, status){
+  const obj = _.clone(self);
+  obj.status = status;
+}
+
 export function deal(deck, hands, cards){
   const n = cards * hands;
   return [

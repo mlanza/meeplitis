@@ -2,16 +2,16 @@ import _ from "./@atomic/core.js";
 import {IGame} from "./game.js";
 import * as g from "./game.js";
 
-const suits = ["♥️", "♠️", "♦️", "♣️"];
 const ranks = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "K", "Q", "A"];
+const suits = ["♥️", "♠️", "♦️", "♣️"];
 
 function name(self){
   const face = {"J": "Jack", "K": "King", "Q": "Queen", "A": "Ace"}[self.rank] || self.rank;
   return `${face} ${self.suit}`;
 }
 
-function card(suit, rank){
-  return {suit, rank};
+function card(rank, suit){
+  return {rank, suit};
 }
 
 function rank(card){
@@ -30,23 +30,33 @@ export function ranked(cards, trump){ //begin with lead card then follow in play
 }
 
 function deck(){
-  return _.braid(card, suits, ranks);
+  return _.braid(card, ranks, suits);
 }
 
-function OhHell(seated, config, events, state){
+function OhHell(seated, config, status, events, state){
   this.seated = seated;
   this.config = config;
+  this.status = status;
   this.events = events;
   this.state = state;
 }
 
-export function ohHell(seated, config, events = [], state = null){
-  return new OhHell(seated, config, events, state);
+export function ohHell(seated, config, status, events = [], state = null){
+  return new OhHell(seated, config, status, events, state);
+}
+
+export function swap(self, f){
+  return ohHell(self.seated, self.config, self.status, self.events, f(state));
 }
 
 function start(self){
   const cards = _.shuffle(deck());
-  const details = {deck: cards, round: 0, deal: [1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1]};
+  const details = {
+    deck: cards,
+    round: 0,
+    seated: _.chain(self.seated, _.count, _.repeat(_, {scored: []}), _.toArray),
+    deal: [1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1]
+  };
   return _.chain(self, function(self){
     return g.execute(self, {type: "start", details});
   }, deal);
@@ -65,9 +75,9 @@ function deal(self){
 }
 
 //bids are simultaneous and blind
-export function bid(seat, tricks){ //command
+export function bid(seat, bid){ //command
   return function(self){
-    return g.execute(self, {type: "bid", details: {tricks}}, seat);
+    return g.execute(self, {type: "bid", details: {bid}}, seat);
   }
 }
 
@@ -85,10 +95,49 @@ function execute(self, command, seat){
   const cmd = Object.assign({seat}, command);
   switch (type) {
     case "start":
-      return ohHell(self.seated, self.config, _.append(self.events, cmd), details);
+      return ohHell(self.seated, self.config, "ready", _.append(self.events, cmd), details);
+
+    case "deal":
+      const lead = self.state.round % _.count(self.seated);
+      const cards = _.chain(details.hands, _.flatten, _.toArray);
+      const deck = _.chain(self.state.deck, _.remove(_.includes(cards, _), _), _.toArray);
+      return ohHell(self.seated, self.config, "bidding", _.append(self.events, cmd), _.chain(self.state, _.assoc(_, "lead", lead), _.assoc(_, "up", lead), _.assoc(_, "deck", deck), _.foldkv(function(memo, seat, hand){
+        return _.updateIn(memo, ["seated", seat], function(seated){
+          return Object.assign({}, seated, {hand, tricks: [], bid: null, played: null});
+        });
+      }, _, details.hands)));
+
+    case "bid":
+      return _.chain(self.state, _.assocIn(_, ["seated", seat, "bid"], details.bid), function(state){
+        const bids = _.chain(_.range(_.count(self.seated)), _.mapa(function(seat){
+          return _.getIn(state, ["seated", seat, "bid"]);
+        }, _));
+        return ohHell(self.seated, self.config, _.count(_.filter(_.isSome, bids)) == _.count(self.seated) ? "playing" : self.status, _.append(self.events, cmd), state);
+      });
+
+    case "play":
+      return _.chain(self.state,
+        _.assocIn(_, ["seated", seat, "played"], details.card),
+        _.updateIn(_, ["seated", seat, "hand"], _.pipe(_.remove(_.eq(_, details.card), _), _.toArray)),
+        function(state){
+          const trick = _.chain(_.range(_.count(self.seated)), _.mapa(function(seat){
+            return _.getIn(state, ["seated", seat, "played"]);
+          }, _));
+          const give = _.count(_.filter(_.isSome, trick)) == _.count(self.seated);
+          if (give){
+            const ranking = ranked(trick, state.trump);
+            const best = _.first(ranking);
+            const winner = _.indexOf(trick, best);
+            return ohHell(self.seated, self.config, self.status, _.append(self.events, cmd),
+              _.chain(state,
+                _.updateIn(_, ["seated", winner, "tricks"], _.conj(_, trick)),
+                _.update(_, "lead", winner)));
+          }
+          return ohHell(self.seated, self.config, self.status, _.append(self.events, cmd), state);
+        });
 
     default:
-      return ohHell(self.seated, self.config, _.append(self.events, cmd), self.state);
+      return ohHell(self.seated, self.config, "*", _.append(self.events, cmd), self.state);
     }
 }
 
@@ -100,4 +149,5 @@ export function commit(seat){
 }
 
 _.doto(OhHell,
+  _.implement(_.ISwappable, {swap}),
   _.implement(IGame, {start, execute, commit, finish}));

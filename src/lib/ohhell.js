@@ -137,16 +137,19 @@ function execute(self, command, seat){
         function(state){
           const ord = ordered(_.count(self.seated), state.lead);
           const trick = _.mapa(_.pipe(_.array(_, "played"), _.getIn(state.seated, _)), ord);
-          const complete = _.count(_.filter(_.isSome, trick)) == _.count(self.seated);
-          if (complete){
+          const award = _.count(_.filter(_.isSome, trick)) == _.count(self.seated);
+          if (award){
             const ranking = ranked(trick, state.trump.suit);
             const best = _.first(ranking);
             const winner = _.indexOf(trick, best);
-            const more = _.chain(state, _.get(_, ["seated", seat, "hand"]), _.seq);
-            return ohHell(self.seated, self.config, self.status, _.append(self.events, cmd),
-              _.chain(state,
-                _.updateIn(_, ["seated", winner, "tricks"], _.conj(_, trick)),
-                _.assoc(_, "lead", winner)));
+            const endRound = _.chain(state, _.get(_, ["seated", seat, "hand"]), _.seq, _.not);
+            return _.chain(
+                ohHell(self.seated, self.config, self.status, _.append(self.events, cmd),
+                  _.chain(state,
+                    _.updateIn(_, ["seated", winner, "tricks"], _.conj(_, trick)),
+                    _.assoc(_, "lead", winner),
+                    endRound ? _.update(_, "round", _.inc) : _.identity)),
+                  endRound ? deal : _.identity);
           }
           return ohHell(self.seated, self.config, self.status, _.append(self.events, cmd), state);
         });

@@ -14,15 +14,15 @@ function card(rank, suit){
   return {rank, suit};
 }
 
-function rank(card){
+function rank(card, trump, lead){
   const n = _.indexOf(ranks, card.rank);
   return (card.suit === trump ? 100 : 0) + (card.suit === lead ? 0 : -50) + n;
 }
 
 export function ranked(cards, trump){ //begin with lead card then follow in play order
-  const lead = cards[0].suit;
+  const lead = _.first(cards).suit;
   function compare(a, b){
-    return rank(b) - rank(a);
+    return rank(b, trump, lead) - rank(a, trump, lead);
   }
   return Array.from(cards).filter(function(card){
     return card.suit === lead || card.suit === trump;
@@ -83,9 +83,21 @@ export function bid(seat, bid){ //command
 
 export function play(card){ //command
   return function(self){
-    const seat = 0; //TODO
-    return g.execute(self, {type: "play", details: {card}}, seat);
+    const has = _.detect(function(c){
+      return card.suit == c.suit && card.rank == c.rank;
+    }, self.state.seated[self.state.up].hand);
+    return g.execute(self, {type: "play", details: {card}}, self.state.up);
   }
+}
+
+const after = _.partly(function after(seat, seats){
+  const max = seats - 1;
+  const n = seat + 1;
+  return n > max ? 0 : n;
+});
+
+function ordered(seats, lead){
+  return _.chain(seats, _.range, _.cycle, _.dropWhile(_.notEq(_, lead), _), _.take(seats, _), _.toArray);
 }
 
 //the command will be fully computed by the request and the game state when passed in
@@ -97,11 +109,14 @@ function execute(self, command, seat){
     case "start":
       return ohHell(self.seated, self.config, "ready", _.append(self.events, cmd), details);
 
+    case "commit":
+      return ohHell(self.seated, self.config, self.status, _.append(self.events, cmd), _.chain(self.state, _.update(_, "up", after(_, _.count(self.seated)))));
+
     case "deal":
       const lead = self.state.round % _.count(self.seated);
       const cards = _.chain(details.hands, _.flatten, _.toArray);
       const deck = _.chain(self.state.deck, _.remove(_.includes(cards, _), _), _.toArray);
-      return ohHell(self.seated, self.config, "bidding", _.append(self.events, cmd), _.chain(self.state, _.assoc(_, "lead", lead), _.assoc(_, "up", lead), _.assoc(_, "deck", deck), _.foldkv(function(memo, seat, hand){
+      return ohHell(self.seated, self.config, "bidding", _.append(self.events, cmd), _.chain(self.state, _.assoc(_, "trump", details.trump), _.assoc(_, "lead", lead), _.assoc(_, "up", lead), _.assoc(_, "deck", deck), _.foldkv(function(memo, seat, hand){
         return _.updateIn(memo, ["seated", seat], function(seated){
           return Object.assign({}, seated, {hand, tricks: [], bid: null, played: null});
         });
@@ -120,18 +135,18 @@ function execute(self, command, seat){
         _.assocIn(_, ["seated", seat, "played"], details.card),
         _.updateIn(_, ["seated", seat, "hand"], _.pipe(_.remove(_.eq(_, details.card), _), _.toArray)),
         function(state){
-          const trick = _.chain(_.range(_.count(self.seated)), _.mapa(function(seat){
-            return _.getIn(state, ["seated", seat, "played"]);
-          }, _));
-          const give = _.count(_.filter(_.isSome, trick)) == _.count(self.seated);
-          if (give){
-            const ranking = ranked(trick, state.trump);
+          const ord = ordered(_.count(self.seated), state.lead);
+          const trick = _.mapa(_.pipe(_.array(_, "played"), _.getIn(state.seated, _)), ord);
+          const complete = _.count(_.filter(_.isSome, trick)) == _.count(self.seated);
+          if (complete){
+            const ranking = ranked(trick, state.trump.suit);
             const best = _.first(ranking);
             const winner = _.indexOf(trick, best);
+            const more = _.chain(state, _.get(_, ["seated", seat, "hand"]), _.seq);
             return ohHell(self.seated, self.config, self.status, _.append(self.events, cmd),
               _.chain(state,
                 _.updateIn(_, ["seated", winner, "tricks"], _.conj(_, trick)),
-                _.update(_, "lead", winner)));
+                _.assoc(_, "lead", winner)));
           }
           return ohHell(self.seated, self.config, self.status, _.append(self.events, cmd), state);
         });

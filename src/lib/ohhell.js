@@ -54,8 +54,7 @@ function start(self){
   const details = {
     deck: cards,
     round: 0,
-    seated: _.chain(self.seated, _.count, _.repeat(_, {scored: []}), _.toArray),
-    deal: [1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1]
+    seated: _.chain(self.seated, _.count, _.repeat(_, {scored: []}), _.toArray)
   };
   return _.chain(self, function(self){
     return g.execute(self, {type: "start", details});
@@ -68,10 +67,10 @@ function finish(self){
 }
 
 function deal(self){
-  const {deck, round, deal} = self.state, cards = deal[round];
+  const {deck, round, deal} = self.state, cards = [1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1][round];
   const [_deck, hands] = g.deal(deck, _.count(self.seated), cards);
   const trump = _.first(_deck);
-  return g.execute(self, {type: "deal", details: {hands, trump}})
+  return g.execute(self, {type: "deal", details: {hands, trump, round}})
 }
 
 //bids are simultaneous and blind
@@ -100,6 +99,9 @@ function ordered(seats, lead){
   return _.chain(seats, _.range, _.cycle, _.dropWhile(_.notEq(_, lead), _), _.take(seats, _), _.toArray);
 }
 
+/*          _.chain(self.state,
+            _.update(_, "lead", after(_, _.count(self.seated))))*/
+
 //the command will be fully computed by the request and the game state when passed in
 function execute(self, command, seat){
   //TODO implement all state reductions
@@ -110,17 +112,28 @@ function execute(self, command, seat){
       return ohHell(self.seated, self.config, "ready", _.append(self.events, cmd), details);
 
     case "commit":
-      return ohHell(self.seated, self.config, self.status, _.append(self.events, cmd), _.chain(self.state, _.update(_, "up", after(_, _.count(self.seated)))));
+      const endRound = _.chain(self.state.seated, _.mapa(_.get(_, "hand"), _), _.flatten, _.compact, _.seq, _.not);
+      const up = _.second(ordered(_.count(self.seated), seat));
+      return _.chain(
+        ohHell(self.seated, self.config, self.status, _.append(self.events, cmd), _.assoc(self.state, "up", up)),
+          endRound ? deal : _.identity);
 
     case "deal":
       const lead = self.state.round % _.count(self.seated);
       const cards = _.chain(details.hands, _.flatten, _.toArray);
       const deck = _.chain(self.state.deck, _.remove(_.includes(cards, _), _), _.toArray);
-      return ohHell(self.seated, self.config, "bidding", _.append(self.events, cmd), _.chain(self.state, _.assoc(_, "trump", details.trump), _.assoc(_, "lead", lead), _.assoc(_, "up", lead), _.assoc(_, "deck", deck), _.foldkv(function(memo, seat, hand){
-        return _.updateIn(memo, ["seated", seat], function(seated){
-          return Object.assign({}, seated, {hand, tricks: [], bid: null, played: null});
-        });
-      }, _, details.hands)));
+      return ohHell(self.seated, self.config, "bidding", _.append(self.events, cmd),
+        _.chain(self.state,
+          _.assoc(_, "trump", details.trump),
+          _.assoc(_, "lead", lead),
+          _.assoc(_, "up", lead),
+          _.assoc(_, "deck", deck),
+          _.update(_, "round", _.inc),
+          _.foldkv(function(memo, seat, hand){
+            return _.updateIn(memo, ["seated", seat], function(seated){
+              return Object.assign({}, seated, {hand, tricks: [], bid: null, played: null});
+            });
+          }, _, details.hands)));
 
     case "bid":
       return _.chain(self.state, _.assocIn(_, ["seated", seat, "bid"], details.bid), function(state){
@@ -129,6 +142,12 @@ function execute(self, command, seat){
         }, _));
         return ohHell(self.seated, self.config, _.count(_.filter(_.isSome, bids)) == _.count(self.seated) ? "playing" : self.status, _.append(self.events, cmd), state);
       });
+
+    case "award":
+      return ohHell(self.seated, self.config, "awarded", _.append(self.events, cmd),
+        _.chain(self.state,
+          _.updateIn(_, ["seated", details.winner, "tricks"], _.conj(_, details.trick)),
+          _.assoc(_, "lead", details.winner)));
 
     case "play":
       return _.chain(self.state,
@@ -142,14 +161,9 @@ function execute(self, command, seat){
             const ranking = ranked(trick, state.trump.suit);
             const best = _.first(ranking);
             const winner = _.indexOf(trick, best);
-            const endRound = _.chain(state, _.get(_, ["seated", seat, "hand"]), _.seq, _.not);
             return _.chain(
-                ohHell(self.seated, self.config, self.status, _.append(self.events, cmd),
-                  _.chain(state,
-                    _.updateIn(_, ["seated", winner, "tricks"], _.conj(_, trick)),
-                    _.assoc(_, "lead", winner),
-                    endRound ? _.update(_, "round", _.inc) : _.identity)),
-                  endRound ? deal : _.identity);
+              ohHell(self.seated, self.config, "awarding", _.append(self.events, cmd), state),
+               g.execute(_, {type: "award", details: {winner, trick}}));
           }
           return ohHell(self.seated, self.config, self.status, _.append(self.events, cmd), state);
         });

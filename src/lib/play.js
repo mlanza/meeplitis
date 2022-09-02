@@ -11,9 +11,9 @@ function play(self){
   return oh.play(card)(self);
 }
 const $state = $.cell(oh.ohHell(["Ava", "Zoe", "Jennabel", "Mario"], {}));
-$.sub($state, function(game){
-  const event = _.last(game.events);
-  _.log(game.state, "←", event, event ? game.seated[event.seat] || null : null);
+$.sub($.hist($state), function([curr, prior]){
+  const added = prior ? _.last(_.count(curr.events) - _.count(prior.events), curr.events) : null;
+  _.log(added, "→", curr);
 });
 _.swap($state, g.start);
 _.swap($state, oh.bid(0, 1));
@@ -33,6 +33,6 @@ _.swap($state, oh.commit(3));
 //oh.play({rank: 10, suit: "♥️"}), //TODO for this to work we have to verify we hold this card
 //oh.commit(0),
 
-Object.assign(window, {_, oh, g});
+Object.assign(window, {_, oh, g, $state});
 
 //game statues: dealing, bidding, playing, finished

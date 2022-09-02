@@ -8,9 +8,9 @@ export const IGame = _.protocol({
 });
 
 export const start = IGame.start;
-export const execute = _.overload(null, null, function(self, command){
+export const execute = _.partly(_.overload(null, null, function(self, command){
   return IGame.execute(self, command, null);
-}, IGame.execute);
+}, IGame.execute));
 export const commit = IGame.commit;
 export const finish = IGame.finish;
 

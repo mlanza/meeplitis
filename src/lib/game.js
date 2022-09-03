@@ -1,7 +1,9 @@
 import _ from "./@atomic/core.js";
 
 export const IGame = _.protocol({
-  execute: null
+  execute: null, //validates a command, confirms it as an event
+  moves: null, //what can be done now and by which seats/players?
+  ranking: null //final and/or current standings if interim scoring is possible
 });
 
 export const execute = _.partly(_.overload(null, null, function(self, command){
@@ -16,11 +18,6 @@ export function start(config){
 
 export function finish(self){
   return execute(self, {type: "finish"});
-}
-
-export function status(self, status){
-  const obj = _.clone(self);
-  obj.status = status;
 }
 
 export function deal(deck, hands, cards){

@@ -50,41 +50,19 @@ export function swap(self, f){
   return ohHell(self.seated, self.config, self.status, self.events, f(state));
 }
 
-function start(self){
-  const cards = _.shuffle(deck());
-  const details = {
-    deck: cards,
-    round: 0,
-    seated: _.chain(self.seated, _.count, _.repeat(_, {scored: []}), _.toArray)
-  };
-  return _.chain(self, function(self){
-    return g.execute(self, {type: "start", details});
-  }, deal);
-}
-
-function finish(self){
-  return g.execute(self, {type: "finish"});
-}
-
 function deal(self){
-  const {deck, round, deal} = self.state, cards = handSizes[round];
-  const [_deck, hands] = g.deal(deck, _.count(self.seated), cards);
-  const trump = _.first(_deck);
-  return g.execute(self, {type: "deal", details: {hands, trump, round}})
+  return g.execute(self, {type: "deal"});
 }
 
 //bids are simultaneous and blind
-export function bid(seat, bid){ //command
+export function bid(seat, bid){
   return function(self){
     return g.execute(self, {type: "bid", details: {bid}}, seat);
   }
 }
 
-export function play(card){ //command
+export function play(card){
   return function(self){
-    const has = _.detect(function(c){
-      return card.suit == c.suit && card.rank == c.rank;
-    }, self.state.seated[self.state.up].hand);
     return g.execute(self, {type: "play", details: {card}}, self.state.up);
   }
 }
@@ -112,7 +90,15 @@ function execute(self, command, seat){
   const cmd = Object.assign({seat}, command);
   switch (type) {
     case "start":
-      return ohHell(self.seated, self.config, "ready", _.append(self.events, cmd), details);
+      return (function(){
+        const cards = _.shuffle(deck());
+        const _details = Object.assign({
+          deck: cards,
+          round: 0,
+          seated: _.chain(self.seated, _.count, _.repeat(_, {scored: []}), _.toArray)
+        }, details);
+        return _.chain(ohHell(self.seated, self.config, "ready", _.append(self.events, _.assoc(cmd, "details", _details)), _details), deal);
+      })();
 
     case "commit":
       const endRound = _.chain(self.state.seated, _.mapa(_.get(_, "hand"), _), _.flatten, _.compact, _.seq, _.not);
@@ -121,24 +107,29 @@ function execute(self, command, seat){
       return _.chain(
         ohHell(self.seated, self.config, self.status, _.append(self.events, cmd),
           _.chain(self.state, endRound ? scoreRound : _.identity, _.assoc(_, "up", up))),
-          endRound ? (endGame ? finish : deal) : _.identity);
+          endRound ? (endGame ? g.finish : deal) : _.identity);
 
     case "deal":
-      const lead = self.state.round % _.count(self.seated);
-      const cards = _.chain(details.hands, _.flatten, _.toArray);
-      const deck = _.chain(self.state.deck, _.remove(_.includes(cards, _), _), _.toArray);
-      return ohHell(self.seated, self.config, "bidding", _.append(self.events, cmd),
-        _.chain(self.state,
-          _.assoc(_, "trump", details.trump),
-          _.assoc(_, "lead", lead),
-          _.assoc(_, "up", lead),
-          _.assoc(_, "deck", deck),
-          _.update(_, "round", _.inc),
-          _.foldkv(function(memo, seat, hand){
-            return _.updateIn(memo, ["seated", seat], function(seated){
-              return Object.assign({}, seated, {hand, tricks: [], bid: null, played: null});
-            });
-          }, _, details.hands)));
+      return (function(){
+        const {deck, round, deal} = self.state, num = handSizes[round];
+        const [_deck, hands] = g.deal(deck, _.count(self.seated), num);
+        const trump = _.first(_deck);
+        const lead = self.state.round % _.count(self.seated);
+        const cards = _.chain(hands, _.flatten, _.toArray);
+        const undealt = _.chain(self.state.deck, _.remove(_.includes(cards, _), _), _.toArray);
+        return ohHell(self.seated, self.config, "bidding", _.append(self.events, _.merge(cmd, {hands, trump, round})),
+          _.chain(self.state,
+            _.assoc(_, "trump", trump),
+            _.assoc(_, "lead", lead),
+            _.assoc(_, "up", lead),
+            _.assoc(_, "deck", undealt),
+            _.update(_, "round", _.inc),
+            _.foldkv(function(memo, seat, hand){
+              return _.updateIn(memo, ["seated", seat], function(seated){
+                return Object.assign({}, seated, {hand, tricks: [], bid: null, played: null});
+              });
+            }, _, hands)));
+      })();
 
     case "bid":
       return _.chain(self.state, _.assocIn(_, ["seated", seat, "bid"], details.bid), function(state){
@@ -158,8 +149,15 @@ function execute(self, command, seat){
           _.assoc(_, "lead", details.winner)));
 
     case "play":
-      if (!details.card) {
-        throw new Error("Must specify a card");
+      const card = details.card;
+      if (!card) {
+        throw new Error("Must provide a card");
+      }
+      const has = _.detect(function(c){
+        return card.suit == c.suit && card.rank == c.rank;
+      }, self.state.seated[self.state.up].hand);
+      if (!has){
+        throw new Error("Must own the played card");
       }
       return _.chain(self.state,
         _.assocIn(_, ["seated", seat, "played"], details.card),
@@ -209,4 +207,4 @@ export function commit(seat){
 
 _.doto(OhHell,
   _.implement(_.ISwappable, {swap}),
-  _.implement(IGame, {start, execute, commit, finish}));
+  _.implement(IGame, {execute}));

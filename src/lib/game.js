@@ -1,18 +1,22 @@
 import _ from "./@atomic/core.js";
 
 export const IGame = _.protocol({
-  start: null,
-  execute: null,
-  commit: null,
-  finish: null
+  execute: null
 });
 
-export const start = IGame.start;
 export const execute = _.partly(_.overload(null, null, function(self, command){
   return IGame.execute(self, command, null);
 }, IGame.execute));
-export const commit = IGame.commit;
-export const finish = IGame.finish;
+
+export function start(config){
+  return function(self){
+    return execute(self, {type: "start", details: {config}});
+  }
+}
+
+export function finish(self){
+  return execute(self, {type: "finish"});
+}
 
 export function status(self, status){
   const obj = _.clone(self);

@@ -8,8 +8,13 @@ export const $ = reactives;
 
 function play(self){
   const card = _.first(self.state.seated[self.state.up].hand);
-  return oh.play(card)(self);
+  return commit(oh.play(card)(self));
 }
+
+function commit(self){
+  return oh.commit(self.state.up)(self);
+}
+
 const $state = $.cell(oh.ohHell(["Ava", "Zoe", "Jennabel", "Mario"], {}));
 $.sub($.hist($state), function([curr, prior]){
   const added = prior ? _.last(_.count(curr.events) - _.count(prior.events), curr.events) : null;
@@ -21,13 +26,21 @@ _.swap($state, oh.bid(1, 0));
 _.swap($state, oh.bid(2, 0));
 _.swap($state, oh.bid(3, 1));
 _.swap($state, play);
-_.swap($state, oh.commit(0));
 _.swap($state, play);
-_.swap($state, oh.commit(1));
 _.swap($state, play);
-_.swap($state, oh.commit(2));
 _.swap($state, play);
-_.swap($state, oh.commit(3));
+_.swap($state, oh.bid(0, 1));
+_.swap($state, oh.bid(1, 0));
+_.swap($state, oh.bid(2, 0));
+_.swap($state, oh.bid(3, 1));
+_.swap($state, play);
+_.swap($state, play);
+_.swap($state, play);
+_.swap($state, play);
+_.swap($state, play);
+_.swap($state, play);
+_.swap($state, play);
+_.swap($state, play);
 
 //oh.bid(1, null),
 //oh.play({rank: 10, suit: "♥️"}), //TODO for this to work we have to verify we hold this card

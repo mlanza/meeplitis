@@ -933,9 +933,9 @@ function addMethod(self, key, handler) {
 var _mm, _invoke;
 
 function key$2(self) {
-  try {
+  if (satisfies(IMapEntry, "key", self)) {
     return key$3(self);
-  } catch {
+  } else {
     return self; //coercible fallback
   }
 } //hide the details of using `key` for potential cross-frame compatibility

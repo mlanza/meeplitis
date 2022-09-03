@@ -4,6 +4,7 @@ import * as g from "./game.js";
 
 const ranks = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "K", "Q", "A"];
 const suits = ["♥️", "♠️", "♦️", "♣️"];
+const handSizes = [1, 2 /*, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1*/];
 
 function name(self){
   const face = {"J": "Jack", "K": "King", "Q": "Queen", "A": "Ace"}[self.rank] || self.rank;
@@ -62,11 +63,8 @@ function start(self){
 }
 
 function finish(self){
-  const summary = {seatsRanked: [0, 2, 1, 3]}; //TODO compute
-  return g.execute(self, {type: "finish", details: summary});
+  return g.execute(self, {type: "finish"});
 }
-
-const handSizes = [1, 2 /*, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1*/];
 
 function deal(self){
   const {deck, round, deal} = self.state, cards = handSizes[round];
@@ -84,12 +82,9 @@ export function bid(seat, bid){ //command
 
 export function play(card){ //command
   return function(self){
-    const has = card && _.detect(function(c){
+    const has = _.detect(function(c){
       return card.suit == c.suit && card.rank == c.rank;
     }, self.state.seated[self.state.up].hand);
-    if (!card){
-      throw new Error("Must play a card");
-    }
     return g.execute(self, {type: "play", details: {card}}, self.state.up);
   }
 }
@@ -104,9 +99,6 @@ function ordered(seats, lead){
   return _.chain(seats, _.range, _.cycle, _.dropWhile(_.notEq(_, lead), _), _.take(seats, _), _.toArray);
 }
 
-/*          _.chain(self.state,
-            _.update(_, "lead", after(_, _.count(self.seated))))*/
-
 const scoreRound = _.update(_, "seated", _.foldkv(function(memo, idx, seat){
   const tricks = _.count(seat.tricks),
         bid = seat.bid,
@@ -114,9 +106,8 @@ const scoreRound = _.update(_, "seated", _.foldkv(function(memo, idx, seat){
   return _.assoc(memo, idx, _.update(seat, "scored", _.conj(_, {bid, tricks, points})));
 }, [], _));
 
-//the command will be fully computed by the request and the game state when passed in
 function execute(self, command, seat){
-  //TODO implement all state reductions
+  //TODO validate all commands before executing
   const {type, details} = command;
   const cmd = Object.assign({seat}, command);
   switch (type) {
@@ -130,7 +121,7 @@ function execute(self, command, seat){
       return _.chain(
         ohHell(self.seated, self.config, self.status, _.append(self.events, cmd),
           _.chain(self.state, endRound ? scoreRound : _.identity, _.assoc(_, "up", up))),
-          endRound ? deal : _.identity);
+          endRound ? (endGame ? finish : deal) : _.identity);
 
     case "deal":
       const lead = self.state.round % _.count(self.seated);
@@ -160,14 +151,21 @@ function execute(self, command, seat){
     case "award":
       return ohHell(self.seated, self.config, "awarded", _.append(self.events, cmd),
         _.chain(self.state,
+          _.update(_, "seated", _.mapa(function(seat){
+            return _.assoc(seat, "played", null);
+          }, _)),
           _.updateIn(_, ["seated", details.winner, "tricks"], _.conj(_, details.trick)),
           _.assoc(_, "lead", details.winner)));
 
     case "play":
+      if (!details.card) {
+        throw new Error("Must specify a card");
+      }
       return _.chain(self.state,
         _.assocIn(_, ["seated", seat, "played"], details.card),
         _.updateIn(_, ["seated", seat, "hand"], _.pipe(_.remove(_.eq(_, details.card), _), _.toArray)),
         function(state){
+          _.count(_.getIn(self.state, ["seated", seat, "hand"])) - _.count(_.getIn(state, ["seated", seat, "hand"]))
           const ord = ordered(_.count(self.seated), state.lead);
           const trick = _.mapa(_.pipe(_.array(_, "played"), _.getIn(state.seated, _)), ord);
           const award = _.count(_.filter(_.isSome, trick)) == _.count(self.seated);
@@ -179,11 +177,26 @@ function execute(self, command, seat){
               ohHell(self.seated, self.config, "awarding", _.append(self.events, cmd), state),
                g.execute(_, {type: "award", details: {winner, trick}}));
           }
-          return ohHell(self.seated, self.config, self.status, _.append(self.events, cmd), state);
+          return ohHell(self.seated, self.config, "playing", _.append(self.events, cmd), state);
         });
 
+    case "finish":
+      return ohHell(self.seated, self.config, "finished", _.chain(cmd, function(cmd){
+        const scores = _.mapa(function(seat){
+          return _.sum(_.map(_.get(_, "points"), seat.scored));
+        }, self.state.seated);
+        const places = _.chain(scores, _.unique, _.sort, _.reverse, _.toArray);
+        const ranked = _.chain(self.state.seated, _.mapIndexed(function(seat){
+          const points = _.nth(scores, seat);
+          const place = _.indexOf(places, points);
+          const tie = _.count(_.filter(_.eq(_, points), scores)) > 1;
+          return {seat, points, place, tie};
+        }, _), _.sort(_.asc(_.get(_, "place")), _));
+        return _.assoc(cmd, "details", {ranked})
+      }, _.append(self.events, _)), self.state);
+
     default:
-      return ohHell(self.seated, self.config, "*", _.append(self.events, cmd), self.state);
+      throw new Error("Unknown command");
     }
 }
 

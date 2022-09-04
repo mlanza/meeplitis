@@ -7,7 +7,7 @@ export const _ = core;
 export const $ = reactives;
 
 function play(self){
-  const card = _.first(self.state.seated[self.state.up].hand);
+  const card = _.first(g.moves(self, self.state.up)).details.card;
   return commit(oh.play(card)(self));
 }
 

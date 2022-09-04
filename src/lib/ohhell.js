@@ -82,15 +82,44 @@ const scoreRound = _.update(_, "seated", _.foldkv(function(memo, idx, seat){
   return _.assoc(memo, idx, _.update(seat, "scored", _.conj(_, {bid, tricks, points})));
 }, [], _));
 
+function follow(self){
+  return self.state.seated[self.state.lead].played || null;
+}
+
+function broken(self, trump){
+  return !!_.chain(self.state.seated, _.mapcat(_.get(_, "tricks"), _), _.detect(_.eq(_, trump.suit), _));
+}
+
+function tight(hand){
+  return _.chain(hand, _.map(_.get(_, "suit"), _), _.unique, _.count, _.eq(_, 1));
+}
+
+//TODO factor in trumps being broken
+//TODO list only valid plays
 function moves(self){
   const allBidsIn = _.count(_.filter(_.isSome, _.map(_.get(_, "bid"), self.state.seated))) === _.count(self.seated);
   const maxBid = handSizes[self.state.round - 1];
   const bids = _.cons(null, _.range(0, maxBid + 1));
-  return _.chain(self.state.seated, _.mapIndexed(function(idx, seat){
-    return [allBidsIn ? [] : _.chain(bids, _.map(function(bid){
-      return {type: "bid", details: {bid}, seat: idx};
-    }, _), _.remove(_.pipe(_.getIn(_, ["details", "bid"]), _.eq(_, seat.bid)), _))];
-  }, _), _.flatten, _.compact, _.toArray);
+  if (allBidsIn) {
+    const seat = self.state.up;
+    const seated = self.state.seated[seat];
+    const lead = follow(self);
+    const trump = self.state.trump;
+    const hand = seated.hand;
+    const follows = lead ? _.pipe(_.get(_, "suit"), _.eq(_, lead.suit)) : _.identity;
+    const canFollow = _.detect(follows, hand);
+    const playable = lead ? (canFollow ? _.filter(follows, hand) : hand) : broken(self, trump) || tight(hand) ? hand : _.filter(_.pipe(_.get(_, "suit"), _.notEq(_, trump.suit)), hand);
+    const type = seated.played ? "commit" : "play";
+    return _.mapa(function(card){
+      return {type, seat, details: {card}};
+    }, playable);
+  } else {
+    return _.chain(self.state.seated, _.mapIndexed(function(idx, seat){
+      return [allBidsIn ? [] : _.chain(bids, _.map(function(bid){
+        return {type: "bid", details: {bid}, seat: idx};
+      }, _), _.remove(_.pipe(_.getIn(_, ["details", "bid"]), _.eq(_, seat.bid)), _))];
+    }, _), _.flatten, _.compact, _.toArray);
+  }
 }
 
 function execute(self, command, seat){

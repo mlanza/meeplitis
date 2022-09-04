@@ -161,6 +161,10 @@ function execute(self, command, seat){
 
     case "bid":
       return (function(){
+        const valid = _.detect(_.eq(_, cmd), g.moves(self, seat));
+        if (!valid) {
+          throw new Error("Invalid bid");
+        }
         return _.chain(self.state, _.assocIn(_, ["seated", seat, "bid"], details.bid), function(state){
           const bids = _.chain(_.range(_.count(self.seated)), _.mapa(function(seat){
             return _.getIn(state, ["seated", seat, "bid"]);
@@ -175,12 +179,9 @@ function execute(self, command, seat){
         if (!card) {
           throw new Error("Must provide a card");
         }
-        const hand = self.state.seated[self.state.up].hand;
-        const owned = _.detect(function(c){
-          return card.suit == c.suit && card.rank == c.rank;
-        }, hand);
-        if (!owned){
-          throw new Error("Must own the played card");
+        const valid = _.detect(_.eq(_, cmd), g.moves(self, seat));
+        if (!valid) {
+          throw new Error("Invalid play");
         }
         return _.chain(self.state,
           _.assocIn(_, ["seated", seat, "played"], details.card),

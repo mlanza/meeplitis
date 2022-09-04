@@ -12,7 +12,7 @@ export const execute = _.partly(_.overload(null, null, function(self, command){
 }, IGame.execute));
 
 function moves2(self, seat){
-  return _.filter(_.pipe(_.get(_, "seat"), _.eq(_, seat)), IGame.moves(self))
+  return _.filtera(_.pipe(_.get(_, "seat"), _.eq(_, seat)), IGame.moves(self))
 }
 
 export const moves = _.partly(_.overload(null, IGame.moves, moves2));

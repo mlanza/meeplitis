@@ -82,6 +82,17 @@ const scoreRound = _.update(_, "seated", _.foldkv(function(memo, idx, seat){
   return _.assoc(memo, idx, _.update(seat, "scored", _.conj(_, {bid, tricks, points})));
 }, [], _));
 
+function moves(self){
+  const allBidsIn = _.count(_.filter(_.isSome, _.map(_.get(_, "bid"), self.state.seated))) === _.count(self.seated);
+  const maxBid = handSizes[self.state.round - 1];
+  const bids = _.cons(null, _.range(0, maxBid + 1));
+  return _.chain(self.state.seated, _.mapIndexed(function(idx, seat){
+    return [allBidsIn ? [] : _.chain(bids, _.map(function(bid){
+      return {type: "bid", details: {bid}, seat: idx};
+    }, _), _.remove(_.pipe(_.getIn(_, ["details", "bid"]), _.eq(_, seat.bid)), _))];
+  }, _), _.flatten, _.compact, _.toArray);
+}
+
 function execute(self, command, seat){
   //TODO validate all commands before executing
   const {type, details} = command;
@@ -208,4 +219,4 @@ function execute(self, command, seat){
 
 _.doto(OhHell,
   _.implement(_.ISwappable, {swap}),
-  _.implement(IGame, {execute}));
+  _.implement(IGame, {moves, execute}));

@@ -24,6 +24,7 @@ _.swap($state, g.start({}));
 _.swap($state, oh.bid(0, 1));
 _.swap($state, oh.bid(1, 0));
 _.swap($state, oh.bid(2, 0));
+_.chain($state, _.deref, g.moves, _.toArray, _.see("moves"));
 _.swap($state, oh.bid(3, 1));
 _.dotimes(4, function(){
   _.swap($state, play);

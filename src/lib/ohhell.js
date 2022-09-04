@@ -89,24 +89,12 @@ function execute(self, command, seat){
   switch (type) {
     case "start":
       return (function(){
-        const cards = _.shuffle(deck());
         const _details = Object.assign({
-          deck: cards,
+          deck: _.shuffle(deck()),
           round: 0,
           seated: _.chain(self.seated, _.count, _.repeat(_, {scored: []}), _.toArray)
         }, details);
         return _.chain(ohHell(self.seated, _.append(self.events, _.assoc(cmd, "details", _details)), _details), deal);
-      })();
-
-    case "commit":
-      return (function(){
-        const endRound = _.chain(self.state.seated, _.mapa(_.get(_, "hand"), _), _.flatten, _.compact, _.seq, _.not);
-        const endGame = endRound && !handSizes[self.state.round];
-        const up = _.second(ordered(_.count(self.seated), self.state.up));
-        return _.chain(
-          ohHell(self.seated, _.append(self.events, cmd),
-            _.chain(self.state, endRound ? scoreRound : _.identity, _.assoc(_, "up", up))),
-            endRound ? (endGame ? g.finish : deal) : _.identity);
       })();
 
     case "deal":
@@ -141,48 +129,59 @@ function execute(self, command, seat){
         });
       })();
 
-    case "award":
-      return (function(){
-        return ohHell(self.seated, _.append(self.events, cmd),
-        _.chain(self.state,
-          _.update(_, "seated", _.mapa(function(seat){
-            return _.assoc(seat, "played", null);
-          }, _)),
-          _.updateIn(_, ["seated", details.winner, "tricks"], _.conj(_, details.trick)),
-          _.assoc(_, "lead", details.winner)));
-      })();
-
     case "play":
       return (function(){
         const card = details.card;
         if (!card) {
           throw new Error("Must provide a card");
         }
-        const has = _.detect(function(c){
+        const hand = self.state.seated[self.state.up].hand;
+        const owned = _.detect(function(c){
           return card.suit == c.suit && card.rank == c.rank;
-        }, self.state.seated[self.state.up].hand);
-        if (!has){
+        }, hand);
+        if (!owned){
           throw new Error("Must own the played card");
         }
         return _.chain(self.state,
           _.assocIn(_, ["seated", seat, "played"], details.card),
           _.updateIn(_, ["seated", seat, "hand"], _.pipe(_.remove(_.eq(_, details.card), _), _.toArray)),
           function(state){
-            _.count(_.getIn(self.state, ["seated", seat, "hand"])) - _.count(_.getIn(state, ["seated", seat, "hand"]))
             const ord = ordered(_.count(self.seated), state.lead);
             const trick = _.mapa(_.pipe(_.array(_, "played"), _.getIn(state.seated, _)), ord);
             const award = _.count(_.filter(_.isSome, trick)) == _.count(self.seated);
+            const oh = ohHell(self.seated, _.append(self.events, cmd), state);
             if (award){
               const ranking = ranked(trick, state.trump.suit);
               const best = _.first(ranking);
               const winner = _.indexOf(trick, best);
-              return _.chain(
-                ohHell(self.seated, _.append(self.events, cmd), state),
+              return _.chain(oh,
                  g.execute(_, {type: "award", details: {winner, trick}}));
             }
-            return ohHell(self.seated, _.append(self.events, cmd), state);
+            return oh;
           });
       })();
+
+      case "award":
+        return (function(){
+          return ohHell(self.seated, _.append(self.events, cmd),
+          _.chain(self.state,
+            _.update(_, "seated", _.mapa(function(seat){
+              return _.assoc(seat, "played", null);
+            }, _)),
+            _.updateIn(_, ["seated", details.winner, "tricks"], _.conj(_, details.trick)),
+            _.assoc(_, "lead", details.winner)));
+        })();
+
+      case "commit":
+        return (function(){
+          const endRound = _.chain(self.state.seated, _.mapa(_.get(_, "hand"), _), _.flatten, _.compact, _.seq, _.not);
+          const endGame = endRound && !handSizes[self.state.round];
+          const up = _.second(ordered(_.count(self.seated), self.state.up));
+          return _.chain(
+            ohHell(self.seated, _.append(self.events, cmd),
+              _.chain(self.state, endRound ? scoreRound : _.identity, _.assoc(_, "up", up))),
+              endRound ? (endGame ? g.finish : deal) : _.identity);
+        })();
 
     case "finish":
       return (function(){
@@ -203,14 +202,8 @@ function execute(self, command, seat){
 
     default:
       throw new Error("Unknown command");
-    }
-}
 
-//commit a tentative move
-export function commit(seat){
-  return function(self){
-    return g.execute(self, {type: "commit"}, seat);
-  }
+    }
 }
 
 _.doto(OhHell,

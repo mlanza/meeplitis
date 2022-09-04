@@ -12,7 +12,7 @@ function play(self){
 }
 
 function commit(self){
-  return oh.commit(self.state.up)(self);
+  return g.commit(self.state.up)(self);
 }
 
 const $state = $.cell(oh.ohHell(["Ava", "Zoe", "Jennabel", "Mario"]));
@@ -37,5 +37,3 @@ _.dotimes(8, function(){
 });
 
 Object.assign(window, {_, oh, g, $state});
-
-//game statues: dealing, bidding, playing, finished

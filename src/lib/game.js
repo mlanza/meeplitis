@@ -16,6 +16,13 @@ export function start(config){
   }
 }
 
+//commit a tentative move
+export function commit(seat){
+  return function(self){
+    return execute(self, {type: "commit"}, seat);
+  }
+}
+
 export function finish(self){
   return execute(self, {type: "finish"});
 }

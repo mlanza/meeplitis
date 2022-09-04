@@ -1,9 +1,9 @@
 import _ from "./@atomic/core.js";
 
 export const IGame = _.protocol({
-  execute: null, //validates a command, confirms it as an event
-  moves: null, //what can be done now and by which seats/players?
   up: null, //returns the seat(s) which are required to move
+  moves: null, //what can be done now and by which seats/players?
+  execute: null, //validates a command, confirms it as an event
   score: null //maintains current interim and/or final scoring and rankings as possible
 });
 

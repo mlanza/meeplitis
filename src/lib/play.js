@@ -18,13 +18,13 @@ function commit(self){
 const $state = $.cell(oh.ohHell(["Ava", "Zoe", "Jennabel", "Mario"]));
 $.sub($.hist($state), function([curr, prior]){
   const added = prior ? _.last(_.count(curr.events) - _.count(prior.events), curr.events) : null;
-  _.log(added, "→", curr);
+  const moves = prior ? _.chain(curr, g.moves, _.toArray) : [];
+  _.log(added, "→", curr, "moves", moves);
 });
 _.swap($state, g.start({}));
 _.swap($state, oh.bid(0, 1));
 _.swap($state, oh.bid(1, 0));
 _.swap($state, oh.bid(2, 0));
-_.chain($state, _.deref, g.moves, _.toArray, _.see("moves"));
 _.swap($state, oh.bid(3, 1));
 _.dotimes(4, function(){
   _.swap($state, play);

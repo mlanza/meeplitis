@@ -4941,7 +4941,7 @@ function flush(self) {
 }
 
 function flushable(self) {
-  return _.count(self.history) > 1;
+  return ICounted.count(self.history) > 1;
 }
 
 function undoable(self) {

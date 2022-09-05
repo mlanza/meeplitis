@@ -8,7 +8,7 @@ export const $ = reactives;
 
 function play(self){
   const card = _.first(g.moves(self, _.chain(self, _.deref, _.get(_, "up")))).details.card;
-  return _.chain(self, oh.play(card), commit);
+  return _.chain(self, oh.play(card));
 }
 
 function commit(self){
@@ -33,8 +33,18 @@ $.sub($state, function(j){
 dispatch(
   g.start({}),
   oh.bid(0, 1), oh.bid(1, 0), oh.bid(2, 0), oh.bid(3, 1),
-  _.repeat(4, play),
+  play, g.undo(0), g.redo(0), commit,
+  play, commit,
+  play, commit,
+  play, commit,
   oh.bid(0, 1), oh.bid(1, 0), oh.bid(2, 0), oh.bid(3, 1),
-  _.repeat(8, play));
+  play, commit,
+  play, commit,
+  play, commit,
+  play, commit,
+  play, commit,
+  play, commit,
+  play, commit,
+  play, commit);
 
 Object.assign(window, {_, oh, g, $state});

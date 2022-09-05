@@ -117,6 +117,11 @@ function moves(self){
   const state = _.deref(self.journal);
   const maxBid = handSizes[state.round - 1];
   const bids = _.cons(null, _.range(0, maxBid + 1));
+  const reversibility = _.compact([
+    _.undoable(self.journal) ? {type: "undo"} : null,
+    _.redoable(self.journal) ? {type: "redo"} : null,
+    _.flushable(self.journal) ? {type: "clear"} : null
+  ]);
   if (allBidsIn) {
     const seat = state.up;
     const seated = state.seated[seat];
@@ -127,15 +132,15 @@ function moves(self){
     const canFollow = _.detect(follows, hand);
     const playable = lead ? (canFollow ? _.filter(follows, hand) : hand) : broken(self, trump) || tight(hand) ? hand : _.filter(_.pipe(_.get(_, "suit"), _.notEq(_, trump.suit)), hand);
     const type = seated.played ? "commit" : "play";
-    return _.mapa(function(card){
+    return _.concat(reversibility, _.map(function(card){
       return {type, seat, details: {card}};
-    }, playable);
+    }, playable));
   } else {
-    return _.chain(state.seated, _.mapIndexed(function(idx, seat){
+    return _.concat(reversibility, _.chain(state.seated, _.mapIndexed(function(idx, seat){
       return [allBidsIn ? [] : _.chain(bids, _.map(function(bid){
         return {type: "bid", details: {bid}, seat: idx};
       }, _), _.remove(_.pipe(_.getIn(_, ["details", "bid"]), _.eq(_, seat.bid)), _))];
-    }, _), _.flatten, _.compact, _.toArray);
+    }, _), _.flatten, _.compact));
   }
 }
 

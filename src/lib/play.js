@@ -7,12 +7,12 @@ export const _ = core;
 export const $ = reactives;
 
 function play(self){
-  const card = _.first(g.moves(self, self.state.up)).details.card;
-  return commit(oh.play(card)(self));
+  const card = _.first(g.moves(self, _.chain(self, _.deref, _.get(_, "up")))).details.card;
+  return _.chain(self, oh.play(card), commit);
 }
 
 function commit(self){
-  return g.commit(self.state.up)(self);
+  return g.commit(_.chain(self, _.deref, _.get(_, "up")))(self);
 }
 
 const $state = _.chain(["Ava", "Zoe", "Jennabel", "Mario"], oh.ohHell, _.journal, $.cell);

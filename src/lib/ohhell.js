@@ -34,18 +34,14 @@ function deck(){
   return _.braid(card, ranks, suits);
 }
 
-function OhHell(seated, events, state){
+function OhHell(seated, events, journal){
   this.seated = seated;
   this.events = events;
-  this.state = state;
+  this.journal = journal;
 }
 
-export function ohHell(seated, events = [], state = null){
-  return new OhHell(seated, events, state);
-}
-
-export function swap(self, f){
-  return ohHell(self.seated, self.events, f(state));
+export function ohHell(seated, events = [], journal){
+  return new OhHell(seated, events, journal || _.journal(null));
 }
 
 function deal(self){
@@ -61,7 +57,7 @@ export function bid(seat, bid){
 
 export function play(card){
   return function(self){
-    return g.execute(self, {type: "play", details: {card}}, self.state.up);
+    return g.execute(self, {type: "play", details: {card}}, _.chain(self.journal, _.deref, _.get(_, "up")));
   }
 }
 
@@ -83,11 +79,13 @@ const scoreRound = _.update(_, "seated", _.foldkv(function(memo, idx, seat){
 }, [], _));
 
 function follow(self){
-  return self.state.seated[self.state.lead].played || null;
+  return _.chain(self.journal, _.deref, function(state){
+    return state.seated[state.lead].played || null;
+  });
 }
 
 function broken(self, trump){
-  return !!_.chain(self.state.seated, _.mapcat(_.get(_, "tricks"), _), _.detect(_.eq(_, trump.suit), _));
+  return !!_.chain(self.journal, _.deref, _.get(_, "seated"), _.mapcat(_.get(_, "tricks"), _), _.detect(_.eq(_, trump.suit), _));
 }
 
 function tight(hand){
@@ -95,34 +93,35 @@ function tight(hand){
 }
 
 function bidding(self){
-  return _.count(_.filter(_.isSome, _.map(_.get(_, "bid"), self.state.seated))) !== _.count(self.seated);
+  return _.count(_.filter(_.isSome, _.map(_.get(_, "bid"), _.chain(self.journal, _.deref, _.get(_, "seated"))))) !== _.count(self.seated);
 }
 
 function up(self){
-  return _.chain(self.state.seated, _.mapIndexed(function(seat, data){
+  return _.chain(self.journal, _.deref, _.get(_, "seated"), _.mapIndexed(function(seat, data){
     return {seat, bid: data.bid};
   }, _), _.filter(function(seat){
     return seat.bid == null;
-  }, _), _.mapa(_.get(_, "seat"), _), _.seq) || [self.state.up];
+  }, _), _.mapa(_.get(_, "seat"), _), _.seq) || [_.chain(self.journal, _.deref, _.get(_, "up"))];
 }
 
 function score(self){
-  return _.mapa(function(seat){
+  return _.chain(self.journal, _.deref, _.get(_, "seated"), _.mapa(function(seat){
     return _.sum(_.map(_.get(_, "points"), seat.scored));
-  }, self.state.seated);
+  }, _));
 }
 
 //TODO factor in trumps being broken
 //TODO list only valid plays
 function moves(self){
   const allBidsIn = !bidding(self);
-  const maxBid = handSizes[self.state.round - 1];
+  const state = _.deref(self.journal);
+  const maxBid = handSizes[state.round - 1];
   const bids = _.cons(null, _.range(0, maxBid + 1));
   if (allBidsIn) {
-    const seat = self.state.up;
-    const seated = self.state.seated[seat];
+    const seat = state.up;
+    const seated = state.seated[seat];
     const lead = follow(self);
-    const trump = self.state.trump;
+    const trump = state.trump;
     const hand = seated.hand;
     const follows = lead ? _.pipe(_.get(_, "suit"), _.eq(_, lead.suit)) : _.identity;
     const canFollow = _.detect(follows, hand);
@@ -132,7 +131,7 @@ function moves(self){
       return {type, seat, details: {card}};
     }, playable);
   } else {
-    return _.chain(self.state.seated, _.mapIndexed(function(idx, seat){
+    return _.chain(state.seated, _.mapIndexed(function(idx, seat){
       return [allBidsIn ? [] : _.chain(bids, _.map(function(bid){
         return {type: "bid", details: {bid}, seat: idx};
       }, _), _.remove(_.pipe(_.getIn(_, ["details", "bid"]), _.eq(_, seat.bid)), _))];
@@ -140,10 +139,19 @@ function moves(self){
   }
 }
 
+function irreversible(self, command){
+  return _.includes(["start", "deal", "bid", "commit", "finish"], command.type);
+}
+
+function raise(self, event, f){
+  return ohHell(self.seated, _.append(self.events, event), _.chain(self.journal, g.confirming(event) ? f : _.fmap(_, f), irreversible(self, event) ? _.flush : _.identity));
+}
+
 function execute(self, command, seat){
   //TODO validate all commands before executing
   const {type, details} = command;
-  const cmd = Object.assign({seat}, command);
+  const event = Object.assign({seat}, command);
+  const state = _.deref(self);
   switch (type) {
     case "start":
       return (function(){
@@ -152,19 +160,19 @@ function execute(self, command, seat){
           round: 0,
           seated: _.chain(self.seated, _.count, _.repeat(_, {scored: []}), _.toArray)
         }, details);
-        return _.chain(ohHell(self.seated, _.append(self.events, _.assoc(cmd, "details", _details)), _details), deal);
+        return _.chain(self, g.raise(_, _.assoc(event, "details", _details), _.constantly(_details)), deal);
       })();
 
     case "deal":
       return (function(){
-        const {deck, round, deal} = self.state, num = handSizes[round];
+        const {deck, round, deal} = state, num = handSizes[round];
         const [_deck, hands] = g.deal(deck, _.count(self.seated), num);
         const trump = _.first(_deck);
-        const lead = self.state.round % _.count(self.seated);
+        const lead = state.round % _.count(self.seated);
         const cards = _.chain(hands, _.flatten, _.toArray);
-        const undealt = _.chain(self.state.deck, _.remove(_.includes(cards, _), _), _.toArray);
-        return ohHell(self.seated, _.append(self.events, _.merge(cmd, {hands, trump, round})),
-          _.chain(self.state,
+        const undealt = _.chain(state.deck, _.remove(_.includes(cards, _), _), _.toArray);
+        return _.chain(self, g.raise(_, _.merge(event, {hands, trump, round}),
+          _.pipe(
             _.assoc(_, "trump", trump),
             _.assoc(_, "lead", lead),
             _.assoc(_, "up", lead),
@@ -174,21 +182,17 @@ function execute(self, command, seat){
               return _.updateIn(memo, ["seated", seat], function(seated){
                 return Object.assign({}, seated, {hand, tricks: [], bid: null, played: null});
               });
-            }, _, hands)));
+            }, _, hands))));
       })();
 
     case "bid":
       return (function(){
-        const valid = _.detect(_.eq(_, cmd), g.moves(self, seat));
+        const valid = _.detect(_.eq(_, event), g.moves(self, seat));
         if (!valid) {
           throw new Error("Invalid bid");
         }
-        return _.chain(self.state, _.assocIn(_, ["seated", seat, "bid"], details.bid), function(state){
-          const bids = _.chain(_.range(_.count(self.seated)), _.mapa(function(seat){
-            return _.getIn(state, ["seated", seat, "bid"]);
-          }, _));
-          return ohHell(self.seated, _.append(self.events, cmd), state);
-        });
+        return _.chain(self, g.raise(_, event,
+            _.assocIn(_, ["seated", seat, "bid"], details.bid)));
       })();
 
     case "play":
@@ -197,64 +201,63 @@ function execute(self, command, seat){
         if (!card) {
           throw new Error("Must provide a card");
         }
-        const valid = _.detect(_.eq(_, cmd), g.moves(self, seat));
+        const valid = _.detect(_.eq(_, event), g.moves(self, seat));
         if (!valid) {
           throw new Error("Invalid play");
         }
-        return _.chain(self.state,
-          _.assocIn(_, ["seated", seat, "played"], details.card),
-          _.updateIn(_, ["seated", seat, "hand"], _.pipe(_.remove(_.eq(_, details.card), _), _.toArray)),
-          function(state){
+        return _.chain(self,
+          g.raise(_, event,
+          _.pipe(
+            _.assocIn(_, ["seated", seat, "played"], details.card),
+            _.updateIn(_, ["seated", seat, "hand"], _.pipe(_.remove(_.eq(_, details.card), _), _.toArray)))),
+          function(self){
+            const state = _.deref(self);
             const ord = ordered(_.count(self.seated), state.lead);
             const trick = _.mapa(_.pipe(_.array(_, "played"), _.getIn(state.seated, _)), ord);
             const award = _.count(_.filter(_.isSome, trick)) == _.count(self.seated);
-            const oh = ohHell(self.seated, _.append(self.events, cmd), state);
-            if (award){
+            if (award) {
               const ranking = ranked(trick, state.trump.suit);
               const best = _.first(ranking);
               const winner = _.indexOf(trick, best);
-              return _.chain(oh,
+              return _.chain(self,
                  g.execute(_, {type: "award", details: {winner, trick}}));
             }
-            return oh;
+            return self;
           });
       })();
 
       case "award":
         return (function(){
-          return ohHell(self.seated, _.append(self.events, cmd),
-          _.chain(self.state,
-            _.update(_, "seated", _.mapa(function(seat){
-              return _.assoc(seat, "played", null);
-            }, _)),
-            _.updateIn(_, ["seated", details.winner, "tricks"], _.conj(_, details.trick)),
-            _.assoc(_, "lead", details.winner)));
+          return _.chain(self, g.raise(_, event,
+            _.pipe(
+              _.update(_, "seated", _.mapa(function(seat){
+                return _.assoc(seat, "played", null);
+              }, _)),
+              _.updateIn(_, ["seated", details.winner, "tricks"], _.conj(_, details.trick)),
+              _.assoc(_, "lead", details.winner))));
         })();
 
       case "commit":
         return (function(){
-          const endRound = _.chain(self.state.seated, _.mapa(_.get(_, "hand"), _), _.flatten, _.compact, _.seq, _.not);
-          const endGame = endRound && !handSizes[self.state.round];
-          const up = _.second(ordered(_.count(self.seated), self.state.up));
-          return _.chain(
-            ohHell(self.seated, _.append(self.events, cmd),
-              _.chain(self.state, endRound ? scoreRound : _.identity, _.assoc(_, "up", up))),
-              endRound ? (endGame ? g.finish : deal) : _.identity);
+          const endRound = _.chain(state.seated, _.mapa(_.get(_, "hand"), _), _.flatten, _.compact, _.seq, _.not);
+          const endGame = endRound && !handSizes[state.round];
+          const up = _.second(ordered(_.count(self.seated), state.up));
+          return _.chain(self,
+            g.raise(_, event, _.pipe(endRound ? scoreRound : _.identity, _.assoc(_, "up", up))),
+            endRound ? (endGame ? g.finish : deal) : _.identity);
         })();
 
     case "finish":
       return (function(){
-        return ohHell(self.seated, _.chain(cmd, function(cmd){
-          const scores = g.score(self);
-          const places = _.chain(scores, _.unique, _.sort, _.reverse, _.toArray);
-          const ranked = _.chain(self.state.seated, _.mapIndexed(function(seat){
-            const points = _.nth(scores, seat);
-            const place = _.indexOf(places, points);
-            const tie = _.count(_.filter(_.eq(_, points), scores)) > 1;
-            return {seat, points, place, tie};
-          }, _), _.sort(_.asc(_.get(_, "place")), _));
-          return _.assoc(cmd, "details", {ranked})
-        }, _.append(self.events, _)), self.state);
+        const scores = g.score(self);
+        const places = _.chain(scores, _.unique, _.sort, _.reverse, _.toArray);
+        const ranked = _.chain(state.seated, _.mapIndexed(function(seat){
+          const points = _.nth(scores, seat);
+          const place = _.indexOf(places, points);
+          const tie = _.count(_.filter(_.eq(_, points), scores)) > 1;
+          return {seat, points, place, tie};
+        }, _), _.sort(_.asc(_.get(_, "place")), _));
+        return _.chain(self, g.raise(_, _.assoc(event, "details", {ranked}), _.identity));
       })();
 
     default:
@@ -263,6 +266,10 @@ function execute(self, command, seat){
     }
 }
 
+function deref(self){
+  return _.deref(self.journal);
+}
+
 _.doto(OhHell,
-  _.implement(_.ISwappable, {swap}),
-  _.implement(IGame, {up, moves, execute, score}));
+  _.implement(_.IDeref, {deref}),
+  _.implement(IGame, {up, moves, irreversible, execute, raise, score}));

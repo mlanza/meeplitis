@@ -4938,7 +4938,7 @@ function flush(self) {
 }
 
 function undoable(self) {
-  return self.pos < count$b(self.history);
+  return self.pos + 1 < count$b(self.history);
 }
 
 function redoable(self) {

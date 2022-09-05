@@ -3,16 +3,53 @@ import _ from "./@atomic/core.js";
 export const IGame = _.protocol({
   up: null, //returns the seat(s) which are required to move
   moves: null, //what can be done now and by which seats/players?
+  irreversible: null, //what commands/events cannot be undone?
   execute: null, //validates a command, confirms it as an event
+  raise: null,
   score: null //maintains current interim and/or final scoring and rankings as possible
 });
 
 export const up = IGame.up;
 export const score = IGame.score;
+export const raise = _.partly(IGame.raise);
+export const irreversible = IGame.irreversible;
 
-export const execute = _.partly(_.overload(null, null, function(self, command){
-  return IGame.execute(self, command, null);
-}, IGame.execute));
+
+const execute3 = _.partly(function execute3(self, command, seat){
+  const {type} = command;
+  const event = Object.assign({seat: seat}, command);
+  switch(type){
+    case "undo":
+      return (function(){
+        if (!_.undoable(self.journal)){
+          throw new Error("Undo is not possible or allowed.");
+        }
+        return IGame.raise(self, event, _.undo);
+      })();
+
+    case "redo":
+      return (function(){
+        if (!_.redoable(self.journal)){
+          throw new Error("Redo is not possible or allowed.");
+        }
+        return IGame.raise(self, event, _.redo);
+      })();
+
+    case "clear":
+      return (function(){
+        if (!self.journal.history.length < 2){
+          throw new Error("Clear is not possible or allowed.");
+        }
+        return IGame.raise(self, event, _.clear);
+      })();
+
+    default:
+      return IGame.execute(self, command, seat);
+
+  }
+});
+
+export const execute = _.partly(_.overload(null, null, execute3(_, _, null), execute3));
 
 function moves2(self, seat){
   return _.filtera(_.pipe(_.get(_, "seat"), _.eq(_, seat)), IGame.moves(self))
@@ -33,8 +70,30 @@ export function commit(seat){
   }
 }
 
+export function confirming(command){
+  return _.includes(["undo", "redo", "clear"], command.type);
+}
+
 export function finish(self){
   return execute(self, {type: "finish"});
+}
+
+export function undo(seat){
+  return function(self){
+    return execute(self, {type: "undo", seat});
+  }
+}
+
+export function redo(seat){
+  return function(self){
+    return execute(self, {type: "redo", seat});
+  }
+}
+
+export function clear(seat){
+  return function(self){
+    return execute(self, {type: "clear", seat});
+  }
 }
 
 export function deal(deck, hands, cards){

@@ -245,9 +245,7 @@ function execute(self, command, seat){
     case "finish":
       return (function(){
         return ohHell(self.seated, _.chain(cmd, function(cmd){
-          const scores = _.mapa(function(seat){
-            return _.sum(_.map(_.get(_, "points"), seat.scored));
-          }, self.state.seated);
+          const scores = g.score(self);
           const places = _.chain(scores, _.unique, _.sort, _.reverse, _.toArray);
           const ranked = _.chain(self.state.seated, _.mapIndexed(function(seat){
             const points = _.nth(scores, seat);

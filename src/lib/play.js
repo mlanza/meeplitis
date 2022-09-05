@@ -15,28 +15,26 @@ function commit(self){
   return g.commit(self.state.up)(self);
 }
 
-const $state = $.cell(oh.ohHell(["Ava", "Zoe", "Jennabel", "Mario"]));
-$.sub($.hist($state), function([curr, prior]){
+const $state = _.chain(["Ava", "Zoe", "Jennabel", "Mario"], oh.ohHell, _.journal, $.cell);
+function dispatch(...commands){
+  _.each(function(command){
+    _.swap($state, _.fmap(_, command));
+  }, _.flatten(commands));
+}
+$.sub($state, function(j){
+  const [curr, prior] = _.revision(j);
   const added = prior ? _.last(_.count(curr.events) - _.count(prior.events), curr.events) : null;
   const moves = prior ? _.chain(curr, g.moves, _.toArray) : [];
   const up = prior ? g.up(curr) : [];
   const score = prior ? g.score(curr) : [];
   _.log(added, "→", curr, "up", up, "moves", moves, "score", score);
 });
-_.swap($state, g.start({}));
-_.swap($state, oh.bid(0, 1));
-_.swap($state, oh.bid(1, 0));
-_.swap($state, oh.bid(2, 0));
-_.swap($state, oh.bid(3, 1));
-_.dotimes(4, function(){
-  _.swap($state, play);
-});
-_.swap($state, oh.bid(0, 1));
-_.swap($state, oh.bid(1, 0));
-_.swap($state, oh.bid(2, 0));
-_.swap($state, oh.bid(3, 1));
-_.dotimes(8, function(){
-  _.swap($state, play);
-});
+
+dispatch(
+  g.start({}),
+  oh.bid(0, 1), oh.bid(1, 0), oh.bid(2, 0), oh.bid(3, 1),
+  _.repeat(4, play),
+  oh.bid(0, 1), oh.bid(1, 0), oh.bid(2, 0), oh.bid(3, 1),
+  _.repeat(8, play));
 
 Object.assign(window, {_, oh, g, $state});

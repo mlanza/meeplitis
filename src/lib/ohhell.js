@@ -4,7 +4,11 @@ import * as g from "./game.js";
 
 const ranks = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "K", "Q", "A"];
 const suits = ["♥️", "♠️", "♦️", "♣️"];
-const handSizes = [1, 2 /*, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1*/];
+const handSizes = _.toArray(upAndDown(1, 2));
+
+function upAndDown(min, max){
+  return _.dedupe(_.concat(_.range(min, max + 1), _.range(max, min - 1, -1)));
+}
 
 function name(self){
   const face = {"J": "Jack", "K": "King", "Q": "Queen", "A": "Ace"}[self.rank] || self.rank;

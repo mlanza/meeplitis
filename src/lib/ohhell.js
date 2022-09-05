@@ -102,7 +102,7 @@ function up(self){
     return {seat, bid: data.bid};
   }, _), _.filter(function(seat){
     return seat.bid == null;
-  }, _), _.mapa(_.get(_, "seat"), _), _.seq) || state.up == null ? [] : [state.up];
+  }, _), _.mapa(_.get(_, "seat"), _), _.seq) || (state.up == null ? [] : [state.up]);
 }
 
 function score(self){

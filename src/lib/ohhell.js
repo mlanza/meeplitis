@@ -94,10 +94,22 @@ function tight(hand){
   return _.chain(hand, _.map(_.get(_, "suit"), _), _.unique, _.count, _.eq(_, 1));
 }
 
+function bidding(self){
+  return _.count(_.filter(_.isSome, _.map(_.get(_, "bid"), self.state.seated))) !== _.count(self.seated);
+}
+
+function up(self){
+  return _.chain(self.state.seated, _.mapIndexed(function(seat, data){
+    return {seat, bid: data.bid};
+  }, _), _.filter(function(seat){
+    return seat.bid == null;
+  }, _), _.mapa(_.get(_, "seat"), _), _.seq) || [self.state.up];
+}
+
 //TODO factor in trumps being broken
 //TODO list only valid plays
 function moves(self){
-  const allBidsIn = _.count(_.filter(_.isSome, _.map(_.get(_, "bid"), self.state.seated))) === _.count(self.seated);
+  const allBidsIn = !bidding(self);
   const maxBid = handSizes[self.state.round - 1];
   const bids = _.cons(null, _.range(0, maxBid + 1));
   if (allBidsIn) {
@@ -249,4 +261,4 @@ function execute(self, command, seat){
 
 _.doto(OhHell,
   _.implement(_.ISwappable, {swap}),
-  _.implement(IGame, {moves, execute}));
+  _.implement(IGame, {up, moves, execute}));

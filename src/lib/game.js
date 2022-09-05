@@ -7,6 +7,8 @@ export const IGame = _.protocol({
   score: null //maintains current interim and/or final scoring and rankings as possible
 });
 
+export const up = IGame.up;
+
 export const execute = _.partly(_.overload(null, null, function(self, command){
   return IGame.execute(self, command, null);
 }, IGame.execute));

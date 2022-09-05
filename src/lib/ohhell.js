@@ -176,8 +176,8 @@ function execute(self, command, seat){
 
     case "deal":
       return (function(){
-        const {deck, deal} = state, round = state.round + 1, num = handSizes[round];
-        const [_deck, hands] = g.deal(deck, _.count(self.seated), num);
+        const {deck} = state, round = state.round + 1;
+        const [_deck, hands] = g.deal(deck, _.count(self.seated), handSizes[round]);
         const trump = _.first(_deck);
         const lead = round % _.count(self.seated);
         const cards = _.chain(hands, _.flatten, _.toArray);

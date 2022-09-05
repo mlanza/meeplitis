@@ -44,8 +44,11 @@ function OhHell(seated, events, journal){
   this.journal = journal;
 }
 
-export function ohHell(seated, events = [], journal){
-  return new OhHell(seated, events, journal || _.journal({}));
+export function ohHell(seated, events, journal){
+  if (!_.count(seated)) {
+    throw new Error("Cannot play a game with no one seated at the table");
+  }
+  return new OhHell(seated, events || [], journal || _.journal({}));
 }
 
 function deal(self){
@@ -160,7 +163,11 @@ function irreversible(self, command){
 
 function raise(self, event, f){
   const id = _.uident(5);
-  return ohHell(self.seated, _.append(self.events, Object.assign({id}, event)), _.chain(self.journal, g.confirming(event) ? f : _.fmap(_, f), irreversible(self, event) ? _.flush : _.identity));
+  return ohHell(self.seated,
+    _.append(self.events, Object.assign({id}, event)),
+    _.chain(self.journal,
+      g.confirming(event) ? f : _.fmap(_, f),
+      irreversible(self, event) ? _.flush : _.identity));
 }
 
 function execute(self, command, seat){

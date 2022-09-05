@@ -25,9 +25,9 @@ export function ranked(cards, trump){ //begin with lead card then follow in play
   function compare(a, b){
     return rank(b, trump, lead) - rank(a, trump, lead);
   }
-  return Array.from(cards).filter(function(card){
+  return _.chain(cards, _.filter(function(card){
     return card.suit === lead || card.suit === trump;
-  }).sort(compare);
+  }, _), _.sort(compare, _));
 }
 
 function deck(){

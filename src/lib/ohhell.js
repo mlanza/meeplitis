@@ -68,12 +68,6 @@ export function play(card){
   }
 }
 
-const after = _.partly(function after(seat, seats){
-  const max = seats - 1;
-  const n = seat + 1;
-  return n > max ? 0 : n;
-});
-
 function ordered(seats, lead){
   return _.chain(seats, _.range, _.cycle, _.dropWhile(_.notEq(_, lead), _), _.take(seats, _), _.toArray);
 }
@@ -86,13 +80,13 @@ const scoreRound = _.update(_, "seated", _.foldkv(function(memo, idx, seat){
 }, [], _));
 
 function follow(self){
-  return _.chain(self.journal, _.deref, function(state){
-    return state.seated[state.lead].played || null;
-  });
+  const state = _.deref(self);
+  return state.seated[state.lead].played || null;
 }
 
 function broken(self, trump){
-  return !!_.chain(self.journal, _.deref, _.get(_, "seated"), _.mapcat(_.get(_, "tricks"), _), _.detect(_.eq(_, trump.suit), _));
+  const state = _.deref(self);
+  return !!_.chain(state.seated, _.mapcat(_.get(_, "tricks"), _), _.detect(_.eq(_, trump.suit), _));
 }
 
 function tight(hand){
@@ -100,11 +94,12 @@ function tight(hand){
 }
 
 function bidding(self){
-  return _.count(_.filter(_.isSome, _.map(_.get(_, "bid"), _.chain(self.journal, _.deref, _.get(_, "seated"))))) !== _.count(self.seated);
+  const state = _.deref(self);
+  return _.count(_.filter(_.isSome, _.map(_.get(_, "bid"), state.seated))) !== _.count(self.seated);
 }
 
 function up(self){
-  const state = _.deref(self.journal);
+  const state = _.deref(self);
   return _.chain(state.seated, _.mapIndexed(function(seat, data){
     return {seat, bid: data.bid};
   }, _), _.filter(function(seat){
@@ -113,7 +108,8 @@ function up(self){
 }
 
 function score(self){
-  return _.chain(self.journal, _.deref, _.get(_, "seated"), _.mapa(function(seat){
+  const state = _.deref(self);
+  return _.chain(state.seated, _.mapa(function(seat){
     return _.sum(_.map(_.get(_, "points"), seat.scored));
   }, _));
 }
@@ -122,7 +118,7 @@ function score(self){
 //TODO list only valid plays
 function moves(self){
   const allBidsIn = !bidding(self);
-  const state = _.deref(self.journal);
+  const state = _.deref(self);
   const seat = state.up;
   const size = handSizes[state.round] || 0;
   const bids = _.cons(null, _.range(0, size + 1));

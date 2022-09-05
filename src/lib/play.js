@@ -45,6 +45,11 @@ dispatch(
   play, commit,
   play, commit,
   play, commit,
+  play, commit,
+  oh.bid(0, 1), oh.bid(1, 0), oh.bid(2, 0), oh.bid(3, 1),
+  play, commit,
+  play, commit,
+  play, commit,
   play, commit);
 
 Object.assign(window, {_, oh, g, $state});

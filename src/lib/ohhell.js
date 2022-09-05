@@ -253,7 +253,7 @@ function execute(self, command, seat){
       case "commit":
         return (function(){
           const endRound = _.chain(state.seated, _.mapa(_.get(_, "hand"), _), _.flatten, _.compact, _.seq, _.not);
-          const endGame = endRound && !handSizes[state.round];
+          const endGame = endRound && !handSizes[state.round + 1];
           const up = _.second(ordered(_.count(self.seated), state.up));
           return _.chain(self,
             g.raise(_, event, _.pipe(endRound ? scoreRound : _.identity, _.assoc(_, "up", up), _.assoc(_, "trick", null))),

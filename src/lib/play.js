@@ -23,7 +23,7 @@ function dispatch(...commands){
 }
 $.sub($state, function(j){
   const [curr, prior] = _.revision(j);
-  const added = prior ? _.last(_.count(curr.events) - _.count(prior.events), curr.events) : null;
+  const added = prior ? _.chain(curr.events, _.last(_.count(curr.events) - _.count(prior.events), _), _.toArray) : null;
   const moves = prior ? _.chain(curr, g.moves, _.toArray) : [];
   const up = prior ? g.up(curr) : [];
   const score = prior ? g.score(curr) : [];

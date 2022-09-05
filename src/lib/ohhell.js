@@ -97,11 +97,12 @@ function bidding(self){
 }
 
 function up(self){
-  return _.chain(self.journal, _.deref, _.get(_, "seated"), _.mapIndexed(function(seat, data){
+  const state = _.deref(self.journal);
+  return _.chain(state.seated, _.mapIndexed(function(seat, data){
     return {seat, bid: data.bid};
   }, _), _.filter(function(seat){
     return seat.bid == null;
-  }, _), _.mapa(_.get(_, "seat"), _), _.seq) || [_.chain(self.journal, _.deref, _.get(_, "up"))];
+  }, _), _.mapa(_.get(_, "seat"), _), _.seq) || state.up == null ? [] : [state.up];
 }
 
 function score(self){
@@ -115,26 +116,31 @@ function score(self){
 function moves(self){
   const allBidsIn = !bidding(self);
   const state = _.deref(self.journal);
+  const seat = state.up;
   const maxBid = handSizes[state.round - 1];
   const bids = _.cons(null, _.range(0, maxBid + 1));
   const reversibility = _.compact([
-    _.undoable(self.journal) ? {type: "undo"} : null,
-    _.redoable(self.journal) ? {type: "redo"} : null,
-    _.flushable(self.journal) ? {type: "clear"} : null
+    _.undoable(self.journal) ? {type: "undo", seat} : null,
+    _.redoable(self.journal) ? {type: "redo", seat} : null,
+    _.flushable(self.journal) ? {type: "clear", seat} : null
   ]);
   if (allBidsIn) {
-    const seat = state.up;
-    const seated = state.seated[seat];
-    const lead = follow(self);
-    const trump = state.trump;
-    const hand = seated.hand;
-    const follows = lead ? _.pipe(_.get(_, "suit"), _.eq(_, lead.suit)) : _.identity;
-    const canFollow = _.detect(follows, hand);
-    const playable = lead ? (canFollow ? _.filter(follows, hand) : hand) : broken(self, trump) || tight(hand) ? hand : _.filter(_.pipe(_.get(_, "suit"), _.notEq(_, trump.suit)), hand);
-    const type = seated.played ? "commit" : "play";
-    return _.concat(reversibility, _.map(function(card){
-      return {type, seat, details: {card}};
-    }, playable));
+    if (seat == null) {
+      return [];
+    } else {
+      const seated = state.seated[seat];
+      const committable = state.up && (seated.played || state.trick) ? [{type: "commit", seat}] : [];
+      const lead = follow(self);
+      const trump = state.trump;
+      const hand = seated.hand;
+      const follows = lead ? _.pipe(_.get(_, "suit"), _.eq(_, lead.suit)) : _.identity;
+      const canFollow = _.detect(follows, hand);
+      const playable = lead ? (canFollow ? _.filter(follows, hand) : hand) : broken(self, trump) || tight(hand) ? hand : _.filter(_.pipe(_.get(_, "suit"), _.notEq(_, trump.suit)), hand);
+      const type = seated.played || state.trick ? "commit" : "play";
+      return _.concat(reversibility, committable, _.map(function(card){
+        return {type, seat, details: {card}};
+      }, playable));
+    }
   } else {
     return _.concat(reversibility, _.chain(state.seated, _.mapIndexed(function(idx, seat){
       return [allBidsIn ? [] : _.chain(bids, _.map(function(bid){
@@ -213,6 +219,7 @@ function execute(self, command, seat){
         return _.chain(self,
           g.raise(_, event,
           _.pipe(
+            _.assocIn(_, ["seated", seat, "trick"], null),
             _.assocIn(_, ["seated", seat, "played"], details.card),
             _.updateIn(_, ["seated", seat, "hand"], _.pipe(_.remove(_.eq(_, details.card), _), _.toArray)))),
           function(self){
@@ -239,6 +246,7 @@ function execute(self, command, seat){
                 return _.assoc(seat, "played", null);
               }, _)),
               _.updateIn(_, ["seated", details.winner, "tricks"], _.conj(_, details.trick)),
+              _.assoc(_, "trick", details.trick),
               _.assoc(_, "lead", details.winner))));
         })();
 
@@ -248,7 +256,7 @@ function execute(self, command, seat){
           const endGame = endRound && !handSizes[state.round];
           const up = _.second(ordered(_.count(self.seated), state.up));
           return _.chain(self,
-            g.raise(_, event, _.pipe(endRound ? scoreRound : _.identity, _.assoc(_, "up", up))),
+            g.raise(_, event, _.pipe(endRound ? scoreRound : _.identity, _.assoc(_, "up", up), _.assoc(_, "trick", null))),
             endRound ? (endGame ? g.finish : deal) : _.identity);
         })();
 
@@ -262,7 +270,7 @@ function execute(self, command, seat){
           const tie = _.count(_.filter(_.eq(_, points), scores)) > 1;
           return {seat, points, place, tie};
         }, _), _.sort(_.asc(_.get(_, "place")), _));
-        return _.chain(self, g.raise(_, _.assoc(event, "details", {ranked}), _.identity));
+        return _.chain(self, g.raise(_, _.assoc(event, "details", {ranked}), _.assoc(_, "up", null)));
       })();
 
     default:

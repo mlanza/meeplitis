@@ -64,7 +64,8 @@ export function bid(seat, bid){
 
 export function play(card){
   return function(self){
-    return g.execute(self, {type: "play", details: {card}}, _.chain(self.journal, _.deref, _.get(_, "up")));
+    const state = _.deref(self);
+    return g.execute(self, {type: "play", details: {card}}, state.up);
   }
 }
 

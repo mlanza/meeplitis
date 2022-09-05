@@ -41,7 +41,7 @@ function OhHell(seated, events, journal){
 }
 
 export function ohHell(seated, events = [], journal){
-  return new OhHell(seated, events, journal || _.journal(null));
+  return new OhHell(seated, events, journal || _.journal({}));
 }
 
 function deal(self){
@@ -117,8 +117,8 @@ function moves(self){
   const allBidsIn = !bidding(self);
   const state = _.deref(self.journal);
   const seat = state.up;
-  const maxBid = handSizes[state.round - 1];
-  const bids = _.cons(null, _.range(0, maxBid + 1));
+  const size = handSizes[state.round] || 0;
+  const bids = _.cons(null, _.range(0, size + 1));
   const reversibility = _.compact([
     _.undoable(self.journal) ? {type: "undo", seat} : null,
     _.redoable(self.journal) ? {type: "redo", seat} : null,
@@ -168,7 +168,7 @@ function execute(self, command, seat){
       return (function(){
         const _details = Object.assign({
           deck: _.shuffle(deck()),
-          round: 0,
+          round: -1, //pending deal
           seated: _.chain(self.seated, _.count, _.repeat(_, {scored: []}), _.toArray)
         }, details);
         return _.chain(self, g.raise(_, _.assoc(event, "details", _details), _.constantly(_details)), deal);
@@ -176,19 +176,19 @@ function execute(self, command, seat){
 
     case "deal":
       return (function(){
-        const {deck, round, deal} = state, num = handSizes[round];
+        const {deck, round, deal} = state, num = handSizes[round + 1];
         const [_deck, hands] = g.deal(deck, _.count(self.seated), num);
         const trump = _.first(_deck);
-        const lead = state.round % _.count(self.seated);
+        const lead = (round + 1) % _.count(self.seated);
         const cards = _.chain(hands, _.flatten, _.toArray);
         const undealt = _.chain(state.deck, _.remove(_.includes(cards, _), _), _.toArray);
-        return _.chain(self, g.raise(_, _.merge(event, {hands, trump, round}),
+        return _.chain(self, g.raise(_, _.merge(event, {hands, trump, round: round + 1}),
           _.pipe(
             _.assoc(_, "trump", trump),
             _.assoc(_, "lead", lead),
             _.assoc(_, "up", lead),
             _.assoc(_, "deck", undealt),
-            _.update(_, "round", _.inc),
+            _.assoc(_, "round", round + 1),
             _.foldkv(function(memo, seat, hand){
               return _.updateIn(memo, ["seated", seat], function(seated){
                 return Object.assign({}, seated, {hand, tricks: [], bid: null, played: null});

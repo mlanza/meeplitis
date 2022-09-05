@@ -37,10 +37,10 @@ const execute3 = _.partly(function execute3(self, command, seat){
 
     case "clear":
       return (function(){
-        if (!self.journal.history.length < 2){
+        if (!_.flushable(self.journal)){
           throw new Error("Clear is not possible or allowed.");
         }
-        return IGame.raise(self, event, _.clear);
+        return IGame.raise(self, event, _.flush);
       })();
 
     default:

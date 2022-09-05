@@ -176,19 +176,19 @@ function execute(self, command, seat){
 
     case "deal":
       return (function(){
-        const {deck, round, deal} = state, num = handSizes[round + 1];
+        const {deck, deal} = state, round = state.round + 1, num = handSizes[round];
         const [_deck, hands] = g.deal(deck, _.count(self.seated), num);
         const trump = _.first(_deck);
-        const lead = (round + 1) % _.count(self.seated);
+        const lead = round % _.count(self.seated);
         const cards = _.chain(hands, _.flatten, _.toArray);
         const undealt = _.chain(state.deck, _.remove(_.includes(cards, _), _), _.toArray);
-        return _.chain(self, g.raise(_, _.merge(event, {hands, trump, round: round + 1}),
+        return _.chain(self, g.raise(_, _.merge(event, {hands, trump, round}),
           _.pipe(
             _.assoc(_, "trump", trump),
             _.assoc(_, "lead", lead),
             _.assoc(_, "up", lead),
             _.assoc(_, "deck", undealt),
-            _.assoc(_, "round", round + 1),
+            _.assoc(_, "round", round),
             _.foldkv(function(memo, seat, hand){
               return _.updateIn(memo, ["seated", seat], function(seated){
                 return Object.assign({}, seated, {hand, tricks: [], bid: null, played: null});

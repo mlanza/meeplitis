@@ -159,7 +159,8 @@ function irreversible(self, command){
 }
 
 function raise(self, event, f){
-  return ohHell(self.seated, _.append(self.events, event), _.chain(self.journal, g.confirming(event) ? f : _.fmap(_, f), irreversible(self, event) ? _.flush : _.identity));
+  const id = _.uident(5);
+  return ohHell(self.seated, _.append(self.events, Object.assign({id}, event)), _.chain(self.journal, g.confirming(event) ? f : _.fmap(_, f), irreversible(self, event) ? _.flush : _.identity));
 }
 
 function execute(self, command, seat){

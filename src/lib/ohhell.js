@@ -106,6 +106,12 @@ function up(self){
   }, _), _.mapa(_.get(_, "seat"), _), _.seq) || [self.state.up];
 }
 
+function score(self){
+  return _.mapa(function(seat){
+    return _.sum(_.map(_.get(_, "points"), seat.scored));
+  }, self.state.seated);
+}
+
 //TODO factor in trumps being broken
 //TODO list only valid plays
 function moves(self){
@@ -261,4 +267,4 @@ function execute(self, command, seat){
 
 _.doto(OhHell,
   _.implement(_.ISwappable, {swap}),
-  _.implement(IGame, {up, moves, execute}));
+  _.implement(IGame, {up, moves, execute, score}));

@@ -20,7 +20,8 @@ $.sub($.hist($state), function([curr, prior]){
   const added = prior ? _.last(_.count(curr.events) - _.count(prior.events), curr.events) : null;
   const moves = prior ? _.chain(curr, g.moves, _.toArray) : [];
   const up = prior ? g.up(curr) : [];
-  _.log(added, "→", curr, "up", up, "moves", moves);
+  const score = prior ? g.score(curr) : [];
+  _.log(added, "→", curr, "up", up, "moves", moves, "score", score);
 });
 _.swap($state, g.start({}));
 _.swap($state, oh.bid(0, 1));

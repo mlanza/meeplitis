@@ -8,6 +8,7 @@ export const IGame = _.protocol({
 });
 
 export const up = IGame.up;
+export const score = IGame.score;
 
 export const execute = _.partly(_.overload(null, null, function(self, command){
   return IGame.execute(self, command, null);

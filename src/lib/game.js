@@ -60,7 +60,7 @@ export function invalid(self, command, seat){
 }
 
 function moves2(self, seat){
-  return _.filter(_.pipe(_.get(_, "seat"), _.eq(_, seat)), IGame.moves(self))
+  return _.filter(_.pipe(_.get(_, "seat"), _.eq(_, seat)), IGame.moves(self));
 }
 
 export const moves = _.partly(_.overload(null, IGame.moves, moves2));

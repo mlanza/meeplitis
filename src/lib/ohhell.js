@@ -219,20 +219,20 @@ function execute(self, command, seat){
           });
       })();
 
-      case "award":
-        return (function(){
-          return _.chain(self, g.raise(_, event));
-        })();
+    case "award":
+      return (function(){
+        return _.chain(self, g.raise(_, event));
+      })();
 
-      case "commit":
-        return (function(){
-          const endRound = _.chain(state.seated, _.mapa(_.get(_, "hand"), _), _.flatten, _.compact, _.seq, _.not);
-          const endGame = endRound && !handSizes[state.round + 1];
-          const up = _.second(ordered(_.count(self.seated), state.up));
-          return _.chain(self,
-            g.raise(_, _.assoc(event, "details", {up, endRound, endGame})),
-            endRound ? (endGame ? g.finish : deal) : _.identity);
-        })();
+    case "commit":
+      return (function(){
+        const endRound = _.chain(state.seated, _.mapa(_.get(_, "hand"), _), _.flatten, _.compact, _.seq, _.not);
+        const endGame = endRound && !handSizes[state.round + 1];
+        const up = _.second(ordered(_.count(self.seated), state.up));
+        return _.chain(self,
+          g.raise(_, _.assoc(event, "details", {up, endRound, endGame})),
+          endRound ? (endGame ? g.finish : deal) : _.identity);
+      })();
 
     case "finish":
       return (function(){

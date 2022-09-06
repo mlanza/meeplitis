@@ -164,6 +164,7 @@ function execute(self, command, seat){
   const event = Object.assign({seat}, command);
   const {type, details} = event;
   const state = _.deref(self);
+  const valid = _.detect(_.eq(_, event), g.moves(self, seat));
   switch (type) {
     case "start":
       return (function(){
@@ -184,45 +185,36 @@ function execute(self, command, seat){
       })();
 
     case "bid":
-      return (function(){
-        const valid = _.detect(_.eq(_, event), g.moves(self, seat));
-        if (!valid) {
-          throw new Error("Invalid bid");
-        }
-        return _.chain(self, g.raise(_, event));
-      })();
+      if (!valid) {
+        throw new Error("Invalid bid");
+      }
+      return _.chain(self, g.raise(_, event));
 
     case "play":
-      return (function(){
-        const card = details.card;
-        if (!card) {
-          throw new Error("Must provide a card");
-        }
-        const valid = _.detect(_.eq(_, event), g.moves(self, seat));
-        if (!valid) {
-          throw new Error("Invalid play");
-        }
-        return _.chain(self, g.raise(_, event),
-          function(self){
-            const state = _.deref(self);
-            const ord = ordered(_.count(self.seated), state.lead);
-            const trick = _.mapa(_.pipe(_.array(_, "played"), _.getIn(state.seated, _)), ord);
-            const award = _.count(_.filter(_.isSome, trick)) == _.count(self.seated);
-            if (award) {
-              const ranking = ranked(trick, state.trump.suit);
-              const best = _.first(ranking);
-              const winner = _.indexOf(trick, best);
-              return _.chain(self,
-                 g.execute(_, {type: "award", details: {winner, trick}}));
-            }
-            return self;
-          });
-      })();
+      if (!details.card) {
+        throw new Error("Must provide a card");
+      }
+      if (!valid) {
+        throw new Error("Invalid play");
+      }
+      return _.chain(self, g.raise(_, event),
+        function(self){
+          const state = _.deref(self);
+          const ord = ordered(_.count(self.seated), state.lead);
+          const trick = _.mapa(_.pipe(_.array(_, "played"), _.getIn(state.seated, _)), ord);
+          const award = _.count(_.filter(_.isSome, trick)) == _.count(self.seated);
+          if (award) {
+            const ranking = ranked(trick, state.trump.suit);
+            const best = _.first(ranking);
+            const winner = _.indexOf(trick, best);
+            return _.chain(self,
+                g.execute(_, {type: "award", details: {winner, trick}}));
+          }
+          return self;
+        });
 
     case "award":
-      return (function(){
-        return _.chain(self, g.raise(_, event));
-      })();
+      return _.chain(self, g.raise(_, event));
 
     case "commit":
       return (function(){
@@ -258,9 +250,7 @@ function raise2(self, event){
   const {type, details, seat} = event;
   switch (type) {
     case "start":
-      return (function(){
-        return _.chain(self, g.raise(_, event, _.constantly(details)));
-      })();
+      return _.chain(self, g.raise(_, event, _.constantly(details)));
 
     case "deal":
       return (function(){
@@ -282,43 +272,32 @@ function raise2(self, event){
       })();
 
     case "bid":
-      return (function(){
-        return _.chain(self, g.raise(_, event,
-          _.assocIn(_, ["seated", seat, "bid"], details.bid)));
-
-      })();
+      return _.chain(self, g.raise(_, event,
+        _.assocIn(_, ["seated", seat, "bid"], details.bid)));
 
     case "play":
-      return (function(){
-        return _.chain(self,
-          g.raise(_, event,
-            _.pipe(
-              _.assocIn(_, ["seated", seat, "trick"], null),
-              _.assocIn(_, ["seated", seat, "played"], details.card),
-              _.updateIn(_, ["seated", seat, "hand"], _.pipe(_.remove(_.eq(_, details.card), _), _.toArray)))));
-      })();
+      return _.chain(self,
+        g.raise(_, event,
+          _.pipe(
+            _.assocIn(_, ["seated", seat, "trick"], null),
+            _.assocIn(_, ["seated", seat, "played"], details.card),
+            _.updateIn(_, ["seated", seat, "hand"], _.pipe(_.remove(_.eq(_, details.card), _), _.toArray)))));
 
     case "award":
-      return (function(){
-        return _.chain(self, g.raise(_, event,
-          _.pipe(
-            _.update(_, "seated", _.mapa(function(seat){
-              return _.assoc(seat, "played", null);
-            }, _)),
-            _.updateIn(_, ["seated", details.winner, "tricks"], _.conj(_, details.trick)),
-            _.assoc(_, "trick", details.trick),
-            _.assoc(_, "lead", details.winner))));
-      })();
+      return _.chain(self, g.raise(_, event,
+        _.pipe(
+          _.update(_, "seated", _.mapa(function(seat){
+            return _.assoc(seat, "played", null);
+          }, _)),
+          _.updateIn(_, ["seated", details.winner, "tricks"], _.conj(_, details.trick)),
+          _.assoc(_, "trick", details.trick),
+          _.assoc(_, "lead", details.winner))));
 
     case "commit":
-      return (function(){
-        return _.chain(self, g.raise(_, event, _.pipe(details.endRound ? scoreRound : _.identity, _.assoc(_, "up", details.up), _.assoc(_, "trick", null))));
-      })();
+      return _.chain(self, g.raise(_, event, _.pipe(details.endRound ? scoreRound : _.identity, _.assoc(_, "up", details.up), _.assoc(_, "trick", null))));
 
     case "finish":
-      return (function(){
-        return _.chain(self, g.raise(_, event, _.assoc(_, "up", null)));
-      })();
+      return _.chain(self, g.raise(_, event, _.assoc(_, "up", null)));
 
     default:
       throw new Error("Unknown event");

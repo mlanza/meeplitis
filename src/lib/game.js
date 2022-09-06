@@ -50,6 +50,10 @@ const execute3 = _.partly(function execute3(self, command, seat){
 
 export const execute = _.partly(_.overload(null, null, execute3(_, _, null), execute3));
 
+export function load(self, events){
+  return _.reduce(raise, self, events);
+}
+
 export function invalid(self, command, seat){
   try {
     execute(self, command, seat); //potentially throw error

@@ -4,10 +4,10 @@ import * as g from "./game.js";
 
 const ranks = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "K", "Q", "A"];
 const suits = ["♥️", "♠️", "♦️", "♣️"];
-const handSizes = _.toArray(upAndDown(1, 2));
+const handSizes = upAndDown(1, 2);
 
 function upAndDown(min, max){
-  return _.dedupe(_.concat(_.range(min, max + 1), _.range(max, min - 1, -1)));
+  return _.toArray(_.dedupe(_.concat(_.range(min, max + 1), _.range(max, min - 1, -1))));
 }
 
 function name(self){
@@ -122,7 +122,6 @@ function score(self){
 }
 
 //TODO factor in trumps being broken
-//TODO list only valid plays
 function moves(self){
   const allBidsIn = !bidding(self);
   const state = _.deref(self);

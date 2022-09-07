@@ -327,12 +327,10 @@ const fold = _.overload(null, null, fold2, fold3);
 function perspective(self, seat){
   const up = _.chain(self, g.up, _.includes(_, seat));
   const state = _.chain(self, _.deref,
-    _.update(_, "deck", _.mapa(_.constantly({}), _)),
-    _.update(_, "seated", function(seated){
-      return _.chain(seated, _.mapIndexed(function(i, chair){
-        return i === seat ? chair : _.update(chair, "hand", _.mapa(_.constantly({}), _));
-      }, _), _.toArray);
-    }));
+    _.update(_, "deck", _.mapa(_.constantly({}), _)), //no one can see the deck
+    _.update(_, "seated", _.pipe(_.mapIndexed(function(i, seated){ //can only see your own hand
+        return i === seat ? seated : _.update(seated, "hand", _.mapa(_.constantly({}), _));
+      }, _), _.toArray)));
   const moves = _.chain(self, g.moves(_, seat), _.toArray);
   const score = g.score(self)[seat];
   return {seat, up, state, moves, score};

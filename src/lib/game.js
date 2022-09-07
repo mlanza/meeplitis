@@ -5,13 +5,13 @@ export const IGame = _.protocol({
   moves: null, //what commands can seats/players do?
   irreversible: null, //what commands/events cannot be undone?
   execute: null, //validates a command, confirms it as an event
-  raise: null,
+  fold: null,
   score: null //maintains current interim and/or final scoring and rankings as possible
 });
 
 export const up = IGame.up;
 export const score = IGame.score;
-export const raise = _.partly(IGame.raise);
+export const fold = _.partly(IGame.fold);
 export const irreversible = IGame.irreversible;
 
 const execute3 = _.partly(function execute3(self, command, seat){
@@ -23,7 +23,7 @@ const execute3 = _.partly(function execute3(self, command, seat){
         if (!_.undoable(self.journal)){
           throw new Error("Undo is not possible or allowed.");
         }
-        return IGame.raise(self, event, _.undo);
+        return IGame.fold(self, event, _.undo);
       })();
 
     case "redo":
@@ -31,7 +31,7 @@ const execute3 = _.partly(function execute3(self, command, seat){
         if (!_.redoable(self.journal)){
           throw new Error("Redo is not possible or allowed.");
         }
-        return IGame.raise(self, event, _.redo);
+        return IGame.fold(self, event, _.redo);
       })();
 
     case "clear":
@@ -39,7 +39,7 @@ const execute3 = _.partly(function execute3(self, command, seat){
         if (!_.flushable(self.journal)){
           throw new Error("Clear is not possible or allowed.");
         }
-        return IGame.raise(self, event, _.flush);
+        return IGame.fold(self, event, _.flush);
       })();
 
     default:
@@ -51,7 +51,7 @@ const execute3 = _.partly(function execute3(self, command, seat){
 export const execute = _.partly(_.overload(null, null, execute3(_, _, null), execute3));
 
 export function load(self, events){
-  return _.reduce(raise, self, events);
+  return _.reduce(fold, self, events);
 }
 
 export function invalid(self, command, seat){

@@ -159,12 +159,12 @@ function irreversible(self, command){
 }
 
 function execute(self, command, seat){
-  //TODO validate all commands before executing
-  //TODO assign ids to events
-  const event = Object.assign({seat}, command);
-  const {type, details} = event;
+  //TODO validate commands before execution
   const state = _.deref(self);
-  const valid = _.detect(_.eq(_, event), g.moves(self, seat));
+  const valid = _.detect(_.eq(_, Object.assign({seat}, command)), g.moves(self, seat));
+  const id = _.uident(5);
+  const event = Object.assign({seat, id}, command);
+  const {type, details} = event;
   switch (type) {
     case "start":
       return (function(){
@@ -181,14 +181,14 @@ function execute(self, command, seat){
         const {deck} = state, round = state.round + 1;
         const [_deck, hands] = g.deal(deck, _.count(self.seated), handSizes[round]);
         const trump = _.first(_deck);
-        return _.chain(self, g.fold(_, _.assoc(event, "details", {hands, trump, round})));
+        return g.fold(self, _.assoc(event, "details", {hands, trump, round}));
       })();
 
     case "bid":
       if (!valid) {
         throw new Error("Invalid bid");
       }
-      return _.chain(self, g.fold(_, event));
+      return g.fold(self, event);
 
     case "play":
       if (!details.card) {
@@ -207,14 +207,13 @@ function execute(self, command, seat){
             const ranking = ranked(trick, state.trump.suit);
             const best = _.first(ranking);
             const winner = _.indexOf(trick, best);
-            return _.chain(self,
-                g.execute(_, {type: "award", details: {winner, trick}}));
+            return g.execute(self, {type: "award", details: {winner, trick}});
           }
           return self;
         });
 
     case "award":
-      return _.chain(self, g.fold(_, event));
+      return g.fold(self, event);
 
     case "commit":
       return (function(){
@@ -236,7 +235,7 @@ function execute(self, command, seat){
           const tie = _.count(_.filter(_.eq(_, points), scores)) > 1;
           return {seat, points, place, tie};
         }, _), _.sort(_.asc(_.get(_, "place")), _));
-        return _.chain(self, g.fold(_, _.assoc(event, "details", {ranked})));
+        return g.fold(self, _.assoc(event, "details", {ranked}));
       })();
 
     default:

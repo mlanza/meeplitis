@@ -250,14 +250,14 @@ function fold2(self, event){
   const {type, details, seat} = event;
   switch (type) {
     case "start":
-      return _.chain(self, g.fold(_, event, _.constantly(details)));
+      return g.fold(self, event, _.constantly(details));
 
     case "deal":
       return (function(){
         const lead = details.round % _.count(self.seated);
         const cards = _.chain(details.hands, _.flatten, _.toArray);
         const undealt = _.chain(state.deck, _.remove(_.includes(cards, _), _), _.toArray);
-        return _.chain(self, g.fold(_, event,
+        return g.fold(self, event,
           _.pipe(
             _.assoc(_, "trump", details.trump),
             _.assoc(_, "lead", lead),
@@ -268,36 +268,35 @@ function fold2(self, event){
               return _.updateIn(memo, ["seated", seat], function(seated){
                 return Object.assign({}, seated, {hand, tricks: [], bid: null, played: null});
               });
-            }, _, details.hands))));
+            }, _, details.hands)));
       })();
 
     case "bid":
-      return _.chain(self, g.fold(_, event,
-        _.assocIn(_, ["seated", seat, "bid"], details.bid)));
+      return g.fold(self, event,
+        _.assocIn(_, ["seated", seat, "bid"], details.bid));
 
     case "play":
-      return _.chain(self,
-        g.fold(_, event,
-          _.pipe(
-            _.assocIn(_, ["seated", seat, "trick"], null),
-            _.assocIn(_, ["seated", seat, "played"], details.card),
-            _.updateIn(_, ["seated", seat, "hand"], _.pipe(_.remove(_.eq(_, details.card), _), _.toArray)))));
+      return g.fold(self, event,
+        _.pipe(
+          _.assocIn(_, ["seated", seat, "trick"], null),
+          _.assocIn(_, ["seated", seat, "played"], details.card),
+          _.updateIn(_, ["seated", seat, "hand"], _.pipe(_.remove(_.eq(_, details.card), _), _.toArray))));
 
     case "award":
-      return _.chain(self, g.fold(_, event,
+      return g.fold(self, event,
         _.pipe(
           _.update(_, "seated", _.mapa(function(seat){
             return _.assoc(seat, "played", null);
           }, _)),
           _.updateIn(_, ["seated", details.winner, "tricks"], _.conj(_, details.trick)),
           _.assoc(_, "trick", details.trick),
-          _.assoc(_, "lead", details.winner))));
+          _.assoc(_, "lead", details.winner)));
 
     case "commit":
-      return _.chain(self, g.fold(_, event, _.pipe(details.endRound ? scoreRound : _.identity, _.assoc(_, "up", details.up), _.assoc(_, "trick", null))));
+      return g.fold(self, event, _.pipe(details.endRound ? scoreRound : _.identity, _.assoc(_, "up", details.up), _.assoc(_, "trick", null)));
 
     case "finish":
-      return _.chain(self, g.fold(_, event, _.assoc(_, "up", null)));
+      return g.fold(self, event, _.assoc(_, "up", null));
 
     default:
       throw new Error("Unknown event");

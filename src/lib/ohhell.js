@@ -69,6 +69,12 @@ export function play(card){
   }
 }
 
+function award(winner, trick){
+  return function(self)  {
+    return g.execute(self, {type: "award", details: {winner, trick}});
+  }
+}
+
 function ordered(seats, lead){
   return _.chain(seats, _.range, _.cycle, _.dropWhile(_.notEq(_, lead), _), _.take(seats, _), _.toArray);
 }
@@ -179,8 +185,18 @@ function execute(self, command, seat){
     case "deal":
       return (function(){
         const {deck} = state, round = state.round + 1;
-        const [_deck, hands] = g.deal(deck, _.count(self.seated), handSizes[round]);
-        const trump = _.first(_deck);
+        const numHands = _.count(self.seated);
+        const numCards = handSizes[round];
+        const dealt = numCards * numHands;
+        const hands = _.chain(deck,
+          _.take(dealt, _),
+          _.mapa(function(card, hand){
+            return [card, hand];
+          }, _, _.cycle(_.range(numHands))),
+          _.reduce(function(memo, [card, hand]){
+            return _.update(memo, hand, _.conj(_, card));
+          }, _.repeat(numHands, []), _));
+        const trump = _.chain(deck, _.drop(dealt, _), _.first);
         return g.fold(self, _.assoc(event, "details", {hands, trump, round}));
       })();
 
@@ -202,12 +218,12 @@ function execute(self, command, seat){
           const state = _.deref(self);
           const ord = ordered(_.count(self.seated), state.lead);
           const trick = _.mapa(_.pipe(_.array(_, "played"), _.getIn(state.seated, _)), ord);
-          const award = _.count(_.filter(_.isSome, trick)) == _.count(self.seated);
-          if (award) {
+          const complete = _.count(_.filter(_.isSome, trick)) == _.count(self.seated);
+          if (complete) {
             const ranking = ranked(trick, state.trump.suit);
             const best = _.first(ranking);
             const winner = _.indexOf(trick, best);
-            return g.execute(self, {type: "award", details: {winner, trick}});
+            return _.chain(self, award(winner, trick));
           }
           return self;
         });
@@ -254,8 +270,8 @@ function fold2(self, event){
     case "deal":
       return (function(){
         const lead = details.round % _.count(self.seated);
-        const cards = _.chain(details.hands, _.flatten, _.toArray);
-        const undealt = _.chain(state.deck, _.remove(_.includes(cards, _), _), _.toArray);
+        const dealt = _.chain(details.hands, _.cons(details.trump, _), _.flatten, _.toArray);
+        const undealt = _.chain(state.deck, _.remove(_.includes(dealt, _), _), _.toArray);
         return g.fold(self, event,
           _.pipe(
             _.assoc(_, "trump", details.trump),
@@ -306,7 +322,7 @@ function fold3(self, event, f){
   return ohHell(self.seated,
     _.append(self.events, event),
     _.chain(self.journal,
-      g.confirming(event) ? f : _.fmap(_, f),
+      g.confirmational(event) ? f : _.fmap(_, f),
       irreversible(self, event) ? _.flush : _.identity));
 }
 

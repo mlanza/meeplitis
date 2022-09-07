@@ -3,9 +3,9 @@ import _ from "./@atomic/core.js";
 export const IGame = _.protocol({
   up: null, //returns the seat(s) which are required to move
   moves: null, //what commands can seats/players do?
-  irreversible: null, //what commands/events cannot be undone?
-  execute: null, //validates a command, confirms it as an event
-  fold: null,
+  irreversible: null, //can the command be reversed by a player?
+  execute: null, //validates a command and transforms it into one or more events, potentially executing other commands
+  fold: null, //folds an event into the aggregate state
   score: null //maintains current interim and/or final scoring and rankings as possible
 });
 
@@ -50,10 +50,6 @@ const execute3 = _.partly(function execute3(self, command, seat){
 
 export const execute = _.partly(_.overload(null, null, execute3(_, _, null), execute3));
 
-export function load(self, events){
-  return _.reduce(fold, self, events);
-}
-
 export function invalid(self, command, seat){
   try {
     execute(self, command, seat); //potentially throw error
@@ -61,6 +57,10 @@ export function invalid(self, command, seat){
   } catch (ex) {
     return _.str(ex);
   }
+}
+
+export function load(self, events){
+  return _.reduce(fold, self, events);
 }
 
 function moves2(self, seat){
@@ -75,19 +75,14 @@ export function start(config){
   }
 }
 
-//commit a tentative move
-export function commit(seat){
+export function finish(self){
+  return execute(self, {type: "finish"});
+}
+
+export function commit(seat){ //treats moves as tentative
   return function(self){
     return execute(self, {type: "commit"}, seat);
   }
-}
-
-export function confirming(command){
-  return _.includes(["undo", "redo", "clear"], command.type);
-}
-
-export function finish(self){
-  return execute(self, {type: "finish"});
 }
 
 export function undo(seat){
@@ -108,19 +103,6 @@ export function clear(seat){
   }
 }
 
-export function deal(deck, hands, cards){
-  const n = cards * hands;
-  return [
-    _.chain(deck,
-      _.drop(n, _),
-      _.toArray),
-    _.chain(deck,
-      _.take(n, _),
-      _.mapa(function(card, hand){
-        return [card, hand];
-      }, _, _.cycle(_.range(hands))),
-      _.reduce(function(memo, [card, hand]){
-        return _.update(memo, hand, _.conj(_, card));
-      }, Array.from(_.repeat(hands, [])), _))
-  ];
+export function confirmational(command){
+  return _.includes(["undo", "redo", "clear"], command.type);
 }

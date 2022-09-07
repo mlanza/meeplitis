@@ -19,11 +19,9 @@ const $state = _.chain(["Ava", "Zoe", "Jennabel", "Mario"], oh.ohHell, _.journal
 
 fetch("./data/events.json").then(function(resp){
   return resp.json();
-}).then(function(events){
-  _.swap($state, _.fmap(_, function(game){
-    return g.load(game, events);
-  }));
-});
+}).then(_.each(function(event){
+  _.swap($state, _.fmap(_, g.fold(_, event)));
+}, _));
 
 function dispatch(...commands){
   _.each(function(command){

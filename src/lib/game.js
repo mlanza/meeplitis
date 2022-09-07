@@ -1,6 +1,7 @@
 import _ from "./@atomic/core.js";
 
 export const IGame = _.protocol({
+  perspective: null,
   up: null, //returns the seat(s) which are required to move
   moves: null, //what commands can seats/players do?
   irreversible: null, //can the command be reversed by a player?
@@ -13,10 +14,20 @@ export const up = IGame.up;
 export const score = IGame.score;
 export const fold = _.partly(IGame.fold);
 export const irreversible = IGame.irreversible;
+export const perspective = _.chain(IGame.perspective,
+  _.post(_,
+    _.and(
+      _.contains(_, "seat"),
+      _.contains(_, "state"),
+      _.contains(_, "moves"),
+      _.contains(_, "score"),
+      _.contains(_, "up"))),
+  _.partly);
 
 const execute3 = _.partly(function execute3(self, command, seat){
   const {type} = command;
-  const event = Object.assign({seat: seat}, command);
+  const id = _.uident(5);
+  const event = Object.assign({id, seat}, command);
   switch(type){
     case "undo":
       return (function(){
@@ -43,7 +54,7 @@ const execute3 = _.partly(function execute3(self, command, seat){
       })();
 
     default:
-      return IGame.execute(self, command, seat);
+      return IGame.execute(self, event, seat);
 
   }
 });

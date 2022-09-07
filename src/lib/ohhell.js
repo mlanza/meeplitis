@@ -165,10 +165,8 @@ function irreversible(self, command){
 
 function execute(self, command, seat){
   const state = _.deref(self);
-  const valid = _.detect(_.eq(_, Object.assign({seat}, command)), g.moves(self, seat));
-  const id = _.uident(5);
-  const event = Object.assign({seat, id}, command);
-  const {type, details} = event;
+  const valid = _.detect(_.eq(_, _.dissoc(command, "id")), g.moves(self, seat));
+  const {type, details} = command;
   switch (type) {
     case "start":
       return (function(){
@@ -177,7 +175,7 @@ function execute(self, command, seat){
           round: -1, //pending deal
           seated: _.chain(self.seated, _.count, _.repeat(_, {scored: []}), _.toArray)
         }, details);
-        return _.chain(self, g.fold(_, _.assoc(event, "details", _details)), deal);
+        return _.chain(self, g.fold(_, _.assoc(command, "details", _details)), deal);
       })();
 
     case "deal":
@@ -195,14 +193,14 @@ function execute(self, command, seat){
             return _.update(memo, hand, _.conj(_, card));
           }, Array.from(_.repeat(numHands, [])), _));
         const trump = _.chain(deck, _.drop(dealt, _), _.first);
-        return g.fold(self, _.assoc(event, "details", {hands, trump, round}));
+        return g.fold(self, _.assoc(command, "details", {hands, trump, round}));
       })();
 
     case "bid":
       if (!valid) {
         throw new Error("Invalid bid");
       }
-      return g.fold(self, event);
+      return g.fold(self, command);
 
     case "play":
       if (!details.card) {
@@ -211,7 +209,7 @@ function execute(self, command, seat){
       if (!valid) {
         throw new Error("Invalid play");
       }
-      return _.chain(self, g.fold(_, event),
+      return _.chain(self, g.fold(_, command),
         function(self){
           const state = _.deref(self);
           const ord = ordered(_.count(self.seated), state.lead);
@@ -227,7 +225,7 @@ function execute(self, command, seat){
         });
 
     case "award":
-      return g.fold(self, event);
+      return g.fold(self, command);
 
     case "commit":
       return (function(){
@@ -235,7 +233,7 @@ function execute(self, command, seat){
         const endGame = endRound && !handSizes[state.round + 1];
         const up = _.second(ordered(_.count(self.seated), state.up));
         return _.chain(self,
-          g.fold(_, _.assoc(event, "details", {up, endRound, endGame})),
+          g.fold(_, _.assoc(command, "details", {up, endRound, endGame})),
           endRound ? (endGame ? g.finish : deal) : _.identity);
       })();
 
@@ -249,7 +247,7 @@ function execute(self, command, seat){
           const tie = _.count(_.filter(_.eq(_, points), scores)) > 1;
           return {seat, points, place, tie};
         }, _), _.sort(_.asc(_.get(_, "place")), _));
-        return g.fold(self, _.assoc(event, "details", {ranked}));
+        return g.fold(self, _.assoc(command, "details", {ranked}));
       })();
 
     default:
@@ -326,10 +324,24 @@ function fold3(self, event, f){
 
 const fold = _.overload(null, null, fold2, fold3);
 
+function perspective(self, seat){
+  const up = _.chain(self, g.up, _.includes(_, seat));
+  const state = _.chain(self, _.deref,
+    _.update(_, "deck", _.mapa(_.constantly({}), _)),
+    _.update(_, "seated", function(seated){
+      return _.chain(seated, _.mapIndexed(function(i, chair){
+        return i === seat ? chair : _.update(chair, "hand", _.mapa(_.constantly({}), _));
+      }, _), _.toArray);
+    }));
+  const moves = _.chain(self, g.moves(_, seat), _.toArray);
+  const score = g.score(self)[seat];
+  return {seat, up, state, moves, score};
+}
+
 function deref(self){
   return _.deref(self.journal);
 }
 
 _.doto(OhHell,
   _.implement(_.IDeref, {deref}),
-  _.implement(IGame, {up, moves, irreversible, execute, fold, score}));
+  _.implement(IGame, {perspective, up, moves, irreversible, execute, fold, score}));

@@ -23,11 +23,9 @@ function dispatch(...commands){
 }
 $.sub($state, function(j){
   const [curr, prior] = _.revision(j);
-  const added = prior ? _.chain(curr.events, _.last(_.count(curr.events) - _.count(prior.events), _), _.toArray) : null;
-  const moves = prior ? _.chain(curr, g.moves, _.toArray) : [];
-  const up = prior ? g.up(curr) : [];
-  const score = prior ? g.score(curr) : [];
-  _.log(added, "→", curr, "up", up, "moves", moves, "score", score);
+  const added = prior ? _.chain(curr.events, _.last(_.count(curr.events) - _.count(prior.events), _), _.toArray) : [];
+  const perspectives = _.chain(curr.seated, _.mapIndexed(g.perspective(curr, _), _), _.toArray);
+  _.log(added, "→", curr, perspectives);
 });
 
 dispatch(

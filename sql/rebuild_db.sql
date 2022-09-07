@@ -6,7 +6,6 @@ DROP TABLE seats;
 DROP TABLE tables;
 DROP TABLE games;
 
-DROP TYPE event_status;
 DROP TYPE table_status;
 DROP TYPE seating_mode;
 
@@ -16,13 +15,6 @@ CREATE TYPE table_status AS ENUM ('open', 'closed', 'started', 'finished', 'aban
 -- started - the game is ready for moves
 -- finished - the game has concluded
 -- abandoned - the game was not concluded before time ran out
-
-CREATE TYPE event_status AS ENUM ('tentative', 'readied', 'confirmed', 'reversed', 'redacted'); -- redacted is an action for admins (e.g. GM)
--- tentative - contemplating move
--- readied - only used in simultaneous action selection games, can be reversed while not everyone is ready
--- confirmed - the move was executed
--- reversed - the move was momentarily undone
--- redacted - an admin in rare instances may back out several recent moves to allow minor fixes
 
 CREATE TYPE seating_mode AS ENUM ('random', 'fixed', 'choice', 'bid');
 
@@ -42,10 +34,10 @@ CREATE TABLE tables (
     game_id varchar(4) references games(id) not null,
     seating seating_mode default 'random',
     admins uuid [], -- users capable of editing during/after play
+    up varchar [], -- seats required to take action
+    scored boolean default true,
     started_at timestamp, -- used to delay start as in a tournament
-    last_confirmed_move varchar(5),
-    last_touched_at timestamp, -- when was the last time a player interacted with the game?
-    touches int default 0, -- bumped every time a player interacts with the game
+    last_touch varchar(5), -- last touch (e.g. event applied to game)
     finished_at timestamp,
     keypass varchar, -- for restricting access, hashed
     settings jsonb default '{}', -- configure this play
@@ -66,10 +58,10 @@ CREATE TABLE seats (
     settings jsonb, -- player specific settings
     player_id uuid references auth.users(id),
     score float,
+    adjustment float, -- from handicap, bid for seating order, penalties
+    effective_score float,
     place smallint, -- final placement upon completion of game
     tie boolean,
-    up boolean default false,
-    /* bid float, -- bid to get seat, if seating mode is `bid` */
     seq smallint, -- must be provide once game starts
     created_at timestamp default now(),
     updated_at timestamp,
@@ -97,8 +89,12 @@ CREATE TABLE events(
 
 ALTER TABLE events ENABLE ROW LEVEL SECURITY;
 
+ALTER TABLE tables
+ADD FOREIGN KEY (id, last_touch)
+REFERENCES events(table_id, id);
+
 INSERT INTO games (id, title, slug)
-    VALUES ('8Mj1', 'Oh Hell', 'oh-hell');
+    VALUES ('8Mj1', 'Oh Hell (Blackout)', 'oh-hell');
 INSERT INTO tables (id, game_id, created_by)
     VALUES ('823Wonk34yU', '8Mj1', '5e6b12f5-f24c-4fd3-8812-f537778dc5c2');
 INSERT INTO seats (table_id, id, player_id, seq)

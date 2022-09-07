@@ -10,9 +10,14 @@ export const IGame = _.protocol({
   score: null //maintains current interim and/or final scoring and rankings as possible
 });
 
+function irreversible3(self, event, f){
+  return g.confirmational(event) ? f : _.fmap(_, f),
+    IGame.irreversible(self, event) ? _.flush : _.identity;
+}
+
+export const irreversible = _.partly(_.overload(null, null, IGame.irreversible, irreversible3));
 export const up = IGame.up;
 export const score = IGame.score;
-export const irreversible = IGame.irreversible;
 export const perspective = _.chain(IGame.perspective,
   _.post(_,
     _.and(

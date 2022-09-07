@@ -317,9 +317,7 @@ function fold2(self, event){
 function fold3(self, event, f){
   return ohHell(self.seated,
     _.append(self.events, event),
-    _.chain(self.journal,
-      g.confirmational(event) ? f : _.fmap(_, f),
-      irreversible(self, event) ? _.flush : _.identity));
+    _.chain(self.journal, g.irreversible(self, event, f)));
 }
 
 const fold = _.overload(null, null, fold2, fold3);

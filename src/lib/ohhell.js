@@ -165,7 +165,6 @@ function irreversible(self, command){
 }
 
 function execute(self, command, seat){
-  //TODO validate commands before execution
   const state = _.deref(self);
   const valid = _.detect(_.eq(_, Object.assign({seat}, command)), g.moves(self, seat));
   const id = _.uident(5);
@@ -195,7 +194,7 @@ function execute(self, command, seat){
           }, _, _.cycle(_.range(numHands))),
           _.reduce(function(memo, [card, hand]){
             return _.update(memo, hand, _.conj(_, card));
-          }, _.repeat(numHands, []), _));
+          }, Array.from(_.repeat(numHands, [])), _));
         const trump = _.chain(deck, _.drop(dealt, _), _.first);
         return g.fold(self, _.assoc(event, "details", {hands, trump, round}));
       })();

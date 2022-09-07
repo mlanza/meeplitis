@@ -11,8 +11,8 @@ export const IGame = _.protocol({
 });
 
 function irreversible3(self, event, f){
-  return g.confirmational(event) ? f : _.fmap(_, f),
-    IGame.irreversible(self, event) ? _.flush : _.identity;
+  return _.pipe(g.confirmational(event) ? f : _.fmap(_, f),
+    IGame.irreversible(self, event) ? _.flush : _.identity);
 }
 
 export const irreversible = _.partly(_.overload(null, null, IGame.irreversible, irreversible3));

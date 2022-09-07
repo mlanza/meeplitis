@@ -14,6 +14,7 @@ site
   .copy("favicon.ico")
   .copy("index.css")
   .copy("lib")
+  .copy("data")
   .copy("images")
   .copy("signin")
   .copy("testing")

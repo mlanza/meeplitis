@@ -12,7 +12,6 @@ export const IGame = _.protocol({
 
 export const up = IGame.up;
 export const score = IGame.score;
-export const fold = _.partly(IGame.fold);
 export const irreversible = IGame.irreversible;
 export const perspective = _.chain(IGame.perspective,
   _.post(_,
@@ -24,7 +23,26 @@ export const perspective = _.chain(IGame.perspective,
       _.contains(_, "up"))),
   _.partly);
 
-const execute3 = _.partly(function execute3(self, command, seat){
+function fold2(self, event){
+  const {type, details, seat} = event;
+  switch (type) {
+    case "undo":
+      return IGame.fold(self, event, _.undo);
+
+    case "redo":
+      return IGame.fold(self, event, _.redo);
+
+    case "clear":
+      return IGame.fold(self, event, _.flush);
+
+    default:
+      return IGame.fold(self, event);
+  }
+}
+
+export const fold = _.partly(_.overload(null, null, fold2, IGame.fold));
+
+function execute3(self, command, seat){
   const {type} = command;
   const id = _.uident(5);
   const event = Object.assign({id, seat}, command);
@@ -34,7 +52,7 @@ const execute3 = _.partly(function execute3(self, command, seat){
         if (!_.undoable(self.journal)){
           throw new Error("Undo is not possible or allowed.");
         }
-        return IGame.fold(self, event, _.undo);
+        return IGame.fold(self, event);
       })();
 
     case "redo":
@@ -42,7 +60,7 @@ const execute3 = _.partly(function execute3(self, command, seat){
         if (!_.redoable(self.journal)){
           throw new Error("Redo is not possible or allowed.");
         }
-        return IGame.fold(self, event, _.redo);
+        return IGame.fold(self, event);
       })();
 
     case "clear":
@@ -50,16 +68,16 @@ const execute3 = _.partly(function execute3(self, command, seat){
         if (!_.flushable(self.journal)){
           throw new Error("Clear is not possible or allowed.");
         }
-        return IGame.fold(self, event, _.flush);
+        return IGame.fold(self, event);
       })();
 
     default:
       return IGame.execute(self, event, seat);
 
   }
-});
+}
 
-export const execute = _.partly(_.overload(null, null, execute3(_, _, null), execute3));
+export const execute = _.partly(_.overload(null, null, execute3, execute3));
 
 export function invalid(self, command, seat){
   try {

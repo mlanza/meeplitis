@@ -1,14 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Mountains+of+Christmas&family=Dokdo&family=Racing+Sans+One&family=Bangers&family=Irish+Grover&display=swap');
-
-body {
-  background-image: url(./images/connected.jpg);
+html {
+  background-image: url(./images/boardgames-seamless-1.webp);
+  background-size: 30em;
   background-repeat: repeat;
   background-color: white;
+}
+body {
+  background-color: rgba(255, 255, 255, .95);
+  min-height: 100vh;
   color: #454344;
   padding: 2em 0 4em;
   margin: 0;
   text-align: center;
-  min-height: 100%;
   font-size: 1.2em;
 }
 header,

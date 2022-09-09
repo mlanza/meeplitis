@@ -11,7 +11,7 @@ export const IGame = _.protocol({
 });
 
 function irreversible3(self, event, f){
-  return _.pipe(g.confirmational(event) ? f : _.fmap(_, f),
+  return _.pipe(confirmational(event) ? f : _.fmap(_, f),
     IGame.irreversible(self, event) ? _.flush : _.identity);
 }
 
@@ -57,7 +57,7 @@ function execute3(self, command, seat){
         if (!_.undoable(self.journal)){
           throw new Error("Undo is not possible or allowed.");
         }
-        return IGame.fold(self, event);
+        return fold2(self, event);
       })();
 
     case "redo":
@@ -65,7 +65,7 @@ function execute3(self, command, seat){
         if (!_.redoable(self.journal)){
           throw new Error("Redo is not possible or allowed.");
         }
-        return IGame.fold(self, event);
+        return fold2(self, event);
       })();
 
     case "clear":
@@ -73,7 +73,7 @@ function execute3(self, command, seat){
         if (!_.flushable(self.journal)){
           throw new Error("Clear is not possible or allowed.");
         }
-        return IGame.fold(self, event);
+        return fold2(self, event);
       })();
 
     default:

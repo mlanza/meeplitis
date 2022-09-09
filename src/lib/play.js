@@ -17,11 +17,13 @@ function commit(self){
 
 const $state = _.chain(["Ava", "Zoe", "Jennabel", "Mario"], oh.ohHell, _.journal, $.cell);
 
+/*
 fetch("./data/events.json").then(function(resp){
   return resp.json();
 }).then(_.each(function(event){
   _.swap($state, _.fmap(_, g.fold(_, event)));
 }, _));
+*/
 
 function dispatch(...commands){
   _.each(function(command){
@@ -34,7 +36,7 @@ $.sub($state, function(j){
   const perspectives = _.chain(curr.seated, _.mapIndexed(g.perspective(curr, _), _), _.toArray);
   _.log(added, "→", curr, perspectives);
 });
-/*
+
 dispatch(
   g.start({}),
   oh.bid(0, 1), oh.bid(1, 0), oh.bid(2, 0), oh.bid(3, 1),
@@ -56,7 +58,6 @@ dispatch(
   play, commit,
   play, commit,
   play, commit);
-*/
 
 /*
 _.chain($state, _.deref, _.deref, _.get(_, "events"), function(events){

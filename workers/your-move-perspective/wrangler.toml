@@ -1,0 +1,3 @@
+name = "your-move-perspective"
+main = "src/index.js"
+compatibility_date = "2022-09-08"

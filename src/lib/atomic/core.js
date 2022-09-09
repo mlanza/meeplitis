@@ -1534,7 +1534,7 @@ function gteN(...args) {
 
 const gte = overload(constantly(false), constantly(true), gte2, gteN);
 
-var _$1, _IAddable$add, _IAddable, _2, _IAddable$add2, _IAddable2;
+var _, _IAddable$add, _IAddable, _2, _IAddable$add2, _IAddable2;
 function directed(start, step) {
   return compare$6(IAddable.add(start, step), start);
 }
@@ -1572,8 +1572,8 @@ function subtract2(self, n) {
 
 const subtract = overload(constantly(0), identity, subtract2, reducing(subtract2));
 const add$3 = overload(constantly(0), identity, IAddable.add, reducing(IAddable.add));
-const inc = overload(constantly(+1), (_IAddable = IAddable, _IAddable$add = _IAddable.add, _$1 = +1, function add(_argPlaceholder) {
-  return _IAddable$add.call(_IAddable, _argPlaceholder, _$1);
+const inc = overload(constantly(+1), (_IAddable = IAddable, _IAddable$add = _IAddable.add, _ = +1, function add(_argPlaceholder) {
+  return _IAddable$add.call(_IAddable, _argPlaceholder, _);
 }));
 const dec = overload(constantly(-1), (_IAddable2 = IAddable, _IAddable$add2 = _IAddable2.add, _2 = -1, function add(_argPlaceholder2) {
   return _IAddable$add2.call(_IAddable2, _argPlaceholder2, _2);
@@ -6576,10 +6576,8 @@ function called2(fn, message) {
 
 const called = overload(null, null, called2, called3, called4);
 
-function addProp(obj, key, value) {
-  if (obj.hasOwnProperty(key)) {
-    throw new Error("Property `" + key + "` already defined on " + obj.constructor.name + ".");
-  } else {
+function fillProp(obj, key, value) {
+  if (!obj.hasOwnProperty(key)) {
     Object.defineProperty(obj, key, {
       value,
       writable: true,
@@ -6593,7 +6591,7 @@ function equals(other) {
   return equiv$a(this, other);
 }
 
-addProp(Object.prototype, "equals", equals);
+fillProp(Object.prototype, "equals", equals);
 const yank = called(omit$3, "`yank` is deprecated — use `omit` instead.");
 const numeric = (_test = test, _param = /^\d+$/i, function test(_argPlaceholder2) {
   return _test(_param, _argPlaceholder2);

@@ -17,6 +17,7 @@ site
   .copy("data")
   .copy("images")
   .copy("signin")
+  .copy("signup")
   .copy("testing")
   .use(date())
   .use(relative_urls());

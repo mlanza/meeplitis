@@ -40,7 +40,7 @@ CREATE TABLE tables (
     up varchar [], -- seats required to take action
     scored boolean default true,
     started_at timestamp, -- used to delay start as in a tournament
-    last_touch varchar(5), -- last touch (e.g. event applied to game)
+    last_touch_id varchar(5), -- last touch (e.g. event applied to game)
     finished_at timestamp,
     keypass varchar, -- for restricting access, hashed
     settings jsonb default '{}', -- configure this play
@@ -96,7 +96,7 @@ ALTER TABLE events ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE tables
 ADD CONSTRAINT fk_last_touch
-FOREIGN KEY (id, last_touch)
+FOREIGN KEY (id, last_touch_id)
 REFERENCES events(table_id, id);
 
 INSERT INTO games (id, title, slug, seats)
@@ -106,7 +106,10 @@ INSERT INTO tables (id, game_id, created_by)
 INSERT INTO seats (table_id, id, player_id, seq)
     VALUES ('823Wonk34yU', 'Hj3', '5e6b12f5-f24c-4fd3-8812-f537778dc5c2', 1),
            ('823Wonk34yU', '4jh', 'c8619345-0c1a-44c4-bdfe-e6e1de11c6bd', 2);
-INSERT INTO events (table_id, seat_id, event, details)
-    VALUES ('823Wonk34yU', null, 'start', '{"deck": []}'),
-           ('823Wonk34yU', 'Hj3', 'draw', '{"cards": 1}'),
-           ('823Wonk34yU', '4jh', 'draw', '{"cards": 2}');
+INSERT INTO events (table_id, id, seat_id, event, details)
+    VALUES ('823Wonk34yU', '23JDb', null, 'start', '{"deck": []}'),
+           ('823Wonk34yU', '20kMn', 'Hj3', 'draw', '{"cards": 1}'),
+           ('823Wonk34yU', '6YTHx', '4jh', 'draw', '{"cards": 2}');
+UPDATE tables
+SET last_touch = '6YTHx'
+WHERE id = '823Wonk34yU';

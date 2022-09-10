@@ -1,6 +1,7 @@
 -- TODO define indexes
 -- TODO define proc for committing move
 
+ALTER TABLE tables DROP CONSTRAINT fk_last_touch;
 DROP TABLE events;
 DROP TABLE seats;
 DROP TABLE tables;
@@ -21,7 +22,8 @@ CREATE TYPE seating_mode AS ENUM ('random', 'fixed', 'choice', 'bid');
 CREATE TABLE games (
     id varchar(4) not null default generate_uid(4) primary key,
     title text not null,
-    slug text,
+    seats int2[] not null,
+    thumbnail_url varchar,
     created_at timestamp not null default now());
 
 ALTER TABLE games ENABLE ROW LEVEL SECURITY;
@@ -49,6 +51,8 @@ CREATE TABLE tables (
 
 --ALTER TABLE tables ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tables REPLICA IDENTITY FULL;
+
+CREATE INDEX idx_tables_game_status ON tables (game_id, status);
 
 --CREATE POLICY "tables are viewable by everyone."  ON tables FOR ALL USING (true);
 
@@ -90,11 +94,12 @@ CREATE TABLE events(
 ALTER TABLE events ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE tables
-ADD FOREIGN KEY (id, last_touch)
+ADD CONSTRAINT fk_last_touch
+FOREIGN KEY (id, last_touch)
 REFERENCES events(table_id, id);
 
-INSERT INTO games (id, title, slug)
-    VALUES ('8Mj1', 'Oh Hell (Blackout)', 'oh-hell');
+INSERT INTO games (id, title, slug, seats)
+    VALUES ('8Mj1', 'Oh Hell (Blackout)', 'oh-hell', ARRAY[2, 3, 4, 5, 6, 7]);
 INSERT INTO tables (id, game_id, created_by)
     VALUES ('823Wonk34yU', '8Mj1', '5e6b12f5-f24c-4fd3-8812-f537778dc5c2');
 INSERT INTO seats (table_id, id, player_id, seq)

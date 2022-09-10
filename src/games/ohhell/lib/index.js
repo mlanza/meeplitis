@@ -1,6 +1,6 @@
-import _ from "./@atomic/core.js";
-import {IGame} from "./game.js";
-import * as g from "./game.js";
+import _ from "/lib/@atomic/core.js";
+import {IGame} from "/lib/game.js";
+import * as g from "/lib/game.js";
 
 const ranks = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "K", "Q", "A"];
 const suits = ["♥️", "♠️", "♦️", "♣️"];

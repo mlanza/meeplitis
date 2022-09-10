@@ -1,8 +1,8 @@
-import _ from "./@atomic/core.js";
-import $ from "./@atomic/reactives.js";
-import * as g from "./game.js";
-import * as oh from "./ohhell.js";
-import supabase from "../../lib/supabase.js";
+import _ from "/lib/@atomic/core.js";
+import $ from "/lib/@atomic/reactives.js";
+import * as g from "/lib/game.js";
+import supabase from "/lib/supabase.js";
+import * as oh from "./index.js";
 
 function play(self){
   const card = _.first(g.moves(self, _.chain(self, _.deref, _.get(_, "up")))).details.card;

@@ -18,6 +18,8 @@ site
   .copy("images")
   .copy("signin")
   .copy("signup")
+  .copy("games/index.css")
+  .copy("games/oh-hell/index.css")
   .copy("games/oh-hell/lib")
   .copy("testing")
   .use(date())

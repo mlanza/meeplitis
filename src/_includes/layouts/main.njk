@@ -3,16 +3,20 @@
   <head>
     <meta charset="utf-8">
     <title>{{ title }} | {{ site.title }}</title>
-    <meta name="author" content="{{ author.name }}">
+    <meta name="description" content="{{ site.description }}">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="stylesheet" type="text/css" href="/index.css">
-  {% for url in stylesheets %}
-    <link rel="stylesheet" type="text/css" href="{{ url }}">
+  {% for href in stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ href }}">
   {% endfor %}
   </head>
-  <body{% if slug %} id="{{slug}}"{% endif %}>
+  <body{% if classes %} class="{{classes}}"{% endif %}>
+    <h1>{{ title }}</h1>
     <main>
       {{ content | safe }}
     </main>
   </body>
+  {% for src in modules %}
+    <script type="module" src="{{ src }}"></script>
+  {% endfor %}
 </html>

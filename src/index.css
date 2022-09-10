@@ -9,7 +9,7 @@ body {
   background-color: rgba(255, 255, 255, .95);
   min-height: 100vh;
   color: #454344;
-  padding: 2em 0 4em;
+  padding: 1em 0 4em;
   margin: 0;
   font-size: 1.2em;
   font-family: "Source Sans Pro";
@@ -23,12 +23,15 @@ h5 {
   font-family: "Racing Sans One";
   font-style: italic;
 }
+body > h1 {
+  text-align: center;
+}
 header {
   font-weight: bold;
   text-align: center;
   margin-bottom: 1em;
 }
-#sitename {
+body.meeple h1 {
   color: #36454f;
   color: #454344;
   font-size: 3em;
@@ -40,11 +43,8 @@ header {
   background-repeat: no-repeat;
   background-position: left;
   background-size: 2em;
-  line-height: 3em;
+  line-height: 2em;
   -webkit-text-stroke: 1px white;
   margin: 0 auto;
   width: 6em;
-}
-#sitename {
-  text-align: center;
 }

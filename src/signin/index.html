@@ -21,7 +21,7 @@
   </div>
   </body>
   <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+    import supabase from "../../lib/supabase.js";
 
     function toJSON(resp){
       return resp.json();
@@ -32,16 +32,6 @@
         return console.log(label, ...args);
       }
     }
-
-    const {supabaseUrl, supabaseKey, options} = await fetch("https://config.workers.yourmove.cc", {
-      mode: "cors",
-      headers: {
-        "accept": "application/json",
-        "content-type": "application/json; charset=UTF-8"
-      }
-    }).then(toJSON);
-
-    const supabase = createClient(supabaseUrl, supabaseKey, options);
 
     if (supabase.auth.currentUser) {
       document.getElementById("signout-section").style.display = "block";

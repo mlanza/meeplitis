@@ -1,10 +1,8 @@
-import core from "./@atomic/core.js";
-import reactives from "./@atomic/reactives.js";
+import _ from "./@atomic/core.js";
+import $ from "./@atomic/reactives.js";
 import * as g from "./game.js";
 import * as oh from "./ohhell.js";
-export * as oh from "./ohhell.js";
-export const _ = core;
-export const $ = reactives;
+import supabase from "../../lib/supabase.js";
 
 function play(self){
   const card = _.first(g.moves(self, _.chain(self, _.deref, _.get(_, "up")))).details.card;
@@ -64,4 +62,4 @@ _.chain($state, _.deref, _.deref, _.get(_, "events"), function(events){
   return JSON.stringify(events, null, "  ");
 }, _.log);
 */
-Object.assign(window, {_, oh, g, $state});
+Object.assign(window, {_, oh, g, $state, supabase});

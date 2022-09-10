@@ -18,7 +18,7 @@ site
   .copy("images")
   .copy("signin")
   .copy("signup")
-  .copy("games/ohhell/lib")
+  .copy("games/oh-hell/lib")
   .copy("testing")
   .use(date())
   .use(relative_urls());

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Sign Up | Your Move</title>
+    <link rel="icon" type="image/x-icon" href="../favicon.ico">
+    <link rel="stylesheet" type="text/css" href="./index.css">
+  </head>
+  <body>
+    <h1 id="sitename">Your Move</h1>
+    <div id='signup-section'>
+      <form id='signup'>
+          <label>Email</label><input type='email' name='email' /><br>
+          <label>Password</label><input type='password' name='password' /><br>
+          <input type='submit' value="Sign Up">
+      </form>
+  </div>
+  </body>
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    function toJSON(resp){
+      return resp.json();
+    }
+
+    function see(label){
+      return function(...args){
+        return console.log(label, ...args);
+      }
+    }
+
+    const {supabaseUrl, supabaseKey, options} = await fetch("https://config.workers.yourmove.cc", {
+      mode: "cors",
+      headers: {
+        "accept": "application/json",
+        "content-type": "application/json; charset=UTF-8"
+      }
+    }).then(toJSON);
+
+    const supabase = createClient(supabaseUrl, supabaseKey, options);
+
+    const signUpForm = document.querySelector('#signup');
+    document.querySelector('#signup').onsubmit = signUpSubmitted.bind(signUpForm);
+
+    function signUpSubmitted(event){
+      event.preventDefault();
+      const email = event.target[0].value
+      const password = event.target[1].value
+      supabase.auth
+        .signUp({ email, password })
+        .then(setToken)
+        .catch((err) => {
+          alert(err.response.text);
+        });
+    }
+
+    function setToken(response) {
+      if (response.user.confirmation_sent_at && !response?.session?.access_token) {
+        alert('Confirmation Email Sent');
+        location.href = "/signin";
+      } else {
+        console.error(response);
+      }
+    }
+
+    Object.assign(window, {supabase});
+  </script>
+</html>

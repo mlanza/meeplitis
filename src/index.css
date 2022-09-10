@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Mountains+of+Christmas&family=Dokdo&family=Racing+Sans+One&family=Bangers&family=Irish+Grover&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro&family=Racing+Sans+One&display=swap');
 html {
   background-image: url(./images/boardgames-seamless-1.webp);
   background-size: 30em;
@@ -11,8 +11,8 @@ body {
   color: #454344;
   padding: 2em 0 4em;
   margin: 0;
-  text-align: center;
   font-size: 1.2em;
+  font-family: "Source Sans Pro";
 }
 header,
 h1,
@@ -20,10 +20,6 @@ h2,
 h3,
 h4,
 h5 {
-  font-family: "Bangers";
-  font-family: "Dokdo";
-  font-family: "Irish Grover";
-  font-family: "Mountains of Christmas";
   font-family: "Racing Sans One";
   font-style: italic;
 }
@@ -48,5 +44,7 @@ header {
   -webkit-text-stroke: 1px white;
   margin: 0 auto;
   width: 6em;
-
+}
+#sitename {
+  text-align: center;
 }

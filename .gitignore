@@ -2,4 +2,5 @@ npm_modules
 workers/your-move-perspective/node_modules/
 secrets.md
 public
+dist
 .vscode

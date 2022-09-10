@@ -1,0 +1,28 @@
+@import url(../index.css);
+
+#signin-section label {
+  width: 5em;
+  display: inline-block;
+}
+#signin-section input[type='email'],
+#signin-section input[type='password'] {
+  padding: .5em;
+  width: 16em;
+  margin: .25em;
+}
+#signin-section input[type='submit'],
+#signout-section button {
+  padding: .5em;
+  width: 6em;
+  margin: 1em auto;
+  display: block;
+}
+#signout-section p {
+  text-align: center;
+  font-size: 1.5em;
+}
+#signin-section,
+#signout-section {
+  width: 17.5em;
+  margin: 0 auto;
+}

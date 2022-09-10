@@ -22,6 +22,7 @@ CREATE TYPE seating_mode AS ENUM ('random', 'fixed', 'choice', 'bid');
 CREATE TABLE games (
     id varchar(4) not null default generate_uid(4) primary key,
     title text not null,
+    slug varchar(20),
     seats int2[] not null,
     thumbnail_url varchar,
     created_at timestamp not null default now());

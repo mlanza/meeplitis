@@ -25,6 +25,7 @@ export const perspective = _.chain(IGame.perspective,
   _.post(_,
     _.and(
       _.contains(_, "seat"),
+      _.contains(_, "seated"),
       _.contains(_, "state"),
       _.contains(_, "events"),
       _.contains(_, "moves"),
@@ -161,6 +162,7 @@ function aggregate2(self, events){
 
 function aggregate3(self, events, f){ //observability
   const $state = $.cell(self);
+  const seated = IGame.seated(self);
   if (f) {
     $.sub($state, f);
     _.each(function(event){
@@ -175,12 +177,7 @@ function aggregate3(self, events, f){ //observability
       _.swap($state, _.fmap(_, execute(_, command, seat)));
     }, commands);
     const curr = _.chain($state, _.deref);
-    return {
-      seat,
-      seated: seated(curr),
-      added: added(curr, prior),
-      perspective: perspective(curr, seat)
-    };
+    return [perspective(curr, seat), added(curr, prior)];
   }
 }
 

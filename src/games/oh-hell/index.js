@@ -10,7 +10,7 @@ fetch("./data/events.json").
   then(aggregate(["Ava", "Zoe", "Jennabel", "Mario"], {}, _, function(self){
     const game = _.chain(self, _.deref);
     return _.chain(
-      _.range(0, _.chain(game, _.deref, _.get(_, "seated"), _.count)),
+      _.cons(null, _.range(0, _.chain(game, _.deref, _.get(_, "seated"), _.count))),
       _.mapa(g.perspective(game, _), _),
       _.log(game, _));
   })).

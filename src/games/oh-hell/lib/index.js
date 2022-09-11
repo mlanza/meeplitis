@@ -269,7 +269,7 @@ function fold2(self, event){
       return (function(){
         const lead = details.round % _.count(self.seated);
         const dealt = _.chain(details.hands, _.cons(details.trump, _), _.flatten, _.toArray);
-        const undealt = _.chain(state.deck, _.remove(_.includes(dealt, _), _), _.toArray);
+        const undealt = _.chain(state.deck, _.drop(_.count(dealt) + 1, _), _.toArray);
         return g.fold(self, event,
           _.pipe(
             _.assoc(_, "trump", details.trump),

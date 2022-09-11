@@ -161,25 +161,26 @@ function aggregate2(self, events){
 
 function aggregate3(self, events, f){ //observability
   const $state = $.cell(self);
-
   if (f) {
     $.sub($state, f);
     _.each(function(event){
-      _.swap($state, g.fold(_, event));
+      _.swap($state, fold(_, event));
     }, events);
   } else {
-    _.swap($state, g.load(_, events));
+    _.swap($state, load(_, events));
   }
   return function(commands, seat){
     const prior = _.chain($state, _.deref);
     _.each(function(command){
-      _.swap($state, _.fmap(_, g.execute(_, command, seat)));
+      _.swap($state, _.fmap(_, execute(_, command, seat)));
     }, commands);
     const curr = _.chain($state, _.deref);
-    const seated = g.seated(curr);
-    const added = g.added(curr, prior);
-    const perspective = g.perspective(curr, seat);
-    return {seat, seated, added, perspective};
+    return {
+      seat,
+      seated: seated(curr),
+      added: added(curr, prior),
+      perspective: perspective(curr, seat)
+    };
   }
 }
 

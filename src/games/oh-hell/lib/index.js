@@ -349,37 +349,3 @@ function deref(self){
 _.doto(OhHell,
   _.implement(_.IDeref, {deref}),
   _.implement(IGame, {perspective, up, seated, moves, irreversible, execute, fold, score}));
-
-function aggregate3(seated, config, events){
-  return aggregate4(seated, config, events, null);
-}
-
-function aggregate4(seated, config, events, f){ //observability
-  const $state = _.chain(ohHell(seated, config), _.journal, $.cell);
-  if (f) {
-    $.sub($state, f);
-    _.each(function(event){
-      _.swap($state, _.fmap(_, g.fold(_, event)));
-    }, events);
-  } else {
-    _.swap($state, _.fmap(_, g.load(_, events)));
-  }
-  return function(commands, seat){
-    const prior = _.chain($state, _.deref, _.deref);
-    _.each(function(command){
-      _.swap($state, _.fmap(_, g.execute(_, command, seat)));
-    }, commands);
-    const curr = _.chain($state, _.deref, _.deref);
-    const added = g.added(curr, prior);
-    const perspective = g.perspective(curr, seat);
-    return {seat, seated, added, perspective};
-  }
-}
-
-function aggregate5(seated, config, events, commands, seat){
-  return aggregate3(seated, config, events)(commands, seat);
-}
-
-const aggregate = _.partly(_.overload(null, null, null, aggregate3, aggregate4, aggregate5));
-
-export default aggregate;

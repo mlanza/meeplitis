@@ -1,4 +1,5 @@
 import _ from "./@atomic/core.js";
+import $ from "./@atomic/reactives.js";
 
 export const IGame = _.protocol({
   perspective: null,
@@ -148,9 +149,42 @@ export function confirmational(command){
 }
 
 export function inspect(self){
-  const game = _.chain(self, _.deref);
   return _.chain(
-    _.cons(null, _.range(0, _.chain(game, seated, _.count))),
-    _.mapa(perspective(game, _), _),
-    _.log(game, _));
+    _.cons(null, _.range(0, _.chain(self, seated, _.count))),
+    _.mapa(perspective(self, _), _),
+    _.log(self, _));
 }
+
+function aggregate2(self, events){
+  return aggregate3(self, events, null);
+}
+
+function aggregate3(self, events, f){ //observability
+  const $state = $.cell(self);
+
+  if (f) {
+    $.sub($state, f);
+    _.each(function(event){
+      _.swap($state, g.fold(_, event));
+    }, events);
+  } else {
+    _.swap($state, g.load(_, events));
+  }
+  return function(commands, seat){
+    const prior = _.chain($state, _.deref);
+    _.each(function(command){
+      _.swap($state, _.fmap(_, g.execute(_, command, seat)));
+    }, commands);
+    const curr = _.chain($state, _.deref);
+    const seated = g.seated(curr);
+    const added = g.added(curr, prior);
+    const perspective = g.perspective(curr, seat);
+    return {seat, seated, added, perspective};
+  }
+}
+
+function aggregate4(self, events, commands, seat){
+  return aggregate2(self, events)(commands, seat);
+}
+
+export const aggregate = _.partly(_.overload(null, null, aggregate2, aggregate3, aggregate4));

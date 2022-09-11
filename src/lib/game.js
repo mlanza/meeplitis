@@ -3,6 +3,7 @@ import _ from "./@atomic/core.js";
 export const IGame = _.protocol({
   perspective: null,
   up: null, //returns the seat(s) which are required to move
+  seated: null,
   moves: null, //what commands can seats/players do?
   irreversible: null, //can the command be reversed by a player?
   execute: null, //validates a command and transforms it into one or more events, potentially executing other commands
@@ -17,6 +18,7 @@ function irreversible3(self, event, f){
 
 export const irreversible = _.partly(_.overload(null, null, IGame.irreversible, irreversible3));
 export const up = IGame.up;
+export const seated = IGame.seated;
 export const score = IGame.score;
 export const perspective = _.chain(IGame.perspective,
   _.post(_,
@@ -143,4 +145,12 @@ export function clear(seat){
 
 export function confirmational(command){
   return _.includes(["undo", "redo", "clear"], command.type);
+}
+
+export function inspect(self){
+  const game = _.chain(self, _.deref);
+  return _.chain(
+    _.cons(null, _.range(0, _.chain(game, seated, _.count))),
+    _.mapa(perspective(game, _), _),
+    _.log(game, _));
 }

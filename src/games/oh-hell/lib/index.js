@@ -325,6 +325,10 @@ function fold3(self, event, f){
 
 const fold = _.overload(null, null, fold2, fold3);
 
+function seated(self){
+  return self.seated;
+}
+
 function perspective(self, seat){
   const up = seat == null ? null : _.chain(self, g.up, _.includes(_, seat));
   const state = _.chain(self, _.deref,
@@ -344,7 +348,7 @@ function deref(self){
 
 _.doto(OhHell,
   _.implement(_.IDeref, {deref}),
-  _.implement(IGame, {perspective, up, moves, irreversible, execute, fold, score}));
+  _.implement(IGame, {perspective, up, seated, moves, irreversible, execute, fold, score}));
 
 function aggregate3(seated, config, events){
   return aggregate4(seated, config, events, null);

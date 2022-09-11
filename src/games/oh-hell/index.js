@@ -7,8 +7,14 @@ fetch("./data/events.json").
   then(function(resp){
     return resp.json();
   }).
-  then(aggregate(["Ava", "Zoe", "Jennabel", "Mario"], {}, _)).
-  then(_.invoke(_, [], null)).
+  then(aggregate(["Ava", "Zoe", "Jennabel", "Mario"], {}, _, function(self){
+    const game = _.chain(self, _.deref);
+    return _.chain(
+      _.range(0, _.chain(game, _.deref, _.get(_, "seated"), _.count)),
+      _.mapa(g.perspective(game, _), _),
+      _.log(game, _));
+  })).
+  then(_.invoke(_, [], null)). //no new commands
   then(_.see("aggregate"));
 
 Object.assign(window, {_, oh, g});

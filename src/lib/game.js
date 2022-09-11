@@ -23,6 +23,7 @@ export const perspective = _.chain(IGame.perspective,
     _.and(
       _.contains(_, "seat"),
       _.contains(_, "state"),
+      _.contains(_, "events"),
       _.contains(_, "moves"),
       _.contains(_, "score"),
       _.contains(_, "up"))),
@@ -97,16 +98,19 @@ export function load(self, events){
   return _.reduce(fold, self, events);
 }
 
+export function added(curr, prior){
+  return prior ? _.chain(curr.events, _.last(_.count(curr.events) - _.count(prior.events), _), _.toArray) : [];
+}
+
 function moves2(self, seat){
   return _.filter(_.pipe(_.get(_, "seat"), _.eq(_, seat)), IGame.moves(self));
 }
 
 export const moves = _.partly(_.overload(null, IGame.moves, moves2));
 
-export function start(config){
-  return function(self){
-    return execute(self, {type: "start", details: {config}});
-  }
+export function start(self){
+  const config = self.config;
+  return execute(self, {type: "start", details: {config}});
 }
 
 export function finish(self){

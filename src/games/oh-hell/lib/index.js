@@ -1,4 +1,5 @@
 import _ from "/lib/@atomic/core.js";
+import $ from "/lib/@atomic/reactives.js";
 import {IGame} from "/lib/game.js";
 import * as g from "/lib/game.js";
 
@@ -38,17 +39,18 @@ function deck(){
   return _.braid(card, ranks, suits);
 }
 
-function OhHell(seated, events, journal){
+function OhHell(seated, config, events, journal){
   this.seated = seated;
+  this.config = config;
   this.events = events;
   this.journal = journal;
 }
 
-export function ohHell(seated, events, journal){
+export function ohHell(seated, config, events, journal){
   if (!_.count(seated)) {
     throw new Error("Cannot play a game with no one seated at the table");
   }
-  return new OhHell(seated, events || [], journal || _.journal({}));
+  return new OhHell(seated, config, events || [], journal || _.journal({}));
 }
 
 function deal(self){
@@ -316,6 +318,7 @@ function fold2(self, event){
 
 function fold3(self, event, f){
   return ohHell(self.seated,
+    self.config,
     _.append(self.events, event),
     _.chain(self.journal, g.irreversible(self, event, f)));
 }
@@ -323,15 +326,16 @@ function fold3(self, event, f){
 const fold = _.overload(null, null, fold2, fold3);
 
 function perspective(self, seat){
-  const up = _.chain(self, g.up, _.includes(_, seat));
+  const up = seat == null ? null : _.chain(self, g.up, _.includes(_, seat));
   const state = _.chain(self, _.deref,
     _.update(_, "deck", _.mapa(_.constantly({}), _)), //no one can see the deck
     _.update(_, "seated", _.pipe(_.mapIndexed(function(i, seated){ //can only see your own hand
         return i === seat ? seated : _.update(seated, "hand", _.mapa(_.constantly({}), _));
       }, _), _.toArray)));
   const moves = _.chain(self, g.moves(_, seat), _.toArray);
+  const events = self.events; //TODO hide details
   const score = g.score(self)[seat];
-  return {seat, up, state, moves, score};
+  return {seat, up, state, moves, events, score};
 }
 
 function deref(self){
@@ -341,3 +345,26 @@ function deref(self){
 _.doto(OhHell,
   _.implement(_.IDeref, {deref}),
   _.implement(IGame, {perspective, up, moves, irreversible, execute, fold, score}));
+
+function aggregate5(seated, config, events, commands, seat){
+  return aggregate3(seated, config, events)(commands, seat);
+}
+
+function aggregate3(seated, config, events){
+  const $state = _.chain(ohHell(seated, config), _.journal, $.cell);
+  _.swap($state, _.fmap(_, g.load(_, events)));
+  return function(commands, seat){
+    const prior = _.chain($state, _.deref, _.deref);
+    _.each(function(command){
+      _.swap($state, _.fmap(_, g.execute(_, command, seat)));
+    }, commands);
+    const curr = _.chain($state, _.deref, _.deref);
+    const added = g.added(curr, prior);
+    const perspective = g.perspective(curr, seat);
+    return {seat, seated, added, perspective};
+  }
+}
+
+const aggregate = _.partly(_.overload(null, null, null, aggregate3, null, aggregate5));
+
+export default aggregate;

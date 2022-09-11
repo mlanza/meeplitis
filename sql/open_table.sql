@@ -16,12 +16,11 @@ _id := generate_uid(11);
 insert into tables (id, game_id, created_by)
 values (_id, _game_id, _player_ids[1]);
 
-insert into seats (id, table_id, player_id, seq)
+insert into seats (id, table_id, player_id)
 select
   id,
   table_id,
-  _player_ids[seq] as player_id ,
-  seq
+  _player_ids[seq] as player_id
 from (select generate_uid(3) as id, _id as table_id, generate_series(1, cardinality(_player_ids) + 1) as seq) as seated;
 
 return _id;

@@ -10,10 +10,12 @@ DROP TABLE games;
 DROP TYPE table_status;
 DROP TYPE seating_mode;
 
-CREATE TYPE table_status AS ENUM ('open', 'closed', 'started', 'finished', 'abandoned');
--- open - players may freely take a seat or withdraw
--- closed - the players are fixed and ready to start (in immediate games closed instantly becomes started)
--- started - the game is ready for moves
+CREATE TYPE table_status AS ENUM ('open', 'vacant', 'full', 'started', 'locked', 'finished', 'abandoned');
+-- open - players may freely join and leave
+-- vacant - all players vacated before the game started
+-- full - the full complement of players are seated, the game will start momentarily
+-- started - the game is ready for moves (occurs once `start` event is added)
+-- locked - rare admin action perhaps to resolve a concern
 -- finished - the game has concluded
 -- abandoned - the game was not concluded before time ran out
 
@@ -101,15 +103,19 @@ REFERENCES events(table_id, id);
 
 INSERT INTO games (id, title, slug, seats)
     VALUES ('8Mj1', 'Oh Hell (Blackout)', 'oh-hell', ARRAY[2, 3, 4, 5, 6, 7]);
-INSERT INTO tables (id, game_id, created_by)
-    VALUES ('823Wonk34yU', '8Mj1', '5e6b12f5-f24c-4fd3-8812-f537778dc5c2');
-INSERT INTO seats (table_id, id, player_id, seq)
-    VALUES ('823Wonk34yU', 'Hj3', '5e6b12f5-f24c-4fd3-8812-f537778dc5c2', 1),
-           ('823Wonk34yU', '4jh', 'c8619345-0c1a-44c4-bdfe-e6e1de11c6bd', 2);
-INSERT INTO events (table_id, id, seat_id, event, details)
-    VALUES ('823Wonk34yU', '23JDb', null, 'start', '{"deck": []}'),
-           ('823Wonk34yU', '20kMn', 'Hj3', 'draw', '{"cards": 1}'),
-           ('823Wonk34yU', '6YTHx', '4jh', 'draw', '{"cards": 2}');
+
+INSERT INTO events (table_id, event, details)
+SELECT open_table(array[
+    '5e6b12f5-f24c-4fd3-8812-f537778dc5c2'::uuid,
+    'c8619345-0c1a-44c4-bdfe-e6e1de11c6bd'::uuid,
+    '4c2e10da-a868-4098-aa0d-030644b4e4d7'::uuid,
+    '8cb76dc4-4338-42d4-a324-b61fcb889bd1'::uuid], '8Mj1') as table_id,
+    'start' as event,
+    '{"id":"ZrTKK","type":"start","details":{"deck":[{"rank":"7","suit":"♣️"},{"rank":"4","suit":"♥️"},{"rank":"6","suit":"♣️"},{"rank":"10","suit":"♣️"},{"rank":"2","suit":"♦️"},{"rank":"4","suit":"♣️"},{"rank":"9","suit":"♦️"},{"rank":"Q","suit":"♠️"},{"rank":"8","suit":"♦️"},{"rank":"8","suit":"♥️"},{"rank":"4","suit":"♦️"},{"rank":"9","suit":"♥️"},{"rank":"2","suit":"♣️"},{"rank":"2","suit":"♥️"},{"rank":"9","suit":"♣️"},{"rank":"5","suit":"♠️"},{"rank":"K","suit":"♦️"},{"rank":"A","suit":"♣️"},{"rank":"7","suit":"♠️"},{"rank":"6","suit":"♠️"},{"rank":"6","suit":"♥️"},{"rank":"Q","suit":"♦️"},{"rank":"10","suit":"♠️"},{"rank":"J","suit":"♠️"},{"rank":"2","suit":"♠️"},{"rank":"7","suit":"♥️"},{"rank":"3","suit":"♣️"},{"rank":"J","suit":"♥️"},{"rank":"5","suit":"♥️"},{"rank":"5","suit":"♦️"},{"rank":"J","suit":"♦️"},{"rank":"6","suit":"♦️"},{"rank":"A","suit":"♦️"},{"rank":"8","suit":"♣️"},{"rank":"A","suit":"♠️"},{"rank":"A","suit":"♥️"},{"rank":"J","suit":"♣️"},{"rank":"K","suit":"♥️"},{"rank":"K","suit":"♣️"},{"rank":"Q","suit":"♣️"},{"rank":"3","suit":"♦️"},{"rank":"10","suit":"♦️"},{"rank":"3","suit":"♥️"},{"rank":"K","suit":"♠️"},{"rank":"10","suit":"♥️"},{"rank":"9","suit":"♠️"},{"rank":"5","suit":"♣️"},{"rank":"7","suit":"♦️"},{"rank":"Q","suit":"♥️"},{"rank":"3","suit":"♠️"},{"rank":"8","suit":"♠️"},{"rank":"4","suit":"♠️"}],"round":-1,"seated":[{"scored":[]},{"scored":[]},{"scored":[]},{"scored":[]}],"config":{}}}'::jsonb as details;
+
+
+/*
 UPDATE tables
-SET last_touch = '6YTHx'
+SET last_touch_id = '6YTHx'
 WHERE id = '823Wonk34yU';
+*/

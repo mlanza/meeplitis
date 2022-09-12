@@ -102,14 +102,10 @@ FOREIGN KEY (id, last_touch_id)
 REFERENCES events(table_id, id);
 
 INSERT INTO games (id, title, slug, seats)
-    VALUES ('8Mj1', 'Oh Hell (Blackout)', 'oh-hell', ARRAY[2, 3, 4, 5, 6, 7]);
+    VALUES ('8Mj1', 'Oh Hell (Blackout)', 'oh-hell', array[2, 3, 4, 5, 6, 7]);
 
 INSERT INTO events (table_id, event, details)
-SELECT open_table(array[
-    '5e6b12f5-f24c-4fd3-8812-f537778dc5c2'::uuid,
-    'c8619345-0c1a-44c4-bdfe-e6e1de11c6bd'::uuid,
-    '4c2e10da-a868-4098-aa0d-030644b4e4d7'::uuid,
-    '8cb76dc4-4338-42d4-a324-b61fcb889bd1'::uuid], '8Mj1') as table_id,
+SELECT open_table('8Mj1', '{}'::jsonb, '5e6b12f5-f24c-4fd3-8812-f537778dc5c2'::uuid, 'c8619345-0c1a-44c4-bdfe-e6e1de11c6bd'::uuid, '4c2e10da-a868-4098-aa0d-030644b4e4d7'::uuid, '8cb76dc4-4338-42d4-a324-b61fcb889bd1'::uuid) as table_id,
     'start' as event,
     '{"id":"ZrTKK","type":"start","details":{"deck":[{"rank":"7","suit":"♣️"},{"rank":"4","suit":"♥️"},{"rank":"6","suit":"♣️"},{"rank":"10","suit":"♣️"},{"rank":"2","suit":"♦️"},{"rank":"4","suit":"♣️"},{"rank":"9","suit":"♦️"},{"rank":"Q","suit":"♠️"},{"rank":"8","suit":"♦️"},{"rank":"8","suit":"♥️"},{"rank":"4","suit":"♦️"},{"rank":"9","suit":"♥️"},{"rank":"2","suit":"♣️"},{"rank":"2","suit":"♥️"},{"rank":"9","suit":"♣️"},{"rank":"5","suit":"♠️"},{"rank":"K","suit":"♦️"},{"rank":"A","suit":"♣️"},{"rank":"7","suit":"♠️"},{"rank":"6","suit":"♠️"},{"rank":"6","suit":"♥️"},{"rank":"Q","suit":"♦️"},{"rank":"10","suit":"♠️"},{"rank":"J","suit":"♠️"},{"rank":"2","suit":"♠️"},{"rank":"7","suit":"♥️"},{"rank":"3","suit":"♣️"},{"rank":"J","suit":"♥️"},{"rank":"5","suit":"♥️"},{"rank":"5","suit":"♦️"},{"rank":"J","suit":"♦️"},{"rank":"6","suit":"♦️"},{"rank":"A","suit":"♦️"},{"rank":"8","suit":"♣️"},{"rank":"A","suit":"♠️"},{"rank":"A","suit":"♥️"},{"rank":"J","suit":"♣️"},{"rank":"K","suit":"♥️"},{"rank":"K","suit":"♣️"},{"rank":"Q","suit":"♣️"},{"rank":"3","suit":"♦️"},{"rank":"10","suit":"♦️"},{"rank":"3","suit":"♥️"},{"rank":"K","suit":"♠️"},{"rank":"10","suit":"♥️"},{"rank":"9","suit":"♠️"},{"rank":"5","suit":"♣️"},{"rank":"7","suit":"♦️"},{"rank":"Q","suit":"♥️"},{"rank":"3","suit":"♠️"},{"rank":"8","suit":"♠️"},{"rank":"4","suit":"♠️"}],"round":-1,"seated":[{"scored":[]},{"scored":[]},{"scored":[]},{"scored":[]}],"config":{}}}'::jsonb as details;
 

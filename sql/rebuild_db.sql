@@ -45,7 +45,7 @@ CREATE TABLE tables (
     last_touch_id varchar(5), -- last touch (e.g. event applied to game)
     finished_at timestamp,
     keypass varchar, -- for restricting access, hashed
-    settings jsonb default '{}', -- configure this play
+    config jsonb default '{}', -- configure this play
     status table_status not null default 'open',
     archived boolean default false, -- drops replability content to conserve space
     created_by uuid references auth.users(id) not null, -- this person can update before starting
@@ -62,7 +62,7 @@ CREATE INDEX idx_tables_game_status ON tables (game_id, status);
 CREATE TABLE seats (
     table_id varchar(11) references tables(id) not null,
     id varchar(3) not null default generate_uid(4),
-    settings jsonb, -- player specific settings
+    config jsonb, -- player specific configuration
     player_id uuid references auth.users(id),
     score float,
     adjustment float, -- from handicap, bid for seating order, penalties
@@ -112,7 +112,6 @@ SELECT open_table(array[
     '8cb76dc4-4338-42d4-a324-b61fcb889bd1'::uuid], '8Mj1') as table_id,
     'start' as event,
     '{"id":"ZrTKK","type":"start","details":{"deck":[{"rank":"7","suit":"♣️"},{"rank":"4","suit":"♥️"},{"rank":"6","suit":"♣️"},{"rank":"10","suit":"♣️"},{"rank":"2","suit":"♦️"},{"rank":"4","suit":"♣️"},{"rank":"9","suit":"♦️"},{"rank":"Q","suit":"♠️"},{"rank":"8","suit":"♦️"},{"rank":"8","suit":"♥️"},{"rank":"4","suit":"♦️"},{"rank":"9","suit":"♥️"},{"rank":"2","suit":"♣️"},{"rank":"2","suit":"♥️"},{"rank":"9","suit":"♣️"},{"rank":"5","suit":"♠️"},{"rank":"K","suit":"♦️"},{"rank":"A","suit":"♣️"},{"rank":"7","suit":"♠️"},{"rank":"6","suit":"♠️"},{"rank":"6","suit":"♥️"},{"rank":"Q","suit":"♦️"},{"rank":"10","suit":"♠️"},{"rank":"J","suit":"♠️"},{"rank":"2","suit":"♠️"},{"rank":"7","suit":"♥️"},{"rank":"3","suit":"♣️"},{"rank":"J","suit":"♥️"},{"rank":"5","suit":"♥️"},{"rank":"5","suit":"♦️"},{"rank":"J","suit":"♦️"},{"rank":"6","suit":"♦️"},{"rank":"A","suit":"♦️"},{"rank":"8","suit":"♣️"},{"rank":"A","suit":"♠️"},{"rank":"A","suit":"♥️"},{"rank":"J","suit":"♣️"},{"rank":"K","suit":"♥️"},{"rank":"K","suit":"♣️"},{"rank":"Q","suit":"♣️"},{"rank":"3","suit":"♦️"},{"rank":"10","suit":"♦️"},{"rank":"3","suit":"♥️"},{"rank":"K","suit":"♠️"},{"rank":"10","suit":"♥️"},{"rank":"9","suit":"♠️"},{"rank":"5","suit":"♣️"},{"rank":"7","suit":"♦️"},{"rank":"Q","suit":"♥️"},{"rank":"3","suit":"♠️"},{"rank":"8","suit":"♠️"},{"rank":"4","suit":"♠️"}],"round":-1,"seated":[{"scored":[]},{"scored":[]},{"scored":[]},{"scored":[]}],"config":{}}}'::jsonb as details;
-
 
 /*
 UPDATE tables

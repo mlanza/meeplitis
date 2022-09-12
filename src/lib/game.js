@@ -174,7 +174,7 @@ function aggregate3(self, events, f){ //observability
   return function(commands, seat){
     const prior = _.chain($state, _.deref);
     _.each(function(command){
-      _.swap($state, _.fmap(_, execute(_, command, seat)));
+      _.swap($state, execute(_, command, seat));
     }, commands);
     const curr = _.chain($state, _.deref);
     return [perspective(curr, seat), added(curr, prior)];

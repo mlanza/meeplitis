@@ -63,8 +63,9 @@ fetch("./data/events.json").
   then(function(resp){
     return resp.json();
   }).
+  then(_.butlast).
   then(g.aggregate(game, _, g.inspect)).
-  then(_.invoke(_, [], null)). //no new commands
+  then(_.invoke(_, [{type: "finish"}], null)). //no new commands
   then(_.see("aggregate"));
 
 Object.assign(window, {_, oh, g});

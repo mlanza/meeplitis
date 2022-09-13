@@ -48,7 +48,7 @@ CREATE TABLE tables (
     config jsonb default '{}', -- configure this play
     status table_status not null default 'open',
     archived boolean default false, -- drops replability content to conserve space
-    created_by uuid references auth.users(id) not null, -- this person can update before starting
+    created_by uuid references auth.users(id) not null default auth.uid(), -- this person can update before starting
     created_at timestamp not null default now(),
     updated_at timestamp);
 
@@ -70,6 +70,7 @@ CREATE TABLE seats (
     place smallint, -- final placement upon completion of game
     tie boolean,
     seq smallint, -- must be provide once game starts
+    joined_at timestamp,
     created_at timestamp default now(),
     updated_at timestamp,
     PRIMARY KEY (table_id, id),
@@ -104,10 +105,16 @@ REFERENCES events(table_id, id);
 INSERT INTO games (id, title, slug, seats)
     VALUES ('8Mj1', 'Oh Hell (Blackout)', 'oh-hell', array[2, 3, 4, 5, 6, 7]);
 
-INSERT INTO events (table_id, event, details)
-SELECT open_table('8Mj1', '{}'::jsonb, '5e6b12f5-f24c-4fd3-8812-f537778dc5c2'::uuid, 'c8619345-0c1a-44c4-bdfe-e6e1de11c6bd'::uuid, '4c2e10da-a868-4098-aa0d-030644b4e4d7'::uuid, '8cb76dc4-4338-42d4-a324-b61fcb889bd1'::uuid) as table_id,
-    'start' as event,
-    '{"id":"ZrTKK","type":"start","details":{"deck":[{"rank":"7","suit":"♣️"},{"rank":"4","suit":"♥️"},{"rank":"6","suit":"♣️"},{"rank":"10","suit":"♣️"},{"rank":"2","suit":"♦️"},{"rank":"4","suit":"♣️"},{"rank":"9","suit":"♦️"},{"rank":"Q","suit":"♠️"},{"rank":"8","suit":"♦️"},{"rank":"8","suit":"♥️"},{"rank":"4","suit":"♦️"},{"rank":"9","suit":"♥️"},{"rank":"2","suit":"♣️"},{"rank":"2","suit":"♥️"},{"rank":"9","suit":"♣️"},{"rank":"5","suit":"♠️"},{"rank":"K","suit":"♦️"},{"rank":"A","suit":"♣️"},{"rank":"7","suit":"♠️"},{"rank":"6","suit":"♠️"},{"rank":"6","suit":"♥️"},{"rank":"Q","suit":"♦️"},{"rank":"10","suit":"♠️"},{"rank":"J","suit":"♠️"},{"rank":"2","suit":"♠️"},{"rank":"7","suit":"♥️"},{"rank":"3","suit":"♣️"},{"rank":"J","suit":"♥️"},{"rank":"5","suit":"♥️"},{"rank":"5","suit":"♦️"},{"rank":"J","suit":"♦️"},{"rank":"6","suit":"♦️"},{"rank":"A","suit":"♦️"},{"rank":"8","suit":"♣️"},{"rank":"A","suit":"♠️"},{"rank":"A","suit":"♥️"},{"rank":"J","suit":"♣️"},{"rank":"K","suit":"♥️"},{"rank":"K","suit":"♣️"},{"rank":"Q","suit":"♣️"},{"rank":"3","suit":"♦️"},{"rank":"10","suit":"♦️"},{"rank":"3","suit":"♥️"},{"rank":"K","suit":"♠️"},{"rank":"10","suit":"♥️"},{"rank":"9","suit":"♠️"},{"rank":"5","suit":"♣️"},{"rank":"7","suit":"♦️"},{"rank":"Q","suit":"♥️"},{"rank":"3","suit":"♠️"},{"rank":"8","suit":"♠️"},{"rank":"4","suit":"♠️"}],"round":-1,"seated":[{"scored":[]},{"scored":[]},{"scored":[]},{"scored":[]}],"config":{}}}'::jsonb as details;
+DO $$
+DECLARE
+    _table_id varchar;
+BEGIN
+    select open_table('8Mj1', '{}'::jsonb, 4::smallint, '5e6b12f5-f24c-4fd3-8812-f537778dc5c2'::uuid) into _table_id;
+    perform join_table(_table_id, 'c8619345-0c1a-44c4-bdfe-e6e1de11c6bd'::uuid);
+    perform join_table(_table_id, '4c2e10da-a868-4098-aa0d-030644b4e4d7'::uuid);
+    perform join_table(_table_id, '8cb76dc4-4338-42d4-a324-b61fcb889bd1'::uuid);
+
+END $$;
 
 /*
 UPDATE tables

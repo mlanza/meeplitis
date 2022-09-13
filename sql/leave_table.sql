@@ -1,3 +1,5 @@
+drop function leave_table(_table_id varchar, _player_id uuid);
+
 create or replace function leave_table(_table_id varchar, _player_id uuid = auth.uid())
 returns varchar
 language plpgsql
@@ -16,7 +18,7 @@ where table_id = _table_id
 and player_id = _player_id
 and id = v_seat_id;
 
-raise log '$ player %s leaves table %s', _player_id, _table_id;
+raise info '$ player % leaves seat % at table %', _player_id, v_seat_id, _table_id;
 
 return v_seat_id;
 

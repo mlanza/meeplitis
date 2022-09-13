@@ -1,5 +1,4 @@
 import _ from "/lib/@atomic/core.js";
-import $ from "/lib/@atomic/reactives.js";
 import {IGame} from "/lib/game.js";
 import * as g from "/lib/game.js";
 

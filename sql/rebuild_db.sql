@@ -41,13 +41,14 @@ CREATE TABLE tables (
     admins uuid [], -- users capable of editing during/after play
     up varchar [], -- seats required to take action
     scored boolean default true,
+    seating_change_at timestamp,
     started_at timestamp, -- used to delay start as in a tournament
-    last_touch_id varchar(5), -- last touch (e.g. event applied to game)
+    last_touch_id varchar(5), -- last event touching game state
     finished_at timestamp,
     keypass varchar, -- for restricting access, hashed
     config jsonb default '{}', -- configure this play
     status table_status not null default 'open',
-    archived boolean default false, -- drops replability content to conserve space
+    shredded boolean default false, -- replayable history was discarded; happens sometime after finished/abandoned
     created_by uuid references auth.users(id) not null default auth.uid(), -- this person can update before starting
     created_at timestamp not null default now(),
     updated_at timestamp);
@@ -115,9 +116,3 @@ BEGIN
     perform join_table(_table_id, '8cb76dc4-4338-42d4-a324-b61fcb889bd1'::uuid);
 
 END $$;
-
-/*
-UPDATE tables
-SET last_touch_id = '6YTHx'
-WHERE id = '823Wonk34yU';
-*/

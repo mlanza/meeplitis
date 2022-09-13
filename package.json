@@ -1,0 +1,9 @@
+{
+  "name": "yourmove",
+  "version": "1.0.0",
+  "scripts": {
+    "bundle-rollup": "rollup ./src/db/ohhell.js -o dist/ohhell.bundle.js --format iife",
+    "bundle": "webpack build --config ./webpack.config.js",
+    "develop": "lume --dev --watch"
+  }
+}

@@ -15,7 +15,7 @@ set
 where table_id = _table_id
 and id = v_seat_id;
 
-raise log '$ player %s joins table %s', _player_id, _table_id;
+raise log '$ player % joins seat % at table %', _player_id, v_seat_id, _table_id;
 
 return v_seat_id;
 

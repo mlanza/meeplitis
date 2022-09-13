@@ -1,5 +1,8 @@
 {
   "imports": {
-    "lume/": "https://deno.land/x/lume@v1.10.0/"
+    "lume/": "https://deno.land/x/lume@v1.10.0/",
+    "/lib/@atomic/core.js": "./src/lib/@atomic/core.js",
+    "/lib/@atomic/reactives.js": "./src/lib/@atomic/reactives.js",
+    "/lib/game.js": "./src/lib/game.js"
   }
 }

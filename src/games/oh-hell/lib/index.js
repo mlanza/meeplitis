@@ -331,10 +331,12 @@ function perspective(self, seat){
   const up = seat == null ? null : _.chain(self, g.up, _.includes(_, seat));
   const seated = g.seated(self);
   const state = _.chain(self, _.deref,
-    _.update(_, "deck", _.mapa(_.constantly({}), _)), //no one can see the deck
-    _.update(_, "seated", _.pipe(_.mapIndexed(function(i, seated){ //can only see your own hand
-        return i === seat ? seated : _.update(seated, "hand", _.mapa(_.constantly({}), _));
-      }, _), _.toArray)));
+    seat == null ? _.identity :
+    _.pipe(
+      _.update(_, "deck", _.mapa(_.constantly({}), _)), //no one can see the deck
+      _.update(_, "seated", _.pipe(_.mapIndexed(function(i, seated){ //can only see your own hand
+          return i === seat ? seated : _.update(seated, "hand", _.mapa(_.constantly({}), _));
+        }, _), _.toArray))));
   const moves = _.chain(self, g.moves(_, seat), _.toArray);
   const events = self.events; //TODO hide details
   const score = g.score(self)[seat];

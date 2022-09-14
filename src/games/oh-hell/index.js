@@ -68,4 +68,4 @@ fetch("./data/events.json").
   then(_.invoke(_, [{type: "finish"}], null)). //no new commands
   then(_.see("aggregate"));
 
-//Object.assign(window, {_, oh, g});
+Object.assign(window, {_, oh, g});

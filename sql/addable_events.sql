@@ -1,7 +1,7 @@
 drop function addable_events(_events jsonb);
 create or replace function addable_events(_events jsonb)
 returns table(type text, details jsonb, seat smallint)
-language plpgsql
+language plpgsql immutable
 as $$
 begin
 return query

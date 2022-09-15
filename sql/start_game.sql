@@ -7,11 +7,11 @@ begin
 
   if (new.status = 'full'::table_status and old.status <> 'full'::table_status) then
     _seated := (select seated(new.id));
-    _events := (ohhell(_seated, '{}'::jsonb, '[]'::jsonb, '[{"type": "start"}]'::jsonb, null))->1;
+    _events := (select simulate(new.id, '[{"type": "start"}]'::jsonb, null))->1;
 
-    insert into events (table_id, event, details, seat_id)
+    insert into events (table_id, type, details, seat_id)
     select new.id as table_id, type, details, (_seated->(e.seat)->'seat') as seat_id
-    from add_events(_events) as e;
+    from addable_events(_events) as e;
 
     update tables
     set started_at = now(),

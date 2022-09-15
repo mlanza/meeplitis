@@ -8,7 +8,7 @@ begin
 
 if exists (select 1
     from (
-      select id, exists (select 1 from auth.users where id = l.id) as present
+      select id, exists (select 1 from profiles where id = l.id) as present
       from (select *
             from unnest(_player_ids) as id) as l
             where l.id is not null) as x

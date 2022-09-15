@@ -19,7 +19,7 @@ CREATE TYPE table_status AS ENUM ('open', 'vacant', 'full', 'started', 'locked',
 -- finished - the game has concluded
 -- abandoned - the game was not concluded before time ran out
 
-CREATE TYPE seating_mode AS ENUM ('random', 'fixed', 'choice', 'bid');
+CREATE TYPE seating_mode AS ENUM ('random', 'joined', 'picked');
 
 CREATE TABLE games (
     id varchar(4) not null default generate_uid(4) primary key,
@@ -38,6 +38,8 @@ CREATE TABLE tables (
     id varchar(11) default generate_uid(11) not null primary key,
     game_id varchar(4) references games(id) not null,
     seating seating_mode default 'random',
+    config jsonb default '{}', -- configure this play
+    seated jsonb,
     admins uuid [], -- users capable of editing during/after play
     up varchar [], -- seats required to take action
     scored boolean default true,
@@ -46,9 +48,8 @@ CREATE TABLE tables (
     last_touch_id varchar(5), -- last event touching game state
     finished_at timestamp,
     keypass varchar, -- for restricting access, hashed
-    config jsonb default '{}', -- configure this play
     status table_status not null default 'open',
-    shredded boolean default false, -- replayable history was discarded; happens sometime after finished/abandoned
+    shredded_at timestamp, -- replayable history was discarded; happens sometime after finished/abandoned
     created_by uuid references auth.users(id) not null default auth.uid(), -- this person can update before starting
     created_at timestamp not null default now(),
     updated_at timestamp);

@@ -1,14 +1,10 @@
-drop function leave_table(_table_id varchar, _player_id uuid);
-
 create or replace function leave_table(_table_id varchar, _player_id uuid = auth.uid())
 returns varchar
 language plpgsql
 as $$
 declare
-v_seat_id varchar;
+_seat_id varchar;
 begin
-
-v_seat_id = (select id from seats where table_id = _table_id and player_id = _player_id limit 1);
 
 update seats
 set
@@ -16,10 +12,10 @@ set
   joined_at = null
 where table_id = _table_id
 and player_id = _player_id
-and id = v_seat_id;
+returning id into _seat_id;
 
-raise info '$ player % leaves seat % at table %', _player_id, v_seat_id, _table_id;
+raise log '$ player `%` leaves seat `%` at table `%`', _player_id, _seat_id, _table_id;
 
-return v_seat_id;
+return _seat_id;
 
 end; $$

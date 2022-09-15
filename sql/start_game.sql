@@ -11,10 +11,14 @@ begin
 
     -- reorder seats
     update seats
-    set seq = os.ord + 100
+    set seat = os.ord + 100
     from order_seats(new.id) as os
     where seats.table_id = new.id
     and os.id = seats.id;
+
+    update seats
+    set seat = public.seat(new.id, seats.player_id)
+    where seats.table_id = new.id;
 
     _seated := (select seated(new.id));
     _events := (select simulate(new.id, '[{"type": "start"}]'::jsonb, null))->1;

@@ -70,12 +70,12 @@ CREATE TABLE seats (
     effective_score float,
     place smallint, -- final placement upon completion of game
     tie boolean,
-    seq smallint, -- must be provide once game starts
+    seat smallint, -- must be provide once game starts
     joined_at timestamp,
     created_at timestamp default now(),
     updated_at timestamp,
     PRIMARY KEY (table_id, id),
-    UNIQUE (table_id, seq),
+    UNIQUE (table_id, seat),
     UNIQUE (table_id, player_id)); -- player can only occupy one seat
 
 ALTER TABLE seats ENABLE ROW LEVEL SECURITY;

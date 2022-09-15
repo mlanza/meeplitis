@@ -10,12 +10,12 @@ insert into tables (game_id, config, scored, created_by)
 values (_game_id, _config, _scored, _player_id)
 returning id into _id;
 
-insert into seats (table_id, player_id, seq)
+insert into seats (table_id, player_id, seat)
 select
   table_id,
-  case seq when 1 then _player_id else null end as player_id,
-  seq
-from (select _id as table_id, generate_series(1, _seats) as seq) as seated;
+  case seat when 1 then _player_id else null end as player_id,
+  seat
+from (select _id as table_id, generate_series(1, _seats) as seat) as seated;
 
 raise log '$ opened % `%` with % seats', case _scored when true then 'scored table' else 'unscored table' end, _id, _seats;
 

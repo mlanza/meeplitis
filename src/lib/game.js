@@ -156,11 +156,11 @@ export function inspect(self){
     _.log(self, _));
 }
 
-function aggregate2(self, events){
-  return aggregate3(self, events, null);
+function simulate2(self, events){
+  return simulate3(self, events, null);
 }
 
-function aggregate3(self, events, f){ //observability
+function simulate3(self, events, f){ //observability
   const $state = $.cell(self);
   const seated = IGame.seated(self);
   if (f) {
@@ -181,8 +181,8 @@ function aggregate3(self, events, f){ //observability
   }
 }
 
-function aggregate4(self, events, commands, seat){
-  return aggregate2(self, events)(commands, seat);
+function simulate4(self, events, commands, seat){
+  return simulate2(self, events)(commands, seat);
 }
 
-export const aggregate = _.partly(_.overload(null, null, aggregate2, aggregate3, aggregate4));
+export const simulate = _.partly(_.overload(null, null, simulate2, simulate3, simulate4));

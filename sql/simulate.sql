@@ -1,4 +1,4 @@
-create or replace function play(p_table_id varchar, p_commands jsonb, p_seat smallint) returns jsonb as $$
+create or replace function simulate(p_table_id varchar, p_commands jsonb, p_seat smallint) returns jsonb as $$
 declare
 v_slug text;
 v_result jsonb;

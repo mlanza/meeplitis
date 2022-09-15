@@ -3,7 +3,7 @@ declare
 v_result jsonb;
 begin
 
-v_result := (select play(p_table_id, '[]'::jsonb, p_seat));
+v_result := (select simulate(p_table_id, '[]'::jsonb, p_seat));
 
 return v_result;
 end;

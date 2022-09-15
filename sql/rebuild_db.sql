@@ -39,7 +39,6 @@ CREATE TABLE tables (
     game_id varchar(4) references games(id) not null,
     seating seating_mode default 'random',
     config jsonb default '{}', -- configure this play
-    seated jsonb,
     admins uuid [], -- users capable of editing during/after play
     up varchar [], -- seats required to take action
     scored boolean default true,

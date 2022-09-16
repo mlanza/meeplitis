@@ -29,8 +29,7 @@ begin
     from addable_events(_events) as e;
 
     update tables
-    set started_at = now(),
-        status = 'started'::table_status
+    set status = 'started'::table_status
     where id = new.id;
 
     raise log '$ game `%` started at table `%`', _slug, new.id;

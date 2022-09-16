@@ -8,8 +8,7 @@ begin
 
 update seats
 set
-  player_id = null,
-  joined_at = null
+  player_id = null
 where table_id = _table_id
 and player_id = _player_id
 returning id into _seat_id;

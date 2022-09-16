@@ -3,20 +3,18 @@ returns varchar
 language plpgsql
 as $$
 declare
-v_seat_id varchar;
+_seat_id varchar;
 begin
 
-v_seat_id = (select id from seats where table_id = $1 and player_id is null limit 1);
+_seat_id = (select id from seats where table_id = _table_id and player_id is null limit 1);
 
 update seats
-set
-  player_id = $2,
-  joined_at = now()
-where table_id = $1
-and id = v_seat_id;
+set player_id = _player_id
+where table_id = _table_id
+and id = _seat_id;
 
-raise log '$ player `%` joins seat `%` at table `%`', $2, v_seat_id, $1;
+raise log '$ player `%` joins seat `%` at table `%`', _player_id, _seat_id, _table_id;
 
-return v_seat_id;
+return _seat_id;
 
 end; $$

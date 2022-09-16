@@ -1,4 +1,4 @@
-create or replace function open_table(_game_id varchar, _config jsonb, _scored bool, _seats smallint, _player_id uuid)
+create or replace function open_table(_game_id varchar, _config jsonb, _scored bool, _seats smallint, _player_id uuid default auth.uid())
 returns varchar
 language plpgsql
 as $$
@@ -10,11 +10,12 @@ insert into tables (game_id, config, scored, created_by)
 values (_game_id, _config, _scored, _player_id)
 returning id into _id;
 
-insert into seats (table_id, player_id, seat)
+insert into seats (table_id, player_id, seat, joined_at)
 select
   table_id,
   case seat when 1 then _player_id else null end as player_id,
-  seat
+  seat,
+  now()
 from (select _id as table_id, generate_series(1, _seats) as seat) as seated;
 
 raise log '$ opened % `%` with % seats', case _scored when true then 'scored table' else 'unscored table' end, _id, _seats;

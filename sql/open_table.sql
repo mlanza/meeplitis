@@ -16,10 +16,10 @@ returning id into _id;
 insert into seats (table_id, player_id, seat, joined_at)
 select
   table_id,
-  case seat when 1 then _player_id else null end as player_id,
+  case seat when 0 then _player_id else null end as player_id,
   seat,
   now()
-from (select _id as table_id, generate_series(1, _seats) as seat) as seated;
+from (select _id as table_id, generate_series(0, _seats - 1) as seat) as seated;
 
 raise log '$ opened % `%` with % seats', case _scored when true then 'scored table' else 'unscored table' end, _id, _seats;
 

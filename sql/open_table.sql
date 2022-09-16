@@ -3,11 +3,14 @@ returns varchar
 language plpgsql
 as $$
 declare
+_fn varchar;
 _id varchar;
 begin
 
-insert into tables (game_id, config, scored, created_by)
-values (_game_id, _config, _scored, _player_id)
+_fn = (select fn from games where id = _game_id);
+
+insert into tables (game_id, config, scored, created_by, fn)
+values (_game_id, _config, _scored, _player_id, _fn)
 returning id into _id;
 
 insert into seats (table_id, player_id, seat, joined_at)

@@ -24,7 +24,8 @@ CREATE TYPE seating_mode AS ENUM ('random', 'joined', 'picked');
 CREATE TABLE games (
     id varchar(4) not null default generate_uid(4) primary key,
     title text not null,
-    slug varchar(20),
+    slug varchar(30) not null,
+    fn varchar(30) not null, -- name of versioned function
     seats int2[] not null,
     thumbnail_url varchar,
     created_at timestamp not null default now());
@@ -37,6 +38,7 @@ CREATE POLICY "Games are viewable by everyone."
 CREATE TABLE tables (
     id varchar(11) default generate_uid(11) not null primary key,
     game_id varchar(4) references games(id) not null,
+    fn varchar(30) not null, -- name of versioned function
     seating seating_mode default 'random',
     config jsonb default '{}', -- configure this play
     admins uuid [], -- users capable of editing during/after play
@@ -75,7 +77,7 @@ CREATE TABLE seats (
     created_at timestamp default now(),
     updated_at timestamp,
     PRIMARY KEY (table_id, id),
-    UNIQUE (table_id, seat),
+    UNIQUE (table_id, seat), -- seats are ordered beginning with 0 once game starts
     UNIQUE (table_id, player_id)); -- player can only occupy one seat
 
 ALTER TABLE seats ENABLE ROW LEVEL SECURITY;

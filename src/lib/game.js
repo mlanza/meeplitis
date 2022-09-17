@@ -6,7 +6,6 @@ export const IGame = _.protocol({
   up: null, //returns the seat(s) which are required to move
   seated: null,
   moves: null, //what commands can seats/players do?
-  conclude: null,
   irreversible: null, //can the command be reversed by a player?
   execute: null, //validates a command and transforms it into one or more events, potentially executing other commands
   fold: null, //folds an event into the aggregate state
@@ -45,10 +44,6 @@ export function crunch(self){
   return j;
 }
 
-export function conclude(self){
-  return _.seq(moves(self)) || over(self) ? self : IGame.conclude(self);
-}
-
 function execute3(self, command, seat){
   const {type} = command;
   const event = Object.assign({seat}, command);
@@ -72,19 +67,10 @@ function execute3(self, command, seat){
       break;
 
   }
-  return conclude(IGame.execute(self, event, seat));
+  return IGame.execute(self, event, seat);
 }
 
 export const execute = _.partly(_.overload(null, null, execute3, execute3));
-
-export function invalid(self, command, seat){
-  try {
-    execute(self, command, seat); //potentially throw error
-    return null;
-  } catch (ex) {
-    return _.str(ex);
-  }
-}
 
 export function load(self, events){
   return _.reduce(fold, self, events);
@@ -99,33 +85,6 @@ function moves2(self, seat){
 }
 
 export const moves = _.partly(_.overload(null, IGame.moves, moves2));
-
-export function start(self){
-  const config = self.config;
-  return execute(self, {type: "start", details: {config}});
-}
-
-export function finish(self){
-  return execute(self, {type: "finish"});
-}
-
-export function undo(seat){
-  return function(self){
-    return execute(self, {type: "undo", seat});
-  }
-}
-
-export function redo(seat){
-  return function(self){
-    return execute(self, {type: "redo", seat});
-  }
-}
-
-export function commit(seat){ //confirms otherwise tentative moves
-  return function(self){
-    return execute(self, {type: "commit"}, seat);
-  }
-}
 
 export function inspect(self){
   return _.chain(

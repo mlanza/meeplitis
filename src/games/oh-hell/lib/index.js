@@ -56,20 +56,6 @@ function deal(self){
   return g.execute(self, {type: "deal"});
 }
 
-//bids are simultaneous and blind
-export function bid(seat, bid){
-  return function(self){
-    return g.execute(self, {type: "bid", details: {bid}}, seat);
-  }
-}
-
-export function play(card){
-  return function(self){
-    const state = _.deref(self);
-    return g.execute(self, {type: "play", details: {card}}, state.up);
-  }
-}
-
 function award(winner, trick){
   return function(self)  {
     return g.execute(self, {type: "award", details: {winner, trick}});
@@ -271,10 +257,6 @@ function handsEmpty(self){
   return _.chain(self, _.deref, _.get(_, "seated"), _.mapa(_.get(_, "hand"), _), _.flatten, _.compact, _.seq, _.not);
 }
 
-function conclude(self){
-  return self; //scoring(self);
-}
-
 function fold2(self, event){
   const state = _.deref(self);
   const {type, details, seat} = event;
@@ -356,17 +338,6 @@ function fold2(self, event){
   }
 }
 
-export function Journal(pos, max, history, state){
-  this.pos = pos;
-  this.max = max;
-  this.history = history;
-  this.state = state;
-}
-
-function journal2(max, state){
-  return new Journal(0, max, [state], state);
-}
-
 function fold3(self, event, f){
   return ohHell(self.seated,
     self.config,
@@ -405,4 +376,4 @@ function deref(self){
 
 _.doto(OhHell,
   _.implement(_.IDeref, {deref}),
-  _.implement(IGame, {perspective, up, seated, moves, conclude, irreversible, execute, fold, score}));
+  _.implement(IGame, {perspective, up, seated, moves, irreversible, execute, fold, score}));

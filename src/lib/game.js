@@ -29,10 +29,6 @@ export const perspective = _.chain(IGame.perspective,
       _.contains(_, "up"))),
   _.partly);
 
-function over(self){
-  return _.chain(self.events, _.last, _.get(_, "type"), _.eq(_, "finish"));
-}
-
 export function incidental({seat}){
   return seat == null;
 }

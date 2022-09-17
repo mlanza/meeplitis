@@ -24,7 +24,7 @@ function rank(card, trump, lead){
   return (card.suit === trump ? 100 : 0) + (card.suit === lead ? 0 : -50) + n;
 }
 
-export function ranked(cards, trump){ //begin with lead card then follow in play order
+function ranked(cards, trump){ //begin with lead card then follow in play order
   const lead = _.first(cards).suit;
   function compare(a, b){
     return rank(b, trump, lead) - rank(a, trump, lead);
@@ -65,13 +65,6 @@ function award(winner, trick){
 function ordered(seats, lead){
   return _.chain(seats, _.range, _.cycle, _.dropWhile(_.notEq(_, lead), _), _.take(seats, _), _.toArray);
 }
-
-const scoreRound = _.update(_, "seated", _.foldkv(function(memo, idx, seat){
-  const tricks = _.count(seat.tricks),
-        bid = seat.bid,
-        points = tricks === bid ? 10 + tricks : 0;
-  return _.assoc(memo, idx, _.update(seat, "scored", _.conj(_, {bid, tricks, points})));
-}, [], _));
 
 function follow(self){
   const state = _.deref(self);
@@ -226,15 +219,15 @@ function execute(self, command, seat){
     case "commit":
       return _.chain(self, g.fold(_, command), function(self){
         const empty = handsEmpty(self);
-        const endGame = !handSizes[state.round + 1];
-        return empty ? (endGame ? g.finish : deal)(self) : self;
+        const over = !handSizes[state.round + 1];
+        return empty ? (over ? g.finish : deal)(self) : self;
       });
 
     case "award":
     case "scoring":
     case "undo":
     case "redo":
-      return g.fold(self, command);
+      return g.fold(self, command); //vanilla commands
 
     default:
       throw new Error("Unknown command");

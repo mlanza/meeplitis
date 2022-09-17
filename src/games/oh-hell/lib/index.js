@@ -222,14 +222,7 @@ function execute(self, command, seat){
           }
           return self;
         },
-        function(self){
-          const empty = handsEmpty(self);
-          return empty ? scoring(self) : self;
-        });
-
-    case "scoring":
-      return g.fold(self, command);
-      //return _.chain(self, g.fold(_, command), endGame ? g.finish : deal);
+        _.branch(handsEmpty, scoring, _.identity));
 
     case "finish":
       return (function(){
@@ -252,6 +245,7 @@ function execute(self, command, seat){
       });
 
     case "award":
+    case "scoring":
     case "undo":
     case "redo":
       return g.fold(self, command);

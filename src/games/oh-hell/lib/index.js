@@ -356,11 +356,25 @@ function fold2(self, event){
   }
 }
 
+export function Journal(pos, max, history, state){
+  this.pos = pos;
+  this.max = max;
+  this.history = history;
+  this.state = state;
+}
+
+function journal2(max, state){
+  return new Journal(0, max, [state], state);
+}
+
 function fold3(self, event, f){
   return ohHell(self.seated,
     self.config,
     event ? _.append(self.events, event) : self.events,
-    _.chain(self.journal, f, g.irreversible(self, event) ? _.flush : _.identity));
+    _.chain(self.journal,
+      f,
+      g.incidental(event) ? g.crunch : _.identity, //improve undo/redo from user perspective
+      g.irreversible(self, event) ? _.flush : _.identity));
 }
 
 const fold = _.overload(null, null, fold2, fold3);

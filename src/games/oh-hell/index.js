@@ -17,6 +17,10 @@ const game = oh.ohHell([{
   id: "5e6b12f5-f24c-4fd3-8812-f537778dc5c2"
 }], {});
 
+const $game = $.cell(game);
+
+$.sub($game, _.see("game"));
+
 function play(self){
   const card = _.first(g.moves(self, _.chain(self, _.deref, _.get(_, "up")))).details.card;
   return _.chain(self, oh.play(card));
@@ -31,6 +35,10 @@ function record($state, ...fs){
   return _.chain($state, _.deref, _.get(_, "events"), function(events){
     return JSON.stringify(events, null, "  ");
   });
+}
+
+function go(type, details, seat){
+  _.swap($game, g.execute(_, {type, details: details || {}}, seat));
 }
 
 function simulate(game){
@@ -58,7 +66,7 @@ function simulate(game){
 }
 
 // _.chain(game, simulate, _.log);
-
+/*
 fetch("./data/events.json").
   then(function(resp){
     return resp.json();
@@ -66,6 +74,6 @@ fetch("./data/events.json").
   then(_.butlast).
   then(g.simulate(game, _, g.inspect)).
   then(_.invoke(_, [{type: "finish"}], null)). //no new commands
-  then(_.see("simulate"));
+  then(_.see("simulate"));*/
 
-Object.assign(window, {_, oh, g});
+Object.assign(window, {$game, go, _, oh, g});

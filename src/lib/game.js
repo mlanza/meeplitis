@@ -54,8 +54,7 @@ export const fold = _.partly(_.overload(null, null, fold2, IGame.fold));
 
 function execute3(self, command, seat){
   const {type} = command;
-  const id = _.uident(5);
-  const event = Object.assign({id, seat}, command);
+  const event = Object.assign({seat}, command);
   switch(type){
     case "undo":
       return (function(){

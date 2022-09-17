@@ -170,13 +170,7 @@ function execute(self, command, seat){
   const {type, details} = command;
   switch (type) {
     case "start":
-      return (function(){
-        const _details = Object.assign({
-          round: -1, //pending deal
-          seated: _.chain(self.seated, _.count, _.repeat(_, {scored: []}), _.toArray)
-        }, details);
-        return _.chain(self, g.fold(_, _.assoc(command, "details", _details)), deal);
-      })();
+      return _.chain(self, g.fold(_, command), deal);
 
     case "deal":
       return (function(){
@@ -263,7 +257,13 @@ function fold2(self, event){
   const {type, details, seat} = event;
   switch (type) {
     case "start":
-      return g.fold(self, event, _.constantly(details));
+      return (function(){
+        const details = {
+          round: -1, //pending deal
+          seated: _.chain(self.seated, _.count, _.repeat(_, {scored: []}), _.toArray)
+        };
+        return g.fold(self, event, _.constantly(details));
+      })();
 
     case "deal":
       return (function(){

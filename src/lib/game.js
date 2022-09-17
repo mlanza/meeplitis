@@ -6,19 +6,16 @@ export const IGame = _.protocol({
   up: null, //returns the seat(s) which are required to move
   seated: null,
   moves: null, //what commands can seats/players do?
+  conclude: null,
   irreversible: null, //can the command be reversed by a player?
   execute: null, //validates a command and transforms it into one or more events, potentially executing other commands
   fold: null, //folds an event into the aggregate state
   score: null //maintains current interim and/or final scoring and rankings as possible
 });
 
-function irreversible3(self, event, f){
-  return _.pipe(confirmational(event) ? f : _.fmap(_, f),
-    IGame.irreversible(self, event) ? _.flush : _.identity);
-}
-
-export const irreversible = _.partly(_.overload(null, null, IGame.irreversible, irreversible3));
+export const irreversible = IGame.irreversible;
 export const up = IGame.up;
+export const fold = _.partly(IGame.fold);
 export const seated = IGame.seated;
 export const score = IGame.score;
 export const perspective = _.chain(IGame.perspective,
@@ -33,24 +30,13 @@ export const perspective = _.chain(IGame.perspective,
       _.contains(_, "up"))),
   _.partly);
 
-function fold2(self, event){
-  const {type, details, seat} = event;
-  switch (type) {
-    case "undo":
-      return IGame.fold(self, event, _.undo);
-
-    case "redo":
-      return IGame.fold(self, event, _.redo);
-
-    case "clear":
-      return IGame.fold(self, event, _.flush);
-
-    default:
-      return IGame.fold(self, event);
-  }
+function over(self){
+  return _.chain(self.events, _.last, _.get(_, "type"), _.eq(_, "finish"));
 }
 
-export const fold = _.partly(_.overload(null, null, fold2, IGame.fold));
+export function conclude(self){
+  return _.seq(moves(self)) || over(self) ? self : IGame.conclude(self);
+}
 
 function execute3(self, command, seat){
   const {type} = command;
@@ -61,7 +47,7 @@ function execute3(self, command, seat){
         if (!_.undoable(self.journal)){
           throw new Error("Undo is not possible or allowed.");
         }
-        return fold2(self, event);
+        return conclude(IGame.fold(self, event));
       })();
 
     case "redo":
@@ -69,19 +55,19 @@ function execute3(self, command, seat){
         if (!_.redoable(self.journal)){
           throw new Error("Redo is not possible or allowed.");
         }
-        return fold2(self, event);
+        return conclude(IGame.fold(self, event));
       })();
 
-    case "clear":
+    case "commit":
       return (function(){
         if (!_.flushable(self.journal)){
-          throw new Error("Clear is not possible or allowed.");
+          throw new Error("Commit is not possible or allowed.");
         }
-        return fold2(self, event);
+        return conclude(IGame.fold(self, event));
       })();
 
     default:
-      return IGame.execute(self, event, seat);
+      return conclude(IGame.execute(self, event, seat));
 
   }
 }
@@ -120,12 +106,6 @@ export function finish(self){
   return execute(self, {type: "finish"});
 }
 
-export function commit(seat){ //treats moves as tentative
-  return function(self){
-    return execute(self, {type: "commit"}, seat);
-  }
-}
-
 export function undo(seat){
   return function(self){
     return execute(self, {type: "undo", seat});
@@ -138,14 +118,10 @@ export function redo(seat){
   }
 }
 
-export function clear(seat){
+export function commit(seat){ //confirms otherwise tentative moves
   return function(self){
-    return execute(self, {type: "clear", seat});
+    return execute(self, {type: "commit"}, seat);
   }
-}
-
-export function confirmational(command){
-  return _.includes(["undo", "redo", "clear"], command.type);
 }
 
 export function inspect(self){

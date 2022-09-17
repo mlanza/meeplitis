@@ -132,14 +132,13 @@ function moves(self){
   const reversibility = _.compact([
     _.undoable(self.journal) ? {type: "undo", seat} : null,
     _.redoable(self.journal) ? {type: "redo", seat} : null,
-    _.flushable(self.journal) ? {type: "clear", seat} : null
+    _.flushable(self.journal) ? {type: "commit", seat} : null
   ]);
   if (allBidsIn) {
     if (seat == null) {
       return [];
     } else {
       const seated = state.seated[seat];
-      const committable = state.up && (seated.played || state.trick) ? [{type: "commit", seat}] : [];
       const lead = follow(self);
       const trump = state.trump;
       const hand = seated.hand;
@@ -147,7 +146,7 @@ function moves(self){
       const canFollow = _.detect(follows, hand);
       const playable = lead ? (canFollow ? _.filter(follows, hand) : hand) : broken(self, trump) || tight(hand) ? hand : _.filter(_.pipe(_.get(_, "suit"), _.notEq(_, trump.suit)), hand);
       const type = seated.played || state.trick ? "commit" : "play";
-      return _.concat(reversibility, committable, _.map(function(card){
+      return _.concat(reversibility, _.map(function(card){
         return {type, seat, details: {card}};
       }, playable));
     }
@@ -161,7 +160,7 @@ function moves(self){
 }
 
 function irreversible(self, command){
-  return _.includes(["start", "deal", "bid", "commit", "finish"], command.type);
+  return command && _.includes(["start", "deal", "bid", "commit", "finish"], command.type);
 }
 
 function execute(self, command, seat){
@@ -220,18 +219,9 @@ function execute(self, command, seat){
           return self;
         });
 
-    case "award":
-      return g.fold(self, command);
-
-    case "commit":
-      return (function(){
-        const endRound = _.chain(state.seated, _.mapa(_.get(_, "hand"), _), _.flatten, _.compact, _.seq, _.not);
-        const endGame = endRound && !handSizes[state.round + 1];
-        const up = _.second(ordered(_.count(self.seated), state.up));
-        return _.chain(self,
-          g.fold(_, _.assoc(command, "details", {up, endRound, endGame})),
-          endRound ? (endGame ? g.finish : deal) : _.identity);
-      })();
+    case "scoring":
+      const endGame = !handSizes[state.round + 1];
+      return _.chain(self, g.fold(_, command), endGame ? g.finish : deal);
 
     case "finish":
       return (function(){
@@ -246,10 +236,41 @@ function execute(self, command, seat){
         return g.fold(self, _.assoc(command, "details", {ranked}));
       })();
 
+    case "award":
+    case "undo":
+    case "redo":
+    case "commit":
+      return g.fold(self, command);
+
     default:
       throw new Error("Unknown command");
 
     }
+}
+
+function scoring(self){
+  const state = _.deref(self);
+  const scoring = _.chain(state, _.get(_, "seated"), _.mapa(function(seat){
+    const tricks = _.count(seat.tricks),
+          bid = seat.bid,
+          points = tricks === bid ? 10 + tricks : 0;
+    return {bid, tricks, points};
+  }, _));
+  return g.execute(self, {type: "scoring", details: {scoring}}, null);
+}
+
+function emptyHanded(self){
+  return _.chain(self, _.deref, _.get(_, "seated"), _.mapa(_.get(_, "hand"), _), _.flatten, _.compact, _.seq, _.not);
+}
+
+function conclude(self){
+  return scoring(self);
+}
+
+function nextUp(self){
+  const state = _.deref(self);
+  const up = _.second(ordered(_.count(state.seated), state.up));
+  return _.fmap(self, _.pipe(_.assoc(_, "up", up), _.assoc(_, "trick", null)));
 }
 
 function fold2(self, event){
@@ -262,52 +283,66 @@ function fold2(self, event){
           round: -1, //pending deal
           seated: _.chain(self.seated, _.count, _.repeat(_, {scored: []}), _.toArray)
         };
-        return g.fold(self, event, _.constantly(details));
+        return g.fold(self, event, _.fmap(_, _.constantly(details)));
       })();
 
     case "deal":
       return (function(){
         const lead = details.round % _.count(self.seated);
         return g.fold(self, event,
-          _.pipe(
-            _.assoc(_, "lead", lead),
-            _.assoc(_, "up", lead),
-            _.assoc(_, "trump", details.trump),
-            _.assoc(_, "deck", details.deck),
-            _.assoc(_, "round", details.round),
-            _.foldkv(function(memo, seat, hand){
-              return _.updateIn(memo, ["seated", seat], function(seated){
-                return Object.assign({}, seated, {hand, tricks: [], bid: null, played: null});
-              });
-            }, _, details.hands)));
+          _.fmap(_,
+            _.pipe(
+              _.assoc(_, "lead", lead),
+              _.assoc(_, "up", lead),
+              _.assoc(_, "trump", details.trump),
+              _.assoc(_, "deck", details.deck),
+              _.assoc(_, "round", details.round),
+              _.foldkv(function(memo, seat, hand){
+                return _.updateIn(memo, ["seated", seat], function(seated){
+                  return Object.assign({}, seated, {hand, tricks: [], bid: null, played: null});
+                });
+              }, _, details.hands))));
       })();
 
     case "bid":
       return g.fold(self, event,
-        _.assocIn(_, ["seated", seat, "bid"], details.bid));
+        _.fmap(_, _.assocIn(_, ["seated", seat, "bid"], details.bid)));
 
     case "play":
       return g.fold(self, event,
-        _.pipe(
-          _.assocIn(_, ["seated", seat, "trick"], null),
-          _.assocIn(_, ["seated", seat, "played"], details.card),
-          _.updateIn(_, ["seated", seat, "hand"], _.pipe(_.remove(_.eq(_, details.card), _), _.toArray))));
+        _.fmap(_,
+          _.pipe(
+            _.assocIn(_, ["seated", seat, "trick"], null),
+            _.assocIn(_, ["seated", seat, "played"], details.card),
+            _.updateIn(_, ["seated", seat, "hand"], _.pipe(_.remove(_.eq(_, details.card), _), _.toArray)))));
 
     case "award":
       return g.fold(self, event,
-        _.pipe(
-          _.update(_, "seated", _.mapa(function(seat){
-            return _.assoc(seat, "played", null);
-          }, _)),
-          _.updateIn(_, ["seated", details.winner, "tricks"], _.conj(_, details.trick)),
-          _.assoc(_, "trick", details.trick),
-          _.assoc(_, "lead", details.winner)));
+        _.fmap(_,
+          _.pipe(
+            _.update(_, "seated", _.mapa(function(seat){
+              return _.assoc(seat, "played", null);
+            }, _)),
+            _.updateIn(_, ["seated", details.winner, "tricks"], _.conj(_, details.trick)),
+            _.assoc(_, "trick", details.trick),
+            _.assoc(_, "lead", details.winner))));
+
+    case "undo":
+      return g.fold(self, event, _.undo);
+
+    case "redo":
+      return g.fold(self, event, _.redo);
 
     case "commit":
-      return g.fold(self, event, _.pipe(details.endRound ? scoreRound : _.identity, _.assoc(_, "up", details.up), _.assoc(_, "trick", null)));
+      return g.fold(self, event, _.pipe(nextUp, _.flush));
+
+    case "scoring":
+      return g.fold(self, event, _.fmap(_, _.update(_, "seated", _.foldkv(function(memo, idx, seat){
+        return _.assoc(memo, idx, _.update(seat, "scored", _.conj(_, event.details.scoring[idx])));
+      }, [], _))));
 
     case "finish":
-      return g.fold(self, event, _.assoc(_, "up", null));
+      return g.fold(self, event, _.fmap(_, _.assoc(_, "up", null)));
 
     default:
       throw new Error("Unknown event");
@@ -317,8 +352,8 @@ function fold2(self, event){
 function fold3(self, event, f){
   return ohHell(self.seated,
     self.config,
-    _.append(self.events, event),
-    _.chain(self.journal, g.irreversible(self, event, f)));
+    event ? _.append(self.events, event) : self.events,
+    _.chain(self.journal, f, g.irreversible(self, event) ? _.flush : _.identity));
 }
 
 const fold = _.overload(null, null, fold2, fold3);
@@ -349,4 +384,4 @@ function deref(self){
 
 _.doto(OhHell,
   _.implement(_.IDeref, {deref}),
-  _.implement(IGame, {perspective, up, seated, moves, irreversible, execute, fold, score}));
+  _.implement(IGame, {perspective, up, seated, moves, conclude, irreversible, execute, fold, score}));

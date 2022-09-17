@@ -18,55 +18,51 @@ const game = oh.ohHell([{
 }], {});
 
 const $game = $.cell(game);
-
 $.sub($game, _.see("game"));
 
-function play(self){
-  const card = _.first(g.moves(self, _.chain(self, _.deref, _.get(_, "up")))).details.card;
-  return _.chain(self, oh.play(card));
-}
-
-function commit(self){
-  return g.commit(_.chain(self, _.deref, _.get(_, "up")))(self);
-}
-
-function record($state, ...fs){
-  _.each(_.swap($state, _), fs);
-  return _.chain($state, _.deref, _.get(_, "events"), function(events){
-    return JSON.stringify(events, null, "  ");
-  });
-}
-
 function go(type, details, seat){
-  _.swap($game, g.execute(_, {type, details: details || {}}, seat));
+  if (arguments.length === 0) {
+    const move = _.chain($game, _.deref, g.moves, _.last);
+    _.swap($game, g.execute(_, move, move.seat));
+  } else {
+    _.swap($game, g.execute(_, {type, details: details || {}}, seat));
+  }
 }
 
-function simulate(game){
-  return record($.cell(game),
-    g.start,
-    oh.bid(0, 1), oh.bid(1, 0), oh.bid(2, 0), oh.bid(3, 1),
-    play, g.undo(0), g.redo(0), commit,
-    play, commit,
-    play, commit,
-    play, commit,
-    oh.bid(0, 1), oh.bid(1, 0), oh.bid(2, 0), oh.bid(3, 1),
-    play, commit,
-    play, commit,
-    play, commit,
-    play, commit,
-    play, commit,
-    play, commit,
-    play, commit,
-    play, commit,
-    oh.bid(0, 1), oh.bid(1, 0), oh.bid(2, 0), oh.bid(3, 1),
-    play, commit,
-    play, commit,
-    play, commit,
-    play, commit);
+function create(){
+  go("start");
+  go("bid", {bid: 1}, 0);
+  go("bid", {bid: 1}, 1);
+  go("bid", {bid: 1}, 2);
+  go("bid", {bid: 1}, 3);
+  go(); go();
+  go(); go();
+  go(); go();
+  go(); go();
+  go("bid", {bid: 1}, 0);
+  go("bid", {bid: 1}, 1);
+  go("bid", {bid: 1}, 2);
+  go("bid", {bid: 1}, 3);
+  go(); go();
+  go(); go();
+  go(); go();
+  go(); go();
+  go(); go();
+  go(); go();
+  go(); go();
+  go(); go();
+  go("bid", {bid: 1}, 0);
+  go("bid", {bid: 1}, 1);
+  go("bid", {bid: 1}, 2);
+  go("bid", {bid: 1}, 3);
+  go(); go();
+  go(); go();
+  go(); go();
+  go(); go();
 }
 
 // _.chain(game, simulate, _.log);
-/*
+
 fetch("./data/events.json").
   then(function(resp){
     return resp.json();
@@ -74,6 +70,6 @@ fetch("./data/events.json").
   then(_.butlast).
   then(g.simulate(game, _, g.inspect)).
   then(_.invoke(_, [{type: "finish"}], null)). //no new commands
-  then(_.see("simulate"));*/
+  then(_.see("simulate"));
 
 Object.assign(window, {$game, go, _, oh, g});

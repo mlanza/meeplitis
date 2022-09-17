@@ -129,10 +129,14 @@ function moves(self){
   const seat = state.up;
   const size = handSizes[state.round] || 0;
   const bids = _.cons(null, _.range(0, size + 1));
+  const undoable = _.undoable(self.journal),
+        redoable = _.redoable(self.journal),
+        flushable = _.flushable(self.journal);
   const reversibility = _.compact([
-    _.undoable(self.journal) ? {type: "undo", seat} : null,
-    _.redoable(self.journal) ? {type: "redo", seat} : null,
-    _.flushable(self.journal) ? {type: "commit", seat} : null
+    undoable ? {type: "undo", seat} : null,
+    redoable ? {type: "redo", seat} : null,
+    //TODO flushable && !redoable ? {type: "reset", seat} : null,
+    flushable && !redoable ? {type: "commit", seat} : null
   ]);
   if (allBidsIn) {
     if (seat == null) {
@@ -217,11 +221,15 @@ function execute(self, command, seat){
             return _.chain(self, award(winner, trick));
           }
           return self;
+        },
+        function(self){
+          const empty = handsEmpty(self);
+          return empty ? scoring(self) : self;
         });
 
     case "scoring":
-      const endGame = !handSizes[state.round + 1];
-      return _.chain(self, g.fold(_, command), endGame ? g.finish : deal);
+      return g.fold(self, command);
+      //return _.chain(self, g.fold(_, command), endGame ? g.finish : deal);
 
     case "finish":
       return (function(){
@@ -236,10 +244,16 @@ function execute(self, command, seat){
         return g.fold(self, _.assoc(command, "details", {ranked}));
       })();
 
+    case "commit":
+      return _.chain(self, g.fold(_, command), function(self){
+        const empty = handsEmpty(self);
+        const endGame = !handSizes[state.round + 1];
+        return empty ? (endGame ? g.finish : deal)(self) : self;
+      });
+
     case "award":
     case "undo":
     case "redo":
-    case "commit":
       return g.fold(self, command);
 
     default:
@@ -259,18 +273,12 @@ function scoring(self){
   return g.execute(self, {type: "scoring", details: {scoring}}, null);
 }
 
-function emptyHanded(self){
+function handsEmpty(self){
   return _.chain(self, _.deref, _.get(_, "seated"), _.mapa(_.get(_, "hand"), _), _.flatten, _.compact, _.seq, _.not);
 }
 
 function conclude(self){
-  return scoring(self);
-}
-
-function nextUp(self){
-  const state = _.deref(self);
-  const up = _.second(ordered(_.count(state.seated), state.up));
-  return _.fmap(self, _.pipe(_.assoc(_, "up", up), _.assoc(_, "trick", null)));
+  return self; //scoring(self);
 }
 
 function fold2(self, event){
@@ -334,7 +342,12 @@ function fold2(self, event){
       return g.fold(self, event, _.redo);
 
     case "commit":
-      return g.fold(self, event, _.pipe(nextUp, _.flush));
+      const up = _.second(ordered(_.count(state.seated), state.up));
+      return g.fold(self, event, _.pipe(
+        _.fmap(_, _.pipe(
+          _.assoc(_, "up", up),
+          _.assoc(_, "trick", null))),
+        _.flush));
 
     case "scoring":
       return g.fold(self, event, _.fmap(_, _.update(_, "seated", _.foldkv(function(memo, idx, seat){

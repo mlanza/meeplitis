@@ -59,9 +59,8 @@ function create(){
   go(); go();
   go(); go();
   go(); go();
-}
 
-// _.chain(game, simulate, _.log);
+}
 
 fetch("./data/events.json").
   then(function(resp){

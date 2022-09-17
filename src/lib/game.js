@@ -43,33 +43,25 @@ function execute3(self, command, seat){
   const event = Object.assign({seat}, command);
   switch(type){
     case "undo":
-      return (function(){
-        if (!_.undoable(self.journal)){
-          throw new Error("Undo is not possible or allowed.");
-        }
-        return conclude(IGame.fold(self, event));
-      })();
+      if (!_.undoable(self.journal)){
+        throw new Error("Undo is not possible or allowed.");
+      }
+      break;
 
     case "redo":
-      return (function(){
-        if (!_.redoable(self.journal)){
-          throw new Error("Redo is not possible or allowed.");
-        }
-        return conclude(IGame.fold(self, event));
-      })();
+      if (!_.redoable(self.journal)){
+        throw new Error("Redo is not possible or allowed.");
+      }
+      break;
 
     case "commit":
-      return (function(){
-        if (!_.flushable(self.journal)){
-          throw new Error("Commit is not possible or allowed.");
-        }
-        return conclude(IGame.fold(self, event));
-      })();
-
-    default:
-      return conclude(IGame.execute(self, event, seat));
+      if (!_.flushable(self.journal)){
+        throw new Error("Commit is not possible or allowed.");
+      }
+      break;
 
   }
+  return conclude(IGame.execute(self, event, seat));
 }
 
 export const execute = _.partly(_.overload(null, null, execute3, execute3));

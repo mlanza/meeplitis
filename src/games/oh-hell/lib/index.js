@@ -73,7 +73,9 @@ function follow(self){
 
 function broken(self, trump){
   const state = _.deref(self);
-  return !!_.chain(state.seated, _.mapcat(_.get(_, "tricks"), _), _.detect(_.eq(_, trump.suit), _));
+  return !!_.chain(state.seated, _.mapcat(function(seated){
+    return _.compact(_.cons(seated.played, seated.tricks));
+  }, _), _.detect(_.eq(_, trump.suit), _));
 }
 
 function tight(hand){
@@ -187,7 +189,9 @@ function execute(self, command, seat){
       if (!valid) {
         throw new Error("Invalid play");
       }
+      const breaks = details.card.suit == state.trump.suit && !broken(self, state.trump);
       return _.chain(self, g.fold(_, command),
+        breaks ? g.fold(_, {type: "broken"}) : _.identity,
         function(self){
           const state = _.deref(self);
           const ord = ordered(_.count(self.seated), state.lead);
@@ -271,6 +275,7 @@ function fold2(self, event){
             _.pipe(
               _.assoc(_, "lead", lead),
               _.assoc(_, "up", lead),
+              _.assoc(_, "broken", false),
               _.assoc(_, "trump", details.trump),
               _.assoc(_, "deck", details.deck),
               _.assoc(_, "round", details.round),
@@ -280,6 +285,9 @@ function fold2(self, event){
                 });
               }, _, details.hands))));
       })();
+
+    case "broken":
+      return g.fold(self, event, _.fmap(_, _.assoc(_, "broken", true)));
 
     case "bid":
       return g.fold(self, event,

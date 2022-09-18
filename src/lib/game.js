@@ -16,7 +16,7 @@ export const irreversible = IGame.irreversible;
 export const up = IGame.up;
 export const fold = _.partly(IGame.fold);
 export const seated = IGame.seated;
-export const score = IGame.score;
+export const score = IGame.score; //permissible to return null when calculating makes no sense
 export const perspective = _.chain(IGame.perspective,
   _.post(_,
     _.and(
@@ -68,6 +68,10 @@ function execute3(self, command, seat){
 
 export const execute = _.partly(_.overload(null, null, execute3, execute3));
 
+export function finish(self){
+  return execute(self, {type: "finish"});
+}
+
 export function load(self, events){
   return _.reduce(fold, self, events);
 }
@@ -82,22 +86,40 @@ function moves2(self, seat){
 
 export const moves = _.partly(_.overload(null, IGame.moves, moves2));
 
-export function inspect(self){
+export function perspectives(self){
   return _.chain(
     _.cons(null, _.range(0, _.chain(self, seated, _.count))),
-    _.mapa(perspective(self, _), _),
-    _.log(self, _));
+    _.mapa(perspective(self, _), _));
+}
+
+export function summarize([curr, prior]){ //use $.hist
+  return {
+    added: added(curr, prior),
+    perspectives: perspectives(curr),
+    game: curr
+  };
+}
+
+export function executing($game){ //development tool
+  return function exec(type, details, seat){
+    if (arguments.length === 0) {
+      const move = _.chain($game, _.deref, g.moves, _.last);
+      _.swap($game, g.execute(_, move, move.seat));
+    } else {
+      _.swap($game, g.execute(_, {type, details: details || {}}, seat));
+    }
+  }
 }
 
 function simulate2(self, events){
   return simulate3(self, events, null);
 }
 
-function simulate3(self, events, f){ //observability
+function simulate3(self, events, f){
   const $state = $.cell(self);
   const seated = IGame.seated(self);
   if (f) {
-    $.sub($state, f);
+    $.sub($.hist($state), f); //observe events as applied
     _.each(function(event){
       _.swap($state, fold(_, event));
     }, events);

@@ -1,5 +1,6 @@
 import _ from "/lib/@atomic/core.js";
 import $ from "/lib/@atomic/reactives.js";
+import t from "/lib/@atomic/transducers.js";
 import * as g from "/lib/game.js";
 import * as oh from "./lib/index.js";
 
@@ -18,48 +19,26 @@ const game = oh.ohHell([{
 }], {});
 
 const $game = $.cell(game);
-$.sub($game, _.see("game"));
-
-function go(type, details, seat){
-  if (arguments.length === 0) {
-    const move = _.chain($game, _.deref, g.moves, _.last);
-    _.swap($game, g.execute(_, move, move.seat));
-  } else {
-    _.swap($game, g.execute(_, {type, details: details || {}}, seat));
-  }
-}
+const exec = g.executing($game);
+$.sub($.hist($game), t.map(g.summarize), _.log);
 
 function create(){
-  go("start");
-  go("bid", {bid: 1}, 0);
-  go("bid", {bid: 1}, 1);
-  go("bid", {bid: 1}, 2);
-  go("bid", {bid: 1}, 3);
-  go(); go();
-  go(); go();
-  go(); go();
-  go(); go();
-  go("bid", {bid: 1}, 0);
-  go("bid", {bid: 1}, 1);
-  go("bid", {bid: 1}, 2);
-  go("bid", {bid: 1}, 3);
-  go(); go();
-  go(); go();
-  go(); go();
-  go(); go();
-  go(); go();
-  go(); go();
-  go(); go();
-  go(); go();
-  go("bid", {bid: 1}, 0);
-  go("bid", {bid: 1}, 1);
-  go("bid", {bid: 1}, 2);
-  go("bid", {bid: 1}, 3);
-  go(); go();
-  go(); go();
-  go(); go();
-  go(); go();
-
+  exec("start");
+  exec("bid", {bid: 1}, 0);
+  exec("bid", {bid: 1}, 1);
+  exec("bid", {bid: 1}, 2);
+  exec("bid", {bid: 1}, 3);
+  _.dotimes(8, _.nullary(exec));
+  exec("bid", {bid: 1}, 0);
+  exec("bid", {bid: 1}, 1);
+  exec("bid", {bid: 1}, 2);
+  exec("bid", {bid: 1}, 3);
+  _.dotimes(16, _.nullary(exec));
+  exec("bid", {bid: 1}, 0);
+  exec("bid", {bid: 1}, 1);
+  exec("bid", {bid: 1}, 2);
+  exec("bid", {bid: 1}, 3);
+  _.dotimes(8, _.nullary(exec));
 }
 
 fetch("./data/events.json").
@@ -67,8 +46,8 @@ fetch("./data/events.json").
     return resp.json();
   }).
   then(_.butlast).
-  then(g.simulate(game, _, g.inspect)).
+  then(g.simulate(game, _, _.pipe(g.summarize, _.log))).
   then(_.invoke(_, [{type: "finish"}], null)). //no new commands
   then(_.see("simulate"));
 
-Object.assign(window, {$game, go, _, oh, g});
+Object.assign(window, {$game, exec, _, oh, g});

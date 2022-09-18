@@ -112,11 +112,12 @@ function moves(self){
   const bids = _.cons(null, _.range(0, size + 1));
   const undoable = _.undoable(self.journal),
         redoable = _.redoable(self.journal),
-        flushable = _.flushable(self.journal);
+        flushable = _.flushable(self.journal),
+        resettable = _.resettable(self.journal);
   const reversibility = _.compact([
+    resettable ? {type: "reset", seat} : null,
     undoable ? {type: "undo", seat} : null,
     redoable ? {type: "redo", seat} : null,
-    //TODO flushable && !redoable ? {type: "reset", seat} : null,
     flushable && !redoable ? {type: "commit", seat} : null
   ]);
   if (allBidsIn) {
@@ -231,6 +232,7 @@ function execute(self, command, seat){
     case "scoring":
     case "undo":
     case "redo":
+    case "reset":
       return g.fold(self, command); //vanilla commands
 
     default:
@@ -317,6 +319,9 @@ function fold2(self, event){
 
     case "redo":
       return g.fold(self, event, _.redo);
+
+    case "reset":
+      return g.fold(self, event, _.reset);
 
     case "commit":
       const up = _.second(ordered(_.count(state.seated), state.up));

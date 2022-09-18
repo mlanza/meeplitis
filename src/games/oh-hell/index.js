@@ -40,7 +40,6 @@ function create(){
   exec("bid", {bid: 1}, 3);
   _.dotimes(8, _.nullary(exec));
 }
-
 fetch("./data/events.json").
   then(function(resp){
     return resp.json();

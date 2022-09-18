@@ -103,10 +103,10 @@ export function summarize([curr, prior]){ //use $.hist
 export function executing($game){ //development tool
   return function exec(type, details, seat){
     if (arguments.length === 0) {
-      const move = _.chain($game, _.deref, g.moves, _.last);
-      _.swap($game, g.execute(_, move, move.seat));
+      const move = _.chain($game, _.deref, moves, _.last);
+      _.swap($game, execute(_, move, move.seat));
     } else {
-      _.swap($game, g.execute(_, {type, details: details || {}}, seat));
+      _.swap($game, execute(_, {type, details: details || {}}, seat));
     }
   }
 }

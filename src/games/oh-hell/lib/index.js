@@ -376,20 +376,39 @@ function seated(self){
   return self.seated;
 }
 
-function perspective(self, seat){
+const obscureCards = _.mapa(_.constantly({}), _);
+
+function obscure(seat){
+  return seat == null ? _.identity : function(event){
+    const {type} = event;
+    switch (type) {
+      case "deal":
+        return _.chain(event,
+          _.updateIn(_, ["details", "hands"], _.pipe(_.mapIndexed(function(idx, cards){
+            return idx == seat ? cards : obscureCards(cards);
+          }, _), _.toArray)),
+          _.updateIn(_, ["details", "deck"], obscureCards));
+      default:
+        return event;
+    }
+  }
+}
+
+function perspective(self, seat = null){
   const up = seat == null ? null : _.chain(self, g.up, _.includes(_, seat));
   const seated = g.seated(self);
+  const you = seat == null ? null : _.nth(seated, seat);
   const state = _.chain(self, _.deref,
     seat == null ? _.identity :
     _.pipe(
-      _.update(_, "deck", _.mapa(_.constantly({}), _)), //no one can see the deck
+      _.update(_, "deck", obscureCards),
       _.update(_, "seated", _.pipe(_.mapIndexed(function(i, seated){ //can only see your own hand
-          return i === seat ? seated : _.update(seated, "hand", _.mapa(_.constantly({}), _));
+          return i === seat ? seated : _.update(seated, "hand", obscureCards);
         }, _), _.toArray))));
   const moves = _.chain(self, g.moves(_, seat), _.toArray);
-  const events = self.events; //TODO hide details
+  const events = _.mapa(obscure(seat), self.events);
   const score = g.score(self)[seat];
-  return {seat, seated, up, state, moves, events, score};
+  return {seat, seated, you, up, state, moves, events, score};
 }
 
 function deref(self){

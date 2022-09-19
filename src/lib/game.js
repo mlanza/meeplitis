@@ -26,7 +26,8 @@ export const perspective = _.chain(IGame.perspective,
       _.contains(_, "events"),
       _.contains(_, "moves"),
       _.contains(_, "score"),
-      _.contains(_, "up"))),
+      _.contains(_, "up"),
+      _.contains(_, "you"))),
   _.partly);
 
 export function incidental({seat}){
@@ -87,15 +88,24 @@ function moves2(self, seat){
 export const moves = _.partly(_.overload(null, IGame.moves, moves2));
 
 export function perspectives(self){
-  return _.chain(
-    _.cons(null, _.range(0, _.chain(self, seated, _.count))),
+  return _.chain(self,
+    seated,
+    _.count,
+    _.range(0, _),
     _.mapa(perspective(self, _), _));
+}
+
+export function notify(curr, prior){
+  return _.difference(up(curr), prior ? up(prior) : []);
 }
 
 export function summarize([curr, prior]){ //use $.hist
   return {
+    up: up(curr),
+    notify: notify(curr, prior),
     added: added(curr, prior),
     perspectives: perspectives(curr),
+    reality: perspective(curr),
     game: curr
   };
 }

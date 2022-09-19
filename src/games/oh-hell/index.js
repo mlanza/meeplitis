@@ -2,9 +2,9 @@ import _ from "/lib/@atomic/core.js";
 import $ from "/lib/@atomic/reactives.js";
 import t from "/lib/@atomic/transducers.js";
 import * as g from "/lib/game.js";
-import * as oh from "./lib/index.js";
+import ohHell from "./lib/index.js";
 
-const game = oh.ohHell([{
+const game = ohHell([{
   username: "brielle",
   id: "8cb76dc4-4338-42d4-a324-b61fcb889bd1"
 }, {
@@ -40,6 +40,7 @@ function create(){
   exec("bid", {bid: 1}, 3);
   _.dotimes(8, _.nullary(exec));
 }
+
 fetch("./data/events.json").
   then(function(resp){
     return resp.json();
@@ -49,4 +50,4 @@ fetch("./data/events.json").
   then(_.invoke(_, [{type: "finish"}], null)). //no new commands
   then(_.see("simulate"));
 
-Object.assign(window, {$game, exec, _, oh, g});
+Object.assign(window, {$game, exec, _, $, t, g});

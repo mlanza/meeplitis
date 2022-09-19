@@ -85,7 +85,7 @@ function bidding(state){
 }
 
 function handsEmpty(state){
-  return _.chain(_.get(_, "seated"), _.mapa(_.get(_, "hand"), _), _.flatten, _.compact, _.seq, _.not);
+  return _.chain(state, _.get(_, "seated"), _.mapa(_.get(_, "hand"), _), _.flatten, _.compact, _.seq, _.not);
 }
 
 
@@ -105,49 +105,58 @@ function score(self){
   }, _));
 }
 
-//TODO factor in trumps being broken
-function moves(self){
-  const state = _.deref(self);
-  const seat = state.up;
+function bids(state){
   const size = handSizes[state.round] || 0;
   const bids = _.cons(null, _.range(0, size + 1));
-  const undoable = _.undoable(self.journal),
-        redoable = _.redoable(self.journal),
-        flushable = _.flushable(self.journal),
-        resettable = _.resettable(self.journal);
-  const reversibility = _.compact([
+  return _.chain(state.seated, _.mapIndexed(function(idx, seat){
+    return _.chain(bids, _.mapa(function(bid){
+      return {type: "bid", details: {bid}, seat: idx};
+    }, _), _.remove(_.pipe(_.getIn(_, ["details", "bid"]), _.eq(_, seat.bid)), _));
+  }, _), _.flatten, _.compact)
+}
+
+function playable(state, seat){
+  const seated = state.seated[seat];
+  const lead = follow(state);
+  const trump = state.trump;
+  const hand = seated.hand;
+  const follows = lead ? _.pipe(_.get(_, "suit"), _.eq(_, lead.suit)) : _.identity;
+  const cards = lead ? (_.seq(_.filter(follows, hand)) || hand) : broken(state, trump) || tight(hand) ? hand : _.filter(_.pipe(_.get(_, "suit"), _.notEq(_, trump.suit)), hand);
+  return seated.played ? [] : _.map(function(card){
+    return {type: "play", seat, details: {card}};
+  }, cards);
+}
+
+function reversibility(journal, seat){
+  const undoable = _.undoable(journal),
+        redoable = _.redoable(journal),
+        flushable = _.flushable(journal),
+        resettable = _.resettable(journal);
+  return _.compact([
     resettable ? {type: "reset", seat} : null,
     undoable ? {type: "undo", seat} : null,
     redoable ? {type: "redo", seat} : null,
     flushable && !redoable ? {type: "commit", seat} : null
   ]);
-  if (seat == null) {
-    return [];
-  } else {
+}
+
+function moves(self){
+  const state = _.deref(self),
+        rev = reversibility(self.journal, state.up);
+  if (state.up != null) {
     switch(state.status){
+      case "confirming":
+        return rev;
+
       case "bidding":
-        return _.concat(reversibility, _.chain(state.seated, _.mapIndexed(function(idx, seat){
-          return _.chain(bids, _.mapa(function(bid){
-            return {type: "bid", details: {bid}, seat: idx};
-          }, _), _.remove(_.pipe(_.getIn(_, ["details", "bid"]), _.eq(_, seat.bid)), _));
-        }, _), _.flatten, _.compact));
-        break;
+        return _.concat(rev, bids(state));
 
       case "playing":
-        const seated = state.seated[seat];
-        const lead = follow(state);
-        const trump = state.trump;
-        const hand = seated.hand;
-        const follows = lead ? _.pipe(_.get(_, "suit"), _.eq(_, lead.suit)) : _.identity;
-        const canFollow = _.detect(follows, hand);
-        const playable = lead ? (canFollow ? _.filter(follows, hand) : hand) : broken(state, trump) || tight(hand) ? hand : _.filter(_.pipe(_.get(_, "suit"), _.notEq(_, trump.suit)), hand);
-        const type = seated.played || state.trick ? "commit" : "play";
-        return _.concat(reversibility, _.map(function(card){
-          return {type, seat, details: {card}};
-        }, playable));
-        break;
+        return _.concat(rev, state.trick ? [] : playable(state, state.up));
+
     }
   }
+  return [];
 }
 
 function irreversible(self, command){
@@ -184,6 +193,8 @@ function execute(self, command, seat){
 
     case "bid":
       if (!valid) {
+        debugger
+        const x = _.toArray(g.moves(self, seat));
         throw new Error("Invalid bid");
       }
       return g.fold(self, command);
@@ -228,7 +239,7 @@ function execute(self, command, seat){
 
     case "commit":
       return _.chain(self, g.fold(_, command), function(self){
-        const empty = handsEmpty(self);
+        const empty = _.chain(self, _.deref, handsEmpty);
         const over = !handSizes[state.round + 1];
         return empty ? (over ? g.finish : deal)(self) : self;
       });
@@ -312,11 +323,11 @@ function fold2(self, event){
       return g.fold(self, event,
         _.fmap(_,
           _.pipe(
+            _.assoc(_, "status", "confirming"),
             _.update(_, "seated", _.mapa(function(seat){
               return _.assoc(seat, "played", null);
             }, _)),
             _.updateIn(_, ["seated", details.winner, "tricks"], _.conj(_, details.trick)),
-            _.assoc(_, "trick", details.trick),
             _.assoc(_, "lead", details.winner))));
 
     case "undo":
@@ -332,8 +343,8 @@ function fold2(self, event){
       const up = _.second(ordered(_.count(state.seated), state.up));
       return g.fold(self, event, _.pipe(
         _.fmap(_, _.pipe(
-          _.assoc(_, "up", up),
-          _.assoc(_, "trick", null))),
+          _.assoc(_, "status", "playing"),
+          _.assoc(_, "up", up))),
         _.flush));
 
     case "scoring":
@@ -342,7 +353,7 @@ function fold2(self, event){
       }, [], _))));
 
     case "finish":
-      return g.fold(self, event, _.fmap(_, _.pipe(_.assoc(_, "up", null), _.assoc(_, "status", "finished"))));
+      return g.fold(self, event, _.fmap(_, _.pipe(_.dissoc(_, "up"), _.assoc(_, "status", "finished"))));
 
     default:
       throw new Error("Unknown event");

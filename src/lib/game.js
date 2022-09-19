@@ -81,7 +81,7 @@ export function added(curr, prior){
 }
 
 function moves2(self, seat){
-  return _.filter(_.pipe(_.get(_, "seat"), _.eq(_, seat)), IGame.moves(self));
+  return _.chain(self, IGame.moves, seat == null ? _.identity : _.filter(_.pipe(_.get(_, "seat"), _.eq(_, seat)), _));
 }
 
 export const moves = _.partly(_.overload(null, IGame.moves, moves2));
@@ -100,12 +100,19 @@ export function summarize([curr, prior]){ //use $.hist
   };
 }
 
-export function executing($game){ //development tool
+export function executing($game, observe){ //development tool
   return function exec(type, details, seat){
     if (arguments.length === 0) {
-      const move = _.chain($game, _.deref, moves, _.last);
-      _.swap($game, execute(_, move, move.seat));
+      (function(){
+        const seat = _.chain($game, _.deref, up, _.first);
+        const move = _.chain($game, _.deref, moves(_, seat), _.toArray, _.tee(function(moves){
+          observe && observe({moves});
+        }), _.last);
+        const {type, details} = move;
+        exec(type, details, seat);
+      })();
     } else {
+      observe && observe({command: {type, details, seat}});
       _.swap($game, execute(_, {type, details: details || {}}, seat));
     }
   }

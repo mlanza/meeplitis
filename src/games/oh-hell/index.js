@@ -19,25 +19,22 @@ const game = ohHell([{
 }], {});
 
 const $game = $.cell(game);
-const exec = g.executing($game);
+const exec = g.executing($game, _.log);
 $.sub($.hist($game), t.map(g.summarize), _.log);
 
 function create(){
   exec("start");
-  exec("bid", {bid: 1}, 0);
-  exec("bid", {bid: 1}, 1);
-  exec("bid", {bid: 1}, 2);
-  exec("bid", {bid: 1}, 3);
+  _.log("@bidding", 4)
+  _.dotimes(4, _.nullary(exec));
+  _.log("@playing", 8)
   _.dotimes(8, _.nullary(exec));
-  exec("bid", {bid: 1}, 0);
-  exec("bid", {bid: 1}, 1);
-  exec("bid", {bid: 1}, 2);
-  exec("bid", {bid: 1}, 3);
+  _.log("@bidding", 4)
+  _.dotimes(4, _.nullary(exec));
+  _.log("@playing", 16)
   _.dotimes(16, _.nullary(exec));
-  exec("bid", {bid: 1}, 0);
-  exec("bid", {bid: 1}, 1);
-  exec("bid", {bid: 1}, 2);
-  exec("bid", {bid: 1}, 3);
+  _.log("@bidding", 4)
+  _.dotimes(4, _.nullary(exec));
+  _.log("@playing", 8)
   _.dotimes(8, _.nullary(exec));
 }
 

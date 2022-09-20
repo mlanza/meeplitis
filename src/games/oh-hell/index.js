@@ -19,24 +19,10 @@ const game = ohHell([{
 }], {});
 
 const $game = $.cell(game);
-const exec = g.executing($game, _.log);
-$.sub($.hist($game), t.map(g.summarize), _.log);
+const simulate = g.simulate(game, [], _.pipe(g.summarize, _.log));
 
-function create(){
-  exec("start");
-  _.log("@bidding", 4)
-  _.dotimes(4, _.nullary(exec));
-  _.log("@playing", 8)
-  _.dotimes(8, _.nullary(exec));
-  _.log("@bidding", 4)
-  _.dotimes(4, _.nullary(exec));
-  _.log("@playing", 16)
-  _.dotimes(16, _.nullary(exec));
-  _.log("@bidding", 4)
-  _.dotimes(4, _.nullary(exec));
-  _.log("@playing", 8)
-  _.dotimes(8, _.nullary(exec));
-}
+$.sub($.hist($game), t.map(g.summarize), _.log);
+//simulate(_.concat([{type: "start"}], _.repeat(44, {type: "~"})));
 
 fetch("./data/events.json").
   then(function(resp){
@@ -44,7 +30,10 @@ fetch("./data/events.json").
   }).
   then(_.butlast).
   then(g.simulate(game, _, _.pipe(g.summarize, _.log))).
-  then(_.invoke(_, [{type: "finish"}], null)). //no new commands
-  then(_.see("simulate"));
+  then(_.pipe(_, _.log)).
+  then(function(simulate){
+    simulate([{type: "finish"}]);
+    Object.assign(window, {simulate});
+  });
 
-Object.assign(window, {$game, exec, _, $, t, g});
+Object.assign(window, {$game, _, $, t, g, simulate});

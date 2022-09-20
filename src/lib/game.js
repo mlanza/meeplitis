@@ -45,6 +45,14 @@ function execute3(self, command, seat){
   const {type} = command;
   const event = Object.assign({seat}, command);
   switch(type){
+    case "~": //pluck next command, for development purposes
+      return _.maybe(self,
+        up,
+        _.first,
+        moves(self, _),
+        _.last,
+        execute(self, _, seat)) || self;
+
     case "undo":
       if (!_.undoable(self.journal)){
         throw new Error("Undo is not possible or allowed.");
@@ -110,47 +118,35 @@ export function summarize([curr, prior]){ //use $.hist
   };
 }
 
-export function executing($game, observe){ //development tool
-  return function exec(type, details, seat){
-    if (arguments.length === 0) {
-      (function(){
-        const seat = _.chain($game, _.deref, up, _.first);
-        const move = _.chain($game, _.deref, moves(_, seat), _.toArray, _.tee(function(moves){
-          observe && observe({moves});
-        }), _.last);
-        const {type, details} = move;
-        exec(type, details, seat);
-      })();
-    } else {
-      observe && observe({command: {type, details, seat}});
-      _.swap($game, execute(_, {type, details: details || {}}, seat));
-    }
-  }
-}
-
-function simulate2(self, events){
-  return simulate3(self, events, null);
-}
-
-function simulate3(self, events, f){
-  const $state = $.cell(self);
-  const seated = IGame.seated(self);
-  if (f) {
-    $.sub($.hist($state), f); //observe events as applied
-    _.each(function(event){
-      _.swap($state, fold(_, event));
-    }, events);
-  } else {
-    _.swap($state, load(_, events));
-  }
+function executor($state){
   return function(commands, seat){
     const prior = _.chain($state, _.deref);
     _.each(function(command){
       _.swap($state, execute(_, command, seat));
     }, commands);
     const curr = _.chain($state, _.deref);
-    return [perspective(curr, seat), added(curr, prior)];
+    return {
+      added: added(curr, prior),
+      up: up(curr),
+      perspective: perspective(curr, seat),
+      notify: notify(curr, prior)
+    };
   }
+}
+
+function simulate2(self, events){
+  const $state = $.cell(self);
+  _.swap($state, load(_, events));
+  return executor($state);
+}
+
+function simulate3(self, events, f){
+  const $state = $.cell(self);
+  $.sub($.hist($state), f); //observe events as applied
+  _.each(function(event){
+    _.swap($state, fold(_, event));
+  }, events);
+  return executor($state);
 }
 
 function simulate4(self, events, commands, seat){

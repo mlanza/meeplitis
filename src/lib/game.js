@@ -85,6 +85,31 @@ export function load(self, events){
   return _.reduce(fold, self, events);
 }
 
+export function run(self, commands, seat){
+  return _.reduce(execute(_, _, seat), self, commands);
+}
+
+export const exec = _.partly(function exec(self, commands, seat){
+  const prior = self;
+  const curr = _.reduce(execute(_, _, seat), prior, commands);
+  return {
+    added: added(curr, prior),
+    up: up(curr),
+    perspective: perspective(curr, seat),
+    notify: notify(curr, prior)
+  };
+});
+
+export const intermittently = _.partly(function intermittently($state, f, xs){
+  _.each(function(x){
+    _.swap($state, f(_, [x]));
+  }, xs);
+})
+
+export const consecutively = _.partly(function consecutively($state, f, xs){
+  _.swap($state, f(_, xs));
+});
+
 export function added(curr, prior){
   return prior ? _.chain(curr.events, _.last(_.count(curr.events) - _.count(prior.events), _), _.toArray) : [];
 }
@@ -118,39 +143,6 @@ export function summarize([curr, prior]){ //use $.hist
   };
 }
 
-function executor($state){
-  return function(commands, seat){
-    const prior = _.chain($state, _.deref);
-    _.each(function(command){
-      _.swap($state, execute(_, command, seat));
-    }, commands);
-    const curr = _.chain($state, _.deref);
-    return {
-      added: added(curr, prior),
-      up: up(curr),
-      perspective: perspective(curr, seat),
-      notify: notify(curr, prior)
-    };
-  }
+export function simulate(self, events, commands, seat){
+  return _.chain(self, load(_, events), exec(_, commands, seat));
 }
-
-function simulate2(self, events){
-  const $state = $.cell(self);
-  _.swap($state, load(_, events));
-  return executor($state);
-}
-
-function simulate3(self, events, f){
-  const $state = $.cell(self);
-  $.sub($.hist($state), f); //observe events as applied
-  _.each(function(event){
-    _.swap($state, fold(_, event));
-  }, events);
-  return executor($state);
-}
-
-function simulate4(self, events, commands, seat){
-  return simulate2(self, events)(commands, seat);
-}
-
-export const simulate = _.partly(_.overload(null, null, simulate2, simulate3, simulate4));

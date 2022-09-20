@@ -19,21 +19,15 @@ const game = ohHell([{
 }], {});
 
 const $game = $.cell(game);
-const simulate = g.simulate(game, [], _.pipe(g.summarize, _.log));
-
+const commands = _.take(1, _.concat([{type: "start"}], _.repeat({type: "~"})));
 $.sub($.hist($game), t.map(g.summarize), _.log);
-//simulate(_.concat([{type: "start"}], _.repeat(44, {type: "~"})));
+//g.intermittently($game, g.run, commands);
+//_.chain($game, _.deref, g.exec(_, [{type: "bid", details: {bid: 1}}], 0));
 
 fetch("./data/events.json").
   then(function(resp){
     return resp.json();
   }).
-  then(_.butlast).
-  then(g.simulate(game, _, _.pipe(g.summarize, _.log))).
-  then(_.pipe(_, _.log)).
-  then(function(simulate){
-    simulate([{type: "finish"}]);
-    Object.assign(window, {simulate});
-  });
+  then(g.intermittently($game, g.load, _));
 
-Object.assign(window, {$game, _, $, t, g, simulate});
+Object.assign(window, {$game, _, $, t, g});

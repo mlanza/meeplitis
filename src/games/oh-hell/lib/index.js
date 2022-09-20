@@ -257,6 +257,22 @@ function execute(self, command, seat){
     }
 }
 
+function compel1(self){
+  const seat = _.chain(self, up, _.first);
+  const options = seat == null ? [] : moves(self, seat);
+  const compelled = _.count(options) == 1;
+  const command = _.first(options);
+  return compelled ? compel3(self, command, seat) : self;
+}
+
+function compel3(self, command, seat){ //play
+  return _.chain(self,
+    g.execute(_, command, seat),
+    g.execute(_, {type: "commit"}, seat));
+}
+
+const compel = _.overload(null, compel1, null, compel3);
+
 function scoring(self){
   const state = _.deref(self);
   const scoring = _.chain(state, _.get(_, "seated"), _.mapa(function(seat){
@@ -417,4 +433,4 @@ function deref(self){
 
 _.doto(OhHell,
   _.implement(_.IDeref, {deref}),
-  _.implement(IGame, {perspective, up, seated, moves, irreversible, execute, fold, score}));
+  _.implement(IGame, {perspective, up, seated, moves, irreversible, execute: _.comp(compel, execute), fold, score}));

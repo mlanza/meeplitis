@@ -37,8 +37,7 @@ export function incidental({seat}){
 export function crunch(self){
   const history = _.clone(self.history); //TODO fix `splice`
   history.splice(_.count(history) - 1, 1);
-  const j = new _.Journal(self.pos, self.max, history, self.state);
-  return j;
+  return new _.Journal(self.pos, self.max, history, self.state);
 }
 
 function execute3(self, command, seat){
@@ -89,7 +88,7 @@ export function run(self, commands, seat){
   return _.reduce(execute(_, _, seat), self, commands);
 }
 
-export const exec = _.partly(function exec(self, commands, seat){
+export const whatif = _.partly(function whatif(self, commands, seat){
   const prior = self;
   const curr = _.reduce(execute(_, _, seat), prior, commands);
   return {
@@ -144,5 +143,5 @@ export function summarize([curr, prior]){ //use $.hist
 }
 
 export function simulate(self, events, commands, seat){
-  return _.chain(self, load(_, events), exec(_, commands, seat));
+  return _.chain(self, load(_, events), whatif(_, commands, seat));
 }

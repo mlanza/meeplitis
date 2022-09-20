@@ -5,6 +5,7 @@ export const IGame = _.protocol({
   perspective: null,
   up: null, //returns the seat(s) which are required to move
   seated: null,
+  events: null,
   moves: null, //what commands can seats/players do?
   irreversible: null, //can the command be reversed by a player?
   execute: null, //validates a command and transforms it into one or more events, potentially executing other commands
@@ -16,6 +17,7 @@ export const irreversible = IGame.irreversible;
 export const up = IGame.up;
 export const fold = _.partly(IGame.fold);
 export const seated = IGame.seated;
+export const events = IGame.events;
 export const score = IGame.score; //permissible to return null when calculating makes no sense
 export const perspective = _.chain(IGame.perspective,
   _.post(_,
@@ -40,10 +42,49 @@ export function crunch(self){
   return new _.Journal(self.pos, self.max, history, self.state);
 }
 
+export function reversibility(self){
+  const state = _.deref(self);
+  const seat = state.up;
+  const undoable = _.undoable(self),
+        redoable = _.redoable(self),
+        flushable = _.flushable(self),
+        resettable = _.resettable(self);
+  return _.compact([
+    resettable ? {type: "reset", seat} : null,
+    undoable ? {type: "undo", seat} : null,
+    redoable ? {type: "redo", seat} : null,
+    flushable && !redoable ? {type: "commit", seat} : null
+  ]);
+}
+
 function execute3(self, command, seat){
   const {type} = command;
   const event = Object.assign({seat}, command);
   switch(type){
+    case "start":
+      if (_.seq(events(self))) {
+        throw new Error("Game already started!");
+      }
+      break;
+
+    case "undo":
+      if (!_.undoable(self)){
+        throw new Error("Undo is not possible or allowed.");
+      }
+      break;
+
+    case "redo":
+      if (!_.redoable(self)){
+        throw new Error("Redo is not possible or allowed.");
+      }
+      break;
+
+    case "commit":
+      if (!_.flushable(self)){
+        throw new Error("Commit is not possible or allowed.");
+      }
+      break;
+
     case "~": //pluck next command, for development purposes
       return _.maybe(self,
         up,
@@ -51,25 +92,6 @@ function execute3(self, command, seat){
         moves(self, _),
         _.last,
         execute(self, _, seat)) || self;
-
-    case "undo":
-      if (!_.undoable(self.journal)){
-        throw new Error("Undo is not possible or allowed.");
-      }
-      break;
-
-    case "redo":
-      if (!_.redoable(self.journal)){
-        throw new Error("Redo is not possible or allowed.");
-      }
-      break;
-
-    case "commit":
-      if (!_.flushable(self.journal)){
-        throw new Error("Commit is not possible or allowed.");
-      }
-      break;
-
   }
   return IGame.execute(self, event, seat);
 }
@@ -110,7 +132,7 @@ export const consecutively = _.partly(function consecutively($state, f, xs){
 });
 
 export function added(curr, prior){
-  return prior ? _.chain(curr.events, _.last(_.count(curr.events) - _.count(prior.events), _), _.toArray) : [];
+  return prior ? _.chain(events(curr), _.last(_.count(events(curr)) - _.count(events(prior)), _), _.toArray) : [];
 }
 
 function moves2(self, seat){

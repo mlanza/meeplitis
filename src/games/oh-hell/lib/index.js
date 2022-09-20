@@ -127,32 +127,19 @@ function playable(state, seat){
   }, cards);
 }
 
-function reversibility(journal, seat){
-  const undoable = _.undoable(journal),
-        redoable = _.redoable(journal),
-        flushable = _.flushable(journal),
-        resettable = _.resettable(journal);
-  return _.compact([
-    resettable ? {type: "reset", seat} : null,
-    undoable ? {type: "undo", seat} : null,
-    redoable ? {type: "redo", seat} : null,
-    flushable && !redoable ? {type: "commit", seat} : null
-  ]);
-}
-
 function moves(self){
   const state = _.deref(self),
-        rev = reversibility(self.journal, state.up);
+        reversibility = g.reversibility(self);
   if (state.up != null) {
     switch(state.status){
       case "confirming":
-        return rev;
+        return reversibility;
 
       case "bidding":
-        return _.concat(rev, bids(state));
+        return _.concat(reversibility, bids(state));
 
       case "playing":
-        return _.concat(rev, state.trick ? [] : playable(state, state.up));
+        return _.concat(reversibility, state.trick ? [] : playable(state, state.up));
 
     }
   }
@@ -167,6 +154,16 @@ function execute(self, command, seat){
   const state = _.deref(self);
   const valid = _.detect(_.eq(_, _.dissoc(command, "id")), g.moves(self, seat));
   const {type, details} = command;
+  const automatic = _.includes(["start", "award", "scoring", "finish", "deal"], type);
+
+  if (!automatic && !valid){
+    throw new Error(`Invalid ${type}`);
+  }
+
+  if (automatic && seat != null) {
+    throw new Error(`Cannot invoke automatic command ${type}`);
+  }
+
   switch (type) {
     case "start":
       return _.chain(self, g.fold(_, command), deal);
@@ -191,20 +188,9 @@ function execute(self, command, seat){
         return g.fold(self, _.assoc(command, "details", {deck: _.chain(undealt, _.rest, _.toArray), hands, trump, round}));
       })();
 
-    case "bid":
-      if (!valid) {
-        debugger
-        const x = _.toArray(g.moves(self, seat));
-        throw new Error("Invalid bid");
-      }
-      return g.fold(self, command);
-
     case "play":
       if (!details.card) {
         throw new Error("Must provide a card");
-      }
-      if (!valid) {
-        throw new Error("Invalid play");
       }
       const breaks = details.card.suit == state.trump.suit && !broken(self, state.trump);
       return _.chain(self, g.fold(_, command),
@@ -244,6 +230,7 @@ function execute(self, command, seat){
         return empty ? (over ? g.finish : deal)(self) : self;
       });
 
+    case "bid":
     case "award":
     case "scoring":
     case "undo":
@@ -272,6 +259,10 @@ function compel3(self, command, seat){ //play
 }
 
 const compel = _.overload(null, compel1, null, compel3);
+
+function events(self){
+  return self.events;
+}
 
 function scoring(self){
   const state = _.deref(self);
@@ -431,6 +422,24 @@ function deref(self){
   return _.deref(self.journal);
 }
 
+function undoable(self){
+  return _.undoable(self.journal);
+}
+
+function redoable(self){
+  return _.redoable(self.journal);
+}
+
+function flushable(self){
+  return _.flushable(self.journal);
+}
+
+function resettable(self){
+  return _.resettable(self.journal);
+}
+
 _.doto(OhHell,
   _.implement(_.IDeref, {deref}),
-  _.implement(IGame, {perspective, up, seated, moves, irreversible, execute: _.comp(compel, execute), fold, score}));
+  _.implement(_.IResettable, {resettable}),
+  _.implement(_.IRevertible, {undoable, redoable, flushable}),
+  _.implement(IGame, {perspective, up, seated, moves, events, irreversible, execute: _.comp(compel, execute), fold, score}));

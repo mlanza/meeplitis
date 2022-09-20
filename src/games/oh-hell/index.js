@@ -19,7 +19,7 @@ const game = ohHell([{
 }], {});
 
 const $game = $.cell(game);
-const commands = _.take(50, _.concat([{type: "start"}], _.repeat({type: "~"})));
+const commands = _.take(1, _.concat([{type: "start"}], _.repeat({type: "~"})));
 $.sub($.hist($game), t.map(g.summarize), _.log);
 //g.intermittently($game, g.run, commands);
 //_.swap($game, g.run(_, [{type: "~"}]))
@@ -29,6 +29,8 @@ fetch("./data/events.json").
   then(function(resp){
     return resp.json();
   }).
+  then(_.see("events")).
+  //then(_.take(55, _)).
   then(g.intermittently($game, g.load, _));
 
 Object.assign(window, {$game, _, $, t, g});

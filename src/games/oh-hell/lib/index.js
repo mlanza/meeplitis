@@ -244,15 +244,15 @@ function execute(self, command, seat){
     }
 }
 
-function compel1(self){
+function compel1(self){ //compels play of final card in hand
   const seat = _.chain(self, up, _.first);
-  const options = seat == null ? [] : moves(self, seat);
-  const compelled = _.count(options) == 1;
+  const options = seat == null ? [] : g.moves(self, seat);
+  const compelled = _.count(options) === 1;
   const command = _.first(options);
   return compelled ? compel3(self, command, seat) : self;
 }
 
-function compel3(self, command, seat){ //play
+function compel3(self, command, seat){
   return _.chain(self,
     g.execute(_, command, seat),
     g.execute(_, {type: "commit"}, seat));
@@ -347,7 +347,8 @@ function fold2(self, event){
       return g.fold(self, event, _.reset);
 
     case "commit":
-      const up = _.second(ordered(_.count(state.seated), state.up));
+      const empty = handsEmpty(state);
+      const up = empty ? null : _.second(ordered(_.count(state.seated), state.up));
       return g.fold(self, event, _.pipe(
         _.fmap(_, _.pipe(
           _.assoc(_, "status", "playing"),

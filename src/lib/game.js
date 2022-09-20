@@ -60,28 +60,35 @@ export function reversibility(self){
 function execute3(self, command, seat){
   const {type} = command;
   const event = Object.assign({seat}, command);
+  if (seat == null) {
+  } else if (!_.isInt(seat)) {
+    throw new Error("Seat must be an integer");
+  } else if (_.clamp(seat, 0, _.count(seated(self)) - 1) !== seat) {
+    throw new Error("Invalid seat");
+  }
   switch(type){
     case "start":
-      if (_.seq(events(self))) {
-        throw new Error("Game already started!");
+    case "finish":
+      if (_.detect(_.pipe(_, _.get(_, "type"), _.eq(_, type)), events(self))) {
+        throw new Error(`Cannot ${type} more than once!`);
       }
       break;
 
     case "undo":
       if (!_.undoable(self)){
-        throw new Error("Undo is not possible or allowed.");
+        throw new Error("Undo not possible.");
       }
       break;
 
     case "redo":
       if (!_.redoable(self)){
-        throw new Error("Redo is not possible or allowed.");
+        throw new Error("Redo not possible.");
       }
       break;
 
     case "commit":
       if (!_.flushable(self)){
-        throw new Error("Commit is not possible or allowed.");
+        throw new Error("Commit not possible.");
       }
       break;
 
@@ -121,13 +128,13 @@ export const whatif = _.partly(function whatif(self, commands, seat){
   };
 });
 
-export const intermittently = _.partly(function intermittently($state, f, xs){
+export const batch = _.partly(function batch($state, f, xs){
   _.each(function(x){
     _.swap($state, f(_, [x]));
   }, xs);
 })
 
-export const consecutively = _.partly(function consecutively($state, f, xs){
+export const transact = _.partly(function transact($state, f, xs){
   _.swap($state, f(_, xs));
 });
 

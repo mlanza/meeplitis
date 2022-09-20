@@ -164,11 +164,18 @@ function execute(self, command, seat){
     throw new Error(`Cannot invoke automatic command ${type}`);
   }
 
+  if (!_.seq(g.events(self)) && type != "start") {
+    throw new Error(`Cannot ${type} unless the game is first started.`);
+  }
+
   switch (type) {
     case "start":
       return _.chain(self, g.fold(_, command), deal);
 
     case "deal":
+      if (!handsEmpty(state)) {
+        throw new Error("Hands are not yet empty!");
+      }
       return (function(){
         const round = state.round + 1;
         const numHands = _.count(self.seated);
@@ -189,9 +196,6 @@ function execute(self, command, seat){
       })();
 
     case "play":
-      if (!details.card) {
-        throw new Error("Must provide a card");
-      }
       const breaks = details.card.suit == state.trump.suit && !broken(self, state.trump);
       return _.chain(self, g.fold(_, command),
         breaks ? g.fold(_, {type: "broken"}) : _.identity,
@@ -239,7 +243,7 @@ function execute(self, command, seat){
       return g.fold(self, command); //vanilla commands
 
     default:
-      throw new Error("Unknown command");
+      throw new Error(`Unknown command ${type}`);
 
     }
 }

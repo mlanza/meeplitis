@@ -11,7 +11,7 @@ _seated := (select seated(_table_id));
 _events := (select evented(_table_id));
 _config := (select config from tables where id = _table_id);
 _fn := (select fn from tables where id = _table_id limit 1);
-_result := (select case v_fn when 'ohhell' then ohhell(_seated, _config, _events, _commands, _seat) else null end);
+_result := (select case _fn when 'ohhell' then ohhell(_seated, _config, _events, _commands, _seat) else null end);
 
 return _result;
 end;

@@ -3,17 +3,17 @@ returns table(id varchar, table_id varchar, type varchar, details jsonb, seat_id
 language plpgsql
 as $$
 declare
-_events jsonb;
+_simulated jsonb;
 begin
 
-_events := ((select simulate(_table_id, _commands, _seat))->1);
+_simulated := (select simulate(_table_id, _commands, _seat));
 
-raise log '$ seat % moved at table `%` adding `%`', _seat, _table_id, _events;
+raise log '$ seat % moved at table `%` adding `%`', _seat, _table_id, _simulated->'added';
 
 return query
 insert into events (table_id, type, details, seat_id)
 select s.table_id, e.type, e.details, s.id as seat_id
-from addable_events(_events) e
+from addable_events(_simulated->'added') e
 join seats s on s.table_id = _table_id and s.seat = e.seat
 returning events.id, events.table_id, events.type, events.details, events.seat_id;
 

@@ -123,7 +123,6 @@ export const whatif = _.partly(function whatif(self, commands, seat){
   return {
     added: added(curr, prior),
     up: up(curr),
-    perspective: perspective(curr, seat),
     notify: notify(curr, prior)
   };
 });
@@ -172,5 +171,5 @@ export function summarize([curr, prior]){ //use $.hist
 }
 
 export function simulate(self, events, commands, seat){
-  return _.chain(self, load(_, events), whatif(_, commands, seat));
+  return _.chain(self, load(_, events), _.seq(commands) ? whatif(_, commands, seat) : perspective(_, seat));
 }

@@ -2,7 +2,7 @@ create or replace function start_game() returns trigger
 AS $$
 declare
   _seated jsonb;
-  _events jsonb;
+  _simulated jsonb;
   _slug text;
   _next smallint;
 begin
@@ -21,12 +21,12 @@ begin
     where seats.table_id = new.id;
 
     _seated := (select seated(new.id));
-    _events := (select simulate(new.id, '[{"type": "start"}]'::jsonb, null))->1;
+    _simulated := (select simulate(new.id, '[{"type": "start"}]'::jsonb, null));
     _slug := (select slug from games where id = new.game_id);
 
     insert into events (table_id, type, details, seat_id)
     select new.id as table_id, type, details, (_seated->(e.seat)->'seat') as seat_id
-    from addable_events(_events) as e;
+    from addable_events(_simulated->'added') as e;
 
     update tables
     set status = 'started'::table_status

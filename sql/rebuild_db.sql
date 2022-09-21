@@ -41,8 +41,8 @@ CREATE TABLE tables (
     fn varchar(30) not null, -- name of versioned function
     seating seating_mode default 'random',
     config jsonb default '{}', -- configure this play
-    admins uuid [], -- users capable of editing during/after play
-    up varchar [], -- seats required to take action
+    admins uuid[], -- users capable of editing during/after play
+    up smallint[], -- seats required to take action
     scored boolean default true,
     seating_change_at timestamp,
     started_at timestamp, -- used to delay start as in a tournament
@@ -91,7 +91,7 @@ CREATE TABLE events(
     seq bigserial not null, -- guarantees order
     seat_id varchar(3),
     type varchar(15) not null,
-    details jsonb not null,
+    details jsonb,
     created_at timestamp not null default now(),
     CONSTRAINT fk_events_seats
       FOREIGN KEY(table_id, seat_id)

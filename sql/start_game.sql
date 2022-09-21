@@ -3,6 +3,7 @@ AS $$
 declare
   _seated jsonb;
   _simulated jsonb;
+  _up smallint[];
   _slug text;
   _next smallint;
 begin
@@ -21,7 +22,8 @@ begin
     where seats.table_id = new.id;
 
     _seated := (select seated(new.id));
-    _simulated := (select simulate(new.id, '[{"type": "start"}]'::jsonb, null));
+    _simulated := (select simulate(new.id, '[{"type": "start"}]', null));
+    _up := (select array_agg(value::smallint)::smallint[] from jsonb_array_elements(_simulated->'up'));
     _slug := (select slug from games where id = new.game_id);
 
     insert into events (table_id, type, details, seat_id)
@@ -29,7 +31,8 @@ begin
     from addable_events(_simulated->'added') as e;
 
     update tables
-    set status = 'started'::table_status
+    set status = 'started'::table_status,
+        up = _up
     where id = new.id;
 
     raise log '$ game `%` started at table `%`', _slug, new.id;

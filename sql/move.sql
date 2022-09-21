@@ -5,6 +5,7 @@ as $$
 declare
 _count int;
 _simulated jsonb;
+_up smallint[];
 begin
 
 _count := (select coalesce(array_length(array(select jsonb_array_elements_text(_commands)), 1),0));
@@ -16,8 +17,13 @@ end if;
 raise log '$ seat % moved at table `%` executing % commands', _seat, _table_id, _count;
 
 _simulated := (select simulate(_table_id, _commands, _seat));
+_up := (select array_agg(value::smallint)::smallint[] from jsonb_array_elements(_simulated->'up'));
 
 raise log '$ seat % moved at table `%` adding `%`', _seat, _table_id, _simulated->'added';
+
+update tables
+set up = _up
+where tables.id = _table_id;
 
 return query
 insert into events (table_id, type, details, seat_id)

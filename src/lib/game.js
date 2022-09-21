@@ -166,7 +166,7 @@ export function summarize([curr, prior]){ //use $.hist
     notify: notify(curr, prior),
     added: added(curr, prior),
     perspectives: perspectives(curr),
-    reality: perspective(curr),
+    reality: _.chain(curr, perspective, _.compact),
     game: curr
   };
 }

@@ -1,10 +1,7 @@
-create or replace function perspective(p_table_id varchar, p_seat smallint default null) returns jsonb as $$
-declare
-_simulated jsonb;
+create or replace function perspective(_table_id varchar, _seat int default null) returns jsonb as $$
 begin
 
-_simulated := (select simulate(p_table_id, '[]'::jsonb, p_seat));
+return (select simulate(_table_id, '[]'::jsonb, _seat));
 
-return _simulated;
 end;
 $$ language plpgsql;

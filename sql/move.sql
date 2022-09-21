@@ -1,10 +1,19 @@
-create or replace function move(_table_id varchar, _commands jsonb, _seat smallint)
+create or replace function move(_table_id varchar, _commands jsonb, _seat int)
 returns table(id varchar, table_id varchar, type varchar, details jsonb, seat_id varchar)
 language plpgsql
 as $$
 declare
+_count int;
 _simulated jsonb;
 begin
+
+_count := (select coalesce(array_length(array(select jsonb_array_elements_text(_commands)), 1),0));
+
+if _count = 0 then
+  raise exception 'must provide at least 1 command';
+end if;
+
+raise log '$ seat % moved at table `%` executing % commands', _seat, _table_id, _count;
 
 _simulated := (select simulate(_table_id, _commands, _seat));
 

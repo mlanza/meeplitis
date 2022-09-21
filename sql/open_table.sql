@@ -1,4 +1,4 @@
-create or replace function open_table(_game_id varchar, _config jsonb, _scored bool, _seats smallint, _player_id uuid default auth.uid())
+create or replace function open_table(_game_id varchar, _config jsonb, _scored bool, _seats int, _player_id uuid default auth.uid())
 returns varchar
 language plpgsql
 as $$

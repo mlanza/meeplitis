@@ -12,6 +12,9 @@ begin
     update tables
     set finished_at = now()
     where id = new.id;
+
+    insert into jobs(type, details)
+    values ('finished:notice', ('{"table_id": "' || new.id || '"}')::jsonb);
   end if;
 
   return new;

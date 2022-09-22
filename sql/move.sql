@@ -18,12 +18,14 @@ raise log '$ seat % moved at table `%` executing % commands', _seat, _table_id, 
 
 _simulated := (select simulate(_table_id, _commands, _seat));
 _up := (select array_agg(value::smallint)::smallint[] from jsonb_array_elements(_simulated->'up'));
-
 raise log '$ seat % moved at table `%` adding `%`', _seat, _table_id, _simulated->'added';
 
 update tables
 set up = _up
 where tables.id = _table_id;
+
+insert into jobs(type, details)
+values ('up:notice', ('{"table_id": "' || _table_id || '", "seats": ' || (_simulated->'notify')::jsonb || '}')::jsonb);
 
 return query
 insert into events (table_id, type, details, seat_id)

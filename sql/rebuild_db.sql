@@ -40,7 +40,7 @@ CREATE TABLE tables (
     game_id varchar(4) references games(id) not null,
     fn varchar(30) not null, -- name of versioned function
     seating seating_mode default 'random',
-    config jsonb default '{}', -- configure this play
+    config jsonb, -- configure this play
     admins uuid[], -- users capable of editing during/after play
     up smallint[], -- seats required to take action
     scored boolean default true,
@@ -104,6 +104,21 @@ ALTER TABLE tables
 ADD CONSTRAINT fk_last_touch
 FOREIGN KEY (id, last_touch_id)
 REFERENCES events(table_id, id);
+
+CREATE TYPE job_status AS ENUM ('pending', 'succeeded', 'failed', 'deferred');
+CREATE TYPE job_type AS ENUM ('started:notice', 'up:notice', 'finished:notice');
+
+CREATE TABLE jobs (
+    seq bigserial not null primary key,
+    type job_type not null,
+    details jsonb,
+    status job_status not null default 'pending',
+    created_at timestamp not null default now(),
+    expires_at timestamp,
+    executed_at timestamp,
+    tries smallint default 0);
+
+CREATE INDEX idx_jobs_status ON jobs (status, seq);
 
 INSERT INTO games (id, title, slug, seats)
     VALUES ('8Mj1', 'Oh Hell (Blackout)', 'oh-hell', array[2, 3, 4, 5, 6, 7]);

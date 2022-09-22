@@ -35,6 +35,12 @@ begin
         up = _up
     where id = new.id;
 
+    insert into jobs(type, details)
+    values ('started:notice', ('{"table_id": "' || new.id || '"}')::jsonb);
+
+    insert into jobs(type, details)
+    values ('up:notice', ('{"table_id": "' || new.id || '", "seats": ' || (_simulated->'notify')::jsonb || '}')::jsonb);
+
     raise log '$ game `%` started at table `%`', _slug, new.id;
 
   end if;

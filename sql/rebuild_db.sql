@@ -114,7 +114,6 @@ CREATE TABLE jobs (
     details jsonb,
     status job_status not null default 'pending',
     created_at timestamp not null default now(),
-    expires_at timestamp,
     executed_at timestamp,
     tries smallint default 0);
 

@@ -22,14 +22,13 @@ export const score = IGame.score; //permissible to return null when calculating 
 export const perspective = _.chain(IGame.perspective,
   _.post(_,
     _.and(
-      _.contains(_, "seat"),
+      _.contains(_, "seats"),
       _.contains(_, "seated"),
       _.contains(_, "state"),
       _.contains(_, "events"),
       _.contains(_, "moves"),
       _.contains(_, "score"),
-      _.contains(_, "up"),
-      _.contains(_, "you"))),
+      _.contains(_, "up"))),
   _.partly);
 
 export function incidental({seat}){
@@ -96,6 +95,7 @@ function execute3(self, command, seat){
       return _.maybe(self,
         up,
         _.first,
+        _.array,
         moves(self, _),
         _.last,
         execute(self, _, seat)) || self;
@@ -141,8 +141,8 @@ export function added(curr, prior){
   return prior ? _.chain(events(curr), _.last(_.count(events(curr)) - _.count(events(prior)), _), _.toArray) : [];
 }
 
-function moves2(self, seat){
-  return _.chain(self, IGame.moves, seat == null ? _.identity : _.filter(_.pipe(_.get(_, "seat"), _.eq(_, seat)), _));
+function moves2(self, seats){
+  return _.chain(self, IGame.moves, _.filter(_.pipe(_.get(_, "seat"), _.includes(seats, _)), _));
 }
 
 export const moves = _.partly(_.overload(null, IGame.moves, moves2));
@@ -152,11 +152,15 @@ export function perspectives(self){
     seated,
     _.count,
     _.range(0, _),
-    _.mapa(perspective(self, _), _));
+    _.mapa(_.pipe(_.array, perspective(self, _)), _));
 }
 
 export function notify(curr, prior){
   return _.difference(up(curr), prior ? up(prior) : []);
+}
+
+export function everyone(self){
+  return _.toArray(_.mapIndexed(_.identity, seated(self)));
 }
 
 export function summarize([curr, prior]){ //use $.hist
@@ -165,7 +169,7 @@ export function summarize([curr, prior]){ //use $.hist
     notify: notify(curr, prior),
     added: added(curr, prior),
     perspectives: perspectives(curr),
-    reality: _.chain(curr, perspective, _.compact),
+    reality: _.chain(curr, perspective(_, everyone(curr)), _.compact),
     game: curr
   };
 }

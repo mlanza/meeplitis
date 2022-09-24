@@ -21,6 +21,7 @@ site
   .copy("games/oh-hell/index.js")
   .copy("games/oh-hell/index.css")
   .copy("games/oh-hell/lib")
+  .copy("games/oh-hell/table")
   .copy("games/oh-hell/data")
   .copy("testing")
   .use(date())

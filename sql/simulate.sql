@@ -1,4 +1,5 @@
-create or replace function simulate(_table_id varchar, _commands jsonb, _seat int) returns jsonb as $$
+create or replace function simulate(_table_id varchar, _commands jsonb, _seat int) returns jsonb
+as $$
 declare
 _fn text;
 _result jsonb;
@@ -6,8 +7,6 @@ _seated jsonb;
 _events jsonb;
 _config jsonb;
 begin
-
-raise log '$ seat % at table `%` simulates issuing commands %', _seat, _table_id, _commands;
 
 _seated := (select seated(_table_id));
 _events := (select evented from evented(_table_id));

@@ -1,34 +1,38 @@
 create or replace function move(_table_id varchar, _commands jsonb)
-returns table(id varchar, table_id varchar, type varchar, details jsonb, seat_id varchar)
+returns table(id varchar, table_id varchar, type varchar, seat_id varchar)
+security definer
+set search_path = public
 language plpgsql
 as $$
 declare
 _count int;
 _simulated jsonb;
 _up smallint[];
-_seats int[];
+_seat int;
 begin
 
-select array[seat] as seats
-  from seats s
-  where table_id = _table_id
-  and player_id = auth.uid()
-  union (select '{}' as seats)
-  order by seats desc
-  limit 1
-  into _seats;
+select seat as seats
+from seats s
+where s.table_id = _table_id
+and player_id = auth.uid()
+into _seat;
 
-_count := (select coalesce(array_length(array(select jsonb_array_elements_text(_commands)), 1),0));
-
-if _count = 0 then
-  raise exception 'must provide at least 1 command';
+if _seat is null then
+  raise exception 'Only seated players may issue moves';
 end if;
 
-raise log '$ seat % moved at table `%` executing % commands', _seats, _table_id, _count;
+select count(*)
+from jsonb_array_elements_text(_commands)
+into _count;
+
+if _count = 0 then
+  raise exception 'No move issued';
+end if;
+
+raise log '$ seat % at table `%` moves issuing % command(s): %', _seat, _table_id, _count, _commands;
 
 _simulated := (select simulate(_table_id, _commands, _seat));
 _up := (select array_agg(value::smallint)::smallint[] from jsonb_array_elements(_simulated->'up'));
-raise log '$ seat % moved at table `%` adding `%`', _seats, _table_id, _simulated->'added';
 
 update tables
 set up = _up
@@ -42,6 +46,6 @@ insert into events (table_id, type, details, seat_id)
 select s.table_id, e.type, e.details, s.id as seat_id
 from addable_events(_simulated->'added') e
 join seats s on s.table_id = _table_id and s.seat = e.seat
-returning events.id, events.table_id, events.type, events.details, events.seat_id;
+returning events.id, events.table_id, events.type, events.seat_id;
 
 end; $$

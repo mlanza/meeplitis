@@ -6,8 +6,6 @@ begin
   set last_touch_id = new.id
   where id = new.table_id;
 
-  raise log '$ table `%` touched `%`', new.table_id, new.id;
-
   return new;
 
 end;

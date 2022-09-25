@@ -19,8 +19,8 @@ const game = ohHell([{
 }], {});
 
 const $game = $.cell(game);
-const commands = _.take(1, _.concat([{type: "start"}], _.repeat({type: "~"})));
-$.sub($.hist($game), t.map(g.summarize), _.log);
+//const commands = _.take(50, _.concat([{type: "start"}], _.repeat({type: "~"})));
+//$.sub($.hist($game), t.map(g.summarize), _.log);
 //g.batch($game, g.run, commands);
 //_.swap($game, g.run(_, [{type: "~"}]))
 //_.chain($game, _.deref, g.whatif(_, [{type: "bid", details: {bid: 1}}], 0));

@@ -56,19 +56,20 @@ export function reversibility(self){
   ]);
 }
 
-function execute3(self, command, seat){
+function execute3(self, command, s){
   const {type} = command;
-  const event = Object.assign({seat}, command);
+  const event = Object.assign({seat: s}, command);
+  const {seat} = event;
   if (seat == null) {
   } else if (!_.isInt(seat)) {
     throw new Error("Seat must be an integer");
-  } else if (_.clamp(seat, 0, _.count(seated(self)) - 1) !== seat) {
+  } else if (!_.includes(everyone(self), seat)) {
     throw new Error("Invalid seat");
   }
   switch(type){
     case "start":
     case "finish":
-      if (_.detect(_.pipe(_, _.get(_, "type"), _.eq(_, type)), events(self))) {
+      if (_.detect(_.pipe(_.get(_, "type"), _.eq(_, type)), events(self))) {
         throw new Error(`Cannot ${type} more than once!`);
       }
       break;
@@ -174,6 +175,14 @@ export function summarize([curr, prior]){ //use $.hist
   };
 }
 
-export function simulate(self, events, commands, seat){
-  return _.chain(self, load(_, events), _.seq(commands) ? whatif(_, commands, seat) : perspective(_, seat));
+function singular(xs){
+  const n = _.count(xs);
+  if (n !== 1) {
+    throw new Error("Singular value expected");
+  }
+  return _.first(xs);
+}
+
+export function simulate(self, events, commands, seats){
+  return _.chain(self, load(_, events), _.seq(commands) ? whatif(_, commands, singular(seats)) : perspective(_, seats));
 }

@@ -152,7 +152,7 @@ function irreversible(self, command){
 
 function execute(self, command, seat){
   const state = _.deref(self);
-  const valid = _.detect(_.eq(_, _.dissoc(command, "id")), g.moves(self, seat));
+  const valid = _.detect(_.eq(_, _.dissoc(command, "id")), g.moves(self, [seat]));
   const {type, details} = command;
   const automatic = _.includes(["start", "award", "scoring", "finish", "deal"], type);
 
@@ -250,7 +250,7 @@ function execute(self, command, seat){
 
 function compel1(self){ //compels play of final card in hand
   const seat = _.chain(self, up, _.first);
-  const options = seat == null ? [] : g.moves(self, seat);
+  const options = seat == null ? [] : g.moves(self, [seat]);
   const compelled = _.count(options) === 1;
   const command = _.first(options);
   return compelled ? compel3(self, command, seat) : self;
@@ -415,8 +415,8 @@ function perspective(self, seats){
     all ? _.identity :
     _.pipe(
       _.update(_, "deck", obscureCards),
-      _.update(_, "seated", _.pipe(_.mapIndexed(function(i, seated){ //can only see your own hand
-          return _.includes(seats, i) ? seated : _.update(seated, "hand", obscureCards);
+      _.update(_, "seated", _.pipe(_.mapIndexed(function(idx, seated){ //can only see your own hand
+          return _.includes(seats, idx) ? seated : _.update(seated, "hand", obscureCards);
         }, _), _.toArray))));
   const moves = _.chain(self, g.moves(_, seats), _.toArray);
   const events = all ? self.events : _.mapa(obscure(seats), self.events);

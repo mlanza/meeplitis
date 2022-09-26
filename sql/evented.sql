@@ -4,7 +4,7 @@ language plpgsql
 as $$
 begin
 
-return (select json_agg(json_build_object('id', id, 'type', type, 'details', details, 'seat', seat)) as evented
+return (select coalesce(json_agg(json_build_object('id', id, 'type', type, 'details', details, 'seat', seat)), '[]'::json) as evented
   from (select e.id, e.type, e.details, s.seat
         from events e
         left join seats s on s.table_id = e.table_id and s.id = e.seat_id

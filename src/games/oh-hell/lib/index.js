@@ -70,12 +70,6 @@ function follow(state){
   return state.seated[state.lead].played || null;
 }
 
-function broken(state, trump){
-  return !!_.chain(state.seated, _.mapcat(function(seated){
-    return _.compact(_.cons(seated.played, seated.tricks));
-  }, _), _.detect(_.eq(_, trump.suit), _));
-}
-
 function tight(hand){
   return _.chain(hand, _.map(_.get(_, "suit"), _), _.unique, _.count, _.eq(_, 1));
 }
@@ -121,7 +115,7 @@ function playable(state, seat){
   const trump = state.trump;
   const hand = seated.hand;
   const follows = lead ? _.pipe(_.get(_, "suit"), _.eq(_, lead.suit)) : _.identity;
-  const cards = lead ? (_.seq(_.filter(follows, hand)) || hand) : broken(state, trump) || tight(hand) ? hand : _.filter(_.pipe(_.get(_, "suit"), _.notEq(_, trump.suit)), hand);
+  const cards = lead ? (_.seq(_.filter(follows, hand)) || hand) : state.broken || tight(hand) ? hand : _.filter(_.pipe(_.get(_, "suit"), _.notEq(_, trump.suit)), hand);
   return seated.played ? [] : _.map(function(card){
     return {type: "play", seat, details: {card}};
   }, cards);
@@ -196,7 +190,7 @@ function execute(self, command, seat){
       })();
 
     case "play":
-      const breaks = details.card.suit == state.trump.suit && !broken(self, state.trump);
+      const breaks = details.card.suit == state.trump.suit && !state.broken;
       return _.chain(self, g.fold(_, command),
         breaks ? g.fold(_, {type: "broken"}) : _.identity,
         function(self){

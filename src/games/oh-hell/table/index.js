@@ -9,36 +9,34 @@ function json(resp){
 }
 
 function getTouches(tableId){
-  return fetch(`https://touches.workers.yourmove.cc?table_id=${tableId}`).then(json);
+  return _.fmap(fetch(`https://touches.workers.yourmove.cc?table_id=${tableId}`), json);
 }
 
 function getSeated(tableId){
-  return fetch(`https://seated.workers.yourmove.cc?table_id=${tableId}`).then(json);
+  return _.fmap(fetch(`https://seated.workers.yourmove.cc?table_id=${tableId}`), json);
 }
 
 function getSeat(tableId, accessToken){
-  return accessToken ? fetch(`https://seat.workers.yourmove.cc?table_id=${tableId}`, {
+  return accessToken ? _.fmap(fetch(`https://seat.workers.yourmove.cc?table_id=${tableId}`, {
     headers: {
       accessToken
     }
-  }).then(json) : Promise.resolve(null);
+  }), json) : Promise.resolve(null);
 }
 
-function getPerspective(tableId, accessToken, eventId, seat){
-  return fetch(`https://perspective.workers.yourmove.cc?table_id=${tableId}&event_id=${eventId}&seat=${seat}`, {
+const getPerspective = _.partly(function getPerspective(tableId, accessToken, eventId, seat){
+  return _.fmap(fetch(`https://perspective.workers.yourmove.cc?table_id=${tableId}&event_id=${eventId}&seat=${seat}`, {
     headers: {
       accessToken
     }
-  }).then(json);
-}
+  }), json);
+});
 
 function watchTable($state, tableId){
   function postTouches(){
-    getTouches(tableId)
-    .then(function(touches){
+    _.fmap(getTouches(tableId), function(touches){
       return _.assoc(_, "touches", touches);
-    })
-    .then(_.swap($state, _));
+    }, _.swap($state, _));
   }
 
   supabase
@@ -79,7 +77,7 @@ function expand(idx){
   }
 }
 
-function setAt($state, tableId, accessToken, seat, at){
+function setAt($state, at, getPerspective){
   const perspective = _.chain($state, _.deref, _.get(_, "history"), _.nth(_, at)),
         eventId = _.chain($state, _.deref, _.get(_, "touches"), _.nth(_, at));
   if (!eventId) {
@@ -88,7 +86,7 @@ function setAt($state, tableId, accessToken, seat, at){
   if (perspective){
     _.swap($state, _.assoc(_, "at", at));
   } else {
-    getPerspective(tableId, accessToken, eventId, seat).then(function(perspective){
+    _.fmap(getPerspective(eventId), function(perspective){
       _.swap($state, _.update(_, "history", _.pipe(expand(at), _.assoc(_, at, perspective))));
       _.swap($state, _.assoc(_, "at", at));
     });
@@ -96,21 +94,16 @@ function setAt($state, tableId, accessToken, seat, at){
 }
 
 function postMove(tableId, accessToken, seat, commands){
-  return fetch(`https://move.workers.yourmove.cc?table_id=${tableId}&seat=${seat}`, {
+  return _.fmap(fetch(`https://move.workers.yourmove.cc?table_id=${tableId}&seat=${seat}`, {
     method: "POST",
     headers: {
       accessToken
     }
-  }).then(json);
+  }), json);
 }
 
 function TablePass(userId, accessToken, tableId, seat, seated, $state){
-  this.userId = userId;
-  this.accessToken = accessToken;
-  this.tableId = tableId;
-  this.seat = seat;
-  this.seated = seated;
-  this.$state = $state;
+  Object.assign(this, {userId, accessToken, tableId, seat, seated, $state});
 }
 
 function dispatch(self, command){
@@ -133,35 +126,33 @@ function tablePass(userId, accessToken, tableId, seat, seated){
     at: null
   });
   $.sub($state, _.see("$state"));
+  const getPerspectiveByTouch = getPerspective(tableId, accessToken, _, seat);
   const $touches = $.map(_.get(_, "touches"), $state);
-  $.sub($touches, t.filter(_.identity), function(touches){
-    const at = _.chain(touches, _.count, _.dec);
-    setAt($state, tableId, accessToken, seat, at);
+  $.sub($touches, t.filter(_.identity), function(touches){ //always growing
+    setAt($state, _.chain(touches, _.count, _.dec), getPerspectiveByTouch);
   });
-  getTouches(tableId)
-    .then(function(touches){
-      return _.assoc(_, "touches", touches);
-    })
-    .then(_.swap($state, _));
+  _.fmap(getTouches(tableId), function(touches){
+    return _.assoc(_, "touches", touches);
+  }, _.swap($state, _));
   watchTable($state, tableId);
   return new TablePass(userId, accessToken, tableId, seat, seated, $state);
 }
 
-const userId = supabase.auth?.currentUser?.id,
-      accessToken = supabase.auth?.currentSession?.access_token;
 const params = new URLSearchParams(document.location.search),
       tableId = params.get('id');
 
-tableId && Promise.all([
-  getSeat(tableId, accessToken),
-  getSeated(tableId)
-]).then(function([seat, seated]){
-  const pass = tablePass(userId, accessToken, tableId, seat, seated);
-
-  if (!pass){
-    document.location.href = "../";
-  }
-
-  Object.assign(window, {pass});
-});
-Object.assign(window, {$, _, sh, supabase});
+if (tableId) {
+  const userId = supabase.auth?.currentUser?.id,
+        accessToken = supabase.auth?.currentSession?.access_token;
+  _.fmap(Promise.all([
+    getSeat(tableId, accessToken),
+    getSeated(tableId)
+  ]), function([seat, seated]){
+    return tablePass(userId, accessToken, tableId, seat, seated);
+  }, function(pass){
+    Object.assign(window, {pass});
+  });
+  Object.assign(window, {$, _, sh, supabase});
+} else {
+  document.location.href = "../";
+}

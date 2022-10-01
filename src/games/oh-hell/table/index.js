@@ -33,12 +33,6 @@ const getPerspective = _.partly(function getPerspective(tableId, accessToken, ev
 });
 
 function watchTable($state, tableId){
-  function postTouches(){
-    _.fmap(getTouches(tableId), function(touches){
-      return _.assoc(_, "touches", touches);
-    }, _.swap($state, _));
-  }
-
   supabase
     .from('tables')
     .select('*')
@@ -54,11 +48,9 @@ function watchTable($state, tableId){
   supabase
     .from('tables')
     .on('*',function(payload){
-      debugger;
       switch (payload.eventType) {
         case "UPDATE":
           _.swap($state, _.assoc(_, "table", payload.new));
-          postTouches();
           break;
         default:
           _.log("payload", payload);
@@ -66,8 +58,6 @@ function watchTable($state, tableId){
       }
     })
     .subscribe();
-
-    postTouches();
 }
 
 function expand(idx){
@@ -87,27 +77,39 @@ function setAt($state, at, getPerspective){
     _.swap($state, _.assoc(_, "at", at));
   } else {
     _.fmap(getPerspective(eventId), function(perspective){
-      _.swap($state, _.update(_, "history", _.pipe(expand(at), _.assoc(_, at, perspective))));
-      _.swap($state, _.assoc(_, "at", at));
+      _.swap($state,
+        _.pipe(
+          _.update(_, "history", _.pipe(expand(at), _.assoc(_, at, perspective))),
+          _.assoc(_, "at", at)));
     });
   }
 }
 
-function postMove(tableId, accessToken, seat, commands){
-  return _.fmap(fetch(`https://move.workers.yourmove.cc?table_id=${tableId}&seat=${seat}`, {
-    method: "POST",
-    headers: {
-      accessToken
-    }
-  }), json);
+function move(tableId, seat, commands){
+  return supabase
+    .rpc('move', {
+      _commands: commands,
+      _seat: seat,
+      _table_id: tableId
+    });
+}
+
+function postTouches($state, tableId){
+  _.fmap(getTouches(tableId), function(touches){
+    return _.assoc(_, "touches", touches);
+  }, _.swap($state, _));
 }
 
 function TablePass(userId, accessToken, tableId, seat, seated, $state){
   Object.assign(this, {userId, accessToken, tableId, seat, seated, $state});
 }
 
-function dispatch(self, command){
-
+async function dispatch(self, command){
+  const {error, data} = await move(self.tableId, self.seat, [command]);
+  if (error) {
+    throw error;
+  }
+  _.log("move", command, data);
 }
 
 function deref(self){
@@ -126,15 +128,17 @@ function tablePass(userId, accessToken, tableId, seat, seated){
     at: null
   });
   $.sub($state, _.see("$state"));
+  const $lasttouch = $.map(_.getIn(_, ["table", "last_touch_id"]), $state);
   const getPerspectiveByTouch = getPerspective(tableId, accessToken, _, seat);
   const $touches = $.map(_.get(_, "touches"), $state);
   $.sub($touches, t.filter(_.identity), function(touches){ //always growing
     setAt($state, _.chain(touches, _.count, _.dec), getPerspectiveByTouch);
   });
-  _.fmap(getTouches(tableId), function(touches){
-    return _.assoc(_, "touches", touches);
-  }, _.swap($state, _));
+  postTouches($state, tableId);
   watchTable($state, tableId);
+  $.sub($lasttouch, function(touch){
+    postTouches($state, tableId);
+  });
   return new TablePass(userId, accessToken, tableId, seat, seated, $state);
 }
 

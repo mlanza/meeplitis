@@ -127,7 +127,9 @@ function tablePass(userId, accessToken, tableId, seat, seated){
     history: [],
     at: null
   });
-  $.sub($state, _.see("$state"));
+  $.sub($state, t.filter(function({table, touches, at}){
+    return table && touches && at;
+  }), _.see("$state"));
   const $touch = $.map(_.getIn(_, ["table", "last_touch_id"]), $state);
   const getPerspectiveByTouch = getPerspective(tableId, accessToken, _, seat);
   const $touches = $.map(_.get(_, "touches"), $state);

@@ -400,7 +400,8 @@ function obscure(seen){
   }
 }
 
-function perspective(self, seen){
+function perspective(self, _seen){
+  const seen = _.chain(_seen, _.compact, _.toArray);
   const up = g.up(self);
   const seated = g.seated(self);
   const score = g.score(self);

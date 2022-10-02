@@ -16,20 +16,20 @@ function getSeated(tableId){
   return _.fmap(fetch(`https://seated.workers.yourmove.cc?table_id=${tableId}`), json);
 }
 
-function getSeat(tableId, accessToken){
-  return accessToken ? _.fmap(fetch(`https://seat.workers.yourmove.cc?table_id=${tableId}`, {
+function getSeat(tableId, session){
+  return session ? _.fmap(fetch(`https://seat.workers.yourmove.cc?table_id=${tableId}`, {
     headers: {
-      accessToken
+      accessToken: session.accessToken
     }
   }), json) : Promise.resolve(null);
 }
 
-const getPerspective = _.partly(function getPerspective(tableId, accessToken, eventId, seat){
-  return _.fmap(fetch(`https://perspective.workers.yourmove.cc?table_id=${tableId}&event_id=${eventId}&seat=${seat}`, {
+const getPerspective = _.partly(function getPerspective(tableId, session, eventId, seat){
+  return session && seat ? _.fmap(fetch(`https://perspective.workers.yourmove.cc?table_id=${tableId}&event_id=${eventId}&seat=${seat}`, {
     headers: {
-      accessToken
+      accessToken: session.accessToken
     }
-  }), json);
+  }), json) : _.fmap(fetch(`https://perspective.workers.yourmove.cc?table_id=${tableId}&event_id=${eventId}`), json);
 });
 
 function table(tableId){
@@ -99,12 +99,20 @@ function postTouches($state, tableId){
   }, _.swap($state, _));
 }
 
-function TablePass(userId, accessToken, tableId, seat, state){
-  Object.assign(this, {userId, accessToken, tableId, seat, state});
+function Session(userId, accessToken){
+  Object.assign(this, {userId, accessToken});
+}
+
+function session(userId, accessToken){
+  return userId && accessToken ? new Session(userId, accessToken) : null;
+}
+
+function TablePass(session, tableId, seat, state){
+  Object.assign(this, {session, tableId, seat, state});
 }
 
 function assoc(self, key, value){
-  return new TablePass(self.userId, self.accessToken, self.tableId, self.seat, _.assoc(self.state, key, value));
+  return new TablePass(self.session, self.tableId, self.seat, _.assoc(self.state, key, value));
 }
 
 function lookup(self, key){
@@ -120,8 +128,8 @@ _.doto(TablePass,
   _.implement(_.IAssociative, {assoc}),
   _.implement(_.ILookup, {lookup}));
 
-function tablePass(userId, accessToken, tableId, seat){
-  return new TablePass(userId, accessToken, tableId, seat, {
+function tablePass(session, tableId, seat){
+  return new TablePass(session, tableId, seat, {
     touches: null,
     history: null,
     at: null
@@ -164,7 +172,7 @@ function load(prom) {
   return $.pipe($state, t.compact());
 }
 
-function shell(userId, accessToken, tableId){
+function shell(session, tableId){
   const $table = table(tableId),
         $seated = _.chain(tableId, getSeated, load),
         $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), t.compact()),
@@ -177,12 +185,12 @@ function shell(userId, accessToken, tableId){
   $.sub($touch, function(){
     postTouches($state, tableId);
   });
-  _.fmap(getSeat(tableId, accessToken), function(seat){
-    const getPerspectiveByTouch = getPerspective(tableId, accessToken, _, seat);
+  _.fmap(getSeat(tableId, session), function(seat){
+    const getPerspectiveByTouch = getPerspective(tableId, session, _, seat);
     $.sub($touches, function(touches){ //always growing
       setAt($state, _.chain(touches, _.count, _.dec), getPerspectiveByTouch);
     });
-    return tablePass(userId, accessToken, tableId, seat);
+    return tablePass(session, tableId, seat);
   }, _.reset($state, _));
   return new Shell($state, $table, $touch, $touches);
 }
@@ -192,8 +200,9 @@ const params = new URLSearchParams(document.location.search),
 
 if (tableId) {
   const s = shell(
-    supabase.auth?.currentUser?.id,
-    supabase.auth?.currentSession?.access_token,
+    session(
+      supabase.auth?.currentUser?.id,
+      supabase.auth?.currentSession?.access_token),
     tableId);
   Object.assign(window, {$, _, sh, s, supabase});
 } else {

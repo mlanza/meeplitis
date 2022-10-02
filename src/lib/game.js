@@ -4,7 +4,7 @@ import $ from "./@atomic/reactives.js";
 export const IGame = _.protocol({
   perspective: null,
   up: null, //returns the seat(s) which are required to move
-  seated: null,
+  seats: null,
   events: null,
   moves: null, //what commands can seats/players do?
   irreversible: null, //can the command be reversed by a player?
@@ -15,14 +15,14 @@ export const IGame = _.protocol({
 
 export const irreversible = IGame.irreversible;
 export const up = IGame.up;
+export const seats = IGame.seats;
 export const fold = _.partly(IGame.fold);
-export const seated = IGame.seated;
 export const events = IGame.events;
 export const score = IGame.score; //permissible to return null when calculating makes no sense
 export const perspective = _.chain(IGame.perspective,
   _.post(_,
     _.and(
-      _.contains(_, "seats"),
+      _.contains(_, "seen"),
       _.contains(_, "seated"),
       _.contains(_, "state"),
       _.contains(_, "events"),
@@ -30,6 +30,10 @@ export const perspective = _.chain(IGame.perspective,
       _.contains(_, "score"),
       _.contains(_, "up"))),
   _.partly);
+
+export function seated(self){
+  return _.chain(self, seats, _.range, _.toArray);
+}
 
 export function incidental({seat}){
   return seat == null;
@@ -151,8 +155,6 @@ export const moves = _.partly(_.overload(null, IGame.moves, moves2));
 export function perspectives(self){
   return _.chain(self,
     seated,
-    _.count,
-    _.range(0, _),
     _.mapa(_.pipe(_.array, perspective(self, _)), _));
 }
 
@@ -183,6 +185,6 @@ function singular(xs){
   return _.first(xs);
 }
 
-export function simulate(self, events, commands, seats){
-  return _.chain(self, load(_, events), _.seq(commands) ? whatif(_, commands, singular(seats)) : perspective(_, seats));
+export function simulate(self, events, commands, seen){
+  return _.chain(self, load(_, events), _.seq(commands) ? whatif(_, commands, singular(seen)) : perspective(_, seen));
 }

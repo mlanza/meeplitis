@@ -158,14 +158,21 @@ const Shell = (function(){
 
 })();
 
+function load(prom) {
+  const $state = $.cell(null);
+  _.fmap(prom, _.reset($state, _));
+  return $.pipe($state, t.compact());
+}
 
 function shell(userId, accessToken, tableId){
   const $table = table(tableId),
+        $seated = _.chain(tableId, getSeated, load),
         $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), t.compact()),
         $state = $.cell(null),
         $touches = $.pipe($.map(_.get(_, "touches"), $state), t.compact());
   $.sub($table, _.see("$table"));
   $.sub($touch, _.see("$touch"));
+  $.sub($seated, _.see("$seated"));
   $.sub($state, t.filter(_.and(_.get(_, "touches"), _.get(_, "history"), _.get(_, "at"))), _.see("$state"));
   $.sub($touch, function(){
     postTouches($state, tableId);

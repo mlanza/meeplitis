@@ -4,7 +4,7 @@ import t from "/lib/@atomic/transducers.js";
 import * as g from "/lib/game.js";
 import ohHell from "./lib/index.js";
 
-const $game = $.cell(ohHell(["Atticus Finch", "Scout Finch", "Boo Radley", "Bob Ewell"], {}));
+const $game = $.cell(ohHell(4, {}));
 const commands = _.take(1, _.concat([{type: "start"}], _.repeat({type: "~"})));
 $.sub($.hist($game), t.map(g.summarize), _.log);
 g.batch($game, g.run, commands);

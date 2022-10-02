@@ -38,18 +38,18 @@ function deck(){
   return _.braid(card, ranks, suits);
 }
 
-function OhHell(seated, config, events, journal){
-  this.seated = seated;
+function OhHell(seats, config, events, journal){
+  this.seats = seats;
   this.config = config;
   this.events = events;
   this.journal = journal;
 }
 
-export default function ohHell(seated, config, events, journal){
-  if (!_.count(seated)) {
+export default function ohHell(seats, config, events, journal){
+  if (seats < 1) {
     throw new Error("Cannot play a game with no one seated at the table");
   }
-  return new OhHell(seated, config, events || [], journal || _.journal({}));
+  return new OhHell(seats, config, events || [], journal || _.journal({}));
 }
 
 function deal(self){
@@ -172,7 +172,7 @@ function execute(self, command, seat){
       }
       return (function(){
         const round = state.round + 1;
-        const numHands = _.count(self.seated);
+        const numHands = g.seats(self);
         const numCards = handSizes[round];
         const dealt = numCards * numHands;
         const cards = _.chain(deck(), _.shuffle);
@@ -195,9 +195,9 @@ function execute(self, command, seat){
         breaks ? g.fold(_, {type: "broken"}) : _.identity,
         function(self){
           const state = _.deref(self);
-          const ord = ordered(_.count(self.seated), state.lead);
+          const ord = ordered(g.seats(self), state.lead);
           const trick = _.mapa(_.pipe(_.array(_, "played"), _.getIn(state.seated, _)), ord);
-          const complete = _.count(_.filter(_.isSome, trick)) == _.count(self.seated);
+          const complete = _.count(_.filter(_.isSome, trick)) == g.seats(self);
           if (complete) {
             const ranking = ranked(trick, state.trump.suit);
             const best = _.first(ranking);
@@ -282,14 +282,14 @@ function fold2(self, event){
         const details = {
           status: "wait",
           round: -1, //pending deal
-          seated: _.chain(self.seated, _.count, _.repeat(_, {scored: []}), _.toArray)
+          seated: _.chain(self, g.seats, _.repeat(_, {scored: []}), _.toArray)
         };
         return g.fold(self, event, _.fmap(_, _.constantly(details)));
       })();
 
     case "deal":
       return (function(){
-        const lead = details.round % _.count(self.seated);
+        const lead = details.round % g.seats(self);
         return g.fold(self, event,
           _.fmap(_,
             _.pipe(
@@ -367,7 +367,7 @@ function fold2(self, event){
 }
 
 function fold3(self, event, f){
-  return ohHell(self.seated,
+  return ohHell(self.seats,
     self.config,
     event ? _.append(self.events, event) : self.events,
     _.chain(self.journal,
@@ -378,20 +378,20 @@ function fold3(self, event, f){
 
 const fold = _.overload(null, null, fold2, fold3);
 
-function seated(self){
-  return self.seated;
+function seats(self){
+  return self.seats;
 }
 
 const obscureCards = _.mapa(_.constantly({}), _);
 
-function obscure(seats){
+function obscure(seen){
   return function(event){
     const {type} = event;
     switch (type) {
       case "deal":
         return _.chain(event,
           _.updateIn(_, ["details", "hands"], _.pipe(_.mapIndexed(function(idx, cards){
-            return _.includes(seats, idx) ? cards : obscureCards(cards);
+            return _.includes(seen, idx) ? cards : obscureCards(cards);
           }, _), _.toArray)),
           _.updateIn(_, ["details", "deck"], obscureCards));
       default:
@@ -400,21 +400,21 @@ function obscure(seats){
   }
 }
 
-function perspective(self, seats){
+function perspective(self, seen){
   const up = g.up(self);
-  const score = g.score(self);
   const seated = g.seated(self);
-  const all = _.eq(seats, g.everyone(self));
+  const score = g.score(self);
+  const all = _.eq(seen, g.everyone(self));
   const state = _.chain(self, _.deref,
     all ? _.identity :
     _.pipe(
       _.update(_, "deck", obscureCards),
       _.update(_, "seated", _.pipe(_.mapIndexed(function(idx, seated){ //can only see your own hand
-          return _.includes(seats, idx) ? seated : _.update(seated, "hand", obscureCards);
+          return _.includes(seen, idx) ? seated : _.update(seated, "hand", obscureCards);
         }, _), _.toArray))));
-  const moves = _.chain(self, g.moves(_, seats), _.toArray);
-  const events = all ? self.events : _.mapa(obscure(seats), self.events);
-  return {seats, seated, up, state, moves, events, score};
+  const moves = _.chain(self, g.moves(_, seen), _.toArray);
+  const events = all ? self.events : _.mapa(obscure(seen), self.events);
+  return {seen, seated, up, state, moves, events, score};
 }
 
 function deref(self){
@@ -441,4 +441,4 @@ _.doto(OhHell,
   _.implement(_.IDeref, {deref}),
   _.implement(_.IResettable, {resettable}),
   _.implement(_.IRevertible, {undoable, redoable, flushable}),
-  _.implement(IGame, {perspective, up, seated, moves, events, irreversible, execute: _.comp(compel, execute), fold, score}));
+  _.implement(IGame, {perspective, up, seats, moves, events, irreversible, execute: _.comp(compel, execute), fold, score}));

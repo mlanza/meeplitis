@@ -128,15 +128,14 @@ function tablePass(userId, accessToken, tableId, seat, seated){
     at: null
   });
   $.sub($state, _.see("$state"));
-  const $lasttouch = $.map(_.getIn(_, ["table", "last_touch_id"]), $state);
+  const $touch = $.map(_.getIn(_, ["table", "last_touch_id"]), $state);
   const getPerspectiveByTouch = getPerspective(tableId, accessToken, _, seat);
   const $touches = $.map(_.get(_, "touches"), $state);
   $.sub($touches, t.filter(_.identity), function(touches){ //always growing
     setAt($state, _.chain(touches, _.count, _.dec), getPerspectiveByTouch);
   });
-  postTouches($state, tableId);
   watchTable($state, tableId);
-  $.sub($lasttouch, function(touch){
+  $.sub($touch, t.filter(_.identity), function(){
     postTouches($state, tableId);
   });
   return new TablePass(userId, accessToken, tableId, seat, seated, $state);

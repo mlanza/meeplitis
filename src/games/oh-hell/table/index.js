@@ -40,17 +40,14 @@ function watchTable($state, tableId){
     .then(function(resp){
       return resp.body[0];
     })
-    .then(function(table){
-      return _.assoc(_, "table", table);
-    })
-    .then(_.swap($state, _));
+    .then(_.reset($state, _));
 
   supabase
     .from('tables')
     .on('*',function(payload){
       switch (payload.eventType) {
         case "UPDATE":
-          _.swap($state, _.assoc(_, "table", payload.new));
+          _.reset($state, payload.new);
           break;
         default:
           _.log("payload", payload);
@@ -100,64 +97,78 @@ function postTouches($state, tableId){
   }, _.swap($state, _));
 }
 
-function TablePass(userId, accessToken, tableId, seat, seated, $state){
-  Object.assign(this, {userId, accessToken, tableId, seat, seated, $state});
+const TablePass = (function(){
+  function TablePass(userId, accessToken, tableId, seat, state){
+    Object.assign(this, {userId, accessToken, tableId, seat, state});
+  }
+
+  function assoc(self, key, value){
+    return new TablePass(self.userId, self.accessToken, self.tableId, self.seat, _.assoc(self.state, key, value));
+  }
+
+  function lookup(self, key){
+    return _.get(self.state, key);
+  }
+
+  return _.doto(TablePass,
+    _.implement(_.IAssociative, {assoc}),
+    _.implement(_.ILookup, {lookup}));
+})();
+
+function tablePass(userId, accessToken, tableId, seat){
+  return new TablePass(userId, accessToken, tableId, seat, {
+    touches: null,
+    history: null,
+    at: null
+  });
+}
+
+function Shell($state, $table, $touch, $touches){
+  Object.assign(this, {$state, $table, $touch, $touches});
 }
 
 async function dispatch(self, command){
-  const {error, data} = await move(self.tableId, self.seat, [command]);
+  const state = _.deref(self.$state);
+  const {error, data} = await move(state.tableId, state.seat, [command]);
   if (error) {
     throw error;
   }
   _.log("move", command, data);
 }
 
-function deref(self){
-  return _.deref(self.$state);
-}
+_.doto(Shell, _.implement(sh.IDispatch, {dispatch}));
 
-_.doto(TablePass,
-  _.implement(sh.IDispatch, {dispatch}),
-  _.implement(_.IDeref, {deref}));
-
-function tablePass(userId, accessToken, tableId, seat, seated){
-  const $state = $.cell({
-    table: null,
-    touches: null,
-    history: [],
-    at: null
-  });
-  $.sub($state, t.filter(function({table, touches, at}){
-    return table && touches && at;
-  }), _.see("$state"));
-  const $touch = $.map(_.getIn(_, ["table", "last_touch_id"]), $state);
-  const getPerspectiveByTouch = getPerspective(tableId, accessToken, _, seat);
-  const $touches = $.map(_.get(_, "touches"), $state);
-  $.sub($touches, t.filter(_.identity), function(touches){ //always growing
-    setAt($state, _.chain(touches, _.count, _.dec), getPerspectiveByTouch);
-  });
-  watchTable($state, tableId);
-  $.sub($touch, t.filter(_.identity), function(){
+function shell(userId, accessToken, tableId){
+  const $table = $.cell(null),
+        $touch = $.map(_.get(_, "last_touch_id"), $table),
+        $state = $.cell(null),
+        $touches = $.map(_.get(_, "touches"), $state);
+  watchTable($table, tableId);
+  $.sub($table, t.compact(), _.see("$table"));
+  $.sub($touch, t.compact(), _.see("$touch"));
+  $.sub($state, t.filter(_.and(_.get(_, "touches"), _.get(_, "history"), _.get(_, "at"))), _.see("$state"));
+  $.sub($touch, t.compact(), function(){
     postTouches($state, tableId);
   });
-  return new TablePass(userId, accessToken, tableId, seat, seated, $state);
+  _.fmap(getSeat(tableId, accessToken), function(seat){
+    const getPerspectiveByTouch = getPerspective(tableId, accessToken, _, seat);
+    $.sub($touches, t.compact(), function(touches){ //always growing
+      setAt($state, _.chain(touches, _.count, _.dec), getPerspectiveByTouch);
+    });
+    return tablePass(userId, accessToken, tableId, seat);
+  }, _.reset($state, _));
+  return new Shell($state, $table, $touch, $touches);
 }
 
 const params = new URLSearchParams(document.location.search),
       tableId = params.get('id');
 
 if (tableId) {
-  const userId = supabase.auth?.currentUser?.id,
-        accessToken = supabase.auth?.currentSession?.access_token;
-  _.fmap(Promise.all([
-    getSeat(tableId, accessToken),
-    getSeated(tableId)
-  ]), function([seat, seated]){
-    return tablePass(userId, accessToken, tableId, seat, seated);
-  }, function(pass){
-    Object.assign(window, {pass});
-  });
-  Object.assign(window, {$, _, sh, supabase});
+  const s = shell(
+    supabase.auth?.currentUser?.id,
+    supabase.auth?.currentSession?.access_token,
+    tableId);
+  Object.assign(window, {$, _, sh, s, supabase});
 } else {
   document.location.href = "../";
 }

@@ -5,14 +5,16 @@ as $$
 declare
 _fn text;
 _result jsonb;
-_seated jsonb;
+_seats int;
 _events jsonb;
 _config jsonb;
 _sql text;
 begin
 
-select seated(_table_id)
-into _seated;
+select count(*)
+from seats
+where table_id = _table_id
+into _seats;
 
 select evented
 from evented(_table_id)
@@ -28,9 +30,9 @@ from tables
 where id = _table_id
 into _fn;
 
-raise log '$ simulating %, config %, events %, commands %', _seated, _config, _events, _commands;
+raise log '$ simulating %, config %, events %, commands %', _seats, _config, _events, _commands;
 
-select case _fn when 'ohhell' then ohhell(_seated, _config, _events, _commands, array[_seat]) else null end into _result;
+select case _fn when 'ohhell' then ohhell(_seats, _config, _events, _commands, array[_seat]) else null end into _result;
 
 return _result;
 end;
@@ -43,14 +45,16 @@ as $$
 declare
 _fn text;
 _result jsonb;
-_seated jsonb;
+_seats int;
 _events jsonb;
 _config jsonb;
 _sql text;
 begin
 
-select seated(_table_id)
-into _seated;
+select count(*)
+from seats
+where table_id = _table_id
+into _seats;
 
 select evented
 from evented(_table_id, _event_id)
@@ -66,11 +70,10 @@ from tables
 where id = _table_id
 into _fn;
 
-raise log '$ simulating %, config %, events %, commands %', _seated, _config, _events, _commands;
+raise log '$ simulating %, config %, events %, commands %', _seats, _config, _events, _commands;
 
-select case _fn when 'ohhell' then ohhell(_seated, _config, _events, _commands, array[_seat]) else null end into _result;
+select case _fn when 'ohhell' then ohhell(_seats, _config, _events, _commands, array[_seat]) else null end into _result;
 
 return _result;
 end;
 $$ language plpgsql;
-

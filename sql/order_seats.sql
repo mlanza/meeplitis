@@ -6,7 +6,6 @@ language plpgsql
 as $$
 declare
 _seating seating_mode;
-_seated text[];
 begin
 
 _seating := (select seating from tables where tables.id = _table_id);

@@ -69,7 +69,6 @@ CREATE TABLE seats (
     player_id uuid references auth.users(id),
     score float,
     adjustment float, -- from handicap, bid for seating order, penalties
-    effective_score float,
     place smallint, -- final placement upon completion of game
     tie boolean,
     seat smallint, -- must be provide once game starts

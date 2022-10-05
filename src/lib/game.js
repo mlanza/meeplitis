@@ -1,5 +1,5 @@
-import _ from "./@atomic/core.js";
-import $ from "./@atomic/reactives.js";
+import _ from "./atomic_/core.js";
+import $ from "./atomic_/reactives.js";
 
 export const IGame = _.protocol({
   perspective: null,
@@ -16,7 +16,7 @@ export const IGame = _.protocol({
 export const irreversible = IGame.irreversible;
 export const up = IGame.up;
 export const seats = IGame.seats;
-export const fold = _.partly(IGame.fold);
+export const fold = IGame.fold;
 export const events = IGame.events;
 export const score = IGame.score; //permissible to return null when calculating makes no sense
 export const perspective = _.chain(IGame.perspective,
@@ -28,8 +28,7 @@ export const perspective = _.chain(IGame.perspective,
       _.contains(_, "events"),
       _.contains(_, "moves"),
       _.contains(_, "score"),
-      _.contains(_, "up"))),
-  _.partly);
+      _.contains(_, "up"))));
 
 export function seated(self){
   return _.chain(self, seats, _.range, _.toArray);
@@ -103,12 +102,12 @@ function execute3(self, command, s){
         _.array,
         moves(self, _),
         _.last,
-        execute(self, _, seat)) || self;
+        (x) => execute(self, x, seat)) || self;
   }
   return IGame.execute(self, event, seat);
 }
 
-export const execute = _.partly(_.overload(null, null, execute3, execute3));
+export const execute = _.overload(null, null, execute3, execute3);
 
 export function finish(self){
   return execute(self, {type: "finish"});
@@ -119,28 +118,28 @@ export function load(self, events){
 }
 
 export function run(self, commands, seat){
-  return _.reduce(execute(_, _, seat), self, commands);
+  return _.reduce((x, y) => execute(x, y, seat), self, commands);
 }
 
-export const whatif = _.partly(function whatif(self, commands, seat){
+export function whatif(self, commands, seat){
   const prior = self;
-  const curr = _.reduce(execute(_, _, seat), prior, commands);
+  const curr = _.reduce((x, y) => execute(x, y, seat), prior, commands);
   return {
     added: added(curr, prior),
     up: up(curr),
     notify: notify(curr, prior)
   };
-});
+}
 
-export const batch = _.partly(function batch($state, f, xs){
+export function batch($state, f, xs){
   _.each(function(x){
     _.swap($state, f(_, [x]));
   }, xs);
-})
+}
 
-export const transact = _.partly(function transact($state, f, xs){
+export function transact($state, f, xs){
   _.swap($state, f(_, xs));
-});
+}
 
 export function added(curr, prior){
   return prior ? _.chain(events(curr), _.last(_.count(events(curr)) - _.count(events(prior)), _), _.toArray) : [];
@@ -150,12 +149,12 @@ function moves2(self, seats){
   return _.chain(self, IGame.moves, _.filter(_.pipe(_.get(_, "seat"), _.includes(seats, _)), _));
 }
 
-export const moves = _.partly(_.overload(null, IGame.moves, moves2));
+export const moves = _.overload(null, IGame.moves, moves2);
 
 export function perspectives(self){
   return _.chain(self,
     seated,
-    _.mapa(_.pipe(_.array, perspective(self, _)), _));
+    _.mapa(_.pipe(_.array, _.partial(perspective, self)), _));
 }
 
 export function notify(curr, prior){
@@ -172,7 +171,7 @@ export function summarize([curr, prior]){ //use $.hist
     notify: notify(curr, prior),
     added: added(curr, prior),
     perspectives: perspectives(curr),
-    reality: _.chain(curr, perspective(_, everyone(curr)), _.compact),
+    reality: _.compact(perspective(curr, everyone(curr))),
     game: curr
   };
 }
@@ -186,5 +185,5 @@ function singular(xs){
 }
 
 export function simulate(self, events, commands, seen){
-  return _.chain(self, load(_, events), _.seq(commands) ? whatif(_, commands, singular(seen)) : perspective(_, seen));
+  return _.chain(self, (x) => load(x, events), _.seq(commands) ? (x) => whatif(x, commands, singular(seen)) : (x) => perspective(x, seen));
 }

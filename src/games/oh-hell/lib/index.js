@@ -1,7 +1,7 @@
-import _ from "/lib/@atomic/core.js";
-import {IGame} from "/lib/game.js";
-import * as g from "/lib/game.js";
+import _ from "/lib/atomic_/core.js";
+import g from "/lib/game_.js";
 
+const IGame = g.IGame;
 const ranks = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "K", "Q", "A"];
 const suits = ["♥️", "♠️", "♦️", "♣️"];
 const handSizes = upAndDown(1, 2);

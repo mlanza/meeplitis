@@ -1,5 +1,5 @@
-import _ from "../../../src/lib/@atomic/core.js";
-import $ from "../../../src/lib/@atomic/reactives.js";
+import _ from "../../../src/lib/atomic_/core.js";
+import $ from "../../../src/lib/atomic_/reactives.js";
 import * as g from "../../../src/lib/game.js";
 import * as oh from "../../../src/lib/ohhell.js";
 

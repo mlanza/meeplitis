@@ -1,7 +1,7 @@
-import _ from "/lib/@atomic/core.js";
-import $ from "/lib/@atomic/reactives.js";
-import t from "/lib/@atomic/transducers.js";
-import sh from "/lib/@atomic/shell.js";
+import _ from "/lib/atomic_/core.js";
+import $ from "/lib/atomic_/reactives.js";
+import t from "/lib/atomic_/transducers.js";
+import sh from "/lib/atomic_/shell.js";
 import supabase from "../../../lib/supabase.js";
 
 function json(resp){

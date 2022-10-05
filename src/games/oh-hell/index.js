@@ -1,7 +1,7 @@
-import _ from "/lib/@atomic/core.js";
-import $ from "/lib/@atomic/reactives.js";
-import t from "/lib/@atomic/transducers.js";
-import * as g from "/lib/game.js";
+import _ from "/lib/atomic_/core.js";
+import $ from "/lib/atomic_/reactives.js";
+import t from "/lib/atomic_/transducers.js";
+import g from "/lib/game_.js";
 import ohHell from "./lib/index.js";
 
 const $game = $.cell(ohHell(4, {}));

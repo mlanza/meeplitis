@@ -5,7 +5,7 @@ import g from "/lib/game_.js";
 import ohHell from "./lib/index.js";
 
 const $game = $.cell(ohHell(4, {}));
-const commands = _.take(1, _.concat([{type: "start"}], _.repeat({type: "~"})));
+const commands = _.take(50, _.concat([{type: "start"}], _.repeat({type: "~"})));
 $.sub($.hist($game), t.map(g.summarize), _.log);
 g.batch($game, g.run, commands);
 //_.swap($game, g.run(_, [{type: "~"}]))

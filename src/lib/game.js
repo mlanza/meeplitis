@@ -100,9 +100,9 @@ function execute3(self, command, s){
         up,
         _.first,
         _.array,
-        moves(self, _),
+        x => moves(self, x),
         _.last,
-        (x) => execute(self, x, seat)) || self;
+        x => execute(self, x, seat)) || self;
   }
   return IGame.execute(self, event, seat);
 }
@@ -185,5 +185,5 @@ function singular(xs){
 }
 
 export function simulate(self, events, commands, seen){
-  return _.chain(self, (x) => load(x, events), _.seq(commands) ? (x) => whatif(x, commands, singular(seen)) : (x) => perspective(x, seen));
+  return _.chain(self, x => load(x, events), _.seq(commands) ? x => whatif(x, commands, singular(seen)) : x => perspective(x, seen));
 }

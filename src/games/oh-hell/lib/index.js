@@ -46,10 +46,10 @@ function OhHell(seats, config, events, journal){
 }
 
 export default function ohHell(seats, config, events, journal){
-  if (seats < 1) {
+  if (!_.count(seats)) {
     throw new Error("Cannot play a game with no one seated at the table");
   }
-  return new OhHell(seats, config, events || [], journal || _.journal({}));
+  return new OhHell(_.toArray(seats), config, events || [], journal || _.journal({}));
 }
 
 function deal(self){
@@ -172,7 +172,7 @@ function execute(self, command, seat){
       }
       return (function(){
         const round = state.round + 1;
-        const numHands = g.seats(self);
+        const numHands = g.numSeats(self);
         const numCards = handSizes[round];
         const dealt = numCards * numHands;
         const cards = _.chain(deck(), _.shuffle);
@@ -195,9 +195,9 @@ function execute(self, command, seat){
         breaks ? g.fold(_, {type: "broken"}) : _.identity,
         function(self){
           const state = _.deref(self);
-          const ord = ordered(g.seats(self), state.lead);
+          const ord = ordered(g.numSeats(self), state.lead);
           const trick = _.mapa(_.pipe(_.array(_, "played"), _.getIn(state.seated, _)), ord);
-          const complete = _.count(_.filter(_.isSome, trick)) == g.seats(self);
+          const complete = _.count(_.filter(_.isSome, trick)) == g.numSeats(self);
           if (complete) {
             const ranking = ranked(trick, state.trump.suit);
             const best = _.first(ranking);
@@ -282,14 +282,14 @@ function fold2(self, event){
         const details = {
           status: "wait",
           round: -1, //pending deal
-          seated: _.chain(self, g.seats, _.repeat(_, {scored: []}), _.toArray)
+          seated: _.chain(self, g.numSeats, _.repeat(_, {scored: []}), _.toArray)
         };
         return g.fold(self, event, _.fmap(_, _.constantly(details)));
       })();
 
     case "deal":
       return (function(){
-        const lead = details.round % g.seats(self);
+        const lead = details.round % g.numSeats(self);
         return g.fold(self, event,
           _.fmap(_,
             _.pipe(

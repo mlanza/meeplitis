@@ -31,7 +31,11 @@ export const perspective = _.chain(IGame.perspective,
       _.contains(_, "up"))));
 
 export function seated(self){
-  return _.chain(self, seats, _.range, _.toArray);
+  return _.chain(self, numSeats, _.range, _.toArray);
+}
+
+export function numSeats(self){
+  return _.chain(self, seats, _.count);
 }
 
 export function incidental({seat}){

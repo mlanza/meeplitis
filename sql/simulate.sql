@@ -8,6 +8,7 @@ _result jsonb;
 _seats int;
 _events jsonb;
 _config jsonb;
+_seat_configs jsonb;
 _sql text;
 begin
 
@@ -25,6 +26,9 @@ from tables
 where id = _table_id
 into _config;
 
+select seat_configs(_table_id)
+into _seat_configs;
+
 select fn
 from tables
 where id = _table_id
@@ -32,7 +36,7 @@ into _fn;
 
 raise log '$ simulating %, config %, events %, commands %', _seats, _config, _events, _commands;
 
-select case _fn when 'ohhell' then ohhell(_seats, _config, _events, _commands, array[_seat]) else null end into _result;
+select case _fn when 'ohhell' then ohhell(_seats_config, _config, _events, _commands, array[_seat]) else null end into _result;
 
 return _result;
 end;
@@ -48,6 +52,7 @@ _result jsonb;
 _seats int;
 _events jsonb;
 _config jsonb;
+_seat_configs jsonb;
 _sql text;
 begin
 
@@ -65,6 +70,9 @@ from tables
 where id = _table_id
 into _config;
 
+select seat_configs(_table_id)
+into _seat_configs;
+
 select fn
 from tables
 where id = _table_id
@@ -72,7 +80,7 @@ into _fn;
 
 raise log '$ simulating %, config %, events %, commands %', _seats, _config, _events, _commands;
 
-select case _fn when 'ohhell' then ohhell(_seats, _config, _events, _commands, array[_seat]) else null end into _result;
+select case _fn when 'ohhell' then ohhell(_seats_config, _config, _events, _commands, array[_seat]) else null end into _result;
 
 return _result;
 end;

@@ -13,8 +13,6 @@ export default lume({
 })
   .ignore("README.md")
   .ignore("cf")
-  .copy("signin")
-  .copy("signup")
-  .copy([".ico", ".js", ".css", ".html", ".jpg", ".png", ".webp"])
+  .copy([".html", ".css", ".js", ".jpg", ".png", ".webp", ".ico"])
   .use(date())
   .use(relative_urls());

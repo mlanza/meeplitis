@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "bundle-rollup": "rollup ./src/db/ohhell.js -o dist/ohhell.bundle.js --format umd --name '$OhHell$'",
-    "bundle-deno": "deno bundle ./src/db/ohhell.js dist/ohhell.deno.bundle.js",
+    "bundle-ohhell": "deno task ohhell && lume --config _config.ohhell.js",
     "bundle": "webpack build --config ./webpack.config.js",
     "develop": "lume --dev --watch"
   }

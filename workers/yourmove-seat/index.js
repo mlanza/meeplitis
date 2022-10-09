@@ -38,7 +38,7 @@ async function handleRequest(request) {
 
       console.log("url", request.url, "table", _table_id, "player_id", _player_id, "accessToken", accessToken);
 
-      const seat = await fetch(`https://${HOSTKEY}.supabase.co/rest/v1/rpc/seat`, {
+      const seat = await fetch(`${SUPABASE_URL}/rest/v1/rpc/seat`, {
         method: "POST",
         body: JSON.stringify({_table_id, _player_id}),
         headers: {

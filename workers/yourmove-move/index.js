@@ -57,7 +57,7 @@ async function handleRequest(request) {
 
       const _player_id = sub;
 
-      const seat = await fetch(`https://${HOSTKEY}.supabase.co/rest/v1/rpc/seat`, {
+      const seat = await fetch(`${SUPABASE_URL}/rest/v1/rpc/seat`, {
         method: "POST",
         body: JSON.stringify({_player_id, _table_id}),
         headers: {
@@ -76,7 +76,7 @@ async function handleRequest(request) {
 
       console.log("seat", _seat);
 
-      const resp = await fetch(`https://${HOSTKEY}.supabase.co/rest/v1/rpc/move`, {
+      const resp = await fetch(`${SUPABASE_URL}/rest/v1/rpc/move`, {
         method: "POST",
         body: JSON.stringify({_table_id, _seat, _commands}),
         headers: {

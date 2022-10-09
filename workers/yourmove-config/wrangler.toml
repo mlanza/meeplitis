@@ -1,5 +1,5 @@
 name = "yourmove-config"
-type = "javascript"
+type = "modules"
 main = "index.js"
 compatibility_date = "2022-10-08"
 usage_model = 'bundled'

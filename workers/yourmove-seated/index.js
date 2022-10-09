@@ -27,7 +27,7 @@ async function handleRequest(request) {
 
       console.log("url", request.url, "table", _table_id);
 
-      const resp = await fetch(`https://${HOSTKEY}.supabase.co/rest/v1/rpc/seated`, {
+      const resp = await fetch(`${SUPABASE_URL}/rest/v1/rpc/seated`, {
         method: "POST",
         body: JSON.stringify({_table_id}),
         headers: {

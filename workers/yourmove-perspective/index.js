@@ -10,13 +10,13 @@ async function handleRequest(request) {
   switch (request.method) {
     case "OPTIONS":
       return Promise.resolve(new Response("", {
-          status: 200,
-          headers: {
-              "access-control-allow-origin": '*',
-              'access-control-allow-headers': 'accessToken,Apikey,Accept,Content-Type,Authorization',
-              'access-control-allow-methods': 'GET,POST,PATCH,OPTIONS',
-              'access-control-max-age': '86400'
-          }
+        status: 200,
+        headers: {
+          "access-control-allow-origin": '*',
+          'access-control-allow-headers': 'accessToken,Apikey,Accept,Content-Type,Authorization',
+          'access-control-allow-methods': 'GET,POST,PATCH,OPTIONS',
+          'access-control-max-age': '86400'
+        }
       }));
       break;
 
@@ -24,13 +24,13 @@ async function handleRequest(request) {
       return await request.json().then(function(payload){
         console.log("payload", payload)
         return new Response("", {
-            status: 201,
-            headers: {
-                "access-control-allow-origin": '*',
-                'access-control-allow-headers': 'accessToken,Apikey,Accept,Content-Type,Authorization',
-                'access-control-allow-methods': 'GET,POST,PATCH,OPTIONS',
-                'access-control-max-age': '86400'
-            }
+          status: 201,
+          headers: {
+            "access-control-allow-origin": '*',
+            'access-control-allow-headers': 'accessToken,Apikey,Accept,Content-Type,Authorization',
+            'access-control-allow-methods': 'GET,POST,PATCH,OPTIONS',
+            'access-control-max-age': '86400'
+          }
         })
       });
       break;
@@ -60,7 +60,7 @@ async function handleRequest(request) {
 
         const _player_id = sub;
 
-        let seat = await fetch(`https://${HOSTKEY}.supabase.co/rest/v1/rpc/seat`, {
+        let seat = await fetch(`${SUPABASE_URL}/rest/v1/rpc/seat`, {
           method: "POST",
           body: JSON.stringify({_player_id, _table_id}),
           headers: {
@@ -80,7 +80,7 @@ async function handleRequest(request) {
         }
       }
 
-      const resp = await fetch(`https://${HOSTKEY}.supabase.co/rest/v1/rpc/simulate`, {
+      const resp = await fetch(`${SUPABASE_URL}/rest/v1/rpc/simulate`, {
         method: "POST",
         body: JSON.stringify(_event_id ? {_table_id, _event_id, _commands, _seat} : {_table_id, _commands, _seat}),
         headers: {

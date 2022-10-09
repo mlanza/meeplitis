@@ -1,6 +1,4 @@
 import lume from "lume/mod.ts";
-import date from "lume/plugins/date.ts";
-import relative_urls from "lume/plugins/relative_urls.ts";
 
 function simulation(page){
   page.dest.ext = ".js"

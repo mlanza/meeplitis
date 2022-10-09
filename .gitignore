@@ -1,7 +1,7 @@
 node_modules
-workers/your-move-perspective/node_modules/
-secrets.md
 public
 dist
 .vscode
+.env
 sim/dist
+secrets.md

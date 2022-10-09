@@ -1,0 +1,16 @@
+{
+  "private": true,
+  "name": "yourmove-move",
+  "version": "1.0.0",
+  "description": "Posts a move for a seat at a table",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "prettier --write '**/*.{js,css,json,md}'"
+  },
+  "author": "Mario T. Lanza",
+  "license": "MIT",
+  "devDependencies": {
+    "prettier": "^1.18.2"
+  }
+}

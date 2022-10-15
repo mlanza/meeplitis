@@ -1,8 +1,9 @@
 {
   "importMap": "import_map.json",
   "tasks": {
-    "build": "deno run -A https://deno.land/x/lume@v1.10.0/ci.ts",
-    "serve": "deno task build -s",
-    "ohhell": "deno bundle ./sim/bundle/ohhell.js ./sim/src/ohhell.js"
+    "build": "deno task lume",
+    "serve": "deno task lume -s",
+    "ohhell": "deno bundle ./sim/bundle/ohhell.js ./sim/src/ohhell.js",
+    "lume": "deno eval \"import 'lume/task.ts'\" --"
   }
 }

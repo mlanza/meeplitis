@@ -38,25 +38,21 @@ function table(tableId){
     .from('tables')
     .select('*')
     .eq('id', tableId)
-    .then(function(resp){
-      return resp.body[0];
-    })
+    .then(_.getIn(_, ["data", 0]))
     .then(_.reset($table, _));
 
-  supabase
-    .from('tables')
-    .on('*',function(payload){
-      switch (payload.eventType) {
-        case "UPDATE":
-          _.reset($table, payload.new);
-          break;
-        default:
-          _.log("payload", payload);
-          break;
-      }
-    })
-    .subscribe();
-    return $.pipe($table, t.compact());
+  const channel = supabase.channel('db-messages').
+    on('postgres_changes', {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'tables',
+      filter: `id=eq.${tableId}`,
+    }, function(payload){
+      _.reset($table, payload.new);
+    }).
+    subscribe();
+
+  return $.pipe($table, t.compact());
 }
 
 function expand(idx){

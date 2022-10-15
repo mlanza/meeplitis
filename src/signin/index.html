@@ -51,7 +51,7 @@
       const email = event.target[0].value
       const password = event.target[1].value
       supabase.auth
-        .signIn({ email, password })
+        .signInWithPassword({ email, password })
         .then(setToken)
         .catch((err) => {
           alert(err.response.text);
@@ -67,7 +67,7 @@
     }
 
     function setToken(response) {
-      if (response.user.confirmation_sent_at && !response?.session?.access_token) {
+      if (response?.data?.user.confirmation_sent_at && !response?.session?.access_token) {
         alert('Confirmation Email Sent')
       } else {
         console.log("resp", response);

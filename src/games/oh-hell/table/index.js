@@ -25,11 +25,16 @@ function getSeat(tableId, session){
 }
 
 const getPerspective = _.partly(function getPerspective(tableId, session, eventId, seat){
-  return session && seat ? _.fmap(fetch(`https://perspective.workers.yourmove.cc?table_id=${tableId}&event_id=${eventId}&seat=${seat}`, {
+  const qs = _.chain([
+    `table_id=${tableId}`,
+    eventId != null ? `event_id=${eventId}` : null,
+    seat != null ? `seat=${seat}` : null
+  ], _.compact, _.join("&", _));
+  return _.fmap(fetch(`https://perspective.workers.yourmove.cc?${qs}`, session ? {
     headers: {
       accessToken: session.accessToken
     }
-  }), json) : _.fmap(fetch(`https://perspective.workers.yourmove.cc?table_id=${tableId}&event_id=${eventId}`), json);
+  } : {}), json);
 });
 
 function table(tableId){

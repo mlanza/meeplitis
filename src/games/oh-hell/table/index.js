@@ -195,12 +195,20 @@ const params = new URLSearchParams(document.location.search),
       tableId = params.get('id');
 
 if (tableId) {
-  const s = shell(
-    session(
-      supabase.auth?.currentUser?.id,
-      supabase.auth?.currentSession?.access_token),
-    tableId);
-  Object.assign(window, {$, _, sh, s, supabase});
+  Promise.all([
+    supabase.auth.getUser(),
+    supabase.auth.getSession()
+  ]).then(function([
+    {data: {user}},
+    {data: {session: sess}}
+  ]){
+    const s = shell(
+      session(
+        user.id,
+        sess.access_token),
+      tableId);
+    Object.assign(window, {$, _, sh, s, supabase});
+  });
 } else {
   document.location.href = "../";
 }

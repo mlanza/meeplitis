@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title></title>
+</head>
+<body>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat&display=swap');
+    body {
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      background-image: url(../images/connected.jpg);
+      -border: solid 2px brown;
+    }
+    .hand {
+      position: absolute;
+      bottom: -5em;
+      border: solid 2px red;
+      height: 10em;
+      width: calc(100% - 15em);
+      transition: bottom .5s;
+
+    }
+    .hand:hover {
+      bottom: 0;
+    }
+    .players {
+      -border: solid 1px salmon;
+      width: calc(100% - 12.3em);
+      height: calc(100% - 5em);
+      position: absolute;
+      left: 0;
+      margin: 0;
+      margin-left: 1em;
+    }
+    .played {
+      border: dashed 1px green;
+      height: 14em;
+      width: 10em;
+      margin: 0 auto;
+    }
+    .upkeep {
+      -border: solid 1px purple;
+      width: 10em;
+      height: calc(100% - 5em);
+      margin-right: 1em;
+      position: absolute;
+      right: 0;
+    }
+    .zone {
+      -border: solid 1px red;
+      margin: 0 .25em 1em;
+      display: block;
+      width: 17.6em;
+      min-height: 14.5em;
+      text-align: left;
+      float: left;
+      display: flex;
+      flex-flow: column wrap;
+    }
+    .zone.bottom {
+      -flex-direction: column-reverse;
+    }
+    article {
+      font-size: .8em;
+      border: solid 1px black;
+      height: 6.5em;
+      overflow: hidden;
+      border-radius: 1.65em;
+      background-color: #36454F;
+      box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+      opacity: 1;
+      transition: opacity .5s, box-shadow 1s;
+      margin: 5px 0;
+    }
+    article.offline {
+      opacity: .7;
+      box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0);
+    }
+    article:hover {
+      opacity: 1;
+      box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+    }
+    .avatar {
+      position: relative;
+    }
+    .avatar img {
+      position: absolute;
+      margin: auto;
+      top: 0;
+      right: 0;
+      left: 0;
+      bottom: 0;
+      min-height: 100%;
+      min-width: 100%;
+    }
+    article img {
+      max-width: 6.75em;
+      margin: -1px;
+      float: left;
+    }
+    article .avatar {
+      margin: -1px;
+      float: left;
+      width: 6.75em;
+      height: 6.75em;
+      border-right: solid 1px gray;
+    }
+    article div {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    article > div {
+      font-size: 1.2em;
+      margin: 3px;
+      margin-left: 7.25em;
+      color: white;
+      font-family: monospace;
+      width: 15em;
+    }
+    article div.username {
+      font-size: 1.2em;
+      font-family: monospace;
+      margin-bottom: 2px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    article > div > div {
+      font-family: Montserrat;
+    }
+    .game {
+      background-color: #3E505C;
+      color: snow;
+      font-family: Montserrat;
+      font-weight: 1.2em;
+      width: 100%;
+      padding: 5px;
+      margin-bottom: 2px;
+      text-align: left;
+    }
+  </style>
+  <div class="game">Your Move: Oh Hell (Round 8 of 13)</div>
+  <div class="upkeep">
+    <div class="deck">[]</div>
+    <div class="trump">TR</div>
+  </div>
+  <div class="players">
+    <div class="zone">
+      <article>
+        <div class="avatar">
+          <img class="circular--square" src="http://www.gravatar.com/avatar/67bd5fdcc4c5ce1dc3cd2bcd4b94d253?s=104" />
+        </div>
+        <div>
+          <div class="username" title="capnemo-1734">capnemo-1734</div>
+          <div>62 pts.</div>
+          <div>5/4 (bid/taken)</div>
+        </div>
+      </article>
+      <div class="played">
+      </div>
+    </div>
+    <div class="zone">
+      <article class="offline">
+        <div class="avatar">
+          <img src="https://img.freepik.com/free-vector/mysterious-mafia-man-smoking-cigarette_52683-34828.jpg" />
+        </div>
+        <div>
+          <div class="username">slyone99</div>
+          <div>92 pts.</div>
+          <div>2/3 (bid/taken)</div>
+        </div>
+      </article>
+      <div class="played">
+      </div>
+    </div>
+    <div class="zone">
+      <article class="offline">
+        <div class="avatar">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/7/7d/Kate_Winslet_at_the_2017_Toronto_International_Film_Festival_(cropped).jpg" />
+        </div>
+        <div>
+          <div class="username" title="titanic-love4leonardo">titanic-love4leonardo</div>
+          <div>11 pts.</div>
+          <div>7/7 (bid/taken)</div>
+        </div>
+      </article>
+      <div class="played">
+      </div>
+    </div>
+    <div class="zone">
+      <article class="offline">
+        <div class="avatar">
+          <img src="https://images7.alphacoders.com/876/thumb-1920-876336.jpg" />
+        </div>
+        <div>
+          <div class="username">catastic</div>
+          <div>9 pts.</div>
+          <div>2/1 (bid/taken)</div>
+        </div>
+      </article>
+      <div class="played">
+      </div>
+    </div>
+    <div class="zone bottom">
+      <article class="offline">
+        <div class="avatar">
+          <img class="circular--square" src="https://cdn.drawception.com/images/avatars/607990-07A.jpg" />
+        </div>
+        <div>
+          <div class="username">underdog</div>
+          <div>9 pts.</div>
+          <div>2/1 (bid/taken)</div>
+        </div>
+      </article>
+      <div class="played">
+      </div>
+    </div>
+    <div class="zone bottom">
+      <article class="offline">
+        <div class="avatar">
+          <img class="circular--square" src="https://gamepedia.cursecdn.com/mtgsalvation_gamepedia/b/bb/Dragon.jpg" />
+        </div>
+        <div>
+          <div class="username">dragonfire</div>
+          <div>10 pts.</div>
+          <div>2/1 (bid/taken)</div>
+        </div>
+      </article>
+      <div class="played">
+      </div>
+    </div>
+    <div class="zone bottom">
+      <article class="offline">
+        <div class="avatar">
+          <img src="http://www.powerofpop.com/wp-content/uploads/2015/07/Spy-VS-Spy.png" />
+        </div>
+        <div>
+          <div class="username">spy-vs-spy</div>
+          <div>22 pts.</div>
+          <div>2/1 (bid/taken)</div>
+        </div>
+      </article>
+      <div class="played">
+      </div>
+    </div>
+  </div>
+  <div class="hand"></div>
+</body>
+</html>

@@ -38,6 +38,12 @@
       animation-fill-mode: both;
       animation-iteration-count: infinite;
     }
+    .yours img[data-action="must"] {
+      animation-iteration-count: 2;
+    }
+    .yours:hover img[data-action="must"] {
+      animation-iteration-count: infinite;
+    }
     img[data-action="may"] {
       opacity: .25;
     }
@@ -262,7 +268,7 @@
           <div>62 pts.</div>
           <div>5/4 (bid/taken)</div>
         </div>
-        <img data-action="may" src="pawn.svg">
+        <img data-action="must" src="pawn.svg">
       </div>
       <div class="played">
         <img src="../images/deck/AH.svg">
@@ -307,7 +313,7 @@
           <div>9 pts.</div>
           <div>2/1 (bid/taken)</div>
         </div>
-        <img data-action="must" src="pawn.svg" class="wobble">
+        <img data-action="may" src="pawn.svg" class="wobble">
       </div>
       <div class="played">
       </div>

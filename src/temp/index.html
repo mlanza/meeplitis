@@ -150,6 +150,8 @@
       flex-flow: column wrap;
       position: relative;
       font-size: 1em;
+      padding: 5px;
+      border-radius: 1.65em;
     }
     .zone:hover {
       z-index: 99;
@@ -161,11 +163,18 @@
       overflow: hidden;
       border-radius: 1.65em;
       background-color: #36454F;
-      box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+      box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.3);
       opacity: 1;
       transition: opacity .5s, box-shadow 1s;
-      margin: 5px 0;
-      position: relative;
+      margin: 0 0 5px 0;
+      position: relative;;
+    }
+    .yours div.username {
+      text-decoration: underline;
+    }
+    .yours {
+      background-color: rgba(206, 214, 195, .3);
+      background-color: rgba(135, 125, 138, .1);
     }
     div.player.offline {
       opacity: .7;
@@ -178,6 +187,7 @@
     }
     .avatar {
       position: relative;
+      opacity: 1;
     }
     .avatar img {
       position: absolute;
@@ -242,8 +252,8 @@
     <div>Round <b>8</b> of <b>13</b></div>
   </div>
   <div class="players">
-    <div class="zone">
-      <div class="player">
+    <div class="zone yours">
+      <div class="player online">
         <div class="avatar">
           <img class="circular--square" src="http://www.gravatar.com/avatar/67bd5fdcc4c5ce1dc3cd2bcd4b94d253?s=104" />
         </div>
@@ -305,7 +315,7 @@
     <div class="zone">
       <div class="player offline">
         <div class="avatar">
-          <img class="circular--square" src="https://cdn.drawception.com/images/avatars/607990-07A.jpg" />
+          <img src="https://cdn.drawception.com/images/avatars/607990-07A.jpg" />
         </div>
         <div>
           <div class="username">underdog</div>
@@ -319,7 +329,7 @@
     <div class="zone">
       <div class="player offline">
         <div class="avatar">
-          <img class="circular--square" src="https://gamepedia.cursecdn.com/mtgsalvation_gamepedia/b/bb/Dragon.jpg" />
+          <img src="https://gamepedia.cursecdn.com/mtgsalvation_gamepedia/b/bb/Dragon.jpg" />
         </div>
         <div>
           <div class="username">dragonfire</div>

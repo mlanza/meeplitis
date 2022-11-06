@@ -12,7 +12,19 @@
       margin: 0;
       padding: 0;
       background-image: url(../images/connected.jpg);
-      -border: solid 2px brown;
+    }
+    img[data-action] {
+      width: 3em;
+      position: absolute;
+      left: 19em;
+      top: 3.5em;
+      transition: opacity .5s;
+    }
+    img[data-action="must"] {
+      opacity: 1;
+    }
+    img[data-action="may"] {
+      opacity: .25;
     }
     .hand {
       position: absolute;
@@ -59,6 +71,7 @@
       float: left;
       display: flex;
       flex-flow: column wrap;
+      position: relative;
     }
     .zone.bottom {
       -flex-direction: column-reverse;
@@ -74,6 +87,7 @@
       opacity: 1;
       transition: opacity .5s, box-shadow 1s;
       margin: 5px 0;
+      position: relative;
     }
     article.offline {
       opacity: .7;
@@ -159,6 +173,7 @@
           <div>62 pts.</div>
           <div>5/4 (bid/taken)</div>
         </div>
+        <img data-action="may" src="pawn.svg">
       </article>
       <div class="played">
       </div>
@@ -173,6 +188,7 @@
           <div>92 pts.</div>
           <div>2/3 (bid/taken)</div>
         </div>
+        <img data-action="may" src="pawn.svg">
       </article>
       <div class="played">
       </div>
@@ -201,6 +217,7 @@
           <div>9 pts.</div>
           <div>2/1 (bid/taken)</div>
         </div>
+        <img data-action="must" src="pawn.svg">
       </article>
       <div class="played">
       </div>

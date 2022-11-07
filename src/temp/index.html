@@ -123,6 +123,13 @@
       margin: 0;
       margin-left: 1em;
     }
+    .zone div span {
+      opacity: 0;
+      transition: opacity ease-in .5s;
+    }
+    .zone:hover div span {
+      opacity: 1;
+    }
     .played {
       height: 14em;
       width: 10em;
@@ -229,9 +236,9 @@
       width: 10em;
       transition: width .5s;
     }
-    .zone:hover div.player > div:nth-child(2) {
+    /*.zone:hover div.player > div:nth-child(2) {
       width: 15em;
-    }
+    }*/
     div.player div.username {
       font-size: 1.2em;
       margin-bottom: 2px;
@@ -266,7 +273,7 @@
         <div>
           <div class="username" title="capnemo-1734">capnemo-1734</div>
           <div>62 pts.</div>
-          <div>5/4 (bid/taken)</div>
+          <div>5/4 <span>(bid/taken)</span></div>
         </div>
         <img data-action="must" src="pawn.svg">
       </div>
@@ -282,7 +289,7 @@
         <div>
           <div class="username">slyone99</div>
           <div>92 pts.</div>
-          <div>2/3 (bid/taken)</div>
+          <div>2/3 <span>(bid/taken)</span></div>
         </div>
         <img data-action="may" src="pawn.svg">
       </div>
@@ -297,7 +304,7 @@
         <div>
           <div class="username" title="titanic-love4leonardo">titanic-love4leonardo</div>
           <div>11 pts.</div>
-          <div>7/7 (bid/taken)</div>
+          <div>7/7 <span>(bid/taken)</span></div>
         </div>
       </div>
       <div class="played">
@@ -311,7 +318,7 @@
         <div>
           <div class="username">catastic</div>
           <div>9 pts.</div>
-          <div>2/1 (bid/taken)</div>
+          <div>2/1 <span>(bid/taken)</span></div>
         </div>
         <img data-action="may" src="pawn.svg" class="wobble">
       </div>
@@ -326,7 +333,7 @@
         <div>
           <div class="username">underdog</div>
           <div>9 pts.</div>
-          <div>2/1 (bid/taken)</div>
+          <div>2/1 <span>(bid/taken)</span></div>
         </div>
       </div>
       <div class="played">
@@ -340,7 +347,7 @@
         <div>
           <div class="username">dragonfire</div>
           <div>10 pts.</div>
-          <div>2/1 (bid/taken)</div>
+          <div>2/1 <span>(bid/taken)</span></div>
         </div>
       </div>
       <div class="played">
@@ -354,7 +361,7 @@
         <div>
           <div class="username">spy-vs-spy</div>
           <div>22 pts.</div>
-          <div>2/1 (bid/taken)</div>
+          <div>2/1 <span>(bid/taken)</span></div>
         </div>
       </div>
       <div class="played">

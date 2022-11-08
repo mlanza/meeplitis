@@ -1,3 +1,159 @@
-body.meeple h1 {
+.bid {
+  position: fixed;
+  left: 1em;
+  bottom: 1em;
+  background-color: rgba(255, 255, 255, 0.8);
+}
+.bid ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-weight: bold;
+  float: left;
+}
+.bid li, .bid label {
+  float: left;
+  padding: .5em;
+  font-size: 1.5em;
+  cursor: pointer;
+}
+.bid li {
+  background-color: #A5A9A0;
+  border-radius: 5px;
+  margin: 5px;
+  min-width: 1em;
+  text-align: center;
+  transition: background-color .5s, color .5s;
+}
+.bid li:hover {
+  background-color: saddlebrown;
+  color: snow;
+}
+.bid li.selected {
+  color: white;
+  background-color: #3E505C;
+}
+.hand {
+  position: fixed;
+  right: 1em;
+  bottom: -11em;
+  height: 17.5em;
+  width: 30em;
+  transition: bottom .5s;
+  padding: 0;
+  list-style: none;
+  display: inline-flex;
+  -border:solid 1px saddlebrown;
+}
+.hand:hover {
+  bottom: -8em;
+}
+.hand li {
+  transition: padding-top .25s;
+  margin-right: -8.5em;
+  height: 18em;
+  padding-top: 2em;
+}
+.hand li,
+.hand li img {
   width: 10em;
+}
+.hand li img {
+  height: 16em;
+  cursor: pointer;
+}
+.hand li:hover {
+  padding-top: 0;
+}
+.deck img, .trump img {
+  width: 8em;
+  margin: 5px;
+}
+.upkeep {
+  -border: solid 1px purple;
+  width: 10em;
+  height: calc(100% - 5em);
+  position: absolute;
+  right: 0;
+  text-align: center;
+}
+[data-max-bid="1"] li[data-bid="2"],
+[data-max-bid="1"] li[data-bid="3"],
+[data-max-bid="1"] li[data-bid="4"],
+[data-max-bid="1"] li[data-bid="5"],
+[data-max-bid="1"] li[data-bid="6"],
+[data-max-bid="1"] li[data-bid="7"],
+[data-max-bid="1"] li[data-bid="8"],
+[data-max-bid="1"] li[data-bid="9"],
+[data-max-bid="1"] li[data-bid="10"],
+[data-max-bid="1"] li[data-bid="11"],
+[data-max-bid="1"] li[data-bid="12"],
+[data-max-bid="1"] li[data-bid="13"],
+[data-max-bid="2"] li[data-bid="3"],
+[data-max-bid="2"] li[data-bid="4"],
+[data-max-bid="2"] li[data-bid="5"],
+[data-max-bid="2"] li[data-bid="6"],
+[data-max-bid="2"] li[data-bid="7"],
+[data-max-bid="2"] li[data-bid="8"],
+[data-max-bid="2"] li[data-bid="9"],
+[data-max-bid="2"] li[data-bid="10"],
+[data-max-bid="2"] li[data-bid="11"],
+[data-max-bid="2"] li[data-bid="12"],
+[data-max-bid="2"] li[data-bid="13"],
+[data-max-bid="3"] li[data-bid="4"],
+[data-max-bid="3"] li[data-bid="5"],
+[data-max-bid="3"] li[data-bid="6"],
+[data-max-bid="3"] li[data-bid="7"],
+[data-max-bid="3"] li[data-bid="8"],
+[data-max-bid="3"] li[data-bid="9"],
+[data-max-bid="3"] li[data-bid="10"],
+[data-max-bid="3"] li[data-bid="11"],
+[data-max-bid="3"] li[data-bid="12"],
+[data-max-bid="3"] li[data-bid="13"],
+[data-max-bid="4"] li[data-bid="5"],
+[data-max-bid="4"] li[data-bid="6"],
+[data-max-bid="4"] li[data-bid="7"],
+[data-max-bid="4"] li[data-bid="8"],
+[data-max-bid="4"] li[data-bid="9"],
+[data-max-bid="4"] li[data-bid="10"],
+[data-max-bid="4"] li[data-bid="11"],
+[data-max-bid="4"] li[data-bid="12"],
+[data-max-bid="4"] li[data-bid="13"],
+[data-max-bid="5"] li[data-bid="6"],
+[data-max-bid="5"] li[data-bid="7"],
+[data-max-bid="5"] li[data-bid="8"],
+[data-max-bid="5"] li[data-bid="9"],
+[data-max-bid="5"] li[data-bid="10"],
+[data-max-bid="5"] li[data-bid="11"],
+[data-max-bid="5"] li[data-bid="12"],
+[data-max-bid="5"] li[data-bid="13"],
+[data-max-bid="6"] li[data-bid="7"],
+[data-max-bid="6"] li[data-bid="8"],
+[data-max-bid="6"] li[data-bid="9"],
+[data-max-bid="6"] li[data-bid="10"],
+[data-max-bid="6"] li[data-bid="11"],
+[data-max-bid="6"] li[data-bid="12"],
+[data-max-bid="6"] li[data-bid="13"],
+[data-max-bid="7"] li[data-bid="8"],
+[data-max-bid="7"] li[data-bid="9"],
+[data-max-bid="7"] li[data-bid="10"],
+[data-max-bid="7"] li[data-bid="11"],
+[data-max-bid="7"] li[data-bid="12"],
+[data-max-bid="7"] li[data-bid="13"],
+[data-max-bid="8"] li[data-bid="9"],
+[data-max-bid="8"] li[data-bid="10"],
+[data-max-bid="8"] li[data-bid="11"],
+[data-max-bid="8"] li[data-bid="12"],
+[data-max-bid="8"] li[data-bid="13"],
+[data-max-bid="9"] li[data-bid="10"],
+[data-max-bid="9"] li[data-bid="11"],
+[data-max-bid="9"] li[data-bid="12"],
+[data-max-bid="9"] li[data-bid="13"],
+[data-max-bid="10"] li[data-bid="11"],
+[data-max-bid="10"] li[data-bid="12"],
+[data-max-bid="10"] li[data-bid="13"],
+[data-max-bid="11"] li[data-bid="12"],
+[data-max-bid="11"] li[data-bid="13"],
+[data-max-bid="12"] li[data-bid="13"] {
+  display: none;
 }

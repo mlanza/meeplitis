@@ -1,3 +1,170 @@
-body.meeple h1 {
-  width: 4.75em;
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap');
+body {
+  font-family: Montserrat;
+  margin: 0;
+  padding: 0;
+  padding-top: 2.5em;
+  background: url(../../images/connected.jpg);
+  color: #3E505C;
+}
+#game {
+  position: fixed;
+  top: 0;
+  background-color: #3E505C;
+  color: snow;
+  font-weight: 1.2em;
+  width: 100%;
+  padding: 5px;
+  text-align: left;
+  z-index: 999;
+  box-shadow: -3px 5px 5px -3px rgba(0, 0, 0, 0.6);
+}
+@keyframes wobble {
+  0% { transform: translateX(0%); }
+  15% { transform: translateX(-25%) rotate(-5deg); }
+  30% { transform: translateX(20%) rotate(3deg); }
+  45% { transform: translateX(-15%) rotate(-3deg); }
+  60% { transform: translateX(10%) rotate(2deg); }
+  75% { transform: translateX(-5%) rotate(-1deg); }
+  100% { transform: translateX(0%); }
+}
+img[data-action] {
+  width: 3em;
+  position: absolute;
+  right: .25em;
+  top: 3.5em;
+  transition: opacity .5s;
+}
+img[data-action="must"] {
+  opacity: 1;
+  animation-name: wobble;
+  animation-duration: .5s;
+  animation-fill-mode: both;
+  animation-iteration-count: infinite;
+}
+.yours img[data-action="must"] {
+  animation-iteration-count: 2;
+}
+.yours:hover img[data-action="must"] {
+  animation-iteration-count: infinite;
+}
+img[data-action="may"] {
+  opacity: .25;
+}
+.players {
+  -border: solid 1px salmon;
+  width: calc(100% - 12.3em);
+  height: calc(100% - 5em);
+  position: absolute;
+  left: 0;
+  margin: 0;
+  margin-left: 1em;
+}
+.zone div span {
+  opacity: 0;
+  transition: opacity ease-in .25s;
+}
+.zone:hover div span {
+  opacity: 1;
+  transition: opacity ease-in .5s;
+}
+.played {
+  height: 14em;
+  width: 10em;
+  margin: 2px auto 0;
+}
+.played img {
+  width: 10em;
+  margin: 0 auto;
+}
+.zone {
+  -border: solid 1px red;
+  margin: 0 .1em 1em;
+  display: block;
+  width: auto;
+  min-height: 14.5em;
+  text-align: left;
+  float: left;
+  display: flex;
+  flex-flow: column wrap;
+  position: relative;
+  font-size: 1em;
+  padding: 5px;
+  border-radius: 1.65em;
+}
+.zone:hover {
+  z-index: 99;
+}
+div.player {
+  font-size: .8em;
+  border: solid 1px black;
+  height: 6.5em;
+  overflow: hidden;
+  border-radius: 1.65em;
+  background-color: #36454F;
+  box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.3);
+  opacity: 1;
+  transition: opacity .5s, box-shadow 1s;
+  margin: 0 0 5px 0;
+  position: relative;;
+}
+.yours div.username {
+  text-decoration: underline;
+}
+.yours {
+  background-color: rgba(206, 214, 195, .3);
+  background-color: rgba(135, 125, 138, .1);
+}
+div.player.offline {
+  opacity: .7;
+  box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0);
+}
+div.player:hover {
+  opacity: 1;
+  box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+}
+.avatar {
+  position: relative;
+  opacity: 1;
+}
+.avatar img {
+  position: absolute;
+  margin: auto;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  min-height: 100%;
+  min-width: 100%;
+}
+div.player img {
+  max-width: 6em;
+  margin: 0;
+  float: left;
+}
+div.player .avatar {
+  margin: -1px;
+  float: left;
+  width: 6em;
+  height: 6em;
+}
+div.player div {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+div.player > div {
+  font-size: 1.1em;
+  margin: 3px;
+  margin-left: 6.5em;
+  color: white;
+  width: 10em;
+  transition: width .5s;
+}
+div.player div.username {
+  font-size: 1.2em;
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

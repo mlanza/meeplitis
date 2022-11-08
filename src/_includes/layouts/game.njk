@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="{{ language }}">
+  <head>
+    <meta charset="utf-8">
+    <title>{{ title }} | {{ site.title }}</title>
+    <meta name="description" content="{{ site.description }}">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="/games/index.css">
+  {% for href in stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ href }}">
+  {% endfor %}
+  </head>
+  <body>
+    <div id="game">{{site.title}}: {{ title }}</div>
+    {{ content | safe }}
+  </body>
+  {% for src in modules %}
+    <script type="module" src="{{ src }}"></script>
+  {% endfor %}
+</html>

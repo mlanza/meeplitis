@@ -5,6 +5,10 @@ import t from "/lib/atomic_/transducers.js";
 import sh from "/lib/atomic_/shell.js";
 import supabase from "../../../lib/supabase.js";
 
+const root = document.body,
+      params = new URLSearchParams(document.location.search),
+      tableId = params.get('id');
+
 function json(resp){
   return resp.json();
 }
@@ -191,11 +195,12 @@ function shell(session, tableId){
           return seat != null && _.first(hist) != null;
         }));
 
-  const root = document.body;
   const players = dom.sel1(".players");
   const trumpEl = dom.sel1(".trump img");
   const [roundNum, roundMax] = dom.sel(".round b");
   const bidding = dom.sel1(".bidding");
+  const cardsRemaining = dom.sel1(".cards b");
+  const deckEl = dom.sel1(".deck");
   const handEl = dom.sel1(".hand");
   const div = dom.tag('div'), span = dom.tag('span'), img = dom.tag('img'), li = dom.tag('li');
 
@@ -219,17 +224,24 @@ function shell(session, tableId){
             div(
               div({class: "username"}, username),
               div(span({class: "points"}, "0"), " pts."),
-              div(span({class: "tricks"}, "-"), "/", span({class: "bid"}, "-"), span({class: "tip"}, " (bid/taken)"))),
+              div(span({class: "tricks"}, "-"), "/", span({class: "bid"}, "-"), span({class: "tip"}, " (taken/bid)"))),
             img({"data-action": "", src: "../../../images/pawn.svg"})),
           div({class: "played"})));
     }, seated);
   });
 
   $.sub($hist, function([seat, [curr, prior]]){
-    const {state, state: {trump, round, status, seated}} = curr;
+    const {state, state: {trump, round, status, seated, deck}} = curr;
     const {hand} = _.nth(seated, seat);
     const s = dom.sel1(`[data-seat="${seat}"]`);
+    _.eachIndexed(function(idx, {bid, tricks, hand, played, scored}){
+      const el = dom.sel1(`[data-seat="${idx}"]`);
+      dom.text(dom.sel1(".tricks", el), _.count(tricks));
+      dom.text(dom.sel1(".bid", el), bid || "?");
+      dom.html(dom.sel1(".played", el), _.maybe(played, cardPic));
+    }, seated);
     dom.attr(root, "data-status", status);
+    dom.text(cardsRemaining, _.count(deck));
     dom.attr(trumpEl, "src", cardPic(trump));
     dom.text(roundNum, round + 1);
     dom.text(roundMax, 13);
@@ -255,9 +267,6 @@ function shell(session, tableId){
   return new Shell($state, $table, $touch, $touches);
 }
 
-const params = new URLSearchParams(document.location.search),
-      tableId = params.get('id');
-
 if (tableId) {
   Promise.all([
     supabase.auth.getUser(),
@@ -271,6 +280,15 @@ if (tableId) {
         user?.id,
         sess?.access_token),
       tableId);
+
+    $.on(root, "click", "[data-bid]", function(e){
+      const bid = _.maybe(e.target, dom.attr(_, "data-bid"), _.blot, parseInt),
+            actual = _.maybe(dom.sel1("[data-actual-bid]"), dom.attr(_, "data-actual-bid"), _.blot, parseInt);
+      if (bid != actual) {
+        sh.dispatch(s, {bid});
+      }
+    });
+
     Object.assign(window, {$, _, sh, s, supabase});
   });
 } else {

@@ -29,10 +29,6 @@
   background-color: saddlebrown;
   color: snow;
 }
-.bidding li.selected {
-  color: white;
-  background-color: #3E505C;
-}
 .hand {
   position: fixed;
   right: 1em;
@@ -66,7 +62,7 @@
   padding-top: 0;
 }
 .deck img, .trump img {
-  width: 8em;
+  width: 9em;
   margin: 5px;
 }
 .upkeep {
@@ -79,6 +75,17 @@
 }
 .bidding {
   visibility: hidden;
+}
+.cards {
+  text-align: center;
+  display: block;
+  margin: .5em auto 0;
+  color: black;
+}
+[data-actual-bid=""] li[data-bid=""] {
+  color: white;
+  background-color: #3E505C;
+  cursor: default;
 }
 [data-status="bidding"] .bidding {
   visibility: visible;

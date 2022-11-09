@@ -1,4 +1,5 @@
 import _ from "/lib/atomic_/core.js";
+import dom from "/lib/atomic_/dom.js";
 import $ from "/lib/atomic_/reactives.js";
 import t from "/lib/atomic_/transducers.js";
 import sh from "/lib/atomic_/shell.js";
@@ -178,11 +179,69 @@ function shell(session, tableId){
         $seated = _.chain(tableId, getSeated, load),
         $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), t.compact()),
         $state = $.cell(null),
-        $touches = $.pipe($.map(_.get(_, "touches"), $state), t.compact());
+        $ready = $.pipe($state,  t.filter(_.and(_.get(_, "touches"), _.get(_, "history"), _.get(_, "at")))),
+        $seat = $.map(function(state){
+          return state?.seat;
+        }, $state),
+        $snapshot = $.map(_.pipe(_.juxt(_.get(_, "history"), _.get(_, "at")), function([history, at]){
+          return _.nth(history, at);
+        }), $ready),
+        $touches = $.pipe($.map(_.get(_, "touches"), $state), t.compact()),
+        $hist = $.pipe($.map(_.array, $seat, $.hist($snapshot)), t.filter(function([seat, hist]){
+          return seat != null && _.first(hist) != null;
+        }));
+
+  const root = document.body;
+  const players = dom.sel1(".players");
+  const trumpEl = dom.sel1(".trump img");
+  const [roundNum, roundMax] = dom.sel(".round b");
+  const bidding = dom.sel1(".bidding");
+  const handEl = dom.sel1(".hand");
+  const div = dom.tag('div'), span = dom.tag('span'), img = dom.tag('img'), li = dom.tag('li');
+
+  function cardPic({suit, rank}){
+    const suits = {"♥️": "H", "♦️": "D", "♣️": "C", "♠️": "S"};
+    return `../../../images/deck/${rank}${suits[suit]}.svg`;
+  }
+
   $.sub($table, _.see("$table"));
   $.sub($touch, _.see("$touch"));
   $.sub($seated, _.see("$seated"));
-  $.sub($state, t.filter(_.and(_.get(_, "touches"), _.get(_, "history"), _.get(_, "at"))), _.see("$state"));
+  $.sub($ready, _.see("$ready"));
+  $.sub($hist, _.see("$hist"));
+
+  $.sub($seated, function(seated){
+    _.eachIndexed(function(idx, {username, avatar}){
+      dom.append(players,
+        div({class: "zone", "data-seat": idx, "data-username": username, "data-presence": "offline"},
+          div({class: "player"},
+            div({class: "avatar"}, img({src: `${avatar}?s=104`})),
+            div(
+              div({class: "username"}, username),
+              div(span({class: "points"}, "0"), " pts."),
+              div(span({class: "tricks"}, "-"), "/", span({class: "bid"}, "-"), span({class: "tip"}, " (bid/taken)"))),
+            img({"data-action": "", src: "../../../images/pawn.svg"})),
+          div({class: "played"})));
+    }, seated);
+  });
+
+  $.sub($hist, function([seat, [curr, prior]]){
+    const {state, state: {trump, round, status, seated}} = curr;
+    const {hand} = _.nth(seated, seat);
+    const s = dom.sel1(`[data-seat="${seat}"]`);
+    dom.attr(root, "data-status", status);
+    dom.attr(trumpEl, "src", cardPic(trump));
+    dom.text(roundNum, round + 1);
+    dom.text(roundMax, 13);
+    dom.attr(bidding, "data-max-bid", round + 1);
+    dom.append(handEl, _.map(function(card){
+      return li(img({src: cardPic(card)}));
+    }, hand));
+    dom.addClass(s, "yours");
+    dom.attr(dom.sel1("[data-action]", s), "data-action", "must");
+    dom.attr(s, "data-presence", "online");
+  });
+
   $.sub($touch, function(){
     postTouches($state, tableId);
   });

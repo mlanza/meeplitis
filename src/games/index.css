@@ -34,6 +34,11 @@ img[data-action] {
   right: .25em;
   top: 3.5em;
   transition: opacity .5s;
+  visibility: hidden;
+}
+img[data-action="may"],
+img[data-action="must"] {
+  visibility: visible;
 }
 img[data-action="must"] {
   opacity: 1;
@@ -60,11 +65,11 @@ img[data-action="may"] {
   margin: 0;
   margin-left: 1em;
 }
-.zone div span {
+.zone div span.tip {
   opacity: 0;
   transition: opacity ease-in .25s;
 }
-.zone:hover div span {
+.zone:hover div span.tip {
   opacity: 1;
   transition: opacity ease-in .5s;
 }
@@ -115,7 +120,7 @@ div.player {
   background-color: rgba(206, 214, 195, .3);
   background-color: rgba(135, 125, 138, .1);
 }
-div.player.offline {
+[data-presence="offline"] div.player {
   opacity: .7;
   box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0);
 }

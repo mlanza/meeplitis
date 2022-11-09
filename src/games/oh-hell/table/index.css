@@ -1,23 +1,23 @@
-.bid {
+.bidding {
   position: fixed;
   left: 1em;
   bottom: 1em;
   background-color: rgba(255, 255, 255, 0.8);
 }
-.bid ul {
+.bidding ul {
   list-style: none;
   padding: 0;
   margin: 0;
   font-weight: bold;
   float: left;
 }
-.bid li, .bid label {
+.bidding li, .bidding label {
   float: left;
   padding: .5em;
   font-size: 1.5em;
   cursor: pointer;
 }
-.bid li {
+.bidding li {
   background-color: #A5A9A0;
   border-radius: 5px;
   margin: 5px;
@@ -25,11 +25,11 @@
   text-align: center;
   transition: background-color .5s, color .5s;
 }
-.bid li:hover {
+.bidding li:hover {
   background-color: saddlebrown;
   color: snow;
 }
-.bid li.selected {
+.bidding li.selected {
   color: white;
   background-color: #3E505C;
 }
@@ -76,6 +76,12 @@
   position: absolute;
   right: 0;
   text-align: center;
+}
+.bidding {
+  visibility: hidden;
+}
+[data-status="bidding"] .bidding {
+  visibility: visible;
 }
 [data-max-bid="1"] li[data-bid="2"],
 [data-max-bid="1"] li[data-bid="3"],

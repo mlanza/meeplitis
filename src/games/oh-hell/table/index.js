@@ -268,8 +268,8 @@ if (tableId) {
   ]){
     const s = shell(
       session(
-        user.id,
-        sess.access_token),
+        user?.id,
+        sess?.access_token),
       tableId);
     Object.assign(window, {$, _, sh, s, supabase});
   });

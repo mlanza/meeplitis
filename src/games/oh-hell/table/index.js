@@ -287,7 +287,7 @@ if (tableId) {
       const bid = _.maybe(e.target, dom.attr(_, "data-bid"), _.blot, parseInt),
             actual = _.maybe(dom.sel1("[data-actual-bid]"), dom.attr(_, "data-actual-bid"), _.blot, parseInt);
       if (bid != actual) {
-        sh.dispatch(s, {type: "bid", bid});
+        sh.dispatch(s, {type: "bid", "details": {bid}});
       }
     });
 

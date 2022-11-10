@@ -42,6 +42,16 @@ const getPerspective = _.partly(function getPerspective(tableId, session, eventI
   } : {}), json);
 });
 
+function move(_table_id, _seat, _commands, session){
+  return fetch("https://move.workers.yourmove.cc", {
+    method: "POST",
+    body: JSON.stringify({_table_id, _seat, _commands}),
+    headers: {
+      accessToken: session.accessToken
+    }
+  });
+}
+
 function table(tableId){
   const $table = $.cell(null);
   supabase
@@ -88,15 +98,6 @@ function setAt($state, at, getPerspective){
           _.assoc(_, "at", at)));
     });
   }
-}
-
-function move(tableId, seat, commands){
-  return supabase
-    .rpc('move', {
-      _commands: commands,
-      _seat: seat,
-      _table_id: tableId
-    });
 }
 
 function postTouches($state, tableId){
@@ -159,7 +160,7 @@ const Shell = (function(){
       throw new Error("Spectators are not permitted to issue moves");
     }
 
-    const {error, data} = await move(state.tableId, state.seat, [command]);
+    const {error, data} = await move(state.tableId, state.seat, [command], state.session.accessToken);
     if (error) {
       throw error;
     }

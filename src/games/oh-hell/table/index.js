@@ -49,7 +49,7 @@ function move(_table_id, _seat, _commands, session){
     headers: {
       accessToken: session.accessToken
     }
-  }), _.see("move"));
+  }), json);
 }
 
 function table(tableId){

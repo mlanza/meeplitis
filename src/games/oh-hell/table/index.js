@@ -43,13 +43,13 @@ const getPerspective = _.partly(function getPerspective(tableId, session, eventI
 });
 
 function move(_table_id, _seat, _commands, session){
-  return fetch("https://move.workers.yourmove.cc", {
+  return _.fmap(fetch("https://move.workers.yourmove.cc", {
     method: "POST",
     body: JSON.stringify({_table_id, _seat, _commands}),
     headers: {
       accessToken: session.accessToken
     }
-  });
+  }), _.see("move"));
 }
 
 function table(tableId){
@@ -160,7 +160,7 @@ const Shell = (function(){
       throw new Error("Spectators are not permitted to issue moves");
     }
 
-    const {error, data} = await move(state.tableId, state.seat, [command], state.session.accessToken);
+    const {error, data} = await move(state.tableId, state.seat, [command], state.session);
     if (error) {
       throw error;
     }
@@ -286,7 +286,7 @@ if (tableId) {
       const bid = _.maybe(e.target, dom.attr(_, "data-bid"), _.blot, parseInt),
             actual = _.maybe(dom.sel1("[data-actual-bid]"), dom.attr(_, "data-actual-bid"), _.blot, parseInt);
       if (bid != actual) {
-        sh.dispatch(s, {bid});
+        sh.dispatch(s, {type: "bid", bid});
       }
     });
 

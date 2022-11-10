@@ -233,7 +233,7 @@ function shell(session, tableId){
 
   $.sub($hist, function([seat, [curr, prior]]){
     const {state, state: {trump, round, status, seated, deck}} = curr;
-    const {hand} = _.nth(seated, seat);
+    const {hand, bid} = _.nth(seated, seat);
     const s = dom.sel1(`[data-seat="${seat}"]`);
     _.eachIndexed(function(idx, {bid, tricks, hand, played, scored}){
       const el = dom.sel1(`[data-seat="${idx}"]`);
@@ -247,6 +247,7 @@ function shell(session, tableId){
     dom.text(roundNum, round + 1);
     dom.text(roundMax, 13);
     dom.attr(bidding, "data-max-bid", round + 1);
+    dom.attr(bidding, "data-actual-bid", bid);
     dom.append(handEl, _.map(function(card){
       return li(img({src: cardPic(card)}));
     }, hand));

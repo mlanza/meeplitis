@@ -82,7 +82,21 @@
   margin: .5em auto 0;
   color: black;
 }
-[data-actual-bid=""] li[data-bid=""] {
+[data-actual-bid=""] li[data-bid=""],
+[data-actual-bid="0"] li[data-bid="0"],
+[data-actual-bid="1"] li[data-bid="1"],
+[data-actual-bid="2"] li[data-bid="2"],
+[data-actual-bid="3"] li[data-bid="3"],
+[data-actual-bid="4"] li[data-bid="4"],
+[data-actual-bid="5"] li[data-bid="5"],
+[data-actual-bid="6"] li[data-bid="6"],
+[data-actual-bid="7"] li[data-bid="7"],
+[data-actual-bid="8"] li[data-bid="8"],
+[data-actual-bid="9"] li[data-bid="9"],
+[data-actual-bid="10"] li[data-bid="10"],
+[data-actual-bid="11"] li[data-bid="11"],
+[data-actual-bid="12"] li[data-bid="12"],
+[data-actual-bid="13"] li[data-bid="13"] {
   color: white;
   background-color: #3E505C;
   cursor: default;

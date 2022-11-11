@@ -248,7 +248,7 @@ function shell(session, tableId){
     dom.text(roundMax, 13);
     dom.attr(bidding, "data-max-bid", round + 1);
     dom.attr(bidding, "data-actual-bid", bid);
-    dom.append(handEl, _.map(function(card){
+    dom.html(handEl, _.map(function(card){
       return li(img({src: cardPic(card)}));
     }, hand));
     dom.addClass(s, "yours");

@@ -63,7 +63,11 @@
 .hand li:hover {
   padding-top: 0;
 }
-.deck img, .trump img {
+.trump, .deck {
+  min-height: 14em;
+}
+.deck img,
+.trump img {
   width: 9em;
   margin: 5px;
 }

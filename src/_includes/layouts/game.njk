@@ -11,7 +11,16 @@
   {% endfor %}
   </head>
   <body>
-    <div id="game">{{site.title}}: {{ title }}</div>
+    <div id="game">
+      <span>{{site.title}}: {{ title }}</span>
+      <div id="replay">
+        <span class="touch">0</span> of <span class="touches">0</span>
+        <img data-go="inception" src="../../../images/inception.png">
+        <img data-go="back" src="../../../images/back.png">
+        <img data-go="forward" src="../../../images/forward.png">
+        <img data-go="present" src="../../../images/present.png">
+      </div>
+    </div>
     {{ content | safe }}
   </body>
   {% for src in modules %}

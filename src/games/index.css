@@ -7,17 +7,36 @@ body {
   background: url(../../images/connected.jpg);
   color: #3E505C;
 }
+#replay {
+  float: right;
+  font-size: .9em;
+}
+#replay img {
+  margin: 2px 2px 0;
+  cursor: pointer;
+}
+#replay span {
+  width: 2em;
+  display: inline-block;
+  text-align: right;
+}
+#replay span.touches {
+  text-align: left;
+}
 #game {
   position: fixed;
   top: 0;
   background-color: #3E505C;
   color: snow;
   font-weight: 1.2em;
-  width: 100%;
+  width: calc(100% - 10px);
   padding: 5px;
   text-align: left;
   z-index: 999;
   box-shadow: -3px 5px 5px -3px rgba(0, 0, 0, 0.6);
+}
+[data-tense="past"] #game {
+  background-color: #4e0007;
 }
 @keyframes wobble {
   0% { transform: translateX(0%); }

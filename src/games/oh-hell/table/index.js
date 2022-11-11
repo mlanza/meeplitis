@@ -316,7 +316,7 @@ if (tableId) {
         sess?.access_token),
       tableId);
 
-    $.on(root, "click", "[data-bid]", function(e){
+    $.on(root, "click", "[data-tense=\"present\"] [data-bid]", function(e){
       const bid = _.maybe(e.target, dom.attr(_, "data-bid"), _.blot, parseInt),
             actual = _.maybe(dom.sel1("[data-actual-bid]"), dom.attr(_, "data-actual-bid"), _.blot, parseInt);
       if (bid != actual) {

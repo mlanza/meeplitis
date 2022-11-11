@@ -34,9 +34,16 @@ body {
   text-align: left;
   z-index: 999;
   box-shadow: -3px 5px 5px -3px rgba(0, 0, 0, 0.6);
+  transition: background-color .5s;
 }
 [data-tense="past"] #game {
   background-color: #4e0007;
+}
+[data-tense="past"] * {
+  cursor: not-allowed;
+}
+[data-tense="past"] #replay {
+  cursor: default;
 }
 @keyframes wobble {
   0% { transform: translateX(0%); }

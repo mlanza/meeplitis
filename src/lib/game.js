@@ -4,6 +4,7 @@ import $ from "./atomic_/reactives.js";
 export const IGame = _.protocol({
   perspective: null,
   up: null, //returns the seat(s) which are required to move
+  may: null, //returns the seat(s) which have the option to move
   seats: null,
   events: null,
   moves: null, //what commands can seats/players do?
@@ -15,6 +16,7 @@ export const IGame = _.protocol({
 
 export const irreversible = IGame.irreversible;
 export const up = IGame.up;
+export const may = IGame.may;
 export const seats = IGame.seats;
 export const fold = IGame.fold;
 export const events = IGame.events;
@@ -162,7 +164,7 @@ export function perspectives(self){
 }
 
 export function notify(curr, prior){
-  return _.difference(up(curr), prior ? up(prior) : []);
+  return _.difference(_.chain(curr, up), _.maybe(prior, up) || []);
 }
 
 export function everyone(self){
@@ -172,6 +174,7 @@ export function everyone(self){
 export function summarize([curr, prior]){ //use $.hist
   return {
     up: up(curr),
+    may: may(curr),
     notify: notify(curr, prior),
     added: added(curr, prior),
     perspectives: perspectives(curr),

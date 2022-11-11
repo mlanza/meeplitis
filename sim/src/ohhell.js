@@ -56,22 +56,22 @@ function overload() {
     };
 }
 function comp() {
-    const fs = arguments, start1 = fs.length - 2, f1 = fs[fs.length - 1];
+    const fs = arguments, start = fs.length - 2, f = fs[fs.length - 1];
     return function() {
-        let memo = f1.apply(this, arguments);
-        for(let i = start1; i > -1; i--){
-            const f = fs[i];
-            memo = f.call(this, memo);
+        let memo = f.apply(this, arguments);
+        for(let i = start; i > -1; i--){
+            const f1 = fs[i];
+            memo = f1.call(this, memo);
         }
         return memo;
     };
 }
-function pipeN(f2, ...fs) {
+function pipeN(f, ...fs) {
     return function() {
-        let memo = f2.apply(this, arguments);
+        let memo = f.apply(this, arguments);
         for(let i = 0; i < fs.length; i++){
-            const f = fs[i];
-            memo = f.call(this, memo);
+            const f1 = fs[i];
+            memo = f1.call(this, memo);
         }
         return memo;
     };
@@ -94,11 +94,11 @@ function handle() {
         return fallback.apply(this, arguments);
     };
 }
-function assume(pred, obj1, f) {
+function assume(pred, obj, f) {
     return handle([
         pred,
         f
-    ], partial(f, obj1));
+    ], partial(f, obj));
 }
 function subj(f, len) {
     const length = len || f.length;
@@ -169,9 +169,9 @@ function deferring(f) {
 function factory(f, ...args) {
     return deferring(partial(f, ...args));
 }
-function multi(dispatch1) {
+function multi(dispatch) {
     return function(...args) {
-        const f = dispatch1.apply(this, args);
+        const f = dispatch.apply(this, args);
         if (!f) {
             throw Error("Failed dispatch");
         }
@@ -187,13 +187,13 @@ function tee(f) {
 function see(...labels) {
     return tee(partial(console.log, ...labels));
 }
-function doto(obj2, ...effects) {
+function doto(obj, ...effects) {
     const len = effects.length;
     for(let i = 0; i < len; i++){
         const effect = effects[i];
-        effect(obj2);
+        effect(obj);
     }
-    return obj2;
+    return obj;
 }
 function does(...effects) {
     const len = effects.length;
@@ -261,15 +261,15 @@ function memoize1(f) {
         return JSON.stringify(args);
     });
 }
-function memoize2(f, hash1) {
-    const cache1 = {};
+function memoize2(f, hash) {
+    const cache = {};
     return function() {
-        const key1 = hash1.apply(this, arguments);
-        if (cache1.hasOwnProperty(key1)) {
-            return cache1[key1];
+        const key = hash.apply(this, arguments);
+        if (cache.hasOwnProperty(key)) {
+            return cache[key];
         } else {
             const result = f.apply(this, arguments);
-            cache1[key1] = result;
+            cache[key] = result;
             return result;
         }
     };
@@ -286,8 +286,8 @@ function toggles5(on, off, _, self, want) {
 }
 const toggles = overload(null, null, null, null, toggles4, toggles5);
 function detach(method) {
-    return function(obj3, ...args) {
-        return obj3[method](...args);
+    return function(obj, ...args) {
+        return obj[method](...args);
     };
 }
 function attach(f) {
@@ -370,8 +370,8 @@ function fold(f, init, xs) {
     let memo = init, to = xs.length - 1, r = {};
     for(let i = 0; i <= to; i++){
         if (memo === r) break;
-        memo = f(memo, xs[i], function(reduced) {
-            return r = reduced;
+        memo = f(memo, xs[i], function(reduced1) {
+            return r = reduced1;
         });
     }
     return memo;
@@ -380,47 +380,47 @@ function foldkv(f, init, xs) {
     let memo = init, len = xs.length, r = {};
     for(let i = 0; i < len; i++){
         if (memo === r) break;
-        memo = f(memo, i, xs[i], function(reduced) {
-            return r = reduced;
+        memo = f(memo, i, xs[i], function(reduced1) {
+            return r = reduced1;
         });
     }
     return memo;
 }
 function posn(...xfs) {
     return function(arr) {
-        return foldkv(function(memo, idx1, xf) {
-            const val1 = arr[idx1];
-            memo.push(xf ? xf(val1) : val1);
+        return foldkv(function(memo, idx, xf) {
+            const val = arr[idx];
+            memo.push(xf ? xf(val) : val);
             return memo;
         }, [], xfs);
     };
 }
 function signature(...preds) {
     return function(...values) {
-        return foldkv(function(memo, idx4, pred, reduced) {
-            return memo ? !pred || pred(values[idx4]) : reduced(memo);
+        return foldkv(function(memo, idx, pred, reduced1) {
+            return memo ? !pred || pred(values[idx]) : reduced1(memo);
         }, preds.length === values.length, preds);
     };
 }
 function signatureHead(...preds) {
     return function(...values) {
-        return foldkv(function(memo, idx5, value, reduced) {
-            let pred = preds[idx5];
-            return memo ? !pred || pred(value) : reduced(memo);
+        return foldkv(function(memo, idx, value, reduced1) {
+            let pred = preds[idx];
+            return memo ? !pred || pred(value) : reduced1(memo);
         }, true, values);
     };
 }
 function and(...preds) {
     return function(...args) {
-        return fold(function(memo, pred, reduced) {
-            return memo ? pred(...args) : reduced(memo);
+        return fold(function(memo, pred, reduced1) {
+            return memo ? pred(...args) : reduced1(memo);
         }, true, preds);
     };
 }
 function or(...preds) {
     return function(...args) {
-        return fold(function(memo, pred, reduced) {
-            return memo ? reduced(memo) : pred(...args);
+        return fold(function(memo, pred, reduced1) {
+            return memo ? reduced1(memo) : pred(...args);
         }, false, preds);
     };
 }
@@ -435,26 +435,26 @@ function isIdentical(x, y) {
 }
 function everyPred(...preds) {
     return function() {
-        return fold(function(memo1, arg) {
-            return fold(function(memo, pred, reduced) {
+        return fold(function(memo, arg) {
+            return fold(function(memo, pred, reduced1) {
                 let result = memo && pred(arg);
-                return result ? result : reduced(result);
-            }, memo1, preds);
+                return result ? result : reduced1(result);
+            }, memo, preds);
         }, true, slice(arguments));
     };
 }
-function someFn1(p1) {
+function someFn1(p) {
     function f1(x) {
-        return p1(x);
+        return p(x);
     }
     function f2(x, y) {
-        return p1(x) || p1(y);
+        return p(x) || p(y);
     }
     function f3(x, y, z) {
-        return p1(x) || p1(y) || p1(z);
+        return p(x) || p(y) || p(z);
     }
     function fn(x, y, z, ...args) {
-        return f3(x, y, z) || some(p1, args);
+        return f3(x, y, z) || some(p, args);
     }
     return overload(constantly(null), f1, f2, f3, fn);
 }
@@ -492,47 +492,47 @@ const folding = overload(null, folding1, folding2);
 const all = overload(null, identity, both, folding1(both));
 const any = overload(null, identity, either, folding1(either));
 function everyPair(pred, xs) {
-    let every1 = xs.length > 0;
-    while(every1 && xs.length > 1){
-        every1 = pred(xs[0], xs[1]);
+    let every = xs.length > 0;
+    while(every && xs.length > 1){
+        every = pred(xs[0], xs[1]);
         xs = slice(xs, 1);
     }
-    return every1;
+    return every;
 }
-function addMeta(target, key2, value) {
+function addMeta(target, key, value) {
     try {
-        Object.defineProperty(target, key2, {
+        Object.defineProperty(target, key, {
             configurable: true,
             enumerable: false,
             writable: true,
             value: value
         });
     } catch (ex) {
-        target[key2] = value;
+        target[key] = value;
     }
 }
 const TEMPLATE = Symbol("@protocol-template"), INDEX = Symbol("@protocol-index"), MISSING = Symbol("@protocol-missing");
-function protocol(template1) {
-    const p3 = new Protocol({}, {});
-    p3.extend(template1);
-    return p3;
+function protocol(template) {
+    const p = new Protocol({}, {});
+    p.extend(template);
+    return p;
 }
-function Protocol(template2, index1) {
-    this[INDEX] = index1;
-    this[TEMPLATE] = template2;
+function Protocol(template, index) {
+    this[INDEX] = index;
+    this[TEMPLATE] = template;
 }
-function extend$1(template3) {
-    for(let method in template3){
+function extend$1(template) {
+    for(let method in template){
         this[method] = this.dispatch(method);
     }
-    Object.assign(this[TEMPLATE], template3);
+    Object.assign(this[TEMPLATE], template);
 }
 function dispatch(method) {
-    const protocol1 = this;
+    const protocol = this;
     return function(self, ...args) {
-        const f = satisfies2.call(protocol1, method, self);
+        const f = satisfies2.call(protocol, method, self);
         if (!f) {
-            throw new ProtocolLookupError(protocol1, method, self, args);
+            throw new ProtocolLookupError(protocol, method, self, args);
         }
         return f.apply(null, [
             self
@@ -540,10 +540,10 @@ function dispatch(method) {
     };
 }
 function generate$1() {
-    const index5 = this[INDEX];
+    const index = this[INDEX];
     return function(method) {
-        const sym = index5[method] || Symbol(method);
-        index5[method] = sym;
+        const sym = index[method] || Symbol(method);
+        index[method] = sym;
         return sym;
     };
 }
@@ -551,9 +551,9 @@ function keys$c() {
     return Object.keys(this[TEMPLATE]);
 }
 function specify1(behavior) {
-    const protocol2 = this;
+    const protocol = this;
     return function(target) {
-        specify2.call(protocol2, behavior, target);
+        specify2.call(protocol, behavior, target);
     };
 }
 function specify2(behavior, target) {
@@ -566,36 +566,36 @@ function specify2(behavior, target) {
     if (target == null) {
         throw new Error("Subject not specified.");
     }
-    const keys = this.generate();
-    addMeta(target, keys("__marker__"), this);
+    const keys1 = this.generate();
+    addMeta(target, keys1("__marker__"), this);
     for(let method in behavior){
         if (!this[method]) {
             throw new Error("Foreign behavior specified: " + method);
         }
-        addMeta(target, keys(method), behavior[method]);
+        addMeta(target, keys1(method), behavior[method]);
     }
 }
 const specify$1 = overload(null, specify1, specify2);
 function unspecify1(behavior) {
-    const protocol3 = this;
+    const protocol = this;
     return function(target) {
-        unspecify2.call(protocol3, behavior, target);
+        unspecify2.call(protocol, behavior, target);
     };
 }
 function unspecify2(behavior, target) {
-    const keys = this.generate();
-    addMeta(target, keys("__marker__"), undefined);
+    const keys1 = this.generate();
+    addMeta(target, keys1("__marker__"), undefined);
     for(let method in behavior){
-        addMeta(target, keys(method), undefined);
+        addMeta(target, keys1(method), undefined);
     }
 }
 const unspecify$1 = overload(null, unspecify1, unspecify2);
 function implement0() {
     return implement1.call(this, {});
 }
-function implement1(obj4) {
-    const behavior = obj4.behaves ? obj4.behaves(this) : obj4;
-    if (obj4.behaves && !behavior) {
+function implement1(obj) {
+    const behavior = obj.behaves ? obj.behaves(this) : obj;
+    if (obj.behaves && !behavior) {
         throw new Error("Unable to borrow behavior.");
     }
     return Object.assign(implement2.bind(this, behavior), {
@@ -614,13 +614,13 @@ const implement$1 = overload(implement0, implement1, implement2);
 function satisfies0() {
     return this.satisfies.bind(this);
 }
-function satisfies1(obj5) {
-    const target = obj5 == null ? new Nil() : obj5, key3 = this[INDEX]["__marker__"] || MISSING;
-    return target[key3] || (target.constructor === Object ? target.constructor[key3] : null);
+function satisfies1(obj) {
+    const target = obj == null ? new Nil() : obj, key = this[INDEX]["__marker__"] || MISSING;
+    return target[key] || (target.constructor === Object ? target.constructor[key] : null);
 }
-function satisfies2(method, obj6) {
-    const target = obj6 == null ? new Nil() : obj6, key4 = this[INDEX][method] || MISSING;
-    return target[key4] || (target.constructor === Object ? target.constructor[key4] : null) || this[TEMPLATE][method];
+function satisfies2(method, obj) {
+    const target = obj == null ? new Nil() : obj, key = this[INDEX][method] || MISSING;
+    return target[key] || (target.constructor === Object ? target.constructor[key] : null) || this[TEMPLATE][method];
 }
 const satisfies$1 = overload(satisfies0, satisfies1, satisfies2);
 Object.assign(Protocol.prototype, {
@@ -634,8 +634,8 @@ Object.assign(Protocol.prototype, {
     satisfies: satisfies$1
 });
 Protocol.prototype[Symbol.toStringTag] = "Protocol";
-function ProtocolLookupError(protocol4, method, subject, args) {
-    this.protocol = protocol4;
+function ProtocolLookupError(protocol, method, subject, args) {
+    this.protocol = protocol;
     this.method = method;
     this.subject = subject;
     this.args = args;
@@ -650,26 +650,26 @@ const satisfies = unbind(Protocol.prototype.satisfies);
 const specify = unbind(Protocol.prototype.specify);
 const unspecify = unbind(Protocol.prototype.unspecify);
 const implement = unbind(Protocol.prototype.implement);
-function reifiable(properties1) {
+function reifiable(properties) {
     function Reifiable(properties) {
         Object.assign(this, properties);
     }
-    return new Reifiable(properties1 || {});
+    return new Reifiable(properties || {});
 }
-function behaves(behaviors1, env, callback) {
-    for(let key5 in behaviors1){
-        if (key5 in env) {
-            const type1 = env[key5], behave1 = behaviors1[key5];
-            callback && callback(type1, key5, behave1);
-            behave1(type1);
+function behaves(behaviors, env, callback) {
+    for(let key in behaviors){
+        if (key in env) {
+            const type = env[key], behave = behaviors[key];
+            callback && callback(type, key, behave);
+            behave(type);
         }
     }
 }
-function forward1(key6) {
+function forward1(key) {
     return function forward(f) {
         return function(self, ...args) {
             return f.apply(this, [
-                self[key6],
+                self[key],
                 ...args
             ]);
         };
@@ -677,12 +677,12 @@ function forward1(key6) {
 }
 function forwardN(target, ...protocols) {
     const fwd = forward1(target);
-    const behavior = fold(function(memo2, protocol5) {
-        memo2.push(implement(protocol5, fold(function(memo, key7) {
-            memo[key7] = fwd(protocol5[key7]);
+    const behavior = fold(function(memo, protocol) {
+        memo.push(implement(protocol, fold(function(memo, key) {
+            memo[key] = fwd(protocol[key]);
             return memo;
-        }, {}, protocol5.keys() || [])));
-        return memo2;
+        }, {}, protocol.keys() || [])));
+        return memo;
     }, [], protocols);
     return does(...behavior);
 }
@@ -721,23 +721,23 @@ const ISwappable = protocol({
     swap: null
 });
 const invoke$3 = IFn.invoke;
-function invokable(obj7) {
-    let state = obj7;
-    function invoke1(self, ...args) {
+function invokable(obj) {
+    let state = obj;
+    function invoke(self, ...args) {
         return IFn.invoke(state, ...args);
     }
-    function swap1(self, f) {
+    function swap(self, f) {
         state = f(state);
     }
-    function deref1(self) {
+    function deref(self) {
         return state;
     }
-    return doto(partial(invoke1, null), specify(IFn, {
-        invoke: invoke1
+    return doto(partial(invoke, null), specify(IFn, {
+        invoke
     }), specify(ISwappable, {
-        swap: swap1
+        swap
     }), specify(IDeref, {
-        deref: deref1
+        deref
     }));
 }
 const IMapEntry = protocol({
@@ -770,9 +770,9 @@ function hash$7(self) {
     } else if (self[cache]) {
         return self[cache];
     }
-    const hash2 = satisfies(IHashable, "hash", self);
-    if (hash2) {
-        const hashcode = hash2(self);
+    const hash = satisfies(IHashable, "hash", self);
+    if (hash) {
+        const hashcode = hash(self);
         return Object.isFrozen(self) ? hashcode : self[cache] = hashcode;
     } else {
         hashTag()(self);
@@ -807,19 +807,19 @@ function keying(label) {
         Type[Symbol.toStringTag] = label;
     } : noop);
 }
-function Multimethod(dispatch2, methods, fallback) {
-    this.dispatch = dispatch2;
+function Multimethod(dispatch, methods, fallback) {
+    this.dispatch = dispatch;
     this.methods = methods;
     this.fallback = fallback;
 }
-function multimethod(dispatch3, fallback) {
-    return new Multimethod(dispatch3, {}, fallback);
+function multimethod(dispatch, fallback) {
+    return new Multimethod(dispatch, {}, fallback);
 }
-function addMethod(self, key8, handler) {
-    const hashcode = hash$7(key8);
+function addMethod(self, key, handler) {
+    const hashcode = hash$7(key);
     const potentials = self.methods[hashcode] = self.methods[hashcode] || [];
     potentials.push([
-        key8,
+        key,
         handler
     ]);
     return self;
@@ -968,8 +968,8 @@ function log$1(...args) {
 const ILogger = protocol({
     log: log$1
 });
-function lookup$9(self, key9) {
-    return self && self[key9];
+function lookup$9(self, key) {
+    return self && self[key];
 }
 const ILookup = protocol({
     lookup: lookup$9
@@ -996,88 +996,88 @@ function reducekv3(f, init, coll) {
 const reducekv$a = overload(null, null, reducekv2, reducekv3);
 const first$d = ISeq.first;
 const rest$d = ISeq.rest;
-function get(self, key10, notFound) {
-    const found = ILookup.lookup(self, key10);
+function get(self, key, notFound) {
+    const found = ILookup.lookup(self, key);
     return found == null ? notFound == null ? null : notFound : found;
 }
-function getIn(self, keys, notFound) {
-    const found = reduce$e(get, self, keys);
+function getIn(self, keys1, notFound) {
+    const found = reduce$e(get, self, keys1);
     return found == null ? notFound == null ? null : notFound : found;
 }
-function assocN(self, key11, value, ...args) {
-    const instance = IAssociative.assoc(self, key11, value);
+function assocN(self, key, value, ...args) {
+    const instance = IAssociative.assoc(self, key, value);
     return args.length > 0 ? assocN(instance, ...args) : instance;
 }
 const assoc$8 = overload(null, null, null, IAssociative.assoc, assocN);
-function assocIn(self, keys, value) {
-    let key12 = keys[0];
-    switch(keys.length){
+function assocIn(self, keys1, value) {
+    let key = keys1[0];
+    switch(keys1.length){
         case 0:
             return self;
         case 1:
-            return IAssociative.assoc(self, key12, value);
+            return IAssociative.assoc(self, key, value);
         default:
-            return IAssociative.assoc(self, key12, assocIn(get(self, key12), toArray(rest$d(keys)), value));
+            return IAssociative.assoc(self, key, assocIn(get(self, key), toArray(rest$d(keys1)), value));
     }
 }
-function update3(self, key13, f) {
-    return IAssociative.assoc(self, key13, f(get(self, key13)));
+function update3(self, key, f) {
+    return IAssociative.assoc(self, key, f(get(self, key)));
 }
-function update4(self, key14, f, a) {
-    return IAssociative.assoc(self, key14, f(get(self, key14), a));
+function update4(self, key, f, a) {
+    return IAssociative.assoc(self, key, f(get(self, key), a));
 }
-function update5(self, key15, f, a, b) {
-    return IAssociative.assoc(self, key15, f(get(self, key15), a, b));
+function update5(self, key, f, a, b) {
+    return IAssociative.assoc(self, key, f(get(self, key), a, b));
 }
-function update6(self, key16, f, a, b, c) {
-    return IAssociative.assoc(self, key16, f(get(self, key16), a, b, c));
+function update6(self, key, f, a, b, c) {
+    return IAssociative.assoc(self, key, f(get(self, key), a, b, c));
 }
-function updateN(self, key17, f) {
-    let tgt = get(self, key17), args = [
+function updateN(self, key, f) {
+    let tgt = get(self, key), args = [
         tgt
     ].concat(slice(arguments, 3));
-    return IAssociative.assoc(self, key17, f.apply(this, args));
+    return IAssociative.assoc(self, key, f.apply(this, args));
 }
 const update = overload(null, null, null, update3, update4, update5, update6, updateN);
-function updateIn3(self, keys, f) {
-    let k = keys[0], ks = toArray(rest$d(keys));
+function updateIn3(self, keys1, f) {
+    let k = keys1[0], ks = toArray(rest$d(keys1));
     return ks.length ? IAssociative.assoc(self, k, updateIn3(get(self, k), ks, f)) : update3(self, k, f);
 }
-function updateIn4(self, keys, f, a) {
-    let k = keys[0], ks = toArray(rest$d(keys));
+function updateIn4(self, keys1, f, a) {
+    let k = keys1[0], ks = toArray(rest$d(keys1));
     return ks.length ? IAssociative.assoc(self, k, updateIn4(get(self, k), ks, f, a)) : update4(self, k, f, a);
 }
-function updateIn5(self, keys, f, a, b) {
-    let k = keys[0], ks = toArray(rest$d(keys));
+function updateIn5(self, keys1, f, a, b) {
+    let k = keys1[0], ks = toArray(rest$d(keys1));
     return ks.length ? IAssociative.assoc(self, k, updateIn5(get(self, k), ks, f, a, b)) : update5(self, k, f, a, b);
 }
 function updateIn6(self, key, f, a, b, c) {
     let k = keys[0], ks = toArray(rest$d(keys));
     return ks.length ? IAssociative.assoc(self, k, updateIn6(get(self, k), ks, f, a, b, c)) : update6(self, k, f, a, b, c);
 }
-function updateInN(self, keys, f) {
-    return updateIn3(self, keys, function(obj8, ...args) {
+function updateInN(self, keys1, f) {
+    return updateIn3(self, keys1, function(obj, ...args) {
         return f.apply(null, [
-            obj8
+            obj
         ].concat(args));
     });
 }
-function contains3(self, key18, value) {
-    return IAssociative.contains(self, key18) && get(self, key18) === value;
+function contains3(self, key, value) {
+    return IAssociative.contains(self, key) && get(self, key) === value;
 }
 const contains$8 = overload(null, null, IAssociative.contains, contains3);
 const updateIn = overload(null, null, null, updateIn3, updateIn4, updateIn5, updateIn6, updateInN);
 const rewrite = branch(IAssociative.contains, update, identity);
-const prop = overload(null, function(key19) {
+const prop = overload(null, function(key) {
     return overload(null, function(v) {
-        return get(v, key19);
+        return get(v, key);
     }, function(v) {
-        return assoc$8(v, key19, v);
+        return assoc$8(v, key, v);
     });
 }, get, assoc$8);
 function patch2(target, source) {
-    return reducekv$a(function(memo, key20, value) {
-        return assoc$8(memo, key20, typeof value === "function" ? value(get(memo, key20)) : value);
+    return reducekv$a(function(memo, key, value) {
+        return assoc$8(memo, key, typeof value === "function" ? value(get(memo, key)) : value);
     }, target, source);
 }
 const patch = overload(null, identity, patch2, reducing(patch2));
@@ -1085,8 +1085,8 @@ function merge$5(target, source) {
     return reducekv$a(assoc$8, target, source);
 }
 function mergeWith3(f, init, x) {
-    return reducekv$a(function(memo, key21, value) {
-        return assoc$8(memo, key21, contains$8(memo, key21) ? f(get(memo, key21), value) : f(value));
+    return reducekv$a(function(memo, key, value) {
+        return assoc$8(memo, key, contains$8(memo, key) ? f(get(memo, key), value) : f(value));
     }, init, x);
 }
 function mergeWithN(f, init, ...xs) {
@@ -1209,18 +1209,18 @@ function equiv$a(self, other) {
 function alike2(self, other) {
     return alike3(self, other, Object.keys(self));
 }
-function alike3(self, other, keys) {
-    return reduce$e(function(memo, key22) {
-        return memo ? equiv$a(self[key22], other[key22]) : reduced$1(memo);
-    }, true, keys);
+function alike3(self, other, keys1) {
+    return reduce$e(function(memo, key) {
+        return memo ? equiv$a(self[key], other[key]) : reduced$1(memo);
+    }, true, keys1);
 }
 const alike = overload(null, null, alike2, alike3);
 function equivalent() {
-    function equiv1(self, other) {
+    function equiv(self, other) {
         return kin(self, other) && alike(self, other);
     }
     return implement(IEquiv, {
-        equiv: equiv1
+        equiv
     });
 }
 function eqN(...args) {
@@ -1310,28 +1310,28 @@ function gteN(...args) {
 }
 const gte = overload(constantly(false), constantly(true), gte2, gteN);
 var _, _IAddable$add, _IAddable, _2, _IAddable$add2, _IAddable2;
-function directed(start2, step) {
-    return compare$6(IAddable.add(start2, step), start2);
+function directed(start, step) {
+    return compare$6(IAddable.add(start, step), start);
 }
 function steps(Type, pred) {
-    return function(start3, end1, step) {
-        if (start3 == null && end1 == null) {
+    return function(start, end, step) {
+        if (start == null && end == null) {
             return new Type();
         }
-        if (start3 != null && !pred(start3)) {
+        if (start != null && !pred(start)) {
             throw Error(Type.name + " passed invalid start value.");
         }
-        if (end1 != null && !pred(end1)) {
+        if (end != null && !pred(end)) {
             throw Error(Type.name + " passed invalid end value.");
         }
-        if (start3 == null && end1 != null) {
+        if (start == null && end != null) {
             throw Error(Type.name + " cannot get started without a beginning.");
         }
-        const direction = directed(start3, step);
+        const direction = directed(start, step);
         if (direction === 0) {
             throw Error(Type.name + " lacks direction.");
         }
-        return new Type(start3, end1, step, direction);
+        return new Type(start, end, step, direction);
     };
 }
 function subtract2(self, n) {
@@ -1386,8 +1386,8 @@ function isOdd(n) {
     return !!(n % 2);
 }
 const isEven = complement(isOdd);
-function clamp(self, min1, max1) {
-    return self < min1 ? min1 : self > max1 ? max1 : self;
+function clamp(self, min, max) {
+    return self < min ? min : self > max ? max : self;
 }
 function rand0() {
     return Math.random();
@@ -1530,10 +1530,10 @@ function list(...args) {
     }, emptyList(), args.reverse());
 }
 const merge$4 = overload(null, identity, IMergable.merge, reducing(IMergable.merge));
-function assoc$7(self, key23, value) {
-    const obj9 = {};
-    obj9[key23] = value;
-    return obj9;
+function assoc$7(self, key, value) {
+    const obj = {};
+    obj[key] = value;
+    return obj;
 }
 function reduce$c(self, f, init) {
     return init;
@@ -1601,19 +1601,19 @@ var behave$D = does(keying("Nil"), implement(IHashable, {
 behave$D(Nil);
 const deref$b = IDeref.deref;
 const fmap$b = overload(constantly(identity), IFunctor.fmap, reducing(IFunctor.fmap));
-function thrushN(unit1, init, ...fs) {
-    return deref$b(reduce$e(IFunctor.fmap, unit1(init), fs));
+function thrushN(unit, init, ...fs) {
+    return deref$b(reduce$e(IFunctor.fmap, unit(init), fs));
 }
 function thrush1(f) {
     return overload(null, f, partial(thrushN, f));
 }
 const thrush = overload(null, thrush1, thrushN);
-function pipeline1(unit2) {
-    return partial(pipelineN, unit2);
+function pipeline1(unit) {
+    return partial(pipelineN, unit);
 }
-function pipelineN(unit3, ...fs) {
+function pipelineN(unit, ...fs) {
     return function(init) {
-        return thrush(unit3, init, ...fs);
+        return thrush(unit, init, ...fs);
     };
 }
 const pipeline = overload(null, pipeline1, pipelineN);
@@ -1631,9 +1631,9 @@ const maybe = thrush(maybe1);
 const opt = pipeline(maybe1);
 const inverse$1 = IInversive.inverse;
 const seq$a = ISeqable.seq;
-function Range(start4, end2, step, direction) {
-    this.start = start4;
-    this.end = end2;
+function Range(start, end, step, direction) {
+    this.start = start;
+    this.end = end;
     this.step = step;
     this.direction = direction;
 }
@@ -1643,11 +1643,11 @@ function emptyRange() {
 function range0() {
     return range1(Number.POSITIVE_INFINITY);
 }
-function range1(end3) {
-    return range3(0, end3, 1);
+function range1(end) {
+    return range3(0, end, 1);
 }
-function range2(start5, end4) {
-    return range3(start5, end4, 1);
+function range2(start, end) {
+    return range3(start, end, 1);
 }
 const range3 = steps(Range, isNumber);
 const range = overload(range0, range1, range2, range3);
@@ -1656,8 +1656,8 @@ function emptyString() {
     return "";
 }
 var _param$2, _upperCase, _replace;
-function isBlank(str3) {
-    return str3 == null || typeof str3 === "string" && str3.trim().length === 0;
+function isBlank(str) {
+    return str == null || typeof str === "string" && str.trim().length === 0;
 }
 function str1(x) {
     return x == null ? "" : x.toString();
@@ -1665,8 +1665,8 @@ function str1(x) {
 function str2(x, y) {
     return str1(x) + str1(y);
 }
-function camelToDashed(str4) {
-    return str4.replace(/[A-Z]/, function(x) {
+function camelToDashed(str) {
+    return str.replace(/[A-Z]/, function(x) {
         return "-" + x.toLowerCase();
     });
 }
@@ -1781,8 +1781,8 @@ function Concatenated(colls) {
 Concatenated.prototype[Symbol.toStringTag] = "Concatenated";
 const keys$b = IMap.keys;
 const vals$5 = IMap.vals;
-function dissocN(obj10, ...keys) {
-    return reduce$e(IMap.dissoc, obj10, keys);
+function dissocN(obj, ...keys1) {
+    return reduce$e(IMap.dissoc, obj, keys1);
 }
 const dissoc$5 = overload(null, identity, IMap.dissoc, dissocN);
 const nth$6 = IIndexed.nth;
@@ -1820,10 +1820,10 @@ function mapArgs(xf, f) {
         }), slice(arguments)));
     };
 }
-function keyed(f, keys) {
-    return reduce$e(function(memo, key24) {
-        return assoc$8(memo, key24, f(key24));
-    }, {}, keys);
+function keyed(f, keys1) {
+    return reduce$e(function(memo, key) {
+        return assoc$8(memo, key, f(key));
+    }, {}, keys1);
 }
 function transduce3(xform, f, coll) {
     return transduce4(xform, f, f(), coll);
@@ -1888,21 +1888,21 @@ function doseqN(f, xs, ...colls) {
 }
 const doseq = overload(null, null, each, doseq3, doseq4, doseqN);
 function eachkv(f, xs) {
-    each(function([key25, value]) {
-        return f(key25, value);
+    each(function([key, value]) {
+        return f(key, value);
     }, entries(xs));
 }
 function eachvk(f, xs) {
-    each(function([key26, value]) {
-        return f(value, key26);
+    each(function([key, value]) {
+        return f(value, key);
     }, entries(xs));
 }
-function entries2(xs, keys) {
-    return seq$a(keys) ? lazySeq(function() {
+function entries2(xs, keys1) {
+    return seq$a(keys1) ? lazySeq(function() {
         return cons([
-            first$d(keys),
-            get(xs, first$d(keys))
-        ], entries2(xs, rest$d(keys)));
+            first$d(keys1),
+            get(xs, first$d(keys1))
+        ], entries2(xs, rest$d(keys1)));
     }) : emptyList();
 }
 function entries1(xs) {
@@ -1910,13 +1910,13 @@ function entries1(xs) {
 }
 const entries = overload(null, entries1, entries2);
 function mapkv(f, xs) {
-    return map(function([key27, value]) {
-        return f(key27, value);
+    return map(function([key, value]) {
+        return f(key, value);
     }, entries(xs));
 }
 function mapvk(f, xs) {
-    return map(function([key28, value]) {
-        return f(value, key28);
+    return map(function([key, value]) {
+        return f(value, key);
     }, entries(xs));
 }
 function seek(...fs) {
@@ -1979,11 +1979,11 @@ function cycle(coll) {
         return cons(first$d(coll), concat(rest$d(coll), cycle(coll)));
     }) : emptyList();
 }
-function treeSeq(branch1, children1, root1) {
+function treeSeq(branch, children, root) {
     function walk(node) {
-        return cons(node, branch1(node) ? mapcat(walk, children1(node)) : emptyList());
+        return cons(node, branch(node) ? mapcat(walk, children(node)) : emptyList());
     }
-    return walk(root1);
+    return walk(root);
 }
 function flatten(coll) {
     return filter(complement(satisfies(ISequential$1)), rest$d(treeSeq(satisfies(ISequential$1), seq$a, coll)));
@@ -2085,10 +2085,10 @@ const partitionAll = overload(null, partitionAll1, partitionAll2, partitionAll3)
 function partitionBy(f, xs) {
     const coll = seq$a(xs);
     if (!coll) return xs;
-    const head = first$d(coll), val2 = f(head), run1 = cons(head, takeWhile(function(x) {
-        return val2 === f(x);
+    const head = first$d(coll), val = f(head), run = cons(head, takeWhile(function(x) {
+        return val === f(x);
     }, next$a(coll)));
-    return cons(run1, partitionBy(f, seq$a(drop(count$b(run1), coll))));
+    return cons(run, partitionBy(f, seq$a(drop(count$b(run), coll))));
 }
 function last1(coll) {
     let xs = coll, ys = null;
@@ -2115,14 +2115,14 @@ function dedupe1(coll) {
 function dedupe2(f, coll) {
     return dedupe3(f, equiv$a, coll);
 }
-function dedupe3(f, equiv2, coll) {
+function dedupe3(f, equiv, coll) {
     return seq$a(coll) ? lazySeq(function() {
         let xs = seq$a(coll);
-        const last3 = first$d(xs);
-        while(next$a(xs) && equiv2(f(first$d(next$a(xs))), f(last3))){
+        const last = first$d(xs);
+        while(next$a(xs) && equiv(f(first$d(next$a(xs))), f(last))){
             xs = next$a(xs);
         }
-        return cons(last3, dedupe2(f, next$a(xs)));
+        return cons(last, dedupe2(f, next$a(xs)));
     }) : coll;
 }
 const dedupe = overload(null, dedupe1, dedupe2, dedupe3);
@@ -2148,9 +2148,9 @@ function isEmpty(coll) {
 function notEmpty(coll) {
     return isEmpty(coll) ? null : coll;
 }
-function asc2(compare1, f) {
+function asc2(compare, f) {
     return function(a, b) {
-        return compare1(f(a), f(b));
+        return compare(f(a), f(b));
     };
 }
 function asc1(f) {
@@ -2162,9 +2162,9 @@ function desc0() {
         return compare$6(b, a);
     };
 }
-function desc2(compare2, f) {
+function desc2(compare, f) {
     return function(a, b) {
-        return compare2(f(b), f(a));
+        return compare(f(b), f(a));
     };
 }
 function desc1(f) {
@@ -2174,17 +2174,17 @@ const desc = overload(desc0, desc1, desc2);
 function sort1(coll) {
     return sort2(compare$6, coll);
 }
-function sort2(compare3, coll) {
-    return into([], coll).sort(compare3);
+function sort2(compare, coll) {
+    return into([], coll).sort(compare);
 }
 function sortN(...args) {
     const compares = initial(args), coll = last(args);
-    function compare4(x, y) {
-        return reduce$e(function(memo, compare5) {
-            return memo === 0 ? compare5(x, y) : reduced$1(memo);
+    function compare(x, y) {
+        return reduce$e(function(memo, compare) {
+            return memo === 0 ? compare(x, y) : reduced$1(memo);
         }, 0, compares);
     }
-    return sort2(compare4, coll);
+    return sort2(compare, coll);
 }
 const sort = overload(null, sort1, sort2, sortN);
 function sortBy2(keyFn, coll) {
@@ -2198,9 +2198,9 @@ function sortBy3(keyFn, compare, coll) {
 const sortBy = overload(null, null, sortBy2, sortBy3);
 function withIndex(iter) {
     return function(f, xs) {
-        let idx6 = -1;
+        let idx = -1;
         return iter(function(x) {
-            return f(++idx6, x);
+            return f(++idx, x);
         }, xs);
     };
 }
@@ -2345,17 +2345,17 @@ function shuffle(coll) {
     }
     return a;
 }
-function generate(iterable1) {
-    let iter = iterable1[Symbol.iterator]();
+function generate(iterable) {
+    let iter = iterable[Symbol.iterator]();
     return function() {
         return iter.done ? null : iter.next().value;
     };
 }
-function splice4(self, start6, nix, coll) {
-    return concat(take(start6, self), coll, drop(start6 + nix, self));
+function splice4(self, start, nix, coll) {
+    return concat(take(start, self), coll, drop(start + nix, self));
 }
-function splice3(self, start7, coll) {
-    return splice4(self, start7, 0, coll);
+function splice3(self, start, coll) {
+    return splice4(self, start, 0, coll);
 }
 const splice = overload(null, null, null, splice3, splice4);
 function also(f, xs) {
@@ -2384,16 +2384,16 @@ function groupBy2(f, coll) {
     return groupBy3({}, f, coll);
 }
 const groupBy = overload(null, null, groupBy2, groupBy3);
-function index4(init, key29, val3, coll) {
+function index4(init, key, val, coll) {
     return reduce$e(function(memo, x) {
-        return assoc$8(memo, key29(x), val3(x));
+        return assoc$8(memo, key(x), val(x));
     }, init, coll);
 }
-function index3(key30, val4, coll) {
-    return index4({}, key30, val4, coll);
+function index3(key, val, coll) {
+    return index4({}, key, val, coll);
 }
-function index2(key31, coll) {
-    return index4({}, key31, identity, coll);
+function index2(key, coll) {
+    return index4({}, key, identity, coll);
 }
 const index = overload(null, null, index2, index3, index4);
 function coalesce(...fs) {
@@ -2462,9 +2462,9 @@ function iterator() {
 function iterable(Type) {
     Type.prototype[Symbol.iterator] = iterator;
 }
-function find$4(coll, key32) {
+function find$4(coll, key) {
     return reducekv$9(coll, function(memo, k, v) {
-        return key32 === k ? reduced$1([
+        return key === k ? reduced$1([
             k,
             v
         ]) : memo;
@@ -2480,13 +2480,13 @@ function next$9(self) {
     return seq$a(rest$d(self));
 }
 function nth$5(self, n) {
-    let xs = self, idx7 = 0;
+    let xs = self, idx = 0;
     while(xs){
         let x = first$d(xs);
-        if (idx7 === n) {
+        if (idx === n) {
             return x;
         }
-        idx7++;
+        idx++;
         xs = next$a(xs);
     }
     return null;
@@ -2511,9 +2511,9 @@ function reduce$b(xs, f, init) {
     return unreduced(memo);
 }
 function reducekv$9(xs, f, init) {
-    let memo = init, ys = seq$a(xs), idx8 = 0;
+    let memo = init, ys = seq$a(xs), idx = 0;
     while(ys && !isReduced(memo)){
-        memo = f(memo, idx8++, first$d(ys));
+        memo = f(memo, idx++, first$d(ys));
         ys = next$a(ys);
     }
     return unreduced(memo);
@@ -2580,12 +2580,12 @@ var lazyseq = does(iterable, iequiv, reductive, keying("LazySeq"), implement(ISe
     next: next$9
 }));
 lazyseq(LazySeq);
-function Multimap(attrs, empty1) {
+function Multimap(attrs, empty) {
     this.attrs = attrs;
-    this.empty = empty1;
+    this.empty = empty;
 }
-function multimap(attrs, empty2) {
-    return new Multimap(attrs || {}, empty2 || function() {
+function multimap(attrs, empty) {
+    return new Multimap(attrs || {}, empty || function() {
         return [];
     });
 }
@@ -2594,11 +2594,11 @@ const clone$4 = IClonable.clone;
 function coerce(self, Type) {
     return is(Type, Object) ? self.attrs : coerce$1(self.attrs, Type);
 }
-function contains$7(self, key33) {
-    return self.attrs.hasOwnProperty(key33);
+function contains$7(self, key) {
+    return self.attrs.hasOwnProperty(key);
 }
-function lookup$8(self, key34) {
-    return get(self.attrs, key34);
+function lookup$8(self, key) {
+    return get(self.attrs, key);
 }
 function seq$8(self) {
     return seq$a(self.attrs);
@@ -2618,19 +2618,19 @@ function keys$a(self) {
 function vals$4(self) {
     return vals$5(self.attrs);
 }
-function assoc$6(self, key35, value) {
+function assoc$6(self, key, value) {
     return Object.assign(clone$4(self), {
-        attrs: assoc$8(self.attrs, key35, value)
+        attrs: assoc$8(self.attrs, key, value)
     });
 }
-function dissoc$4(self, key36) {
+function dissoc$4(self, key) {
     return Object.assign(clone$4(self), {
-        attrs: dissoc$5(self.attrs, key36)
+        attrs: dissoc$5(self.attrs, key)
     });
 }
 function equiv$7(self, other) {
-    return count$b(self) === count$b(other) && reducekv$8(self, function(memo, key37, value) {
-        return memo ? equiv$a(get(other, key37), value) : reduced$1(memo);
+    return count$b(self) === count$b(other) && reducekv$8(self, function(memo, key, value) {
+        return memo ? equiv$a(get(other, key), value) : reduced$1(memo);
     }, true);
 }
 function empty$2(self) {
@@ -2639,16 +2639,16 @@ function empty$2(self) {
     });
 }
 function reduce$a(self, f, init) {
-    return reduce$e(function(memo, key38) {
+    return reduce$e(function(memo, key) {
         return f(memo, [
-            key38,
-            lookup$8(self, key38)
+            key,
+            lookup$8(self, key)
         ]);
     }, init, keys$b(self));
 }
 function reducekv$8(self, f, init) {
-    return reduce$e(function(memo, key39) {
-        return f(memo, key39, lookup$8(self, key39));
+    return reduce$e(function(memo, key) {
+        return f(memo, key, lookup$8(self, key));
     }, init, keys$b(self));
 }
 function construct(Type) {
@@ -2659,11 +2659,11 @@ function construct(Type) {
     };
 }
 function emptyable(Type) {
-    function empty3() {
+    function empty() {
         return new Type();
     }
     implement(IEmptyableCollection, {
-        empty: empty3
+        empty
     }, Type);
 }
 var behave$B = does(emptyable, implement(IReducible, {
@@ -2700,13 +2700,13 @@ function count$8(self) {
     return count$b(seq$7(self));
 }
 function seq$7(self) {
-    return concatenated(map(function(key40) {
+    return concatenated(map(function(key) {
         return map(function(value) {
             return [
-                key40,
+                key,
                 value
             ];
-        }, seq$a(get(self, key40)) || emptyList());
+        }, seq$a(get(self, key)) || emptyList());
     }, keys$9(self)));
 }
 function first$a(self) {
@@ -2715,15 +2715,15 @@ function first$a(self) {
 function rest$a(self) {
     return rest$d(seq$7(self));
 }
-function lookup$7(self, key41) {
-    return get(self.attrs, key41);
+function lookup$7(self, key) {
+    return get(self.attrs, key);
 }
-function assoc$5(self, key42, value) {
-    const values = lookup$7(self, key42) || self.empty(key42);
-    return new self.constructor(assoc$8(self.attrs, key42, conj$8(values, value)), self.empty);
+function assoc$5(self, key, value) {
+    const values = lookup$7(self, key) || self.empty(key);
+    return new self.constructor(assoc$8(self.attrs, key, conj$8(values, value)), self.empty);
 }
-function contains$6(self, key43) {
-    return contains$8(self.attrs, key43);
+function contains$6(self, key) {
+    return contains$8(self.attrs, key);
 }
 function reduce$9(self, f, init) {
     return reduce$e(function(memo, pair) {
@@ -2731,8 +2731,8 @@ function reduce$9(self, f, init) {
     }, init, seq$7(self));
 }
 function reducekv$7(self, f, init) {
-    return reduce$9(self, function(memo, [key44, value]) {
-        return f(memo, key44, value);
+    return reduce$9(self, function(memo, [key, value]) {
+        return f(memo, key, value);
     }, init);
 }
 var behave$A = does(behave$B, keying("Multimap"), implement(IMap, {
@@ -2755,25 +2755,25 @@ var behave$A = does(behave$B, keying("Multimap"), implement(IMap, {
     rest: rest$a
 }));
 behave$A(Multimap);
-function IndexedSeq(seq1, start8) {
-    this.seq = seq1;
-    this.start = start8;
+function IndexedSeq(seq, start) {
+    this.seq = seq;
+    this.start = start;
 }
-function indexedSeq1(seq3) {
-    return indexedSeq2(seq3, 0);
+function indexedSeq1(seq) {
+    return indexedSeq2(seq, 0);
 }
-function indexedSeq2(seq4, start9) {
-    return start9 < count$b(seq4) ? new IndexedSeq(seq4, start9) : emptyList();
+function indexedSeq2(seq, start) {
+    return start < count$b(seq) ? new IndexedSeq(seq, start) : emptyList();
 }
 const indexedSeq = overload(null, indexedSeq1, indexedSeq2);
 IndexedSeq.prototype[Symbol.toStringTag] = "IndexedSeq";
-function RevSeq(coll, idx9) {
+function RevSeq(coll, idx) {
     this.coll = coll;
-    this.idx = idx9;
+    this.idx = idx;
 }
 RevSeq.prototype[Symbol.toStringTag] = "RevSeq";
-function revSeq(coll, idx10) {
-    return new RevSeq(coll, idx10);
+function revSeq(coll, idx) {
+    return new RevSeq(coll, idx);
 }
 function hashSeq(hs) {
     return reduce$e(function(h1, h2) {
@@ -2781,11 +2781,11 @@ function hashSeq(hs) {
     }, 0, map(hash$7, hs));
 }
 function hashKeyed(self) {
-    return reduce$e(function(memo, key45) {
+    return reduce$e(function(memo, key) {
         return hashSeq([
             memo,
-            key45,
-            get(self, key45)
+            key,
+            get(self, key)
         ]);
     }, 0, sort(keys$b(self)));
 }
@@ -2799,17 +2799,17 @@ function key$1(self) {
 function val$1(self) {
     return lookup$6(self, 1);
 }
-function find$3(self, key46) {
-    return contains$5(self, key46) ? [
-        key46,
-        lookup$6(self, key46)
+function find$3(self, key) {
+    return contains$5(self, key) ? [
+        key,
+        lookup$6(self, key)
     ] : null;
 }
-function contains$5(self, key47) {
-    return key47 < count$b(self.seq) - self.start;
+function contains$5(self, key) {
+    return key < count$b(self.seq) - self.start;
 }
-function lookup$6(self, key48) {
-    return get(self.seq, self.start + key48);
+function lookup$6(self, key) {
+    return get(self.seq, self.start + key);
 }
 function append$4(self, x) {
     return concat(self, [
@@ -2825,18 +2825,18 @@ function next$8(self) {
     const pos = self.start + 1;
     return pos < count$b(self.seq) ? indexedSeq(self.seq, pos) : null;
 }
-function nth$4(self, idx11) {
-    return nth$6(self.seq, idx11 + self.start);
+function nth$4(self, idx) {
+    return nth$6(self.seq, idx + self.start);
 }
 function idx2(self, x) {
     return idx3(self, x, 0);
 }
-function idx3(self, x, idx12) {
+function idx3(self, x, idx) {
     if (first$9(self) === x) {
-        return idx12;
+        return idx;
     }
     const nxt = next$8(self);
-    return nxt ? idx3(nxt, x, idx12 + 1) : null;
+    return nxt ? idx3(nxt, x, idx + 1) : null;
 }
 const idx$1 = overload(null, null, idx2, idx3);
 function first$9(self) {
@@ -2857,10 +2857,10 @@ function reduce$8(self, f, init) {
     return unreduced(memo);
 }
 function reducekv$6(self, f, init) {
-    let idx13 = 0;
+    let idx = 0;
     return reduce$8(self, function(memo, value) {
-        memo = f(memo, idx13, value);
-        idx13 += 1;
+        memo = f(memo, idx, value);
+        idx += 1;
         return memo;
     }, init);
 }
@@ -2927,8 +2927,8 @@ function vals$3(self) {
         return _nth(_self, _argPlaceholder);
     }), keys$8(self));
 }
-function nth$3(self, idx14) {
-    return nth$6(self.coll, count$6(self) - 1 - idx14);
+function nth$3(self, idx) {
+    return nth$6(self.coll, count$6(self) - 1 - idx);
 }
 function first$8(self) {
     return nth$6(self.coll, self.idx);
@@ -3008,12 +3008,12 @@ function after$1(self, reference, inserted) {
 function keys$7(self) {
     return range(count$5(self));
 }
-function _dissoc(self, idx15) {
-    self.splice(idx15, 1);
+function _dissoc(self, idx) {
+    self.splice(idx, 1);
 }
-function dissoc$3(self, idx16) {
+function dissoc$3(self, idx) {
     let arr = Array.from(self);
-    _dissoc(arr, idx16);
+    _dissoc(arr, idx);
     return arr;
 }
 function reduce$6(xs, f, init) {
@@ -3047,28 +3047,28 @@ function key(self) {
 function val(self) {
     return self[1];
 }
-function find$2(self, key49) {
-    return contains$4(self, key49) ? [
-        key49,
-        lookup$5(self, key49)
+function find$2(self, key) {
+    return contains$4(self, key) ? [
+        key,
+        lookup$5(self, key)
     ] : null;
 }
-function lookup$5(self, key50) {
-    return key50 in self ? self[key50] : null;
+function lookup$5(self, key) {
+    return key in self ? self[key] : null;
 }
-function assoc$4(self, key51, value) {
-    if (key51 < 0 || key51 > count$5(self)) {
-        throw new Error(`Index ${key51} out of bounds`);
+function assoc$4(self, key, value) {
+    if (key < 0 || key > count$5(self)) {
+        throw new Error(`Index ${key} out of bounds`);
     }
-    if (lookup$5(self, key51) === value) {
+    if (lookup$5(self, key) === value) {
         return self;
     }
     const arr = Array.from(self);
-    arr.splice(key51, 1, value);
+    arr.splice(key, 1, value);
     return arr;
 }
-function contains$4(self, key52) {
-    return key52 > -1 && key52 < self.length;
+function contains$4(self, key) {
+    return key > -1 && key < self.length;
 }
 function seq$6(self) {
     return self.length ? self : null;
@@ -3197,8 +3197,8 @@ function weekday(self) {
     return self ? !weekend(self) : null;
 }
 function weekend(self) {
-    const day1 = dow1(self);
-    return day1 == null ? null : day1 == 0 || day1 == 6;
+    const day = dow1(self);
+    return day == null ? null : day == 0 || day == 6;
 }
 function dow1(self) {
     return self ? self.getDay() : null;
@@ -3241,12 +3241,12 @@ function rdow(self, n) {
 function mdow(self, n) {
     return rdow(patch(self, som()), n);
 }
-function time(hour1, minute1, second1, millisecond1) {
+function time(hour, minute, second, millisecond) {
     return {
-        hour: hour1 || 0,
-        minute: minute1 || 0,
-        second: second1 || 0,
-        millisecond: millisecond1 || 0
+        hour: hour || 0,
+        minute: minute || 0,
+        second: second || 0,
+        millisecond: millisecond || 0
     };
 }
 function sod() {
@@ -3264,10 +3264,10 @@ function eod() {
 function noon() {
     return time(12, 0, 0, 0);
 }
-function annually(month1, day2) {
+function annually(month, day) {
     return {
-        month: month1,
-        day: day2,
+        month: month,
+        day: day,
         hour: 0,
         minute: 0,
         second: 0,
@@ -3380,18 +3380,18 @@ var p$4 = Object.freeze({
     eq: eq,
     notEq: notEq
 });
-function Period(start10, end5) {
-    this.start = start10;
-    this.end = end5;
+function Period(start, end) {
+    this.start = start;
+    this.end = end;
 }
 function emptyPeriod() {
     return new Period();
 }
-function period1(obj11) {
-    return period2(patch(obj11, sod()), patch(obj11, eod()));
+function period1(obj) {
+    return period2(patch(obj, sod()), patch(obj, eod()));
 }
-function period2(start11, end6) {
-    const pd = new Period(start11, end6 == null || isDate(end6) ? end6 : add$3(start11, end6));
+function period2(start, end) {
+    const pd = new Period(start, end == null || isDate(end) ? end : add$3(start, end));
     if (!(pd.start == null || isDate(pd.start))) {
         throw new Error("Invalid start of period.");
     }
@@ -3405,18 +3405,18 @@ function period2(start11, end6) {
 }
 const period = overload(emptyPeriod, period1, period2);
 Period.prototype[Symbol.toStringTag] = "Period";
-function Benchmark(operation, result, period3, duration1) {
+function Benchmark(operation, result, period, duration) {
     this.operation = operation;
     this.result = result;
-    this.period = period3;
-    this.duration = duration1;
+    this.period = period;
+    this.duration = duration;
 }
 Benchmark.prototype[Symbol.toStringTag] = "Benchmark";
 function benchmark1(operation) {
-    const start12 = new Date();
+    const start = new Date();
     return Promise.resolve(operation()).then(function(result) {
-        const end7 = new Date();
-        return new Benchmark(operation, result, period(start12, end7), end7 - start12);
+        const end = new Date();
+        return new Benchmark(operation, result, period(start, end), end - start);
     });
 }
 function benchmark2(n, operation) {
@@ -3446,9 +3446,9 @@ function race2(n, operations) {
         return sort(asc(average), asc(most), measures);
     });
 }
-function race3(n, operations, measures1) {
+function race3(n, operations, measures) {
     return Promise.all([
-        measures1,
+        measures,
         benchmark(n, first$d(operations))
     ]).then(function([xs, x]) {
         const measures = xs.concat(x);
@@ -3497,11 +3497,11 @@ function reduce$5(self, f, init) {
     return unreduced(memo);
 }
 function reducekv$4(self, f, init) {
-    let memo = init, remaining = self, idx17 = 0;
+    let memo = init, remaining = self, idx = 0;
     while(!isReduced(memo) && seq$a(remaining)){
-        memo = f(memo, idx17, first$d(remaining));
+        memo = f(memo, idx, first$d(remaining));
         remaining = next$a(remaining);
-        idx17++;
+        idx++;
     }
     return unreduced(memo);
 }
@@ -3531,8 +3531,8 @@ var behave$v = does(iterable, keying("Concatenated"), implement(IKVReducible, {
     count: count$4
 }));
 behave$v(Concatenated);
-function date7(year1, month2, day3, hour2, minute2, second2, millisecond2) {
-    return new Date(year1, month2 || 0, day3 || 1, hour2 || 0, minute2 || 0, second2 || 0, millisecond2 || 0);
+function date7(year, month, day, hour, minute, second, millisecond) {
+    return new Date(year, month || 0, day || 1, hour || 0, minute || 0, second || 0, millisecond || 0);
 }
 const create = constructs(Date);
 const date = overload(create, create, date7);
@@ -3576,9 +3576,9 @@ function valueOf() {
     const units = this.units;
     return (units.year || 0) * 1000 * 60 * 60 * 24 * 365.25 + (units.month || 0) * 1000 * 60 * 60 * 24 * 30.4375 + (units.day || 0) * 1000 * 60 * 60 * 24 + (units.hour || 0) * 1000 * 60 * 60 + (units.minute || 0) * 1000 * 60 + (units.second || 0) * 1000 + (units.millisecond || 0);
 }
-function unit(key53) {
+function unit(key) {
     return function(n) {
-        return new Duration(assoc$8({}, key53, n));
+        return new Duration(assoc$8({}, key, n));
     };
 }
 const years = unit("year");
@@ -3588,8 +3588,8 @@ const hours = unit("hour");
 const minutes = unit("minute");
 const seconds = unit("second");
 const milliseconds = unit("millisecond");
-const duration = overload(null, branch(isNumber, milliseconds, constructs(Duration)), function(start13, end8) {
-    return milliseconds(end8 - start13);
+const duration = overload(null, branch(isNumber, milliseconds, constructs(Duration)), function(start, end) {
+    return milliseconds(end - start);
 });
 const weeks = comp(days, (_mult = mult$2, function mult(_argPlaceholder2) {
     return _mult(_argPlaceholder2, 7);
@@ -3606,8 +3606,8 @@ Duration.units = [
     "millisecond"
 ];
 function reducekv$3(self, f, init) {
-    return reduce$e(function(memo, key54) {
-        return f(memo, key54, lookup$4(self, key54));
+    return reduce$e(function(memo, key) {
+        return f(memo, key, lookup$4(self, key));
     }, init, keys$6(self));
 }
 const merge$2 = partial(mergeWith, add$3);
@@ -3617,30 +3617,30 @@ function mult(self, n) {
     });
 }
 function fmap$8(self, f) {
-    return new self.constructor(reducekv$3(self, function(memo, key55, value) {
-        return assoc$8(memo, key55, f(value));
+    return new self.constructor(reducekv$3(self, function(memo, key, value) {
+        return assoc$8(memo, key, f(value));
     }, {}));
 }
 function keys$6(self) {
     return keys$b(self.units);
 }
-function dissoc$2(self, key56) {
-    return new self.constructor(dissoc$5(self.units, key56));
+function dissoc$2(self, key) {
+    return new self.constructor(dissoc$5(self.units, key));
 }
-function lookup$4(self, key57) {
-    if (!includes$9(Duration.units, key57)) {
+function lookup$4(self, key) {
+    if (!includes$9(Duration.units, key)) {
         throw new Error("Invalid unit.");
     }
-    return get(self.units, key57);
+    return get(self.units, key);
 }
-function contains$3(self, key58) {
-    return contains$8(self.units, key58);
+function contains$3(self, key) {
+    return contains$8(self.units, key);
 }
-function assoc$3(self, key59, value) {
-    if (!includes$9(Duration.units, key59)) {
+function assoc$3(self, key, value) {
+    if (!includes$9(Duration.units, key)) {
         throw new Error("Invalid unit.");
     }
-    return new self.constructor(assoc$8(self.units, key59, value));
+    return new self.constructor(assoc$8(self.units, key, value));
 }
 function divide$1(a, b) {
     return a.valueOf() / b.valueOf();
@@ -3670,8 +3670,8 @@ behave$u(Duration);
 function add$1(self, other) {
     return mergeWith(add$3, self, isNumber(other) ? days(other) : other);
 }
-function lookup$3(self, key60) {
-    switch(key60){
+function lookup$3(self, key) {
+    switch(key){
         case "year":
             return self.getFullYear();
         case "month":
@@ -3688,12 +3688,12 @@ function lookup$3(self, key60) {
             return self.getMilliseconds();
     }
 }
-function InvalidKeyError(key61, target) {
-    this.key = key61;
+function InvalidKeyError(key, target) {
+    this.key = key;
     this.target = target;
 }
-function contains$2(self, key62) {
-    return keys$5().indexOf(key62) > -1;
+function contains$2(self, key) {
+    return keys$5().indexOf(key) > -1;
 }
 function keys$5(self) {
     return [
@@ -3707,17 +3707,17 @@ function keys$5(self) {
     ];
 }
 function vals$2(self) {
-    return reduce$e(function(memo, key63) {
-        memo.push(get(self, key63));
+    return reduce$e(function(memo, key) {
+        memo.push(get(self, key));
         return memo;
     }, [], keys$5());
 }
-function conj$3(self, [key64, value]) {
-    return assoc$2(self, key64, value);
+function conj$3(self, [key, value]) {
+    return assoc$2(self, key, value);
 }
-function assoc$2(self, key65, value) {
+function assoc$2(self, key, value) {
     const dt = new Date(self.valueOf());
-    switch(key65){
+    switch(key){
         case "year":
             dt.setFullYear(value);
             break;
@@ -3740,7 +3740,7 @@ function assoc$2(self, key65, value) {
             dt.setMilliseconds(value);
             break;
         default:
-            throw new InvalidKeyError(key65, self);
+            throw new InvalidKeyError(key, self);
     }
     return dt;
 }
@@ -3754,17 +3754,17 @@ function compare$3(self, other) {
     return other == null ? -1 : deref$9(self) - deref$b(other);
 }
 function reduce$4(self, f, init) {
-    return reduce$e(function(memo, key66) {
-        const value = get(self, key66);
+    return reduce$e(function(memo, key) {
+        const value = get(self, key);
         return f(memo, [
-            key66,
+            key,
             value
         ]);
     }, init, keys$5());
 }
 function reducekv$2(self, f, init) {
-    return reduce$4(self, function(memo, [key67, value]) {
-        return f(memo, key67, value);
+    return reduce$4(self, function(memo, [key, value]) {
+        return f(memo, key, value);
     }, init);
 }
 function deref$9(self) {
@@ -3866,18 +3866,18 @@ var behave$q = does(keying("GUID"), implement(IHashable, {
     equiv: equiv$5
 }));
 behave$q(GUID);
-function Indexed(obj12) {
-    this.obj = obj12;
+function Indexed(obj) {
+    this.obj = obj;
 }
 Indexed.prototype[Symbol.toStringTag] = "Indexed";
-function indexed(obj13) {
-    return new Indexed(obj13);
+function indexed(obj) {
+    return new Indexed(obj);
 }
 function count$3(self) {
     return self.obj.length;
 }
-function nth$1(self, idx18) {
-    return self.obj[idx18];
+function nth$1(self, idx) {
+    return self.obj[idx];
 }
 function first$5(self) {
     return nth$1(self, 0);
@@ -3920,15 +3920,15 @@ var behave$p = does(iterable, reductive, keying("Indexed"), implement(IHashable,
     count: count$3
 }));
 behave$p(Indexed);
-function Journal(pos, max3, history, state) {
+function Journal(pos, max, history, state) {
     this.pos = pos;
-    this.max = max3;
+    this.max = max;
     this.history = history;
     this.state = state;
 }
 Journal.prototype[Symbol.toStringTag] = "Journal";
-function journal2(max4, state) {
-    return new Journal(0, max4, [
+function journal2(max, state) {
+    return new Journal(0, max, [
         state
     ], state);
 }
@@ -3954,13 +3954,13 @@ const fork$5 = overload(null, null, (_IForkable = IForkable, _IForkable$fork = _
     return _IForkable$fork.call(_IForkable, _argPlaceholder, _noop, _argPlaceholder2);
 }), IForkable.fork);
 const path$1 = IPath.path;
-function Lens(root2, path1) {
-    this.root = root2;
-    this.path = path1;
+function Lens(root, path) {
+    this.root = root;
+    this.path = path;
 }
 Lens.prototype[Symbol.toStringTag] = "Lens";
-function lens(root3, path2) {
-    return new Lens(root3, path2 || []);
+function lens(root, path) {
+    return new Lens(root, path || []);
 }
 var _juxt, _map;
 function downward(f) {
@@ -3970,9 +3970,9 @@ function downward(f) {
     };
 }
 function upward(f) {
-    return function up2(self) {
+    return function up(self) {
         const other = f(self);
-        return other ? cons(other, up2(other)) : emptyList();
+        return other ? cons(other, up(other)) : emptyList();
     };
 }
 const root$2 = IHierarchy.root;
@@ -4277,22 +4277,22 @@ var behave$o = does(keying("Journal"), implement(IDeref, {
     revision
 }));
 behave$o(Journal);
-function monadic(construct1) {
-    function fmap1(self, f) {
-        return construct1(f(self.value));
+function monadic(construct) {
+    function fmap(self, f) {
+        return construct(f(self.value));
     }
-    function flatMap1(self, f) {
+    function flatMap(self, f) {
         return f(self.value);
     }
-    function deref2(self) {
+    function deref(self) {
         return self.value;
     }
     return does(implement(IDeref, {
-        deref: deref2
+        deref
     }), implement(IFlatMappable, {
-        flatMap: flatMap1
+        flatMap
     }), implement(IFunctor, {
-        fmap: fmap1
+        fmap
     }));
 }
 function otherwise$3(self) {
@@ -4309,8 +4309,8 @@ Left.prototype[Symbol.toStringTag] = "Left";
 const left = thrush(constructs(Left));
 const fmap$6 = identity;
 const flatMap$2 = identity;
-function fork$4(self, reject1, resolve) {
-    reject1(self.value);
+function fork$4(self, reject, resolve) {
+    reject(self.value);
 }
 function deref$7(self) {
     return self.value;
@@ -4375,28 +4375,28 @@ function deref$6(self) {
     return getIn(self.root, self.path);
 }
 function conj$2(self, value) {
-    var _value, _p$conj, _p1;
-    return swap(self, (_p1 = p$1, _p$conj = _p1.conj, _value = value, function conj(_argPlaceholder) {
-        return _p$conj.call(_p1, _argPlaceholder, _value);
+    var _value, _p$conj, _p;
+    return swap(self, (_p = p$1, _p$conj = _p.conj, _value = value, function conj(_argPlaceholder) {
+        return _p$conj.call(_p, _argPlaceholder, _value);
     }));
 }
-function lookup$2(self, key68) {
+function lookup$2(self, key) {
     return Object.assign(clone$4(self), {
-        path: conj$8(self.path, key68)
+        path: conj$8(self.path, key)
     });
 }
-function assoc$1(self, key69, value) {
+function assoc$1(self, key, value) {
     var _key, _value2, _p$assoc, _p2;
-    return swap(self, (_p2 = p$1, _p$assoc = _p2.assoc, _key = key69, _value2 = value, function assoc(_argPlaceholder2) {
+    return swap(self, (_p2 = p$1, _p$assoc = _p2.assoc, _key = key, _value2 = value, function assoc(_argPlaceholder2) {
         return _p$assoc.call(_p2, _argPlaceholder2, _key, _value2);
     }));
 }
-function contains$1(self, key70) {
-    return includes$9(keys$3(self), key70);
+function contains$1(self, key) {
+    return includes$9(keys$3(self), key);
 }
-function dissoc$1(self, key71) {
+function dissoc$1(self, key) {
     var _key2, _p$dissoc, _p3;
-    return swap(self, (_p3 = p$1, _p$dissoc = _p3.dissoc, _key2 = key71, function dissoc(_argPlaceholder3) {
+    return swap(self, (_p3 = p$1, _p$dissoc = _p3.dissoc, _key2 = key, function dissoc(_argPlaceholder3) {
         return _p$dissoc.call(_p3, _argPlaceholder3, _key2);
     }));
 }
@@ -4421,9 +4421,9 @@ function root$1(self) {
     });
 }
 function children(self) {
-    return map(function(key72) {
+    return map(function(key) {
         return Object.assign(clone$4(self), {
-            path: conj$8(self.path, key72)
+            path: conj$8(self.path, key)
         });
     }, keys$3(self));
 }
@@ -4439,34 +4439,34 @@ function vals$1(self) {
     }), keys$3(self));
 }
 function siblings$1(self) {
-    const p4 = parent(self), ctx = toArray(butlast(self.path)), key73 = last(self.path);
-    return map(function(key74) {
-        return Object.assign(p4.clone(self), {
-            path: p4.conj(ctx, key74)
+    const p = parent(self), ctx = toArray(butlast(self.path)), key = last(self.path);
+    return map(function(key) {
+        return Object.assign(p.clone(self), {
+            path: p.conj(ctx, key)
         });
     }, remove(function(k) {
-        return k === key73;
-    }, p4 ? keys$3(p4) : []));
+        return k === key;
+    }, p ? keys$3(p) : []));
 }
 function prevSiblings$1(self) {
-    const p5 = parent(self), ctx = toArray(butlast(self.path)), key75 = last(self.path);
-    return map(function(key76) {
-        return Object.assign(p5.clone(self), {
-            path: p5.conj(ctx, key76)
+    const p = parent(self), ctx = toArray(butlast(self.path)), key = last(self.path);
+    return map(function(key) {
+        return Object.assign(p.clone(self), {
+            path: p.conj(ctx, key)
         });
-    }, p5.reverse(toArray(take(1, takeWhile(function(k) {
-        return k !== key75;
-    }, p5 ? keys$3(p5) : [])))));
+    }, p.reverse(toArray(take(1, takeWhile(function(k) {
+        return k !== key;
+    }, p ? keys$3(p) : [])))));
 }
 function nextSiblings$1(self) {
-    const p6 = parent(self), ctx = toArray(butlast(self.path)), key77 = last(self.path);
-    return map(function(key78) {
-        return Object.assign(p6.clone(self), {
-            path: p6.conj(ctx, key78)
+    const p = parent(self), ctx = toArray(butlast(self.path)), key = last(self.path);
+    return map(function(key) {
+        return Object.assign(p.clone(self), {
+            path: p.conj(ctx, key)
         });
     }, drop(1, dropWhile(function(k) {
-        return k !== key77;
-    }, p6 ? keys$3(p6) : [])));
+        return k !== key;
+    }, p ? keys$3(p) : [])));
 }
 const prevSibling$1 = comp(first$d, prevSiblings$1);
 const nextSibling$1 = comp(first$d, nextSiblings$1);
@@ -4477,8 +4477,8 @@ function parent(self) {
 }
 function parents$1(self) {
     return lazySeq(function() {
-        const p7 = parent(self);
-        return p7 ? cons(p7, parents$1(p7)) : emptyList();
+        const p = parent(self);
+        return p ? cons(p, parents$1(p)) : emptyList();
     });
 }
 function closest$1(self, pred) {
@@ -4570,8 +4570,8 @@ function prepend$1(self, other) {
         items: prepend$2(self.items, other)
     });
 }
-function includes$4(self, name1) {
-    return includes$9(self.items, name1);
+function includes$4(self, name) {
+    return includes$9(self.items, name);
 }
 function count$2(self) {
     return count$b(self.items);
@@ -4640,11 +4640,11 @@ var behave$h = does(keying("Mutable"), implement(IDeref, {
 }));
 behave$h(Mutable);
 function invoke$1(self, ...args) {
-    const key79 = self.dispatch.apply(this, args);
-    const hashcode = hash$7(key79);
+    const key = self.dispatch.apply(this, args);
+    const hashcode = hash$7(key);
     const potentials = self.methods[hashcode];
     const f = some$1(function([k, h]) {
-        return equiv$a(k, key79) ? h : null;
+        return equiv$a(k, key) ? h : null;
     }, potentials) || self.fallback || function() {
         throw new Error("Unable to locate appropriate method.");
     };
@@ -4733,44 +4733,44 @@ function descriptive$1(self) {
     return satisfies(ILookup, self) && satisfies(IMap, self) && !satisfies(IIndexed, self);
 }
 function subsumes(self, other) {
-    return reducekv$a(function(memo, key80, value) {
-        return memo ? contains$8(self, key80, value) : reduced(memo);
+    return reducekv$a(function(memo, key, value) {
+        return memo ? contains$8(self, key, value) : reduced(memo);
     }, true, other);
 }
 const emptied = branch(satisfies(IEmptyableCollection), empty$1, emptyObject);
 function juxtVals(self, value) {
-    return reducekv$a(function(memo, key81, f) {
-        return assoc$8(memo, key81, isFunction(f) ? f(value) : f);
+    return reducekv$a(function(memo, key, f) {
+        return assoc$8(memo, key, isFunction(f) ? f(value) : f);
     }, emptied(self), self);
 }
-function selectKeys(self, keys) {
-    return reduce$e(function(memo, key82) {
-        return assoc$8(memo, key82, get(self, key82));
-    }, emptied(self), keys);
+function selectKeys(self, keys1) {
+    return reduce$e(function(memo, key) {
+        return assoc$8(memo, key, get(self, key));
+    }, emptied(self), keys1);
 }
-function removeKeys(self, keys) {
-    return reducekv$a(function(memo, key83, value) {
-        return includes$9(keys, key83) ? memo : assoc$8(memo, key83, value);
+function removeKeys(self, keys1) {
+    return reducekv$a(function(memo, key, value) {
+        return includes$9(keys1, key) ? memo : assoc$8(memo, key, value);
     }, emptied(self), self);
 }
 function mapKeys(self, f) {
-    return reducekv$a(function(memo, key84, value) {
-        return assoc$8(memo, f(key84), value);
+    return reducekv$a(function(memo, key, value) {
+        return assoc$8(memo, f(key), value);
     }, emptied(self), self);
 }
 function mapVals2(self, f) {
-    return reducekv$a(function(memo, key85, value) {
-        return assoc$8(memo, key85, f(value));
+    return reducekv$a(function(memo, key, value) {
+        return assoc$8(memo, key, f(value));
     }, self, self);
 }
 function mapVals3(init, f, pred) {
-    return reduce$e(function(memo, key86) {
-        return pred(key86) ? assoc$8(memo, key86, f(get(memo, key86))) : memo;
+    return reduce$e(function(memo, key) {
+        return pred(key) ? assoc$8(memo, key, f(get(memo, key))) : memo;
     }, init, keys$b(init));
 }
 const mapVals = overload(null, null, mapVals2, mapVals3);
-function defaults2(self, defaults1) {
-    return reducekv$a(assoc$8, defaults1, self);
+function defaults2(self, defaults) {
+    return reducekv$a(assoc$8, defaults, self);
 }
 const defaults = overload(null, null, defaults2, reducing(defaults2));
 function compile(self) {
@@ -4781,21 +4781,21 @@ function compile(self) {
 const keys$2 = Object.keys;
 const vals = Object.values;
 function fill$1(self, params) {
-    return reducekv$a(function(memo, key87, value) {
-        var _value, _params, _p$fill, _p5, _params2, _fill;
-        return assoc$8(memo, key87, (_value = value, branch(isString, (_p5 = p, _p$fill = _p5.fill, _params = params, function fill(_argPlaceholder) {
-            return _p$fill.call(_p5, _argPlaceholder, _params);
+    return reducekv$a(function(memo, key, value) {
+        var _value, _params, _p$fill, _p, _params2, _fill;
+        return assoc$8(memo, key, (_value = value, branch(isString, (_p = p, _p$fill = _p.fill, _params = params, function fill(_argPlaceholder) {
+            return _p$fill.call(_p, _argPlaceholder, _params);
         }), isObject, (_fill = fill$1, _params2 = params, function fill(_argPlaceholder2) {
             return _fill(_argPlaceholder2, _params2);
         }), identity)(_value)));
     }, {}, self);
 }
 function merge$1(...maps) {
-    return reduce$e(function(memo3, map1) {
-        return reduce$e(function(memo, [key88, value]) {
-            memo[key88] = value;
+    return reduce$e(function(memo, map) {
+        return reduce$e(function(memo, [key, value]) {
+            memo[key] = value;
             return memo;
-        }, memo3, seq$a(map1));
+        }, memo, seq$a(map));
     }, {}, maps);
 }
 function blank$1(self) {
@@ -4807,71 +4807,71 @@ function compact1(self) {
     });
 }
 function compact2(self, pred) {
-    return reducekv$a(function(memo, key89, value) {
+    return reducekv$a(function(memo, key, value) {
         return pred([
-            key89,
+            key,
             value
-        ]) ? memo : assoc$8(memo, key89, value);
+        ]) ? memo : assoc$8(memo, key, value);
     }, {}, self);
 }
 const compact = overload(null, compact1, compact2);
 function omit(self, entry) {
-    const key90 = key$3(entry);
+    const key = key$3(entry);
     if (includes$3(self, entry)) {
         const result = clone(self);
-        delete result[key90];
+        delete result[key];
         return result;
     } else {
         return self;
     }
 }
 function compare$2(self, other) {
-    return equiv$a(self, other) ? 0 : descriptive$1(other) ? reduce$e(function(memo, key91) {
-        return memo == 0 ? compare$6(get(self, key91), get(other, key91)) : reduced$1(memo);
+    return equiv$a(self, other) ? 0 : descriptive$1(other) ? reduce$e(function(memo, key) {
+        return memo == 0 ? compare$6(get(self, key), get(other, key)) : reduced$1(memo);
     }, 0, keys$b(self)) : -1;
 }
 function conj$1(self, entry) {
-    const key92 = key$3(entry), val5 = val$2(entry);
+    const key = key$3(entry), val = val$2(entry);
     const result = clone$4(self);
-    result[key92] = val5;
+    result[key] = val;
     return result;
 }
 function equiv$4(self, other) {
-    return self === other ? true : descriptive$1(other) && count$b(keys$b(self)) === count$b(keys$b(other)) && reduce$e(function(memo, key93) {
-        return memo ? equiv$a(get(self, key93), get(other, key93)) : reduced$1(memo);
+    return self === other ? true : descriptive$1(other) && count$b(keys$b(self)) === count$b(keys$b(other)) && reduce$e(function(memo, key) {
+        return memo ? equiv$a(get(self, key), get(other, key)) : reduced$1(memo);
     }, true, keys$b(self));
 }
-function find(self, key94) {
-    return contains(self, key94) ? [
-        key94,
-        lookup$1(self, key94)
+function find(self, key) {
+    return contains(self, key) ? [
+        key,
+        lookup$1(self, key)
     ] : null;
 }
 function includes$3(self, entry) {
-    const key95 = key$3(entry), val6 = val$2(entry);
-    return self[key95] === val6;
+    const key = key$3(entry), val = val$2(entry);
+    return self[key] === val;
 }
-function lookup$1(self, key96) {
-    return self[key96];
+function lookup$1(self, key) {
+    return self[key];
 }
 function first$2(self) {
-    const key97 = first$d(keys$2(self));
-    return key97 ? [
-        key97,
-        lookup$1(self, key97)
+    const key = first$d(keys$2(self));
+    return key ? [
+        key,
+        lookup$1(self, key)
     ] : null;
 }
 function rest$2(self) {
     return next$2(self) || {};
 }
-function next2(self, keys) {
-    if (seq$a(keys)) {
+function next2(self, keys1) {
+    if (seq$a(keys1)) {
         return lazySeq(function() {
-            const key98 = first$d(keys);
+            const key = first$d(keys1);
             return cons([
-                key98,
-                lookup$1(self, key98)
-            ], next2(self, next$a(keys)));
+                key,
+                lookup$1(self, key)
+            ], next2(self, next$a(keys1)));
         });
     } else {
         return null;
@@ -4880,33 +4880,33 @@ function next2(self, keys) {
 function next$2(self) {
     return next2(self, next$a(keys$2(self)));
 }
-function dissoc(self, key99) {
-    if (contains$8(self, key99)) {
+function dissoc(self, key) {
+    if (contains$8(self, key)) {
         const result = clone(self);
-        delete result[key99];
+        delete result[key];
         return result;
     } else {
         return self;
     }
 }
-function assoc(self, key100, value) {
-    if (get(self, key100) === value) {
+function assoc(self, key, value) {
+    if (get(self, key) === value) {
         return self;
     } else {
         const result = clone(self);
-        result[key100] = value;
+        result[key] = value;
         return result;
     }
 }
-function contains(self, key101) {
-    return self.hasOwnProperty(key101);
+function contains(self, key) {
+    return self.hasOwnProperty(key);
 }
 function seq$2(self) {
     if (!count$1(self)) return null;
-    return map(function(key102) {
+    return map(function(key) {
         return [
-            key102,
-            lookup$1(self, key102)
+            key,
+            lookup$1(self, key)
         ];
     }, keys$2(self));
 }
@@ -4917,16 +4917,16 @@ function clone(self) {
     return Object.assign({}, self);
 }
 function reduce$2(self, f, init) {
-    return reduce$e(function(memo, key103) {
+    return reduce$e(function(memo, key) {
         return f(memo, [
-            key103,
-            lookup$1(self, key103)
+            key,
+            lookup$1(self, key)
         ]);
     }, init, keys$2(self));
 }
 function reducekv$1(self, f, init) {
-    return reduce$e(function(memo, key104) {
-        return f(memo, key104, lookup$1(self, key104));
+    return reduce$e(function(memo, key) {
+        return f(memo, key, lookup$1(self, key));
     }, init, keys$2(self));
 }
 var behave$e = does(keying("Object"), implement(IHashable, {
@@ -5003,8 +5003,8 @@ function flatMap$1(self, f) {
         return left(ex);
     }
 }
-function fork$3(self, reject, resolve1) {
-    resolve1(self);
+function fork$3(self, reject, resolve) {
+    resolve(self);
 }
 function deref$2(self) {
     return self.value;
@@ -5019,29 +5019,29 @@ var behave$d = does(keying("Okay"), implement(IDeref, {
     fmap: fmap$3
 }));
 behave$d(Okay);
-function Recurrence(start14, end9, step, direction) {
-    this.start = start14;
-    this.end = end9;
+function Recurrence(start, end, step, direction) {
+    this.start = start;
+    this.end = end;
     this.step = step;
     this.direction = direction;
 }
 function emptyRecurrence() {
     return new Recurrence();
 }
-function recurrence1(obj14) {
-    return recurrence2(patch(obj14, sod()), patch(obj14, eod()));
+function recurrence1(obj) {
+    return recurrence2(patch(obj, sod()), patch(obj, eod()));
 }
-function recurrence2(start15, end10) {
-    return recurrence3(start15, end10, days(end10 == null || start15 <= end10 ? 1 : -1));
+function recurrence2(start, end) {
+    return recurrence3(start, end, days(end == null || start <= end ? 1 : -1));
 }
 const recurrence3 = steps(Recurrence, isDate);
-function recurrence4(start16, end11, step, f) {
-    const pred = end11 == null ? constantly(true) : directed(start16, end11) > 0 ? function(dt) {
-        return compare$6(start16, dt) <= 0;
-    } : directed(start16, end11) < 0 ? function(dt) {
-        return compare$6(start16, dt) >= 0;
+function recurrence4(start, end, step, f) {
+    const pred = end == null ? constantly(true) : directed(start, end) > 0 ? function(dt) {
+        return compare$6(start, dt) <= 0;
+    } : directed(start, end) < 0 ? function(dt) {
+        return compare$6(start, dt) >= 0;
     } : constantly(true);
-    return filter(pred, f(recurrence3(start16, end11, step)));
+    return filter(pred, f(recurrence3(start, end, step)));
 }
 const recurrence = overload(emptyRecurrence, recurrence1, recurrence2, recurrence3, recurrence4);
 Recurrence.prototype[Symbol.toStringTag] = "Recurrence";
@@ -5056,9 +5056,9 @@ function split3$1(self, step, n) {
 }
 const split$1 = overload(null, null, split2, split3$1);
 function add(self, dur) {
-    var _ref, _self, _dur, _p$add, _p6;
-    return end$2(self) ? new self.constructor(start$2(self), (_ref = (_self = self, end$2(_self)), (_p6 = p$4, _p$add = _p6.add, _dur = dur, function add(_argPlaceholder2) {
-        return _p$add.call(_p6, _argPlaceholder2, _dur);
+    var _ref, _self, _dur, _p$add, _p;
+    return end$2(self) ? new self.constructor(start$2(self), (_ref = (_self = self, end$2(_self)), (_p = p$4, _p$add = _p.add, _dur = dur, function add(_argPlaceholder2) {
+        return _p$add.call(_p, _argPlaceholder2, _dur);
     })(_ref))) : self;
 }
 function merge(self, other) {
@@ -5112,21 +5112,21 @@ const toPromise = (_coerce = coerce$1, _Promise = Promise, function coerce(_argP
     return _coerce(_argPlaceholder, _Promise);
 });
 function awaits(f) {
-    return function(...args1) {
-        if (detect(isPromise, args1)) {
-            return fmap$b(Promise.all(args1), function(args) {
+    return function(...args) {
+        if (detect(isPromise, args)) {
+            return fmap$b(Promise.all(args), function(args) {
                 return f.apply(this, args);
             });
         } else {
-            return f.apply(this, args1);
+            return f.apply(this, args);
         }
     };
 }
-function fmap$2(self, resolve2) {
-    return self.then(resolve2);
+function fmap$2(self, resolve) {
+    return self.then(resolve);
 }
-function fork$2(self, reject2, resolve3) {
-    self.then(resolve3, reject2);
+function fork$2(self, reject, resolve) {
+    self.then(resolve, reject);
 }
 function otherwise$1(self, other) {
     return fmap$2(self, function(value) {
@@ -5183,11 +5183,11 @@ function reducekv(self, f, init) {
     return unreduced(memo);
 }
 function inverse(self) {
-    const start17 = self.end, end12 = self.start, step = inverse$1(self.step);
-    return new self.constructor(start17, end12, step, directed(start17, step));
+    const start = self.end, end = self.start, step = inverse$1(self.step);
+    return new self.constructor(start, end, step, directed(start, step));
 }
-function nth(self, idx19) {
-    return first$d(drop(idx19, self));
+function nth(self, idx) {
+    return first$d(drop(idx, self));
 }
 function count(self) {
     let n = 0, xs = self;
@@ -5208,9 +5208,9 @@ function includes$1(self, value) {
         }
     } else {
         while(seq$a(xs)){
-            let c = compare$6(first$d(xs), value);
-            if (c === 0) return true;
-            if (c < 0) break;
+            let c1 = compare$6(first$d(xs), value);
+            if (c1 === 0) return true;
+            if (c1 < 0) break;
             xs = rest$d(xs);
         }
     }
@@ -5254,10 +5254,10 @@ function reFind(re, s) {
         return count$b(matches) === 1 ? first$d(matches) : matches;
     }
 }
-function reFindAll2(text, find1) {
-    const found = find1(text);
+function reFindAll2(text, find) {
+    const found = find(text);
     return found ? lazySeq(function() {
-        return cons(found, reFindAll2(text, find1));
+        return cons(found, reFindAll2(text, find));
     }) : emptyList();
 }
 function reFindAll(re, text) {
@@ -5298,8 +5298,8 @@ const right = thrush(constructs(Right));
 function otherwise(self, other) {
     return self.value;
 }
-function fork$1(self, reject, resolve4) {
-    resolve4(self.value);
+function fork$1(self, reject, resolve) {
+    resolve(self.value);
 }
 var behave$8 = does(keying("Right"), monadic(right), implement(IForkable, {
     fork: fork$1
@@ -5346,28 +5346,28 @@ Object.assign(behaviors, {
     Symbol: behave$6
 });
 behave$6(Symbol);
-function split1(str5) {
-    return str5.split("");
+function split1(str) {
+    return str.split("");
 }
-function split3(str6, pattern, n) {
+function split3(str, pattern, n) {
     const parts = [];
-    while(str6 && n !== 0){
-        let found = str6.match(pattern);
+    while(str && n !== 0){
+        let found = str.match(pattern);
         if (!found || n < 2) {
-            parts.push(str6);
+            parts.push(str);
             break;
         }
-        let pos = str6.indexOf(found), part = str6.substring(0, pos);
+        let pos = str.indexOf(found), part = str.substring(0, pos);
         parts.push(part);
-        str6 = str6.substring(pos + found.length);
+        str = str.substring(pos + found.length);
         n = n ? n - 1 : n;
     }
     return parts;
 }
 const split = overload(null, split1, unbind(String.prototype.split), split3);
 function fill(self, params) {
-    return reducekv$a(function(text, key105, value) {
-        return replace(text, new RegExp("\\{" + key105 + "\\}", 'ig'), value);
+    return reducekv$a(function(text, key, value) {
+        return replace(text, new RegExp("\\{" + key + "\\}", 'ig'), value);
     }, self, params);
 }
 function blank(self) {
@@ -5379,16 +5379,16 @@ function compare(self, other) {
 function conj(self, other) {
     return self + other;
 }
-function seq2(self, idx20) {
-    return idx20 < self.length ? lazySeq(function() {
-        return cons(self[idx20], seq2(self, idx20 + 1));
+function seq2(self, idx) {
+    return idx < self.length ? lazySeq(function() {
+        return cons(self[idx], seq2(self, idx + 1));
     }) : null;
 }
 function seq(self) {
     return seq2(self, 0);
 }
-function lookup(self, key106) {
-    return self[key106];
+function lookup(self, key) {
+    return self[key];
 }
 function first(self) {
     return self[0] || null;
@@ -5402,8 +5402,8 @@ function next(self) {
 function prepend(self, head) {
     return head + self;
 }
-function includes(self, str7) {
-    return self.indexOf(str7) > -1;
+function includes(self, str) {
+    return self.indexOf(str) > -1;
 }
 function reduce(self, f, init) {
     let memo = init;
@@ -5415,14 +5415,14 @@ function reduce(self, f, init) {
     return unreduced(memo);
 }
 function hash$1(self) {
-    var hash3 = 0, i, chr;
-    if (self.length === 0) return hash3;
+    var hash = 0, i, chr;
+    if (self.length === 0) return hash;
     for(i = 0; i < self.length; i++){
         chr = self.charCodeAt(i);
-        hash3 = (hash3 << 5) - hash3 + chr;
-        hash3 |= 0;
+        hash = (hash << 5) - hash + chr;
+        hash |= 0;
     }
-    return hash3;
+    return hash;
 }
 var behave$5 = does(iindexed, keying("String"), implement(IHashable, {
     hash: hash$1
@@ -5464,40 +5464,40 @@ Object.assign(behaviors, {
     String: behave$5
 });
 behave$5(String);
-function Task(fork1) {
-    this.fork = fork1;
+function Task(fork) {
+    this.fork = fork;
 }
 Task.prototype[Symbol.toStringTag] = "Task";
-function task(fork2) {
-    return new Task(fork2);
+function task(fork) {
+    return new Task(fork);
 }
 function resolve(value) {
-    return task(function(reject, resolve5) {
-        resolve5(value);
+    return task(function(reject, resolve) {
+        resolve(value);
     });
 }
 function reject(value) {
-    return task(function(reject3, resolve) {
-        reject3(value);
+    return task(function(reject, resolve) {
+        reject(value);
     });
 }
 Task.of = resolve;
 Task.resolve = resolve;
 Task.reject = reject;
 function fmap$1(self, f) {
-    return task(function(reject4, resolve6) {
-        self.fork(reject4, comp(resolve6, f));
+    return task(function(reject, resolve) {
+        self.fork(reject, comp(resolve, f));
     });
 }
 function flatMap(self, f) {
-    return task(function(reject5, resolve7) {
-        self.fork(reject5, function(value) {
-            fork$5(f(value), reject5, resolve7);
+    return task(function(reject, resolve) {
+        self.fork(reject, function(value) {
+            fork$5(f(value), reject, resolve);
         });
     });
 }
-function fork(self, reject6, resolve8) {
-    self.fork(reject6, resolve8);
+function fork(self, reject, resolve) {
+    self.fork(reject, resolve);
 }
 var behave$4 = does(keying("Task"), implement(IFlatMappable, {
     flatMap
@@ -5619,9 +5619,9 @@ function called2(fn, message) {
     return called3(fn, message, {});
 }
 const called = overload(null, null, called2, called3, called4);
-function fillProp(obj15, key107, value) {
-    if (!obj15.hasOwnProperty(key107)) {
-        Object.defineProperty(obj15, key107, {
+function fillProp(obj, key, value) {
+    if (!obj.hasOwnProperty(key)) {
+        Object.defineProperty(obj, key, {
             value,
             writable: true,
             enumerable: false,
@@ -5638,11 +5638,11 @@ const numeric = (_test = test, _param = /^\d+$/i, function test(_argPlaceholder2
     return _test(_param, _argPlaceholder2);
 });
 (function() {
-    function log1(self, ...args) {
+    function log(self, ...args) {
         self.log(...args);
     }
     doto(console, specify(ILogger, {
-        log: log1
+        log
     }));
     doto(Nil, implement(ILogger, {
         log: noop$1
@@ -5650,18 +5650,18 @@ const numeric = (_test = test, _param = /^\d+$/i, function test(_argPlaceholder2
 })();
 function severityLogger(logger, severity) {
     const f = logger[severity].bind(logger);
-    function log2(self, ...args) {
+    function log(self, ...args) {
         f(...args);
     }
     return doto({
         logger,
         severity
     }, specify(ILogger, {
-        log: log2
+        log
     }));
 }
 function metaLogger(logger, ...meta) {
-    function log$11(self, ...args) {
+    function log$1(self, ...args) {
         log(logger, ...[
             ...mapa(execute, meta),
             ...args
@@ -5671,11 +5671,11 @@ function metaLogger(logger, ...meta) {
         logger,
         meta
     }, specify(ILogger, {
-        log: log$11
+        log: log$1
     }));
 }
 function labelLogger(logger, ...labels) {
-    function log$12(self, ...args) {
+    function log$1(self, ...args) {
         log(logger, ...[
             ...labels,
             ...args
@@ -5685,21 +5685,21 @@ function labelLogger(logger, ...labels) {
         logger,
         labels
     }, specify(ILogger, {
-        log: log$12
+        log: log$1
     }));
 }
 function peek(logger) {
-    var _logger, _p$log, _p7;
-    return tee((_p7 = p$2, _p$log = _p7.log, _logger = logger, function log(_argPlaceholder3) {
-        return _p$log.call(_p7, _logger, _argPlaceholder3);
+    var _logger, _p$log, _p;
+    return tee((_p = p$2, _p$log = _p.log, _logger = logger, function log(_argPlaceholder3) {
+        return _p$log.call(_p, _logger, _argPlaceholder3);
     }));
 }
 function siblings(self) {
-    const parent1 = parent$1(self);
-    if (parent1) {
+    const parent = parent$1(self);
+    if (parent) {
         return filter(function(sibling) {
             return sibling !== self;
-        }, children$1(parent1));
+        }, children$1(parent));
     } else {
         return emptyList();
     }
@@ -5749,25 +5749,25 @@ function cleanlyN(f, ...args) {
     }
 }
 const cleanly = overload(null, curry(cleanlyN, 2), cleanlyN);
-function mod3(obj16, key108, f) {
-    if (key108 in obj16) {
-        obj16[key108] = f(obj16[key108]);
+function mod3(obj, key, f) {
+    if (key in obj) {
+        obj[key] = f(obj[key]);
     }
-    return obj16;
+    return obj;
 }
-function modN(obj17, key109, value, ...args) {
-    return args.length > 0 ? modN(mod3(obj17, key109, value), ...args) : mod3(obj17, key109, value);
+function modN(obj, key, value, ...args) {
+    return args.length > 0 ? modN(mod3(obj, key, value), ...args) : mod3(obj, key, value);
 }
-function edit(obj18, ...args) {
-    const copy = clone$4(obj18);
+function edit(obj, ...args) {
+    const copy = clone$4(obj);
     args.unshift(copy);
     return modN.apply(copy, args);
 }
 function deconstruct(dur, ...units) {
     let memo = dur;
-    return mapa(function(unit4) {
-        const n = fmap$b(divide$2(memo, unit4), Math.floor);
-        memo = subtract(memo, fmap$b(unit4, constantly(n)));
+    return mapa(function(unit) {
+        const n = fmap$b(divide$2(memo, unit), Math.floor);
+        memo = subtract(memo, fmap$b(unit, constantly(n)));
         return n;
     }, units);
 }
@@ -5783,8 +5783,8 @@ const toQueryString = opt((_mapkv = mapkv, _str = (_str2 = str, function str(_ar
 function fromQueryString(url) {
     const params = {};
     each(function(match) {
-        const key110 = decodeURIComponent(match[1]), val7 = decodeURIComponent(match[2]);
-        params[key110] = val7;
+        const key = decodeURIComponent(match[1]), val = decodeURIComponent(match[2]);
+        params[key] = val;
     }, reFindAll(/[?&]([^=&]*)=([^=&]*)/g, url));
     return params;
 }
@@ -5834,8 +5834,8 @@ function decorating2(self, f) {
 }
 function decorating3(self, pred, f) {
     const memo = {};
-    for (const [key111, value] of Object.entries(self)){
-        memo[key111] = pred(value, key111) ? f(value) : value;
+    for (const [key, value] of Object.entries(self)){
+        memo[key] = pred(value, key) ? f(value) : value;
     }
     return memo;
 }
@@ -5861,9 +5861,9 @@ function include3(self, value, want) {
     }), self, want);
 }
 const include = overload(null, null, include2, include3);
-function inventory(obj19) {
+function inventory(obj) {
     var _ref, _ref2, _obj, _join2, _str3;
-    return _ref = (_ref2 = (_obj = obj19, Object.keys(_obj)), (_join2 = join, function join(_argPlaceholder17) {
+    return _ref = (_ref2 = (_obj = obj, Object.keys(_obj)), (_join2 = join, function join(_argPlaceholder17) {
         return _join2(",\n", _argPlaceholder17);
     })(_ref2)), (_str3 = str, function str(_argPlaceholder18) {
         return _str3("{\n", _argPlaceholder18, "\n}");
@@ -5873,46 +5873,46 @@ const fmt = expands(str);
 function when(pred, ...xs) {
     return last(map(realize, pred ? xs : null));
 }
-function readable(keys) {
-    const lookup1 = keys ? function(self, key112) {
-        if (!includes$9(keys, key112)) {
-            throw new Error("Cannot read from " + key112);
+function readable(keys1) {
+    const lookup = keys1 ? function(self, key) {
+        if (!includes$9(keys1, key)) {
+            throw new Error("Cannot read from " + key);
         }
-        return self[key112];
-    } : function(self, key113) {
-        return self[key113];
+        return self[key];
+    } : function(self, key) {
+        return self[key];
     };
     return implement(ILookup, {
-        lookup: lookup1
+        lookup
     });
 }
-function writable(keys) {
-    function clone1(self) {
+function writable(keys1) {
+    function clone(self) {
         return Object.assign(Object.create(self.constructor.prototype), self);
     }
-    function contains1(self, key114) {
-        return self.hasOwnProperty(key114);
+    function contains(self, key) {
+        return self.hasOwnProperty(key);
     }
-    const assoc1 = keys ? function(self, key115, value) {
-        if (!includes$9(keys, key115) || !contains1(self, key115)) {
-            throw new Error("Cannot write to " + key115);
+    const assoc = keys1 ? function(self, key, value) {
+        if (!includes$9(keys1, key) || !contains(self, key)) {
+            throw new Error("Cannot write to " + key);
         }
-        const tgt = clone1(self);
-        tgt[key115] = value;
+        const tgt = clone(self);
+        tgt[key] = value;
         return tgt;
-    } : function(self, key116, value) {
-        if (!contains1(self, key116)) {
-            throw new Error("Cannot write to " + key116);
+    } : function(self, key, value) {
+        if (!contains(self, key)) {
+            throw new Error("Cannot write to " + key);
         }
-        const tgt = clone1(self);
-        tgt[key116] = value;
+        const tgt = clone(self);
+        tgt[key] = value;
         return tgt;
     };
     return does(implement(IClonable, {
-        clone: clone1
+        clone
     }), implement(IAssociative, {
-        assoc: assoc1,
-        contains: contains1
+        assoc,
+        contains
     }));
 }
 function scanKey1(better) {
@@ -5931,8 +5931,8 @@ const scanKey = overload(null, scanKey1, null, scanKey3, scanKey4, scanKeyN);
 const maxKey = scanKey(gt);
 const minKey = scanKey(lt);
 function absorb2(tgt, src) {
-    return reducekv$a(function(memo, key117, value) {
-        const was = get(memo, key117);
+    return reducekv$a(function(memo, key, value) {
+        const was = get(memo, key);
         let absorbed;
         if (was == null) {
             absorbed = value;
@@ -5943,13 +5943,13 @@ function absorb2(tgt, src) {
         } else {
             absorbed = value;
         }
-        return assoc$8(memo, key117, absorbed);
+        return assoc$8(memo, key, absorbed);
     }, tgt, src || empty$1(tgt));
 }
 const absorb = overload(constantly({}), identity, absorb2, reducing(absorb2));
 function unfork(self) {
-    return new Promise(function(resolve9, reject7) {
-        fork$5(self, reject7, resolve9);
+    return new Promise(function(resolve, reject) {
+        fork$5(self, reject, resolve);
     });
 }
 function reduceToArray(self) {
@@ -6018,8 +6018,8 @@ ICoercible.addMethod([
     Array,
     Object
 ], function(self) {
-    return reduce$e(function(memo, [key118, value]) {
-        memo[key118] = value;
+    return reduce$e(function(memo, [key, value]) {
+        memo[key] = value;
         return memo;
     }, {}, self);
 });
@@ -6696,6 +6696,7 @@ const __default = Object.assign(mod.placeholder, mod.impart(mod, mod.partly));
 const IGame = __default.protocol({
     perspective: null,
     up: null,
+    may: null,
     seats: null,
     events: null,
     moves: null,
@@ -6706,6 +6707,7 @@ const IGame = __default.protocol({
 });
 const irreversible = IGame.irreversible;
 const up = IGame.up;
+const may = IGame.may;
 const seats = IGame.seats;
 const fold1 = IGame.fold;
 const events = IGame.events;
@@ -6728,28 +6730,28 @@ function crunch(self) {
 function reversibility(self) {
     const state = __default.deref(self);
     const seat = state.up;
-    const undoable2 = __default.undoable(self), redoable2 = __default.redoable(self), flushable2 = __default.flushable(self), resettable2 = __default.resettable(self);
+    const undoable = __default.undoable(self), redoable = __default.redoable(self), flushable = __default.flushable(self), resettable = __default.resettable(self);
     return __default.compact([
-        resettable2 ? {
+        resettable ? {
             type: "reset",
             seat
         } : null,
-        undoable2 ? {
+        undoable ? {
             type: "undo",
             seat
         } : null,
-        redoable2 ? {
+        redoable ? {
             type: "redo",
             seat
         } : null,
-        flushable2 && !redoable2 ? {
+        flushable && !redoable ? {
             type: "commit",
             seat
         } : null
     ]);
 }
 function execute3(self, command, s) {
-    const { type: type2  } = command;
+    const { type  } = command;
     const event = Object.assign({
         seat: s
     }, command);
@@ -6759,11 +6761,11 @@ function execute3(self, command, s) {
     } else if (!__default.includes(everyone(self), seat)) {
         throw new Error("Invalid seat");
     }
-    switch(type2){
+    switch(type){
         case "start":
         case "finish":
-            if (__default.detect(__default.pipe(__default.get(__default, "type"), __default.eq(__default, type2)), events(self))) {
-                throw new Error(`Cannot ${type2} more than once!`);
+            if (__default.detect(__default.pipe(__default.get(__default, "type"), __default.eq(__default, type)), events(self))) {
+                throw new Error(`Cannot ${type} more than once!`);
             }
             break;
         case "undo":
@@ -6782,9 +6784,7 @@ function execute3(self, command, s) {
             }
             break;
         case "~":
-            return __default.maybe(self, up, __default.first, __default.array, (x)=>moves(self, x)
-            , __default.last, (x)=>execute1(self, x, seat)
-            ) || self;
+            return __default.maybe(self, up, __default.first, __default.array, (x)=>moves(self, x), __default.last, (x)=>execute1(self, x, seat)) || self;
     }
     return IGame.execute(self, event, seat);
 }
@@ -6794,17 +6794,15 @@ function finish(self) {
         type: "finish"
     });
 }
-function load(self, events1) {
-    return __default.reduce(fold1, self, events1);
+function load(self, events) {
+    return __default.reduce(fold1, self, events);
 }
 function run(self, commands, seat) {
-    return __default.reduce((x, y)=>execute1(x, y, seat)
-    , self, commands);
+    return __default.reduce((x, y)=>execute1(x, y, seat), self, commands);
 }
 function whatif(self, commands, seat) {
     const prior = self;
-    const curr = __default.reduce((x, y)=>execute1(x, y, seat)
-    , prior, commands);
+    const curr = __default.reduce((x, y)=>execute1(x, y, seat), prior, commands);
     return {
         added: added(curr, prior),
         up: up(curr),
@@ -6824,15 +6822,15 @@ function transact($state, f, xs) {
 function added(curr, prior) {
     return prior ? __default.chain(events(curr), __default.last(__default.count(events(curr)) - __default.count(events(prior)), __default), __default.toArray) : [];
 }
-function moves2(self, seats1) {
-    return __default.chain(self, IGame.moves, __default.filter(__default.pipe(__default.get(__default, "seat"), __default.includes(seats1, __default)), __default));
+function moves2(self, seats) {
+    return __default.chain(self, IGame.moves, __default.filter(__default.pipe(__default.get(__default, "seat"), __default.includes(seats, __default)), __default));
 }
 const moves = __default.overload(null, IGame.moves, moves2);
 function perspectives(self) {
     return __default.chain(self, seated, __default.mapa(__default.pipe(__default.array, __default.partial(perspective, self)), __default));
 }
 function notify(curr, prior) {
-    return __default.difference(up(curr), prior ? up(prior) : []);
+    return __default.difference(__default.chain(curr, up), __default.maybe(prior, up) || []);
 }
 function everyone(self) {
     return __default.toArray(__default.mapIndexed(__default.identity, seated(self)));
@@ -6840,6 +6838,7 @@ function everyone(self) {
 function summarize([curr, prior]) {
     return {
         up: up(curr),
+        may: may(curr),
         notify: notify(curr, prior),
         added: added(curr, prior),
         perspectives: perspectives(curr),
@@ -6854,16 +6853,14 @@ function singular(xs) {
     }
     return __default.first(xs);
 }
-function simulate(self, events2, commands, seen) {
-    return __default.chain(self, (x)=>load(x, events2)
-    , __default.seq(commands) ? (x)=>whatif(x, commands, singular(seen))
-     : (x)=>perspective(x, seen)
-    );
+function simulate(self, events, commands, seen) {
+    return __default.chain(self, (x)=>load(x, events), __default.seq(commands) ? (x)=>whatif(x, commands, singular(seen)) : (x)=>perspective(x, seen));
 }
 const mod1 = {
     IGame: IGame,
     irreversible: irreversible,
     up: up,
+    may: may,
     seats: seats,
     fold: fold1,
     events: events,
@@ -6913,42 +6910,42 @@ const suits = [
     "♣️"
 ];
 const handSizes = upAndDown(1, 2);
-function upAndDown(min3, max5) {
-    return __default.toArray(__default.dedupe(__default.concat(__default.range(min3, max5 + 1), __default.range(max5, min3 - 1, -1))));
+function upAndDown(min, max) {
+    return __default.toArray(__default.dedupe(__default.concat(__default.range(min, max + 1), __default.range(max, min - 1, -1))));
 }
-function card(rank1, suit) {
+function card(rank, suit) {
     return {
-        rank: rank1,
+        rank,
         suit
     };
 }
-function rank(card1, trump, lead) {
-    const n = __default.indexOf(ranks, card1.rank);
-    return (card1.suit === trump ? 100 : 0) + (card1.suit === lead ? 0 : -50) + n;
+function rank(card, trump, lead) {
+    const n = __default.indexOf(ranks, card.rank);
+    return (card.suit === trump ? 100 : 0) + (card.suit === lead ? 0 : -50) + n;
 }
 function ranked(cards, trump) {
     const lead = __default.first(cards).suit;
-    function compare6(a, b) {
+    function compare(a, b) {
         return rank(b, trump, lead) - rank(a, trump, lead);
     }
-    return __default.chain(cards, __default.filter(function(card2) {
-        return card2.suit === lead || card2.suit === trump;
-    }, __default), __default.sort(compare6, __default));
+    return __default.chain(cards, __default.filter(function(card) {
+        return card.suit === lead || card.suit === trump;
+    }, __default), __default.sort(compare, __default));
 }
 function deck() {
     return __default.braid(card, ranks, suits);
 }
-function OhHell(seats1, config1, events1, journal3) {
-    this.seats = seats1;
-    this.config = config1;
-    this.events = events1;
-    this.journal = journal3;
+function OhHell(seats, config, events, journal) {
+    this.seats = seats;
+    this.config = config;
+    this.events = events;
+    this.journal = journal;
 }
-function ohHell(seats2, config2, events2, journal4) {
-    if (!__default.count(seats2)) {
+function ohHell(seats, config, events, journal) {
+    if (!__default.count(seats)) {
         throw new Error("Cannot play a game with no one seated at the table");
     }
-    return new OhHell(__default.toArray(seats2), config2, events2 || [], journal4 || __default.journal({}));
+    return new OhHell(__default.toArray(seats), config, events || [], journal || __default.journal({}));
 }
 function deal(self) {
     return __default1.execute(self, {
@@ -6966,8 +6963,8 @@ function award(winner, trick) {
         });
     };
 }
-function ordered(seats3, lead) {
-    return __default.chain(seats3, __default.range, __default.cycle, __default.dropWhile(__default.notEq(__default, lead), __default), __default.take(seats3, __default), __default.toArray);
+function ordered(seats, lead) {
+    return __default.chain(seats, __default.range, __default.cycle, __default.dropWhile(__default.notEq(__default, lead), __default), __default.take(seats, __default), __default.toArray);
 }
 function follow(state) {
     return state.seated[state.lead].played || null;
@@ -6983,16 +6980,21 @@ function handsEmpty(state) {
 }
 function up1(self) {
     const state = __default.deref(self);
-    return __default.chain(state.seated, __default.mapIndexed(function(seat, data) {
+    return __default.chain(state.seated, __default.mapIndexed(function(seat, { bid  }) {
         return {
             seat,
-            bid: data.bid
+            bid
         };
     }, __default), __default.filter(function(seat) {
         return seat.bid == null;
     }, __default), __default.mapa(__default.get(__default, "seat"), __default), __default.seq) || (state.up == null ? [] : [
         state.up
     ]);
+}
+function may1(self) {
+    return __default.unique(__default.map(function({ seat  }) {
+        return seat;
+    }, __default1.moves(self, __default1.seated(self))));
 }
 function score1(self) {
     const state = __default.deref(self);
@@ -7002,15 +7004,15 @@ function score1(self) {
 }
 function bids(state) {
     const size = handSizes[state.round] || 0;
-    const bids1 = __default.cons(null, __default.range(0, size + 1));
-    return __default.chain(state.seated, __default.mapIndexed(function(idx21, seat) {
-        return __default.chain(bids1, __default.mapa(function(bid) {
+    const bids = __default.cons(null, __default.range(0, size + 1));
+    return __default.chain(state.seated, __default.mapIndexed(function(idx, seat) {
+        return __default.chain(bids, __default.mapa(function(bid) {
             return {
                 type: "bid",
                 details: {
                     bid
                 },
-                seat: idx21
+                seat: idx
             };
         }, __default), __default.remove(__default.pipe(__default.getIn(__default, [
             "details",
@@ -7019,32 +7021,32 @@ function bids(state) {
     }, __default), __default.flatten, __default.compact);
 }
 function playable(state, seat) {
-    const seated1 = state.seated[seat];
+    const seated = state.seated[seat];
     const lead = follow(state);
     const trump = state.trump;
-    const hand = seated1.hand;
+    const hand = seated.hand;
     const follows = lead ? __default.pipe(__default.get(__default, "suit"), __default.eq(__default, lead.suit)) : __default.identity;
     const cards = lead ? __default.seq(__default.filter(follows, hand)) || hand : state.broken || tight(hand) ? hand : __default.filter(__default.pipe(__default.get(__default, "suit"), __default.notEq(__default, trump.suit)), hand);
-    return seated1.played ? [] : __default.map(function(card3) {
+    return seated.played ? [] : __default.map(function(card) {
         return {
             type: "play",
             seat,
             details: {
-                card: card3
+                card
             }
         };
     }, cards);
 }
 function moves1(self) {
-    const state = __default.deref(self), reversibility1 = __default1.reversibility(self);
+    const state = __default.deref(self), reversibility = __default1.reversibility(self);
     if (state.up != null) {
         switch(state.status){
             case "confirming":
-                return reversibility1;
+                return reversibility;
             case "bidding":
-                return __default.concat(reversibility1, bids(state));
+                return __default.concat(reversibility, bids(state));
             case "playing":
-                return __default.concat(reversibility1, state.trick ? [] : playable(state, state.up));
+                return __default.concat(reversibility, state.trick ? [] : playable(state, state.up));
         }
     }
     return [];
@@ -7058,52 +7060,52 @@ function irreversible1(self, command) {
         "finish"
     ], command.type);
 }
-function execute2(self1, command, seat1) {
-    const state1 = __default.deref(self1);
-    const valid = __default.detect(__default.eq(__default, __default.dissoc(command, "id")), __default1.moves(self1, [
-        seat1
+function execute2(self, command, seat) {
+    const state = __default.deref(self);
+    const valid = __default.detect(__default.eq(__default, __default.dissoc(command, "id")), __default1.moves(self, [
+        seat
     ]));
-    const { type: type3 , details  } = command;
+    const { type , details  } = command;
     const automatic = __default.includes([
         "start",
         "award",
         "scoring",
         "finish",
         "deal"
-    ], type3);
+    ], type);
     if (!automatic && !valid) {
-        throw new Error(`Invalid ${type3}`);
+        throw new Error(`Invalid ${type}`);
     }
-    if (automatic && seat1 != null) {
-        throw new Error(`Cannot invoke automatic command ${type3}`);
+    if (automatic && seat != null) {
+        throw new Error(`Cannot invoke automatic command ${type}`);
     }
-    if (!__default.seq(__default1.events(self1)) && type3 != "start") {
-        throw new Error(`Cannot ${type3} unless the game is first started.`);
+    if (!__default.seq(__default1.events(self)) && type != "start") {
+        throw new Error(`Cannot ${type} unless the game is first started.`);
     }
-    switch(type3){
+    switch(type){
         case "start":
-            return __default.chain(self1, __default1.fold(__default, command), deal);
+            return __default.chain(self, __default1.fold(__default, command), deal);
         case "deal":
-            if (!handsEmpty(state1)) {
+            if (!handsEmpty(state)) {
                 throw new Error("Hands are not yet empty!");
             }
             return function() {
-                const round = state1.round + 1;
-                const numHands = __default1.numSeats(self1);
+                const round = state.round + 1;
+                const numHands = __default1.numSeats(self);
                 const numCards = handSizes[round];
                 const dealt = numCards * numHands;
                 const cards = __default.chain(deck(), __default.shuffle);
-                const hands = __default.chain(cards, __default.take(dealt, __default), __default.mapa(function(card4, hand) {
+                const hands = __default.chain(cards, __default.take(dealt, __default), __default.mapa(function(card, hand) {
                     return [
-                        card4,
+                        card,
                         hand
                     ];
-                }, __default, __default.cycle(__default.range(numHands))), __default.reduce(function(memo, [card5, hand]) {
-                    return __default.update(memo, hand, __default.conj(__default, card5));
+                }, __default, __default.cycle(__default.range(numHands))), __default.reduce(function(memo, [card, hand]) {
+                    return __default.update(memo, hand, __default.conj(__default, card));
                 }, Array.from(__default.repeat(numHands, [])), __default));
                 const undealt = __default.chain(cards, __default.drop(dealt, __default));
                 const trump = __default.chain(undealt, __default.first);
-                return __default1.fold(self1, __default.assoc(command, "details", {
+                return __default1.fold(self, __default.assoc(command, "details", {
                     deck: __default.chain(undealt, __default.rest, __default.toArray),
                     hands,
                     trump,
@@ -7111,8 +7113,8 @@ function execute2(self1, command, seat1) {
                 }));
             }();
         case "play":
-            const breaks = details.card.suit == state1.trump.suit && !state1.broken;
-            return __default.chain(self1, __default1.fold(__default, command), breaks ? __default1.fold(__default, {
+            const breaks = details.card.suit == state.trump.suit && !state.broken;
+            return __default.chain(self, __default1.fold(__default, command), breaks ? __default1.fold(__default, {
                 type: "broken"
             }) : __default.identity, function(self) {
                 const state = __default.deref(self);
@@ -7121,17 +7123,17 @@ function execute2(self1, command, seat1) {
                 const complete = __default.count(__default.filter(__default.isSome, trick)) == __default1.numSeats(self);
                 if (complete) {
                     const ranking = ranked(trick, state.trump.suit);
-                    const best1 = __default.first(ranking);
-                    const winner = __default.indexOf(trick, best1);
+                    const best = __default.first(ranking);
+                    const winner = __default.indexOf(trick, best);
                     return __default.chain(self, award(winner, trick));
                 }
                 return self;
             }, __default.branch(__default.pipe(__default.deref, handsEmpty), scoring, __default.identity));
         case "finish":
             return function() {
-                const scores = __default1.score(self1);
+                const scores = __default1.score(self);
                 const places = __default.chain(scores, __default.unique, __default.sort, __default.reverse, __default.toArray);
-                const ranked1 = __default.chain(state1.seated, __default.mapIndexed(function(seat) {
+                const ranked = __default.chain(state.seated, __default.mapIndexed(function(seat) {
                     const points = __default.nth(scores, seat);
                     const place = __default.indexOf(places, points);
                     const tie = __default.count(__default.filter(__default.eq(__default, points), scores)) > 1;
@@ -7142,15 +7144,15 @@ function execute2(self1, command, seat1) {
                         tie
                     };
                 }, __default), __default.sort(__default.asc(__default.get(__default, "place")), __default));
-                return __default1.fold(self1, __default.assoc(command, "details", {
-                    ranked: ranked1
+                return __default1.fold(self, __default.assoc(command, "details", {
+                    ranked
                 }));
             }();
         case "commit":
-            return __default.chain(self1, __default1.fold(__default, command), function(self) {
-                const empty4 = __default.chain(self, __default.deref, handsEmpty);
-                const over = !handSizes[state1.round + 1];
-                return empty4 ? (over ? __default1.finish : deal)(self) : self;
+            return __default.chain(self, __default1.fold(__default, command), function(self) {
+                const empty = __default.chain(self, __default.deref, handsEmpty);
+                const over = !handSizes[state.round + 1];
+                return empty ? (over ? __default1.finish : deal)(self) : self;
             });
         case "bid":
         case "award":
@@ -7158,9 +7160,9 @@ function execute2(self1, command, seat1) {
         case "undo":
         case "redo":
         case "reset":
-            return __default1.fold(self1, command);
+            return __default1.fold(self, command);
         default:
-            throw new Error(`Unknown command ${type3}`);
+            throw new Error(`Unknown command ${type}`);
     }
 }
 function compel1(self) {
@@ -7183,7 +7185,7 @@ function events1(self) {
 }
 function scoring(self) {
     const state = __default.deref(self);
-    const scoring1 = __default.chain(state, __default.get(__default, "seated"), __default.mapa(function(seat) {
+    const scoring = __default.chain(state, __default.get(__default, "seated"), __default.mapa(function(seat) {
         const tricks = __default.count(seat.tricks), bid = seat.bid, points = tricks === bid ? 10 + tricks : 0;
         return {
             bid,
@@ -7194,14 +7196,14 @@ function scoring(self) {
     return __default1.execute(self, {
         type: "scoring",
         details: {
-            scoring: scoring1
+            scoring
         }
     }, null);
 }
 function fold2(self, event) {
-    const state2 = __default.deref(self);
-    const { type: type4 , details: details1 , seat: seat2  } = event;
-    switch(type4){
+    const state = __default.deref(self);
+    const { type , details , seat  } = event;
+    switch(type){
         case "start":
             return function() {
                 const details = {
@@ -7215,53 +7217,53 @@ function fold2(self, event) {
             }();
         case "deal":
             return function() {
-                const lead = details1.round % __default1.numSeats(self);
-                return __default1.fold(self, event, __default.fmap(__default, __default.pipe(__default.assoc(__default, "status", "bidding"), __default.assoc(__default, "lead", lead), __default.assoc(__default, "up", lead), __default.assoc(__default, "broken", false), __default.assoc(__default, "trump", details1.trump), __default.assoc(__default, "deck", details1.deck), __default.assoc(__default, "round", details1.round), __default.foldkv(function(memo, seat, hand) {
+                const lead = details.round % __default1.numSeats(self);
+                return __default1.fold(self, event, __default.fmap(__default, __default.pipe(__default.assoc(__default, "status", "bidding"), __default.assoc(__default, "lead", lead), __default.assoc(__default, "up", lead), __default.assoc(__default, "broken", false), __default.assoc(__default, "trump", details.trump), __default.assoc(__default, "deck", details.deck), __default.assoc(__default, "round", details.round), __default.foldkv(function(memo, seat, hand) {
                     return __default.updateIn(memo, [
                         "seated",
                         seat
-                    ], function(seated2) {
-                        return Object.assign({}, seated2, {
+                    ], function(seated) {
+                        return Object.assign({}, seated, {
                             hand,
                             tricks: [],
                             bid: null,
                             played: null
                         });
                     });
-                }, __default, details1.hands))));
+                }, __default, details.hands))));
             }();
         case "broken":
             return __default1.fold(self, event, __default.fmap(__default, __default.assoc(__default, "broken", true)));
         case "bid":
             return __default1.fold(self, event, __default.fmap(__default, __default.pipe(__default.assocIn(__default, [
                 "seated",
-                seat2,
+                seat,
                 "bid"
-            ], details1.bid), function(state) {
+            ], details.bid), function(state) {
                 return bidding(state) ? state : __default.assoc(state, "status", "playing");
             })));
         case "play":
             return __default1.fold(self, event, __default.fmap(__default, __default.pipe(__default.assocIn(__default, [
                 "seated",
-                seat2,
+                seat,
                 "trick"
             ], null), __default.assocIn(__default, [
                 "seated",
-                seat2,
+                seat,
                 "played"
-            ], details1.card), __default.updateIn(__default, [
+            ], details.card), __default.updateIn(__default, [
                 "seated",
-                seat2,
+                seat,
                 "hand"
-            ], __default.pipe(__default.remove(__default.eq(__default, details1.card), __default), __default.toArray)))));
+            ], __default.pipe(__default.remove(__default.eq(__default, details.card), __default), __default.toArray)))));
         case "award":
             return __default1.fold(self, event, __default.fmap(__default, __default.pipe(__default.assoc(__default, "status", "confirming"), __default.update(__default, "seated", __default.mapa(function(seat) {
                 return __default.assoc(seat, "played", null);
             }, __default)), __default.updateIn(__default, [
                 "seated",
-                details1.winner,
+                details.winner,
                 "tricks"
-            ], __default.conj(__default, details1.trick)), __default.assoc(__default, "lead", details1.winner))));
+            ], __default.conj(__default, details.trick)), __default.assoc(__default, "lead", details.winner))));
         case "undo":
             return __default1.fold(self, event, __default.undo);
         case "redo":
@@ -7269,12 +7271,12 @@ function fold2(self, event) {
         case "reset":
             return __default1.fold(self, event, __default.reset);
         case "commit":
-            const empty5 = handsEmpty(state2);
-            const up11 = empty5 ? null : __default.second(ordered(__default.count(state2.seated), state2.up));
-            return __default1.fold(self, event, __default.pipe(__default.fmap(__default, __default.pipe(__default.assoc(__default, "status", "playing"), __default.assoc(__default, "up", up11))), __default.flush));
+            const empty = handsEmpty(state);
+            const up = empty ? null : __default.second(ordered(__default.count(state.seated), state.up));
+            return __default1.fold(self, event, __default.pipe(__default.fmap(__default, __default.pipe(__default.assoc(__default, "status", "playing"), __default.assoc(__default, "up", up))), __default.flush));
         case "scoring":
-            return __default1.fold(self, event, __default.fmap(__default, __default.update(__default, "seated", __default.foldkv(function(memo, idx22, seat) {
-                return __default.assoc(memo, idx22, __default.update(seat, "scored", __default.conj(__default, event.details.scoring[idx22])));
+            return __default1.fold(self, event, __default.fmap(__default, __default.update(__default, "seated", __default.foldkv(function(memo, idx, seat) {
+                return __default.assoc(memo, idx, __default.update(seat, "scored", __default.conj(__default, event.details.scoring[idx])));
             }, [], __default))));
         case "finish":
             return __default1.fold(self, event, __default.fmap(__default, __default.pipe(__default.dissoc(__default, "up"), __default.assoc(__default, "status", "finished"))));
@@ -7292,14 +7294,14 @@ function seats1(self) {
 const obscureCards = __default.mapa(__default.constantly({}), __default);
 function obscure(seen) {
     return function(event) {
-        const { type: type5  } = event;
-        switch(type5){
+        const { type  } = event;
+        switch(type){
             case "deal":
                 return __default.chain(event, __default.updateIn(__default, [
                     "details",
                     "hands"
-                ], __default.pipe(__default.mapIndexed(function(idx23, cards) {
-                    return __default.includes(seen, idx23) ? cards : obscureCards(cards);
+                ], __default.pipe(__default.mapIndexed(function(idx, cards) {
+                    return __default.includes(seen, idx) ? cards : obscureCards(cards);
                 }, __default), __default.toArray)), __default.updateIn(__default, [
                     "details",
                     "deck"
@@ -7310,24 +7312,26 @@ function obscure(seen) {
     };
 }
 function perspective1(self, _seen) {
-    const seen = __default.chain(_seen, __default.compact, __default.toArray);
-    const up2 = __default1.up(self);
-    const seated1 = __default1.seated(self);
-    const score11 = __default1.score(self);
-    const all1 = __default.eq(seen, __default1.everyone(self));
-    const state = __default.chain(self, __default.deref, all1 ? __default.identity : __default.pipe(__default.update(__default, "deck", obscureCards), __default.update(__default, "seated", __default.pipe(__default.mapIndexed(function(idx24, seated3) {
-        return __default.includes(seen, idx24) ? seated3 : __default.update(seated3, "hand", obscureCards);
+    const seen = __default.chain(_seen, __default.filtera(__default.isSome, __default));
+    const up = __default1.up(self);
+    const may = __default1.may(self);
+    const seated = __default1.seated(self);
+    const score = __default1.score(self);
+    const all = __default.eq(seen, __default1.everyone(self));
+    const state = __default.chain(self, __default.deref, all ? __default.identity : __default.pipe(__default.update(__default, "deck", obscureCards), __default.update(__default, "seated", __default.pipe(__default.mapIndexed(function(idx, seated) {
+        return __default.includes(seen, idx) ? seated : __default.update(seated, "hand", obscureCards);
     }, __default), __default.toArray))));
-    const moves11 = __default.chain(self, __default1.moves(__default, seen), __default.toArray);
-    const events3 = all1 ? self.events : __default.mapa(obscure(seen), self.events);
+    const moves = __default.chain(self, __default1.moves(__default, seen), __default.toArray);
+    const events = all ? self.events : __default.mapa(obscure(seen), self.events);
     return {
         seen,
-        seated: seated1,
-        up: up2,
+        seated,
+        up,
+        may,
         state,
-        moves: moves11,
-        events: events3,
-        score: score11
+        moves,
+        events,
+        score
     };
 }
 function deref1(self) {
@@ -7356,6 +7360,7 @@ __default.doto(OhHell, __default.implement(__default.IDeref, {
 }), __default.implement(IGame1, {
     perspective: perspective1,
     up: up1,
+    may: may1,
     seats: seats1,
     moves: moves1,
     events: events1,
@@ -7364,7 +7369,7 @@ __default.doto(OhHell, __default.implement(__default.IDeref, {
     fold: fold4,
     score: score1
 }));
-function simulate1(seats4, config3, events4, commands, seen) {
-    return simulate(ohHell(seats4, config3), events4, commands, seen);
+function simulate1(seats, config, events, commands, seen) {
+    return simulate(ohHell(seats, config), events, commands, seen);
 }
 export { simulate1 as simulate };

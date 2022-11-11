@@ -82,14 +82,19 @@ function handsEmpty(state){
   return _.chain(state, _.get(_, "seated"), _.mapa(_.get(_, "hand"), _), _.flatten, _.compact, _.seq, _.not);
 }
 
-
 function up(self){
   const state = _.deref(self);
-  return _.chain(state.seated, _.mapIndexed(function(seat, data){
-    return {seat, bid: data.bid};
+  return _.chain(state.seated, _.mapIndexed(function(seat, {bid}){
+    return {seat, bid};
   }, _), _.filter(function(seat){
     return seat.bid == null;
   }, _), _.mapa(_.get(_, "seat"), _), _.seq) || (state.up == null ? [] : [state.up]);
+}
+
+function may(self){
+  return _.unique(_.map(function({seat}){
+    return seat;
+  }, g.moves(self, g.seated(self))));
 }
 
 function score(self){
@@ -401,8 +406,9 @@ function obscure(seen){
 }
 
 function perspective(self, _seen){
-  const seen = _.chain(_seen, _.compact, _.toArray);
+  const seen = _.chain(_seen, _.filtera(_.isSome, _));
   const up = g.up(self);
+  const may = g.may(self);
   const seated = g.seated(self);
   const score = g.score(self);
   const all = _.eq(seen, g.everyone(self));
@@ -415,7 +421,7 @@ function perspective(self, _seen){
         }, _), _.toArray))));
   const moves = _.chain(self, g.moves(_, seen), _.toArray);
   const events = all ? self.events : _.mapa(obscure(seen), self.events);
-  return {seen, seated, up, state, moves, events, score};
+  return {seen, seated, up, may, state, moves, events, score};
 }
 
 function deref(self){
@@ -442,4 +448,4 @@ _.doto(OhHell,
   _.implement(_.IDeref, {deref}),
   _.implement(_.IResettable, {resettable}),
   _.implement(_.IRevertible, {undoable, redoable, flushable}),
-  _.implement(IGame, {perspective, up, seats, moves, events, irreversible, execute: _.comp(compel, execute), fold, score}));
+  _.implement(IGame, {perspective, up, may, seats, moves, events, irreversible, execute: _.comp(compel, execute), fold, score}));

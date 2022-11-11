@@ -2,11 +2,11 @@
   "name": "yourmove",
   "version": "1.0.0",
   "scripts": {
-    "obsolete:bundle-rollup": "rollup ./src/db/ohhell.js -o dist/ohhell.bundle.js --format umd --name '$OhHell$'",
-    "ohhell": "node build ohhell",
-    "ohhell/alt": "npm run build -- ohhell",
-    "obsolete:bundle": "webpack build --config ./webpack.config.js",
     "dev": "lume --dev --serve",
-    "build": "node build"
+    "build": "node build",
+    "ohhell": "node build ohhell && lume --config _config.sim.js",
+    "ohhell/alt": "npm run build -- ohhell",
+    "obsolete:bundle-rollup": "rollup ./src/db/ohhell.js -o dist/ohhell.bundle.js --format umd --name '$OhHell$'",
+    "obsolete:bundle": "webpack build --config ./webpack.config.js"
   }
 }

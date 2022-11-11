@@ -235,17 +235,16 @@ function shell(session, tableId){
   $.sub($pass, t.compact(), function({state}){
     if (state) {
       const {touches, at} = state;
-      const present = _.count(touches) - 1 == at;
-      dom.attr(root, "data-tense", present ? "present" : "past");
+      dom.attr(root, "data-tense", _.count(touches) - 1 == at ? "present" : "past");
       dom.text(els.touch, at + 1);
       dom.text(els.touches, _.count(touches));
     }
   });
 
+  $.sub($ready, _.see("$pass"));
   $.sub($table, _.see("$table"));
   $.sub($touch, _.see("$touch"));
   $.sub($seated, _.see("$seated"));
-  $.sub($ready, _.see("$ready"));
   $.sub($hist, _.see("$hist"));
 
   $.sub($seated, function(seated){
@@ -264,28 +263,30 @@ function shell(session, tableId){
   });
 
   $.sub($hist, function([seat, [curr, prior]]){
-    const {state, state: {trump, round, status, seated, deck}} = curr;
+    const {up, may, seen, state, state: {trump, round, status, seated, deck}} = curr;
     const {hand, bid} = _.nth(seated, seat);
     const s = dom.sel1(`[data-seat="${seat}"]`);
     _.eachIndexed(function(idx, {bid, tricks, hand, played, scored}){
       const el = dom.sel1(`[data-seat="${idx}"]`);
+      _.includes(seen, idx) && _.doto(el,
+        dom.addClass(_, "yours"),
+        dom.attr(_, "data-presence", "online"));
+      dom.attr(dom.sel1("[data-action]", el), "data-action", _.includes(up, idx) ? "must" : (_.includes(may, idx) ? "may" : ""));
       dom.text(dom.sel1(".tricks", el), _.count(tricks));
       dom.text(dom.sel1(".bid", el), bid == null ? "?" : bid);
       dom.html(dom.sel1(".played", el), _.maybe(played, cardPic));
     }, seated);
+    dom.html(els.hand, _.map(function(card){
+      return li(img({src: cardPic(card)}));
+    }, hand));
+    _.doto(els.bidding,
+      dom.attr(_, "data-max-bid", round + 1),
+      dom.attr(_, "data-actual-bid", bid));
     dom.attr(root, "data-status", status);
     dom.text(els.cards, _.count(deck) || 52);
     dom.attr(els.trump, "src", _.maybe(trump, cardPic) || "");
     dom.text(els.roundNum, round + 1);
     dom.text(els.roundMax, 13);
-    dom.attr(els.bidding, "data-max-bid", round + 1);
-    dom.attr(els.bidding, "data-actual-bid", bid);
-    dom.html(els.hand, _.map(function(card){
-      return li(img({src: cardPic(card)}));
-    }, hand));
-    dom.addClass(s, "yours");
-    dom.attr(dom.sel1("[data-action]", s), "data-action", "must");
-    dom.attr(s, "data-presence", "online");
   });
 
   $.sub($touch, function(){

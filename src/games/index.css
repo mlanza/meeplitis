@@ -7,6 +7,9 @@ body {
   color: #3E505C;
   background: url(../../images/backgrounds/round.webp);
 }
+body[data-tense="past"] {
+  background: url(../../images/backgrounds/pixel_weave.webp);
+}
 #replay {
   float: right;
   font-size: .9em;
@@ -153,7 +156,6 @@ div.player {
 div.player:hover {
   opacity: 1;
   box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
-  cursor: pointer;
 }
 .avatar {
   position: relative;
@@ -199,10 +201,12 @@ div.player div.username {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
 @media (prefers-color-scheme: dark) {
   body {
     background: url(../../images/backgrounds/carbon_fibre.webp);
     color: snow;
+  }
+  body[data-tense="past"] {
+    background: url(../../images/backgrounds/denim.webp);
   }
 }

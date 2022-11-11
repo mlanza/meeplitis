@@ -3,6 +3,7 @@
   left: 1em;
   bottom: 1em;
   background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 1em;
   z-index: 999;
 }
 .bidding ul {
@@ -16,18 +17,18 @@
   float: left;
   padding: .5em;
   font-size: 1.5em;
-  cursor: pointer;
 }
 .bidding li {
   background-color: #A5A9A0;
-  border-radius: 5px;
+  border-radius: .5em;
   margin: 5px;
   min-width: 1em;
   text-align: center;
+  cursor: pointer;
   transition: background-color .5s, color .5s;
 }
 .bidding li:hover {
-  background-color: saddlebrown;
+  background-color: orange;
   color: snow;
 }
 .hand {

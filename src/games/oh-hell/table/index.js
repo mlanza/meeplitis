@@ -275,7 +275,9 @@ function shell(session, tableId){
       dom.attr(dom.sel1("[data-action]", el), "data-action", _.includes(up, idx) ? "must" : (_.includes(may, idx) ? "may" : ""));
       dom.text(dom.sel1(".tricks", el), _.count(tricks));
       dom.text(dom.sel1(".bid", el), bid == null ? "?" : bid);
-      dom.html(dom.sel1(".played", el), _.maybe(played, cardPic));
+      dom.html(dom.sel1(".played", el), _.maybe(played, cardPic, function(src){
+        return img({src});
+      }));
     }, seated);
     dom.html(els.hand, _.map(function(card){
       return li(img({src: cardPic(card)}));

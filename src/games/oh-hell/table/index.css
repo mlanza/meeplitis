@@ -1,4 +1,5 @@
 .bidding {
+  font-weight: bold;
   position: fixed;
   left: 1em;
   bottom: 1em;
@@ -8,26 +9,32 @@
 }
 .bidding ul {
   list-style: none;
+}
+.bidding ul,
+.bidding li,
+.bidding label {
+  float: left;
   padding: 0;
   margin: 0;
-  font-weight: bold;
-  float: left;
 }
-.bidding li, .bidding label {
-  float: left;
-  padding: .5em;
+.bidding label,
+.bidding button {
   font-size: 1.5em;
+  font-weight: bold;
+  padding: .5em;
 }
-.bidding li {
+.bidding button {
   background-color: #A5A9A0;
   border-radius: .5em;
   margin: 5px;
-  min-width: 1em;
+  min-width: 2em;
   text-align: center;
-  cursor: pointer;
   transition: background-color .5s, color .5s;
 }
-.bidding li:hover {
+[data-tense="present"] .bidding button {
+  cursor: default;
+}
+[data-tense="present"] .bidding button:hover {
   background-color: orange;
   color: snow;
 }
@@ -42,9 +49,8 @@
   list-style: none;
   display: inline-flex;
   z-index: 999;
-  -border:solid 1px saddlebrown;
 }
-.hand:hover {
+[data-tense="present"] .hand:hover {
   bottom: -8em;
 }
 .hand li {
@@ -56,12 +62,12 @@
 .hand li,
 .hand li img {
   width: 10em;
-}
-.hand li img {
   height: 16em;
+}
+[data-tense="present"] .hand li img {
   cursor: pointer;
 }
-.hand li:hover {
+[data-tense="present"] .hand li:hover {
   padding-top: 0;
 }
 .trump, .deck {
@@ -88,24 +94,24 @@
   display: block;
   margin: .5em auto 0;
 }
-[data-actual-bid=""] li[data-bid=""],
-[data-actual-bid="0"] li[data-bid="0"],
-[data-actual-bid="1"] li[data-bid="1"],
-[data-actual-bid="2"] li[data-bid="2"],
-[data-actual-bid="3"] li[data-bid="3"],
-[data-actual-bid="4"] li[data-bid="4"],
-[data-actual-bid="5"] li[data-bid="5"],
-[data-actual-bid="6"] li[data-bid="6"],
-[data-actual-bid="7"] li[data-bid="7"],
-[data-actual-bid="8"] li[data-bid="8"],
-[data-actual-bid="9"] li[data-bid="9"],
-[data-actual-bid="10"] li[data-bid="10"],
-[data-actual-bid="11"] li[data-bid="11"],
-[data-actual-bid="12"] li[data-bid="12"],
-[data-actual-bid="13"] li[data-bid="13"] {
+[data-actual-bid=""] li[data-bid=""] button,
+[data-actual-bid="0"] li[data-bid="0"] button,
+[data-actual-bid="1"] li[data-bid="1"] button,
+[data-actual-bid="2"] li[data-bid="2"] button,
+[data-actual-bid="3"] li[data-bid="3"] button,
+[data-actual-bid="4"] li[data-bid="4"] button,
+[data-actual-bid="5"] li[data-bid="5"] button,
+[data-actual-bid="6"] li[data-bid="6"] button,
+[data-actual-bid="7"] li[data-bid="7"] button,
+[data-actual-bid="8"] li[data-bid="8"] button,
+[data-actual-bid="9"] li[data-bid="9"] button,
+[data-actual-bid="10"] li[data-bid="10"] button,
+[data-actual-bid="11"] li[data-bid="11"] button,
+[data-actual-bid="12"] li[data-bid="12"] button,
+[data-actual-bid="13"] li[data-bid="13"] button {
   color: white;
-  background-color: #3E505C;
-  cursor: default;
+  background-color: #3E505C !important;
+  cursor: not-allowed;
 }
 [data-status="bidding"] .bidding {
   visibility: visible;

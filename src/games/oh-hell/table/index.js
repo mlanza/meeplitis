@@ -9,6 +9,12 @@ const root = document.body,
       params = new URLSearchParams(document.location.search),
       tableId = params.get('id');
 
+const div = dom.tag('div'),
+      span = dom.tag('span'),
+      img = dom.tag('img'),
+      li = dom.tag('li'),
+      button = dom.tag('button');
+
 function json(resp){
   return resp.json();
 }
@@ -222,11 +228,6 @@ function shell(session, tableId){
     touches: dom.sel1("#replay .touches")
   }
 
-  const div = dom.tag('div'),
-        span = dom.tag('span'),
-        img = dom.tag('img'),
-        li = dom.tag('li');
-
   function cardPic({suit, rank}){
     const suits = {"♥️": "H", "♦️": "D", "♣️": "C", "♠️": "S"};
     return `../../../images/deck/${rank}${suits[suit]}.svg`;
@@ -316,8 +317,8 @@ if (tableId) {
         sess?.access_token),
       tableId);
 
-    $.on(root, "click", "[data-tense=\"present\"] [data-bid]", function(e){
-      const bid = _.maybe(e.target, dom.attr(_, "data-bid"), _.blot, parseInt),
+    $.on(root, "click", "[data-tense=\"present\"] [data-bid] button", function(e){
+      const bid = _.maybe(e.target, _.parent, dom.attr(_, "data-bid"), _.blot, parseInt),
             actual = _.maybe(dom.sel1("[data-actual-bid]"), dom.attr(_, "data-actual-bid"), _.blot, parseInt);
       if (bid != actual) {
         sh.dispatch(s, {type: "bid", "details": {bid}});

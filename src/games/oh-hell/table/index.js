@@ -164,7 +164,7 @@ const Shell = (function(){
   async function dispatch(self, command){
     const pass = _.deref(self.$pass);
 
-    if (!pass.seat) {
+    if (pass.seat == null) {
       throw new Error("Spectators are not permitted to issue moves");
     }
 

@@ -67,7 +67,7 @@
     function signOutSubmitted(event){
       event.preventDefault()
       supabase.auth
-        .signOut().then(redirect);
+        .signOut().then(redirect.bind(0));
     }
 
     function setToken(response) {

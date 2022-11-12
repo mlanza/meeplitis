@@ -23,20 +23,26 @@
   <script type="module">
     import supabase from "../../lib/supabase.js";
 
-    function toJSON(resp){
-      return resp.json();
-    }
+    const params = new URLSearchParams(document.location.search),
+          dest   = params.get('dest') ? decodeURIComponent(params.get('dest')) : null;
 
-    function see(label){
-      return function(...args){
-        return console.log(label, ...args);
+    function redirect(ms){
+      console.log("->", arguments);
+      if (dest) {
+        setTimeout(function(){
+          location.href = dest;
+        }, ms || 1000);
       }
     }
 
-    if (supabase.auth.currentUser) {
+    const {data, error} = await supabase.auth.getUser();
+    const {user} = data;
+
+    if (user) {
       document.getElementById("signout-section").style.display = "block";
       const p = document.querySelector("#signout-section p");
-      p.textContent = supabase.auth.currentUser.email;
+      p.textContent = user.email;
+      redirect(5000);
     } else {
       document.getElementById("signin-section").style.display = "block";
     }
@@ -51,8 +57,8 @@
       const email = event.target[0].value
       const password = event.target[1].value
       supabase.auth
-        .signInWithPassword({ email, password })
-        .then(setToken)
+        .signInWithPassword({email, password})
+        .then(redirect.bind(1000))
         .catch((err) => {
           alert(err.response.text);
         });
@@ -61,9 +67,7 @@
     function signOutSubmitted(event){
       event.preventDefault()
       supabase.auth
-        .signOut().then(function(){
-          location.href = "/";
-        });
+        .signOut().then(redirect);
     }
 
     function setToken(response) {
@@ -72,7 +76,7 @@
       } else {
         console.log("resp", response);
       }
-      location.href = "/";
+      location.href = dest;
     }
 
     Object.assign(window, {supabase});

@@ -5,10 +5,84 @@ body {
   padding: 0;
   padding-top: 2.5em;
   color: #3E505C;
-  background: url(../../images/backgrounds/round.webp);
+  background-image: url(../../images/backgrounds/round.webp);
+  transition: background-image .3s ease-in-out;
+
 }
 body[data-tense="past"] {
-  background: url(../../images/backgrounds/pixel_weave.webp);
+  background-image: url(../../images/backgrounds/pixel_weave.webp);
+  transition: background-image .3s ease-in-out;
+
+}
+@keyframes updown {
+  0% {
+    transform: translateY(0);
+  }
+  25% {
+    transform: translateY(-1em);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+@keyframes fadeout {
+  0% { opacity: 1; }
+  85% { opacity: .8; }
+  100% { opacity: 0; }
+}
+
+#event {
+  animation: updown 3s ease-out infinite;
+}
+#event.acknowledged {
+  animation: .5s ease 0s normal forwards 1 fadeout;
+}
+.hidden {
+  visibility: hidden;
+}
+#event {
+  position: fixed;
+  vertical-align: middle;
+  bottom: 1em;
+  left: calc(50% - 15em - 40px);
+  border: solid 2px white;
+  width: 30em;
+  height: 5em;
+  display: inline-block;
+  text-align: left;
+  margin: auto 0;
+  z-index: 9999;
+  color: white;
+  background-color: rgba(62, 80, 92, .95);
+  box-shadow: -3px 5px 5px -3px rgba(0, 0, 0, 0.6);
+  border-radius: 1em;
+}
+#event p.who {
+  font-size: .8em;
+  text-align: right;
+  color: white;
+  padding: 0;
+  margin-bottom: -3px;
+  position: absolute;
+  bottom: 5px;
+  right: 0;
+  margin-right: 85px;
+  opacity: .6;
+}
+#event img.who {
+  position: absolute;
+  right: -2px;
+  top: -1px;
+  border-radius: 0 1em 1em 0;
+  border: solid 1px transparent;
+}
+#event p {
+  display: block;
+  width: 23em;
+  margin-left: 1em;
+}
+#event.automatic .who {
+  visibility: hidden;
 }
 #replay {
   float: right;
@@ -203,10 +277,10 @@ div.player div.username {
 }
 @media (prefers-color-scheme: dark) {
   body {
-    background: url(../../images/backgrounds/carbon_fibre.webp);
+    background-image: url(../../images/backgrounds/carbon_fibre.webp);
     color: snow;
   }
   body[data-tense="past"] {
-    background: url(../../images/backgrounds/denim.webp);
+    background-image: url(../../images/backgrounds/denim.webp);
   }
 }

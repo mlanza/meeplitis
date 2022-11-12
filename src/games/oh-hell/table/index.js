@@ -218,6 +218,7 @@ function shell(session, tableId){
   const els = {
     roundNum,
     roundMax,
+    event: dom.sel1("#event"),
     players: dom.sel1(".players"),
     trump: dom.sel1(".trump img"),
     bidding: dom.sel1(".bidding"),
@@ -263,9 +264,26 @@ function shell(session, tableId){
     }, seated);
   });
 
+  function eventFor(event){
+    return event.seat == null ? null : _.chain($seated, _.deref, _.nth(_, event.seat));
+  }
+
   $.sub($hist, function([seat, [curr, prior]]){
-    const {up, may, seen, state, state: {trump, round, status, seated, deck}} = curr;
+    const {up, may, seen, events, state, state: {trump, round, status, seated, deck}} = curr;
     const {hand, bid} = _.nth(seated, seat);
+    const event = _.last(events);
+    const player = eventFor(event);
+    dom.toggleClass(els.event, "automatic", !player);
+    if (player) {
+      dom.attr(dom.sel1("img.who", els.event), "src", `${player.avatar}?=80`);
+      dom.text(dom.sel1("p.who", els.event), player.username);
+    }
+    dom.text(dom.sel1("p", els.event), event.type);
+    _.doto(els.event,
+      dom.addClass(_, "bounce"),
+      dom.removeClass(_, "hidden"),
+      dom.removeClass(_, "acknowledged"));
+
     const s = dom.sel1(`[data-seat="${seat}"]`);
     _.eachIndexed(function(idx, {bid, tricks, hand, played, scored}){
       const el = dom.sel1(`[data-seat="${idx}"]`);
@@ -325,6 +343,14 @@ if (tableId) {
       if (bid != actual) {
         sh.dispatch(s, {type: "bid", "details": {bid}});
       }
+    });
+
+    $.on(root, "click", "#event", function(e){
+      const self = this;
+      dom.addClass(self, "acknowledged");
+      setTimeout(function(){
+        dom.addClass(self, "hidden");
+      }, 500);
     });
 
     $.on(root, "click", "#replay [data-go]", function(e){

@@ -19,9 +19,9 @@
 }
 .bidding label,
 .bidding button {
-  font-size: 1.5em;
-  font-weight: bold;
-  padding: .5em;
+  font-size: 1.1em;
+  width: 4em;
+  padding: 5px;
 }
 .bidding button {
   background-color: #A5A9A0;
@@ -50,7 +50,7 @@
   display: inline-flex;
   z-index: 999;
 }
-[data-tense="present"] .hand:hover {
+[data-tense="present"][data-status="playing"] .hand:hover {
   bottom: -8em;
 }
 .hand li {
@@ -64,10 +64,10 @@
   width: 10em;
   height: 16em;
 }
-[data-tense="present"] .hand li img {
+[data-tense="present"][data-status="playing"] .hand li img {
   cursor: pointer;
 }
-[data-tense="present"] .hand li:hover {
+[data-tense="present"][data-status="playing"] .hand li:hover {
   padding-top: 0;
 }
 .trump, .deck {
@@ -81,7 +81,6 @@
 .upkeep {
   -border: solid 1px purple;
   width: 10em;
-  height: calc(100% - 5em);
   position: absolute;
   right: 0;
   text-align: center;

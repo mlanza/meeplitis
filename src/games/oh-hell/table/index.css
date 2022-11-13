@@ -3,14 +3,17 @@
   left: 1em;
   bottom: 1em;
   background-color: rgba(255, 255, 255, 0.8);
-  border-radius: 1em;
+  border-radius: .7em;
   z-index: 999;
+  padding: 1px;
 }
-body .moves {
-  visibility: hidden;
+body .moves, body #event {
+  opacity: 0;
+  transition: opacity .5s;
 }
-body[data-status] .moves {
-  visibility: visible;
+body[data-status] .moves,
+body[data-status] #event {
+  opacity: 1;
 }
 button {
   font-size: 1.1em;
@@ -21,6 +24,11 @@ button {
   min-width: 2em;
   text-align: center;
   transition: background-color .5s, color .5s;
+  display: none;
+}
+button.active,
+button.selected {
+  display: initial;
 }
 [data-tense="present"] button {
   cursor: default;

@@ -277,16 +277,31 @@ function shell(session, tableId){
     switch(event.type) {
       case "start":
         return "Starts game.";
+
       case "deal":
         return "Deals cards.";
+
       case "commit":
         return "I'm done.";
+
+      case "undo":
+        return "Undoes.";
+
+      case "redo":
+        return "Redoes.";
+
+      case "reset":
+        return "Resets.";
+
       case "broken":
         return "Breaks trump!";
+
       case "bid":
         return `Bids.`;
+
       case "play":
         return `Plays ${event.details.card.rank} of ${event.details.card.suit}.`;
+
       case "scoring":
         const seated = _.deref($seated);
         const {scoring} = event.details;
@@ -297,6 +312,7 @@ function shell(session, tableId){
 
       case "award":
         return ["Awards trick to ", recipient(_.chain($seated, _.deref, _.nth(_, event.details.winner))), "."];
+
       default:
         return event.type;
     }
@@ -306,7 +322,7 @@ function shell(session, tableId){
     const {details} = move;
     switch(move.type){
       case "bid":
-        return `[data-bid="${details.bid}"]`;
+        return `[data-bid="${details.bid == null ? '' : details.bid}"]`;
       default:
         return "";
     }
@@ -317,10 +333,17 @@ function shell(session, tableId){
     const {hand, bid} = _.nth(seated, seat);
     const event = _.last(events);
     const player = eventFor(event);
-    _.each(dom.hide, dom.sel("button", els.moves));
+    _.each(_.doto(_,
+      dom.removeClass(_, "active"),
+      dom.removeClass(_, "selected"),
+      dom.prop(_, "disabled", false)),
+        dom.sel("button", els.moves));
     _.chain(moves, _.map(function(move){
       return dom.sel1(`button[data-type="${move.type}"]${moveSel(move)}`, els.moves);
-    }, _), _.compact, _.each(dom.show, _));
+    }, _), _.compact, _.each(dom.addClass(_, "active"), _));
+    status == "bidding" && _.doto(dom.sel1(`button[data-type="bid"][data-bid="${bid == null ? '' : bid}"]`),
+      dom.addClass(_, "selected"),
+      dom.prop(_, "disabled", true));
 
     dom.toggleClass(els.event, "automatic", !player);
     if (player) {

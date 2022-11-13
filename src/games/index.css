@@ -133,6 +133,14 @@ body[data-tense="past"] {
   box-shadow: -3px 5px 5px -3px rgba(0, 0, 0, 0.6);
   transition: background-color .5s;
 }
+#game img {
+  width: 18px;
+  margin-right: 3px;
+  margin-bottom: -3px;
+}
+#game #phase:not(:empty)::before {
+  content: ": ";
+}
 [data-tense="past"] #game {
   background-color: #4e0007;
 }
@@ -170,12 +178,14 @@ img[data-action="must"] {
   animation-fill-mode: both;
   animation-iteration-count: infinite;
 }
+/*
 .yours img[data-action="must"] {
   animation-iteration-count: 2;
 }
 .yours:hover img[data-action="must"] {
   animation-iteration-count: infinite;
 }
+*/
 img[data-action="may"] {
   opacity: .25;
 }

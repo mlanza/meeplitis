@@ -218,6 +218,7 @@ function shell(session, tableId){
   const els = {
     roundNum,
     roundMax,
+    game: dom.sel1("#game"),
     event: dom.sel1("#event"),
     players: dom.sel1(".players"),
     trump: dom.sel1(".trump img"),
@@ -337,6 +338,7 @@ function shell(session, tableId){
     _.doto(els.bidding,
       dom.attr(_, "data-max-bid", round + 1),
       dom.attr(_, "data-actual-bid", bid));
+    dom.text(dom.sel1("#phase", game), {"bidding": "Bidding", "playing": "Playing", "confirming": "Playing"}[status]);
     dom.attr(root, "data-status", status);
     dom.text(els.cards, _.count(deck) || 52);
     dom.attr(els.trump, "src", _.maybe(trump, cardPic) || "");

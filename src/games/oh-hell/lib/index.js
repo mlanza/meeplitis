@@ -151,7 +151,7 @@ function irreversible(self, command){
 
 function execute(self, command, seat){
   const state = _.deref(self);
-  const valid = _.detect(_.eq(_, _.dissoc(command, "id")), g.moves(self, [seat]));
+  const valid = _.detect(_.eq(_, _.chain(command, _.compact, _.dissoc(_, "id"))), g.moves(self, [seat]));
   const {type, details} = command;
   const automatic = _.includes(["start", "award", "scoring", "finish", "deal"], type);
 

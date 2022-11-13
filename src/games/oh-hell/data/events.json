@@ -1,142 +1,22 @@
 [
   {
+    "id": "jgU3T",
+    "seat": null,
     "type": "start",
-    "details": {}
+    "details": null
   },
   {
+    "id": "eA6cX",
+    "seat": null,
     "type": "deal",
     "details": {
       "deck": [
         {
-          "rank": "6",
-          "suit": "♥️"
-        },
-        {
-          "rank": "10",
-          "suit": "♣️"
-        },
-        {
-          "rank": "2",
-          "suit": "♠️"
-        },
-        {
-          "rank": "4",
-          "suit": "♠️"
-        },
-        {
-          "rank": "Q",
-          "suit": "♣️"
-        },
-        {
-          "rank": "6",
-          "suit": "♠️"
-        },
-        {
-          "rank": "A",
-          "suit": "♣️"
-        },
-        {
-          "rank": "J",
-          "suit": "♠️"
-        },
-        {
-          "rank": "7",
-          "suit": "♥️"
-        },
-        {
-          "rank": "2",
-          "suit": "♣️"
-        },
-        {
-          "rank": "5",
-          "suit": "♣️"
-        },
-        {
-          "rank": "4",
-          "suit": "♣️"
-        },
-        {
-          "rank": "K",
-          "suit": "♦️"
-        },
-        {
-          "rank": "10",
-          "suit": "♠️"
-        },
-        {
           "rank": "K",
           "suit": "♠️"
-        },
-        {
-          "rank": "K",
-          "suit": "♣️"
-        },
-        {
-          "rank": "2",
-          "suit": "♦️"
-        },
-        {
-          "rank": "Q",
-          "suit": "♠️"
-        },
-        {
-          "rank": "8",
-          "suit": "♣️"
-        },
-        {
-          "rank": "J",
-          "suit": "♥️"
-        },
-        {
-          "rank": "7",
-          "suit": "♦️"
-        },
-        {
-          "rank": "J",
-          "suit": "♦️"
-        },
-        {
-          "rank": "5",
-          "suit": "♥️"
         },
         {
           "rank": "9",
-          "suit": "♥️"
-        },
-        {
-          "rank": "2",
-          "suit": "♥️"
-        },
-        {
-          "rank": "A",
-          "suit": "♥️"
-        },
-        {
-          "rank": "Q",
-          "suit": "♥️"
-        },
-        {
-          "rank": "8",
-          "suit": "♠️"
-        },
-        {
-          "rank": "8",
-          "suit": "♦️"
-        },
-        {
-          "rank": "5",
-          "suit": "♠️"
-        },
-        {
-          "rank": "6",
-          "suit": "♣️"
-        },
-        {
-          "rank": "9",
-          "suit": "♣️"
-        },
-        {
-          "rank": "3",
           "suit": "♥️"
         },
         {
@@ -148,12 +28,76 @@
           "suit": "♥️"
         },
         {
+          "rank": "A",
+          "suit": "♠️"
+        },
+        {
+          "rank": "4",
+          "suit": "♠️"
+        },
+        {
+          "rank": "A",
+          "suit": "♦️"
+        },
+        {
+          "rank": "7",
+          "suit": "♦️"
+        },
+        {
           "rank": "4",
           "suit": "♥️"
         },
         {
+          "rank": "J",
+          "suit": "♣️"
+        },
+        {
+          "rank": "7",
+          "suit": "♠️"
+        },
+        {
+          "rank": "4",
+          "suit": "♣️"
+        },
+        {
+          "rank": "2",
+          "suit": "♠️"
+        },
+        {
+          "rank": "Q",
+          "suit": "♣️"
+        },
+        {
+          "rank": "6",
+          "suit": "♣️"
+        },
+        {
+          "rank": "K",
+          "suit": "♣️"
+        },
+        {
+          "rank": "10",
+          "suit": "♠️"
+        },
+        {
+          "rank": "9",
+          "suit": "♠️"
+        },
+        {
+          "rank": "9",
+          "suit": "♦️"
+        },
+        {
           "rank": "7",
           "suit": "♣️"
+        },
+        {
+          "rank": "Q",
+          "suit": "♠️"
+        },
+        {
+          "rank": "3",
+          "suit": "♥️"
         },
         {
           "rank": "10",
@@ -161,82 +105,152 @@
         },
         {
           "rank": "A",
-          "suit": "♦️"
+          "suit": "♥️"
         },
         {
-          "rank": "4",
-          "suit": "♦️"
+          "rank": "Q",
+          "suit": "♥️"
         },
         {
-          "rank": "A",
-          "suit": "♠️"
-        },
-        {
-          "rank": "9",
-          "suit": "♦️"
-        },
-        {
-          "rank": "9",
-          "suit": "♠️"
+          "rank": "7",
+          "suit": "♥️"
         },
         {
           "rank": "J",
+          "suit": "♥️"
+        },
+        {
+          "rank": "2",
+          "suit": "♦️"
+        },
+        {
+          "rank": "8",
+          "suit": "♥️"
+        },
+        {
+          "rank": "2",
           "suit": "♣️"
+        },
+        {
+          "rank": "9",
+          "suit": "♣️"
+        },
+        {
+          "rank": "6",
+          "suit": "♠️"
         },
         {
           "rank": "3",
           "suit": "♣️"
         },
         {
-          "rank": "7",
+          "rank": "3",
+          "suit": "♦️"
+        },
+        {
+          "rank": "8",
           "suit": "♠️"
         },
         {
-          "rank": "Q",
+          "rank": "8",
           "suit": "♦️"
+        },
+        {
+          "rank": "8",
+          "suit": "♣️"
+        },
+        {
+          "rank": "10",
+          "suit": "♥️"
+        },
+        {
+          "rank": "6",
+          "suit": "♦️"
+        },
+        {
+          "rank": "K",
+          "suit": "♦️"
+        },
+        {
+          "rank": "J",
+          "suit": "♦️"
+        },
+        {
+          "rank": "5",
+          "suit": "♠️"
+        },
+        {
+          "rank": "4",
+          "suit": "♦️"
+        },
+        {
+          "rank": "5",
+          "suit": "♣️"
+        },
+        {
+          "rank": "6",
+          "suit": "♥️"
+        },
+        {
+          "rank": "A",
+          "suit": "♣️"
+        },
+        {
+          "rank": "2",
+          "suit": "♥️"
         }
       ],
       "hands": [
         [
           {
-            "rank": "6",
+            "rank": "5",
+            "suit": "♥️"
+          }
+        ],
+        [
+          {
+            "rank": "Q",
             "suit": "♦️"
+          }
+        ],
+        [
+          {
+            "rank": "J",
+            "suit": "♠️"
           }
         ],
         [
           {
             "rank": "10",
-            "suit": "♥️"
-          }
-        ],
-        [
-          {
-            "rank": "3",
-            "suit": "♦️"
-          }
-        ],
-        [
-          {
-            "rank": "8",
-            "suit": "♥️"
+            "suit": "♣️"
           }
         ]
       ],
+      "round": 0,
       "trump": {
         "rank": "5",
         "suit": "♦️"
-      },
-      "round": 0
+      }
     }
   },
   {
+    "id": "7hWTs",
+    "seat": 2,
+    "type": "bid",
+    "details": {
+      "bid": 0
+    }
+  },
+  {
+    "id": "yOuxW",
     "seat": 0,
     "type": "bid",
     "details": {
-      "bid": 1
+      "bid": 0
     }
   },
   {
+    "id": "ojyxx",
     "seat": 1,
     "type": "bid",
     "details": {
@@ -244,13 +258,7 @@
     }
   },
   {
-    "seat": 2,
-    "type": "bid",
-    "details": {
-      "bid": 1
-    }
-  },
-  {
+    "id": "TPeGI",
     "seat": 3,
     "type": "bid",
     "details": {
@@ -258,21 +266,443 @@
     }
   },
   {
+    "id": "nldFj",
     "seat": 0,
     "type": "play",
     "details": {
       "card": {
-        "rank": "6",
+        "rank": "5",
+        "suit": "♥️"
+      }
+    }
+  },
+  {
+    "id": "KMgh0",
+    "seat": 0,
+    "type": "commit",
+    "details": null
+  },
+  {
+    "id": "bxKAq",
+    "seat": 1,
+    "type": "play",
+    "details": {
+      "card": {
+        "rank": "Q",
         "suit": "♦️"
       }
     }
   },
   {
-    "seat": 0,
-    "type": "commit"
+    "id": "9FHOm",
+    "seat": null,
+    "type": "broken",
+    "details": null
   },
   {
+    "id": "9hVav",
     "seat": 1,
+    "type": "commit",
+    "details": null
+  },
+  {
+    "id": "edtwN",
+    "seat": 2,
+    "type": "play",
+    "details": {
+      "card": {
+        "rank": "J",
+        "suit": "♠️"
+      }
+    }
+  },
+  {
+    "id": "pQCoG",
+    "seat": 2,
+    "type": "commit",
+    "details": null
+  },
+  {
+    "id": "rVk4h",
+    "seat": 3,
+    "type": "play",
+    "details": {
+      "card": {
+        "rank": "10",
+        "suit": "♣️"
+      }
+    }
+  },
+  {
+    "id": "jJhET",
+    "seat": null,
+    "type": "award",
+    "details": {
+      "trick": [
+        {
+          "rank": "5",
+          "suit": "♥️"
+        },
+        {
+          "rank": "Q",
+          "suit": "♦️"
+        },
+        {
+          "rank": "J",
+          "suit": "♠️"
+        },
+        {
+          "rank": "10",
+          "suit": "♣️"
+        }
+      ],
+      "winner": 1
+    }
+  },
+  {
+    "id": "s4WdR",
+    "seat": null,
+    "type": "scoring",
+    "details": {
+      "scoring": [
+        {
+          "bid": 0,
+          "points": 10,
+          "tricks": 0
+        },
+        {
+          "bid": 1,
+          "points": 11,
+          "tricks": 1
+        },
+        {
+          "bid": 0,
+          "points": 10,
+          "tricks": 0
+        },
+        {
+          "bid": 1,
+          "points": 0,
+          "tricks": 0
+        }
+      ]
+    }
+  },
+  {
+    "id": "uYgLM",
+    "seat": 3,
+    "type": "commit",
+    "details": null
+  },
+  {
+    "id": "XTrbj",
+    "seat": null,
+    "type": "deal",
+    "details": {
+      "deck": [
+        {
+          "rank": "Q",
+          "suit": "♣️"
+        },
+        {
+          "rank": "2",
+          "suit": "♥️"
+        },
+        {
+          "rank": "J",
+          "suit": "♦️"
+        },
+        {
+          "rank": "5",
+          "suit": "♥️"
+        },
+        {
+          "rank": "9",
+          "suit": "♥️"
+        },
+        {
+          "rank": "8",
+          "suit": "♠️"
+        },
+        {
+          "rank": "10",
+          "suit": "♠️"
+        },
+        {
+          "rank": "3",
+          "suit": "♦️"
+        },
+        {
+          "rank": "6",
+          "suit": "♣️"
+        },
+        {
+          "rank": "7",
+          "suit": "♣️"
+        },
+        {
+          "rank": "K",
+          "suit": "♥️"
+        },
+        {
+          "rank": "4",
+          "suit": "♥️"
+        },
+        {
+          "rank": "K",
+          "suit": "♠️"
+        },
+        {
+          "rank": "3",
+          "suit": "♣️"
+        },
+        {
+          "rank": "2",
+          "suit": "♦️"
+        },
+        {
+          "rank": "2",
+          "suit": "♠️"
+        },
+        {
+          "rank": "2",
+          "suit": "♣️"
+        },
+        {
+          "rank": "Q",
+          "suit": "♦️"
+        },
+        {
+          "rank": "Q",
+          "suit": "♥️"
+        },
+        {
+          "rank": "4",
+          "suit": "♠️"
+        },
+        {
+          "rank": "3",
+          "suit": "♠️"
+        },
+        {
+          "rank": "6",
+          "suit": "♠️"
+        },
+        {
+          "rank": "8",
+          "suit": "♥️"
+        },
+        {
+          "rank": "5",
+          "suit": "♣️"
+        },
+        {
+          "rank": "Q",
+          "suit": "♠️"
+        },
+        {
+          "rank": "J",
+          "suit": "♣️"
+        },
+        {
+          "rank": "6",
+          "suit": "♦️"
+        },
+        {
+          "rank": "A",
+          "suit": "♠️"
+        },
+        {
+          "rank": "8",
+          "suit": "♦️"
+        },
+        {
+          "rank": "3",
+          "suit": "♥️"
+        },
+        {
+          "rank": "5",
+          "suit": "♠️"
+        },
+        {
+          "rank": "A",
+          "suit": "♥️"
+        },
+        {
+          "rank": "4",
+          "suit": "♦️"
+        },
+        {
+          "rank": "7",
+          "suit": "♠️"
+        },
+        {
+          "rank": "9",
+          "suit": "♠️"
+        },
+        {
+          "rank": "A",
+          "suit": "♣️"
+        },
+        {
+          "rank": "K",
+          "suit": "♣️"
+        },
+        {
+          "rank": "8",
+          "suit": "♣️"
+        },
+        {
+          "rank": "6",
+          "suit": "♥️"
+        },
+        {
+          "rank": "10",
+          "suit": "♣️"
+        },
+        {
+          "rank": "9",
+          "suit": "♣️"
+        },
+        {
+          "rank": "4",
+          "suit": "♣️"
+        },
+        {
+          "rank": "7",
+          "suit": "♥️"
+        }
+      ],
+      "hands": [
+        [
+          {
+            "rank": "K",
+            "suit": "♦️"
+          },
+          {
+            "rank": "7",
+            "suit": "♦️"
+          }
+        ],
+        [
+          {
+            "rank": "10",
+            "suit": "♦️"
+          },
+          {
+            "rank": "9",
+            "suit": "♦️"
+          }
+        ],
+        [
+          {
+            "rank": "5",
+            "suit": "♦️"
+          },
+          {
+            "rank": "A",
+            "suit": "♦️"
+          }
+        ],
+        [
+          {
+            "rank": "J",
+            "suit": "♠️"
+          },
+          {
+            "rank": "10",
+            "suit": "♥️"
+          }
+        ]
+      ],
+      "round": 1,
+      "trump": {
+        "rank": "J",
+        "suit": "♥️"
+      }
+    }
+  },
+  {
+    "id": "TJpzV",
+    "seat": 3,
+    "type": "bid",
+    "details": {
+      "bid": 1
+    }
+  },
+  {
+    "id": "TFFFO",
+    "seat": 2,
+    "type": "bid",
+    "details": {
+      "bid": 0
+    }
+  },
+  {
+    "id": "JVG3z",
+    "seat": 0,
+    "type": "bid",
+    "details": {
+      "bid": 0
+    }
+  },
+  {
+    "id": "9SzKK",
+    "seat": 1,
+    "type": "bid",
+    "details": {
+      "bid": 0
+    }
+  },
+  {
+    "id": "CfLAN",
+    "seat": 1,
+    "type": "play",
+    "details": {
+      "card": {
+        "rank": "9",
+        "suit": "♦️"
+      }
+    }
+  },
+  {
+    "id": "t5xd7",
+    "seat": 1,
+    "type": "commit",
+    "details": null
+  },
+  {
+    "id": "qAM0g",
+    "seat": 2,
+    "type": "play",
+    "details": {
+      "card": {
+        "rank": "A",
+        "suit": "♦️"
+      }
+    }
+  },
+  {
+    "id": "TyOJu",
+    "seat": 2,
+    "type": "undo",
+    "details": null
+  },
+  {
+    "id": "Fs5VH",
+    "seat": 2,
+    "type": "redo",
+    "details": null
+  },
+  {
+    "id": "AuqzJ",
+    "seat": 2,
+    "type": "commit",
+    "details": null
+  },
+  {
+    "id": "t43fO",
+    "seat": 3,
     "type": "play",
     "details": {
       "card": {
@@ -282,40 +712,40 @@
     }
   },
   {
-    "seat": 1,
-    "type": "commit"
+    "id": "AWAev",
+    "seat": null,
+    "type": "broken",
+    "details": null
   },
   {
-    "seat": 2,
+    "id": "vgRPr",
+    "seat": 3,
+    "type": "commit",
+    "details": null
+  },
+  {
+    "id": "yOdbO",
+    "seat": 0,
     "type": "play",
     "details": {
       "card": {
-        "rank": "3",
+        "rank": "7",
         "suit": "♦️"
       }
     }
   },
   {
-    "seat": 2,
-    "type": "commit"
-  },
-  {
-    "seat": 3,
-    "type": "play",
-    "details": {
-      "card": {
-        "rank": "8",
-        "suit": "♥️"
-      }
-    }
-  },
-  {
+    "id": "MNf21",
+    "seat": null,
     "type": "award",
     "details": {
-      "winner": 0,
       "trick": [
         {
-          "rank": "6",
+          "rank": "9",
+          "suit": "♦️"
+        },
+        {
+          "rank": "A",
           "suit": "♦️"
         },
         {
@@ -323,134 +753,150 @@
           "suit": "♥️"
         },
         {
-          "rank": "3",
+          "rank": "7",
           "suit": "♦️"
-        },
-        {
-          "rank": "8",
-          "suit": "♥️"
         }
-      ]
+      ],
+      "winner": 2
     }
   },
   {
+    "id": "YkK8I",
+    "seat": 0,
+    "type": "commit",
+    "details": null
+  },
+  {
+    "id": "9opeM",
+    "seat": 1,
+    "type": "play",
+    "details": {
+      "card": {
+        "rank": "10",
+        "suit": "♦️"
+      }
+    }
+  },
+  {
+    "id": "QRmxx",
+    "seat": 1,
+    "type": "commit",
+    "details": null
+  },
+  {
+    "id": "M2bjA",
+    "seat": 2,
+    "type": "play",
+    "details": {
+      "card": {
+        "rank": "5",
+        "suit": "♦️"
+      }
+    }
+  },
+  {
+    "id": "PyxdZ",
+    "seat": 2,
+    "type": "commit",
+    "details": null
+  },
+  {
+    "id": "SsDPc",
+    "seat": 3,
+    "type": "play",
+    "details": {
+      "card": {
+        "rank": "J",
+        "suit": "♠️"
+      }
+    }
+  },
+  {
+    "id": "nTbIK",
+    "seat": 3,
+    "type": "commit",
+    "details": null
+  },
+  {
+    "id": "DNF1C",
+    "seat": 0,
+    "type": "play",
+    "details": {
+      "card": {
+        "rank": "K",
+        "suit": "♦️"
+      }
+    }
+  },
+  {
+    "id": "1cp9V",
+    "seat": null,
+    "type": "award",
+    "details": {
+      "trick": [
+        {
+          "rank": "5",
+          "suit": "♦️"
+        },
+        {
+          "rank": "J",
+          "suit": "♠️"
+        },
+        {
+          "rank": "K",
+          "suit": "♦️"
+        },
+        {
+          "rank": "10",
+          "suit": "♦️"
+        }
+      ],
+      "winner": 2
+    }
+  },
+  {
+    "id": "pTXBX",
     "seat": null,
     "type": "scoring",
     "details": {
       "scoring": [
         {
-          "bid": 1,
-          "tricks": 1,
-          "points": 11
+          "bid": 0,
+          "points": 10,
+          "tricks": 0
+        },
+        {
+          "bid": 0,
+          "points": 10,
+          "tricks": 0
+        },
+        {
+          "bid": 0,
+          "points": 0,
+          "tricks": 2
         },
         {
           "bid": 1,
-          "tricks": 0,
-          "points": 0
-        },
-        {
-          "bid": 1,
-          "tricks": 0,
-          "points": 0
-        },
-        {
-          "bid": 1,
-          "tricks": 0,
-          "points": 0
+          "points": 0,
+          "tricks": 0
         }
       ]
     }
   },
   {
-    "seat": 3,
-    "type": "commit"
+    "id": "JDLjJ",
+    "seat": 0,
+    "type": "commit",
+    "details": null
   },
   {
+    "id": "Ae9EL",
+    "seat": null,
     "type": "deal",
     "details": {
       "deck": [
         {
-          "rank": "Q",
-          "suit": "♠️"
-        },
-        {
-          "rank": "2",
-          "suit": "♣️"
-        },
-        {
-          "rank": "3",
-          "suit": "♣️"
-        },
-        {
-          "rank": "6",
-          "suit": "♠️"
-        },
-        {
-          "rank": "K",
-          "suit": "♥️"
-        },
-        {
           "rank": "5",
-          "suit": "♣️"
-        },
-        {
-          "rank": "K",
-          "suit": "♠️"
-        },
-        {
-          "rank": "6",
-          "suit": "♣️"
-        },
-        {
-          "rank": "A",
-          "suit": "♣️"
-        },
-        {
-          "rank": "7",
-          "suit": "♠️"
-        },
-        {
-          "rank": "3",
-          "suit": "♥️"
-        },
-        {
-          "rank": "10",
-          "suit": "♣️"
-        },
-        {
-          "rank": "J",
-          "suit": "♠️"
-        },
-        {
-          "rank": "4",
-          "suit": "♥️"
-        },
-        {
-          "rank": "10",
-          "suit": "♠️"
-        },
-        {
-          "rank": "5",
-          "suit": "♥️"
-        },
-        {
-          "rank": "A",
-          "suit": "♠️"
-        },
-        {
-          "rank": "K",
-          "suit": "♣️"
-        },
-        {
-          "rank": "J",
-          "suit": "♣️"
-        },
-        {
-          "rank": "8",
-          "suit": "♥️"
-        },
-        {
-          "rank": "2",
           "suit": "♥️"
         },
         {
@@ -458,60 +904,92 @@
           "suit": "♦️"
         },
         {
-          "rank": "6",
-          "suit": "♦️"
+          "rank": "4",
+          "suit": "♠️"
         },
         {
           "rank": "10",
           "suit": "♥️"
         },
         {
-          "rank": "3",
-          "suit": "♠️"
-        },
-        {
-          "rank": "2",
-          "suit": "♦️"
-        },
-        {
-          "rank": "10",
-          "suit": "♦️"
-        },
-        {
-          "rank": "Q",
-          "suit": "♣️"
-        },
-        {
-          "rank": "9",
+          "rank": "K",
           "suit": "♠️"
         },
         {
           "rank": "J",
-          "suit": "♥️"
-        },
-        {
-          "rank": "2",
           "suit": "♠️"
-        },
-        {
-          "rank": "4",
-          "suit": "♣️"
-        },
-        {
-          "rank": "5",
-          "suit": "♦️"
         },
         {
           "rank": "9",
           "suit": "♦️"
         },
         {
-          "rank": "4",
+          "rank": "Q",
+          "suit": "♣️"
+        },
+        {
+          "rank": "10",
+          "suit": "♦️"
+        },
+        {
+          "rank": "6",
+          "suit": "♣️"
+        },
+        {
+          "rank": "10",
+          "suit": "♣️"
+        },
+        {
+          "rank": "9",
+          "suit": "♥️"
+        },
+        {
+          "rank": "5",
+          "suit": "♣️"
+        },
+        {
+          "rank": "2",
           "suit": "♠️"
         },
         {
           "rank": "8",
+          "suit": "♣️"
+        },
+        {
+          "rank": "3",
+          "suit": "♥️"
+        },
+        {
+          "rank": "K",
+          "suit": "♦️"
+        },
+        {
+          "rank": "2",
+          "suit": "♥️"
+        },
+        {
+          "rank": "4",
+          "suit": "♣️"
+        },
+        {
+          "rank": "10",
           "suit": "♠️"
+        },
+        {
+          "rank": "7",
+          "suit": "♥️"
+        },
+        {
+          "rank": "K",
+          "suit": "♥️"
+        },
+        {
+          "rank": "A",
+          "suit": "♥️"
+        },
+        {
+          "rank": "6",
+          "suit": "♥️"
         },
         {
           "rank": "J",
@@ -519,14 +997,6 @@
         },
         {
           "rank": "7",
-          "suit": "♣️"
-        },
-        {
-          "rank": "7",
-          "suit": "♥️"
-        },
-        {
-          "rank": "4",
           "suit": "♦️"
         },
         {
@@ -534,694 +1004,117 @@
           "suit": "♦️"
         },
         {
-          "rank": "Q",
-          "suit": "♥️"
+          "rank": "5",
+          "suit": "♦️"
+        },
+        {
+          "rank": "A",
+          "suit": "♠️"
         },
         {
           "rank": "8",
+          "suit": "♥️"
+        },
+        {
+          "rank": "3",
           "suit": "♣️"
+        },
+        {
+          "rank": "2",
+          "suit": "♦️"
+        },
+        {
+          "rank": "K",
+          "suit": "♣️"
+        },
+        {
+          "rank": "3",
+          "suit": "♠️"
+        },
+        {
+          "rank": "5",
+          "suit": "♠️"
+        },
+        {
+          "rank": "A",
+          "suit": "♦️"
+        },
+        {
+          "rank": "6",
+          "suit": "♦️"
+        },
+        {
+          "rank": "9",
+          "suit": "♠️"
+        },
+        {
+          "rank": "8",
+          "suit": "♠️"
+        },
+        {
+          "rank": "A",
+          "suit": "♣️"
+        },
+        {
+          "rank": "J",
+          "suit": "♣️"
+        },
+        {
+          "rank": "J",
+          "suit": "♥️"
+        },
+        {
+          "rank": "4",
+          "suit": "♥️"
+        },
+        {
+          "rank": "4",
+          "suit": "♦️"
+        },
+        {
+          "rank": "6",
+          "suit": "♠️"
+        },
+        {
+          "rank": "7",
+          "suit": "♠️"
+        },
+        {
+          "rank": "Q",
+          "suit": "♥️"
         }
       ],
       "hands": [
         [
           {
-            "rank": "A",
-            "suit": "♦️"
-          },
-          {
-            "rank": "5",
-            "suit": "♠️"
-          }
-        ],
-        [
-          {
             "rank": "9",
             "suit": "♣️"
-          },
-          {
-            "rank": "K",
-            "suit": "♦️"
           }
         ],
         [
           {
             "rank": "7",
-            "suit": "♦️"
-          },
-          {
-            "rank": "6",
-            "suit": "♥️"
+            "suit": "♣️"
           }
         ],
         [
           {
-            "rank": "A",
-            "suit": "♥️"
-          },
+            "rank": "Q",
+            "suit": "♠️"
+          }
+        ],
+        [
           {
-            "rank": "9",
-            "suit": "♥️"
+            "rank": "2",
+            "suit": "♣️"
           }
         ]
       ],
+      "round": 2,
       "trump": {
         "rank": "Q",
         "suit": "♦️"
-      },
-      "round": 1
-    }
-  },
-  {
-    "seat": 0,
-    "type": "bid",
-    "details": {
-      "bid": 1
-    }
-  },
-  {
-    "seat": 1,
-    "type": "bid",
-    "details": {
-      "bid": 1
-    }
-  },
-  {
-    "seat": 2,
-    "type": "bid",
-    "details": {
-      "bid": 1
-    }
-  },
-  {
-    "seat": 3,
-    "type": "bid",
-    "details": {
-      "bid": 1
-    }
-  },
-  {
-    "seat": 1,
-    "type": "play",
-    "details": {
-      "card": {
-        "rank": "9",
-        "suit": "♣️"
       }
-    }
-  },
-  {
-    "seat": 1,
-    "type": "commit",
-    "details": {
-      "card": {
-        "rank": "K",
-        "suit": "♦️"
-      }
-    }
-  },
-  {
-    "seat": 2,
-    "type": "play",
-    "details": {
-      "card": {
-        "rank": "6",
-        "suit": "♥️"
-      }
-    }
-  },
-  {
-    "seat": 2,
-    "type": "commit",
-    "details": {
-      "card": {
-        "rank": "7",
-        "suit": "♦️"
-      }
-    }
-  },
-  {
-    "seat": 3,
-    "type": "play",
-    "details": {
-      "card": {
-        "rank": "9",
-        "suit": "♥️"
-      }
-    }
-  },
-  {
-    "seat": 3,
-    "type": "commit",
-    "details": {
-      "card": {
-        "rank": "A",
-        "suit": "♥️"
-      }
-    }
-  },
-  {
-    "seat": 0,
-    "type": "play",
-    "details": {
-      "card": {
-        "rank": "5",
-        "suit": "♠️"
-      }
-    }
-  },
-  {
-    "type": "award",
-    "details": {
-      "winner": 0,
-      "trick": [
-        {
-          "rank": "9",
-          "suit": "♣️"
-        },
-        {
-          "rank": "6",
-          "suit": "♥️"
-        },
-        {
-          "rank": "9",
-          "suit": "♥️"
-        },
-        {
-          "rank": "5",
-          "suit": "♠️"
-        }
-      ]
-    }
-  },
-  {
-    "seat": 0,
-    "type": "commit",
-    "details": {
-      "card": {
-        "rank": "A",
-        "suit": "♦️"
-      }
-    }
-  },
-  {
-    "seat": 1,
-    "type": "play",
-    "details": {
-      "card": {
-        "rank": "K",
-        "suit": "♦️"
-      }
-    }
-  },
-  {
-    "seat": 1,
-    "type": "commit"
-  },
-  {
-    "seat": 2,
-    "type": "play",
-    "details": {
-      "card": {
-        "rank": "7",
-        "suit": "♦️"
-      }
-    }
-  },
-  {
-    "seat": 2,
-    "type": "commit"
-  },
-  {
-    "seat": 3,
-    "type": "play",
-    "details": {
-      "card": {
-        "rank": "A",
-        "suit": "♥️"
-      }
-    }
-  },
-  {
-    "seat": 3,
-    "type": "commit"
-  },
-  {
-    "seat": 0,
-    "type": "play",
-    "details": {
-      "card": {
-        "rank": "A",
-        "suit": "♦️"
-      }
-    }
-  },
-  {
-    "type": "award",
-    "details": {
-      "winner": 0,
-      "trick": [
-        {
-          "rank": "A",
-          "suit": "♦️"
-        },
-        {
-          "rank": "K",
-          "suit": "♦️"
-        },
-        {
-          "rank": "7",
-          "suit": "♦️"
-        },
-        {
-          "rank": "A",
-          "suit": "♥️"
-        }
-      ]
-    }
-  },
-  {
-    "seat": null,
-    "type": "scoring",
-    "details": {
-      "scoring": [
-        {
-          "bid": 1,
-          "tricks": 2,
-          "points": 0
-        },
-        {
-          "bid": 1,
-          "tricks": 0,
-          "points": 0
-        },
-        {
-          "bid": 1,
-          "tricks": 0,
-          "points": 0
-        },
-        {
-          "bid": 1,
-          "tricks": 0,
-          "points": 0
-        }
-      ]
-    }
-  },
-  {
-    "seat": 0,
-    "type": "commit"
-  },
-  {
-    "type": "deal",
-    "details": {
-      "deck": [
-        {
-          "rank": "A",
-          "suit": "♥️"
-        },
-        {
-          "rank": "3",
-          "suit": "♠️"
-        },
-        {
-          "rank": "A",
-          "suit": "♦️"
-        },
-        {
-          "rank": "10",
-          "suit": "♣️"
-        },
-        {
-          "rank": "Q",
-          "suit": "♦️"
-        },
-        {
-          "rank": "3",
-          "suit": "♦️"
-        },
-        {
-          "rank": "9",
-          "suit": "♣️"
-        },
-        {
-          "rank": "Q",
-          "suit": "♣️"
-        },
-        {
-          "rank": "9",
-          "suit": "♥️"
-        },
-        {
-          "rank": "7",
-          "suit": "♥️"
-        },
-        {
-          "rank": "8",
-          "suit": "♦️"
-        },
-        {
-          "rank": "K",
-          "suit": "♣️"
-        },
-        {
-          "rank": "2",
-          "suit": "♥️"
-        },
-        {
-          "rank": "4",
-          "suit": "♥️"
-        },
-        {
-          "rank": "J",
-          "suit": "♦️"
-        },
-        {
-          "rank": "4",
-          "suit": "♣️"
-        },
-        {
-          "rank": "3",
-          "suit": "♥️"
-        },
-        {
-          "rank": "2",
-          "suit": "♠️"
-        },
-        {
-          "rank": "Q",
-          "suit": "♠️"
-        },
-        {
-          "rank": "9",
-          "suit": "♠️"
-        },
-        {
-          "rank": "8",
-          "suit": "♥️"
-        },
-        {
-          "rank": "A",
-          "suit": "♣️"
-        },
-        {
-          "rank": "6",
-          "suit": "♣️"
-        },
-        {
-          "rank": "9",
-          "suit": "♦️"
-        },
-        {
-          "rank": "6",
-          "suit": "♥️"
-        },
-        {
-          "rank": "8",
-          "suit": "♠️"
-        },
-        {
-          "rank": "K",
-          "suit": "♠️"
-        },
-        {
-          "rank": "10",
-          "suit": "♥️"
-        },
-        {
-          "rank": "A",
-          "suit": "♠️"
-        },
-        {
-          "rank": "10",
-          "suit": "♠️"
-        },
-        {
-          "rank": "5",
-          "suit": "♣️"
-        },
-        {
-          "rank": "3",
-          "suit": "♣️"
-        },
-        {
-          "rank": "2",
-          "suit": "♦️"
-        },
-        {
-          "rank": "J",
-          "suit": "♥️"
-        },
-        {
-          "rank": "5",
-          "suit": "♠️"
-        },
-        {
-          "rank": "K",
-          "suit": "♦️"
-        },
-        {
-          "rank": "6",
-          "suit": "♦️"
-        },
-        {
-          "rank": "5",
-          "suit": "♥️"
-        },
-        {
-          "rank": "K",
-          "suit": "♥️"
-        },
-        {
-          "rank": "6",
-          "suit": "♠️"
-        },
-        {
-          "rank": "4",
-          "suit": "♠️"
-        },
-        {
-          "rank": "8",
-          "suit": "♣️"
-        },
-        {
-          "rank": "7",
-          "suit": "♠️"
-        },
-        {
-          "rank": "10",
-          "suit": "♦️"
-        },
-        {
-          "rank": "4",
-          "suit": "♦️"
-        },
-        {
-          "rank": "7",
-          "suit": "♦️"
-        },
-        {
-          "rank": "Q",
-          "suit": "♥️"
-        }
-      ],
-      "hands": [
-        [
-          {
-            "rank": "J",
-            "suit": "♠️"
-          }
-        ],
-        [
-          {
-            "rank": "7",
-            "suit": "♣️"
-          }
-        ],
-        [
-          {
-            "rank": "5",
-            "suit": "♦️"
-          }
-        ],
-        [
-          {
-            "rank": "J",
-            "suit": "♣️"
-          }
-        ]
-      ],
-      "trump": {
-        "rank": "2",
-        "suit": "♣️"
-      },
-      "round": 2
-    }
-  },
-  {
-    "seat": 0,
-    "type": "bid",
-    "details": {
-      "bid": 1
-    }
-  },
-  {
-    "seat": 1,
-    "type": "bid",
-    "details": {
-      "bid": 1
-    }
-  },
-  {
-    "seat": 2,
-    "type": "bid",
-    "details": {
-      "bid": 1
-    }
-  },
-  {
-    "seat": 3,
-    "type": "bid",
-    "details": {
-      "bid": 1
-    }
-  },
-  {
-    "seat": 2,
-    "type": "play",
-    "details": {
-      "card": {
-        "rank": "5",
-        "suit": "♦️"
-      }
-    }
-  },
-  {
-    "seat": 2,
-    "type": "commit"
-  },
-  {
-    "seat": 3,
-    "type": "play",
-    "details": {
-      "card": {
-        "rank": "J",
-        "suit": "♣️"
-      }
-    }
-  },
-  {
-    "seat": 3,
-    "type": "commit"
-  },
-  {
-    "seat": 0,
-    "type": "play",
-    "details": {
-      "card": {
-        "rank": "J",
-        "suit": "♠️"
-      }
-    }
-  },
-  {
-    "seat": 0,
-    "type": "commit"
-  },
-  {
-    "seat": 1,
-    "type": "play",
-    "details": {
-      "card": {
-        "rank": "7",
-        "suit": "♣️"
-      }
-    }
-  },
-  {
-    "type": "award",
-    "details": {
-      "winner": 1,
-      "trick": [
-        {
-          "rank": "5",
-          "suit": "♦️"
-        },
-        {
-          "rank": "J",
-          "suit": "♣️"
-        },
-        {
-          "rank": "J",
-          "suit": "♠️"
-        },
-        {
-          "rank": "7",
-          "suit": "♣️"
-        }
-      ]
-    }
-  },
-  {
-    "seat": null,
-    "type": "scoring",
-    "details": {
-      "scoring": [
-        {
-          "bid": 1,
-          "tricks": 0,
-          "points": 0
-        },
-        {
-          "bid": 1,
-          "tricks": 1,
-          "points": 11
-        },
-        {
-          "bid": 1,
-          "tricks": 0,
-          "points": 0
-        },
-        {
-          "bid": 1,
-          "tricks": 0,
-          "points": 0
-        }
-      ]
-    }
-  },
-  {
-    "seat": 1,
-    "type": "commit"
-  },
-  {
-    "type": "finish",
-    "details": {
-      "ranked": [
-        {
-          "seat": 0,
-          "points": 11,
-          "place": 0,
-          "tie": true
-        },
-        {
-          "seat": 1,
-          "points": 11,
-          "place": 0,
-          "tie": true
-        },
-        {
-          "seat": 2,
-          "points": 0,
-          "place": 1,
-          "tie": true
-        },
-        {
-          "seat": 3,
-          "points": 0,
-          "place": 1,
-          "tie": true
-        }
-      ]
     }
   }
 ]

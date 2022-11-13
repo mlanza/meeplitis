@@ -1,5 +1,4 @@
-.bidding {
-  font-weight: bold;
+.moves {
   position: fixed;
   left: 1em;
   bottom: 1em;
@@ -7,34 +6,26 @@
   border-radius: 1em;
   z-index: 999;
 }
-.bidding ul {
-  list-style: none;
+body .moves {
+  visibility: hidden;
 }
-.bidding ul,
-.bidding li,
-.bidding label {
-  float: left;
-  padding: 0;
-  margin: 0;
+body[data-status] .moves {
+  visibility: visible;
 }
-.bidding label,
-.bidding button {
+button {
   font-size: 1.1em;
-  width: 4em;
+  min-width: 4em;
   padding: 5px;
-}
-.bidding button {
-  background-color: #A5A9A0;
   border-radius: .5em;
-  margin: 5px;
+  margin: 2px;
   min-width: 2em;
   text-align: center;
   transition: background-color .5s, color .5s;
 }
-[data-tense="present"] .bidding button {
+[data-tense="present"] button {
   cursor: default;
 }
-[data-tense="present"] .bidding button:hover {
+[data-tense="present"] button:hover {
   background-color: orange;
   color: snow;
 }
@@ -85,119 +76,14 @@
   right: 0;
   text-align: center;
 }
-.bidding {
-  visibility: hidden;
-}
 .cards {
   text-align: center;
   display: block;
   margin: .5em auto 0;
 }
-[data-actual-bid=""] li[data-bid=""] button,
-[data-actual-bid="0"] li[data-bid="0"] button,
-[data-actual-bid="1"] li[data-bid="1"] button,
-[data-actual-bid="2"] li[data-bid="2"] button,
-[data-actual-bid="3"] li[data-bid="3"] button,
-[data-actual-bid="4"] li[data-bid="4"] button,
-[data-actual-bid="5"] li[data-bid="5"] button,
-[data-actual-bid="6"] li[data-bid="6"] button,
-[data-actual-bid="7"] li[data-bid="7"] button,
-[data-actual-bid="8"] li[data-bid="8"] button,
-[data-actual-bid="9"] li[data-bid="9"] button,
-[data-actual-bid="10"] li[data-bid="10"] button,
-[data-actual-bid="11"] li[data-bid="11"] button,
-[data-actual-bid="12"] li[data-bid="12"] button,
-[data-actual-bid="13"] li[data-bid="13"] button {
-  color: white;
-  background-color: #3E505C !important;
-  cursor: not-allowed;
-}
-[data-status="bidding"] .bidding {
-  visibility: visible;
-}
-[data-max-bid="1"] li[data-bid="2"],
-[data-max-bid="1"] li[data-bid="3"],
-[data-max-bid="1"] li[data-bid="4"],
-[data-max-bid="1"] li[data-bid="5"],
-[data-max-bid="1"] li[data-bid="6"],
-[data-max-bid="1"] li[data-bid="7"],
-[data-max-bid="1"] li[data-bid="8"],
-[data-max-bid="1"] li[data-bid="9"],
-[data-max-bid="1"] li[data-bid="10"],
-[data-max-bid="1"] li[data-bid="11"],
-[data-max-bid="1"] li[data-bid="12"],
-[data-max-bid="1"] li[data-bid="13"],
-[data-max-bid="2"] li[data-bid="3"],
-[data-max-bid="2"] li[data-bid="4"],
-[data-max-bid="2"] li[data-bid="5"],
-[data-max-bid="2"] li[data-bid="6"],
-[data-max-bid="2"] li[data-bid="7"],
-[data-max-bid="2"] li[data-bid="8"],
-[data-max-bid="2"] li[data-bid="9"],
-[data-max-bid="2"] li[data-bid="10"],
-[data-max-bid="2"] li[data-bid="11"],
-[data-max-bid="2"] li[data-bid="12"],
-[data-max-bid="2"] li[data-bid="13"],
-[data-max-bid="3"] li[data-bid="4"],
-[data-max-bid="3"] li[data-bid="5"],
-[data-max-bid="3"] li[data-bid="6"],
-[data-max-bid="3"] li[data-bid="7"],
-[data-max-bid="3"] li[data-bid="8"],
-[data-max-bid="3"] li[data-bid="9"],
-[data-max-bid="3"] li[data-bid="10"],
-[data-max-bid="3"] li[data-bid="11"],
-[data-max-bid="3"] li[data-bid="12"],
-[data-max-bid="3"] li[data-bid="13"],
-[data-max-bid="4"] li[data-bid="5"],
-[data-max-bid="4"] li[data-bid="6"],
-[data-max-bid="4"] li[data-bid="7"],
-[data-max-bid="4"] li[data-bid="8"],
-[data-max-bid="4"] li[data-bid="9"],
-[data-max-bid="4"] li[data-bid="10"],
-[data-max-bid="4"] li[data-bid="11"],
-[data-max-bid="4"] li[data-bid="12"],
-[data-max-bid="4"] li[data-bid="13"],
-[data-max-bid="5"] li[data-bid="6"],
-[data-max-bid="5"] li[data-bid="7"],
-[data-max-bid="5"] li[data-bid="8"],
-[data-max-bid="5"] li[data-bid="9"],
-[data-max-bid="5"] li[data-bid="10"],
-[data-max-bid="5"] li[data-bid="11"],
-[data-max-bid="5"] li[data-bid="12"],
-[data-max-bid="5"] li[data-bid="13"],
-[data-max-bid="6"] li[data-bid="7"],
-[data-max-bid="6"] li[data-bid="8"],
-[data-max-bid="6"] li[data-bid="9"],
-[data-max-bid="6"] li[data-bid="10"],
-[data-max-bid="6"] li[data-bid="11"],
-[data-max-bid="6"] li[data-bid="12"],
-[data-max-bid="6"] li[data-bid="13"],
-[data-max-bid="7"] li[data-bid="8"],
-[data-max-bid="7"] li[data-bid="9"],
-[data-max-bid="7"] li[data-bid="10"],
-[data-max-bid="7"] li[data-bid="11"],
-[data-max-bid="7"] li[data-bid="12"],
-[data-max-bid="7"] li[data-bid="13"],
-[data-max-bid="8"] li[data-bid="9"],
-[data-max-bid="8"] li[data-bid="10"],
-[data-max-bid="8"] li[data-bid="11"],
-[data-max-bid="8"] li[data-bid="12"],
-[data-max-bid="8"] li[data-bid="13"],
-[data-max-bid="9"] li[data-bid="10"],
-[data-max-bid="9"] li[data-bid="11"],
-[data-max-bid="9"] li[data-bid="12"],
-[data-max-bid="9"] li[data-bid="13"],
-[data-max-bid="10"] li[data-bid="11"],
-[data-max-bid="10"] li[data-bid="12"],
-[data-max-bid="10"] li[data-bid="13"],
-[data-max-bid="11"] li[data-bid="12"],
-[data-max-bid="11"] li[data-bid="13"],
-[data-max-bid="12"] li[data-bid="13"] {
-  display: none;
-}
 
 @media (prefers-color-scheme: dark) {
-  .bidding {
+  .moves {
     color: white;
     background-color: rgba(255, 255, 255, 0.1);
   }

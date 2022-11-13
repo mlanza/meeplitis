@@ -220,9 +220,9 @@ function shell(session, tableId){
     roundMax,
     game: dom.sel1("#game"),
     event: dom.sel1("#event"),
+    moves: dom.sel1(".moves"),
     players: dom.sel1(".players"),
     trump: dom.sel1(".trump img"),
-    bidding: dom.sel1(".bidding"),
     cards: dom.sel1(".cards b"),
     deck: dom.sel1(".deck"),
     hand: dom.sel1(".hand"),
@@ -302,11 +302,26 @@ function shell(session, tableId){
     }
   }
 
+  function moveSel(move){
+    const {details} = move;
+    switch(move.type){
+      case "bid":
+        return `[data-bid="${details.bid}"]`;
+      default:
+        return "";
+    }
+  }
+
   $.sub($hist, function([seat, [curr, prior]]){
-    const {up, may, seen, events, state, state: {trump, round, status, seated, deck}} = curr;
+    const {up, may, seen, events, moves, state, state: {trump, round, status, seated, deck}} = curr;
     const {hand, bid} = _.nth(seated, seat);
     const event = _.last(events);
     const player = eventFor(event);
+    _.each(dom.hide, dom.sel("button", els.moves));
+    _.chain(moves, _.map(function(move){
+      return dom.sel1(`button[data-type="${move.type}"]${moveSel(move)}`, els.moves);
+    }, _), _.compact, _.each(dom.show, _));
+
     dom.toggleClass(els.event, "automatic", !player);
     if (player) {
       dom.attr(dom.sel1("img.who", els.event), "src", `${player.avatar}?=80`);
@@ -333,11 +348,8 @@ function shell(session, tableId){
       }));
     }, seated);
     dom.html(els.hand, _.map(function(card){
-      return li(img({src: cardPic(card)}));
+      return li(img({src: cardPic(card), "data-suit": card.suit, "data-rank": card.rank}));
     }, hand));
-    _.doto(els.bidding,
-      dom.attr(_, "data-max-bid", round + 1),
-      dom.attr(_, "data-actual-bid", bid));
     dom.text(dom.sel1("#phase", game), {"bidding": "Bidding", "playing": "Playing", "confirming": "Playing"}[status]);
     dom.attr(root, "data-status", status);
     dom.text(els.cards, _.count(deck) || 52);
@@ -373,12 +385,14 @@ if (tableId) {
         sess?.access_token),
       tableId);
 
-    $.on(root, "click", "[data-tense=\"present\"] [data-bid] button", function(e){
-      const bid = _.maybe(e.target, _.parent, dom.attr(_, "data-bid"), _.blot, parseInt),
-            actual = _.maybe(dom.sel1("[data-actual-bid]"), dom.attr(_, "data-actual-bid"), _.blot, parseInt);
-      if (bid != actual) {
-        sh.dispatch(s, {type: "bid", "details": {bid}});
-      }
+    $.on(root, "click", "[data-tense=\"present\"] .moves button[data-type=\"bid\"]", function(e){
+      const bid = _.maybe(e.target, dom.attr(_, "data-bid"), _.blot, parseInt);
+      sh.dispatch(s, {type: "bid", "details": {bid}});
+    });
+
+    $.on(root, "click", "[data-tense=\"present\"] .moves button[data-type=\"reset\"], [data-tense=\"present\"] .moves button[data-type=\"undo\"], [data-tense=\"present\"] .moves button[data-type=\"redo\"], [data-tense=\"present\"] .moves button[data-type=\"commit\"]", function(e){
+      const type = dom.attr(e.target, "data-type");
+      sh.dispatch(s, {type});
     });
 
     $.on(root, "click", "#event", function(e){
@@ -387,6 +401,12 @@ if (tableId) {
       setTimeout(function(){
         dom.addClass(self, "hidden");
       }, 500);
+    });
+
+    $.on(root, "click", "[data-tense=\"present\"] .hand img", function(e){
+      const suit = dom.attr(this, "data-suit"),
+            rank = dom.attr(this, "data-rank");
+      sh.dispatch(s, {type: "play", details: {card: {suit, rank}}});
     });
 
     $.on(root, "click", "#replay [data-go]", function(e){

@@ -30,7 +30,6 @@ body[data-tense="past"] {
   85% { opacity: .8; }
   100% { opacity: 0; }
 }
-
 #event {
   animation: updown 3s ease-out infinite;
 }

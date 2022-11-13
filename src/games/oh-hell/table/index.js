@@ -268,6 +268,39 @@ function shell(session, tableId){
     return event.seat == null ? null : _.chain($seated, _.deref, _.nth(_, event.seat));
   }
 
+  function recipient(player){
+    return img({class: "recipient", alt: player.username, src: `${player.avatar}?s=40`});
+  }
+
+  function desc(event){
+    switch(event.type) {
+      case "start":
+        return "Starts game.";
+      case "deal":
+        return "Deals cards.";
+      case "commit":
+        return "I'm done.";
+      case "broken":
+        return "Breaks trump!";
+      case "bid":
+        return `Bids.`;
+      case "play":
+        return `Plays ${event.details.card.rank} of ${event.details.card.suit}.`;
+      case "scoring":
+        const seated = _.deref($seated);
+        const {scoring} = event.details;
+        return _.toArray(_.flatten(_.mapIndexed(function(idx, {points}){
+          const player = seated[idx];
+          return [recipient(player), span(points)];
+        }, scoring)));
+
+      case "award":
+        return ["Awards trick to ", recipient(_.chain($seated, _.deref, _.nth(_, event.details.winner))), "."];
+      default:
+        return event.type;
+    }
+  }
+
   $.sub($hist, function([seat, [curr, prior]]){
     const {up, may, seen, events, state, state: {trump, round, status, seated, deck}} = curr;
     const {hand, bid} = _.nth(seated, seat);
@@ -278,8 +311,9 @@ function shell(session, tableId){
       dom.attr(dom.sel1("img.who", els.event), "src", `${player.avatar}?=80`);
       dom.text(dom.sel1("p.who", els.event), player.username);
     }
-    dom.text(dom.sel1("p", els.event), event.type);
+    dom.html(dom.sel1("p", els.event), desc(event));
     _.doto(els.event,
+      dom.attr(_, "data-type", event.type),
       dom.addClass(_, "bounce"),
       dom.removeClass(_, "hidden"),
       dom.removeClass(_, "acknowledged"));

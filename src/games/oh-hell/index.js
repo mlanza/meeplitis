@@ -4,6 +4,10 @@ import t from "/lib/atomic_/transducers.js";
 import g from "/lib/game_.js";
 import ohHell from "./lib/index.js";
 
+const params = new URLSearchParams(document.location.search),
+      split  = params.get('split') || null;
+
+
 const $game = $.cell(ohHell(_.repeat(4, {}), {}));
 $.sub($.hist($game), t.map(g.summarize), _.log);
 //const commands = _.take(50, _.concat([{type: "start"}], _.repeat({type: "~"})));
@@ -19,16 +23,15 @@ function all($game){
 }
 
 function splits($game, id){
+  function noHit(event){
+    return event.id !== id;
+  }
   return [
     _.pipe(
-      _.takeWhile(function(event){
-        return event.id !== id;
-      }, _),
+      _.takeWhile(noHit, _),
       g.batch($game, g.load, _)),
     _.pipe(
-      _.dropWhile(function(event){
-        return event.id !== id;
-      }, _),
+      _.dropWhile(noHit, _),
       _.map(_.dissoc(_, "id"), _),
       _.take(1, _),
       _.toArray,
@@ -39,7 +42,7 @@ function splits($game, id){
     ];
 }
 
-const [loads, execs] = splits($game, "vgRPr");
+const [loads, execs] = split ? splits($game, split) : all($game);
 const events = fetch("./data/events.json").
   then(function(resp){
     return resp.json();

@@ -206,7 +206,7 @@ function execute(self, command, seat){
           if (complete) {
             const ranking = ranked(trick, state.trump.suit);
             const best = _.first(ranking);
-            const winner = _.indexOf(trick, best);
+            const winner = _.chain(trick, _.indexOf(_, best), _.nth(ord, _));
             return _.chain(self, award(winner, trick));
           }
           return self;

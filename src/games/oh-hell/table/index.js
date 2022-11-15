@@ -329,10 +329,13 @@ function shell(session, tableId){
   }
 
   $.sub($hist, function([seat, [curr, prior]]){
-    const {up, may, seen, events, moves, state, state: {trump, round, status, seated, deck}} = curr;
+    const {up, may, seen, events, moves, state, state: {trump, round, status, seated, deck, lead}} = curr;
     const {hand, bid} = _.nth(seated, seat);
     const event = _.last(events);
     const player = eventFor(event);
+    const cnt = _.count(state.seated);
+    const awarded = event.type == "award" ? _.toArray(_.take(cnt, _.drop(cnt - event.details.lead, _.cycle(event.details.trick)))) : null;
+
     _.each(_.doto(_,
       dom.removeClass(_, "active"),
       dom.removeClass(_, "selected"),
@@ -345,6 +348,10 @@ function shell(session, tableId){
       dom.addClass(_, "selected"),
       dom.prop(_, "disabled", true));
 
+    dom.attr(root, "data-event-type", event.type);
+    dom.attr(els.players, "data-lead", lead);
+
+    dom.attr(els.players, "data-played", event.type == "play" ? event.seat : "");
     dom.toggleClass(els.event, "automatic", !player);
     if (player) {
       dom.attr(dom.sel1("img.who", els.event), "src", `${player.avatar}?=80`);
@@ -359,6 +366,7 @@ function shell(session, tableId){
 
     const s = dom.sel1(`[data-seat="${seat}"]`);
     _.eachIndexed(function(idx, {bid, tricks, hand, played, scored}){
+      const plyd = _.nth(awarded, idx) || played;
       const el = dom.sel1(`[data-seat="${idx}"]`);
       _.includes(seen, idx) && _.doto(el,
         dom.addClass(_, "yours"),
@@ -366,7 +374,7 @@ function shell(session, tableId){
       dom.attr(dom.sel1("[data-action]", el), "data-action", _.includes(up, idx) ? "must" : (_.includes(may, idx) ? "may" : ""));
       dom.text(dom.sel1(".tricks", el), _.count(tricks));
       dom.text(dom.sel1(".bid", el), bid == null ? "?" : bid);
-      dom.html(dom.sel1(".played", el), _.maybe(played, cardPic, function(src){
+      dom.html(dom.sel1(".played", el), _.maybe(plyd, cardPic, function(src){
         return img({src});
       }));
     }, seated);

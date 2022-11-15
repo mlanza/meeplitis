@@ -8,7 +8,7 @@ const params = new URLSearchParams(document.location.search),
       split  = params.get('split') || null;
 
 
-const $game = $.cell(ohHell(_.repeat(4, {}), {}));
+      const $game = $.cell(ohHell(_.repeat(4, {}), {}));
 $.sub($.hist($game), t.map(g.summarize), _.log);
 //const commands = _.take(50, _.concat([{type: "start"}], _.repeat({type: "~"})));
 //g.batch($game, g.run, commands);
@@ -32,7 +32,7 @@ function splits($game, id){
       g.batch($game, g.load, _)),
     _.pipe(
       _.dropWhile(noHit, _),
-      _.map(_.dissoc(_, "id"), _),
+      _.map(_.pipe(_.dissoc(_, "id")), _),
       _.take(1, _),
       _.toArray,
       _.see("executing"),

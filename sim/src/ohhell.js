@@ -1114,6 +1114,9 @@ const IPath = protocol({
 const IPrependable = protocol({
     prepend: null
 });
+const IQueryable = protocol({
+    query: null
+});
 const IResettable = protocol({
     reset: null,
     resettable: null
@@ -4016,6 +4019,7 @@ const log = ILogger.log;
 const name = INamable.name;
 const otherwise$4 = IOtherwise.otherwise;
 const prepend$2 = overload(null, identity, IPrependable.prepend, reducing(IPrependable.prepend, reverse$4));
+const query = IQueryable.query;
 const reset$2 = IResettable.reset;
 const resettable$1 = IResettable.resettable;
 const undo$1 = IRevertible.undo;
@@ -4188,6 +4192,7 @@ var p$2 = Object.freeze({
     otherwise: otherwise$4,
     path: path$1,
     prepend: prepend$2,
+    query: query,
     reduce: reduce$e,
     reducing: reducing,
     reset: reset$2,
@@ -5826,20 +5831,26 @@ function collapse(...args) {
 function impartable(f) {
     return isFunction(f) && !/^[A-Z]./.test(name(f));
 }
-function impart(self, f) {
-    return decorating3(self, impartable, f);
+function impart2(source, f) {
+    return decorating3(source, impartable, f);
 }
-function decorating2(self, f) {
-    return decorating3(self, identity, f);
+function impart3(target, source, f) {
+    return decorating4(target, source, impartable, f);
 }
-function decorating3(self, pred, f) {
-    const memo = {};
-    for (const [key, value] of Object.entries(self)){
-        memo[key] = pred(value, key) ? f(value) : value;
+const impart = overload(null, null, impart2, impart3);
+function decorating2(source, f) {
+    return decorating3(source, identity, f);
+}
+function decorating3(source, pred, f) {
+    return decorating4({}, source, pred, f);
+}
+function decorating4(target, source, pred, f) {
+    for (const [key, value] of Object.entries(source)){
+        target[key] = pred(value, key) ? f(value) : value;
     }
-    return memo;
+    return target;
 }
-const decorating = overload(null, null, decorating2, decorating3);
+const decorating = overload(null, null, decorating2, decorating3, decorating4);
 function include2(self, value) {
     var _value, _p$conj, _p2, _value2, _p$omit, _p3, _value3, _p$includes, _p4;
     return toggles((_p2 = p$2, _p$conj = _p2.conj, _value = value, function conj(_argPlaceholder11) {
@@ -6132,6 +6143,7 @@ const mod = {
     IOtherwise: IOtherwise,
     IPath: IPath,
     IPrependable: IPrependable,
+    IQueryable: IQueryable,
     IReducible: IReducible,
     IResettable: IResettable,
     IReversible: IReversible,
@@ -6542,6 +6554,7 @@ const mod = {
     protocol: protocol,
     quarter: quarter,
     quaternary: quaternary,
+    query: query,
     race: race,
     rand: rand,
     randInt: randInt,
@@ -6952,11 +6965,13 @@ function deal(self) {
         type: "deal"
     });
 }
-function award(winner, trick) {
+function award(lead, best, winner, trick) {
     return function(self) {
         return __default1.execute(self, {
             type: "award",
             details: {
+                lead,
+                best,
                 winner,
                 trick
             }
@@ -7062,7 +7077,7 @@ function irreversible1(self, command) {
 }
 function execute2(self, command, seat) {
     const state = __default.deref(self);
-    const valid = __default.detect(__default.eq(__default, __default.dissoc(command, "id")), __default1.moves(self, [
+    const valid = __default.detect(__default.eq(__default, __default.chain(command, __default.compact, __default.dissoc(__default, "id"))), __default1.moves(self, [
         seat
     ]));
     const { type , details  } = command;
@@ -7124,8 +7139,8 @@ function execute2(self, command, seat) {
                 if (complete) {
                     const ranking = ranked(trick, state.trump.suit);
                     const best = __default.first(ranking);
-                    const winner = __default.indexOf(trick, best);
-                    return __default.chain(self, award(winner, trick));
+                    const winner = __default.chain(trick, __default.indexOf(__default, best), __default.nth(ord, __default));
+                    return __default.chain(self, award(state.lead, best, winner, trick));
                 }
                 return self;
             }, __default.branch(__default.pipe(__default.deref, handsEmpty), scoring, __default.identity));
@@ -7272,7 +7287,8 @@ function fold2(self, event) {
             return __default1.fold(self, event, __default.reset);
         case "commit":
             const empty = handsEmpty(state);
-            const up = empty ? null : __default.second(ordered(__default.count(state.seated), state.up));
+            const played = __default.chain(state.seated, __default.map(__default.get(__default, "played"), __default), __default.compact, __default.first);
+            const up = empty ? null : played ? __default.second(ordered(__default.count(state.seated), state.up)) : state.lead;
             return __default1.fold(self, event, __default.pipe(__default.fmap(__default, __default.pipe(__default.assoc(__default, "status", "playing"), __default.assoc(__default, "up", up))), __default.flush));
         case "scoring":
             return __default1.fold(self, event, __default.fmap(__default, __default.update(__default, "seated", __default.foldkv(function(memo, idx, seat) {

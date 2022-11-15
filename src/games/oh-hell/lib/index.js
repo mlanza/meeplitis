@@ -56,9 +56,9 @@ function deal(self){
   return g.execute(self, {type: "deal"});
 }
 
-function award(winner, trick){
+function award(lead, best, winner, trick){
   return function(self)  {
-    return g.execute(self, {type: "award", details: {winner, trick}});
+    return g.execute(self, {type: "award", details: {lead, best, winner, trick}});
   }
 }
 
@@ -207,7 +207,7 @@ function execute(self, command, seat){
             const ranking = ranked(trick, state.trump.suit);
             const best = _.first(ranking);
             const winner = _.chain(trick, _.indexOf(_, best), _.nth(ord, _));
-            return _.chain(self, award(winner, trick));
+            return _.chain(self, award(state.lead, best, winner, trick));
           }
           return self;
         },
@@ -351,7 +351,8 @@ function fold2(self, event){
 
     case "commit":
       const empty = handsEmpty(state);
-      const up = empty ? null : _.second(ordered(_.count(state.seated), state.up));
+      const played = _.chain(state.seated, _.map(_.get(_, "played"), _), _.compact, _.first);
+      const up = empty ? null : (played ? _.second(ordered(_.count(state.seated), state.up)) : state.lead);
       return g.fold(self, event, _.pipe(
         _.fmap(_, _.pipe(
           _.assoc(_, "status", "playing"),

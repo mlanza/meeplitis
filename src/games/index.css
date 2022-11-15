@@ -205,6 +205,9 @@ body[data-event-type="finish"] {
   opacity: 1;
   transition: background-color .5s;
 }
+#game span {
+  line-height: 1.1em;
+}
 #game img {
   width: 18px;
   margin-right: 3px;

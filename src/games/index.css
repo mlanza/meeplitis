@@ -219,10 +219,11 @@ body[data-event-type="finish"] {
 [data-tense="past"] #game {
   background-color: #74353b;
 }
-[data-tense="past"] * {
+[data-tense="past"] *,
+[data-event-type="finish"] * {
   cursor: not-allowed;
 }
-[data-tense="past"] #replay {
+#game {
   cursor: default;
 }
 @keyframes wobble {

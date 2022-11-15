@@ -329,7 +329,7 @@ function shell(session, tableId){
   }
 
   $.sub($hist, function([seat, [curr, prior]]){
-    const {up, may, seen, events, moves, state, state: {trump, round, status, seated, deck, lead}} = curr;
+    const {up, may, seen, events, moves, score, state, state: {trump, round, status, seated, deck, lead}} = curr;
     const {hand, bid} = _.nth(seated, seat);
     const event = _.last(events);
     const player = eventFor(event);
@@ -371,6 +371,7 @@ function shell(session, tableId){
       _.includes(seen, idx) && _.doto(el,
         dom.addClass(_, "yours"),
         dom.attr(_, "data-presence", "online"));
+      dom.text(dom.sel1(".points", el), _.nth(score, idx));
       dom.attr(dom.sel1("[data-action]", el), "data-action", _.includes(up, idx) ? "must" : (_.includes(may, idx) ? "may" : ""));
       dom.text(dom.sel1(".tricks", el), _.count(tricks));
       dom.text(dom.sel1(".bid", el), bid == null ? "?" : bid);
@@ -381,7 +382,7 @@ function shell(session, tableId){
     dom.html(els.hand, _.map(function(card){
       return li(img({src: cardPic(card), "data-suit": card.suit, "data-rank": card.rank}));
     }, hand));
-    dom.text(dom.sel1("#phase", game), {"bidding": "Bidding", "playing": "Playing", "confirming": "Playing"}[status]);
+    dom.text(dom.sel1("#phase", game), {"bidding": "Bidding", "playing": "Playing", "confirming": "Playing", "finished": "Finished"}[status]);
     dom.attr(root, "data-status", status);
     dom.text(els.cards, _.count(deck) || 52);
     dom.attr(els.trump, "src", _.maybe(trump, cardPic) || "");

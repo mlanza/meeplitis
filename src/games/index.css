@@ -68,6 +68,7 @@ body[data-tense="past"] {
   background: rgba(62, 80, 92, .95);
   box-shadow: -3px 5px 5px -3px rgba(0, 0, 0, 0.6);
   border-radius: 1em;
+  transition: height .5s;
 }
 #event[data-type="scoring"] {
   text-align: center;
@@ -120,6 +121,13 @@ body[data-tense="past"] {
 #event.automatic .who {
   visibility: hidden;
 }
+[data-event-type="finish"] #event {
+  height: 10em;
+  transition: height .5s;
+}
+[data-event-type="finish"] #game {
+  background-color: rgba(0, 0, 0, .6);
+}
 #replay {
   float: right;
   font-size: .9em;
@@ -147,6 +155,7 @@ body[data-tense="past"] {
   text-align: left;
   z-index: 999;
   box-shadow: -3px 5px 5px -3px rgba(0, 0, 0, 0.6);
+  opacity: 1;
   transition: background-color .5s;
 }
 #game img {

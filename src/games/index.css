@@ -25,6 +25,7 @@ body[data-tense="past"] {
   transform: translateY(-30em);
   animation: award .8s !important;
 }
+
 [data-played="0"][data-lead="0"] [data-seat="0"] .played img,
 [data-played="1"][data-lead="1"] [data-seat="1"] .played img,
 [data-played="2"][data-lead="2"] [data-seat="2"] .played img,

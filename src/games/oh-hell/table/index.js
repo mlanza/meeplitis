@@ -329,7 +329,7 @@ function shell(session, tableId){
   }
 
   $.sub($hist, function([seat, [curr, prior]]){
-    const {up, may, seen, events, moves, score, state, state: {trump, round, status, seated, deck, lead}} = curr;
+    const {up, may, seen, events, moves, score, state, state: {trump, round, status, seated, deck, lead, broken}} = curr;
     const {hand, bid} = _.nth(seated, seat);
     const event = _.last(events);
     const player = eventFor(event);
@@ -384,6 +384,7 @@ function shell(session, tableId){
 
     dom.text(dom.sel1("#phase", game), {"bidding": "Bidding", "playing": "Playing", "confirming": "Playing", "finished": "Finished"}[status]);
     dom.attr(root, "data-status", status);
+    dom.attr(root, "data-broken", broken);
     dom.text(els.cards, _.count(deck) || 52);
     dom.attr(els.trump, "src", _.maybe(trump, cardPic) || "");
     dom.text(els.roundNum, round + 1);

@@ -77,6 +77,14 @@ button.selected {
   width: 9em;
   margin: 5px;
 }
+.broken {
+  visibility: hidden;
+  margin-top: -.8em;
+  margin-bottom: 1em;
+}
+body[data-broken="true"] .broken {
+  visibility: visible;
+}
 .upkeep {
   -border: solid 1px purple;
   width: 10em;

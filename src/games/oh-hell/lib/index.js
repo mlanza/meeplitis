@@ -394,12 +394,18 @@ function obscure(seen){
   return function(event){
     const {type} = event;
     switch (type) {
+      case "bid":
+        return _.includes(seen, event.seat) ? event : _.updateIn(event, ["details", "bid"], function(bid){
+          return bid == null ? null : "";
+        });
+
       case "deal":
         return _.chain(event,
           _.updateIn(_, ["details", "hands"], _.pipe(_.mapIndexed(function(idx, cards){
             return _.includes(seen, idx) ? cards : obscureCards(cards);
           }, _), _.toArray)),
           _.updateIn(_, ["details", "deck"], obscureCards));
+
       default:
         return event;
     }
@@ -413,12 +419,17 @@ function perspective(self, _seen){
   const seated = g.seated(self);
   const score = g.score(self);
   const all = _.eq(seen, g.everyone(self));
+  const bidding = _.chain(self, _.deref, _.get(_, "status"), _.eq(_, "bidding"));
   const state = _.chain(self, _.deref,
     all ? _.identity :
     _.pipe(
       _.update(_, "deck", obscureCards),
       _.update(_, "seated", _.pipe(_.mapIndexed(function(idx, seated){ //can only see your own hand
-          return _.includes(seen, idx) ? seated : _.update(seated, "hand", obscureCards);
+        return _.includes(seen, idx) ? seated : _.chain(seated,
+          _.update(_, "hand", obscureCards),
+          bidding ? _.update(_, "bid", function(bid){
+            return bid == null ? null : "";
+          }) : _.identity);
         }, _), _.toArray))));
   const moves = _.chain(self, g.moves(_, seen), _.toArray);
   const events = all ? self.events : _.mapa(obscure(seen), self.events);

@@ -7312,6 +7312,13 @@ function obscure(seen) {
     return function(event) {
         const { type  } = event;
         switch(type){
+            case "bid":
+                return __default.includes(seen, event.seat) ? event : __default.updateIn(event, [
+                    "details",
+                    "bid"
+                ], function(bid) {
+                    return bid == null ? null : "";
+                });
             case "deal":
                 return __default.chain(event, __default.updateIn(__default, [
                     "details",
@@ -7334,8 +7341,11 @@ function perspective1(self, _seen) {
     const seated = __default1.seated(self);
     const score = __default1.score(self);
     const all = __default.eq(seen, __default1.everyone(self));
+    const bidding = __default.chain(self, __default.deref, __default.get(__default, "status"), __default.eq(__default, "bidding"));
     const state = __default.chain(self, __default.deref, all ? __default.identity : __default.pipe(__default.update(__default, "deck", obscureCards), __default.update(__default, "seated", __default.pipe(__default.mapIndexed(function(idx, seated) {
-        return __default.includes(seen, idx) ? seated : __default.update(seated, "hand", obscureCards);
+        return __default.includes(seen, idx) ? seated : __default.chain(seated, __default.update(__default, "hand", obscureCards), bidding ? __default.update(__default, "bid", function(bid) {
+            return bid == null ? null : "";
+        }) : __default.identity);
     }, __default), __default.toArray))));
     const moves = __default.chain(self, __default1.moves(__default, seen), __default.toArray);
     const events = all ? self.events : __default.mapa(obscure(seen), self.events);

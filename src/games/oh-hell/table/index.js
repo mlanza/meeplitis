@@ -335,22 +335,30 @@ function shell(session, tableId){
     const player = eventFor(event);
     const cnt = _.count(state.seated);
     const awarded = event.type == "award" ? _.toArray(_.take(cnt, _.drop(cnt - event.details.lead, _.cycle(event.details.trick)))) : null;
+    const s = dom.sel1(`[data-seat="${seat}"]`);
+
+    _.doto(els.event,
+      dom.attr(_, "data-type", event.type),
+      dom.addClass(_, "bounce"),
+      dom.removeClass(_, "hidden"),
+      dom.removeClass(_, "acknowledged"));
 
     _.each(_.doto(_,
       dom.removeClass(_, "active"),
       dom.removeClass(_, "selected"),
       dom.prop(_, "disabled", false)),
         dom.sel("button", els.moves));
+
     _.chain(moves, _.map(function(move){
       return dom.sel1(`button[data-type="${move.type}"]${moveSel(move)}`, els.moves);
     }, _), _.compact, _.each(dom.addClass(_, "active"), _));
+
     status == "bidding" && _.doto(dom.sel1(`button[data-type="bid"][data-bid="${bid == null ? '' : bid}"]`),
       dom.addClass(_, "selected"),
       dom.prop(_, "disabled", true));
 
     dom.attr(root, "data-event-type", event.type);
     dom.attr(els.players, "data-lead", lead);
-
     dom.attr(els.players, "data-played", event.type == "play" ? event.seat : "");
     dom.toggleClass(els.event, "automatic", !player);
     if (player) {
@@ -358,13 +366,7 @@ function shell(session, tableId){
       dom.text(dom.sel1("p.who", els.event), player.username);
     }
     dom.html(dom.sel1("p", els.event), desc(event));
-    _.doto(els.event,
-      dom.attr(_, "data-type", event.type),
-      dom.addClass(_, "bounce"),
-      dom.removeClass(_, "hidden"),
-      dom.removeClass(_, "acknowledged"));
 
-    const s = dom.sel1(`[data-seat="${seat}"]`);
     _.eachIndexed(function(idx, {bid, tricks, hand, played, scored}){
       const plyd = _.nth(awarded, idx) || played;
       const el = dom.sel1(`[data-seat="${idx}"]`);
@@ -374,20 +376,21 @@ function shell(session, tableId){
       dom.text(dom.sel1(".points", el), _.nth(score, idx));
       dom.attr(dom.sel1("[data-action]", el), "data-action", _.includes(up, idx) ? "must" : (_.includes(may, idx) ? "may" : ""));
       dom.text(dom.sel1(".tricks", el), _.count(tricks));
-      dom.text(dom.sel1(".bid", el), bid == null ? "?" : bid);
+      dom.text(dom.sel1(".bid", el), bid === null ? "?" : (bid === "" ? "X" : bid));
       dom.html(dom.sel1(".played", el), _.maybe(plyd, cardPic, function(src){
         return img({src});
       }));
     }, seated);
-    dom.html(els.hand, _.map(function(card){
-      return li(img({src: cardPic(card), "data-suit": card.suit, "data-rank": card.rank}));
-    }, hand));
+
     dom.text(dom.sel1("#phase", game), {"bidding": "Bidding", "playing": "Playing", "confirming": "Playing", "finished": "Finished"}[status]);
     dom.attr(root, "data-status", status);
     dom.text(els.cards, _.count(deck) || 52);
     dom.attr(els.trump, "src", _.maybe(trump, cardPic) || "");
     dom.text(els.roundNum, round + 1);
     dom.text(els.roundMax, 13);
+    dom.html(els.hand, _.map(function(card){
+      return li(img({src: cardPic(card), "data-suit": card.suit, "data-rank": card.rank}));
+    }, hand));
   });
 
   $.sub($touch, function(){

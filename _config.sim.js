@@ -8,7 +8,10 @@ function simulation(page){
   });
   page.content = `create or replace function ${named}(_seats jsonb, _config jsonb, _events jsonb, _commands jsonb, _seen int[])
 returns jsonb as $$
-  ${contents.join("\n")}
+  const simulate1 = (function(){
+    ${contents.join("\n")}
+    return simulate1;
+  })();
 return simulate1(_seats, _config || {}, _events || [], _commands || [], _seen || []);
 
 $$ language plv8 immutable;`;

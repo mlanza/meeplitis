@@ -334,6 +334,7 @@ function shell(session, tableId){
     const event = _.last(events);
     const player = eventFor(event);
     const cnt = _.count(state.seated);
+    const leadSuit = _.maybe(seated, _.nth(_, lead), _.getIn(_, ["played", "suit"])) || "";
     const awarded = event.type == "award" ? _.toArray(_.take(cnt, _.drop(cnt - event.details.lead, _.cycle(event.details.trick)))) : null;
     const s = dom.sel1(`[data-seat="${seat}"]`);
 
@@ -382,7 +383,7 @@ function shell(session, tableId){
       }));
     }, seated);
 
-    dom.text(dom.sel1("#phase", game), {"bidding": "Bidding", "playing": "Playing", "confirming": "Playing", "finished": "Finished"}[status]);
+    dom.text(dom.sel1("#phase", game), {"bidding": "Bidding", "playing": `Playing ${leadSuit}`, "confirming": "Playing", "finished": "Finished"}[status]);
     dom.attr(root, "data-status", status);
     dom.attr(root, "data-broken", broken);
     dom.text(els.cards, _.count(deck) || 52);

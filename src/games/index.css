@@ -128,8 +128,8 @@ body[data-event-type="finish"] {
 }
 #event img.who {
   position: absolute;
-  right: -2px;
-  top: -1px;
+  right: -1px;
+  bottom: -1px;
   border-radius: 0 1em 1em 0;
   border: solid 1px transparent;
 }
@@ -386,7 +386,8 @@ div.player div.username {
     background-image: url(../../images/backgrounds/carbon_fibre.webp);
     color: snow;
   }
-  body[data-tense="past"] {
+  body[data-tense="past"],
+  body[data-event-type="finish"] {
     background-image: url(../../images/backgrounds/denim.webp);
   }
 }

@@ -228,7 +228,7 @@ function shell(session, tableId){
           return state?.touches != null && state?.history != null && state?.at != null;
         })),
         $seat = $.map(function(state){
-          return state?.seat;
+          return state?.seat || -1;
         }, $pass),
         $snapshot = $.map(_.pipe(_.juxt(_.get(_, "history"), _.get(_, "at")), function([history, at]){
           return _.nth(history, at);
@@ -376,7 +376,7 @@ function shell(session, tableId){
 
   $.sub($hist, function([seat, [curr, prior]]){
     const {up, may, seen, events, moves, score, state, state: {trump, round, status, seated, deck, lead, broken}} = curr;
-    const {hand, bid} = _.nth(seated, seat);
+    const {hand, bid} = _.nth(seated, seat) || {hand: null, bid: -1};
     const event = _.last(events);
     const player = eventFor(event);
     const cnt = _.count(state.seated);
@@ -400,9 +400,10 @@ function shell(session, tableId){
       return dom.sel1(`button[data-type="${move.type}"]${moveSel(move)}`, els.moves);
     }, _), _.compact, _.each(dom.addClass(_, "active"), _));
 
-    status == "bidding" && _.doto(dom.sel1(`button[data-type="bid"][data-bid="${bid == null ? '' : bid}"]`),
-      dom.addClass(_, "selected"),
-      dom.prop(_, "disabled", true));
+    status == "bidding" && _.maybe(dom.sel1(`button[data-type="bid"][data-bid="${bid == null ? '' : bid}"]`),
+      _.doto(_,
+        dom.addClass(_, "selected"),
+        dom.prop(_, "disabled", true)));
 
     dom.attr(root, "data-event-type", event.type);
     dom.attr(els.players, "data-lead", lead);

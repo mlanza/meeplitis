@@ -383,6 +383,7 @@ function shell(session, tableId){
     const leadSuit = _.maybe(seated, _.nth(_, lead), _.getIn(_, ["played", "suit"])) || "";
     const awarded = event.type == "award" ? _.toArray(_.take(cnt, _.drop(cnt - event.details.lead, _.cycle(event.details.trick)))) : null;
     const s = dom.sel1(`[data-seat="${seat}"]`);
+    const isUp = _.chain($table, _.deref, _.get(_, "up"), _.includes(_, seat));
 
     _.doto(els.event,
       dom.attr(_, "data-type", event.type),
@@ -406,6 +407,7 @@ function shell(session, tableId){
         dom.prop(_, "disabled", true)));
 
     dom.attr(root, "data-event-type", event.type);
+    dom.attr(root, "data-up", isUp);
     dom.attr(els.players, "data-lead", lead);
     dom.attr(els.players, "data-played", event.type == "play" ? event.seat : "");
     dom.toggleClass(els.event, "automatic", !player);

@@ -8,7 +8,8 @@ body {
   background-image: url(../../images/backgrounds/round.webp);
   transition: background-image .3s ease-in-out;
 }
-body[data-tense="past"] {
+body[data-tense="past"],
+body[data-event-type="finish"] {
   background-image: url(../../images/backgrounds/pixel_weave.webp);
   transition: background-image .3s ease-in-out;
 }
@@ -57,13 +58,24 @@ body[data-tense="past"] {
 .hidden {
   visibility: hidden;
 }
+.victor img {
+  border-radius: 1em;
+  border: solid 2px white;
+  margin: 5px auto;
+  clear: both;
+  display: block;
+}
+.victor {
+  font-size: 1.3em;
+  margin: -100px 0 .5em;
+}
 #event {
   position: fixed;
   vertical-align: middle;
   bottom: 1em;
   left: calc(50% - 15em - 40px);
   border: solid 2px white;
-  width: 25em;
+  min-width: 25em;
   height: 5em;
   display: inline-block;
   text-align: left;
@@ -73,9 +85,10 @@ body[data-tense="past"] {
   background: rgba(62, 80, 92, .95);
   box-shadow: -3px 5px 5px -3px rgba(0, 0, 0, 0.6);
   border-radius: 1em;
-  transition: height .5s;
+  transition: height .5s, width .5s;
 }
-#event[data-type="scoring"] {
+#event[data-type="scoring"],
+#event[data-type="finish"] {
   text-align: center;
   vertical-align: middle;
 }
@@ -84,7 +97,8 @@ body[data-tense="past"] {
   transition: background .25s ease-out;
   cursor: default;
 }
-#event[data-type="scoring"] > * {
+#event[data-type="scoring"] > *,
+#event[data-type="finish"] > * {
   display: inline-block;
 }
 #event img.recipient {
@@ -92,7 +106,8 @@ body[data-tense="past"] {
   border: solid 1px dimgray;
   margin-bottom: -25px;
 }
-#event[data-type="scoring"] span {
+#event[data-type="scoring"] span,
+#event[data-type="finish"] span {
   font-size: 1.2em;
   margin: 0 7px 0 2px;
   padding-bottom: 5px;
@@ -126,12 +141,39 @@ body[data-tense="past"] {
 #event.automatic .who {
   visibility: hidden;
 }
+.scored {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.scored {
+  width: auto;
+}
+.scored li {
+  width: 52px;
+  height: 4.4em;
+  padding: 0;
+  margin: .4em;
+  display: inline-block;
+  position: relative;
+}
+.scored li span {
+  display: inline-block;
+  width: 50px;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+}
+[data-event-type="scoring"] #event {
+  height: 7.5em;
+  transition: height .5s;
+}
 [data-event-type="finish"] #event {
-  height: 10em;
+  height: 14.5em;
   transition: height .5s;
 }
 [data-event-type="finish"] #game {
-  background-color: rgba(0, 0, 0, .6);
+  background-color: rgba(116, 53, 59, .6);
 }
 #replay {
   float: right;

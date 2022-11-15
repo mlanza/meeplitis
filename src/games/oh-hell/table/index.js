@@ -12,6 +12,8 @@ const root = document.body,
 const div = dom.tag('div'),
       span = dom.tag('span'),
       img = dom.tag('img'),
+      ol = dom.tag('ol'),
+      ul = dom.tag('ul'),
       li = dom.tag('li'),
       button = dom.tag('button');
 
@@ -105,6 +107,30 @@ function setAt($state, _at, getPerspective){
           _.update(_, "history", _.pipe(expand(_at), _.assoc(_, _at, perspective))),
           _.assoc(_, "at", _at)));
     });
+  }
+}
+
+function replay(go){
+  const pass = _.deref(s.$pass);
+  const {tableId, seat, session, state} = pass;
+  const getPerspectiveByTouch = getPerspective(tableId, session, _, seat);
+  const {at, history} = state;
+  switch(go) {
+    case "back":
+      setAt(s.$pass, at - 1, getPerspectiveByTouch);
+      break;
+
+    case "forward":
+      setAt(s.$pass, at + 1, getPerspectiveByTouch);
+      break;
+
+    case "inception":
+      setAt(s.$pass, 0, getPerspectiveByTouch);
+      break;
+
+    case "present":
+      setAt(s.$pass, _.count(history) - 1, getPerspectiveByTouch);
+      break;
   }
 }
 
@@ -269,11 +295,25 @@ function shell(session, tableId){
     return event.seat == null ? null : _.chain($seated, _.deref, _.nth(_, event.seat));
   }
 
+  function victor(player){
+    return div({class: "victor"},
+      img({alt: player.username, src: `${player.avatar}?s=150`}),
+      `${player.username} wins!`);
+  }
+
   function recipient(player){
-    return img({class: "recipient", alt: player.username, src: `${player.avatar}?s=40`});
+    return img({class: "recipient", alt: player.username, src: `${player.avatar}?s=50`});
+  }
+
+  function scored(player, points){
+    return li(
+      recipient(player),
+      span(points));
   }
 
   function desc(event){
+    const seated = _.deref($seated);
+
     switch(event.type) {
       case "start":
         return "Starts game.";
@@ -303,12 +343,18 @@ function shell(session, tableId){
         return `Plays ${event.details.card.rank} of ${event.details.card.suit}.`;
 
       case "scoring":
-        const seated = _.deref($seated);
         const {scoring} = event.details;
-        return _.toArray(_.flatten(_.mapIndexed(function(idx, {points}){
-          const player = seated[idx];
-          return [recipient(player), span(points)];
+        return ul({class: "scored"}, _.flatten(_.mapIndexed(function(idx, {points}){
+          return scored(seated[idx], points);
         }, scoring)));
+
+      case "finish":
+        const {ranked} = event.details;
+        const first = ranked[0].tied ? null : ranked[0];
+        const winner = _.maybe(first?.seat, _.nth(seated, _));
+        return ol({class: "scored"}, _.cons(victor(winner), _.flatten(_.mapIndexed(function(idx, {tie, seat, place, points}){
+          return scored(seated[seat], points);
+        }, ranked))));
 
       case "award":
         return ["Awards trick to ", recipient(_.chain($seated, _.deref, _.nth(_, event.details.winner))), "."];
@@ -446,29 +492,16 @@ if (tableId) {
       sh.dispatch(s, {type: "play", details: {card: {suit, rank}}});
     });
 
-    $.on(root, "click", "#replay [data-go]", function(e){
-      const go = dom.attr(e.target, "data-go");
-      const pass = _.deref(s.$pass);
-      const {tableId, seat, session, state} = pass;
-      const getPerspectiveByTouch = getPerspective(tableId, session, _, seat);
-      const {at, history} = state;
-      switch(go) {
-        case "back":
-          setAt(s.$pass, at - 1, getPerspectiveByTouch);
-          break;
-
-        case "forward":
-          setAt(s.$pass, at + 1, getPerspectiveByTouch);
-          break;
-
-        case "inception":
-          setAt(s.$pass, 0, getPerspectiveByTouch);
-          break;
-
-        case "present":
-          setAt(s.$pass, _.count(history) - 1, getPerspectiveByTouch);
-          break;
+    $.on(root, "keydown", function(e){
+      if (e.key == "ArrowLeft") {
+        replay(e.shiftKey ? "inception" : "back");
+      } else if (e.key == "ArrowRight") {
+        replay(e.shiftKey ? "present": "forward");
       }
+    });
+
+    $.on(root, "click", "#replay [data-go]", function(e){
+      replay(dom.attr(e.target, "data-go"));
     });
 
     Object.assign(window, {$, _, sh, s, supabase});

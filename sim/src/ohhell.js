@@ -6922,7 +6922,6 @@ const suits = [
     "♦️",
     "♣️"
 ];
-const handSizes = upAndDown(1, 2);
 function upAndDown(min, max) {
     return __default.toArray(__default.dedupe(__default.concat(__default.range(min, max + 1), __default.range(max, min - 1, -1))));
 }
@@ -6958,7 +6957,10 @@ function ohHell(seats, config, events, journal) {
     if (!__default.count(seats)) {
         throw new Error("Cannot play a game with no one seated at the table");
     }
-    return new OhHell(__default.toArray(seats), config, events || [], journal || __default.journal({}));
+    const deals = upAndDown(config.min || 1, config.max || 7);
+    return new OhHell(__default.toArray(seats), config, events || [], journal || __default.journal({
+        deals
+    }));
 }
 function deal(self) {
     return __default1.execute(self, {
@@ -7018,7 +7020,7 @@ function score1(self) {
     }, __default));
 }
 function bids(state) {
-    const size = handSizes[state.round] || 0;
+    const size = state.deals[state.round] || 0;
     const bids = __default.cons(null, __default.range(0, size + 1));
     return __default.chain(state.seated, __default.mapIndexed(function(idx, seat) {
         return __default.chain(bids, __default.mapa(function(bid) {
@@ -7107,7 +7109,7 @@ function execute2(self, command, seat) {
             return function() {
                 const round = state.round + 1;
                 const numHands = __default1.numSeats(self);
-                const numCards = handSizes[round];
+                const numCards = state.deals[round];
                 const dealt = numCards * numHands;
                 const cards = __default.chain(deck(), __default.shuffle);
                 const hands = __default.chain(cards, __default.take(dealt, __default), __default.mapa(function(card, hand) {
@@ -7166,7 +7168,7 @@ function execute2(self, command, seat) {
         case "commit":
             return __default.chain(self, __default1.fold(__default, command), function(self) {
                 const empty = __default.chain(self, __default.deref, handsEmpty);
-                const over = !handSizes[state.round + 1];
+                const over = !state.deals[state.round + 1];
                 return empty ? (over ? __default1.finish : deal)(self) : self;
             });
         case "bid":
@@ -7228,7 +7230,7 @@ function fold2(self, event) {
                         scored: []
                     }), __default.toArray)
                 };
-                return __default1.fold(self, event, __default.fmap(__default, __default.constantly(details)));
+                return __default1.fold(self, event, __default.fmap(__default, __default.merge(__default, details)));
             }();
         case "deal":
             return function() {

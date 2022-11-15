@@ -4,7 +4,6 @@ import g from "/lib/game_.js";
 const IGame = g.IGame;
 const ranks = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "K", "Q", "A"];
 const suits = ["♥️", "♠️", "♦️", "♣️"];
-const handSizes = upAndDown(1, 2);
 
 function upAndDown(min, max){
   return _.toArray(_.dedupe(_.concat(_.range(min, max + 1), _.range(max, min - 1, -1))));
@@ -49,7 +48,7 @@ export default function ohHell(seats, config, events, journal){
   if (!_.count(seats)) {
     throw new Error("Cannot play a game with no one seated at the table");
   }
-  return new OhHell(_.toArray(seats), config, events || [], journal || _.journal({}));
+  return new OhHell(_.toArray(seats), config, events || [], journal || _.journal({deals: upAndDown(config.min || 1, config.max || 7)}));
 }
 
 function deal(self){
@@ -105,7 +104,7 @@ function score(self){
 }
 
 function bids(state){
-  const size = handSizes[state.round] || 0;
+  const size = state.deals[state.round] || 0;
   const bids = _.cons(null, _.range(0, size + 1));
   return _.chain(state.seated, _.mapIndexed(function(idx, seat){
     return _.chain(bids, _.mapa(function(bid){
@@ -178,7 +177,7 @@ function execute(self, command, seat){
       return (function(){
         const round = state.round + 1;
         const numHands = g.numSeats(self);
-        const numCards = handSizes[round];
+        const numCards = state.deals[round];
         const dealt = numCards * numHands;
         const cards = _.chain(deck(), _.shuffle);
         const hands = _.chain(cards,
@@ -229,7 +228,7 @@ function execute(self, command, seat){
     case "commit":
       return _.chain(self, g.fold(_, command), function(self){
         const empty = _.chain(self, _.deref, handsEmpty);
-        const over = !handSizes[state.round + 1];
+        const over = !state.deals[state.round + 1];
         return empty ? (over ? g.finish : deal)(self) : self;
       });
 
@@ -289,7 +288,7 @@ function fold2(self, event){
           round: -1, //pending deal
           seated: _.chain(self, g.numSeats, _.repeat(_, {scored: []}), _.toArray)
         };
-        return g.fold(self, event, _.fmap(_, _.constantly(details)));
+        return g.fold(self, event, _.fmap(_, _.merge(_, details)));
       })();
 
     case "deal":

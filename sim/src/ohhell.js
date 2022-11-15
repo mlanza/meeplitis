@@ -6957,9 +6957,9 @@ function ohHell(seats, config, events, journal) {
     if (!__default.count(seats)) {
         throw new Error("Cannot play a game with no one seated at the table");
     }
-    const deals = upAndDown(config.min || 1, config.max || 7);
     return new OhHell(__default.toArray(seats), config, events || [], journal || __default.journal({
-        deals
+        config,
+        deals: upAndDown(config.min || 1, config.max || 7)
     }));
 }
 function deal(self) {

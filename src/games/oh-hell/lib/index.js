@@ -48,7 +48,7 @@ export default function ohHell(seats, config, events, journal){
   if (!_.count(seats)) {
     throw new Error("Cannot play a game with no one seated at the table");
   }
-  return new OhHell(_.toArray(seats), config, events || [], journal || _.journal({deals: upAndDown(config.min || 1, config.max || 7)}));
+  return new OhHell(_.toArray(seats), config, events || [], journal || _.journal({config, deals: upAndDown(config.min || 1, config.max || 7)}));
 }
 
 function deal(self){

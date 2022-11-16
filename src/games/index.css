@@ -13,6 +13,13 @@ body[data-event-type="finish"] {
   background-image: url(../../images/backgrounds/pixel_weave.webp);
   transition: background-image .3s ease-in-out;
 }
+body.initialized {
+  opacity: 1;
+  transition: opacity .25s;
+}
+body {
+  opacity: 0;
+}
 [data-played="0"] [data-seat="0"] .played img,
 [data-played="1"] [data-seat="1"] .played img,
 [data-played="2"] [data-seat="2"] .played img,
@@ -55,6 +62,10 @@ body[data-event-type="finish"] {
 #event.acknowledged {
   animation: .5s ease 0s normal forwards 1 fadeout;
 }
+@keyframes arise {
+  0% { transform: translateY(4em)}
+  100% { transform: translateY(0)}
+}
 .hidden {
   visibility: hidden;
 }
@@ -64,6 +75,7 @@ body[data-event-type="finish"] {
   margin: 5px auto;
   clear: both;
   display: block;
+  animation: arise .6s forwards;
 }
 .victor {
   font-size: 1.3em;
@@ -75,13 +87,14 @@ body[data-event-type="finish"] {
   bottom: 1em;
   left: calc(50% - 15em - 40px);
   border: solid 2px white;
-  min-width: 25em;
+  min-width: 23em;
   height: 5em;
   display: inline-block;
   text-align: left;
   margin: auto 0;
   z-index: 9999;
   color: white;
+  padding: 0 1em;
   background: rgba(62, 80, 92, .95);
   box-shadow: -3px 5px 5px -3px rgba(0, 0, 0, 0.6);
   border-radius: 1em;
@@ -135,7 +148,6 @@ body[data-event-type="finish"] {
 }
 #event p {
   display: block;
-  margin-left: 1em;
   font-size: 1.2em;
 }
 #event.automatic .who {
@@ -178,13 +190,22 @@ body[data-event-type="finish"] {
 #replay {
   float: right;
   font-size: .9em;
+  position: absolute;
+  right: 2em;
+  top: 3px;
+}
+#title {
+  color: white;
 }
 img#up {
+  position: absolute;
+  right: 0;
   float: right;
+  top: 4px;
   width: 25px !important;
   padding: 0;
-  margin: -2px 0 .5em 0;
-  opacity: 0;
+  margin: -2px -5px .5em 0;
+  opacity: .2;
   transition: opacity 1s;
 }
 [data-up="true"] img#up {
@@ -337,7 +358,7 @@ div.player {
   position: relative;
   z-index: 99;
 }
-.yours div.username {
+.yours .username {
   text-decoration: underline;
 }
 .yours {
@@ -390,11 +411,16 @@ div.player > div {
   width: 10em;
   transition: width .5s;
 }
-div.player div.username {
+#title {
+  cursor: pointer;
+}
+div.player .username {
   font-size: 1.2em;
   margin-bottom: 2px;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: white;
+  cursor: pointer;
 }
 @media (prefers-color-scheme: dark) {
   body {

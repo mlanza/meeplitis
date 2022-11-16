@@ -10,6 +10,7 @@ const root = document.body,
       tableId = params.get('id');
 
 const div = dom.tag('div'),
+      a = dom.tag('a'),
       span = dom.tag('span'),
       img = dom.tag('img'),
       ol = dom.tag('ol'),
@@ -270,6 +271,8 @@ function shell(session, tableId){
     }
   });
 
+  dom.attr(dom.sel1("#title"), "href", "/games/oh-hell");
+
   $.sub($ready, _.see("$pass"));
   $.sub($table, _.see("$table"));
   $.sub($touch, _.see("$touch"));
@@ -277,13 +280,14 @@ function shell(session, tableId){
   $.sub($hist, _.see("$hist"));
 
   $.sub($seated, function(seated){
+    dom.attr(root, "data-seats", _.count(seated));
     _.eachIndexed(function(idx, {username, avatar}){
       dom.append(els.players,
         div({class: "zone", "data-seat": idx, "data-username": username, "data-presence": "offline"},
           div({class: "player"},
             div({class: "avatar"}, img({src: `${avatar}?s=104`})),
             div(
-              div({class: "username"}, username),
+              a({class: "username", "href": `/profiles?username=${username}`}, username),
               div(span({class: "points"}, "0"), " pts."),
               div(span({class: "tricks"}, "-"), "/", span({class: "bid"}, "-"), span({class: "tip"}, " (taken/bid)"))),
             img({"data-action": "", src: "../../../images/pawn.svg"})),
@@ -406,8 +410,9 @@ function shell(session, tableId){
         dom.addClass(_, "selected"),
         dom.prop(_, "disabled", true)));
 
+    dom.addClass(root, "initialized");
     dom.attr(root, "data-event-type", event.type);
-    dom.attr(root, "data-up", isUp);
+    dom.attr(root, "data-perspective", seat);
     dom.attr(els.players, "data-lead", lead);
     dom.attr(els.players, "data-played", event.type == "play" ? event.seat : "");
     dom.toggleClass(els.event, "automatic", !player);

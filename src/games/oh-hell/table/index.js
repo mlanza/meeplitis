@@ -219,27 +219,21 @@ function load(prom) {
   return $.pipe($state, t.compact());
 }
 
-function shell(session, tableId){
+function shell(session, tableId, seated, seat){
   const $table = table(tableId),
-        $seated = _.chain(tableId, getSeated, load),
         $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), t.compact()),
         $pass = $.cell(null),
         $ready = $.pipe($pass,  t.filter(function(pass){ //TODO cleanup
           const {state} = pass ? pass : {state: null};
           return state?.touches != null && state?.history != null && state?.at != null;
         })),
-        $seat = $.map(function(state){
-          return state?.seat || -1;
-        }, $pass),
         $snapshot = $.map(_.pipe(_.juxt(_.get(_, "history"), _.get(_, "at")), function([history, at]){
           return _.nth(history, at);
         }), $ready),
         $touches = $.pipe($.map(function(pass){
           return pass?.state?.touches;
         }, $pass), t.compact()),
-        $hist = $.pipe($.map(_.array, $seat, $.hist($snapshot)), t.filter(function([seat, hist]){
-          return seat != null && _.first(hist) != null;
-        }));
+        $hist = $.pipe($.hist($snapshot), t.filter(_.first));
 
   const [roundNum, roundMax] = dom.sel(".round b");
   const els = {
@@ -276,27 +270,24 @@ function shell(session, tableId){
   $.sub($ready, _.see("$pass"));
   $.sub($table, _.see("$table"));
   $.sub($touch, _.see("$touch"));
-  $.sub($seated, _.see("$seated"));
   $.sub($hist, _.see("$hist"));
 
-  $.sub($seated, function(seated){
-    dom.attr(root, "data-seats", _.count(seated));
-    _.eachIndexed(function(idx, {username, avatar}){
-      dom.append(els.players,
-        div({class: "zone", "data-seat": idx, "data-username": username, "data-presence": "offline"},
-          div({class: "player"},
-            div({class: "avatar"}, img({src: `${avatar}?s=104`})),
-            div(
-              a({class: "username", "href": `/profiles?username=${username}`}, username),
-              div(span({class: "points"}, "0"), " pts."),
-              div(span({class: "tricks"}, "-"), "/", span({class: "bid"}, "-"), span({class: "tip"}, " (taken/bid)"))),
-            img({"data-action": "", src: "../../../images/pawn.svg"})),
-          div({class: "played"})));
-    }, seated);
-  });
+  dom.attr(root, "data-seats", _.count(seated));
+  _.eachIndexed(function(idx, {username, avatar}){
+    dom.append(els.players,
+      div({class: "zone", "data-seat": idx, "data-username": username, "data-presence": "offline"},
+        div({class: "player"},
+          div({class: "avatar"}, img({src: `${avatar}?s=104`})),
+          div(
+            a({class: "username", "href": `/profiles?username=${username}`}, username),
+            div(span({class: "points"}, "0"), " pts."),
+            div(span({class: "tricks"}, "-"), "/", span({class: "bid"}, "-"), span({class: "tip"}, " (taken/bid)"))),
+          img({"data-action": "", src: "../../../images/pawn.svg"})),
+        div({class: "played"})));
+  }, seated);
 
   function eventFor(event){
-    return event.seat == null ? null : _.chain($seated, _.deref, _.nth(_, event.seat));
+    return event.seat == null ? null : _.chain(seated, _.deref, _.nth(_, event.seat));
   }
 
   function victor(player){
@@ -316,8 +307,6 @@ function shell(session, tableId){
   }
 
   function desc(event){
-    const seated = _.deref($seated);
-
     switch(event.type) {
       case "start":
         return "Starts game.";
@@ -361,7 +350,7 @@ function shell(session, tableId){
         }, ranked))));
 
       case "award":
-        return ["Awards trick to ", recipient(_.chain($seated, _.deref, _.nth(_, event.details.winner))), "."];
+        return ["Awards trick to ", recipient(_.nth(seated, event.details.winner)), "."];
 
       default:
         return event.type;
@@ -378,7 +367,7 @@ function shell(session, tableId){
     }
   }
 
-  $.sub($hist, function([seat, [curr, prior]]){
+  $.sub($hist, function([curr, prior]){
     const {up, may, seen, events, moves, score, state, state: {trump, round, status, seated, deck, lead, broken, deals}} = curr;
     const {hand, bid} = _.nth(seated, seat) || {hand: null, bid: -1};
     const event = _.last(events);
@@ -462,57 +451,63 @@ function shell(session, tableId){
   return new Shell($pass, $table, $touch, $touches);
 }
 
+function toSession([{data: {user}}, {data: {session: sess}}]){
+  return session(user?.id, sess?.access_token);
+}
+
 if (tableId) {
   Promise.all([
     supabase.auth.getUser(),
     supabase.auth.getSession()
-  ]).then(function([
-    {data: {user}},
-    {data: {session: sess}}
-  ]){
-    const s = shell(
-      session(
-        user?.id,
-        sess?.access_token),
-      tableId);
+  ]).then(toSession).then(function(session){
+    Promise.all([
+      getSeated(tableId),
+      getSeat(tableId, session)
+    ]).then(function([seated, seat]){
+      const s = shell(
+        session,
+        tableId,
+        seated,
+        seat == null ? -1 : seat);
 
-    $.on(root, "click", "[data-tense=\"present\"] .moves button[data-type=\"bid\"]", function(e){
-      const bid = _.maybe(e.target, dom.attr(_, "data-bid"), _.blot, parseInt);
-      sh.dispatch(s, {type: "bid", "details": {bid}});
+      $.on(root, "click", "[data-tense=\"present\"] .moves button[data-type=\"bid\"]", function(e){
+        const bid = _.maybe(e.target, dom.attr(_, "data-bid"), _.blot, parseInt);
+        sh.dispatch(s, {type: "bid", "details": {bid}});
+      });
+
+      $.on(root, "click", "[data-tense=\"present\"] .moves button[data-type=\"reset\"], [data-tense=\"present\"] .moves button[data-type=\"undo\"], [data-tense=\"present\"] .moves button[data-type=\"redo\"], [data-tense=\"present\"] .moves button[data-type=\"commit\"]", function(e){
+        const type = dom.attr(e.target, "data-type");
+        sh.dispatch(s, {type});
+      });
+
+      $.on(root, "click", "#event", function(e){
+        const self = this;
+        dom.addClass(self, "acknowledged");
+        setTimeout(function(){
+          dom.addClass(self, "hidden");
+        }, 500);
+      });
+
+      $.on(root, "click", "[data-tense=\"present\"] .hand img", function(e){
+        const suit = dom.attr(this, "data-suit"),
+              rank = dom.attr(this, "data-rank");
+        sh.dispatch(s, {type: "play", details: {card: {suit, rank}}});
+      });
+
+      $.on(root, "keydown", function(e){
+        if (e.key == "ArrowLeft") {
+          replay(e.shiftKey ? "inception" : "back");
+        } else if (e.key == "ArrowRight") {
+          replay(e.shiftKey ? "present": "forward");
+        }
+      });
+
+      $.on(root, "click", "#replay [data-go]", function(e){
+        replay(dom.attr(e.target, "data-go"));
+      });
+
+      Object.assign(window, {$, _, sh, s, supabase});
     });
-
-    $.on(root, "click", "[data-tense=\"present\"] .moves button[data-type=\"reset\"], [data-tense=\"present\"] .moves button[data-type=\"undo\"], [data-tense=\"present\"] .moves button[data-type=\"redo\"], [data-tense=\"present\"] .moves button[data-type=\"commit\"]", function(e){
-      const type = dom.attr(e.target, "data-type");
-      sh.dispatch(s, {type});
-    });
-
-    $.on(root, "click", "#event", function(e){
-      const self = this;
-      dom.addClass(self, "acknowledged");
-      setTimeout(function(){
-        dom.addClass(self, "hidden");
-      }, 500);
-    });
-
-    $.on(root, "click", "[data-tense=\"present\"] .hand img", function(e){
-      const suit = dom.attr(this, "data-suit"),
-            rank = dom.attr(this, "data-rank");
-      sh.dispatch(s, {type: "play", details: {card: {suit, rank}}});
-    });
-
-    $.on(root, "keydown", function(e){
-      if (e.key == "ArrowLeft") {
-        replay(e.shiftKey ? "inception" : "back");
-      } else if (e.key == "ArrowRight") {
-        replay(e.shiftKey ? "present": "forward");
-      }
-    });
-
-    $.on(root, "click", "#replay [data-go]", function(e){
-      replay(dom.attr(e.target, "data-go"));
-    });
-
-    Object.assign(window, {$, _, sh, s, supabase});
   });
 } else {
   document.location.href = "../";

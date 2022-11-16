@@ -375,7 +375,7 @@ function shell(session, tableId){
   }
 
   $.sub($hist, function([seat, [curr, prior]]){
-    const {up, may, seen, events, moves, score, state, state: {trump, round, status, seated, deck, lead, broken}} = curr;
+    const {up, may, seen, events, moves, score, state, state: {trump, round, status, seated, deck, lead, broken, deals}} = curr;
     const {hand, bid} = _.nth(seated, seat) || {hand: null, bid: -1};
     const event = _.last(events);
     const player = eventFor(event);
@@ -438,7 +438,7 @@ function shell(session, tableId){
     dom.text(els.cards, _.count(deck) || 52);
     dom.attr(els.trump, "src", _.maybe(trump, cardPic) || "");
     dom.text(els.roundNum, round + 1);
-    dom.text(els.roundMax, 13);
+    dom.text(els.roundMax, _.count(deals));
     dom.html(els.hand, _.map(function(card){
       return li(img({src: cardPic(card), "data-suit": card.suit, "data-rank": card.rank}));
     }, hand));

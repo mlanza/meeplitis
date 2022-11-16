@@ -487,7 +487,7 @@ function shell(session, tableId, seated, seat, root){
   return s;
 }
 
-async function loadShell(tableId){
+async function loadShell(tableId, root){
   function toSession([{data: {user}}, {data: {session: sess}}]){
     return session(user?.id, sess?.access_token);
   }
@@ -504,13 +504,13 @@ async function loadShell(tableId){
         tableId,
         seated,
         seat == null ? -1 : seat,
-        document.body);
+        root);
     });
   });
 }
 
 if (tableId) {
-  const s = await loadShell(tableId);
+  const s = await loadShell(tableId, document.body);
   Object.assign(window, {$, _, sh, s, supabase});
 } else {
   document.location.href = "../";

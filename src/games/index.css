@@ -10,6 +10,7 @@ body {
 }
 #game progress {
   margin-top: -12px;
+  margin-right: .5em;
   padding: .6em;
 }
 body[data-tense="past"],

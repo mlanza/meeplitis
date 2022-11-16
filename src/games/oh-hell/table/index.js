@@ -222,6 +222,7 @@ function shell(session, tableId, seated, seat, el){
   const $table = table(tableId),
         $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table),
         $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), t.compact()),
+        $status = $.pipe($.map(_.get(_, "status"), $table), t.compact()),
         $pass = $.cell(tablePass(session, tableId, seat, seated)),
         $primedPass = $.pipe($pass,  t.filter(function({state: {touches, history, at}}){ //TODO cleanup
           return touches && history && at != null;
@@ -254,6 +255,7 @@ function shell(session, tableId, seated, seat, el){
   $.sub($primedPass, _.see("$pass"));
   $.sub($table, _.see("$table"));
   $.sub($touch, _.see("$touch"));
+  $.sub($status, _.see("$status"));
   $.sub($hist, _.see("$hist"));
   $.sub($up, dom.attr(el, "data-up", _));
 
@@ -338,7 +340,6 @@ function shell(session, tableId, seated, seat, el){
     }
   }
 
-
   function cardPic({suit, rank}){
     const suits = {"♥️": "H", "♦️": "D", "♣️": "C", "♠️": "S"};
     return `../../../images/deck/${rank}${suits[suit]}.svg`;
@@ -364,6 +365,8 @@ function shell(session, tableId, seated, seat, el){
       setAt($pass, touch || startTouch);
     });
   });
+
+  $.sub($status, dom.attr(el, "data-table-status", _));
 
   $.sub($pass, _.comp(t.map(function({state: {touches}}){
     return touches;

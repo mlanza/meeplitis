@@ -8,6 +8,15 @@ import supabase from "../../../lib/supabase.js";
 const params = new URLSearchParams(document.location.search),
       tableId = params.get('id');
 
+const div = dom.tag('div'),
+      a = dom.tag('a'),
+      span = dom.tag('span'),
+      img = dom.tag('img'),
+      ol = dom.tag('ol'),
+      ul = dom.tag('ul'),
+      li = dom.tag('li'),
+      button = dom.tag('button');
+
 function json(resp){
   return resp.json();
 }
@@ -170,7 +179,7 @@ function tablePass(session, tableId, seat, seated){
 }
 
 const Shell = (function(){
-  function Shell($pass, $table, $touch, $touches){
+  function Shell($pass, $table, $touch, $touches, ready){
     Object.assign(this, {$pass, $table, $touch, $touches});
   }
 
@@ -184,12 +193,15 @@ const Shell = (function(){
     if (pass.seat == null) {
       throw new Error("Spectators are not permitted to issue moves");
     }
+    self.ready(false);
 
     const {error, data} = await move(pass.tableId, pass.seat, [command], pass.session);
     if (error) {
       throw error;
+    } else {
+      self.ready(true);
     }
-    _.log("move", command, data);
+    _.log("move", command, {error, data});
   }
 
   function lookup(self, key){
@@ -209,16 +221,7 @@ function load(prom) {
   return $.pipe($state, t.compact());
 }
 
-function shell(session, tableId, seated, seat, root){
-  const div = dom.tag('div'),
-        a = dom.tag('a'),
-        span = dom.tag('span'),
-        img = dom.tag('img'),
-        ol = dom.tag('ol'),
-        ul = dom.tag('ul'),
-        li = dom.tag('li'),
-        button = dom.tag('button');
-
+function shell(session, tableId, seated, seat, el){
   const $table = table(tableId),
         $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table),
         $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), t.compact()),
@@ -235,11 +238,14 @@ function shell(session, tableId, seated, seat, root){
         }, $pass), t.compact()),
         $hist = $.pipe($.hist($snapshot), t.filter(_.first));
 
+  const ready = dom.attr(el, "data-ready", _);
+  const s = new Shell($pass, $table, $touch, $touches, ready);
+
   $.sub($ready, _.see("$pass"));
   $.sub($table, _.see("$table"));
   $.sub($touch, _.see("$touch"));
   $.sub($hist, _.see("$hist"));
-  $.sub($up, dom.attr(root, "data-up", _));
+  $.sub($up, dom.attr(el, "data-up", _));
 
   function eventFor(event){
     return event.seat == null ? null : _.nth(seated, event.seat);
@@ -344,7 +350,7 @@ function shell(session, tableId, seated, seat, root){
     return `../../../images/deck/${rank}${suits[suit]}.svg`;
   }
 
-  dom.attr(root, "data-seats", _.count(seated));
+  dom.attr(el, "data-seats", _.count(seated));
 
   _.eachIndexed(function(idx, {username, avatar}){
     dom.append(els.players,
@@ -370,7 +376,7 @@ function shell(session, tableId, seated, seat, root){
   $.sub($pass, t.compact(), function({state}){
     if (state) {
       const {touches, at} = state;
-      dom.attr(root, "data-tense", _.count(touches) - 1 == at ? "present" : "past");
+      dom.attr(el, "data-tense", _.count(touches) - 1 == at ? "present" : "past");
       dom.text(els.touch, at + 1);
       dom.text(els.touches, _.count(touches));
     }
@@ -407,9 +413,9 @@ function shell(session, tableId, seated, seat, root){
         dom.addClass(_, "selected"),
         dom.prop(_, "disabled", true)));
 
-    dom.addClass(root, "initialized");
-    dom.attr(root, "data-event-type", event.type);
-    dom.attr(root, "data-perspective", seat);
+    dom.addClass(el, "initialized");
+    dom.attr(el, "data-event-type", event.type);
+    dom.attr(el, "data-perspective", seat);
     dom.attr(els.players, "data-lead", lead);
     dom.attr(els.players, "data-played", event.type == "play" ? event.seat : "");
     dom.toggleClass(els.event, "automatic", !player);
@@ -421,22 +427,22 @@ function shell(session, tableId, seated, seat, root){
 
     _.eachIndexed(function(idx, {bid, tricks, hand, played, scored}){
       const plyd = _.nth(awarded, idx) || played;
-      const el = dom.sel1(`[data-seat="${idx}"]`);
-      _.includes(seen, idx) && _.doto(el,
+      const seat = dom.sel1(`[data-seat="${idx}"]`);
+      _.includes(seen, idx) && _.doto(seat,
         dom.addClass(_, "yours"),
         dom.attr(_, "data-presence", "online"));
-      dom.text(dom.sel1(".points", el), _.nth(score, idx));
-      dom.attr(dom.sel1("[data-action]", el), "data-action", _.includes(up, idx) ? "must" : (_.includes(may, idx) ? "may" : ""));
-      dom.text(dom.sel1(".tricks", el), _.count(tricks));
-      dom.text(dom.sel1(".bid", el), bid === null ? "?" : (bid === "" ? "X" : bid));
-      dom.html(dom.sel1(".played", el), _.maybe(plyd, cardPic, function(src){
+      dom.text(dom.sel1(".points", seat), _.nth(score, idx));
+      dom.attr(dom.sel1("[data-action]", seat), "data-action", _.includes(up, idx) ? "must" : (_.includes(may, idx) ? "may" : ""));
+      dom.text(dom.sel1(".tricks", seat), _.count(tricks));
+      dom.text(dom.sel1(".bid", seat), bid === null ? "?" : (bid === "" ? "X" : bid));
+      dom.html(dom.sel1(".played", seat), _.maybe(plyd, cardPic, function(src){
         return img({src});
       }));
     }, seated);
 
     dom.text(dom.sel1("#phase", game), {"bidding": "Bidding", "playing": `Playing ${leadSuit}`, "confirming": "Playing", "finished": "Finished"}[status]);
-    dom.attr(root, "data-status", status);
-    dom.attr(root, "data-broken", broken);
+    dom.attr(el, "data-status", status);
+    dom.attr(el, "data-broken", broken);
     dom.text(els.cards, _.count(deck) || 52);
     dom.attr(els.trump, "src", _.maybe(trump, cardPic) || "");
     dom.text(els.roundNum, round + 1);
@@ -446,19 +452,17 @@ function shell(session, tableId, seated, seat, root){
     }, hand));
   });
 
-  const s = new Shell($pass, $table, $touch, $touches);
-
-  $.on(root, "click", "[data-tense=\"present\"] .moves button[data-type=\"bid\"]", function(e){
+  $.on(el, "click", "[data-tense=\"present\"] .moves button[data-type=\"bid\"]", function(e){
     const bid = _.maybe(e.target, dom.attr(_, "data-bid"), _.blot, parseInt);
     sh.dispatch(s, {type: "bid", "details": {bid}});
   });
 
-  $.on(root, "click", "[data-tense=\"present\"] .moves button[data-type=\"reset\"], [data-tense=\"present\"] .moves button[data-type=\"undo\"], [data-tense=\"present\"] .moves button[data-type=\"redo\"], [data-tense=\"present\"] .moves button[data-type=\"commit\"]", function(e){
+  $.on(el, "click", "[data-tense=\"present\"] .moves button[data-type=\"reset\"], [data-tense=\"present\"] .moves button[data-type=\"undo\"], [data-tense=\"present\"] .moves button[data-type=\"redo\"], [data-tense=\"present\"] .moves button[data-type=\"commit\"]", function(e){
     const type = dom.attr(e.target, "data-type");
     sh.dispatch(s, {type});
   });
 
-  $.on(root, "click", "#event", function(e){
+  $.on(el, "click", "#event", function(e){
     const self = this;
     dom.addClass(self, "acknowledged");
     setTimeout(function(){
@@ -466,13 +470,13 @@ function shell(session, tableId, seated, seat, root){
     }, 500);
   });
 
-  $.on(root, "click", "[data-tense=\"present\"] .hand img", function(e){
+  $.on(el, "click", "[data-tense=\"present\"] .hand img", function(e){
     const suit = dom.attr(this, "data-suit"),
           rank = dom.attr(this, "data-rank");
     sh.dispatch(s, {type: "play", details: {card: {suit, rank}}});
   });
 
-  $.on(root, "keydown", function(e){
+  $.on(el, "keydown", function(e){
     if (e.key == "ArrowLeft") {
       replay(e.shiftKey ? "inception" : "back");
     } else if (e.key == "ArrowRight") {
@@ -480,14 +484,16 @@ function shell(session, tableId, seated, seat, root){
     }
   });
 
-  $.on(root, "click", "#replay [data-go]", function(e){
+  $.on(el, "click", "#replay [data-go]", function(e){
     replay(dom.attr(e.target, "data-go"));
   });
+
+  ready(true);
 
   return s;
 }
 
-async function loadShell(tableId, root){
+async function loadShell(tableId, el){
   function toSession([{data: {user}}, {data: {session: sess}}]){
     return session(user?.id, sess?.access_token);
   }
@@ -504,7 +510,7 @@ async function loadShell(tableId, root){
         tableId,
         seated,
         seat == null ? -1 : seat,
-        root);
+        el);
     });
   });
 }

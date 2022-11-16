@@ -20,6 +20,10 @@ body.initialized {
 body {
   opacity: 0;
 }
+body[data-ready=""],
+body[data-ready="false"] {
+  cursor: wait;
+}
 [data-played="0"] [data-seat="0"] .played img,
 [data-played="1"] [data-seat="1"] .played img,
 [data-played="2"] [data-seat="2"] .played img,

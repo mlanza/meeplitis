@@ -207,6 +207,7 @@ img#up {
   margin: -2px -5px .5em 0;
   opacity: .2;
   transition: opacity 1s;
+  cursor: default;
 }
 [data-up="true"] img#up {
   opacity: 1;

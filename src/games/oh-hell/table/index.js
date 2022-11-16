@@ -5,8 +5,7 @@ import t from "/lib/atomic_/transducers.js";
 import sh from "/lib/atomic_/shell.js";
 import supabase from "../../../lib/supabase.js";
 
-const root = document.body,
-      params = new URLSearchParams(document.location.search),
+const params = new URLSearchParams(document.location.search),
       tableId = params.get('id');
 
 function json(resp){
@@ -221,6 +220,7 @@ function shell(session, tableId, seated, seat, root){
         button = dom.tag('button');
 
   const $table = table(tableId),
+        $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table),
         $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), t.compact()),
         $pass = $.cell(tablePass(session, tableId, seat, seated)),
         $ready = $.pipe($pass,  t.filter(function(pass){ //TODO cleanup
@@ -239,6 +239,7 @@ function shell(session, tableId, seated, seat, root){
   $.sub($table, _.see("$table"));
   $.sub($touch, _.see("$touch"));
   $.sub($hist, _.see("$hist"));
+  $.sub($up, dom.attr(root, "data-up", _));
 
   function eventFor(event){
     return event.seat == null ? null : _.nth(seated, event.seat);
@@ -343,7 +344,6 @@ function shell(session, tableId, seated, seat, root){
     return `../../../images/deck/${rank}${suits[suit]}.svg`;
   }
 
-  dom.attr(dom.sel1("#title"), "href", "/games/oh-hell");
   dom.attr(root, "data-seats", _.count(seated));
 
   _.eachIndexed(function(idx, {username, avatar}){
@@ -385,7 +385,6 @@ function shell(session, tableId, seated, seat, root){
     const leadSuit = _.maybe(seated, _.nth(_, lead), _.getIn(_, ["played", "suit"])) || "";
     const awarded = event.type == "award" ? _.toArray(_.take(cnt, _.drop(cnt - event.details.lead, _.cycle(event.details.trick)))) : null;
     const s = dom.sel1(`[data-seat="${seat}"]`);
-    const isUp = _.chain($table, _.deref, _.get(_, "up"), _.includes(_, seat));
 
     _.doto(els.event,
       dom.attr(_, "data-type", event.type),

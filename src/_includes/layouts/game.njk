@@ -6,25 +6,21 @@
     <meta name="description" content="{{ site.description }}">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="stylesheet" type="text/css" href="/games/index.css">
-  {% for href in stylesheets %}
-    <link rel="stylesheet" type="text/css" href="{{ href }}">
-  {% endfor %}
+    <link rel="stylesheet" type="text/css" href="./index.css">
   </head>
   <body>
     <div id="game">
-      <img id="logo" src="../../../images/meeple.png"><a id="title">{{ title }}</a><span id="phase"></span>
-      <img id="up" alt="It's your turn" src="../../../images/pawn.svg">
+      <img id="logo" src="../../../images/meeple.png"><a id="title" href="{{ path }}">{{ title }}</a><span id="phase"></span>
+      <img id="up" alt="It's your turn" title="It's your turn (when lit)" src="../../../images/pawn.svg">
       <div id="replay">
         <span class="touch">-</span> of <span class="touches">-</span>
-        <img data-go="inception" title="Press Shift + Left Arrow" src="../../../images/inception.png">
-        <img data-go="back" title="Press Left Arrow" src="../../../images/back.png">
-        <img data-go="forward" title="Press Right Arrow" src="../../../images/forward.png">
-        <img data-go="present" title="Press Shift + Right Arrow" src="../../../images/present.png">
+        <img data-go="inception" title="Inception: Press Shift + Left Arrow" src="../../../images/inception.png">
+        <img data-go="back" title="Back: Press Left Arrow" src="../../../images/back.png">
+        <img data-go="forward" title="Forward: Press Right Arrow" src="../../../images/forward.png">
+        <img data-go="present" title="Present: Press Shift + Right Arrow" src="../../../images/present.png">
       </div>
     </div>
     {{ content | safe }}
   </body>
-  {% for src in modules %}
-    <script type="module" src="{{ src }}"></script>
-  {% endfor %}
+  <script type="module" src="./index.js"></script>
 </html>

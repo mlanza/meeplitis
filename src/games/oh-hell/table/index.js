@@ -478,8 +478,10 @@ function shell(session, tableId, seated, seat, el){
 
   $.on(el, "keydown", function(e){
     if (e.key == "ArrowLeft") {
+      e.preventDefault();
       replay(e.shiftKey ? "inception" : "back");
     } else if (e.key == "ArrowRight") {
+      e.preventDefault();
       replay(e.shiftKey ? "present": "forward");
     }
   });

@@ -7,7 +7,8 @@
   z-index: 999;
   padding: 1px;
 }
-body .moves, body #event {
+body .moves,
+body #event {
   opacity: 0;
   transition: opacity .5s;
 }

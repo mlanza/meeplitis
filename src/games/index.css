@@ -8,6 +8,10 @@ body {
   background-image: url(../../images/backgrounds/round.webp);
   transition: background-image .3s ease-in-out;
 }
+#game progress {
+  margin-top: -12px;
+  padding: .6em;
+}
 body[data-tense="past"],
 body[data-event-type="finish"] {
   background-image: url(../../images/backgrounds/pixel_weave.webp);

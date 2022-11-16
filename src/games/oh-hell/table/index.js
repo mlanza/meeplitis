@@ -98,6 +98,9 @@ function setAt($state, _at, getPerspective){
   if (!eventId) {
     throw new Error("Unknown position");
   }
+  if (pos === at) {
+    return;
+  }
   if (perspective){
     _.swap($state, _.assoc(_, "at", pos));
   } else {
@@ -214,27 +217,20 @@ const Shell = (function(){
 
 })();
 
-function load(prom) {
-  const $state = $.cell(null);
-  _.fmap(prom, _.reset($state, _));
-  return $.pipe($state, t.compact());
-}
-
 function shell(session, tableId, seated, seat, el){
   const $table = table(tableId),
         $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table),
         $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), t.compact()),
         $pass = $.cell(tablePass(session, tableId, seat, seated)),
-        $ready = $.pipe($pass,  t.filter(function(pass){ //TODO cleanup
-          const {state} = pass ? pass : {state: null};
-          return state?.touches != null && state?.history != null && state?.at != null;
+        $ready = $.pipe($pass,  t.filter(function({state: {touches, history, at}}){ //TODO cleanup
+          return touches && history && at != null;
         })),
         $snapshot = $.map(_.pipe(_.juxt(_.get(_, "history"), _.get(_, "at")), function([history, at]){
           return _.nth(history, at);
         }), $ready),
-        $touches = $.pipe($.map(function(pass){
-          return pass?.state?.touches;
-        }, $pass), t.compact()),
+        $touches = $.pipe($.map(function({state: {touches}}){
+          return touches;
+        }, $ready), t.compact()),
         $hist = $.pipe($.hist($snapshot), t.filter(_.first));
 
   const ready = dom.attr(el, "data-ready", _);
@@ -332,6 +328,7 @@ function shell(session, tableId, seated, seat, el){
   const els = {
     roundNum,
     roundMax,
+    progress: dom.sel1("progress"),
     game: dom.sel1("#game"),
     event: dom.sel1("#event"),
     moves: dom.sel1(".moves"),
@@ -364,28 +361,25 @@ function shell(session, tableId, seated, seat, el){
         div({class: "played"})));
   }, seated);
 
-  window.addEventListener('hashchange', function(){
-    setAt($pass, location.hash.replace("#", ""), getPerspectiveByTouch);
+  const init = _.once(function(startTouch){
+    $.sub(dom.hash(window), t.map(_.replace(_, "#", "")), function(touch){
+      setAt($pass, touch || startTouch, getPerspectiveByTouch);
+    });
   });
 
-  const init = _.once(function(touch){
-    setAt($pass, touch, getPerspectiveByTouch);
-  });
+  $.sub($pass, _.comp(t.map(function({state: {touches}}){
+    return touches;
+  }), t.compact(), t.map(_.last)), init);
 
-  $.sub($pass, function({state: {touches, at}}){
-    if (touches){
-      init(location.hash.replace("#", "") || _.last(touches));
-    }
-  });
-
-  $.sub($touch, function(touch){
+  $.sub($touch, function(){
     postTouches($pass, tableId);
   });
 
-  $.sub($pass, t.compact(), function({state}){
-    if (state) {
-      const {touches, at} = state;
+  $.sub($pass, t.compact(), function({state: {touches, at}}){
+    if (touches && at != null) {
       dom.attr(el, "data-tense", _.count(touches) - 1 == at ? "present" : "past");
+      dom.value(els.progress, at + 1);
+      dom.attr(els.progress, "max", _.count(touches));
       dom.text(els.touch, at + 1);
       dom.text(els.touches, _.count(touches));
     }

@@ -91,45 +91,44 @@ function expand(idx){
 }
 
 function setAt($state, _at, getPerspective){
-  const {state} = _.deref($state);
-  const {at, history, touches} = state;
-  const perspective = _.nth(history, _at),
-        eventId = _.nth(touches, _at);
+  const {state: {at, history, touches}} = _.deref($state);
+  const pos = _.isNumber(_at) ? _at : _.indexOf(touches, _at);
+  const perspective = _.nth(history, pos),
+        eventId = _.nth(touches, pos);
   if (!eventId) {
     throw new Error("Unknown position");
   }
   if (perspective){
-    _.swap($state, _.assoc(_, "at", _at));
+    _.swap($state, _.assoc(_, "at", pos));
   } else {
     _.fmap(getPerspective(eventId), function(perspective){
       _.swap($state,
         _.pipe(
-          _.update(_, "history", _.pipe(expand(_at), _.assoc(_, _at, perspective))),
-          _.assoc(_, "at", _at)));
+          _.update(_, "history", _.pipe(expand(pos), _.assoc(_, pos, perspective))),
+          _.assoc(_, "at", pos)));
     });
   }
 }
 
 function replay(go){
-  const pass = _.deref(s.$pass);
-  const {tableId, seat, session, state} = pass;
-  const getPerspectiveByTouch = getPerspective(tableId, session, _, seat);
-  const {at, history} = state;
+  const {state: {at, touches}} = _.deref(s.$pass),
+        max = _.count(touches) - 1;
+
   switch(go) {
     case "back":
-      setAt(s.$pass, at - 1, getPerspectiveByTouch);
+      location.hash = _.nth(touches, _.clamp(at - 1, 0, max));
       break;
 
     case "forward":
-      setAt(s.$pass, at + 1, getPerspectiveByTouch);
+      location.hash = _.nth(touches, _.clamp(at + 1, 0, max));
       break;
 
     case "inception":
-      setAt(s.$pass, 0, getPerspectiveByTouch);
+      location.hash = _.first(touches);
       break;
 
     case "present":
-      setAt(s.$pass, _.count(history) - 1, getPerspectiveByTouch);
+      location.hash = _.last(touches);
       break;
   }
 }
@@ -365,12 +364,22 @@ function shell(session, tableId, seated, seat, el){
         div({class: "played"})));
   }, seated);
 
-  $.sub($touch, function(){
-    postTouches($pass, tableId);
+  window.addEventListener('hashchange', function(){
+    setAt($pass, location.hash.replace("#", ""), getPerspectiveByTouch);
   });
 
-  $.sub($touches, function(touches){ //always growing
-    setAt($pass, _.chain(touches, _.count, _.dec), getPerspectiveByTouch);
+  const init = _.once(function(touch){
+    setAt($pass, touch, getPerspectiveByTouch);
+  });
+
+  $.sub($pass, function({state: {touches, at}}){
+    if (touches){
+      init(location.hash.replace("#", "") || _.last(touches));
+    }
+  });
+
+  $.sub($touch, function(touch){
+    postTouches($pass, tableId);
   });
 
   $.sub($pass, t.compact(), function({state}){
@@ -452,12 +461,12 @@ function shell(session, tableId, seated, seat, el){
     }, hand));
   });
 
-  $.on(el, "click", "[data-tense=\"present\"] .moves button[data-type=\"bid\"]", function(e){
+  $.on(el, "click", '[data-tense="present"][data-ready="true"] .moves button[data-type="bid"]', function(e){
     const bid = _.maybe(e.target, dom.attr(_, "data-bid"), _.blot, parseInt);
     sh.dispatch(s, {type: "bid", "details": {bid}});
   });
 
-  $.on(el, "click", "[data-tense=\"present\"] .moves button[data-type=\"reset\"], [data-tense=\"present\"] .moves button[data-type=\"undo\"], [data-tense=\"present\"] .moves button[data-type=\"redo\"], [data-tense=\"present\"] .moves button[data-type=\"commit\"]", function(e){
+  $.on(el, "click", '[data-tense="present"][data-ready="true"] .moves button[data-type="reset"], [data-tense="present"][data-ready="true"] .moves button[data-type="undo"], [data-tense="present"][data-ready="true"] .moves button[data-type="redo"], [data-tense="present"][data-ready="true"] .moves button[data-type="commit"]', function(e){
     const type = dom.attr(e.target, "data-type");
     sh.dispatch(s, {type});
   });
@@ -470,7 +479,7 @@ function shell(session, tableId, seated, seat, el){
     }, 500);
   });
 
-  $.on(el, "click", "[data-tense=\"present\"] .hand img", function(e){
+  $.on(el, "click", '[data-tense="present"][data-ready="true"] .hand img', function(e){
     const suit = dom.attr(this, "data-suit"),
           rank = dom.attr(this, "data-rank");
     sh.dispatch(s, {type: "play", details: {card: {suit, rank}}});

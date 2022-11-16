@@ -7,15 +7,6 @@
   z-index: 999;
   padding: 1px;
 }
-body .moves,
-body #event {
-  opacity: 0;
-  transition: opacity .5s;
-}
-body[data-status] .moves,
-body[data-status] #event {
-  opacity: 1;
-}
 button {
   font-size: 1.1em;
   min-width: 4em;

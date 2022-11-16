@@ -123,7 +123,7 @@ body[data-ready="false"] {
 #event[data-type="finish"] > * {
   display: inline-block;
 }
-#event img.recipient {
+#event img.subject {
   border-radius: 5px;
   border: solid 1px dimgray;
   margin-bottom: -25px;

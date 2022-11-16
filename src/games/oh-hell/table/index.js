@@ -90,26 +90,27 @@ function expand(idx){
   }
 }
 
-function setAt($state, _at, getPerspective){
-  const {state: {at, history, touches}} = _.deref($state);
+function setAt($state, _at){
+  const {tableId, session, seat, state: {at, history, touches}} = _.deref($state);
   const pos = _.isNumber(_at) ? _at : _.indexOf(touches, _at);
-  const perspective = _.nth(history, pos),
-        eventId = _.nth(touches, pos);
-  if (!eventId) {
-    throw new Error("Unknown position");
+
+  function loaded(pos){
+    const touch = _.nth(touches, pos);
+    return touch && !_.nth(history, pos) ? [pos, touch] : null;
   }
-  if (pos === at) {
-    return;
-  }
-  if (perspective){
-    _.swap($state, _.assoc(_, "at", pos));
-  } else {
-    _.fmap(getPerspective(eventId), function(perspective){
-      _.swap($state,
-        _.pipe(
-          _.update(_, "history", _.pipe(expand(pos), _.assoc(_, pos, perspective))),
-          _.assoc(_, "at", pos)));
-    });
+
+  if (pos !== at) {
+    _.chain(_.range(-1, 2), _.mapa(function(offset){
+      return loaded(pos + offset);
+    }, _), _.compact, _.mapa(function([pos, touch]){
+      return _.fmap(getPerspective(tableId, session, touch, seat), function(perspective){
+        return [pos, touch, perspective];
+      });
+    }, _), Promise.all.bind(Promise), _.fmap(_, function(results){
+      _.swap($state, _.pipe(_.reduce(function(state, [pos, touch, perspective]){
+        return _.update(state, "history", _.pipe(expand(pos), _.assoc(_, pos, perspective)));
+      }, _, results), _.assoc(_, "at", pos)));
+    }));
   }
 }
 
@@ -222,28 +223,42 @@ function shell(session, tableId, seated, seat, el){
         $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table),
         $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), t.compact()),
         $pass = $.cell(tablePass(session, tableId, seat, seated)),
-        $ready = $.pipe($pass,  t.filter(function({state: {touches, history, at}}){ //TODO cleanup
+        $primedPass = $.pipe($pass,  t.filter(function({state: {touches, history, at}}){ //TODO cleanup
           return touches && history && at != null;
         })),
         $snapshot = $.map(_.pipe(_.juxt(_.get(_, "history"), _.get(_, "at")), function([history, at]){
           return _.nth(history, at);
-        }), $ready),
-        $touches = $.pipe($.map(function({state: {touches}}){
-          return touches;
-        }, $ready), t.compact()),
+        }), $primedPass),
+        $touches = $.pipe($.map(_.get(_, "touches"), $primedPass), t.compact()),
         $hist = $.pipe($.hist($snapshot), t.filter(_.first));
 
   const ready = dom.attr(el, "data-ready", _);
   const s = new Shell($pass, $table, $touch, $touches, ready);
+  const [roundNum, roundMax] = dom.sel(".round b");
+  const els = {
+    roundNum,
+    roundMax,
+    progress: dom.sel1("progress"),
+    game: dom.sel1("#game"),
+    event: dom.sel1("#event"),
+    moves: dom.sel1(".moves"),
+    players: dom.sel1(".players"),
+    trump: dom.sel1(".trump img"),
+    cards: dom.sel1(".cards b"),
+    deck: dom.sel1(".deck"),
+    hand: dom.sel1(".hand"),
+    touch: dom.sel1("#replay .touch"),
+    touches: dom.sel1("#replay .touches")
+  }
 
-  $.sub($ready, _.see("$pass"));
+  $.sub($primedPass, _.see("$pass"));
   $.sub($table, _.see("$table"));
   $.sub($touch, _.see("$touch"));
   $.sub($hist, _.see("$hist"));
   $.sub($up, dom.attr(el, "data-up", _));
 
   function eventFor(event){
-    return event.seat == null ? null : _.nth(seated, event.seat);
+    return _.maybe(event.seat, _.nth(seated, _));
   }
 
   function victor(player){
@@ -252,13 +267,13 @@ function shell(session, tableId, seated, seat, el){
       `${player.username} wins!`);
   }
 
-  function recipient(player){
-    return img({class: "recipient", alt: player.username, src: `${player.avatar}?s=50`});
+  function subject(player){
+    return img({class: "subject", alt: player.username, src: `${player.avatar}?s=50`});
   }
 
   function scored(player, points){
     return li(
-      recipient(player),
+      subject(player),
       span(points));
   }
 
@@ -306,7 +321,7 @@ function shell(session, tableId, seated, seat, el){
         }, ranked))));
 
       case "award":
-        return ["Awards trick to ", recipient(_.nth(seated, event.details.winner)), "."];
+        return ["Awards trick to ", subject(_.nth(seated, event.details.winner)), "."];
 
       default:
         return event.type;
@@ -323,23 +338,6 @@ function shell(session, tableId, seated, seat, el){
     }
   }
 
-  const getPerspectiveByTouch = getPerspective(tableId, session, _, seat);
-  const [roundNum, roundMax] = dom.sel(".round b");
-  const els = {
-    roundNum,
-    roundMax,
-    progress: dom.sel1("progress"),
-    game: dom.sel1("#game"),
-    event: dom.sel1("#event"),
-    moves: dom.sel1(".moves"),
-    players: dom.sel1(".players"),
-    trump: dom.sel1(".trump img"),
-    cards: dom.sel1(".cards b"),
-    deck: dom.sel1(".deck"),
-    hand: dom.sel1(".hand"),
-    touch: dom.sel1("#replay .touch"),
-    touches: dom.sel1("#replay .touches")
-  }
 
   function cardPic({suit, rank}){
     const suits = {"♥️": "H", "♦️": "D", "♣️": "C", "♠️": "S"};
@@ -363,7 +361,7 @@ function shell(session, tableId, seated, seat, el){
 
   const init = _.once(function(startTouch){
     $.sub(dom.hash(window), t.map(_.replace(_, "#", "")), function(touch){
-      setAt($pass, touch || startTouch, getPerspectiveByTouch);
+      setAt($pass, touch || startTouch);
     });
   });
 

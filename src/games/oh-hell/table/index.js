@@ -509,7 +509,7 @@ async function loadShell(tableId, el){
         session,
         tableId,
         seated,
-        seat == null ? -1 : seat,
+        seat,
         el);
     });
   });

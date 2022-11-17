@@ -6958,7 +6958,6 @@ function ohHell(seats, config, events, journal) {
         throw new Error("Cannot play a game with no one seated at the table");
     }
     return new OhHell(__default.toArray(seats), config, events || [], journal || __default.journal({
-        config,
         deals: upAndDown(config.min || 1, config.max || 7)
     }));
 }

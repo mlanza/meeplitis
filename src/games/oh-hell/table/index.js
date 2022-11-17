@@ -94,21 +94,25 @@ function setAt($state, _at){
   const {tableId, session, seat, state: {at, history, touches}} = _.deref($state);
   const pos = _.isNumber(_at) ? _at : _.indexOf(touches, _at);
 
-  function loaded(pos){
-    const touch = _.nth(touches, pos);
-    return touch && !_.nth(history, pos) ? [pos, touch] : null;
+  function loaded(offset){
+    const p = pos + offset,
+          touch = _.nth(touches, p),
+          frame = _.nth(history, p);
+    return [offset, p, touch, frame];
   }
 
   if (pos !== at) {
-    _.chain(_.range(-1, 2), _.mapa(function(offset){
-      return loaded(pos + offset);
-    }, _), _.compact, _.mapa(function([pos, touch]){
-      return _.fmap(getPerspective(tableId, session, touch, seat), function(perspective){
-        return [pos, touch, perspective];
-      });
+    _.chain([0, 1, -1], _.mapa(loaded, _), _.tee(_.pipe(_.first, function([offset, pos, touch, frame]){
+      if (frame) {
+        _.swap($state, _.assoc(_, "at", pos));
+      }
+    })), _.filter(function([offset, pos, touch, frame]){
+      return touch && !frame;
+    }, _), _.mapa(function([offset, pos, touch]){
+      return _.fmap(getPerspective(tableId, session, touch, seat), _.array(pos, _));
     }, _), Promise.all.bind(Promise), _.fmap(_, function(results){
-      _.swap($state, _.pipe(_.reduce(function(state, [pos, touch, perspective]){
-        return _.update(state, "history", _.pipe(expand(pos), _.assoc(_, pos, perspective)));
+      _.swap($state, _.pipe(_.reduce(function(state, [pos, frame]){
+        return _.update(state, "history", _.pipe(expand(pos), _.assoc(_, pos, frame)));
       }, _, results), _.assoc(_, "at", pos)));
     }));
   }

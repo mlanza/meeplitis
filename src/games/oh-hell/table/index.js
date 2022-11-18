@@ -525,7 +525,7 @@ async function loadShell(tableId, el){
     ]).then(function([seated, seat]){
       const $online = _.chain(seated, _.detect(function(seat){
               return seat.player_id === session?.userId;
-            }, _), _.get(_, "username"), o.online);
+            }, _), _.get(_, "username"), _.see("username"), o.online);
       return shell(
         session,
         tableId,

@@ -5,8 +5,12 @@ const IGame = g.IGame;
 const ranks = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "K", "Q", "A"];
 const suits = ["♥️", "♠️", "♦️", "♣️"];
 
-function upAndDown(min, max){
-  return _.toArray(_.dedupe(_.concat(_.range(min, max + 1), _.range(max, min - 1, -1))));
+function deals(start, end){
+  function series(start, end){
+    const step = end > start ? 1 : -1;
+    return _.map(_.add(_, step), _.range(start, end, step));
+  }
+  return _.toArray(_.dedupe(_.concat(series(start, end), series(end, start))));
 }
 
 function name(self){
@@ -48,7 +52,7 @@ export default function ohHell(seats, config, events, journal){
   if (!_.count(seats)) {
     throw new Error("Cannot play a game with no one seated at the table");
   }
-  return new OhHell(_.toArray(seats), config, events || [], journal || _.journal({deals: upAndDown(config.min || 1, config.max || 7)}));
+  return new OhHell(_.toArray(seats), config, events || [], journal || _.journal({deals: deals(config.start || 1, config.end || 7)}));
 }
 
 function deal(self){

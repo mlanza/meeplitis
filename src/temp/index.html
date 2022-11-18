@@ -10,15 +10,7 @@
     <h1>Your Move</h1>
   </body>
   <script type="module">
-    import supabase from "../../lib/supabase.js";
-    import {online, seats} from "../../lib/online.js";
-    import _ from "../../lib/atomic_/core.js";
-    import $ from "../../lib/atomic_/reactives.js";
-
-    const $online = online("capnemo-1734");
-    $.sub($online, _.see("online"));
-    $.sub(seats($online, ["catastic", "capnemo-1734", "slyone99", "dragonfire"]), _.see("seats"));
-
-    Object.assign(window, {supabase, online});
+    import {session, $online} from "/lib/session.js";
+    Object.assign(window, {session, $online});
   </script>
 </html>

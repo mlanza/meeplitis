@@ -3,8 +3,9 @@ import dom from "/lib/atomic_/dom.js";
 import $ from "/lib/atomic_/reactives.js";
 import t from "/lib/atomic_/transducers.js";
 import sh from "/lib/atomic_/shell.js";
-import supabase from "../../../lib/supabase.js";
-import * as o from "../../../lib/online.js";
+import supabase from "/lib/supabase.js";
+import {session, $online} from "/lib/session.js";
+import * as o from "/lib/online.js";
 
 const params = new URLSearchParams(document.location.search),
       tableId = params.get('id');
@@ -146,14 +147,6 @@ function postTouches($state, tableId){
   _.fmap(getTouches(tableId), function(touches){
     return _.assoc(_, "touches", touches);
   }, _.swap($state, _));
-}
-
-function Session(userId, accessToken){
-  Object.assign(this, {userId, accessToken});
-}
-
-function session(userId, accessToken){
-  return userId && accessToken ? new Session(userId, accessToken) : null;
 }
 
 function TablePass(session, tableId, seat, seated, state){
@@ -511,35 +504,13 @@ function shell(session, tableId, seated, seat, $online, el){
   return s;
 }
 
-async function loadShell(tableId, el){
-  function toSession([{data: {user}}, {data: {session: sess}}]){
-    return session(user?.id, sess?.access_token);
-  }
-  return Promise.all([
-    supabase.auth.getUser(),
-    supabase.auth.getSession()
-  ]).then(toSession).then(function(session){
-    return Promise.all([
-      getSeated(tableId),
-      getSeat(tableId, session)
-    ]).then(function([seated, seat]){
-      const $online = _.chain(seated, _.detect(function(seat){
-              return seat.player_id === session?.userId;
-            }, _), _.get(_, "username"), _.see("username"), o.online);
-      return shell(
-        session,
-        tableId,
-        seated,
-        seat,
-        $online,
-        el);
-    });
-  });
-}
-
 if (tableId) {
-  const s = await loadShell(tableId, document.body);
-  Object.assign(window, {$, _, sh, s, supabase});
+  const [seated, seat] = await Promise.all([
+    getSeated(tableId),
+    getSeat(tableId, session)
+  ]);
+  const s = shell(session, tableId, seated, seat, $online, document.body);
+  Object.assign(window, {$, _, sh, s, session, $online, supabase});
 } else {
   document.location.href = "../";
 }

@@ -2,6 +2,7 @@ import _ from "/lib/atomic_/core.js";
 import $ from "/lib/atomic_/reactives.js";
 import t from "/lib/atomic_/transducers.js";
 import g from "/lib/game_.js";
+import {session, $online} from "/lib/session.js";
 import ohHell from "./lib/index.js";
 
 const params = new URLSearchParams(document.location.search),

@@ -448,12 +448,12 @@ div.player .username {
   }
 }
 @keyframes play {
-  0% { transform: translateY(-30em); }
+  0% { transform: translateY(-21em); }
   40% { transform: translateY(0); }
 }
 @keyframes award {
   0% { transform: translateY(0); }
-  60% { transform: translateY(-30em); }
+  60% { transform: translateY(-21em); }
 }
 @keyframes updown {
   0% { transform: translateY(0); }

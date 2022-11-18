@@ -330,7 +330,7 @@ img[data-action="may"] {
 }
 .zone {
   -border: solid 1px red;
-  margin: 0 .75em 0 0;
+  margin: 0;
   display: block;
   width: auto;
   min-height: 14.5em;
@@ -340,8 +340,8 @@ img[data-action="may"] {
   flex-flow: column wrap;
   position: relative;
   font-size: 1em;
-  padding: 5px;
-  border-radius: 1.65em;
+  padding: 9px;
+  border-radius: 1.75em;
 }
 .zone:hover {
   z-index: 99;
@@ -366,9 +366,15 @@ div.player {
 .yours {
   background-color: rgba(135, 125, 138, .1);
 }
+[data-presence] {
+  transition: box-shadow 0.3s ease-in-out;
+}
 [data-presence="offline"] div.player {
   opacity: .7;
   box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0);
+}
+[data-presence="online"] div.player {
+  animation: glow 1s ease-out;
 }
 div.player:hover {
   opacity: 1;
@@ -423,6 +429,14 @@ div.player .username {
   color: white;
   cursor: pointer;
 }
+#game #logo {
+  max-height: 18px;
+  max-width: 18px;
+  margin-right: -2px;
+}
+#game #logo > path {
+  --fill: #ed9121;
+}
 @media (prefers-color-scheme: dark) {
   body {
     background-image: url(../../images/backgrounds/carbon_fibre.webp);
@@ -433,7 +447,6 @@ div.player .username {
     background-image: url(../../images/backgrounds/denim.webp);
   }
 }
-
 @keyframes play {
   0% { transform: translateY(-30em); }
   40% { transform: translateY(0); }
@@ -451,7 +464,6 @@ div.player .username {
   25% { transform: translateY(-1em); }
   0% { transform: translateY(0); }
 }
-
 @keyframes fadeout {
   0% { opacity: 1; }
   95% { opacity: .8; }
@@ -462,11 +474,13 @@ div.player .username {
   5% { transform: scale(.9); }
   20% { transform: scale(1); }
 }
-#game #logo {
-  max-height: 18px;
-  max-width: 18px;
-  margin-right: -2px;
-}
-#game #logo > path {
-  --fill: #ed9121;
+@keyframes glow {
+  0% { box-shadow: none; }
+  60% {
+    box-shadow:
+      0 0 5px 5px #fff, /* inner white */
+      0 0 5px 5px #f0f, /* middle magenta */
+      0 0 5px 5px #0ff; /* outer cyan */
+    }
+  0% { box-shadow: none; }
 }

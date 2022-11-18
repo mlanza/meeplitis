@@ -355,7 +355,7 @@ function shell(session, tableId, seated, seat, $online, el){
 
   _.eachIndexed(function(idx, {username, avatar}){
     dom.append(els.players,
-      div({class: "zone", "data-seat": idx, "data-username": username, "data-presence": "offline"},
+      div({class: "zone", "data-seat": idx, "data-username": username, "data-presence": ""},
         div({class: "player"},
           div({class: "avatar"}, img({src: `${avatar}?s=104`})),
           div(

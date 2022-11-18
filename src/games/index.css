@@ -250,7 +250,7 @@ img#up {
 #game span {
   line-height: 1.1em;
 }
-#game img {
+#game img, #game #logo {
   width: 18px;
   margin-right: 3px;
   margin-bottom: -3px;
@@ -296,14 +296,6 @@ img[data-action="must"] {
   animation-fill-mode: both;
   animation-iteration-count: infinite;
 }
-/*
-.yours img[data-action="must"] {
-  animation-iteration-count: 2;
-}
-.yours:hover img[data-action="must"] {
-  animation-iteration-count: infinite;
-}
-*/
 img[data-action="may"] {
   opacity: .25;
 }
@@ -372,7 +364,6 @@ div.player {
   text-decoration: underline;
 }
 .yours {
-  background-color: rgba(206, 214, 195, .3);
   background-color: rgba(135, 125, 138, .1);
 }
 [data-presence="offline"] div.player {
@@ -470,4 +461,12 @@ div.player .username {
   0% { transform: scale(1); }
   5% { transform: scale(.9); }
   20% { transform: scale(1); }
+}
+#game #logo {
+  max-height: 18px;
+  max-width: 18px;
+  margin-right: -2px;
+}
+#game #logo > path {
+  --fill: #ed9121;
 }

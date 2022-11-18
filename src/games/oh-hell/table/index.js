@@ -4,6 +4,7 @@ import $ from "/lib/atomic_/reactives.js";
 import t from "/lib/atomic_/transducers.js";
 import sh from "/lib/atomic_/shell.js";
 import supabase from "../../../lib/supabase.js";
+import * as o from "../../../lib/online.js";
 
 const params = new URLSearchParams(document.location.search),
       tableId = params.get('id');
@@ -222,8 +223,9 @@ const Shell = (function(){
 
 })();
 
-function shell(session, tableId, seated, seat, el){
+function shell(session, tableId, seated, seat, $online, el){
   const $table = table(tableId),
+        $presence = o.seats($online, _.mapa(_.get(_, "username"), seated)),
         $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table),
         $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), t.compact()),
         $status = $.pipe($.map(_.get(_, "status"), $table), t.compact()),
@@ -370,6 +372,13 @@ function shell(session, tableId, seated, seat, el){
     });
   });
 
+  $.sub($presence, t.tee(_.see("presence")), function(presence){
+    _.eachkv(function(username, presence){
+      const zone = dom.sel1(`.zone[data-username="${username}"]`);
+      dom.attr(zone, "data-presence", presence ? "online" : "offline");
+    }, presence);
+  });
+
   $.sub($status, dom.attr(el, "data-table-status", _));
 
   $.sub($pass, _.comp(t.map(function({state: {touches}}){
@@ -437,8 +446,7 @@ function shell(session, tableId, seated, seat, el){
       const plyd = _.nth(awarded, idx) || played;
       const seat = dom.sel1(`[data-seat="${idx}"]`);
       _.includes(seen, idx) && _.doto(seat,
-        dom.addClass(_, "yours"),
-        dom.attr(_, "data-presence", "online"));
+        dom.addClass(_, "yours"));
       dom.text(dom.sel1(".points", seat), _.nth(score, idx));
       dom.attr(dom.sel1("[data-action]", seat), "data-action", _.includes(up, idx) ? "must" : (_.includes(may, idx) ? "may" : ""));
       dom.text(dom.sel1(".tricks", seat), _.count(tricks));
@@ -515,11 +523,15 @@ async function loadShell(tableId, el){
       getSeated(tableId),
       getSeat(tableId, session)
     ]).then(function([seated, seat]){
+      const $online = _.chain(seated, _.detect(function(seat){
+              return seat.player_id === session?.userId;
+            }, _), _.get(_, "username"), o.online);
       return shell(
         session,
         tableId,
         seated,
         seat,
+        $online,
         el);
     });
   });

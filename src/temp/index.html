@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Temp | Your Move</title>
+    <link rel="icon" type="image/x-icon" href="/images/meeple.svg">
+    <link rel="stylesheet" type="text/css" href="./index.css">
+  </head>
+  <body class="meeple">
+    <h1>Your Move</h1>
+  </body>
+  <script type="module">
+    import supabase from "../../lib/supabase.js";
+    import {online, seats} from "../../lib/online.js";
+    import _ from "../../lib/atomic_/core.js";
+    import $ from "../../lib/atomic_/reactives.js";
+
+    const $online = online("capnemo-1734");
+    $.sub($online, _.see("online"));
+    $.sub(seats($online, ["foo", "capnemo-1734", "bar"]), _.see("seated"));
+
+    Object.assign(window, {supabase, online});
+  </script>
+</html>

@@ -5,7 +5,7 @@ import t from "/lib/atomic_/transducers.js";
 import sh from "/lib/atomic_/shell.js";
 import supabase from "/lib/supabase.js";
 import {session, $online} from "/lib/session.js";
-import {table, ui, player, scored, outcome, victor, subject} from "/lib/table.js";
+import {table, ui, scored, outcome, subject} from "/lib/table.js";
 import {getSeated, getSeat, story, nav, waypoint, refresh, hist} from "/lib/story.js";
 
 const img = dom.tag('img'),
@@ -91,7 +91,7 @@ function moveSel(move){
   }
 }
 
-function cardPic({suit, rank}){
+function cardSrc({suit, rank}){
   const suits = {"♥️": "H", "♦️": "D", "♣️": "C", "♠️": "S"};
   return `/images/deck/${rank}${suits[suit]}.svg`;
 }
@@ -140,7 +140,7 @@ $.sub($hist, function([curr, prior]){
     dom.attr(dom.sel1("[data-action]", seat), "data-action", _.includes(up, idx) ? "must" : (_.includes(may, idx) ? "may" : ""));
     dom.text(dom.sel1(".tricks", seat), _.count(tricks));
     dom.text(dom.sel1(".bid", seat), bid === null ? "?" : (bid === "" ? "X" : bid));
-    dom.html(dom.sel1(".area", seat), _.maybe(plyd, cardPic, function(src){
+    dom.html(dom.sel1(".area", seat), _.maybe(plyd, cardSrc, function(src){
       return img({src});
     }));
   }, seated);
@@ -149,11 +149,11 @@ $.sub($hist, function([curr, prior]){
   dom.attr(el, "data-status", status);
   dom.attr(el, "data-broken", broken);
   dom.text(els.cards, _.count(deck) || 52);
-  dom.attr(els.trump, "src", _.maybe(trump, cardPic) || "");
+  dom.attr(els.trump, "src", _.maybe(trump, cardSrc) || "");
   dom.text(els.roundNum, round + 1);
   dom.text(els.roundMax, _.count(deals));
   dom.html(els.hand, _.map(function(card){
-    return li(img({src: cardPic(card), "data-suit": card.suit, "data-rank": card.rank}));
+    return li(img({src: cardSrc(card), "data-suit": card.suit, "data-rank": card.rank}));
   }, hand));
 });
 

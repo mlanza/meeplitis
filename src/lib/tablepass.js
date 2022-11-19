@@ -1,13 +1,65 @@
 import _ from "/lib/atomic_/core.js";
 import $ from "/lib/atomic_/reactives.js";
-import dom from "/lib/atomic_/dom.js";
 import t from "/lib/atomic_/transducers.js";
 import sh from "/lib/atomic_/shell.js";
-import {getPerspective, getTouches, move} from "/lib/table.js";
 import supabase from "/lib/supabase.js";
 
-export function TablePass(session, tableId, seat, seated, ready, $state, $pass, $hist, $table){
-  Object.assign(this, {session, tableId, seat, seated, ready, $state, $pass, $hist, $table});
+function json(resp){
+  return resp.json();
+}
+
+function getTouches(tableId){
+  return _.fmap(fetch(`https://touches.workers.yourmove.cc?table_id=${tableId}`), json);
+}
+
+export function getSeated(tableId){
+  return _.fmap(fetch(`https://seated.workers.yourmove.cc?table_id=${tableId}`), json);
+}
+
+export function getSeat(tableId, session){
+  return session ? _.fmap(fetch(`https://seat.workers.yourmove.cc?table_id=${tableId}`, {
+    headers: {
+      accessToken: session.accessToken
+    }
+  }), json) : Promise.resolve(null);
+}
+
+function getPerspective(tableId, session, eventId, seat){
+  const qs = _.chain([
+    `table_id=${tableId}`,
+    eventId != null ? `event_id=${eventId}` : null,
+    seat != null ? `seat=${seat}` : null
+  ], _.compact, _.join("&", _));
+  return _.fmap(fetch(`https://perspective.workers.yourmove.cc?${qs}`, session ? {
+    headers: {
+      accessToken: session.accessToken
+    }
+  } : {}), json);
+}
+
+function move(_table_id, _seat, _commands, session){
+  return _.fmap(fetch("https://move.workers.yourmove.cc", {
+    method: "POST",
+    body: JSON.stringify({_table_id, _seat, _commands}),
+    headers: {
+      accessToken: session.accessToken
+    }
+  }), json);
+}
+
+export function TablePass(session, tableId, seat, seated, ready, $state, $pass, $table){
+  Object.assign(this, {session, tableId, seat, seated, ready, $state, $pass, $table});
+}
+
+export function hist(self){
+  const $snapshot = $.map(function({history, at}){
+    return _.nth(history, at);
+  }, self.$pass);
+  return $.pipe($.hist($snapshot), t.filter(_.first));
+}
+
+export function table(self){
+  return self.$table;
 }
 
 function deref(self){
@@ -16,6 +68,24 @@ function deref(self){
 
 function sub(self, obs){
   return $.ISubscribe.sub(self.$pass, obs);
+}
+
+export function nav(self, how){
+  const {at, touches} = _.deref($pass);
+
+  switch(how) {
+    case "back":
+      return _.nth(touches, _.clamp(at - 1, 0, _.count(touches) - 1));
+
+    case "forward":
+      return _.nth(touches, _.clamp(at + 1, 0, _.count(touches) - 1));
+
+    case "inception":
+      return _.first(touches);
+
+    case "present":
+      return _.last(touches);
+  }
 }
 
 async function dispatch(self, command){
@@ -42,17 +112,18 @@ _.doto(TablePass,
   _.implement(_.IDeref, {deref}));
 
 export function tablePass(session, tableId, seat, seated, ready){
-  ready(true);
   const $state = $.cell({
     touches: null,
     history: null,
     at: null
   });
+
   const $pass = $.pipe($state,  t.filter(function({touches, history, at}){ //TODO cleanup
     return touches && history && at != null;
   }));
 
   const $t = $.cell(null);
+
   supabase
     .from('tables')
     .select('*')
@@ -73,18 +144,13 @@ export function tablePass(session, tableId, seat, seated, ready){
 
   const $table = $.pipe($t, t.compact()),
         $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), t.compact()),
-        $snapshot = $.map(_.pipe(_.juxt(_.get(_, "history"), _.get(_, "at")), function([history, at]){
-          return _.nth(history, at);
-        }), $pass),
-        $touches = $.pipe($.map(_.get(_, "touches"), $pass), t.compact()),
-        $hist = $.pipe($.hist($snapshot), t.filter(_.first));
+        $touches = $.pipe($.map(_.get(_, "touches"), $pass), t.compact());
 
-  const self = new TablePass(session, tableId, seat, seated, ready, $state, $pass, $hist, $table);
+  const self = new TablePass(session, tableId, seat, seated, ready, $state, $pass, $table);
 
   $.sub($pass, _.see("$pass"));
   $.sub($table, _.see("$table"));
   $.sub($touch, _.see("$touch"));
-  $.sub($hist, _.see("$hist"));
 
   $.sub($touch, function(){
     _.fmap(getTouches(tableId), function(touches){
@@ -92,15 +158,7 @@ export function tablePass(session, tableId, seat, seated, ready){
     }, _.swap($state, _));
   });
 
-  const init = _.once(function(startTouch){
-    $.sub(dom.hash(window), t.map(_.replace(_, "#", "")), function(touch){
-      setAt(self, touch || startTouch);
-    });
-  });
-
-  $.sub($state, _.comp(t.map(function({touches}){
-    return touches;
-  }), t.compact(), t.map(_.last)), init);
+  ready(true);
 
   return self;
 }

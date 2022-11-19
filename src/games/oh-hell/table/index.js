@@ -5,8 +5,7 @@ import t from "/lib/atomic_/transducers.js";
 import sh from "/lib/atomic_/shell.js";
 import supabase from "/lib/supabase.js";
 import {session, $online} from "/lib/session.js";
-import {getSeated, getSeat} from "/lib/table.js";
-import {tablePass} from "/lib/tablepass.js";
+import {getSeated, getSeat, tablePass, setAt, hist, table, nav} from "/lib/tablepass.js";
 import * as o from "/lib/online.js";
 
 const params = new URLSearchParams(document.location.search),
@@ -116,35 +115,19 @@ function cardPic({suit, rank}){
   return `../../../images/deck/${rank}${suits[suit]}.svg`;
 }
 
-function replay(go){
-  const {at, touches} = _.deref($pass),
-        max = _.count(touches) - 1;
-
-  switch(go) {
-    case "back":
-      location.hash = _.nth(touches, _.clamp(at - 1, 0, max));
-      break;
-
-    case "forward":
-      location.hash = _.nth(touches, _.clamp(at + 1, 0, max));
-      break;
-
-    case "inception":
-      location.hash = _.first(touches);
-      break;
-
-    case "present":
-      location.hash = _.last(touches);
-      break;
-  }
+function replay(how){
+  location.hash = nav($pass, how);
 }
 
 const el = document.body,
       $pass = tablePass(session, tableId, seat, seated, dom.attr(el, "data-ready", _)),
-      {$hist, $table} = $pass,
-      $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, $pass.seat)), $table),
-      $status = $.pipe($.map(_.get(_, "status"), $table), t.compact()),
+      $hist = hist($pass),
+      $table = table($pass),
+      $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table),
+      $status = $.map(_.get(_, "status"), $table),
       $presence = o.seats($online, _.mapa(_.get(_, "username"), seated));
+
+$.sub($hist, _.see("$hist"));
 
 const [roundNum, roundMax] = dom.sel(".round b", el);
 const els = {
@@ -163,6 +146,16 @@ const els = {
   hand: dom.sel1(".hand", el)
 }
 
+const init = _.once(function(startTouch){
+  $.sub(dom.hash(window), t.map(_.replace(_, "#", "")), function(touch){
+    setAt($pass, touch || startTouch);
+  });
+});
+
+$.sub($pass.$state, _.comp(t.map(function({touches}){
+  return touches;
+}), t.compact(), t.map(_.last)), init);
+
 $.sub($pass, t.compact(), function({touches, at}){
   if (touches && at != null) {
     dom.attr(el, "data-tense", _.count(touches) - 1 == at ? "present" : "past");
@@ -176,6 +169,7 @@ $.sub($pass, t.compact(), function({touches, at}){
 $.sub($status, _.see("$status"));
 $.sub($status, dom.attr(el, "data-table-status", _));
 $.sub($up, dom.attr(el, "data-up", _));
+
 dom.attr(el, "data-seats", _.count(seated));
 
 _.eachIndexed(function(idx, {username, avatar}){
@@ -206,7 +200,6 @@ $.sub($hist, function([curr, prior]){
   const cnt = _.count(state.seated);
   const leadSuit = _.maybe(seated, _.nth(_, lead), _.getIn(_, ["played", "suit"])) || "";
   const awarded = event.type == "award" ? _.toArray(_.take(cnt, _.drop(cnt - event.details.lead, _.cycle(event.details.trick)))) : null;
-  const s = dom.sel1(`[data-seat="${seat}"]`);
 
   _.doto(els.event,
     dom.attr(_, "data-type", event.type),
@@ -301,8 +294,8 @@ $.on(el, "keydown", function(e){
   }
 });
 
-$.on(el, "click", "#replay [data-go]", function(e){
-  replay(dom.attr(e.target, "data-go"));
+$.on(el, "click", "#replay [data-nav]", function(e){
+  replay(dom.attr(e.target, "data-nav"));
 });
 
 Object.assign(window, {$, _, sh, $pass, session, $online, supabase});

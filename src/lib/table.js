@@ -52,6 +52,9 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, el){
     return _.maybe(event.seat, _.nth(seated, _));
   }
 
+  dom.attr(el, "data-perspective", seat);
+  dom.attr(el, "data-seats", _.count(seated));
+
   $.sub($table, _.see("$table"));
   $.sub($status, _.see("$status"));
   $.sub($touch, _.see("$touch"));
@@ -91,9 +94,6 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, el){
       dom.text(els.touches, _.count(touches));
     }
   });
-
-  dom.attr(el, "data-perspective", seat);
-  dom.attr(el, "data-seats", _.count(seated));
 
   //configure event
   $.sub($hist, function([curr, prior]){

@@ -148,7 +148,7 @@ ui($table, $story, $hist, $online, seated, seat, desc, el);
 
 $.sub($hist, function([curr, prior]){
   const {up, may, seen, events, moves, score, state, state: {trump, round, status, seated, deck, lead, broken, deals}} = curr;
-  const {hand, bid} = _.nth(seated, seat) || {hand: null, bid: -1};
+  const {hand, bid} = _.nth(seated, seat) || {hand: null, bid: null};
   const event = _.last(events);
   const cnt = _.count(seated);
   const leadSuit = _.maybe(seated, _.nth(_, lead), _.getIn(_, ["played", "suit"])) || "";
@@ -169,7 +169,6 @@ $.sub($hist, function([curr, prior]){
       dom.addClass(_, "selected"),
       dom.prop(_, "disabled", true)));
 
-  dom.attr(el, "data-perspective", seat);
   dom.attr(els.players, "data-lead", lead);
   dom.attr(els.players, "data-played", event.type == "play" ? event.seat : "");
 

@@ -58,6 +58,7 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, el){
   $.sub($story, _.see("$story"));
   $.sub($hist, _.see("$hist"));
 
+  dom.attr(el, "data-perspective", seat);
   $.sub($status, dom.attr(el, "data-table-status", _));
   $.sub($up, dom.attr(el, "data-up", _));
 

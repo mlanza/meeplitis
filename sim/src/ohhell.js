@@ -6922,8 +6922,12 @@ const suits = [
     "♦️",
     "♣️"
 ];
-function upAndDown(min, max) {
-    return __default.toArray(__default.dedupe(__default.concat(__default.range(min, max + 1), __default.range(max, min - 1, -1))));
+function deals(start, end) {
+    function series(start, end) {
+        const step = end > start ? 1 : -1;
+        return __default.map(__default.add(__default, step), __default.range(start, end, step));
+    }
+    return __default.toArray(__default.dedupe(__default.concat(series(start, end), series(end, start))));
 }
 function card(rank, suit) {
     return {
@@ -6958,7 +6962,7 @@ function ohHell(seats, config, events, journal) {
         throw new Error("Cannot play a game with no one seated at the table");
     }
     return new OhHell(__default.toArray(seats), config, events || [], journal || __default.journal({
-        deals: upAndDown(config.min || 1, config.max || 7)
+        deals: deals(config.start || 1, config.end || 7)
     }));
 }
 function deal(self) {

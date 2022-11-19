@@ -131,10 +131,10 @@ const $presence = o.seats($online, _.mapa(_.get(_, "username"), seated)),
       $hist = hist($story);
 
 $.sub($table, _.see("$table"));
-$.sub($story, _.see("$story"));
-$.sub($hist, _.see("$hist"));
 $.sub($status, _.see("$status"));
 $.sub($touch, _.see("$touch"));
+$.sub($story, _.see("$story"));
+$.sub($hist, _.see("$hist"));
 
 const [roundNum, roundMax] = dom.sel(".round b", el);
 const els = {

@@ -3,6 +3,7 @@ import dom from "/lib/atomic_/dom.js";
 import $ from "/lib/atomic_/reactives.js";
 import t from "/lib/atomic_/transducers.js";
 import supabase from "/lib/supabase.js";
+import * as o from "/lib/online.js";
 import {getSeated, getSeat, story, setAt, hist, nav, refresh} from "/lib/story.js";
 
 export function table(tableId){
@@ -29,10 +30,11 @@ export function table(tableId){
   return $.pipe($t, t.compact());
 }
 
-export function ui($table, $story, $hist, $presence, seated, seat, desc, el){
+export function ui($table, $story, $hist, $online, seated, seat, desc, el){
   const $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), t.compact()),
         $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table),
-        $status = $.map(_.get(_, "status"), $table);
+        $status = $.map(_.get(_, "status"), $table),
+        $presence = o.presence($online, _.mapa(_.get(_, "username"), seated));
 
   const els = {
     progress: dom.sel1("progress", el),
@@ -92,10 +94,11 @@ export function ui($table, $story, $hist, $presence, seated, seat, desc, el){
 
   dom.attr(el, "data-seats", _.count(seated));
 
+  //configure event
   $.sub($hist, function([curr, prior]){
     const {events} = curr;
-    const event = _.last(events);
-    const player = eventFor(event);
+    const event = _.last(events),
+          player = eventFor(event);
 
     _.doto(els.event,
       dom.attr(_, "data-type", event.type),
@@ -103,12 +106,15 @@ export function ui($table, $story, $hist, $presence, seated, seat, desc, el){
       dom.removeClass(_, "hidden"),
       dom.removeClass(_, "acknowledged"));
 
+    dom.attr(el, "data-event-type", event.type);
+    dom.html(dom.sel1("p", els.event), desc(event));
     dom.toggleClass(els.event, "automatic", !player);
+
     if (player) {
       dom.attr(dom.sel1("img.who", els.event), "src", `${player.avatar}?=80`);
       dom.text(dom.sel1("p.who", els.event), player.username);
     }
-    dom.html(dom.sel1("p", els.event), desc(event));
+
     dom.addClass(el, "initialized");
   });
 

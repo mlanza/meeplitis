@@ -4,7 +4,6 @@ import $ from "/lib/atomic_/reactives.js";
 import t from "/lib/atomic_/transducers.js";
 import sh from "/lib/atomic_/shell.js";
 import supabase from "/lib/supabase.js";
-import * as o from "/lib/online.js";
 import {session, $online} from "/lib/session.js";
 import {table, ui} from "/lib/table.js";
 import {getSeated, getSeat, story, setAt, hist, nav, refresh} from "/lib/story.js";
@@ -114,8 +113,7 @@ const [seated, seat] = await Promise.all([
 
 const el = document.body;
 
-const $presence = o.seats($online, _.mapa(_.get(_, "username"), seated)),
-      $table = table(tableId),
+const $table = table(tableId),
       $story = story(session, tableId, seat, seated, dom.attr(el, "data-ready", _)),
       $hist = hist($story);
 
@@ -147,7 +145,7 @@ _.eachIndexed(function(seat, {username, avatar}){
 }, seated);
 
 //universal ui
-ui($table, $story, $hist, $presence, seated, seat, desc, el);
+ui($table, $story, $hist, $online, seated, seat, desc, el);
 
 $.sub($hist, function([curr, prior]){
   const {up, may, seen, events, moves, score, state, state: {trump, round, status, seated, deck, lead, broken, deals}} = curr;
@@ -172,7 +170,6 @@ $.sub($hist, function([curr, prior]){
       dom.addClass(_, "selected"),
       dom.prop(_, "disabled", true)));
 
-  dom.attr(el, "data-event-type", event.type);
   dom.attr(el, "data-perspective", seat);
   dom.attr(els.players, "data-lead", lead);
   dom.attr(els.players, "data-played", event.type == "play" ? event.seat : "");

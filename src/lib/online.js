@@ -36,7 +36,7 @@ export function online(username){
   return $online;
 }
 
-export function seats($online, usernames){
+export function presence($online, usernames){
   return $.map(function(online){
     return _.reduce(function(memo, username){
       const seen = _.getIn(online, [username, 0, "seen"]);

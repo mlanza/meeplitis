@@ -153,7 +153,7 @@ $.sub($hist, function([curr, prior]){
   const {up, may, seen, events, moves, score, state, state: {trump, round, status, seated, deck, lead, broken, deals}} = curr;
   const {hand, bid} = _.nth(seated, seat) || {hand: null, bid: -1};
   const event = _.last(events);
-  const cnt = _.count(state.seated);
+  const cnt = _.count(seated);
   const leadSuit = _.maybe(seated, _.nth(_, lead), _.getIn(_, ["played", "suit"])) || "";
   const awarded = event.type == "award" ? _.toArray(_.take(cnt, _.drop(cnt - event.details.lead, _.cycle(event.details.trick)))) : null;
 

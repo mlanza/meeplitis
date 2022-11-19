@@ -47,8 +47,8 @@ function move(_table_id, _seat, _commands, session){
   }), json);
 }
 
-export function Story(session, tableId, seat, seated, ready, $state, $story, $table){
-  Object.assign(this, {session, tableId, seat, seated, ready, $state, $story, $table});
+export function Story(session, tableId, seat, seated, ready, $state, $story){
+  Object.assign(this, {session, tableId, seat, seated, ready, $state, $story});
 }
 
 export function hist(self){
@@ -56,10 +56,6 @@ export function hist(self){
     return _.nth(history, at);
   }, self.$story);
   return $.pipe($.hist($snapshot), t.filter(_.first));
-}
-
-export function table(self){
-  return self.$table;
 }
 
 function deref(self){
@@ -71,7 +67,6 @@ function sub(self, obs){
 }
 
 export function nav(self, how){
-  debugger
   const {at, touches} = _.deref(self.$story);
 
   switch(how) {
@@ -94,11 +89,11 @@ async function dispatch(self, command){
     throw new Error("Spectators are not permitted to issue moves");
   }
 
-  self.ready(false);
+  self.ready(false); //protect users from accidentally reissuing commands; one at a time
 
   const {error, data} = await move(self.tableId, self.seat, [command], self.session);
 
-  _.log("move", command, {error, data});
+  _.log(`moved @ ${self.tableId} from ${self.seat}`, command, {error, data});
 
   self.ready(true);
 
@@ -113,55 +108,13 @@ _.doto(Story,
   _.implement(_.IDeref, {deref}));
 
 export function story(session, tableId, seat, seated, ready){
-  const $state = $.cell({
-    touches: null,
-    history: null,
-    at: null
-  });
-
-  const $story = $.pipe($state,  t.filter(function({touches, history, at}){ //TODO cleanup
-    return touches && history && at != null;
-  }));
-
-  const $t = $.cell(null);
-
-  supabase
-    .from('tables')
-    .select('*')
-    .eq('id', tableId)
-    .then(_.getIn(_, ["data", 0]))
-    .then(_.reset($t, _));
-
-  const channel = supabase.channel('db-messages').
-    on('postgres_changes', {
-      event: 'UPDATE',
-      schema: 'public',
-      table: 'tables',
-      filter: `id=eq.${tableId}`,
-    }, function(payload){
-      _.reset($t, payload.new);
-    }).
-    subscribe();
-
-  const $table = $.pipe($t, t.compact()),
-        $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), t.compact()),
-        $touches = $.pipe($.map(_.get(_, "touches"), $story), t.compact());
-
-  const self = new Story(session, tableId, seat, seated, ready, $state, $story, $table);
-
-  $.sub($story, _.see("$story"));
-  $.sub($table, _.see("$table"));
-  $.sub($touch, _.see("$touch"));
-
-  $.sub($touch, function(){
-    _.fmap(getTouches(tableId), function(touches){
-      return _.assoc(_, "touches", touches);
-    }, _.swap($state, _));
-  });
+  const $state = $.cell({touches: null, history: null, at: null});
 
   ready(true);
 
-  return self;
+  return new Story(session, tableId, seat, seated, ready, $state, $.pipe($state,  t.filter(function({touches, history, at}){ //TODO cleanup
+    return touches && history && at != null;
+  })));
 }
 
 function expand(idx){
@@ -169,6 +122,12 @@ function expand(idx){
     const more = idx + 1 - _.count(xs);
     return more > 0 ? _.chain(xs, _.concat(_, _.repeat(more, null)), _.toArray) : xs;
   }
+}
+
+export function refresh(self){
+  _.fmap(getTouches(self.tableId), function(touches){
+    return _.assoc(_, "touches", touches);
+  }, _.swap(self.$state, _));
 }
 
 export function setAt(self, _at){

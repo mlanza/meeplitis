@@ -5,7 +5,8 @@ import t from "/lib/atomic_/transducers.js";
 import sh from "/lib/atomic_/shell.js";
 import supabase from "/lib/supabase.js";
 import {session, $online} from "/lib/session.js";
-import {getSeated, getSeat, story, setAt, hist, table, nav} from "/lib/story.js";
+import {table} from "/lib/table.js";
+import {getSeated, getSeat, story, setAt, hist, nav, refresh} from "/lib/story.js";
 import * as o from "/lib/online.js";
 
 const params = new URLSearchParams(document.location.search),
@@ -15,6 +16,7 @@ if (!tableId) {
   document.location.href = "../";
 }
 
+const el = document.body;
 const [seated, seat] = await Promise.all([
   getSeated(tableId),
   getSeat(tableId, session)
@@ -119,15 +121,19 @@ function replay(how){
   location.hash = nav($story, how);
 }
 
-const el = document.body,
-      $story = story(session, tableId, seat, seated, dom.attr(el, "data-ready", _)),
-      $hist = hist($story),
-      $table = table($story),
+const $table = table(tableId),
+      $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), t.compact()),
       $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table),
       $status = $.map(_.get(_, "status"), $table),
+      $story = story(session, tableId, seat, seated, dom.attr(el, "data-ready", _)),
+      $hist = hist($story),
       $presence = o.seats($online, _.mapa(_.get(_, "username"), seated));
 
+$.sub($table, _.see("$table"));
+$.sub($story, _.see("$story"));
 $.sub($hist, _.see("$hist"));
+$.sub($status, _.see("$status"));
+$.sub($touch, _.see("$touch"));
 
 const [roundNum, roundMax] = dom.sel(".round b", el);
 const els = {
@@ -146,13 +152,17 @@ const els = {
   hand: dom.sel1(".hand", el)
 }
 
+$.sub($touch, function(){
+  refresh($story);
+});
+
 const init = _.once(function(startTouch){
   $.sub(dom.hash(window), t.map(_.replace(_, "#", "")), function(touch){
     setAt($story, touch || startTouch);
   });
 });
 
-$.sub($story.$state, _.comp(t.map(function({touches}){
+$.sub($story.$state, _.comp(t.map(function({touches}){ //TODO law of demeter
   return touches;
 }), t.compact(), t.map(_.last)), init);
 
@@ -166,7 +176,6 @@ $.sub($story, t.compact(), function({touches, at}){
   }
 });
 
-$.sub($status, _.see("$status"));
 $.sub($status, dom.attr(el, "data-table-status", _));
 $.sub($up, dom.attr(el, "data-up", _));
 
@@ -298,4 +307,4 @@ $.on(el, "click", "#replay [data-nav]", function(e){
   replay(dom.attr(e.target, "data-nav"));
 });
 
-Object.assign(window, {$, _, sh, $story, session, $online, supabase});
+Object.assign(window, {$, _, sh, session, $story, $table, $touch, $status, $up, $online, supabase});

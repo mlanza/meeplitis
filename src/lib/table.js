@@ -4,7 +4,7 @@ import $ from "/lib/atomic_/reactives.js";
 import t from "/lib/atomic_/transducers.js";
 import supabase from "/lib/supabase.js";
 import {presence} from "/lib/online.js";
-import {story, setAt, hist, nav, refresh} from "/lib/story.js";
+import {story, nav, hist, waypoint, refresh} from "/lib/story.js";
 
 export function table(tableId){
   const $t = $.cell(null);
@@ -45,7 +45,7 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, el){
   }
 
   function replay(how){
-    location.hash = nav($story, how);
+    location.hash = waypoint($story, how);
   }
 
   function eventFor(event){
@@ -74,7 +74,7 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, el){
 
   const init = _.once(function(startTouch){
     $.sub(dom.hash(window), t.map(_.replace(_, "#", "")), function(touch){
-      setAt($story, touch || startTouch);
+      nav($story, touch || startTouch);
     });
   });
 

@@ -6,7 +6,7 @@ import sh from "/lib/atomic_/shell.js";
 import supabase from "/lib/supabase.js";
 import {session, $online} from "/lib/session.js";
 import {table, ui} from "/lib/table.js";
-import {getSeated, getSeat, story, setAt, hist, nav, refresh} from "/lib/story.js";
+import {getSeated, getSeat, story, nav, waypoint, refresh, hist} from "/lib/story.js";
 
 const div = dom.tag('div'),
       a = dom.tag('a'),
@@ -103,7 +103,7 @@ function moveSel(move){
 
 function cardPic({suit, rank}){
   const suits = {"♥️": "H", "♦️": "D", "♣️": "C", "♠️": "S"};
-  return `../../../images/deck/${rank}${suits[suit]}.svg`;
+  return `/images/deck/${rank}${suits[suit]}.svg`;
 }
 
 const [seated, seat] = await Promise.all([
@@ -139,7 +139,7 @@ _.eachIndexed(function(seat, {username, avatar}){
           a({class: "username", "href": `/profiles?username=${username}`}, username),
           div(span({class: "points"}, "0"), " pts."),
           div(span({class: "tricks"}, "-"), "/", span({class: "bid"}, "-"), span({class: "tip"}, " (taken/bid)"))),
-        img({"data-action": "", src: "../../../images/pawn.svg"})),
+        img({"data-action": "", src: "/images/pawn.svg"})),
       div({class: "played"})));
 }, seated);
 
@@ -148,7 +148,7 @@ ui($table, $story, $hist, $online, seated, seat, desc, el);
 
 $.sub($hist, function([curr, prior]){
   const {up, may, seen, events, moves, score, state, state: {trump, round, status, seated, deck, lead, broken, deals}} = curr;
-  const {hand, bid} = _.nth(seated, seat) || {hand: null, bid: null};
+  const {hand, bid} = _.nth(seated, seat) || {hand: null, bid: -1};
   const event = _.last(events);
   const cnt = _.count(seated);
   const leadSuit = _.maybe(seated, _.nth(_, lead), _.getIn(_, ["played", "suit"])) || "";
@@ -164,10 +164,12 @@ $.sub($hist, function([curr, prior]){
     return dom.sel1(`button[data-type="${move.type}"]${moveSel(move)}`, els.moves);
   }, _), _.compact, _.each(dom.addClass(_, "active"), _));
 
-  status == "bidding" && _.maybe(dom.sel1(`button[data-type="bid"][data-bid="${bid == null ? '' : bid}"]`),
-    _.doto(_,
-      dom.addClass(_, "selected"),
-      dom.prop(_, "disabled", true)));
+  if (status === "bidding") {
+    _.maybe(dom.sel1(`button[data-type="bid"][data-bid="${bid == null ? '' : bid}"]`),
+      _.doto(_,
+        dom.addClass(_, "selected"),
+        dom.prop(_, "disabled", true)));
+  }
 
   dom.attr(els.players, "data-lead", lead);
   dom.attr(els.players, "data-played", event.type == "play" ? event.seat : "");

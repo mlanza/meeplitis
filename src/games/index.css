@@ -5,7 +5,7 @@ body {
   padding: 0;
   padding-top: 2.5em;
   color: #3E505C;
-  background-image: url(../../images/backgrounds/round.webp);
+  background-image: url(/images/backgrounds/round.webp);
   transition: background-image .3s ease-in-out;
 }
 #game progress {
@@ -15,7 +15,7 @@ body {
 }
 body[data-tense="past"],
 body[data-event-type="finish"] {
-  background-image: url(../../images/backgrounds/pixel_weave.webp);
+  background-image: url(/images/backgrounds/pixel_weave.webp);
   transition: background-image .3s ease-in-out;
 }
 body.initialized {
@@ -439,12 +439,12 @@ div.player .username {
 }
 @media (prefers-color-scheme: dark) {
   body {
-    background-image: url(../../images/backgrounds/carbon_fibre.webp);
+    background-image: url(/images/backgrounds/carbon_fibre.webp);
     color: snow;
   }
   body[data-tense="past"],
   body[data-event-type="finish"] {
-    background-image: url(../../images/backgrounds/denim.webp);
+    background-image: url(/images/backgrounds/denim.webp);
   }
 }
 @keyframes play {

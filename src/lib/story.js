@@ -66,7 +66,7 @@ function sub(self, obs){
   return $.ISubscribe.sub(self.$story, obs);
 }
 
-export function nav(self, how){
+export function waypoint(self, how){
   const {at, touches} = _.deref(self.$story);
 
   switch(how) {
@@ -81,7 +81,10 @@ export function nav(self, how){
 
     case "present":
       return _.last(touches);
+
   }
+
+  return null;
 }
 
 async function dispatch(self, command){
@@ -130,7 +133,7 @@ export function refresh(self){
   }, _.swap(self.$state, _));
 }
 
-export function setAt(self, _at){
+export function nav(self, _at){
   const {tableId, session, seat, $state} = self;
   const {at, history, touches} = _.deref($state);
   const pos = _.isNumber(_at) ? _at : _.indexOf(touches, _at);

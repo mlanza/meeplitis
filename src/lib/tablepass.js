@@ -1,12 +1,12 @@
 import _ from "/lib/atomic_/core.js";
-import {getPerspective} from "/lib/table.js";
+import {getPerspective, move} from "/lib/table.js";
 
-function TablePass(session, tableId, seat, seated, state){
-  Object.assign(this, {session, tableId, seat, seated, state});
+function TablePass(session, tableId, seat, seated, ready, state){
+  Object.assign(this, {session, tableId, seat, seated, ready, state});
 }
 
 function assoc(self, key, value){
-  return new TablePass(self.session, self.tableId, self.seat, self.seated, _.assoc(self.state, key, value));
+  return new TablePass(self.session, self.tableId, self.seat, self.seated, self.ready, _.assoc(self.state, key, value));
 }
 
 function lookup(self, key){ //TODO eliminate?
@@ -18,13 +18,29 @@ function deref(self){
   return _.nth(history, at);
 }
 
+async function dispatch(self, command){
+  if (self.seat == null) {
+    throw new Error("Spectators are not permitted to issue moves");
+  }
+  self.ready(false);
+
+  const {error, data} = await move(self.tableId, self.seat, [command], self.session);
+  if (error) {
+    throw error;
+  } else {
+    self.ready(true);
+  }
+  _.log("move", command, {error, data});
+}
+
 _.doto(TablePass,
   _.implement(_.IDeref, {deref}),
   _.implement(_.IAssociative, {assoc}),
   _.implement(_.ILookup, {lookup}));
 
-export function tablePass(session, tableId, seat, seated){
-  return new TablePass(session, tableId, seat, seated, {
+export function tablePass(session, tableId, seat, seated, ready){
+  ready(true);
+  return new TablePass(session, tableId, seat, seated, ready, {
     touches: null,
     history: null,
     at: null

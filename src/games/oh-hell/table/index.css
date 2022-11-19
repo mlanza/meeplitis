@@ -4,7 +4,7 @@
   bottom: 1em;
   background-color: rgba(255, 255, 255, 0.8);
   border-radius: .7em;
-  z-index: 999;
+  z-index: 99;
   padding: 1px;
 }
 button {
@@ -39,7 +39,7 @@ button.selected {
   padding: 0;
   list-style: none;
   display: inline-flex;
-  z-index: 999;
+  z-index: 99;
 }
 [data-tense="present"][data-status="playing"] .hand:hover {
   bottom: -8em;

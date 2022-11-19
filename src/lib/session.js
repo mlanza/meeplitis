@@ -1,8 +1,12 @@
 import supabase from "./supabase.js";
 import * as o from "./online.js";
+import dom from "/lib/atomic_/dom.js";
 
-function Session(userId, username, accessToken){
-  Object.assign(this, {userId, username, accessToken});
+const img = dom.tag("img");
+const you = dom.sel1("#you");
+
+function Session(userId, username, avatar, accessToken){
+  Object.assign(this, {userId, username, avatar, accessToken});
 }
 
 let _session = null;
@@ -10,13 +14,13 @@ let _session = null;
 let {data: {user}} = await supabase.auth.getUser();
 
 if (user){
-  const {data: [profile]} = await supabase
-    .from('profiles')
-    .select('username')
-    .eq("id", user.id);
+  const {data: [{username, avatar}], error} = await supabase.rpc("userinfo", {_id: user.id});
   const {data: {session: sess}} = await supabase.auth.getSession();
-  _session = new Session(user.id, profile.username, sess?.access_token);
+  dom.attr(you, "href", `/profiles/${username}`);
+  _session = new Session(user.id, username, avatar, sess?.access_token);
 }
 
 export const session = _session;
 export const $online = o.online(session?.username);
+
+dom.append(you, img({src: `${session?.avatar}?s=50`}));

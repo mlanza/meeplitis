@@ -11,6 +11,7 @@
   </head>
   <body{% if classes %} class="{{classes}}"{% endif %}>
       {{ content | safe }}
+    <a id="you"></a>
   </body>
   <script type="module" src="/lib/session.js"></script><!-- register user presence! -->
   {% for src in modules %}

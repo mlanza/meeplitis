@@ -6925,7 +6925,7 @@ const suits = [
 function deals(start, end) {
     function series(start, end) {
         const step = end > start ? 1 : -1;
-        return __default.map(__default.add(__default, step), __default.range(start, end, step));
+        return __default.range(start, end + step, step);
     }
     return __default.toArray(__default.dedupe(__default.concat(series(start, end), series(end, start))));
 }

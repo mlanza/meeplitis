@@ -8,7 +8,7 @@ const suits = ["♥️", "♠️", "♦️", "♣️"];
 function deals(start, end){
   function series(start, end){
     const step = end > start ? 1 : -1;
-    return _.map(_.add(_, step), _.range(start, end, step));
+    return _.range(start, end + step, step);
   }
   return _.toArray(_.dedupe(_.concat(series(start, end), series(end, start))));
 }

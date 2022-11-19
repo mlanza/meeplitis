@@ -121,7 +121,6 @@ const [roundNum, roundMax] = dom.sel(".round b", el);
 const els = {
   roundNum,
   roundMax,
-  event: dom.sel1("#event", el),
   moves: dom.sel1(".moves", el),
   players: dom.sel1(".players", el),
   trump: dom.sel1(".trump img", el),

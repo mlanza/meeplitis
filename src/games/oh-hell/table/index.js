@@ -24,7 +24,6 @@ const els = {
   roundNum,
   roundMax,
   moves: dom.sel1(".moves", el),
-  players: dom.sel1(".players", el),
   trump: dom.sel1(".trump img", el),
   cards: dom.sel1(".cards b", el),
   deck: dom.sel1(".deck", el),
@@ -128,8 +127,8 @@ $.sub($hist, function([curr, prior]){
         dom.prop(_, "disabled", true)));
   }
 
-  dom.attr(els.players, "data-lead", lead);
-  dom.attr(els.players, "data-played", event.type == "play" ? event.seat : "");
+  dom.attr(el, "data-lead", lead);
+  dom.attr(el, "data-played", event.type == "play" ? event.seat : "");
 
   _.eachIndexed(function(idx, {bid, tricks, hand, played, scored}){
     const plyd = _.nth(awarded, idx) || played;

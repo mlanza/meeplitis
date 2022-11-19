@@ -3,8 +3,8 @@ import dom from "/lib/atomic_/dom.js";
 import $ from "/lib/atomic_/reactives.js";
 import t from "/lib/atomic_/transducers.js";
 import supabase from "/lib/supabase.js";
-import * as o from "/lib/online.js";
-import {getSeated, getSeat, story, setAt, hist, nav, refresh} from "/lib/story.js";
+import {presence} from "/lib/online.js";
+import {story, setAt, hist, nav, refresh} from "/lib/story.js";
 
 export function table(tableId){
   const $t = $.cell(null);
@@ -34,7 +34,7 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, el){
   const $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), t.compact()),
         $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table),
         $status = $.map(_.get(_, "status"), $table),
-        $presence = o.presence($online, _.mapa(_.get(_, "username"), seated));
+        $presence = presence($online, _.mapa(_.get(_, "username"), seated));
 
   const els = {
     progress: dom.sel1("progress", el),

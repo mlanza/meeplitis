@@ -47,14 +47,14 @@ function move(_table_id, _seat, _commands, session){
   }), json);
 }
 
-export function TablePass(session, tableId, seat, seated, ready, $state, $pass, $table){
-  Object.assign(this, {session, tableId, seat, seated, ready, $state, $pass, $table});
+export function Story(session, tableId, seat, seated, ready, $state, $story, $table){
+  Object.assign(this, {session, tableId, seat, seated, ready, $state, $story, $table});
 }
 
 export function hist(self){
   const $snapshot = $.map(function({history, at}){
     return _.nth(history, at);
-  }, self.$pass);
+  }, self.$story);
   return $.pipe($.hist($snapshot), t.filter(_.first));
 }
 
@@ -63,15 +63,16 @@ export function table(self){
 }
 
 function deref(self){
-  return _.deref(self.$pass);
+  return _.deref(self.$story);
 }
 
 function sub(self, obs){
-  return $.ISubscribe.sub(self.$pass, obs);
+  return $.ISubscribe.sub(self.$story, obs);
 }
 
 export function nav(self, how){
-  const {at, touches} = _.deref($pass);
+  debugger
+  const {at, touches} = _.deref(self.$story);
 
   switch(how) {
     case "back":
@@ -106,19 +107,19 @@ async function dispatch(self, command){
   }
 }
 
-_.doto(TablePass,
+_.doto(Story,
   _.implement(sh.IDispatch, {dispatch}),
   _.implement($.ISubscribe, {sub}),
   _.implement(_.IDeref, {deref}));
 
-export function tablePass(session, tableId, seat, seated, ready){
+export function story(session, tableId, seat, seated, ready){
   const $state = $.cell({
     touches: null,
     history: null,
     at: null
   });
 
-  const $pass = $.pipe($state,  t.filter(function({touches, history, at}){ //TODO cleanup
+  const $story = $.pipe($state,  t.filter(function({touches, history, at}){ //TODO cleanup
     return touches && history && at != null;
   }));
 
@@ -144,11 +145,11 @@ export function tablePass(session, tableId, seat, seated, ready){
 
   const $table = $.pipe($t, t.compact()),
         $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), t.compact()),
-        $touches = $.pipe($.map(_.get(_, "touches"), $pass), t.compact());
+        $touches = $.pipe($.map(_.get(_, "touches"), $story), t.compact());
 
-  const self = new TablePass(session, tableId, seat, seated, ready, $state, $pass, $table);
+  const self = new Story(session, tableId, seat, seated, ready, $state, $story, $table);
 
-  $.sub($pass, _.see("$pass"));
+  $.sub($story, _.see("$story"));
   $.sub($table, _.see("$table"));
   $.sub($touch, _.see("$touch"));
 

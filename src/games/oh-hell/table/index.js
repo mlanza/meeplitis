@@ -5,7 +5,7 @@ import t from "/lib/atomic_/transducers.js";
 import sh from "/lib/atomic_/shell.js";
 import supabase from "/lib/supabase.js";
 import {session, $online} from "/lib/session.js";
-import {getSeated, getSeat, tablePass, setAt, hist, table, nav} from "/lib/tablepass.js";
+import {getSeated, getSeat, story, setAt, hist, table, nav} from "/lib/story.js";
 import * as o from "/lib/online.js";
 
 const params = new URLSearchParams(document.location.search),
@@ -116,13 +116,13 @@ function cardPic({suit, rank}){
 }
 
 function replay(how){
-  location.hash = nav($pass, how);
+  location.hash = nav($story, how);
 }
 
 const el = document.body,
-      $pass = tablePass(session, tableId, seat, seated, dom.attr(el, "data-ready", _)),
-      $hist = hist($pass),
-      $table = table($pass),
+      $story = story(session, tableId, seat, seated, dom.attr(el, "data-ready", _)),
+      $hist = hist($story),
+      $table = table($story),
       $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table),
       $status = $.map(_.get(_, "status"), $table),
       $presence = o.seats($online, _.mapa(_.get(_, "username"), seated));
@@ -148,15 +148,15 @@ const els = {
 
 const init = _.once(function(startTouch){
   $.sub(dom.hash(window), t.map(_.replace(_, "#", "")), function(touch){
-    setAt($pass, touch || startTouch);
+    setAt($story, touch || startTouch);
   });
 });
 
-$.sub($pass.$state, _.comp(t.map(function({touches}){
+$.sub($story.$state, _.comp(t.map(function({touches}){
   return touches;
 }), t.compact(), t.map(_.last)), init);
 
-$.sub($pass, t.compact(), function({touches, at}){
+$.sub($story, t.compact(), function({touches, at}){
   if (touches && at != null) {
     dom.attr(el, "data-tense", _.count(touches) - 1 == at ? "present" : "past");
     dom.value(els.progress, at + 1);
@@ -262,12 +262,12 @@ $.sub($hist, function([curr, prior]){
 
 $.on(el, "click", '[data-tense="present"][data-ready="true"] .moves button[data-type="bid"]', function(e){
   const bid = _.maybe(e.target, dom.attr(_, "data-bid"), _.blot, parseInt);
-  sh.dispatch($pass, {type: "bid", "details": {bid}});
+  sh.dispatch($story, {type: "bid", "details": {bid}});
 });
 
 $.on(el, "click", '[data-tense="present"][data-ready="true"] .moves button[data-type="reset"], [data-tense="present"][data-ready="true"] .moves button[data-type="undo"], [data-tense="present"][data-ready="true"] .moves button[data-type="redo"], [data-tense="present"][data-ready="true"] .moves button[data-type="commit"]', function(e){
   const type = dom.attr(e.target, "data-type");
-  sh.dispatch($pass, {type});
+  sh.dispatch($story, {type});
 });
 
 $.on(el, "click", "#event", function(e){
@@ -281,7 +281,7 @@ $.on(el, "click", "#event", function(e){
 $.on(el, "click", '[data-tense="present"][data-ready="true"] .hand img', function(e){
   const suit = dom.attr(this, "data-suit"),
         rank = dom.attr(this, "data-rank");
-  sh.dispatch($pass, {type: "play", details: {card: {suit, rank}}});
+  sh.dispatch($story, {type: "play", details: {card: {suit, rank}}});
 });
 
 $.on(el, "keydown", function(e){
@@ -298,4 +298,4 @@ $.on(el, "click", "#replay [data-nav]", function(e){
   replay(dom.attr(e.target, "data-nav"));
 });
 
-Object.assign(window, {$, _, sh, $pass, session, $online, supabase});
+Object.assign(window, {$, _, sh, $story, session, $online, supabase});

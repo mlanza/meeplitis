@@ -42,26 +42,9 @@ body[data-ready="false"] {
   transform: translateY(-30em);
   animation: award .8s !important;
 }
-/*
-[data-played="0"][data-lead="0"] [data-seat="0"] .area img,
-[data-played="1"][data-lead="1"] [data-seat="1"] .area img,
-[data-played="2"][data-lead="2"] [data-seat="2"] .area img,
-[data-played="3"][data-lead="3"] [data-seat="3"] .area img,
-[data-played="4"][data-lead="4"] [data-seat="4"] .area img,
-[data-played="5"][data-lead="5"] [data-seat="5"] .area img,
-[data-played="6"][data-lead="6"] [data-seat="6"] .area img {
-  animation: heartbeat 2s 1s infinite, play .8s;
+[data-table-status="finished"] #replay .touches::after {
+  content: "!";
 }
-[data-lead="0"] [data-seat="0"] .area img,
-[data-lead="1"] [data-seat="1"] .area img,
-[data-lead="2"] [data-seat="2"] .area img,
-[data-lead="3"] [data-seat="3"] .area img,
-[data-lead="4"] [data-seat="4"] .area img,
-[data-lead="5"] [data-seat="5"] .area img,
-[data-lead="6"] [data-seat="6"] .area img {
-  animation: heartbeat 2s infinite;
-}
-*/
 #event {
   animation: updown 3s ease-out infinite;
 }
@@ -70,6 +53,9 @@ body[data-ready="false"] {
 }
 #event.acknowledged {
   animation: .5s ease 0s normal forwards 1 fadeout;
+}
+[data-scored="true"] #unscored {
+  display: none;
 }
 @keyframes arise {
   0% { transform: translateY(4em)}

@@ -42,6 +42,7 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, el){
   const $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), t.compact()),
         $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table),
         $status = $.map(_.get(_, "status"), $table),
+        $scored = $.map(_.get(_, "scored"), $table),
         $presence = presence($online, _.mapa(_.get(_, "username"), seated));
 
   const els = {
@@ -78,6 +79,7 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, el){
   $.sub($story, _.see("$story"));
   $.sub($hist, _.see("$hist"));
 
+  $.sub($scored, dom.attr(el, "data-scored", _));
   $.sub($status, dom.attr(el, "data-table-status", _));
   $.sub($up, dom.attr(el, "data-up", _));
 

@@ -6,7 +6,7 @@ import sh from "/lib/atomic_/shell.js";
 import supabase from "/lib/supabase.js";
 import * as o from "/lib/online.js";
 import {session, $online} from "/lib/session.js";
-import {table} from "/lib/table.js";
+import {table, ui} from "/lib/table.js";
 import {getSeated, getSeat, story, setAt, hist, nav, refresh} from "/lib/story.js";
 
 const div = dom.tag('div'),
@@ -23,10 +23,6 @@ const params = new URLSearchParams(document.location.search),
 
 if (!tableId) {
   document.location.href = "../";
-}
-
-function eventFor(event){
-  return _.maybe(event.seat, _.nth(seated, _));
 }
 
 function victor(player){
@@ -111,10 +107,6 @@ function cardPic({suit, rank}){
   return `../../../images/deck/${rank}${suits[suit]}.svg`;
 }
 
-function replay(how){
-  location.hash = nav($story, how);
-}
-
 const [seated, seat] = await Promise.all([
   getSeated(tableId),
   getSeat(tableId, session)
@@ -124,26 +116,13 @@ const el = document.body;
 
 const $presence = o.seats($online, _.mapa(_.get(_, "username"), seated)),
       $table = table(tableId),
-      $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), t.compact()),
-      $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table),
-      $status = $.map(_.get(_, "status"), $table),
       $story = story(session, tableId, seat, seated, dom.attr(el, "data-ready", _)),
       $hist = hist($story);
-
-$.sub($table, _.see("$table"));
-$.sub($status, _.see("$status"));
-$.sub($touch, _.see("$touch"));
-$.sub($story, _.see("$story"));
-$.sub($hist, _.see("$hist"));
 
 const [roundNum, roundMax] = dom.sel(".round b", el);
 const els = {
   roundNum,
   roundMax,
-  progress: dom.sel1("progress", el),
-  touch: dom.sel1("#replay .touch", el),
-  touches: dom.sel1("#replay .touches", el),
-  game: dom.sel1("#game", el),
   event: dom.sel1("#event", el),
   moves: dom.sel1(".moves", el),
   players: dom.sel1(".players", el),
@@ -153,38 +132,10 @@ const els = {
   hand: dom.sel1(".hand", el)
 }
 
-$.sub($touch, function(){
-  refresh($story);
-});
-
-const init = _.once(function(startTouch){
-  $.sub(dom.hash(window), t.map(_.replace(_, "#", "")), function(touch){
-    setAt($story, touch || startTouch);
-  });
-});
-
-$.sub($story.$state, _.comp(t.map(function({touches}){ //TODO law of demeter
-  return touches;
-}), t.compact(), t.map(_.last)), init);
-
-$.sub($story, t.compact(), function({touches, at}){
-  if (touches && at != null) {
-    dom.attr(el, "data-tense", _.count(touches) - 1 == at ? "present" : "past");
-    dom.value(els.progress, at + 1);
-    dom.attr(els.progress, "max", _.count(touches));
-    dom.text(els.touch, at + 1);
-    dom.text(els.touches, _.count(touches));
-  }
-});
-
-$.sub($status, dom.attr(el, "data-table-status", _));
-$.sub($up, dom.attr(el, "data-up", _));
-
-dom.attr(el, "data-seats", _.count(seated));
-
-_.eachIndexed(function(idx, {username, avatar}){
+//render fixed player zones
+_.eachIndexed(function(seat, {username, avatar}){
   dom.append(els.players,
-    div({class: "zone", "data-seat": idx, "data-username": username, "data-presence": ""},
+    div({class: "zone", "data-seat": seat, "data-username": username, "data-presence": ""},
       div({class: "player"},
         div({class: "avatar"}, img({src: `${avatar}?s=104`})),
         div(
@@ -195,27 +146,16 @@ _.eachIndexed(function(idx, {username, avatar}){
       div({class: "played"})));
 }, seated);
 
-$.sub($presence, t.tee(_.see("presence")), function(presence){
-  _.eachkv(function(username, presence){
-    const zone = dom.sel1(`.zone[data-username="${username}"]`);
-    dom.attr(zone, "data-presence", presence ? "online" : "offline");
-  }, presence);
-});
+//universal ui
+ui($table, $story, $hist, $presence, seated, seat, desc, el);
 
 $.sub($hist, function([curr, prior]){
   const {up, may, seen, events, moves, score, state, state: {trump, round, status, seated, deck, lead, broken, deals}} = curr;
   const {hand, bid} = _.nth(seated, seat) || {hand: null, bid: -1};
   const event = _.last(events);
-  const player = eventFor(event);
   const cnt = _.count(state.seated);
   const leadSuit = _.maybe(seated, _.nth(_, lead), _.getIn(_, ["played", "suit"])) || "";
   const awarded = event.type == "award" ? _.toArray(_.take(cnt, _.drop(cnt - event.details.lead, _.cycle(event.details.trick)))) : null;
-
-  _.doto(els.event,
-    dom.attr(_, "data-type", event.type),
-    dom.addClass(_, "bounce"),
-    dom.removeClass(_, "hidden"),
-    dom.removeClass(_, "acknowledged"));
 
   _.each(_.doto(_,
     dom.removeClass(_, "active"),
@@ -232,17 +172,10 @@ $.sub($hist, function([curr, prior]){
       dom.addClass(_, "selected"),
       dom.prop(_, "disabled", true)));
 
-  dom.addClass(el, "initialized");
   dom.attr(el, "data-event-type", event.type);
   dom.attr(el, "data-perspective", seat);
   dom.attr(els.players, "data-lead", lead);
   dom.attr(els.players, "data-played", event.type == "play" ? event.seat : "");
-  dom.toggleClass(els.event, "automatic", !player);
-  if (player) {
-    dom.attr(dom.sel1("img.who", els.event), "src", `${player.avatar}?=80`);
-    dom.text(dom.sel1("p.who", els.event), player.username);
-  }
-  dom.html(dom.sel1("p", els.event), desc(event));
 
   _.eachIndexed(function(idx, {bid, tricks, hand, played, scored}){
     const plyd = _.nth(awarded, idx) || played;
@@ -280,32 +213,10 @@ $.on(el, "click", '[data-tense="present"][data-ready="true"] .moves button[data-
   sh.dispatch($story, {type});
 });
 
-$.on(el, "click", "#event", function(e){
-  const self = this;
-  dom.addClass(self, "acknowledged");
-  setTimeout(function(){
-    dom.addClass(self, "hidden");
-  }, 500);
-});
-
 $.on(el, "click", '[data-tense="present"][data-ready="true"] .hand img', function(e){
   const suit = dom.attr(this, "data-suit"),
         rank = dom.attr(this, "data-rank");
   sh.dispatch($story, {type: "play", details: {card: {suit, rank}}});
 });
 
-$.on(el, "keydown", function(e){
-  if (e.key == "ArrowLeft") {
-    e.preventDefault();
-    replay(e.shiftKey ? "inception" : "back");
-  } else if (e.key == "ArrowRight") {
-    e.preventDefault();
-    replay(e.shiftKey ? "present": "forward");
-  }
-});
-
-$.on(el, "click", "#replay [data-nav]", function(e){
-  replay(dom.attr(e.target, "data-nav"));
-});
-
-Object.assign(window, {$, _, sh, session, $story, $table, $touch, $status, $up, $online, supabase});
+Object.assign(window, {$, _, sh, session, $story, $table, $online, supabase});

@@ -4,23 +4,10 @@ import $ from "/lib/atomic_/reactives.js";
 import t from "/lib/atomic_/transducers.js";
 import sh from "/lib/atomic_/shell.js";
 import supabase from "/lib/supabase.js";
+import * as o from "/lib/online.js";
 import {session, $online} from "/lib/session.js";
 import {table} from "/lib/table.js";
 import {getSeated, getSeat, story, setAt, hist, nav, refresh} from "/lib/story.js";
-import * as o from "/lib/online.js";
-
-const params = new URLSearchParams(document.location.search),
-      tableId = params.get('id');
-
-if (!tableId) {
-  document.location.href = "../";
-}
-
-const el = document.body;
-const [seated, seat] = await Promise.all([
-  getSeated(tableId),
-  getSeat(tableId, session)
-]);
 
 const div = dom.tag('div'),
       a = dom.tag('a'),
@@ -30,6 +17,13 @@ const div = dom.tag('div'),
       ul = dom.tag('ul'),
       li = dom.tag('li'),
       button = dom.tag('button');
+
+const params = new URLSearchParams(document.location.search),
+      tableId = params.get('id');
+
+if (!tableId) {
+  document.location.href = "../";
+}
 
 function eventFor(event){
   return _.maybe(event.seat, _.nth(seated, _));
@@ -121,13 +115,20 @@ function replay(how){
   location.hash = nav($story, how);
 }
 
-const $table = table(tableId),
+const [seated, seat] = await Promise.all([
+  getSeated(tableId),
+  getSeat(tableId, session)
+]);
+
+const el = document.body;
+
+const $presence = o.seats($online, _.mapa(_.get(_, "username"), seated)),
+      $table = table(tableId),
       $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), t.compact()),
       $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table),
       $status = $.map(_.get(_, "status"), $table),
       $story = story(session, tableId, seat, seated, dom.attr(el, "data-ready", _)),
-      $hist = hist($story),
-      $presence = o.seats($online, _.mapa(_.get(_, "username"), seated));
+      $hist = hist($story);
 
 $.sub($table, _.see("$table"));
 $.sub($story, _.see("$story"));

@@ -5,17 +5,11 @@ import t from "/lib/atomic_/transducers.js";
 import sh from "/lib/atomic_/shell.js";
 import supabase from "/lib/supabase.js";
 import {session, $online} from "/lib/session.js";
-import {table, ui} from "/lib/table.js";
+import {table, ui, player, scored, outcome, victor, subject} from "/lib/table.js";
 import {getSeated, getSeat, story, nav, waypoint, refresh, hist} from "/lib/story.js";
 
-const div = dom.tag('div'),
-      a = dom.tag('a'),
-      span = dom.tag('span'),
-      img = dom.tag('img'),
-      ol = dom.tag('ol'),
-      ul = dom.tag('ul'),
-      li = dom.tag('li'),
-      button = dom.tag('button');
+const img = dom.tag('img'),
+      li = dom.tag('li');
 
 const params = new URLSearchParams(document.location.search),
       tableId = params.get('id');
@@ -24,21 +18,23 @@ if (!tableId) {
   document.location.href = "../";
 }
 
-function victor(player){
-  return div({class: "victor"},
-    img({alt: player.username, src: `${player.avatar}?s=150`}),
-    `${player.username} wins!`);
+const el = document.body;
+const [roundNum, roundMax] = dom.sel(".round b", el);
+const els = {
+  roundNum,
+  roundMax,
+  moves: dom.sel1(".moves", el),
+  players: dom.sel1(".players", el),
+  trump: dom.sel1(".trump img", el),
+  cards: dom.sel1(".cards b", el),
+  deck: dom.sel1(".deck", el),
+  hand: dom.sel1(".hand", el)
 }
 
-function subject(player){
-  return img({class: "subject", alt: player.username, src: `${player.avatar}?s=50`});
-}
-
-function scored(player, points){
-  return li(
-    subject(player),
-    span(points));
-}
+const [seated, seat] = await Promise.all([
+  getSeated(tableId),
+  getSeat(tableId, session)
+]);
 
 function desc(event){
   switch(event.type) {
@@ -71,17 +67,11 @@ function desc(event){
 
     case "scoring":
       const {scoring} = event.details;
-      return ul({class: "scored"}, _.flatten(_.mapIndexed(function(idx, {points}){
-        return scored(seated[idx], points);
-      }, scoring)));
+      return scored(seated, scoring);
 
     case "finish":
       const {ranked} = event.details;
-      const first = ranked[0].tied ? null : ranked[0];
-      const winner = _.maybe(first?.seat, _.nth(seated, _));
-      return ol({class: "scored"}, _.cons(victor(winner), _.flatten(_.mapIndexed(function(idx, {tie, seat, place, points}){
-        return scored(seated[seat], points);
-      }, ranked))));
+      return outcome(seated, ranked);
 
     case "award":
       return ["Awards trick to ", subject(_.nth(seated, event.details.winner)), "."];
@@ -106,42 +96,9 @@ function cardPic({suit, rank}){
   return `/images/deck/${rank}${suits[suit]}.svg`;
 }
 
-const [seated, seat] = await Promise.all([
-  getSeated(tableId),
-  getSeat(tableId, session)
-]);
-
-const el = document.body;
-
 const $table = table(tableId),
       $story = story(session, tableId, seat, seated, dom.attr(el, "data-ready", _)),
       $hist = hist($story);
-
-const [roundNum, roundMax] = dom.sel(".round b", el);
-const els = {
-  roundNum,
-  roundMax,
-  moves: dom.sel1(".moves", el),
-  players: dom.sel1(".players", el),
-  trump: dom.sel1(".trump img", el),
-  cards: dom.sel1(".cards b", el),
-  deck: dom.sel1(".deck", el),
-  hand: dom.sel1(".hand", el)
-}
-
-//render fixed player zones
-_.eachIndexed(function(seat, {username, avatar}){
-  dom.append(els.players,
-    div({class: "zone", "data-seat": seat, "data-username": username, "data-presence": ""},
-      div({class: "player"},
-        div({class: "avatar"}, img({src: `${avatar}?s=104`})),
-        div(
-          a({class: "username", "href": `/profiles?username=${username}`}, username),
-          div(span({class: "points"}, "0"), " pts."),
-          div(span({class: "tricks"}, "-"), "/", span({class: "bid"}, "-"), span({class: "tip"}, " (taken/bid)"))),
-        img({"data-action": "", src: "/images/pawn.svg"})),
-      div({class: "played"})));
-}, seated);
 
 //universal ui
 ui($table, $story, $hist, $online, seated, seat, desc, el);
@@ -183,7 +140,7 @@ $.sub($hist, function([curr, prior]){
     dom.attr(dom.sel1("[data-action]", seat), "data-action", _.includes(up, idx) ? "must" : (_.includes(may, idx) ? "may" : ""));
     dom.text(dom.sel1(".tricks", seat), _.count(tricks));
     dom.text(dom.sel1(".bid", seat), bid === null ? "?" : (bid === "" ? "X" : bid));
-    dom.html(dom.sel1(".played", seat), _.maybe(plyd, cardPic, function(src){
+    dom.html(dom.sel1(".area", seat), _.maybe(plyd, cardPic, function(src){
       return img({src});
     }));
   }, seated);

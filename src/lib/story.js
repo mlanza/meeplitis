@@ -81,7 +81,6 @@ export function waypoint(self, how){
 
     case "present":
       return _.last(touches);
-
   }
 
   return null;

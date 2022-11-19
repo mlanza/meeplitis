@@ -29,36 +29,36 @@ body[data-ready=""],
 body[data-ready="false"] {
   cursor: wait;
 }
-[data-played="0"] [data-seat="0"] .played img,
-[data-played="1"] [data-seat="1"] .played img,
-[data-played="2"] [data-seat="2"] .played img,
-[data-played="3"] [data-seat="3"] .played img,
-[data-played="4"] [data-seat="4"] .played img,
-[data-played="5"] [data-seat="5"] .played img,
-[data-played="6"] [data-seat="6"] .played img {
+[data-played="0"] [data-seat="0"] .area img,
+[data-played="1"] [data-seat="1"] .area img,
+[data-played="2"] [data-seat="2"] .area img,
+[data-played="3"] [data-seat="3"] .area img,
+[data-played="4"] [data-seat="4"] .area img,
+[data-played="5"] [data-seat="5"] .area img,
+[data-played="6"] [data-seat="6"] .area img {
   animation: play .8s;
 }
-[data-event-type="award"] .played img {
+[data-event-type="award"] .area img {
   transform: translateY(-30em);
   animation: award .8s !important;
 }
 /*
-[data-played="0"][data-lead="0"] [data-seat="0"] .played img,
-[data-played="1"][data-lead="1"] [data-seat="1"] .played img,
-[data-played="2"][data-lead="2"] [data-seat="2"] .played img,
-[data-played="3"][data-lead="3"] [data-seat="3"] .played img,
-[data-played="4"][data-lead="4"] [data-seat="4"] .played img,
-[data-played="5"][data-lead="5"] [data-seat="5"] .played img,
-[data-played="6"][data-lead="6"] [data-seat="6"] .played img {
+[data-played="0"][data-lead="0"] [data-seat="0"] .area img,
+[data-played="1"][data-lead="1"] [data-seat="1"] .area img,
+[data-played="2"][data-lead="2"] [data-seat="2"] .area img,
+[data-played="3"][data-lead="3"] [data-seat="3"] .area img,
+[data-played="4"][data-lead="4"] [data-seat="4"] .area img,
+[data-played="5"][data-lead="5"] [data-seat="5"] .area img,
+[data-played="6"][data-lead="6"] [data-seat="6"] .area img {
   animation: heartbeat 2s 1s infinite, play .8s;
 }
-[data-lead="0"] [data-seat="0"] .played img,
-[data-lead="1"] [data-seat="1"] .played img,
-[data-lead="2"] [data-seat="2"] .played img,
-[data-lead="3"] [data-seat="3"] .played img,
-[data-lead="4"] [data-seat="4"] .played img,
-[data-lead="5"] [data-seat="5"] .played img,
-[data-lead="6"] [data-seat="6"] .played img {
+[data-lead="0"] [data-seat="0"] .area img,
+[data-lead="1"] [data-seat="1"] .area img,
+[data-lead="2"] [data-seat="2"] .area img,
+[data-lead="3"] [data-seat="3"] .area img,
+[data-lead="4"] [data-seat="4"] .area img,
+[data-lead="5"] [data-seat="5"] .area img,
+[data-lead="6"] [data-seat="6"] .area img {
   animation: heartbeat 2s infinite;
 }
 */
@@ -319,12 +319,12 @@ img[data-action="may"] {
   opacity: 1;
   transition: opacity ease-in .5s;
 }
-.played {
+.area {
   height: 14em;
   width: 10em;
   margin: 2px auto 0;
 }
-.played img {
+.area img {
   width: 10em;
   margin: 0 auto;
 }

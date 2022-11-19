@@ -6,6 +6,14 @@ import supabase from "/lib/supabase.js";
 import {presence} from "/lib/online.js";
 import {story, nav, hist, waypoint, refresh} from "/lib/story.js";
 
+const div = dom.tag('div'),
+      a = dom.tag('a'),
+      span = dom.tag('span'),
+      img = dom.tag('img'),
+      ol = dom.tag('ol'),
+      ul = dom.tag('ul'),
+      li = dom.tag('li');
+
 export function table(tableId){
   const $t = $.cell(null);
 
@@ -41,6 +49,7 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, el){
     touch: dom.sel1("#replay .touch", el),
     touches: dom.sel1("#replay .touches", el),
     game: dom.sel1("#game", el),
+    players: dom.sel1(".players", el),
     event: dom.sel1("#event", el)
   }
 
@@ -51,6 +60,14 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, el){
   function eventFor(event){
     return _.maybe(event.seat, _.nth(seated, _));
   }
+
+  //render fixed player zones
+  _.eachIndexed(function(idx, {username, avatar}){
+    dom.append(els.players, zone(idx, username, avatar, [
+      div(span({class: "points"}, "0"), " pts."),
+      div(span({class: "tricks"}, "-"), "/", span({class: "bid"}, "-"), span({class: "tip"}, " (taken/bid)"))
+    ]));
+  }, seated);
 
   dom.attr(el, "data-perspective", seat);
   dom.attr(el, "data-seats", _.count(seated));
@@ -140,4 +157,47 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, el){
       dom.addClass(self, "hidden");
     }, 500);
   });
+}
+
+export function player(username, avatar, ...contents){
+  return div({class: "player"},
+    div({class: "avatar"}, img({src: `${avatar}?s=104`})),
+    div(a({class: "username", "href": `/profiles?username=${username}`}, username), contents),
+    img({"data-action": "", src: "/images/pawn.svg"}));
+}
+
+export function zone(seat, username, avatar, contents){
+  return div({class: "zone", "data-seat": seat, "data-username": username, "data-presence": ""},
+    player(username, avatar, contents),
+    div({class: "area"}));
+}
+
+function score(player, points){
+  return li(
+    subject(player),
+    span(points));
+}
+
+export function scored(seated, scoring){
+  return ul({class: "scored"}, _.flatten(_.mapIndexed(function(idx, {points}){
+    return score(seated[idx], points);
+  }, scoring)));
+}
+
+export function outcome(seated, ranked){
+  const first = ranked[0].tied ? null : ranked[0];
+  const winner = _.maybe(first?.seat, _.nth(seated, _));
+  return ol({class: "scored"}, _.cons(victor(winner), _.flatten(_.mapIndexed(function(idx, {tie, seat, place, points}){
+    return score(seated[seat], points);
+  }, ranked))));
+}
+
+export function victor(player){
+  return div({class: "victor"},
+    img({alt: player.username, src: `${player.avatar}?s=150`}),
+    `${player.username} wins!`);
+}
+
+export function subject(player){
+  return img({class: "subject", alt: player.username, src: `${player.avatar}?s=50`});
 }

@@ -1,7 +1,9 @@
 import _ from "/lib/atomic_/core.js";
 import $ from "/lib/atomic_/reactives.js";
+import dom from "/lib/atomic_/dom.js";
 import t from "/lib/atomic_/transducers.js";
 import supabase from "/lib/supabase.js";
+import {tablePass, setAt} from "/lib/tablepass.js";
 
 function json(resp){
   return resp.json();
@@ -44,27 +46,4 @@ export function move(_table_id, _seat, _commands, session){
       accessToken: session.accessToken
     }
   }), json);
-}
-
-export function table(tableId){
-  const $table = $.cell(null);
-  supabase
-    .from('tables')
-    .select('*')
-    .eq('id', tableId)
-    .then(_.getIn(_, ["data", 0]))
-    .then(_.reset($table, _));
-
-  const channel = supabase.channel('db-messages').
-    on('postgres_changes', {
-      event: 'UPDATE',
-      schema: 'public',
-      table: 'tables',
-      filter: `id=eq.${tableId}`,
-    }, function(payload){
-      _.reset($table, payload.new);
-    }).
-    subscribe();
-
-  return $.pipe($table, t.compact());
 }

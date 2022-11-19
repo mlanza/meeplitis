@@ -5,17 +5,14 @@
     <title>{{ title }} | {{ site.title }}</title>
     <meta name="description" content="{{ site.description }}">
     <link rel="icon" type="image/x-icon" href="/images/meeple.svg">
-    <link rel="stylesheet" type="text/css" href="/index.css">
   {% for href in stylesheets %}
     <link rel="stylesheet" type="text/css" href="{{ href }}">
   {% endfor %}
   </head>
   <body{% if classes %} class="{{classes}}"{% endif %}>
-    <h1>{{ title }}</h1>
-    <main>
       {{ content | safe }}
-    </main>
   </body>
+  <script type="module" src="/lib/session.js"></script><!-- register user presence! -->
   {% for src in modules %}
     <script type="module" src="{{ src }}"></script>
   {% endfor %}

@@ -5,10 +5,21 @@ import t from "/lib/atomic_/transducers.js";
 import sh from "/lib/atomic_/shell.js";
 import supabase from "/lib/supabase.js";
 import {session, $online} from "/lib/session.js";
+import {getTouches, getSeated, getSeat, getPerspective, move, table} from "/lib/table.js";
+import {tablePass, setAt} from "/lib/tablepass.js";
 import * as o from "/lib/online.js";
 
 const params = new URLSearchParams(document.location.search),
       tableId = params.get('id');
+
+if (!tableId) {
+  document.location.href = "../";
+}
+
+const [seated, seat] = await Promise.all([
+  getSeated(tableId),
+  getSeat(tableId, session)
+]);
 
 const div = dom.tag('div'),
       a = dom.tag('a'),
@@ -18,107 +29,6 @@ const div = dom.tag('div'),
       ul = dom.tag('ul'),
       li = dom.tag('li'),
       button = dom.tag('button');
-
-function json(resp){
-  return resp.json();
-}
-
-function getTouches(tableId){
-  return _.fmap(fetch(`https://touches.workers.yourmove.cc?table_id=${tableId}`), json);
-}
-
-function getSeated(tableId){
-  return _.fmap(fetch(`https://seated.workers.yourmove.cc?table_id=${tableId}`), json);
-}
-
-function getSeat(tableId, session){
-  return session ? _.fmap(fetch(`https://seat.workers.yourmove.cc?table_id=${tableId}`, {
-    headers: {
-      accessToken: session.accessToken
-    }
-  }), json) : Promise.resolve(null);
-}
-
-const getPerspective = _.partly(function getPerspective(tableId, session, eventId, seat){
-  const qs = _.chain([
-    `table_id=${tableId}`,
-    eventId != null ? `event_id=${eventId}` : null,
-    seat != null ? `seat=${seat}` : null
-  ], _.compact, _.join("&", _));
-  return _.fmap(fetch(`https://perspective.workers.yourmove.cc?${qs}`, session ? {
-    headers: {
-      accessToken: session.accessToken
-    }
-  } : {}), json);
-});
-
-function move(_table_id, _seat, _commands, session){
-  return _.fmap(fetch("https://move.workers.yourmove.cc", {
-    method: "POST",
-    body: JSON.stringify({_table_id, _seat, _commands}),
-    headers: {
-      accessToken: session.accessToken
-    }
-  }), json);
-}
-
-function table(tableId){
-  const $table = $.cell(null);
-  supabase
-    .from('tables')
-    .select('*')
-    .eq('id', tableId)
-    .then(_.getIn(_, ["data", 0]))
-    .then(_.reset($table, _));
-
-  const channel = supabase.channel('db-messages').
-    on('postgres_changes', {
-      event: 'UPDATE',
-      schema: 'public',
-      table: 'tables',
-      filter: `id=eq.${tableId}`,
-    }, function(payload){
-      _.reset($table, payload.new);
-    }).
-    subscribe();
-
-  return $.pipe($table, t.compact());
-}
-
-function expand(idx){
-  return function(xs){
-    const more = idx + 1 - _.count(xs);
-    return more > 0 ? _.chain(xs, _.concat(_, _.repeat(more, null)), _.toArray) : xs;
-  }
-}
-
-function setAt($state, _at){
-  const {tableId, session, seat, state: {at, history, touches}} = _.deref($state);
-  const pos = _.isNumber(_at) ? _at : _.indexOf(touches, _at);
-
-  function loaded(offset){
-    const p = pos + offset,
-          touch = _.nth(touches, p),
-          frame = _.nth(history, p);
-    return [offset, p, touch, frame];
-  }
-
-  if (pos !== at) {
-    _.chain([0, 1, -1], _.mapa(loaded, _), _.tee(_.pipe(_.first, function([offset, pos, touch, frame]){
-      if (frame) {
-        _.swap($state, _.assoc(_, "at", pos));
-      }
-    })), _.filter(function([offset, pos, touch, frame]){
-      return touch && !frame;
-    }, _), _.mapa(function([offset, pos, touch]){
-      return _.fmap(getPerspective(tableId, session, touch, seat), _.array(pos, _));
-    }, _), Promise.all.bind(Promise), _.fmap(_, function(results){
-      _.swap($state, _.pipe(_.reduce(function(state, [pos, frame]){
-        return _.update(state, "history", _.pipe(expand(pos), _.assoc(_, pos, frame)));
-      }, _, results), _.assoc(_, "at", pos)));
-    }));
-  }
-}
 
 function replay(go){
   const {state: {at, touches}} = _.deref(s.$pass),
@@ -149,39 +59,9 @@ function postTouches($state, tableId){
   }, _.swap($state, _));
 }
 
-function TablePass(session, tableId, seat, seated, state){
-  Object.assign(this, {session, tableId, seat, seated, state});
-}
-
-function assoc(self, key, value){
-  return new TablePass(self.session, self.tableId, self.seat, self.seated, _.assoc(self.state, key, value));
-}
-
-function lookup(self, key){ //TODO eliminate?
-  return _.get(self.state, key);
-}
-
-function deref(self){
-  const {history, at} =  self.state;
-  return _.nth(history, at);
-}
-
-_.doto(TablePass,
-  _.implement(_.IDeref, {deref}),
-  _.implement(_.IAssociative, {assoc}),
-  _.implement(_.ILookup, {lookup}));
-
-function tablePass(session, tableId, seat, seated){
-  return new TablePass(session, tableId, seat, seated, {
-    touches: null,
-    history: null,
-    at: null
-  });
-}
-
 const Shell = (function(){
   function Shell($pass, $table, $touch, $touches, ready){
-    Object.assign(this, {$pass, $table, $touch, $touches});
+    Object.assign(this, {$pass, $table, $touch, $touches, ready});
   }
 
   function deref(self){
@@ -504,13 +384,5 @@ function shell(session, tableId, seated, seat, $online, el){
   return s;
 }
 
-if (tableId) {
-  const [seated, seat] = await Promise.all([
-    getSeated(tableId),
-    getSeat(tableId, session)
-  ]);
-  const s = shell(session, tableId, seated, seat, $online, document.body);
-  Object.assign(window, {$, _, sh, s, session, $online, supabase});
-} else {
-  document.location.href = "../";
-}
+const s = shell(session, tableId, seated, seat, $online, document.body);
+Object.assign(window, {$, _, sh, s, session, $online, supabase});

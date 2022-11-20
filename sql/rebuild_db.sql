@@ -46,12 +46,12 @@ CREATE TABLE tables (
     scored boolean default true,
     seating_change_at timestamp,
     started_at timestamp, -- used to delay start as in a tournament
-    last_touch_id varchar(5), -- last event touching game state
+    last_touch_id varchar(5) references events(id), -- last event touching game state
     finished_at timestamp,
     keypass varchar, -- for restricting access, hashed
     status table_status not null default 'open',
     shredded_at timestamp, -- replayable history was discarded; happens sometime after finished/abandoned
-    created_by uuid references auth.users(id) not null default auth.uid(), -- this person can update before starting
+    created_by uuid references profiles(id) not null default auth.uid(), -- this person can update before starting
     created_at timestamp not null default now(),
     updated_at timestamp);
 
@@ -66,7 +66,7 @@ CREATE TABLE seats (
     table_id varchar(11) references tables(id) not null,
     id varchar(3) not null default generate_uid(4),
     config jsonb, -- player specific configuration
-    player_id uuid references auth.users(id),
+    player_id uuid references profiles(id),
     score float,
     adjustment float, -- from handicap, bid for seating order, penalties
     place smallint, -- final placement upon completion of game

@@ -1,55 +1,114 @@
 import _ from "/lib/atomic_/core.js";
+import dom from "/lib/atomic_/dom.js";
 import $ from "/lib/atomic_/reactives.js";
 import t from "/lib/atomic_/transducers.js";
-import g from "/lib/game_.js";
-import ohHell from "./core.js";
+import supabase from "/lib/supabase.js";
+import {session} from "/lib/session.js";
 
-const params = new URLSearchParams(document.location.search),
-      split  = params.get('split') || null;
+const div = dom.tag('div'),
+      span = dom.tag('span'),
+      img = dom.tag('img'),
+      a = dom.tag('a'),
+      button = dom.tag('button'),
+      submit = dom.tag('submit'),
+      form = dom.tag('form'),
+      label = dom.tag('label'),
+      input = dom.tag('input'),
+      radio = dom.tag('input', {type: "radio"});
 
-const $game = $.cell(ohHell(_.repeat(4, {}), {start: 1, end: 2}));
-
-$.sub($.hist($game), t.map(g.summarize), _.log);
-//const commands = _.take(50, _.concat([{type: "start"}], _.repeat({type: "~"})));
-//g.batch($game, g.run, commands);
-//_.swap($game, g.run(_, [{type: "~"}]))
-//_.chain($game, _.deref, g.whatif(_, [{type: "bid", details: {bid: 1}}], 0));
-
-function all($game){
-  return [
-    g.batch($game, g.load, _),
-    _.constantly([])
-  ];
-}
-
-function splits($game, id){
-  function noHit(event){
-    return event.id !== id;
-  }
-  return [
-    _.pipe(
-      _.takeWhile(noHit, _),
-      g.batch($game, g.load, _)),
-    _.pipe(
-      _.dropWhile(noHit, _),
-      _.map(_.pipe(_.dissoc(_, "id")), _),
-      _.take(1, _),
-      _.toArray,
-      _.see("executing"),
-      function(commands){
-        _.swap($game, g.run(_, commands));
-      })
-    ];
-}
-
-const [loads, execs] = split ? splits($game, split) : all($game);
-const events = fetch("./data/events.json").
-  then(function(resp){
-    return resp.json();
+function creates(open, game){
+  const el = form({id: "creates"},
+    label(span("Players"), _.map(function(value){
+      return label(value, radio({name: "players", value}, value === 2 ? {checked: "checked"} : null));
+    }, _.range(2, 8))),
+    label(span("Variant"),
+      label("Up and Down", radio({name: "variant", value: "up-down", checked: "checked"})),
+      label("Down and Up", radio({name: "variant", value: "down-up"}))),
+    label(span("Notes"), input({type: "text", name: "notes"})),
+    label(span("Scored"), input({type: "checkbox", name: "scored", checked: "checked"})),
+    input({type: "submit", value: "Open Table"}));
+  el.addEventListener('submit', function(e){
+    e.preventDefault();
+    const seats = _.maybe(el.elements["players"], _.detect(function(el){
+      return el.checked;
+    }, _), dom.attr(_, "value"), parseInt);
+    const variant = _.chain(el.elements["variant"], _.detect(function(el){
+      return el.checked;
+    }, _), dom.attr(_, "value"));
+    const scored = el.elements["scored"].checked;
+    const notes = el.elements["notes"].value;
+    const config = _.get({"up-down": {start: 1, end: 7}, "down-up": {start: 7, end: 1}}, variant);
+    open({seats, config, scored, notes});
   });
+  return el;
+}
 
-events.then(loads).then(function(){
-  events.then(execs);
-});
+function table(item){
+  const seat = _.detect(function(seat){
+    return seat.player?.username === session?.username;
+  }, item.seats);
+  return div({class: "table", "data-table": item.id, "data-table-status": item.status, "data-scored": item.scored}, div({class: "id"}, item.id),
+      div({class: "game"}, img({src: item.game.thumbnail_url}), item.scored ? null : span({class: "unscored", title: "Learning game (not scored)"}, "*")),
+      div({class: "seats"}, _.map(function(seat){
+        return img({"data-seat": seat.seat, src: seat.player ? `${seat.player.avatar_url}?s=80` : "/images/anon.png"});
+      }, item.seats)),
+      div({class: "controls"}, seat ? null : button({value: "join"}, "Join"), seat ? button({value: "leave"}, "Leave") : null, a({class: "enter", href: `/games/oh-hell/table/?id=${item.id}`}, seat ? "Enter" : "Spectate")));
+}
 
-Object.assign(window, {$game, _, $, t, g});
+const el = dom.sel1(".open");
+const game_id = '8Mj1';
+
+const {data: [game]} = await supabase
+  .from('games')
+  .select(`
+    id,
+    title,
+    seats,
+    thumbnail_url`)
+  .eq('id', game_id);
+
+const {data: tables, error, status} = await supabase
+  .from('tables')
+  .select(`
+    *,
+    seats (
+      id,
+      seat,
+      joined_at,
+      player:player_id(
+        id,
+        username,
+        avatar_url
+      )
+    ),
+    game:game_id (
+      id,
+      title,
+      seats,
+      thumbnail_url
+    )`)
+  .eq('game_id', game_id)
+  .order('created_at', {ascending: false})
+
+async function open({config, seats, scored, notes}){
+  const {data, error} = await supabase.rpc('open_table', {
+    _game_id: game_id,
+    _config: config,
+    _scored: scored,
+    _seats: seats
+  });
+  _.log({data, error});
+}
+
+_.chain(game, _.see("game"), _.partial(creates, open), dom.append(el, _));
+_.chain(tables, _.see("tables"), _.map(table, _), dom.append(el, _));
+
+$.on(document.body, "click", "button", async function(e){
+  const action = `${this.value}_table`,
+        table = _.closest(this, "[data-table]"),
+        id = dom.attr(table, "data-table");
+  const {data, error} = await supabase.rpc(action, {
+    _table_id: id
+  });
+  _.log({data, error});
+})

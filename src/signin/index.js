@@ -1,6 +1,6 @@
 import supabase from "/lib/supabase.js";
 import {session, $online} from "/lib/session.js";
-debugger
+
 const params = new URLSearchParams(document.location.search),
       dest   = params.get('dest') ? decodeURIComponent(params.get('dest')) : null;
 

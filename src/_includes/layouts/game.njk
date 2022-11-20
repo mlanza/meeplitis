@@ -1,0 +1,22 @@
+---
+layout: layouts/main.njk
+modules:
+- ./index.js
+stylesheets:
+- /games/game.css
+- ./index.css
+---
+<div class="banner">
+  <img id="indicator" src="{{ indicator_url }}">
+  <h1>{{ title }}</h1>
+  <div class="player-range">{{ min_players }} to {{ max_players }} players</div>
+  <div class="byline">
+    <span>Published By:</span> {{ publisher }},
+    <span>Designed By:</span> {{ designers }},
+    <span>Implemented By:</span> {{ developers }}
+    </div>
+</div>
+<div class="create">
+</div>
+<div class="open">
+</div>

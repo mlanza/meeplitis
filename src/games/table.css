@@ -239,7 +239,7 @@ img#up {
 }
 #game img, #game #logo {
   width: 18px;
-  margin-right: 3px;
+  margin-right: 0;
   margin-bottom: -3px;
 }
 #game #phase:not(:empty)::before {

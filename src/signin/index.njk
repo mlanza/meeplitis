@@ -1,0 +1,21 @@
+---
+title: Sign In
+layout: layouts/page.njk
+classes: meeple
+stylesheets:
+- /index.css
+- ./index.css
+modules:
+- ./index.js
+---
+<div id='signin-section' style="display: none;">
+  <form id='signin'>
+      <label>Email</label><input type='email' name='email' /><br>
+      <label>Password</label><input type='password' name='password' /><br>
+      <input type='submit'>
+  </form>
+</div>
+<div id='signout-section' style="display: none;">
+<p></p>
+<button id='signout-button'>Sign Out</button>
+</div>

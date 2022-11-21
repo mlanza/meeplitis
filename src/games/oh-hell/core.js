@@ -13,7 +13,7 @@ function deals(start, end){
   return _.toArray(_.dedupe(_.concat(series(start, end), series(end, start))));
 }
 
-function sortHand(cards){
+function sortCards(cards){
   return _.sort(_.asc(function({suit}){
     return _.indexOf(suits, suit);
   }), _.asc(function({rank}){
@@ -202,7 +202,7 @@ function execute(self, command, seat){
           _.reduce(function(memo, [card, hand]){
             return _.update(memo, hand, _.conj(_, card));
           }, Array.from(_.repeat(numHands, [])), _),
-          _.mapa(sortHand, _));
+          _.mapa(sortCards, _));
         return g.fold(self, _.assoc(command, "details", {deck: _.chain(undealt, _.rest, _.toArray), hands, trump, round}));
       })();
 

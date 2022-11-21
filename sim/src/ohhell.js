@@ -6929,7 +6929,7 @@ function deals(start, end) {
     }
     return __default.toArray(__default.dedupe(__default.concat(series(start, end), series(end, start))));
 }
-function sortHand(cards) {
+function sortCards(cards) {
     return __default.sort(__default.asc(function({ suit  }) {
         return __default.indexOf(suits, suit);
     }), __default.asc(function({ rank  }) {
@@ -7131,7 +7131,7 @@ function execute2(self, command, seat) {
                     ];
                 }, __default, __default.cycle(__default.range(numHands))), __default.reduce(function(memo, [card, hand]) {
                     return __default.update(memo, hand, __default.conj(__default, card));
-                }, Array.from(__default.repeat(numHands, [])), __default), __default.mapa(sortHand, __default));
+                }, Array.from(__default.repeat(numHands, [])), __default), __default.mapa(sortCards, __default));
                 return __default1.fold(self, __default.assoc(command, "details", {
                     deck: __default.chain(undealt, __default.rest, __default.toArray),
                     hands,

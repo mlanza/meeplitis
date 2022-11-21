@@ -17,20 +17,15 @@ body {
   color: white;
   background-color: #3E505C;
   box-shadow: -3px 5px 5px -3px rgba(0, 0, 0, 0.6);
-  height: 6em;
+  height: auto;
   background: url(/images/backgrounds/denim.webp);
   transition: height .5s;
-  overflow: hidden;
   margin: 1em auto;
-  width: 40em;
+  width: 26em;
 }
 .unscored {
   vertical-align: top;
   margin-left: -5px;
-}
-.table:hover {
-  height: 10em;
-  transition: height .5s;
 }
 .table img {
   height: 5em;
@@ -45,12 +40,9 @@ body {
 }
 .table .id {
   position: absolute;
-  right: 25px;
+  left: 110px;
   top: 5px;
   font-size: .5em;
-}
-.table .controls button {
-  --display: none;
 }
 .table[data-table-status="open"] .controls button {
   display: inline;
@@ -62,21 +54,24 @@ body {
   display: none;
 }
 .controls {
-  margin-top: 5px;
+  margin-left: 8em;
   font-size: .8em;
+  margin-bottom: 5px;
 }
 .controls > * {
   margin-left: 5px;
 }
 .seats img {
   height: 4em;
-  margin-bottom: 12px;
 }
 .table img + img {
   margin-left: 3px;
 }
 .seats {
-  display: inline-block;
+  display: block;
+  width: 20em;
+  margin-left: 6.1em;
+  margin-top: -5.8em;
 }
 .seats img {
   border: dashed 3px white;

@@ -47,12 +47,19 @@ function table(item){
   const seat = _.detect(function(seat){
     return session && seat.player && seat.player.username === session.username;
   }, item.seats);
-  return div({class: "table", "data-table": item.id, "data-table-status": item.status, "data-scored": item.scored}, div({class: "id"}, item.game.title, " - ", item.id),
-      div({class: "game"}, img({src: item.game.thumbnail_url}), item.scored ? null : span({class: "unscored", title: "Learning game (not scored)"}, "*")),
+  return div({class: "table", "data-table": item.id, "data-table-status": item.status, "data-scored": item.scored, "data-up": `${ _.join(" ", item.up) }`}, (item.status === "open" ? span : a)({class: "id", href: `/games/oh-hell/table/?id=${item.id}`}, item.game.title, " - ", item.id),
+      div({class: "game"},
+        img({src: item.game.thumbnail_url}), item.scored ? null : span({class: "unscored", title: "Learning game (not scored)"}, "*"),
+        seat || !session ? null : button({value: "join"}, "Join"),
+        seat ? button({value: "leave"}, "Leave") : null),
       div({class: "seats"}, _.map(function(seat){
-        return seat.player ? a({href: `/profiles/?username=${seat.player.username}`}, img({title: seat.player.username, "data-seat": seat.seat, src: `${seat.player.avatar_url}?s=80`})) : img({src: "/images/anon.svg"});
-      }, item.seats)),
-      div({class: "controls"}, seat || !session ? null : button({value: "join"}, "Join"), seat ? button({value: "leave"}, "Leave") : null, a({class: "enter", href: `/games/oh-hell/table/?id=${item.id}`}, seat ? "Enter" : "Spectate")));
+        return span({"class": "seat", "data-username": seat?.player?.username || "", "data-seat": seat.seat},
+          img({class: "pawn", src: "/images/pawn.svg"}),
+          seat.player ?
+            a({href: `/profiles/?username=${seat.player.username}`},
+              img({title: seat.player.username, src: `${seat.player.avatar_url}?s=80`})) :
+            img({src: "/images/anon.svg"}));
+      }, _.sort(_.asc(_.get(_, "seat")), item.seats))));
 }
 
 const el = dom.sel1(".open");

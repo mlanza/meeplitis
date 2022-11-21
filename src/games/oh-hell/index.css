@@ -1,11 +1,9 @@
+@import url(/games/effects.css);
 body.meeple h1 {
   width: 10em;
 }
 body {
   padding-bottom: 5em;
-}
-.game {
-  display: inline;
 }
 .table {
   position: relative;
@@ -13,15 +11,21 @@ body {
   border-radius: 30px;
   margin: 1em;
   padding: .5em;
-  display: block;
   color: white;
   background-color: #3E505C;
   box-shadow: -3px 5px 5px -3px rgba(0, 0, 0, 0.6);
-  height: auto;
   background: url(/images/backgrounds/denim.webp);
-  transition: height .5s;
   margin: 1em auto;
-  width: 26em;
+  width: 26.5em;
+  min-height: 6em;
+}
+.game {
+  display: inline-block;
+  margin: 0;
+  width: 5.5em;
+  margin: 5px;
+  text-align: center;
+  vertical-align: top;
 }
 .unscored {
   vertical-align: top;
@@ -31,9 +35,6 @@ body {
   height: 5em;
   border-radius: 1em;
   border: solid 3px #AAA;
-  display: inline;
-  padding: 0;
-  margin: 5px;
 }
 .table a {
   color: white;
@@ -42,48 +43,66 @@ body {
   position: absolute;
   left: 110px;
   top: 5px;
-  font-size: .5em;
+  font-size: .7em;
 }
-.table[data-table-status="open"] .controls button {
-  display: inline;
-}
-.table[data-table-status="open"] .controls a.enter {
-  display: none;
-}
-.table[data-table-status="started"] .controls button {
+.table[data-table-status="started"] button {
   display: none;
 }
 .table[data-table-status="vacant"] {
   display: none;
 }
 .controls {
-  margin-left: 8em;
+  width: 6.5em;
   font-size: .8em;
-  margin-bottom: 5px;
-}
-.controls > * {
-  margin-left: 5px;
+  text-align: center;
+  margin-top: 3px;
+  display: inline-block;
 }
 .seats img {
   height: 4em;
 }
-.table img + img {
-  margin-left: 3px;
-}
 .seats {
-  display: block;
+  display: inline-block;
   width: 20em;
-  margin-left: 6.1em;
-  margin-top: -5.8em;
+  margin: 10px 0 0 5px;
 }
 .seats img {
   border: dashed 3px white;
+}
+.seats .seat {
+  position: relative;
+  display: inline-block;
+  margin: 5px;
 }
 [data-table-status="started"] .seats img {
   border: solid 3px white;
 }
 [data-anonymous="true"] #creates {
   display: none;
+}
+img.pawn {
+  position: absolute;
+  height: 35px;
+  border: none !important;
+  right: 0;
+  bottom: 8px;
+  visibility: hidden;
+  animation-name: wobble;
+  animation-duration: .5s;
+  animation-fill-mode: both;
+  animation-iteration-count: infinite;
+}
+[data-up~="0"] [data-seat="0"] img.pawn,
+[data-up~="1"] [data-seat="1"] img.pawn,
+[data-up~="2"] [data-seat="2"] img.pawn,
+[data-up~="3"] [data-seat="3"] img.pawn,
+[data-up~="4"] [data-seat="4"] img.pawn,
+[data-up~="5"] [data-seat="5"] img.pawn,
+[data-up~="6"] [data-seat="6"] img.pawn {
+  visibility: visible;
+}
+.game button {
+  margin-top: 5px;
 }
 #creates {
   width: 27em;
@@ -117,3 +136,4 @@ body {
 #creates input[type="text"] {
   width: 30em;
 }
+

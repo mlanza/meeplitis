@@ -130,6 +130,13 @@ export function refresh(self, ...fs){
   }, _.swap(self.$state, _), ...fs);
 }
 
+export function atPresent(self){
+  const {$state} = self;
+  const {at, history, touches} = _.deref($state);
+  const max = _.count(touches) - 1;
+  return at === max;
+}
+
 export function nav(self, _at){
   const {tableId, session, seat, $state} = self;
   const {at, history, touches} = _.deref($state);

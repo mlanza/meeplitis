@@ -6,7 +6,7 @@ import sh from "/lib/atomic_/shell.js";
 import supabase from "/lib/supabase.js";
 import {session, $online} from "/lib/session.js";
 import {table, ui, scored, outcome, subject} from "/lib/table.js";
-import {getSeated, getSeat, story, nav, waypoint, refresh, hist} from "/lib/story.js";
+import {getSeated, getSeat, story, nav, waypoint, hist} from "/lib/story.js";
 
 const img = dom.tag('img'),
       li = dom.tag('li');

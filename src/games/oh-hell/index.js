@@ -24,8 +24,8 @@ function creates(open, game){
     label(span("Variant"),
       label("Up and Down", radio({name: "variant", value: "up-down", checked: "checked"})),
       label("Down and Up", radio({name: "variant", value: "down-up"}))),
-    label(span("Notes"), input({type: "text", name: "notes"})),
     label(span("Scored"), input({type: "checkbox", name: "scored", checked: "checked"})),
+    label(span("Remark"), input({type: "text", name: "remark", maxlength: 100, placeholder: "x moves/day, learning game"})),
     input({type: "submit", value: "Open Table"}));
   el.addEventListener('submit', function(e){
     e.preventDefault();
@@ -36,9 +36,9 @@ function creates(open, game){
       return el.checked;
     }, _), dom.attr(_, "value"));
     const scored = el.elements["scored"].checked;
-    const notes = el.elements["notes"].value;
+    const remark = el.elements["remark"].value;
     const config = _.get({"up-down": {start: 1, end: 7}, "down-up": {start: 7, end: 1}}, variant);
-    open({seats, config, scored, notes});
+    open({seats, config, scored, remark});
   });
   return el;
 }

@@ -53,6 +53,9 @@ body {
 .table[data-table-status="started"] .controls button {
   display: none;
 }
+.table[data-table-status="vacant"] {
+  display: none;
+}
 .controls {
   margin-left: 8em;
   font-size: .8em;
@@ -78,6 +81,9 @@ body {
 }
 [data-table-status="started"] .seats img {
   border: solid 3px white;
+}
+[data-anonymous="true"] #creates {
+  display: none;
 }
 #creates {
   width: 27em;

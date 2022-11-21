@@ -55,7 +55,7 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, el){
   }
 
   function replay(how){
-    location.hash = waypoint($story, how);
+    location.hash = waypoint($story, how) || location.hash;
   }
 
   function eventFor(event){
@@ -91,7 +91,9 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, el){
   });
 
   $.sub($touch, function(){
-    refresh($story);
+    refresh($story, function(){
+      replay("forward");
+    });
   });
 
   const init = _.once(function(startTouch){

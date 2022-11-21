@@ -13,6 +13,16 @@ function deals(start, end){
   return _.toArray(_.dedupe(_.concat(series(start, end), series(end, start))));
 }
 
+function sortHand(trump){
+  return function(cards){
+    return _.sort(_.asc(function({suit}){
+      return _.indexOf(suits, suit) + (trump.suit === suit ? 100 : 0);
+    }), _.asc(function({rank}){
+      return _.indexOf(ranks, rank);
+    }), cards);
+  }
+}
+
 function name(self){
   const face = {"J": "Jack", "K": "King", "Q": "Queen", "A": "Ace"}[self.rank] || self.rank;
   return `${face} ${self.suit}`;
@@ -184,6 +194,8 @@ function execute(self, command, seat){
         const numCards = state.deals[round];
         const dealt = numCards * numHands;
         const cards = _.chain(deck(), _.shuffle);
+        const undealt = _.chain(cards, _.drop(dealt, _));
+        const trump = _.chain(undealt, _.first);
         const hands = _.chain(cards,
           _.take(dealt, _),
           _.mapa(function(card, hand){
@@ -191,9 +203,8 @@ function execute(self, command, seat){
           }, _, _.cycle(_.range(numHands))),
           _.reduce(function(memo, [card, hand]){
             return _.update(memo, hand, _.conj(_, card));
-          }, Array.from(_.repeat(numHands, [])), _));
-        const undealt = _.chain(cards, _.drop(dealt, _));
-        const trump = _.chain(undealt, _.first);
+          }, Array.from(_.repeat(numHands, [])), _),
+          _.mapa(sortHand(trump), _));
         return g.fold(self, _.assoc(command, "details", {deck: _.chain(undealt, _.rest, _.toArray), hands, trump, round}));
       })();
 

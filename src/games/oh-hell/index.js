@@ -45,14 +45,14 @@ function creates(open, game){
 
 function table(item){
   const seat = _.detect(function(seat){
-    return seat.player?.username === session?.username;
+    return session && seat.player && seat.player.username === session.username;
   }, item.seats);
   return div({class: "table", "data-table": item.id, "data-table-status": item.status, "data-scored": item.scored}, div({class: "id"}, item.id),
       div({class: "game"}, img({src: item.game.thumbnail_url}), item.scored ? null : span({class: "unscored", title: "Learning game (not scored)"}, "*")),
       div({class: "seats"}, _.map(function(seat){
         return img({"data-seat": seat.seat, src: seat.player ? `${seat.player.avatar_url}?s=80` : "/images/anon.png"});
       }, item.seats)),
-      div({class: "controls"}, seat ? null : button({value: "join"}, "Join"), seat ? button({value: "leave"}, "Leave") : null, a({class: "enter", href: `/games/oh-hell/table/?id=${item.id}`}, seat ? "Enter" : "Spectate")));
+      div({class: "controls"}, seat || !session ? null : button({value: "join"}, "Join"), seat ? button({value: "leave"}, "Leave") : null, a({class: "enter", href: `/games/oh-hell/table/?id=${item.id}`}, seat ? "Enter" : "Spectate")));
 }
 
 const el = dom.sel1(".open");
@@ -111,4 +111,4 @@ $.on(document.body, "click", "button", async function(e){
     _table_id: id
   });
   _.log({data, error});
-})
+});

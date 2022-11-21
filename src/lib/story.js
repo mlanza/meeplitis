@@ -68,7 +68,6 @@ function sub(self, obs){
 
 export function waypoint(self, how){
   const {at, touches} = _.deref(self.$story);
-
   switch(how) {
     case "back":
       return _.nth(touches, _.clamp(at - 1, 0, _.count(touches) - 1));
@@ -82,7 +81,6 @@ export function waypoint(self, how){
     case "present":
       return _.last(touches);
   }
-
   return null;
 }
 
@@ -126,10 +124,10 @@ function expand(idx){
   }
 }
 
-export function refresh(self){
-  _.fmap(getTouches(self.tableId), function(touches){
+export function refresh(self, ...fs){
+  return _.fmap(getTouches(self.tableId), function(touches){
     return _.assoc(_, "touches", touches);
-  }, _.swap(self.$state, _));
+  }, _.swap(self.$state, _), ...fs);
 }
 
 export function nav(self, _at){

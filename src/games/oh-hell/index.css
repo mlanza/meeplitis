@@ -1,6 +1,9 @@
 body.meeple h1 {
   width: 10em;
 }
+body {
+  padding-bottom: 5em;
+}
 .game {
   display: inline;
 }
@@ -53,6 +56,9 @@ body.meeple h1 {
   display: inline;
 }
 .table[data-table-status="open"] .controls a.enter {
+  display: none;
+}
+.table[data-table-status="started"] .controls button {
   display: none;
 }
 .controls {

@@ -21,6 +21,23 @@
   bottom: 0;
   right: 0;
 }
+body[data-anonymous="true"] #you {
+  display: none;
+}
+a.signin {
+  position: fixed;
+  top: 5px;
+  right: 5px;
+  padding: 3px;
+  margin: 0;
+  z-index: 9999;
+  color: black;
+  background-color: rgba(255,255,255,.4);
+  border-radius: 3px;
+}
+body[data-anonymous="false"] a.signin {
+  display: none;
+}
 body.table #you {
   display: none;
 }

@@ -6929,6 +6929,13 @@ function deals(start, end) {
     }
     return __default.toArray(__default.dedupe(__default.concat(series(start, end), series(end, start))));
 }
+function sortHand(cards) {
+    return __default.sort(__default.asc(function({ suit  }) {
+        return __default.indexOf(suits, suit);
+    }), __default.asc(function({ rank  }) {
+        return __default.indexOf(ranks, rank);
+    }), cards);
+}
 function card(rank, suit) {
     return {
         rank,
@@ -7115,6 +7122,8 @@ function execute2(self, command, seat) {
                 const numCards = state.deals[round];
                 const dealt = numCards * numHands;
                 const cards = __default.chain(deck(), __default.shuffle);
+                const undealt = __default.chain(cards, __default.drop(dealt, __default));
+                const trump = __default.chain(undealt, __default.first);
                 const hands = __default.chain(cards, __default.take(dealt, __default), __default.mapa(function(card, hand) {
                     return [
                         card,
@@ -7122,9 +7131,7 @@ function execute2(self, command, seat) {
                     ];
                 }, __default, __default.cycle(__default.range(numHands))), __default.reduce(function(memo, [card, hand]) {
                     return __default.update(memo, hand, __default.conj(__default, card));
-                }, Array.from(__default.repeat(numHands, [])), __default));
-                const undealt = __default.chain(cards, __default.drop(dealt, __default));
-                const trump = __default.chain(undealt, __default.first);
+                }, Array.from(__default.repeat(numHands, [])), __default), __default.mapa(sortHand, __default));
                 return __default1.fold(self, __default.assoc(command, "details", {
                     deck: __default.chain(undealt, __default.rest, __default.toArray),
                     hands,

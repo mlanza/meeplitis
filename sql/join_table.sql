@@ -1,5 +1,6 @@
 create or replace function join_table(_table_id varchar, _player_id uuid = auth.uid())
 returns varchar
+security definer
 language plpgsql
 as $$
 declare

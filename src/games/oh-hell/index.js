@@ -9,6 +9,7 @@ const div = dom.tag('div'),
       span = dom.tag('span'),
       img = dom.tag('img'),
       a = dom.tag('a'),
+      p = dom.tag('p'),
       button = dom.tag('button'),
       submit = dom.tag('submit'),
       form = dom.tag('form'),
@@ -43,13 +44,28 @@ function creates(open, game){
   return el;
 }
 
+function ohhell(config){
+  const descriptors = [];
+  if (config.start === 1 && config.end === 7) {
+    //descriptors.push("Up and Down Variant");
+  } else if (config.start === 7 && config.end === 1) {
+    descriptors.push("Down and Up Variant");
+  }
+  return descriptors;
+}
+
+const games = {
+  "8Mj1": ohhell
+};
+
 function table(item){
   const seat = _.detect(function(seat){
     return session && seat.player && seat.player.username === session.username;
   }, item.seats);
+  const descriptors = games[item.game.id](item.config);
   return div({class: "table", "data-table": item.id, "data-table-status": item.status, "data-scored": item.scored, "data-up": `${ _.join(" ", item.up) }`}, (item.status === "open" ? span : a)({class: "id", href: `/games/oh-hell/table/?id=${item.id}`}, item.game.title, " - ", item.id),
       div({class: "game"},
-        img({src: item.game.thumbnail_url}), item.scored ? null : span({class: "unscored", title: "Learning game (not scored)"}, "*"),
+        img({src: item.game.thumbnail_url}),
         seat || !session ? null : button({value: "join"}, "Join"),
         seat ? button({value: "leave"}, "Leave") : null),
       div({class: "seats"}, _.map(function(seat){
@@ -59,7 +75,8 @@ function table(item){
             a({href: `/profiles/?username=${seat.player.username}`},
               img({title: seat.player.username, src: `${seat.player.avatar_url}?s=80`})) :
             img({src: "/images/anon.svg"}));
-      }, _.sort(_.asc(_.get(_, "seat")), item.seats))));
+      }, _.sort(_.asc(_.get(_, "seat")), item.seats)),
+      _.map(p, _.compact(_.cons(item.remark, _.cons(item.scored ? null : "Unscored", descriptors))))));
 }
 
 const game_id = '8Mj1';
@@ -102,12 +119,12 @@ async function refreshTables(){
   _.chain(tables, _.see("tables"), _.map(table, _), dom.html(dom.sel1(".open"), _));
 }
 
-
-async function open({config, seats, scored, notes}){
+async function open({config, seats, scored, remark}){
   const {data, error} = await supabase.rpc('open_table', {
     _game_id: game_id,
     _config: config,
     _scored: scored,
+    _remark: remark,
     _seats: seats
   });
 

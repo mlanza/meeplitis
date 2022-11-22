@@ -39,8 +39,9 @@ body {
   vertical-align: top;
 }
 .unscored {
-  vertical-align: top;
-  margin-left: -5px;
+  position: absolute;
+  left: 6em;
+  top: 0.4em;
 }
 .table img {
   height: 5em;
@@ -52,9 +53,9 @@ body {
 }
 .table .id {
   position: absolute;
-  left: 110px;
-  top: 5px;
-  font-size: .7em;
+  left: 112px;
+  top: 4px;
+  font-size: .8em;
 }
 .table[data-table-status="started"] button {
   display: none;
@@ -76,6 +77,12 @@ body {
   display: inline-block;
   width: 25em;
   margin: 10px 0 0 5px;
+}
+.table p {
+  display: inline-block;
+  width: 25em;
+  margin: 0 0 5px 0;
+  font-size: .8em;
 }
 .seats img {
   border: dashed 3px white;
@@ -114,11 +121,6 @@ img.pawn {
 }
 .game button {
   margin-top: 5px;
-}
-.unscored {
-  position: absolute;
-  left: 6.3em;
-  top: 0.4em;
 }
 #creates input[type="submit"] {
   padding: 5px;

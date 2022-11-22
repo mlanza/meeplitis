@@ -73,28 +73,33 @@ const {data: [game]} = await supabase
     thumbnail_url`)
   .eq('id', game_id);
 
-const {data: tables, error, status} = await supabase
-  .from('tables')
-  .select(`
-    *,
-    seats (
-      id,
-      seat,
-      joined_at,
-      player:player_id(
+async function refreshTables(){
+  const {data: tables, error, status} = await supabase
+    .from('tables')
+    .select(`
+      *,
+      seats (
         id,
-        username,
-        avatar_url
-      )
-    ),
-    game:game_id (
-      id,
-      title,
-      seats,
-      thumbnail_url
-    )`)
-  .eq('game_id', game_id)
-  .order('created_at', {ascending: false})
+        seat,
+        joined_at,
+        player:player_id(
+          id,
+          username,
+          avatar_url
+        )
+      ),
+      game:game_id (
+        id,
+        title,
+        seats,
+        thumbnail_url
+      )`)
+    .eq('game_id', game_id)
+    .order('created_at', {ascending: false});
+
+  _.chain(tables, _.see("tables"), _.map(table, _), dom.html(dom.sel1(".open"), _));
+}
+
 
 async function open({config, seats, scored, notes}){
   const {data, error} = await supabase.rpc('open_table', {
@@ -103,11 +108,12 @@ async function open({config, seats, scored, notes}){
     _scored: scored,
     _seats: seats
   });
-  _.log({data, error});
+
+  refreshTables();
 }
 
-_.chain(game, _.see("game"), _.partial(creates, open), dom.append(dom.sel1(".create"), _));
-_.chain(tables, _.see("tables"), _.map(table, _), dom.append(dom.sel1(".open"), _));
+_.chain(game, _.see("game"), _.partial(creates, open), dom.html(dom.sel1(".create"), _));
+refreshTables();
 
 $.on(document.body, "click", "button", async function(e){
   const action = `${this.value}_table`,
@@ -116,5 +122,5 @@ $.on(document.body, "click", "button", async function(e){
   const {data, error} = await supabase.rpc(action, {
     _table_id: id
   });
-  _.log({data, error});
+  refreshTables();
 });

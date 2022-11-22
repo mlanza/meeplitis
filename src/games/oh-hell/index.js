@@ -95,6 +95,8 @@ async function refreshTables(){
         thumbnail_url
       )`)
     .eq('game_id', game_id)
+    .neq('status', "finished")
+    .neq('status', "vacant")
     .order('created_at', {ascending: false});
 
   _.chain(tables, _.see("tables"), _.map(table, _), dom.html(dom.sel1(".open"), _));

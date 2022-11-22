@@ -24,4 +24,4 @@ export const session = _session;
 export const $online = o.online(session?.username);
 
 dom.attr(document.body, "data-anonymous", !user);
-dom.append(you, img({src: `${session?.avatar}?s=50`}));
+dom.html(you, img({src: `${session?.avatar}?s=50`}));

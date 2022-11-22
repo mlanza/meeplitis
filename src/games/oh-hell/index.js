@@ -62,7 +62,6 @@ function table(item){
       }, _.sort(_.asc(_.get(_, "seat")), item.seats))));
 }
 
-const el = dom.sel1(".open");
 const game_id = '8Mj1';
 
 const {data: [game]} = await supabase
@@ -107,8 +106,8 @@ async function open({config, seats, scored, notes}){
   _.log({data, error});
 }
 
-_.chain(game, _.see("game"), _.partial(creates, open), dom.append(el, _));
-_.chain(tables, _.see("tables"), _.map(table, _), dom.append(el, _));
+_.chain(game, _.see("game"), _.partial(creates, open), dom.append(dom.sel1(".create"), _));
+_.chain(tables, _.see("tables"), _.map(table, _), dom.append(dom.sel1(".open"), _));
 
 $.on(document.body, "click", "button", async function(e){
   const action = `${this.value}_table`,

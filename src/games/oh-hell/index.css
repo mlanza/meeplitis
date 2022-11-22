@@ -5,6 +5,16 @@ body.meeple h1 {
 body {
   padding-bottom: 5em;
 }
+.about, .create, .open {
+  padding: 0;
+  margin: 1em 2em 1em 1em;
+  width: 35em;
+  float: left;
+  text-align: left;
+}
+.about p:first-child {
+  margin-top: 0;
+}
 .table {
   position: relative;
   border: solid 1px black;
@@ -15,9 +25,10 @@ body {
   background-color: #3E505C;
   box-shadow: -3px 5px 5px -3px rgba(0, 0, 0, 0.6);
   background: url(/images/backgrounds/denim.webp);
-  margin: 1em auto;
-  width: 26.5em;
+  margin: 0 auto 1em;
+  width: 32em;
   min-height: 6em;
+  display: inline-block;
 }
 .game {
   display: inline-block;
@@ -63,7 +74,7 @@ body {
 }
 .seats {
   display: inline-block;
-  width: 20em;
+  width: 25em;
   margin: 10px 0 0 5px;
 }
 .seats img {
@@ -104,12 +115,6 @@ img.pawn {
 .game button {
   margin-top: 5px;
 }
-#creates {
-  width: 27em;
-  padding: 0;
-  margin: -1em auto 2em;
-  font-size: 1.2em;
-}
 #creates input[type="submit"] {
   padding: 5px;
   margin-left: 7.2em;
@@ -134,6 +139,6 @@ img.pawn {
   margin-bottom: 2px;
 }
 #creates input[type="text"] {
-  width: 30em;
+  width: 25em;
 }
 

@@ -116,7 +116,7 @@ async function refreshTables(){
     .neq('status', "vacant")
     .order('created_at', {ascending: false});
 
-  _.chain(tables, _.see("tables"), _.map(table, _), dom.html(dom.sel1(".open"), _));
+  _.chain(tables, _.see("tables"), _.map(table, _), dom.html(dom.sel1(".open > div"), _));
 }
 
 async function open({config, seats, scored, remark}){
@@ -131,7 +131,7 @@ async function open({config, seats, scored, remark}){
   refreshTables();
 }
 
-_.chain(game, _.see("game"), _.partial(creates, open), dom.html(dom.sel1(".create"), _));
+_.chain(game, _.see("game"), _.partial(creates, open), dom.html(dom.sel1(".create > div"), _));
 refreshTables();
 
 $.on(document.body, "click", "button", async function(e){

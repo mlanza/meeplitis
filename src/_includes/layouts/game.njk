@@ -16,8 +16,19 @@ stylesheets:
     <span>Implemented By:</span> {{ developers }}
     </div>
 </div>
-<div class="about">{{ about | md | safe }}</div>
-<div class="create">
-</div>
-<div class="open">
-</div>
+<section class="about">
+  <h2>Playing</h2>
+  {{ about | md | safe }}
+</section>
+<section class="implementation">
+  <h2>Implementation notes</h2>
+{{ implementation | md | safe }}
+</section>
+<section class="create">
+  <h2>Open a table</h2>
+  <div></div>
+</section>
+<section class="open">
+  <h2>Tables (open or started)</h2>
+  <div></div>
+</section>

@@ -5,26 +5,27 @@ import "/lib/cmd.js";
 
 const img = dom.tag("img");
 const you = dom.sel1("#you");
+const data = {session: null, user: null};
 
 function Session(userId, username, avatar, accessToken){
   Object.assign(this, {userId, username, avatar, accessToken});
 }
 
-let _session = null;
+const {data: {session: sess}} = await supabase.auth.getSession();
 
-let {data: {user}} = await supabase.auth.getUser();
-
-if (user){
+if (sess){
+  let {data: {user}} = await supabase.auth.getUser();
+  data.user = user;
   const {data: [{username, avatar}], error} = await supabase.rpc("userinfo", {_id: user.id});
-  const {data: {session: sess}} = await supabase.auth.getSession();
   dom.attr(you, "href", `/profiles/?username=${username}`);
-  _session = new Session(user.id, username, avatar, sess?.access_token);
+  data.session = new Session(user.id, username, avatar, sess?.access_token);
 }
 
-export const session = _session;
+const user = data.user;
+export const session = data.session;
 export const $online = o.online(session?.username);
 
 dom.attr(document.body, "data-anonymous", !user);
-dom.html(you, img({src: `${session?.avatar}?s=50`}));
+session && dom.html(you, img({src: `${session?.avatar}?s=50`}));
 
 Object.assign(window, {$online, session});

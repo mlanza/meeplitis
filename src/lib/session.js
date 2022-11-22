@@ -1,6 +1,7 @@
 import supabase from "./supabase.js";
 import * as o from "./online.js";
 import dom from "/lib/atomic_/dom.js";
+import "/lib/cmd.js";
 
 const img = dom.tag("img");
 const you = dom.sel1("#you");
@@ -25,3 +26,5 @@ export const $online = o.online(session?.username);
 
 dom.attr(document.body, "data-anonymous", !user);
 dom.html(you, img({src: `${session?.avatar}?s=50`}));
+
+Object.assign(window, {$online, session});

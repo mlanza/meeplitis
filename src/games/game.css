@@ -6,14 +6,6 @@ body {
   font-family: Montserrat;
   background: url(/images/backgrounds/white_carbon.webp);
 }
-img#indicator {
-  border: solid 2px #3E505C;
-  border-radius: 1em;
-  width: 7em;
-  float: left;
-  box-shadow: -3px 5px 5px -3px rgba(0, 0, 0, 0.6);
-  margin-bottom: 1em;
-}
 h1 {
   white-space: nowrap;
 }
@@ -29,6 +21,14 @@ h1 {
   float: left;
   clear: both;
 }
+.banner img {
+  border: solid 2px #3E505C;
+  border-radius: 1em;
+  width: 7em;
+  float: left;
+  box-shadow: -3px 5px 5px -3px rgba(0, 0, 0, 0.6);
+  margin-bottom: 1em;
+}
 .banner h1 {
   position: absolute;
   left: 4.5em;
@@ -38,7 +38,7 @@ h1 {
   padding: 0;
   display: block;
 }
-.banner .player-range {
+.banner h1 + * {
   position: absolute;
   left: 8.25em;
   top: 2.5em;

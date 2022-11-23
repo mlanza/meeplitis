@@ -259,12 +259,12 @@ function execute(self, command, seat){
     }
 }
 
-function compel1(self){ //compels play of final card in hand
+function compel1(self){ //compel play of final card in hand
   const seat = _.chain(self, up, _.first);
-  const {deals, round} = _.deref(self);
-  const deal = _.get(deals, round);
+  const state = _.deref(self);
+  const {hand} = state.seated[state.up];
   const options = seat == null ? [] : g.moves(self, [seat]);
-  const compelled = deal === 1 && _.count(options) === 1; //compel only in rounds when 1 card is held
+  const compelled = _.count(hand) === 1 && _.count(options) === 1;
   return compelled ? compel3(self, _.first(options), seat) : self;
 }
 

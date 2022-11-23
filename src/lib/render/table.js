@@ -46,3 +46,15 @@ export function table(item){
       }, _.sort(_.asc(_.get(_, "seat")), item.seats)),
       _.map(p, _.compact(_.cons(item.remark, _.cons(item.scored ? null : "Unscored", descriptors))))));
 }
+
+export function onUpdate(callback){
+  $.on(document.body, "click", "button", async function(e){
+    const action = `${this.value}_table`,
+          table = _.closest(this, "[data-table]"),
+          id = dom.attr(table, "data-table");
+    const {data, error} = await supabase.rpc(action, {
+      _table_id: id
+    });
+    callback();
+  });
+}

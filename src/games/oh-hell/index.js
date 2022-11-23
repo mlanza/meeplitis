@@ -4,7 +4,7 @@ import $ from "/lib/atomic_/reactives.js";
 import t from "/lib/atomic_/transducers.js";
 import supabase from "/lib/supabase.js";
 import {session} from "/lib/session.js";
-import {table} from "/lib/render/table.js";
+import {table, onUpdate} from "/lib/render/table.js";
 
 const div = dom.tag('div'),
       span = dom.tag('span'),
@@ -100,13 +100,4 @@ async function open({config, seats, scored, remark}){
 
 session && _.chain(game, _.see("game"), _.partial(creates, open), dom.html(dom.sel1(".create > p"), _));
 refreshTables();
-
-$.on(document.body, "click", "button", async function(e){
-  const action = `${this.value}_table`,
-        table = _.closest(this, "[data-table]"),
-        id = dom.attr(table, "data-table");
-  const {data, error} = await supabase.rpc(action, {
-    _table_id: id
-  });
-  refreshTables();
-});
+onUpdate(refreshTables);

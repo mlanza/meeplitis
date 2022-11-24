@@ -50,7 +50,12 @@ body.home a#logo {
   margin-bottom: 1em;
   margin-right: 10px;
 }
+h1, h2 {
+  font-family: "Racing Sans One";
+
+}
 .banner h1 {
+  font-family: "Racing Sans One";
   white-space: nowrap;
   font-size: 1.8em;
   padding: 5px;

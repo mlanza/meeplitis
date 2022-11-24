@@ -50,23 +50,21 @@ body.home a#logo {
   margin-bottom: 1em;
   margin-right: 10px;
 }
-h1, h2 {
+h1, h2, h3, h4 {
   font-family: "Racing Sans One";
-
 }
 .banner h1 {
-  font-family: "Racing Sans One";
   white-space: nowrap;
-  font-size: 1.8em;
+  font-size: 2em;
   padding: 5px;
   padding: 0;
   display: inline-block;
   margin-top: 0;
 }
-.banner h1 + * {
+.banner .headline {
   padding: 0;
   margin: 0;
-  margin-top: -1em;
+  margin-top: -1.5em;
 }
 body.borderless-img img {
   margin-left: .5em;

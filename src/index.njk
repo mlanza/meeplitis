@@ -14,7 +14,9 @@ post: |
 
   Your Move implements turn-based, online board and card games.  It's humble beginnings include one game but more will come.
 
-  It primarily aims to implement designer board games, but this necessitates a license from the game publisher.  Thus, the first game, Oh Hell, a traditional card game in the public domain was implemented as a proof of concept.
+  It aims to primarily implement designer board games, but these necessitate a license from a publisher.  Thus, the first game, Oh Hell, a traditional card game in the public domain was implemented as a proof of concept.
+
+  <!-- The core framework requires games to be implemented as single, state-reducing functions in the database.  A game is the aggregate of a series of events enroute to reaching its conclusion.  This means every game, with no special programming effort, gets time travel and undo/redo practically for free! -->
 
 ---
 <section class="open">

@@ -1,11 +1,10 @@
 ---
-layout: layouts/main.njk
+layout: layouts/banner.njk
 stylesheets:
 - /index.css
 - ./index.css
 ---
-<header>
-  <h1>{{ title }}</h1>
-  {% if teaser %}<p>{{ teaser }}</p>{% endif %}
-</header>
+<article>
+{{ post | md | safe }}
+</article>
 {{ content | safe }}

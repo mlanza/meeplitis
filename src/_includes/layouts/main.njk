@@ -9,9 +9,12 @@
     <link rel="stylesheet" type="text/css" href="{{ href }}">
   {% endfor %}
   </head>
-  <body{% if classes %} class="{{classes}}"{% endif %}>
+  <body class="{{ class }}">
+    <a id="logo" href="/"><img src="/images/meeple.svg">Your Move</a>
+    <a id="you"></a>
+    <a class="signin" href="/signin">Sign In</a>
+    <a class="signout" href="/signout">Sign Out</a>
       {{ content | safe }}
-    <a id="you"></a><a class="signin" href="/signin">Sign In</a>
   </body>
   <script type="module" src="/lib/session.js"></script><!-- register user presence! -->
   {% for src in modules %}

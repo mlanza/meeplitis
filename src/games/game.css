@@ -5,6 +5,7 @@ body {
   padding: 0;
   font-family: Montserrat;
   background: url(/images/backgrounds/white_carbon.webp);
+  color: #36454F;
 }
 h1 {
   white-space: nowrap;

@@ -235,10 +235,13 @@ img#up {
   opacity: 1;
   transition: background-color .5s;
 }
+a#logo {
+  display: none;
+}
 #game span {
   line-height: 1.1em;
 }
-#game img, #game #logo {
+#game img, #game .logo {
   width: 18px;
   margin-right: 0;
   margin-bottom: -3px;
@@ -288,7 +291,6 @@ img[data-action="may"] {
   opacity: .25;
 }
 .players {
-  -border: solid 1px salmon;
   width: calc(100% - 12.3em);
   height: calc(100% - 5em);
   position: absolute;
@@ -317,7 +319,6 @@ img[data-action="may"] {
   margin: 0 auto;
 }
 .zone {
-  -border: solid 1px red;
   margin: 0;
   display: block;
   width: auto;
@@ -420,13 +421,13 @@ div.player .username {
   color: white;
   cursor: pointer;
 }
-#game #logo {
+#game .logo {
   max-height: 18px;
   max-width: 18px;
   margin-right: -2px;
 }
-#game #logo > path {
-  --fill: #ed9121;
+#game .logo > path {
+  fill: #FF5733;
 }
 @media (prefers-color-scheme: dark) {
   body {

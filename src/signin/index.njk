@@ -1,21 +1,23 @@
 ---
-title: Sign In
-layout: layouts/page.njk
-classes: meeple
+title: Your Move
+headline: Play games by web
+layout: layouts/banner.njk
 stylesheets:
 - /index.css
-- ./index.css
+- /signon.css
 modules:
 - ./index.js
+class: borderless-img
 ---
-<div id='signin-section' style="display: none;">
+<div class="signon" id='signin-section' style="display: none;">
   <form id='signin'>
       <label>Email</label><input type='email' name='email' /><br>
       <label>Password</label><input type='password' name='password' /><br>
-      <input type='submit'>
+      <input type='submit' value="Sign In">
   </form>
+  <p class="signup">Don't have an account?<br>Go ahead and <a href="/signup">sign up</a>.</p>
 </div>
-<div id='signout-section' style="display: none;">
-<p></p>
-<button id='signout-button'>Sign Out</button>
+<div class="signon" id='signout-section' style="display: none;">
+  <p></p>
+  <button id='signout-button'>Sign Out</button>
 </div>

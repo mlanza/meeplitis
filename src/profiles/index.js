@@ -7,7 +7,8 @@ import {session} from "/lib/session.js";
 import {table, onUpdate} from "/lib/render/table.js";
 
 const params = new URLSearchParams(document.location.search),
-      username = params.get('username');
+      username = params.get('username'),
+      you = session?.username === username;
 
 const {data: [profile]} =
   await supabase
@@ -15,6 +16,7 @@ const {data: [profile]} =
     .select("id,username,headline,description,avatar_url")
     .eq("username", username);
 
+_.chain(you, dom.attr(document.body, "data-you", _));
 _.chain(profile.username, dom.text(dom.sel1(".banner h1"), _));
 _.chain(profile.headline, dom.text(dom.sel1(".banner .headline"), _));
 _.chain(profile.description, dom.html(dom.sel1(".about > p"), _));

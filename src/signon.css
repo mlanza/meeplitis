@@ -1,0 +1,35 @@
+.signon form {
+  margin-top: 5em !important;
+  scale: 1.25;
+}
+.signon label {
+  width: 5em;
+  display: inline-block;
+  font-size: .8em;
+}
+.signon input[type='email'],
+.signon input[type='password'] {
+  padding: .5em;
+  width: 16em;
+  margin: .25em;
+}
+.signon input[type='submit'],
+.signon button {
+  padding: .5em;
+  width: 6em;
+  margin: 1em auto;
+  display: block;
+}
+.signon p {
+  margin-top: 3em;
+  text-align: center;
+}
+.signup,
+.signon form,
+.signon {
+  width: 15em;
+  margin: 0 auto;
+}
+.signup {
+  text-align: center;
+}

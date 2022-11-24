@@ -1,6 +1,6 @@
 #you {
-  position: fixed;
-  top: 5px;
+  position: absolute;
+  top: 25px;
   right: 5px;
   padding: 0;
   margin: 0;
@@ -12,11 +12,10 @@
   border-radius: .5em;
   box-shadow: -3px 5px 5px -3px rgba(0, 0, 0, 0.6);
   transition: scale .25s, opacity .25s;
-  scale: .5;
+  scale: .7;
   opacity: .5;
 }
 #you img:hover {
-  scale: 1;
   opacity: 1;
   bottom: 0;
   right: 0;
@@ -24,10 +23,11 @@
 body[data-anonymous="true"] #you {
   display: none;
 }
-a.signin {
-  position: fixed;
-  top: 5px;
-  right: 5px;
+a.signin,
+a.signout {
+  position: absolute;
+  top: 35px;
+  right: 1em;
   padding: 3px;
   margin: 0;
   z-index: 9999;
@@ -35,9 +35,19 @@ a.signin {
   background-color: rgba(255,255,255,.4);
   border-radius: 3px;
 }
+a.signout {
+  display: none;
+}
 body[data-anonymous="false"] a.signin {
   display: none;
 }
+body[data-anonymous="true"] a.signout {
+  display: none;
+}
+body[data-you="true"] a.signout {
+  display: inherit;
+}
+body[data-you="true"] #you,
 body.table #you {
   display: none;
 }

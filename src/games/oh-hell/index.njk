@@ -14,22 +14,24 @@ modules:
 - ./index.js
 
 about: |
-  Oh Hell is a traditional, trick-taking game which evolved to include a variety of rules permutations.  This implementation, sometimes called "Up and Down The River," is as follows.
+  Oh Hell is a traditional, trick-taking game which evolved to include various rules permutations.  This implementation, sometimes called "Up and Down The River," is as follows.
 
   There is an arbitrary trump suit each round determined by a card flipped from the top of the deck after hands are dealt.
 
   Before each round players assess their hands and blindly bid the number of tricks they'll take.  When a round concludes they compare their tricks against their bids.  Those who matched their bids exactly score their bids plus 10.  Those who are under or over score 0.
 
-  The first card lead to a trick designates the suit others are compelled to follow.  Players who lack this suit, however, may play any card.  Once each player has thrown, the trick is awarded to the one who threw the highest card in the lead suit, unless trumped, in which case it goes to the one who threw the highest card in the trump suit.  The player who wins this trick leads the next.
+  The first card lead to a trick designates suit.  Players who have it are compelled to follow while those who don't may play any card.  Once each player has thrown, the trick is awarded to the one who threw the highest card (aces high, twos low) in suit, unless trumped, in which case it goes to the one who threw the highest trump.  The player who takes this trick leads the next.
 
-  Players may not lead trumps until they've been previously "broken."  This happens when someone is unable to follow the lead suit and chooses to play trump.
+  Players may not lead trumps until they've been previously "broken."  This happens when someone unable to follow the lead suit chooses to play trump.
 
-  Each game lasts 13 rounds.  Players are dealt 1 card in the first round, 2 in the second, and so on up to 7 in the seventh and then back down to 1.  In the "Down and Up" variant players are dealt 7 cards in the first round, 6 in the second, and so on down to 1 in the seventh and then back up to 7.
+  A game is 13 rounds.  Players are dealt 1 card in the first round, 2 in the second, and so on up to 7 in the seventh and then back down to 1.  In the "Down and Up" variant players are dealt 7 cards in the first round, 6 in the second, and so on down to 1 in the seventh and then back up to 7.
 
-  Come the final round, the player who accumlates the best total score wins!
+  The player who accumlates the best score wins!
 
 implementation: |
-  During bidding, since bids are blind, players may change their bids.  When the final bid is received, by whomever happens to bid last, all bids are revealed and playing into and taking tricks begins.
+  Since bids are blind, players may change their bids up until the moment all bids are in.  When that happens bids are revealed and playing into and taking tricks begins.
 
-  Whenever players are down to a single card, play is automatic due to the lack of choice.
+  When players are down to a single card, play is automated due to the lack of choice.
+
+  This is game the implementer played with up to 7 colleages over lunch while working at one of his earliest corporate jobs: Penn National Insurance.  It was played on most days for years, a time of fond reflection.
 ---

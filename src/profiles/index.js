@@ -54,10 +54,7 @@ async function refreshTables(){
       .eq('seated.player_id', profile.id)
       .order('created_at', {ascending: false});
 
-  _.chain(tables, _.see("tables"), /*_.sort(_.desc(function(item){
-    const seat = seated(item.seats);
-    return ready(item, seat);
-  }), _), */ _.map(table, _), dom.html(dom.sel1(".open > p"), _));
+  _.chain(tables, _.see("tables"), _.map(table, _), dom.html(dom.sel1(".open > p"), _));
 }
 
 refreshTables();

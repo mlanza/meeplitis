@@ -7,7 +7,7 @@
   75% { transform: translateX(-5%) rotate(-1deg); }
   100% { transform: translateX(0%); }
 }
-@keyframes glow {
+@keyframes flare {
   0% { box-shadow: none; }
   60% {
     box-shadow:

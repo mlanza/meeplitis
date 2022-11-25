@@ -7,6 +7,7 @@ import supabase from "/lib/supabase.js";
 import {session, $online} from "/lib/session.js";
 import {table, ui, scored, outcome, subject} from "/lib/table.js";
 import {getSeated, getSeat, story, nav, waypoint, hist} from "/lib/story.js";
+import {describe} from "/components/table/index.js";
 
 const img = dom.tag('img'),
       li = dom.tag('li');
@@ -98,6 +99,10 @@ function cardSrc({suit, rank}){
 const $table = table(tableId),
       $story = story(session, tableId, seat, seated, dom.attr(el, "data-ready", _)),
       $hist = hist($story);
+
+$.sub($table, _.comp(t.compact(), t.map(describe), t.map(_.join("\n", _))), function(descriptors){
+  dom.attr(dom.sel1("#title"), "title", descriptors || "Typical play");
+});
 
 //universal ui
 ui($table, $story, $hist, $online, seated, seat, desc, el);

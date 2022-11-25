@@ -36,10 +36,13 @@ export function ready(item, seat) {
   return _.includes(item.up, seat?.seat);
 }
 
+export function describe(table){
+  return _.seq(_.compact(_.cons(table.remark, _.cons(table.scored ? null : "Unscored", games[table.game_id](table.config)))));
+}
+
 export function table(item){
   const seat = seated(item.seats);
-  const descriptors = games[item.game.id](item.config);
-  return div({class: "table", "data-ready": ready(item, seat), "data-table": item.id, "data-table-status": item.status, "data-scored": item.scored, "data-seated": seat?.seat, "data-up": `${ _.join(" ", item.up) }`}, (item.status === "open" ? span : a)({class: "id", href: `/games/oh-hell/table/?id=${item.id}`}, item.game.title, " - ", item.id),
+  return div({class: "table", "data-table": item.id, "data-table-status": item.status, "data-scored": item.scored, "data-seated": seat?.seat, "data-up": `${ _.join(" ", item.up) }`}, (item.status === "open" ? span : a)({class: "id", href: `/games/oh-hell/table/?id=${item.id}`}, item.game.title, " - ", item.id),
       div({class: "game"},
         a({href: `/games/${item.game.slug}`}, img({src: item.game.thumbnail_url, alt: item.game.title})),
         seat || !session ? null : button({value: "join"}, "Join"),
@@ -52,7 +55,7 @@ export function table(item){
               img({title: seat.player.username, src: `${seat.player.avatar_url}?s=80`})) :
             img({src: "/images/anon.svg"}));
       }, _.sort(_.asc(_.get(_, "seat")), item.seats)),
-      _.map(p, _.compact(_.cons(item.remark, _.cons(item.scored ? null : "Unscored", descriptors))))));
+      _.map(p, describe(item))));
 }
 
 export function onUpdate(callback){

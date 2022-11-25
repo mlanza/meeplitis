@@ -376,10 +376,10 @@ div.player {
   box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0);
 }
 [data-presence="online"] div.player {
-  animation: glow 1s ease-out;
+  animation: flare 1s ease-out;
 }
 [data-presence="online"].yours div.player {
-  animation: glow 1s ease-out 2;
+  animation: flare 1s ease-out 2;
 }
 div.player:hover {
   opacity: 1;
@@ -433,6 +433,7 @@ div.player .username {
   text-overflow: ellipsis;
   color: white;
   cursor: pointer;
+  font-family: "Racing Sans One";
 }
 #game .logo {
   max-height: 18px;

@@ -89,7 +89,7 @@ img.pawn {
 [data-up~="4"][data-seated="4"] .game img,
 [data-up~="5"][data-seated="5"] .game img,
 [data-up~="6"][data-seated="6"] .game img {
-  animation: glow .5s infinite;
+  animation: flare .5s infinite;
 }
 [data-up~="0"] [data-seat="0"] img.pawn,
 [data-up~="1"] [data-seat="1"] img.pawn,

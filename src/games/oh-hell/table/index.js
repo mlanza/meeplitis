@@ -100,12 +100,12 @@ const $table = table(tableId),
       $story = story(session, tableId, seat, seated, dom.attr(el, "data-ready", _)),
       $hist = hist($story);
 
+//universal ui
+ui($table, $story, $hist, $online, seated, seat, desc, el);
+
 $.sub($table, _.comp(t.compact(), t.map(describe), t.map(_.join("\n", _))), function(descriptors){
   dom.attr(dom.sel1("#title"), "title", descriptors || "Typical play");
 });
-
-//universal ui
-ui($table, $story, $hist, $online, seated, seat, desc, el);
 
 $.sub($hist, function([curr, prior]){
   const {up, may, seen, events, moves, score, state, state: {trump, round, status, seated, deck, lead, broken, deals}} = curr;

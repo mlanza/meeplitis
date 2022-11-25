@@ -1,6 +1,3 @@
-.table[data-ready="true"] {
-  background: url(/images/backgrounds/contemporary_china.webp);
-}
 .table {
   position: relative;
   border: solid 1px black;
@@ -19,10 +16,6 @@
 .table,
 .table a {
   color: white;
-}
-.table[data-ready="true"],
-.table[data-ready="true"] a {
-  color: #3E505C;
 }
 .table img {
   height: 5em;
@@ -87,6 +80,16 @@ img.pawn {
   animation-duration: .5s;
   animation-fill-mode: both;
   animation-iteration-count: infinite;
+  z-index: 99;
+}
+[data-up~="0"][data-seated="0"] .game img,
+[data-up~="1"][data-seated="1"] .game img,
+[data-up~="2"][data-seated="2"] .game img,
+[data-up~="3"][data-seated="3"] .game img,
+[data-up~="4"][data-seated="4"] .game img,
+[data-up~="5"][data-seated="5"] .game img,
+[data-up~="6"][data-seated="6"] .game img {
+  animation: glow .5s infinite;
 }
 [data-up~="0"] [data-seat="0"] img.pawn,
 [data-up~="1"] [data-seat="1"] img.pawn,
@@ -101,6 +104,7 @@ img.pawn {
   margin-top: 5px;
 }
 .game {
+  position: relative;
   display: inline-block;
   margin: 0;
   width: 5.5em;

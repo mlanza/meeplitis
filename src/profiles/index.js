@@ -4,7 +4,7 @@ import $ from "/lib/atomic_/reactives.js";
 import t from "/lib/atomic_/transducers.js";
 import supabase from "/lib/supabase.js";
 import {session} from "/lib/session.js";
-import {table, onUpdate} from "/lib/render/table.js";
+import {table, seated, ready, onUpdate} from "/components/table/index.js";
 
 const params = new URLSearchParams(document.location.search),
       username = params.get('username'),
@@ -54,7 +54,10 @@ async function refreshTables(){
       .eq('seated.player_id', profile.id)
       .order('created_at', {ascending: false});
 
-  _.chain(tables, _.see("tables"), _.map(table, _), dom.html(dom.sel1(".open > p"), _));
+  _.chain(tables, _.see("tables"), /*_.sort(_.desc(function(item){
+    const seat = seated(item.seats);
+    return ready(item, seat);
+  }), _), */ _.map(table, _), dom.html(dom.sel1(".open > p"), _));
 }
 
 refreshTables();

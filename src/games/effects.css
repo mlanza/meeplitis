@@ -7,3 +7,13 @@
   75% { transform: translateX(-5%) rotate(-1deg); }
   100% { transform: translateX(0%); }
 }
+@keyframes glow {
+  0% { box-shadow: none; }
+  60% {
+    box-shadow:
+      0 0 5px 5px #fff, /* inner white */
+      0 0 5px 5px #f0f, /* middle magenta */
+      0 0 5px 5px #0ff; /* outer cyan */
+    }
+  0% { box-shadow: none; }
+}

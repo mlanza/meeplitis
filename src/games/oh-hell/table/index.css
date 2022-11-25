@@ -7,6 +7,18 @@
   z-index: 99;
   padding: 1px;
 }
+.leads {
+  visibility: hidden;
+}
+[data-lead="0"] [data-seat="0"] .leads,
+[data-lead="1"] [data-seat="1"] .leads,
+[data-lead="2"] [data-seat="2"] .leads,
+[data-lead="3"] [data-seat="3"] .leads,
+[data-lead="4"] [data-seat="4"] .leads,
+[data-lead="5"] [data-seat="5"] .leads,
+[data-lead="6"] [data-seat="6"] .leads {
+  visibility: visible;
+}
 button {
   font-size: 1.1em;
   min-width: 4em;

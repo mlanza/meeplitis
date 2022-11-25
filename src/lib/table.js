@@ -73,7 +73,8 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, el){
   _.eachIndexed(function(idx, {username, avatar}){
     dom.append(els.players, zone(idx, username, avatar, [
       div(span({class: "points"}, "0"), " pts."),
-      div(span({class: "tricks"}, "-"), "/", span({class: "bid"}, "-"), span({class: "tip"}, " (taken/bid)"))
+      div(span({class: "tricks"}, "-"), "/", span({class: "bid"}, "-"), span({class: "tip"}, " (taken/bid)")),
+      div({class: "leads"}, "leads")
     ]));
   }, seated);
 

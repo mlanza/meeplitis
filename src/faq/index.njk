@@ -1,0 +1,51 @@
+---
+title: F.A.Q.
+headline: A few things worth knowing about Your Move
+layout: layouts/page.njk
+class: borderless-img
+stylesheets:
+- /index.css
+- ./index.css
+modules:
+- ./index.js
+post: |
+  ### What motivated its creation?
+
+  There were various factors.
+
+  As the creator, I was initially skeptical of playing turn-based board games online.  So I avoided them even though they'd been popular for years, but eventually I gave them a try and none of the things I was apprehensive about turned out, in practice, to be concerns.  In fact, I found the turn-based paradigm an ideal mode of play.
+
+  I enjoyed various play-by-web sites, but predominantly [Yucata](https://www.yucata.de/en/) and [Board Game Area](https://boardgamearena.com).  As a programmer I had some thoughts about how games were implemented.  I preferred Yucata's approach more than most.
+
+  And the more I contemplated it, and especially when I started thinking about games I'd like to implement, the more I began looking to the means.  While BGA permits developers to implement games, its platform and process seemed more daunting than the one I had in mind, even with having to start from scratch.
+
+  Additionally, I wanted to share my thoughts on and teach programming.  Why not combine two passions?
+
+  ### Is there a cost to use it?
+
+  Presently, no.  But there are costs run it, so there is a potential for a *nominal fee* to be collected at some point.
+
+  ### What determines my avatar and username?
+
+  When you sign up for an account you designate your username, but the email address you use determines your avatar.  This email address is kept private.  Your avatar image comes from your [Gravatar](https://en.gravatar.com) account.  And rather than using an actual photo of yourself, you'll potentially want to keep your real world identity private behind an alternate image and identity.
+
+  There's [a trick](https://www.wikihow.com/Use-Plus-Addressing-in-Gmail) for choosing the image you wish to associate with your account.  If your gmail account is `jrrtolkien@gmail.com`, you can designate alternate identities and images by using plus accounts such as `jrrtolkien+frodo@gmail.com` and `jrrtolkien+samwise@gmail.com`.  A single Gravatar account can be associated with lots of identities and images.  So choose your email address accordingly.
+
+  ### What sets it apart from other play-by-web sites?
+
+  One of the biggest grievances I had playing games online is that while learning new games, I'd make a move only to discover—sometimes even after checking the rulebook—I'd misunderstood a rule, or the user interface.  What I had anticipated didn't unfold as expected.
+
+  This left me in a precarious position and occasionally ruined my hard-wrought plans.  The worst part is these mistakes wouldn't have occurred in the real world because someone would've pointed out the discrepancy when I attempted to finish up the move by doing the wrong thing.
+
+  What these games lacked was a way to rewind the move once I realized my misunderstanding.  Undo/redo was implemented at the whim of the developer to varying degree if at all.
+
+  The core framework for Your Move was designed around the concept of retractibility, that rewinding a bad move should be a simple thing and not a costly feat of the developer.  It follows the same principle of reversibility as the real world.  You can rewind as long as it's your turn and you haven't gained new information (drawn a card, rolled dice, etc.).
+
+  The `I'm Done` button exists as a means to confirming moves.  In many situations, this extra step adds nothing.  But in some, it allows the move to reveal its effects and the player to assess them and then commit or rewind.  Therefore, while having to make a play and confirm it may seem like a nuisance, you're less likely to be trapped by misteps.
+
+  Futhermore, since every game is a series of recorded actions taken by players or the game itself, one can navigate the timeline backwards and forwards.  Reviewing the past to see what been done since your last move is within easy reach.
+
+  It's great feat, however, is how little the back end requires to implement a game.  Each is implemented as a *single, mostly-pure, JavaScript function in a Postgres database.*  This function, which initializes and reduces over game state, is created long before there's a tangible user interface.
+
+  Other than this function and a few facts about the game, the server requires nothing else.  Eventually, creating the user interface will necessitate front-end client logic and assets like images, but you'd have expected that!
+---

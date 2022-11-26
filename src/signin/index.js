@@ -58,11 +58,6 @@ function signOutSubmitted(event){
 }
 
 function setToken(response) {
-  if (response?.data?.user.confirmation_sent_at && !response?.session?.access_token) {
-    alert('Confirmation Email Sent')
-  } else {
-    console.log("resp", response);
-  }
   location.href = dest;
 }
 

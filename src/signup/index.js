@@ -19,18 +19,16 @@ function signUpSubmitted(event){
   const password = event.target[1].value
   supabase.auth
     .signUp({ email, password })
-    .then(setToken)
-    .catch((err) => {
-      alert(err.response.text);
-    });
+    .then(setToken);
 }
 
 function setToken(response) {
-  if (response.user.confirmation_sent_at && !response?.session?.access_token) {
-    alert('Confirmation Email Sent');
+  if (response?.error) {
+    alert("There was an issue");
+    console.log(response?.error);
+  } else if (response?.data?.user.confirmation_sent_at && !response?.data?.session?.access_token) {
+    alert('A confirmation email was sent.  Please confirm it before attempting to sign in.');
     location.href = "/signin";
-  } else {
-    console.error(response);
   }
 }
 

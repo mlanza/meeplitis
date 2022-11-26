@@ -17,9 +17,10 @@ const {data: [profile]} =
     .eq("username", username);
 
 _.chain(you, dom.attr(document.body, "data-you", _));
+_.chain(profile.username, _.str(_, " | ", "Your Move"), dom.text(dom.sel1("head title"), _));
 _.chain(profile.username, dom.text(dom.sel1(".banner h1"), _));
-_.chain(profile.headline, dom.text(dom.sel1(".banner .headline"), _));
-_.chain(profile.description, dom.html(dom.sel1(".about > p"), _));
+_.chain(profile.headline || "Mysteriously quiet", dom.text(dom.sel1(".banner .headline"), _));
+_.chain(profile.description || "Has not chosen to share any details.", dom.html(dom.sel1(".about > p"), _));
 _.chain(profile.avatar_url, _.str(_, "?s=200"), dom.attr(dom.sel1(".banner img"), "src", _));
 
 async function refreshTables(){

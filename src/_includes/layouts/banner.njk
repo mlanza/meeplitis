@@ -8,7 +8,16 @@ stylesheets:
 ---
 <header class="banner">
   <img id="subject" src="{{ subject_url }}">
-  <h1>{{ title }}</h1>
+  <h1 data-title="{{title}}">{{ title }}</h1>
   <div class="headline">{{ headline }}</div>
 </header>
+<main>
 {{ content | safe }}
+</main>
+<footer>
+  <ul>
+    <li><a href="/about">About</a>
+    <li><a href="/faq">F.A.Q.</a>
+    <li>Your Move © 2022</li>
+  </ul>
+</footer>

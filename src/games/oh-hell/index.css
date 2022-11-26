@@ -2,9 +2,6 @@
 body.meeple h1 {
   width: 10em;
 }
-body {
-  padding-bottom: 5em;
-}
 h2 {
   margin: 0 0 5px;
 }
@@ -12,8 +9,10 @@ section {
   padding: 0;
   margin: 1em 3em 1em 0;
   width: 35em;
-  float: left;
+  --float: left;
   text-align: left;
+  display: inline-block;
+  vertical-align: top;
 }
 .about p:first-child {
   margin-top: 0;

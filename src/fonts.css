@@ -2,9 +2,9 @@
 body {
   font-family: Montserrat;
 }
-h1, h2, h3, h4 {
+h1, h2, h3, h4, footer {
   font-family: "Viga";
 }
-.borderless-img .banner h1, a#logo {
+a#logo, [data-title="Your Move"] {
   font-family: "Racing Sans One";
 }

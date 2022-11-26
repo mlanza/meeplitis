@@ -1,6 +1,7 @@
 ---
 title: F.A.Q.
-headline: A few things worth knowing about Your Move
+headline: A few things worth knowing
+subject_url: /images/meeple.png
 layout: layouts/page.njk
 class: borderless-img
 stylesheets:
@@ -9,29 +10,41 @@ stylesheets:
 modules:
 - ./index.js
 post: |
-  ### What motivated its creation?
+  ## Is there a cost to use it?
 
-  There were various factors.
+  Presently, no.  But since there are costs run it, a *nominal fee* may be collected someday.
 
-  As the creator, I was initially skeptical of playing turn-based board games online.  So I avoided them even though they'd been popular for years, but eventually I gave them a try and none of the things I was apprehensive about turned out, in practice, to be concerns.  In fact, I found the turn-based paradigm an ideal mode of play.
+  ## How do I designate my avatar?
 
-  I enjoyed various play-by-web sites, but predominantly [Yucata](https://www.yucata.de/en/) and [Board Game Area](https://boardgamearena.com).  As a programmer I had some thoughts about how games were implemented.  I preferred Yucata's approach more than most.
+  When you sign up for an account you designate your username and email address.  The latter determines your avatar by virtue of your [Gravatar](https://en.gravatar.com) account.  You may need to create one.
 
-  And the more I contemplated it, and especially when I started thinking about games I'd like to implement, the more I began looking to the means.  While BGA permits developers to implement games, its platform and process seemed more daunting than the one I had in mind, even with having to start from scratch.
+  And rather than revealing your actual identity and photo, you may want to hide behind an alternate image and identity.  One easy way to do this is [to create a plus address](https://www.wikihow.com/Use-Plus-Addressing-in-Gmail).
 
-  Additionally, I wanted to share my thoughts on and teach programming.  Why not combine two passions?
+  If your gmail account is `jrrtolkien@gmail.com`, for example, you can designate alternate identities using plus accounts such as `jrrtolkien+frodo@gmail.com` and `jrrtolkien+samwise@gmail.com`.  Doing so bypasses the need to create a new email address.  A single Gravatar account can be associated with several email addresses and/or plus addresses.  Choose your address accordingly and using Gravatar assign to it whatever image you like.
 
-  ### Is there a cost to use it?
+  Your avatar the cornerstone of your online presence and representation.  You must have one.  Regardless of the email address you use, it's kept private from all.  You're known only by your username and avatar.
 
-  Presently, no.  But there are costs run it, so there is a potential for a *nominal fee* to be collected at some point.
+  ## What must I know about the user interface (ui) for playing a game?
 
-  ### What determines my avatar and username?
+  The ui is minimalistic.  At the top of the screen is a header bar.  It has the title of the game you're playing, immediately followed by the current phase of the game.  This generally cues you about what you're to do. The pawn icon in the upper right corner lights up when it's your turn.
 
-  When you sign up for an account you designate your username, but the email address you use determines your avatar.  This email address is kept private.  Your avatar image comes from your [Gravatar](https://en.gravatar.com) account.  And rather than using an actual photo of yourself, you'll potentially want to keep your real world identity private behind an alternate image and identity.
+  Each player is represented by a placard with their username and few other details about their status in the game.  The placard fades out a bit for any who are offline.
 
-  There's [a trick](https://www.wikihow.com/Use-Plus-Addressing-in-Gmail) for choosing the image you wish to associate with your account.  If your gmail account is `jrrtolkien@gmail.com`, you can designate alternate identities without creating another email address using plus accounts such as `jrrtolkien+frodo@gmail.com` and `jrrtolkien+samwise@gmail.com`.  A single Gravatar account can be associated with lots of identities and images.  So choose your email address accordingly.
+  A lit up and wobbling pawn appears on the placards of those obligated to move.  A stationary and dim pawn appears on the placards of those who may revise their moves.  It's only possible to revise trival moves like blind bids.  Typical moves cannot be revised once committed.
 
-  ### What sets it apart from other play-by-web sites?
+  Job number one is to make timely moves and pass the pawn to the next player.
+
+  Each played game is a story told in frames.  As the story progresses, you will be told what just happened.  This is described in floating messages at the bottom of the screen.  You can click these to dismiss them if they get in your way.
+
+  These messages are written in active voice.  They tell you what happened, not what you must do.  You must interact with the interface to drive the story whenever it's your turn.
+
+  The navigation buttons in the upper right (or, alternately, the left and right arrow keys and shift key on your keyboard) allow you to step forwards and backwards along the timeline.  Immediately before these buttons is a progress bar followed by the current frame number and the total number of frames.  Progress is always in reference to the story thus far and the known timeline.  It is not an indicator of how close a game is until the end.
+
+  The ui provides visual cues as you navigate between the present and past.  There is a distinct look to the header bar and screen background when you're in the present moment of the game.  *You are only permitted to make moves from the present.*
+
+  Hovering over the title of the game reveals a tooltip for you to review its configuration.  This is the same configuration which will have been in place when you joined the table.
+
+  ## What sets it apart from other play-by-web sites?
 
   One of the biggest grievances I had playing games online is that while learning new games, I'd make a move only to discover—sometimes even after checking the rulebook—I'd misunderstood a rule, or the user interface.  What I had anticipated didn't unfold as expected.
 
@@ -48,4 +61,5 @@ post: |
   It's great feat, however, is how little the back end requires to implement a game.  Each is implemented as a *single, mostly-pure, JavaScript function in a Postgres database.*  This function, which initializes and reduces over game state, is created long before there's a tangible user interface.
 
   Other than this function and a few facts about the game, the server requires nothing else.  Eventually, creating the user interface will necessitate front-end client logic and assets like images, but you'd have expected that!
+
 ---

@@ -1,10 +1,14 @@
 @import url(/fonts.css);
 @import url(/you.css);
+html {
+  background: url(/images/backgrounds/carbon_fibre.webp);
+}
 body {
   margin: 0;
   padding: 0;
   background: url(/images/backgrounds/white_carbon.webp);
   color: #36454F;
+  overscroll-behavior: none;
 }
 a#logo {
   position: absolute;
@@ -28,9 +32,14 @@ a#logo img {
 .banner img {
   width: 7em;
   height: 7em;
-  float: left;
+  position: absolute;
+  top: 1em;
+  left: 1em;
   margin-bottom: 1em;
   margin-right: 10px;
+}
+body.borderless-img .banner img {
+  left: 2em;
 }
 .banner img[src=""] {
   visibility: hidden;
@@ -47,15 +56,13 @@ a#logo img {
   padding: 0;
   display: inline-block;
   margin-top: 0;
+  margin-left: 125px;
 }
 .banner .headline {
   padding: 0;
   margin: 0;
   margin-top: -1.5em;
-}
-body.borderless-img .banner img {
-  margin-left: .5em;
-  margin-right: -.5em;
+  margin-left: 125px;
 }
 body.borderless-img .banner h1 {
   margin-top: -.3em;
@@ -79,7 +86,8 @@ section {
   padding: 0;
   margin: 0 2em 1em 0;
   width: 35em;
-  float: left;
+  --float: left;
+  display: inline-grid;
   text-align: left;
 }
 .byline {
@@ -92,4 +100,50 @@ section {
 .byline span {
   opacity: .6;
 }
-
+main {
+  min-height: calc(100vh - 10.5em);
+  padding: 1em 1em 1em 9em;
+  columns: 2;
+  margin-bottom: -2em;
+}
+.centered main {
+  columns: 1;
+  padding: 1em;
+}
+.home main {
+  columns: 2;
+}
+.home main > * {
+  display: inline;
+}
+main h1, main h2, main h3, main h4 {
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+footer {
+  background: url(/images/backgrounds/carbon_fibre.webp);
+  padding: 10px;
+  margin: 3em auto 0 auto;
+  height: 1em;
+  color: white;
+  text-align: center;
+  border-radius: 2em 2em 0 0;
+  font-size: .8em;
+  display: block;
+  white-space: nowrap;
+  width: 20em;
+}
+footer ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+footer li {
+  display: inline;
+}
+footer li + li::before {
+  content: " | "
+}
+footer a {
+  color: white
+}

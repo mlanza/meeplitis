@@ -1,10 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro&family=Racing+Sans+One&display=swap');
+@import url(/fonts.css);
 @import url(/you.css);
 body {
   margin: 0;
   padding: 0;
-  font-family: Montserrat;
   background: url(/images/backgrounds/white_carbon.webp);
   color: #36454F;
 }
@@ -13,7 +11,6 @@ a#logo {
   right: 1em;
   top: 10px;
   color: white;
-  font-family: "Racing Sans One";
   font-size: 1.1em;
 }
 a#logo img {
@@ -22,19 +19,6 @@ a#logo img {
 }
 .banner {
   box-shadow: -3px 5px 5px -3px rgba(0, 0, 0, 0.6);
-}
-body.borderless-img .banner h1 {
-  font-family: "Racing Sans One";
-  font-size: 2.5em;
-}
-body.borderless-img .banner img {
-  border: none;
-  box-shadow: none;
-}
-body.home a#logo {
-  display: none;
-}
-.banner {
   background: url(/images/backgrounds/carbon_fibre.webp);
   padding: 1em;
   height: 3.2em;
@@ -42,16 +26,19 @@ body.home a#logo {
   margin-bottom: 1em;
 }
 .banner img {
-  border: solid 2px #3E505C;
-  border-radius: 1em;
   width: 7em;
+  height: 7em;
   float: left;
-  box-shadow: -3px 5px 5px -3px rgba(0, 0, 0, 0.6);
   margin-bottom: 1em;
   margin-right: 10px;
 }
-h1, h2, h3, h4 {
-  font-family: "Racing Sans One";
+.banner img[src=""] {
+  visibility: hidden;
+}
+.banner img:not([src="../images/meeple.png"]) {
+  border: solid 2px #3E505C;
+  border-radius: 1em;
+  box-shadow: -3px 5px 5px -3px rgba(0, 0, 0, 0.6);
 }
 .banner h1 {
   white-space: nowrap;
@@ -66,7 +53,7 @@ h1, h2, h3, h4 {
   margin: 0;
   margin-top: -1.5em;
 }
-body.borderless-img img {
+body.borderless-img .banner img {
   margin-left: .5em;
   margin-right: -.5em;
 }
@@ -76,6 +63,16 @@ body.borderless-img .banner h1 {
 body.borderless-img .banner .headline {
   margin-top: -2em;
   display: block;
+}
+body.borderless-img .banner h1 {
+  font-size: 2.5em;
+}
+body.borderless-img .banner img {
+  border: none;
+  box-shadow: none;
+}
+body.home a#logo {
+  display: none;
 }
 article,
 section {

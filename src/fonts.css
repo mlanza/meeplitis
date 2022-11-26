@@ -1,0 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&family=Racing+Sans+One&family=Viga&family=Fresca&display=swap');
+body {
+  font-family: Montserrat;
+}
+h1, h2, h3, h4 {
+  font-family: "Viga";
+}
+.borderless-img .banner h1, a#logo {
+  font-family: "Racing Sans One";
+}

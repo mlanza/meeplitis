@@ -56,7 +56,7 @@ const {data: [game]} = await supabase
     thumbnail_url`)
   .eq('id', game_id);
 
-function getTables(game_id, statuses, el, none){
+function getTables(game_id, statuses, sort, el, none){
   return supabase
     .from('tables')
     .select(`
@@ -86,6 +86,7 @@ function getTables(game_id, statuses, el, none){
       return data;
     })
     .then(_.see("tables"))
+    .then(_.sort(sort, _))
     .then(_.map(table, _))
     .then(_.seq)
     .then(_.either(_, none))
@@ -93,7 +94,7 @@ function getTables(game_id, statuses, el, none){
 }
 
 async function refreshTables(){
-  getTables(game_id, ["open", "started"], dom.sel1(".tables > p"), "None open or started.");
+  getTables(game_id, ["open", "started"], _.asc(_.get(_, "status")), dom.sel1(".tables > p"), "None open or started.");
 }
 
 async function open({config, seats, scored, remark}){

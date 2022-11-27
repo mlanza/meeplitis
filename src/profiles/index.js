@@ -23,7 +23,7 @@ _.chain(profile.headline || "Mysteriously quiet", dom.text(dom.sel1(".banner .he
 _.chain(profile.description || "Has not chosen to share any details.", dom.html(dom.sel1(".about > p"), _));
 _.chain(profile.avatar_url, _.str(_, "?s=200"), dom.attr(dom.sel1(".banner img"), "src", _));
 
-function getTables(statuses, el, none){
+function getTables(statuses, sort, el, none){
   return supabase
     .from("tables")
     .select(`
@@ -56,6 +56,7 @@ function getTables(statuses, el, none){
       return data;
     })
     .then(_.see("tables"))
+    .then(_.sort(sort, _))
     .then(_.map(table, _))
     .then(_.seq)
     .then(_.either(_, none))
@@ -63,7 +64,7 @@ function getTables(statuses, el, none){
   }
 
 function refreshTables(){
-  getTables(["open", "started"], dom.sel1(".tables > p"), "None open or started");
+  getTables(["open", "started"], _.desc(_.get(_, "status")), dom.sel1(".tables > p"), "None open or started");
 }
 
 refreshTables();

@@ -150,4 +150,11 @@ img.pawn {
 #creates input[type="text"] {
   width: 25em;
 }
-
+main > * {
+  display: inline-block;
+  break-inside: avoid-column;
+  width: 100%;
+}
+.create {
+  break-before: column;
+}

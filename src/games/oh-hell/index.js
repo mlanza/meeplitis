@@ -56,11 +56,12 @@ const {data: [game]} = await supabase
     thumbnail_url`)
   .eq('id', game_id);
 
-async function refreshTables(){
-  const {data: tables, error, status} = await supabase
+function getTables(game_id, statuses, el, none){
+  return supabase
     .from('tables')
     .select(`
       *,
+      status,
       seats (
         id,
         seat,
@@ -79,11 +80,19 @@ async function refreshTables(){
         thumbnail_url
       )`)
     .eq('game_id', game_id)
-    .neq('status', "finished")
-    .neq('status', "vacant")
-    .order('created_at', {ascending: false});
+    .in('status', statuses)
+    .order('created_at', {ascending: false})
+    .then(function({data, error}){
+      return data;
+    })
+    .then(_.map(table, _))
+    .then(_.seq)
+    .then(_.either(_, none))
+    .then(dom.html(el, _));
+}
 
-  _.chain(tables, _.see("tables"), _.map(table, _), dom.html(dom.sel1(".open > p"), _));
+async function refreshTables(){
+  getTables(game_id, ["open", "started"], dom.sel1(".open > p"), "None open or started.");
 }
 
 async function open({config, seats, scored, remark}){

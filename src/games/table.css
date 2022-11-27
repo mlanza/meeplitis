@@ -25,9 +25,7 @@ sub {
   display: inline;
 }
 #game progress {
-  margin-top: -12px;
   margin-right: .5em;
-  padding: .6em;
 }
 .signin,
 .signout {
@@ -357,6 +355,7 @@ div.player {
   font-size: .8em;
   border: solid 1px black;
   height: 6.5em;
+  max-width: 18.5em;
   overflow: hidden;
   border-radius: 1.65em;
   background-color: #36454F;

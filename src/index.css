@@ -84,11 +84,6 @@ body.home a#logo {
 article,
 section {
   padding: 0;
-  margin: 0 2em 1em 0;
-  width: 35em;
-  --float: left;
-  display: inline-grid;
-  text-align: left;
 }
 .byline {
   color: #3E505C;
@@ -104,7 +99,13 @@ main {
   min-height: calc(100vh - 10.5em);
   padding: 1em 1em 1em 9em;
   columns: 2;
+  column-width: 35em;
+  column-gap: 2em;
   margin-bottom: -2em;
+}
+main > * {
+  display: inline-block;
+  break-inside: avoid-column;
 }
 .centered main {
   columns: 1;

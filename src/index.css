@@ -84,6 +84,8 @@ body.home a#logo {
 article,
 section {
   padding: 0;
+  width: 35em;
+  margin: 0 2em 1em 0;
 }
 .byline {
   color: #3E505C;
@@ -98,7 +100,6 @@ section {
 main {
   min-height: calc(100vh - 10.5em);
   padding: 1em 1em 1em 9em;
-  columns: 2;
   column-width: 35em;
   column-gap: 2em;
   margin-bottom: -2em;
@@ -110,9 +111,6 @@ main > * {
 .centered main {
   columns: 1;
   padding: 1em;
-}
-.home main {
-  columns: 2;
 }
 .home main > * {
   display: inline;

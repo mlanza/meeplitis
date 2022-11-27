@@ -86,6 +86,8 @@ section {
   padding: 0;
   width: 35em;
   margin: 0 2em 1em 0;
+  break-inside: avoid;
+  display: inline-block;
 }
 .byline {
   color: #3E505C;
@@ -103,16 +105,11 @@ main {
   column-width: 35em;
   column-gap: 2em;
   margin-bottom: -2em;
-}
-main > * {
-  break-inside: avoid-column;
+  column-fill: auto;
 }
 .centered main {
   columns: 1;
   padding: 1em;
-}
-.home main > * {
-  display: inline;
 }
 main h1, main h2, main h3, main h4 {
   margin-bottom: 0;

@@ -23,9 +23,11 @@ function game(item){
         div({class: "count"}, span(item.open_tables), " Open"), div({class: "slash"}, "/"), div({class: "count"}, span(item.started_tables), " Started"))));
 }
 
-const {data: games, error} =
-  await supabase
+const {data: games, error} = await supabase
     .from("games_with_activity")
     .select("*");
 
-_.chain(games, _.see("games"), _.map(game, _), dom.html(dom.sel1(".open > p"), _));
+_.chain(games,
+  _.see("games"),
+  _.map(game, _),
+  dom.html(dom.sel1(".games > p"), _));

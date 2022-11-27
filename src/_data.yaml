@@ -1,4 +1,4 @@
-layout: layouts/plain.njk
+layout: layouts/main.njk
 language: en
 site:
   title: Your Move

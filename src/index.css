@@ -105,7 +105,6 @@ main {
   margin-bottom: -2em;
 }
 main > * {
-  display: inline-block;
   break-inside: avoid-column;
 }
 .centered main {

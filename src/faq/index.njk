@@ -4,13 +4,10 @@ headline: A few things worth knowing
 subject_url: /images/meeple.png
 layout: layouts/page.njk
 class: borderless-img
-stylesheets:
-- /index.css
-- ./index.css
 post: |
   ## Is there a cost to use it?
 
-  Presently, no.  But since there are costs run it, a *nominal fee* may someday be collected.
+  Presently, no.  But since there are costs run it, a nominal fee may someday be collected.
 
   ## How do I designate my avatar?
 
@@ -48,18 +45,18 @@ post: |
 
   One of the biggest grievances I had playing games online is that while learning new games, I'd make a move only to discover—sometimes even after checking the rulebook—I'd misunderstood a rule, or the user interface.  What I had anticipated didn't unfold as expected.
 
-  This left me in a precarious position and occasionally ruined my hard-wrought plans.  The worst part is these mistakes wouldn't have occurred in the real world because someone would've pointed out the discrepancy when I attempted to finish up the move by doing the wrong thing.
+  This left me in precarious positions and occasionally ruined my hard-wrought plans.  The worst part is these mistakes wouldn't have occurred in the real world.  Someone would've stopped me when I attempted to do something impermissible, then I'd rewind and fix the move.
 
-  What these games lacked was a way to rewind the move once I realized my misunderstanding.  Undo/redo was implemented at the whim of the developer to varying degree if at all.
+  What these games lacked was a rewind.  Undo was implemented at the whim of the developer to varying degree if at all.
 
-  The core framework for Your Move was designed around the concept of retractibility, that rewinding a bad move should be a simple thing and not a costly feat of the developer.  It follows the same principle of reversibility as the real world.  You can rewind as long as it's your turn and you haven't gained new information (drawn a card, rolled dice, etc.).
+  The core framework for Your Move was designed around the concept of retractibility, that rewinding a move should be a simple thing and not a costly feat of the developer.  It follows the same principle of reversibility as the real world.  You can rewind as long as it's your turn and you haven't gained new information (drawn a card, rolled dice, etc.), just as we all occasionally do when seated around a table.
 
   The `I'm Done` button exists as a means to confirming moves.  In many situations, this extra step adds nothing.  But in some, it allows the move to reveal its effects and the player to assess them and then commit or rewind.  Therefore, while having to make a play and confirm it may seem like a nuisance, you're less likely to be trapped by misteps.
 
-  Futhermore, since every game is a series of recorded actions taken by players or the game itself, one can navigate the timeline backwards and forwards.  Reviewing the past to see what been done since your last move is within easy reach.
+  Futhermore, since every game is a series of recorded actions taken by players or the game itself, one can navigate the timeline backwards and forwards.  Reviewing the past to see what's been done since your last move is within easy reach.
 
-  It's great feat, however, is how little the back end requires to implement a game.  Each is implemented as a *single, mostly-pure, JavaScript function in a Postgres database.*  This function, which initializes and reduces over game state, is created long before there's a tangible user interface.
+  It's great feat, however, is how little the back end requires to implement a game.  Each is implemented as a *single, mostly-pure, JavaScript function in a Postgres database.*  This function, which initializes and reduces over game state, is created prior to the user interface.
 
-  Other than this function and a few facts about the game, the server requires nothing else.  Eventually, creating the user interface will necessitate front-end client logic and assets like images, but you'd have expected that!
+  Other than this function the server requires little else.  Eventually, creating the user interface will necessitate front-end client logic and assets like images, but you'd have expected that!
 
 ---

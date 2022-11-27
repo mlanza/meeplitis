@@ -55,6 +55,7 @@ function getTables(statuses, el, none){
     .then(function({data, error}){
       return data;
     })
+    .then(_.see("tables"))
     .then(_.map(table, _))
     .then(_.seq)
     .then(_.either(_, none))
@@ -62,7 +63,7 @@ function getTables(statuses, el, none){
   }
 
 function refreshTables(){
-  getTables(["open", "started"], dom.sel1(".open > p"), "None open or started").
+  getTables(["open", "started"], dom.sel1(".tables > p"), "None open or started");
 }
 
 refreshTables();

@@ -87,7 +87,6 @@ section {
   width: 35em;
   margin: 0 2em 1em 0;
   break-inside: avoid;
-  display: inline-block;
 }
 .byline {
   color: #3E505C;
@@ -102,10 +101,11 @@ section {
 main {
   min-height: calc(100vh - 10.5em);
   padding: 1em 1em 1em 9em;
+  columns: 2;
   column-width: 35em;
   column-gap: 2em;
-  margin-bottom: -2em;
   column-fill: auto;
+  margin-bottom: -2em;
 }
 .centered main {
   columns: 1;

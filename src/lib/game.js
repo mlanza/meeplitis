@@ -11,6 +11,8 @@ export const IGame = _.protocol({
   irreversible: null, //can the command be reversed by a player?
   execute: null, //validates a command and transforms it into one or more events, potentially executing other commands
   fold: null, //folds an event into the aggregate state
+  metric: null, //provides facts for assessing performance/score
+  comparator: null,
   score: null //maintains current interim and/or final scoring and rankings as possible
 });
 
@@ -20,6 +22,8 @@ export const may = IGame.may;
 export const seats = IGame.seats;
 export const fold = IGame.fold;
 export const events = IGame.events;
+export const metric = IGame.metric;
+export const comparator = IGame.comparator;
 export const score = IGame.score; //permissible to return null when calculating makes no sense
 export const perspective = _.chain(IGame.perspective,
   _.post(_,
@@ -65,9 +69,22 @@ export function reversibility(self){
   ]);
 }
 
+export function places(self){
+  const xs = metric(self);
+  const ys = _.sort(comparator(self), xs);
+  const outcomes = _.reduce(function(memo, y){
+    const z = _.last(memo);
+    return _.eq(y, z) ? memo : _.conj(memo, y);
+  }, [_.first(ys)], _.rest(ys));
+  return _.mapa(function(x){
+    const y = _.detect(_.eq(x, _), outcomes);
+    return _.indexOf(outcomes, y) + 1;
+  }, xs);
+}
+
 function execute3(self, command, s){
   const {type} = command;
-  const event = Object.assign({seat: s}, command);
+  const event = Object.assign({seat: s ?? null}, command);
   const {seat} = event;
   if (seat == null) {
   } else if (!_.isInt(seat)) {

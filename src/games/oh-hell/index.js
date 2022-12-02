@@ -26,7 +26,6 @@ function creates(open, game){
     label(span("Variant"),
       label("Up and Down", radio({name: "variant", value: "up-down", checked: "checked"})),
       label("Down and Up", radio({name: "variant", value: "down-up"}))),
-    label(span("Scored"), input({type: "checkbox", name: "scored", checked: "checked"})),
     label(span("Remark"), input({type: "text", name: "remark", maxlength: 100, placeholder: "x moves/day, learning game"})),
     input({type: "submit", value: "Open Table"}));
   el.addEventListener('submit', function(e){
@@ -97,11 +96,10 @@ async function refreshTables(){
   getTables(game_id, ["open", "started"], _.asc(_.get(_, "status")), dom.sel1(".tables > p"), "None open or started.");
 }
 
-async function open({config, seats, scored, remark}){
+async function open({config, seats, remark}){
   const {data, error} = await supabase.rpc('open_table', {
     _game_id: game_id,
     _config: config,
-    _scored: scored,
     _remark: remark,
     _seats: seats
   });

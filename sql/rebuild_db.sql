@@ -43,7 +43,6 @@ CREATE TABLE tables (
     config jsonb, -- configure this play
     admins uuid[], -- users capable of editing during/after play
     up smallint[], -- seats required to take action
-    scored boolean default true,
     seating_change_at timestamp,
     started_at timestamp, -- used to delay start as in a tournament
     last_touch_id varchar(5) references events(id), -- last event touching game state
@@ -67,11 +66,10 @@ CREATE TABLE seats (
     id varchar(3) not null default generate_uid(4),
     config jsonb, -- player specific configuration
     player_id uuid references profiles(id),
+    seat smallint, -- must be provide before game starts
     score float,
-    adjustment float, -- from handicap, bid for seating order, penalties
-    place smallint, -- final placement upon completion of game
-    tie boolean,
-    seat smallint, -- must be provide once game starts
+    metric jsonb, -- scoring stats when finished
+    place smallint, -- final placement when finished
     joined_at timestamp,
     created_at timestamp default now(),
     updated_at timestamp,

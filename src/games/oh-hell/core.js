@@ -108,13 +108,6 @@ function may(self){
   }, g.moves(self, g.seated(self))));
 }
 
-function score(self){
-  const state = _.deref(self);
-  return _.chain(state.seated, _.mapa(function(seat){
-    return _.sum(_.map(_.get(_, "points"), seat.scored));
-  }, _));
-}
-
 function bids(state){
   const size = state.deals[state.round] || 0;
   const bids = _.cons(null, _.range(0, size + 1));
@@ -225,19 +218,6 @@ function execute(self, command, seat){
         },
         _.branch(_.pipe(_.deref, handsEmpty), scoring, _.identity));
 
-    case "finish":
-      return (function(){
-        const scores = g.score(self);
-        const places = _.chain(scores, _.unique, _.sort, _.reverse, _.toArray);
-        const ranked = _.chain(state.seated, _.mapIndexed(function(seat){
-          const points = _.nth(scores, seat);
-          const place = _.indexOf(places, points);
-          const tie = _.count(_.filter(_.eq(_, points), scores)) > 1;
-          return {seat, points, place, tie};
-        }, _), _.sort(_.asc(_.get(_, "place")), _));
-        return g.fold(self, _.assoc(command, "details", {ranked}));
-      })();
-
     case "commit":
       return _.chain(self, g.fold(_, command), function(self){
         const empty = _.chain(self, _.deref, handsEmpty);
@@ -248,6 +228,7 @@ function execute(self, command, seat){
     case "bid":
     case "award":
     case "scoring":
+    case "finish":
     case "undo":
     case "redo":
     case "reset":
@@ -262,7 +243,8 @@ function execute(self, command, seat){
 function compel1(self){ //compel play of final card in hand
   const seat = _.chain(self, up, _.first);
   const state = _.deref(self);
-  const hand = state.seated[state.up]?.hand;
+  const seated = state.seated[state.up] || {hand: null};
+  const {hand} = seated;
   const options = seat == null ? [] : g.moves(self, [seat]);
   const compelled = _.count(hand) === 1 && _.count(options) === 1;
   return compelled ? compel3(self, _.first(options), seat) : self;
@@ -444,9 +426,7 @@ function perspective(self, _seen){
   const up = g.up(self);
   const may = g.may(self);
   const seated = g.seated(self);
-  const score = g.score(self);
   const metric = g.metric(self);
-  const places = g.places(self);
   const all = _.eq(seen, g.everyone(self));
   const bidding = _.chain(self, _.deref, _.get(_, "status"), _.eq(_, "bidding"));
   const state = _.chain(self, _.deref,
@@ -462,7 +442,7 @@ function perspective(self, _seen){
         }, _), _.toArray))));
   const moves = _.chain(self, g.moves(_, seen), _.toArray);
   const events = all ? self.events : _.mapa(obscure(seen), self.events);
-  return {seen, seated, up, may, state, moves, events, score, places, metric};
+  return {seen, seated, up, may, state, moves, events, metric};
 }
 
 function deref(self){
@@ -489,4 +469,4 @@ _.doto(OhHell,
   _.implement(_.IDeref, {deref}),
   _.implement(_.IResettable, {resettable}),
   _.implement(_.IRevertible, {undoable, redoable, flushable}),
-  _.implement(IGame, {perspective, up, may, seats, moves, events, irreversible, metric, comparator, execute: _.comp(compel, execute), fold, score}));
+  _.implement(IGame, {perspective, up, may, seats, moves, events, irreversible, metric, comparator, execute: _.comp(compel, execute), fold}));

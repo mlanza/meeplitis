@@ -12,8 +12,7 @@ export const IGame = _.protocol({
   execute: null, //validates a command and transforms it into one or more events, potentially executing other commands
   fold: null, //folds an event into the aggregate state
   metric: null, //provides facts for assessing performance/score
-  comparator: null,
-  score: null //maintains current interim and/or final scoring and rankings as possible
+  comparator: null
 });
 
 export const irreversible = IGame.irreversible;
@@ -24,7 +23,6 @@ export const fold = IGame.fold;
 export const events = IGame.events;
 export const metric = IGame.metric;
 export const comparator = IGame.comparator;
-export const score = IGame.score; //permissible to return null when calculating makes no sense
 export const perspective = _.chain(IGame.perspective,
   _.post(_,
     _.and(
@@ -33,7 +31,7 @@ export const perspective = _.chain(IGame.perspective,
       _.contains(_, "state"),
       _.contains(_, "events"),
       _.contains(_, "moves"),
-      _.contains(_, "score"),
+      _.contains(_, "metric"),
       _.contains(_, "up"))));
 
 export function seated(self){
@@ -84,8 +82,8 @@ export function places(self){
 
 function execute3(self, command, s){
   const {type} = command;
-  const event = Object.assign({seat: s ?? null}, command);
-  const {seat} = event;
+  const seat = s == null ? null : s;
+  const event = Object.assign({seat}, command);
   if (seat == null) {
   } else if (!_.isInt(seat)) {
     throw new Error("Seat must be an integer");
@@ -133,7 +131,11 @@ function execute3(self, command, s){
 export const execute = _.overload(null, null, execute3, execute3);
 
 export function finish(self){
-  return execute(self, {type: "finish"});
+  return execute(self, {type: "finish", details: {
+      metric: metric(self),
+      places: places(self)
+    }
+  });
 }
 
 export function load(self, events){

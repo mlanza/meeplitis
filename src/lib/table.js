@@ -190,17 +190,21 @@ function score(player, points){
 }
 
 export function scored(seated, scoring){
-  return ul({class: "scored"}, _.flatten(_.mapIndexed(function(idx, {points}){
+  return ul({class: "scored"}, _.mapIndexed(function(idx, {points}){
     return score(seated[idx], points);
-  }, scoring)));
+  }, scoring));
 }
 
-export function outcome(seated, ranked){
-  const first = ranked[0].tied ? null : ranked[0];
-  const winner = _.maybe(first?.seat, _.nth(seated, _));
-  return ol({class: "scored"}, _.cons(victor(winner), _.flatten(_.mapIndexed(function(idx, {tie, seat, place, points}){
+export function outcome(seated, places, metric){
+  const first = _.count(_.filter(_.eq(_, 1), places)) === 1 ? _.indexOf(places, 1) : null;
+  const winner = _.maybe(first, _.nth(seated, _));
+  const ranked = _.chain(places, _.mapkv(function(k, v){
+    return [k, v];
+  }, _), _.toArray, _.sort(_.asc(_.second), _), _.mapa(_.first, _));
+  return ol({class: "scored"}, _.cons(victor(winner), _.mapa(function(seat){
+    const {points} = _.nth(metric, seat);
     return score(seated[seat], points);
-  }, ranked))));
+  }, ranked)));
 }
 
 export function victor(player){

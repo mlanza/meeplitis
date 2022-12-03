@@ -25,7 +25,7 @@ _.chain(profile.avatar_url, _.str(_, "?s=200"), dom.attr(dom.sel1(".banner img")
 
 function getTables(statuses, sort, el, none){
   return supabase
-    .from("tables")
+    .from("touched_tables")
     .select(`
     *,
     seated:seats!inner(
@@ -34,6 +34,7 @@ function getTables(statuses, sort, el, none){
     seats!inner (
       id,
       seat,
+      place,
       joined_at,
       player_id,
       player:player_id(
@@ -65,6 +66,8 @@ function getTables(statuses, sort, el, none){
 
 function refreshTables(){
   getTables(["open", "started"], _.desc(_.get(_, "status")), dom.sel1(".tables > p"), "None open or started");
+  getTables(["finished"], _.desc(_.get(_, "status")), dom.sel1(".finished > p"), "None finished");
+
 }
 
 refreshTables();

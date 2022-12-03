@@ -20,7 +20,7 @@
 .table img {
   height: 5em;
   border-radius: 1em;
-  border: solid 3px #AAA;
+  border: solid 3px white;
 }
 .table .id {
   position: absolute;
@@ -55,32 +55,54 @@
   margin: 0 0 5px 0;
   font-size: .8em;
 }
-.seats img {
-  border: dashed 3px white;
-}
 .seats .seat {
   position: relative;
   display: inline-block;
   margin: 5px;
 }
-[data-table-status="started"] .seats img {
-  border: solid 3px white;
+[data-table-status="started"] img {
+  border-color: white;
+}
+[data-table-status="finished"] img {
+  border-color: #777;
+}
+[data-table-status="open"] .seats img {
+  border-style: dashed;
+}
+[data-table-status="open"] .touched,
+[data-table-status="finished"] .touched {
+  visibility: hidden;
 }
 [data-anonymous="true"] #creates {
   display: none;
 }
+.touched {
+  opacity: .5;
+}
+img.trophy,
 img.pawn {
   position: absolute;
-  height: 35px;
-  border: none !important;
+  border: none;
+  border-radius: 0;
+  z-index: 99;
+  visibility: hidden;
+}
+img.trophy {
+  bottom: 11px;
+  right: 4px;
+  height: 32px;
+}
+img.pawn {
   right: 0;
   bottom: 8px;
-  visibility: hidden;
+  height: 35px;
   animation-name: wobble;
   animation-duration: .5s;
   animation-fill-mode: both;
   animation-iteration-count: infinite;
-  z-index: 99;
+}
+[data-table-status="finished"] img.trophy {
+  visibility: visible;
 }
 [data-up~="0"][data-seated="0"] .game img,
 [data-up~="1"][data-seated="1"] .game img,

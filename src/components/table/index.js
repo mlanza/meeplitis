@@ -14,9 +14,7 @@ const div = dom.tag('div'),
 
 function ohhell(config){
   const descriptors = [];
-  if (config.start === 1 && config.end === 7) {
-    //descriptors.push("Up and Down Variant");
-  } else if (config.start === 7 && config.end === 1) {
+  if (config.start === 7 && config.end === 1) {
     descriptors.push("Down and Up Variant");
   }
   return descriptors;
@@ -37,19 +35,55 @@ export function ready(item, seat) {
 }
 
 export function describe(table){
-  return _.seq(_.compact(_.cons(table.remark, _.cons(table.scored ? null : "Unscored", games[table.game_id](table.config)))));
+  return _.seq(_.compact(_.cons(table.remark, games[table.game_id](table.config))));
 }
 
+function aged(dt, asof){
+  function lessThan(units){
+    return _.subtract(asof, units) < dt;
+  }
+  if (lessThan(_.hours(1))) {
+    return [_.detect(function(n){
+      return lessThan(_.minutes(n + 1));
+    }, _.range(60)), "m"];
+  } else if (lessThan(_.days(1))) {
+    return [_.detect(function(n){
+      return lessThan(_.hours(n + 1));
+    }, _.range(24)), "h"];
+  } else {
+    return [_.detect(function(n){
+      return lessThan(_.days(n + 1));
+    }, _.range(50)), "d"]; //abandoned tables closed after 30 days
+  }
+}
+
+//TODO extract user timezone adjustment
 export function table(item){
   const seat = seated(item.seats);
-  return div({class: "table", "data-table": item.id, "data-table-status": item.status, "data-scored": item.scored, "data-seated": seat?.seat, "data-up": `${ _.join(" ", item.up) }`}, (item.status === "open" ? span : a)({class: "id", href: `/games/oh-hell/table/?id=${item.id}`}, item.game.title, " - ", item.id),
+  const winners = _.maybe(item.seats, _.sort(_.asc(_.get(_, "seat")), _), _.map(_.get(_, "place"), _), _.reducekv(function(memo, seat, place){
+    return seat === 1 ? _.conj(memo, seat) : memo;
+  }, [], _));
+  const link = item.status === "open" ? span : a;
+  const age = _.maybe(item.last_touch_at, _.date, _.add(_, _.hours(-5)), dt => aged(dt, new Date()));
+  return div({
+      "class": "table",
+      "data-table": item.id,
+      "data-table-status": item.status,
+      "data-seated": seat?.seat,
+      "data-up": `${ _.join(" ", item.up) }`
+    },
+      span({class: "id"},
+        link({href: `/games/oh-hell/table/?id=${item.id}`}, item.game.title, " - ", item.id), " ",
+        span({class: "touched"}, _.maybe(age, _.join("", _), _.str("touched ", _, " ago")))),
       div({class: "game"},
         a({href: `/games/${item.game.slug}`}, img({src: item.game.thumbnail_url, alt: item.game.title})),
         seat || !session ? null : button({value: "join"}, "Join"),
-        seat ? button({value: "leave"}, "Leave") : null),
+        seat && item.status === "open" ? button({value: "leave"}, "Leave") : null),
       div({class: "seats"}, _.map(function(seat){
+        const won = _.includes(winners, seat.seat);
         return span({"class": "seat", "data-username": seat?.player?.username || "", "data-seat": seat.seat},
           img({class: "pawn", src: "/images/pawn.svg"}),
+          won ? img({class: "trophy", title: "Winner", alt: "trophy", src: "/images/trophy.svg"}) : null,
           seat.player ?
             a({href: `/profiles/?username=${seat.player.username}`},
               img({title: seat.player.username, src: `${seat.player.avatar_url}?s=80`})) :

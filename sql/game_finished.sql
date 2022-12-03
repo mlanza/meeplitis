@@ -16,7 +16,7 @@ begin
     from seats s
     join (
       select
-        row_number() over(order by metric) - 1 as seat,
+        row_number() over() - 1 as seat,
         metric,
         place
       from (

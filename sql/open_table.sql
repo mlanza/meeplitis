@@ -10,8 +10,8 @@ begin
 
 _fn = (select fn from games where id = _game_id);
 
-insert into tables (game_id, config, scored, remark, created_by, fn)
-values (_game_id, _config, _scored, _remark, _player_id, _fn)
+insert into tables (game_id, config, remark, created_by, fn)
+values (_game_id, _config, _remark, _player_id, _fn)
 returning id into _id;
 
 insert into seats (table_id, player_id, seat, joined_at)
@@ -22,7 +22,7 @@ select
   now()
 from (select _id as table_id, generate_series(0, _seats - 1) as seat) as seated;
 
-raise log '$ opened % `%` with % seats', case _scored when true then 'scored table' else 'unscored table' end, _id, _seats;
+raise log '$ opened table `%` with % seats', _id, _seats;
 
 return _id;
 

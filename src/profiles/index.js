@@ -65,9 +65,8 @@ function getTables(statuses, sort, el, none){
   }
 
 function refreshTables(){
-  getTables(["open", "started"], _.desc(_.get(_, "status")), dom.sel1(".tables > p"), "None open or started");
-  getTables(["finished"], _.desc(_.get(_, "status")), dom.sel1(".finished > p"), "None finished");
-
+  getTables(["open", "started"], _.desc(_.get(_, "status")), dom.sel1(".unfinished-tables > p"), "None open or started");
+  getTables(["finished"], _.desc(_.get(_, "status")), dom.sel1(".finished-tables > p"), "None finished");
 }
 
 refreshTables();

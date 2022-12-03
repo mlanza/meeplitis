@@ -67,8 +67,14 @@ function sub(self, obs){
 }
 
 export function waypoint(self, how){
-  const {at, touches} = _.deref(self.$story);
+  const {at, touches, history} = _.deref(self.$story);
   switch(how) {
+    case "last-move":
+      const {events} = _.nth(history, at);
+      return _.chain(events, _.take(at + 1, _), _.reverse, _.rest, _.detect(function({seat}){
+        return seat === self.seat;
+      }, _), _.get(_, "id"));
+
     case "back":
       return _.nth(touches, _.clamp(at - 1, 0, _.count(touches) - 1));
 

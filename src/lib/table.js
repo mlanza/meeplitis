@@ -148,7 +148,10 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, el){
   });
 
   $.on(el, "keydown", function(e){
-    if (e.key == "ArrowLeft") {
+    if (e.which === 32) { //space
+      e.preventDefault();
+      replay("last-move");
+    } else if (e.key == "ArrowLeft") {
       e.preventDefault();
       replay(e.shiftKey ? "inception" : "back");
     } else if (e.key == "ArrowRight") {

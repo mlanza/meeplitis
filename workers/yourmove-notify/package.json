@@ -1,0 +1,16 @@
+{
+  "private": true,
+  "name": "yourmove-notify",
+  "version": "1.0.0",
+  "description": "Sends a notification to a player",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "prettier --write '**/*.{js,css,json,md}'"
+  },
+  "author": "Mario T. Lanza",
+  "license": "MIT",
+  "devDependencies": {
+    "prettier": "^1.18.2"
+  }
+}

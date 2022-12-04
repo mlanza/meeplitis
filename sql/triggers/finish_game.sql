@@ -1,4 +1,4 @@
-create or replace function game_finished() returns trigger
+create or replace function finish_game() returns trigger
 AS $$
 begin
 
@@ -44,4 +44,4 @@ drop trigger if exists on_finished_event_added on events;
 
 create trigger on_finished_event_added
 after insert on events for each row when (new.type = 'finish')
-execute function game_finished();
+execute function finish_game();

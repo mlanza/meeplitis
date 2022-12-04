@@ -1,0 +1,9 @@
+name = "yourmove-notify"
+type = "modules"
+main = "index.js"
+compatibility_date = "2022-12-04"
+usage_model = 'bundled'
+workers_dev = true
+
+[vars]
+SUPABASE_URL = "https://miwfiwpgvfhggfnqtfso.supabase.co"

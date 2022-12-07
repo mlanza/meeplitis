@@ -71,7 +71,7 @@ export function waypoint(self, how){
   switch(how) {
     case "last-move":
       const {events} = _.nth(history, at);
-      return _.chain(events, _.take(at + 1, _), _.reverse, _.rest, _.detect(function({seat}){
+      return self.seat == null ? null : _.chain(events, _.take(at + 1, _), _.reverse, _.rest, _.detect(function({seat}){
         return seat === self.seat;
       }, _), _.get(_, "id"));
 

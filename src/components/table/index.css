@@ -73,9 +73,6 @@
 [data-table-status="finished"] .touched {
   visibility: hidden;
 }
-[data-anonymous="true"] #creates {
-  display: none;
-}
 .touched {
   opacity: .5;
 }
@@ -139,5 +136,9 @@ img.pawn {
   left: 6em;
   top: 0.4em;
 }
+[data-anonymous="true"] #creates {
+  display: none;
+}
+
 
 

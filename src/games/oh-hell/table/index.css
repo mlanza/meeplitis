@@ -101,6 +101,9 @@ body[data-broken="true"] .broken {
   display: block;
   margin: .5em auto 0;
 }
+[data-anonymous="true"] img[data-nav="last-move"] {
+  display: none;
+}
 
 @media (prefers-color-scheme: dark) {
   .moves {

@@ -66,12 +66,10 @@ function desc(event){
       return `Plays ${event.details.card.rank} of ${event.details.card.suit}.`;
 
     case "scoring":
-      const {scoring} = event.details;
-      return scored(seated, scoring);
+      return scored(seated, event.details);
 
     case "finish":
-      const {metric, places} = event.details;
-      return outcome(seated, places, metric);
+      return outcome(seated, event.details);
 
     case "award":
       return ["Awards trick to ", subject(_.nth(seated, event.details.winner)), "."];
@@ -108,7 +106,7 @@ $.sub($table, _.comp(t.compact(), t.map(describe), t.map(_.join("\n", _))), func
 });
 
 $.sub($hist, function([curr, prior]){
-  const {up, may, seen, events, moves, metric, state, state: {trump, round, status, seated, deck, lead, broken, deals}} = curr;
+  const {up, may, seen, events, moves, metrics, state, state: {trump, round, status, seated, deck, lead, broken, deals}} = curr;
   const {hand, bid} = _.nth(seated, seat) || {hand: null, bid: -1};
   const event = _.last(events);
   const cnt = _.count(seated);
@@ -140,7 +138,7 @@ $.sub($hist, function([curr, prior]){
     const seat = dom.sel1(`[data-seat="${idx}"]`);
     _.includes(seen, idx) && _.doto(seat,
       dom.addClass(_, "yours"));
-    dom.text(dom.sel1(".points", seat), _.chain(metric, _.nth(_, idx), _.get(_, "points")));
+    dom.text(dom.sel1(".points", seat), _.chain(metrics, _.nth(_, idx), _.get(_, "points")));
     dom.attr(dom.sel1("[data-action]", seat), "data-action", _.includes(up, idx) ? "must" : (_.includes(may, idx) ? "may" : ""));
     dom.text(dom.sel1(".tricks", seat), _.count(tricks));
     dom.text(dom.sel1(".bid", seat), bid === null ? "?" : (bid === "" ? "X" : bid));

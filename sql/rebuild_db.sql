@@ -67,9 +67,9 @@ CREATE TABLE seats (
     config jsonb, -- player specific configuration
     player_id uuid references profiles(id),
     seat smallint, -- must be provide before game starts
-    score float,
-    metric jsonb, -- scoring stats when finished
-    place smallint, -- final placement when finished
+    place smallint, -- placement when finished
+    metrics jsonb, -- scoring stats as data when finished
+    brief jsonb, -- scoring stats as text when finished
     joined_at timestamp,
     created_at timestamp default now(),
     updated_at timestamp,

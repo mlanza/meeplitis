@@ -11,8 +11,9 @@ export const IGame = _.protocol({
   irreversible: null, //can the command be reversed by a player?
   execute: null, //validates a command and transforms it into one or more events, potentially executing other commands
   fold: null, //folds an event into the aggregate state
-  metric: null, //provides facts for assessing performance/score
-  comparator: null
+  metrics: null, //provides facts for assessing performance/score
+  comparator: null,
+  textualizer: null
 });
 
 export const irreversible = IGame.irreversible;
@@ -21,8 +22,9 @@ export const may = IGame.may;
 export const seats = IGame.seats;
 export const fold = IGame.fold;
 export const events = IGame.events;
-export const metric = IGame.metric;
+export const metrics = IGame.metrics;
 export const comparator = IGame.comparator;
+export const textualizer = IGame.textualizer;
 export const perspective = _.chain(IGame.perspective,
   _.post(_,
     _.and(
@@ -31,7 +33,7 @@ export const perspective = _.chain(IGame.perspective,
       _.contains(_, "state"),
       _.contains(_, "events"),
       _.contains(_, "moves"),
-      _.contains(_, "metric"),
+      _.contains(_, "metrics"),
       _.contains(_, "up"))));
 
 export function seated(self){
@@ -67,8 +69,8 @@ export function reversibility(self){
   ]);
 }
 
-export function places(self){
-  const xs = metric(self);
+function places(self){
+  const xs = metrics(self);
   const ys = _.sort(comparator(self), xs);
   const outcomes = _.reduce(function(memo, y){
     const z = _.last(memo);
@@ -78,6 +80,10 @@ export function places(self){
     const y = _.detect(_.eq(x, _), outcomes);
     return _.indexOf(outcomes, y) + 1;
   }, xs);
+}
+
+function briefs(self){
+  return _.mapa(textualizer(self), metrics(self));
 }
 
 function execute3(self, command, s){
@@ -132,7 +138,8 @@ export const execute = _.overload(null, null, execute3, execute3);
 
 export function finish(self){
   return execute(self, {type: "finish", details: {
-      metric: metric(self),
+      metrics: metrics(self),
+      briefs: briefs(self),
       places: places(self)
     }
   });

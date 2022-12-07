@@ -273,7 +273,7 @@ function scoring(self){
   return g.execute(self, {type: "scoring", details: {scoring}}, null);
 }
 
-function metric(self){
+function metrics(self){
   const state = _.deref(self);
   return _.mapa(function({scored}){
     const points = _.sum(_.map(_.get(_, "points"), scored));
@@ -285,6 +285,12 @@ function comparator(self){
   return function(a, b){
     return b.points - a.points;
   };
+}
+
+function textualizer(self){
+  return function({points}){
+    return `${points} pts.`;
+  }
 }
 
 function fold2(self, event){
@@ -426,7 +432,7 @@ function perspective(self, _seen){
   const up = g.up(self);
   const may = g.may(self);
   const seated = g.seated(self);
-  const metric = g.metric(self);
+  const metrics = g.metrics(self);
   const all = _.eq(seen, g.everyone(self));
   const bidding = _.chain(self, _.deref, _.get(_, "status"), _.eq(_, "bidding"));
   const state = _.chain(self, _.deref,
@@ -442,7 +448,7 @@ function perspective(self, _seen){
         }, _), _.toArray))));
   const moves = _.chain(self, g.moves(_, seen), _.toArray);
   const events = all ? self.events : _.mapa(obscure(seen), self.events);
-  return {seen, seated, up, may, state, moves, events, metric};
+  return {seen, seated, up, may, state, moves, events, metrics};
 }
 
 function deref(self){
@@ -469,4 +475,4 @@ _.doto(OhHell,
   _.implement(_.IDeref, {deref}),
   _.implement(_.IResettable, {resettable}),
   _.implement(_.IRevertible, {undoable, redoable, flushable}),
-  _.implement(IGame, {perspective, up, may, seats, moves, events, irreversible, metric, comparator, execute: _.comp(compel, execute), fold}));
+  _.implement(IGame, {perspective, up, may, seats, moves, events, irreversible, metrics, comparator, textualizer, execute: _.comp(compel, execute), fold}));

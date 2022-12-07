@@ -5,23 +5,27 @@ begin
   raise log '$ finished game at table `%`', new.table_id;
 
   update seats
-  set metric = x.metric,
-      place = x.place
+  set place = x.place,
+      metrics = x.metrics,
+      brief = x.brief
   from (
     select
       s.table_id,
       s.id,
       e.place,
-      e.metric
+      e.metrics,
+      e.brief
     from seats s
     join (
       select
         row_number() over() - 1 as seat,
-        metric,
+        metrics,
+        brief,
         place
       from (
         select
-          jsonb_array_elements(details->'metric') as metric,
+          jsonb_array_elements(details->'metrics') as metrics,
+          jsonb_array_elements(details->'briefs') as brief,
           jsonb_array_elements(details->'places')::smallint as place
         from events
         where type = 'finish' and table_id = new.table_id

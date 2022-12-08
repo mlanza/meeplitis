@@ -1,7 +1,9 @@
+drop view notices;
 create or replace view notices as
 select
     j.*,
     (j.details->'seats')::jsonb as seats,
+    case j.type when 'finished:notice' then outcome(t.id) else null end as outcome,
     t.id as table_id,
     g.title, g.slug, g.thumbnail_url,
     (select json_agg(json_build_object('email', u.email, 'name', p.username)) as recipients

@@ -1,4 +1,3 @@
-drop function notify(_seq bigint);
 create or replace function notify(_seq bigint)
 returns json
 set search_path = public,extensions
@@ -13,18 +12,19 @@ declare
   _slug varchar;
   _table_id varchar;
   _recipients jsonb;
+  _outcome jsonb;
   _content json;
 begin
 
-  select type, title, slug, table_id, recipients, status
+  select type, title, slug, table_id, recipients, outcome, status
   from notices
   where seq = _seq
-  into _type, _title, _slug, _table_id, _recipients, _job_status;
+  into _type, _title, _slug, _table_id, _recipients, _outcome, _job_status;
 
   if _job_status in ('pending'::job_status, 'failed'::job_status) then
     select status, content
     from http_post('https://notify.workers.yourmove.cc',
-                  '{"type": "' || _type || '", "title": "' || _title || '", "slug": "' || _slug || '", "table_id": "' || _table_id || '" ,"recipients": ' || _recipients || '}', 'application/json')
+                  '{"type": "' || _type || '", "title": "' || _title || '", "slug": "' || _slug || '", "table_id": "' || _table_id || '" ,"outcome": ' || _outcome || '" ,"recipients": ' || _recipients || '}', 'application/json')
     into _status, _content;
 
     update jobs

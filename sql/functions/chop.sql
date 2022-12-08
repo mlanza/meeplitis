@@ -21,19 +21,15 @@ begin
   and table_id = _table_id
   into _seq;
 
+  with deleted as (
+    delete from events
+    where table_id = _table_id
+    and seq > _seq returning *)
   select count(*)
-  from events
-  where table_id = _table_id
-  and seq > _seq
+  from deleted
   into _count;
-
-  delete
-  from events
-  where table_id = _table_id
-  and seq > _seq;
 
   return _count;
 
 end;
 $$;
-

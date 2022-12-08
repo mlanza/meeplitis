@@ -72,9 +72,6 @@ body[data-ready="false"] {
 #event.acknowledged {
   animation: .5s ease 0s normal forwards 1 fadeout;
 }
-[data-scored="true"] #unscored {
-  display: none;
-}
 @keyframes arise {
   0% { transform: translateY(4em)}
   100% { transform: translateY(0)}

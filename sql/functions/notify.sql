@@ -24,7 +24,7 @@ begin
   if _job_status in ('pending'::job_status, 'failed'::job_status) then
     select status, content
     from http_post('https://notify.workers.yourmove.cc',
-                  '{"type": "' || _type || '", "title": "' || _title || '", "slug": "' || _slug || '", "table_id": "' || _table_id || '" ,"outcome": ' || _outcome || '" ,"recipients": ' || _recipients || '}', 'application/json')
+                  '{"type": "' || _type || '", "title": "' || _title || '", "slug": "' || _slug || '", "table_id": "' || _table_id || '" ,"outcome": ' || _outcome || ' ,"recipients": ' || _recipients || '}', 'application/json')
     into _status, _content;
 
     update jobs

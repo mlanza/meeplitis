@@ -1,16 +1,18 @@
 create or replace function chop(_table_id varchar, _event_id varchar)
-returns int
-security definer
-set search_path = public
-language plpgsql
+  returns int
+  security definer
+  set search_path = public
+  language plpgsql
 as $$
 declare
-_count int;
-_seq bigint;
+  _count int;
+  _seq bigint;
 begin
 
   update tables
-  set last_touch_id = _event_id
+  set last_touch_id = _event_id,
+      status = 'started',
+      finished_at = null
   where id = _table_id;
 
   select seq

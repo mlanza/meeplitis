@@ -29,7 +29,7 @@ _.maybe(user, _.get(_, "email"), dom.value(email, _));
 _.maybe(profile, _.get(_, "username"), _.str(_, " | ", "Your Move"), dom.text(dom.sel1("head title"), _));
 _.maybe(profile, _.get(_, "username"), dom.text(dom.sel1(".banner h1"), _));
 _.maybe(profile, _.get(_, "username"), function(username){
-  username && dom.attr(form, "data-mode", "update");
+  username || dom.attr(form, "data-mode", "initial");
 });
 _.chain(profile, _.get(_, "headline"), _.either(_, "Mysteriously quiet"), dom.text(dom.sel1(".banner .headline"), _));
 _.chain(profile, _.get(_, "avatar_url"), _.collapse(_, "?s=200"), _.either(_, "/images/anon.svg"), dom.attr(dom.sel1(".banner img"), "src", _));

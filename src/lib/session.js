@@ -17,8 +17,8 @@ if (sess){
   let {data: {user}} = await supabase.auth.getUser();
   data.user = user;
   const {data: [info], error} = await supabase.rpc("userinfo", {_id: user.id});
-  const {username, avatar} = info;
-  dom.attr(you, "href", `/profiles/?username=${username}`);
+  const {username, avatar} = info ?? {username: null, avatar: null};
+  dom.attr(you, "href", `/profiles/?username=${username ?? ''}`);
   data.session = new Session(user.id, username, avatar, sess?.access_token);
 }
 
@@ -27,6 +27,6 @@ export const session = data.session;
 export const $online = o.online(session?.username);
 
 dom.attr(document.body, "data-anonymous", !user);
-session && dom.html(you, img({src: `${session?.avatar}?s=50`}));
+session && dom.html(you, img({src: session?.avatar ? `${session?.avatar}?s=50` : "/images/anon.svg"}));
 
 Object.assign(window, {$online, session});

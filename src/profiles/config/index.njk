@@ -1,0 +1,32 @@
+---
+layout: layouts/banner.njk
+modules:
+- ./index.js
+stylesheets:
+- /index.css
+- ./index.css
+- /components/table/index.css
+---
+<form id="profile" data-mode="initial" data-availability="unknown">
+  <h2>Profile</h2>
+  <p>Completing a profile is necessary for opening or joining games.</p>
+  <p>
+    <label>Username</label>
+    <input id="username" pattern="^[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9]$" type="text" required minlength="5" maxlength="30" placeholder="Cannot be changed once chosen"/>
+    <small>Must be unused, 5 or more letters and/or numbers (embedded dashes allowed).</small>
+    <span class="issue">
+      <span id="taken">Username taken</span>
+      <span id="available">Username available</span>
+    </span>
+  </p>
+  <p>
+    <label>Headline<label>
+    <input id="headline" type="text" minlength="5" required maxlength="150" placeholder="Set yourself apart with something pithy"/>
+    <small>Must be 5 or more characters</small>
+  </p>
+  <p>
+    <label>About<label>
+    <textarea id="desc" placeholder="Share something about yourself."></textarea>
+  </p>
+  <input type="submit">
+</form>

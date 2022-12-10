@@ -1,0 +1,60 @@
+@import url(/fonts.css);
+label {
+  display: block;
+}
+small {
+  display: block;
+  color: dimgray;
+  padding: 5px 1px;
+}
+input[type="text"],
+textarea {
+  width: 40em;
+  padding: 7px;
+  font-family: "Montserrat";
+}
+input[type="text"] {
+  background-image: url(/images/thumb-up.png);
+  background-position:  calc(100% - 5px) 7px;
+  background-repeat: no-repeat;
+}
+input[type="text"]:invalid {
+  background-image: url(/images/thumb-down.png);
+}
+textarea {
+  height: 5em;
+  min-height: 5em;
+  width: 40em;
+  resize: vertical;
+
+}
+form {
+  break-inside: avoid;
+}
+#available {
+  color: olivedrab;
+  font-family: "Anonymous Pro";
+}
+#taken {
+  color: red;
+  font-family: "Anonymous Pro";
+
+}
+span.issue {
+  height: 1em;
+  padding: 0;
+  margin: 0;
+  display: block;
+}
+#profile[data-availability="unknown"] #available,
+#profile[data-availability="taken"] #available {
+  display: none;
+}
+#profile[data-availability="unknown"] #taken,
+#profile[data-availability="available"] #taken {
+  display: none;
+}
+
+h2 {
+  margin: 0 0 5px;
+}

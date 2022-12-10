@@ -1,0 +1,16 @@
+article img {
+  object-fit: cover;
+  width: 150px;
+  height: 150px;
+  border: solid 3px gray;
+  border-radius: 1em;
+}
+figure {
+  width: 150px;
+  float: right;
+  display: inline;
+  margin: 0 0 0 1em;
+}
+figcaption {
+  text-align: center;
+}

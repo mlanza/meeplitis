@@ -7,12 +7,12 @@ stylesheets:
 - ./index.css
 - /components/table/index.css
 ---
-<form id="profile" data-mode="initial">
+<form id="profile-form" data-mode="initial">
   <h2>Profile</h2>
-  <p>Completing a profile is necessary for opening or joining games.</p>
+  <p class="instruction">Completing a profile is necessary for opening or joining games.</p>
   <p>
     <label>Username</label>
-    <input id="username" pattern="^[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9]$" type="text" required minlength="5" maxlength="30" placeholder="Cannot be changed once chosen"/>
+    <input id="username" autofocus pattern="^[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9]$" type="text" disabled required minlength="5" maxlength="30" placeholder="Cannot be changed once chosen"/>
     <small>Must unique to you, 5 or more letters and/or numbers (embedded dashes allowed).</small>
   </p>
   <p>
@@ -22,7 +22,8 @@ stylesheets:
   </p>
   <p>
     <label>About<label>
-    <textarea id="desc" placeholder="Share something about yourself."></textarea>
+    <textarea id="description" placeholder="Share something about yourself."></textarea>
   </p>
   <input type="submit">
+  <p><a href="../avatar">How do I designate my avatar?</a></p>
 </form>

@@ -21,12 +21,20 @@ input[type="text"] {
 input[type="text"]:invalid {
   background-image: url(/images/thumb-down.png);
 }
+input[type="text"][disabled] {
+  background-image: none;
+}
+input[type="submit"] {
+  padding: 0.5em;
+}
+form[data-mode="update"] .instruction {
+  display: none;
+}
 textarea {
   height: 5em;
   min-height: 5em;
   width: 40em;
   resize: vertical;
-
 }
 form {
   break-inside: avoid;

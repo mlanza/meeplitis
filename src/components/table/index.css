@@ -34,7 +34,7 @@
 .table[data-table-status="vacant"] {
   display: none;
 }
-.controls {
+.table .controls {
   width: 6.5em;
   font-size: .8em;
   text-align: center;

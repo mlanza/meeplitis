@@ -63,7 +63,7 @@ async function process(e) {
       const { data, error } = await supabase.auth.updateUser({
         email:  dom.value(email)
       });
-      alert("You will receive a notification about your email address being changed.  Once you've confirmed and logged in again the update will take effect.");
+      alert("You will receive a notification about your email address change, which you must confirm, for it to take effect.");
     })();
   }
   return false; //returning false prevents default behavior
@@ -72,7 +72,7 @@ async function process(e) {
 $.on(username, "input", async function(e){
   if (dom.value(this)) {
     const {data: [found], error} = await supabase.from("profiles").select('id').eq("username", dom.value(this));
-    this.setCustomValidity(found ? "Username taken" : "");
+    this.setCustomValidity(found ? "Username already taken" : "");
   } else {
     this.setCustomValidity();
   }

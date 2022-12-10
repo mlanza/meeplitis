@@ -23,6 +23,7 @@ input[type="email"]:invalid,
 input[type="text"]:invalid {
   background-image: url(/images/thumb-down.png);
 }
+input[type="text"]:placeholder-shown,
 input[type="text"][disabled] {
   background-image: none;
 }
@@ -36,7 +37,7 @@ textarea {
   height: 5em;
   min-height: 5em;
   width: 40em;
-  resize: vertical;
+  resize: none;
 }
 form {
   break-inside: avoid;

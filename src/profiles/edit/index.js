@@ -25,7 +25,7 @@ const { data: [profile], error } = await supabase
 
 const {data: {user}} = await supabase.auth.getUser();
 
-_.maybe(user, _.see("user"), _.get(_, "email"), dom.value(email, _));
+_.maybe(user, _.get(_, "email"), dom.value(email, _));
 _.maybe(profile, _.get(_, "username"), _.str(_, " | ", "Your Move"), dom.text(dom.sel1("head title"), _));
 _.maybe(profile, _.get(_, "username"), dom.text(dom.sel1(".banner h1"), _));
 _.maybe(profile, _.get(_, "username"), function(username){

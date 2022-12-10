@@ -8,16 +8,18 @@ small {
   padding: 5px 1px;
 }
 input[type="text"],
+input[type="email"],
 textarea {
   width: 40em;
   padding: 7px;
   font-family: "Montserrat";
 }
-input[type="text"] {
+input[type="text"], input[type="email"] {
   background-image: url(/images/thumb-up.png);
   background-position:  calc(100% - 5px) 7px;
   background-repeat: no-repeat;
 }
+input[type="email"]:invalid,
 input[type="text"]:invalid {
   background-image: url(/images/thumb-down.png);
 }
@@ -46,7 +48,6 @@ form {
 #taken {
   color: red;
   font-family: "Anonymous Pro";
-
 }
 span.issue {
   height: 1em;

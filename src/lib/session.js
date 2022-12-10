@@ -18,7 +18,7 @@ if (sess){
   data.user = user;
   const {data: [info], error} = await supabase.rpc("userinfo", {_id: user.id});
   const {username, avatar} = info ?? {username: null, avatar: null};
-  dom.attr(you, "href", `/profiles/?username=${username ?? ''}`);
+  dom.attr(you, "href", username ? `/profiles/?username=${username}` : '/profiles/config/');
   data.session = new Session(user.id, username, avatar, sess?.access_token);
 }
 

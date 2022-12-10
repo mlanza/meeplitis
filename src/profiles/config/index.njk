@@ -7,22 +7,18 @@ stylesheets:
 - ./index.css
 - /components/table/index.css
 ---
-<form id="profile" data-mode="initial" data-availability="unknown">
+<form id="profile" data-mode="initial">
   <h2>Profile</h2>
   <p>Completing a profile is necessary for opening or joining games.</p>
   <p>
     <label>Username</label>
     <input id="username" pattern="^[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9]$" type="text" required minlength="5" maxlength="30" placeholder="Cannot be changed once chosen"/>
-    <small>Must be unused, 5 or more letters and/or numbers (embedded dashes allowed).</small>
-    <span class="issue">
-      <span id="taken">Username taken</span>
-      <span id="available">Username available</span>
-    </span>
+    <small>Must unique to you, 5 or more letters and/or numbers (embedded dashes allowed).</small>
   </p>
   <p>
     <label>Headline<label>
-    <input id="headline" type="text" minlength="5" required maxlength="150" placeholder="Set yourself apart with something pithy"/>
-    <small>Must be 5 or more characters</small>
+    <input id="headline" type="text" minlength="5" maxlength="150" placeholder="Set yourself apart with something pithy"/>
+    <small>Must be 5 or more characters if provided</small>
   </p>
   <p>
     <label>About<label>

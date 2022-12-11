@@ -61,9 +61,9 @@ export function character(seat){
   return `/images/standins/${_.nth(["pinkie.svg", "yellowen.svg", "greenfu.svg", "bleugene.svg", "redmund.svg", "purpleon.svg"], seat)}`;
 }
 
-function avatar(fallback, player, username){
-  const src = session?.userId === player?.id && !session?.avatar_url ? "/images/standins/you.jpg" : username && player?.username === username && !player?.avatar_url ? '/images/standins/purpleon.svg' : player?.avatar_url ? `${player.avatar_url}?s=80` : fallback;
-  return player ? a({href: `/profiles/?username=${player.username}`}, img({src, title: player.username})) : img({src: "/images/standins/chair.jpg"});
+function avatar(fallback, player){
+  const src = session?.userId === player?.id && !session?.avatar_url ? "/images/standins/you.jpg" : _.collapse(player?.avatar_url, "?s=80") || fallback;
+  return player ? a({href: `/profiles/?username=${player.username}`}, img({src, title: player.username})) : img({src: "/images/standins/chair.jpg", title: "Vacant Seat"});
 }
 
 //TODO extract user timezone adjustment

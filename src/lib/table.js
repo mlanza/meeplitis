@@ -5,7 +5,6 @@ import t from "/lib/atomic_/transducers.js";
 import supabase from "/lib/supabase.js";
 import {presence} from "/lib/online.js";
 import {story, nav, hist, waypoint, refresh, atPresent} from "/lib/story.js";
-import {character} from "/components/table/index.js";
 
 const div = dom.tag('div'),
       h1 = dom.tag('h1'),
@@ -73,7 +72,7 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, el){
 
   //render fixed player zones
   _.eachIndexed(function(idx, {username, avatar_url}){
-    dom.append(els.players, zone(idx, username, avatar_url || character(idx), [
+    dom.append(els.players, zone(idx, username, avatar_url, [
       div(span({class: "points"}, "0"), " pts."),
       div(span({class: "tricks"}, "-"), "/", span({class: "bid"}, "-"), span({class: "tip"}, " (taken/bid)")),
       div({class: "leads"}, "leads")
@@ -141,7 +140,7 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, el){
     dom.toggleClass(els.event, "automatic", !player);
 
     if (player) {
-      dom.attr(dom.sel1("img.who", els.event), "src", `${player.avatar_url}?=80`);
+      dom.attr(dom.sel1("img.who", els.event), "src", _.maybe(player.avatar_url, _.str(_, "?s=80")));
       dom.text(dom.sel1("p.who", els.event), player.username);
     }
 

@@ -155,6 +155,10 @@ body[data-ready="false"] {
   bottom: -1px;
   border-radius: 0 1em 1em 0;
   border: solid 1px transparent;
+  height: 80px;
+}
+#event img.subject {
+  height: 50px;
 }
 #event p {
   display: block;

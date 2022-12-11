@@ -143,7 +143,6 @@ $.sub($hist, function([curr, prior]){
     dom.text(dom.sel1(".tricks", seat), _.count(tricks));
     dom.text(dom.sel1(".bid", seat), bid === null ? "?" : (bid === "" ? "X" : bid));
     dom.html(dom.sel1(".area", seat), _.maybe(plyd, cardSrc, function(src){
-      debugger
       return img({src});
     }));
   }, seated);

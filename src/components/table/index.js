@@ -57,17 +57,17 @@ function aged(dt, asof){
   }
 }
 
-function character(seat){
+export function character(seat){
   return `/images/standins/${_.nth(["pinkie.svg", "yellowen.svg", "greenfu.svg", "bleugene.svg", "redmund.svg", "purpleon.svg"], seat)}`;
 }
 
-function avatar(seat, player, username){
-  const src = session?.userId === player?.id && !session?.avatar_url ? "/images/standins/you.jpg" : username && player?.username === username && !player?.avatar_url ? '/images/standins/purpleon.svg' : player?.avatar_url ? `${player.avatar_url}?s=80` : character(seat);
+function avatar(fallback, player, username){
+  const src = session?.userId === player?.id && !session?.avatar_url ? "/images/standins/you.jpg" : username && player?.username === username && !player?.avatar_url ? '/images/standins/purpleon.svg' : player?.avatar_url ? `${player.avatar_url}?s=80` : fallback;
   return player ? a({href: `/profiles/?username=${player.username}`}, img({src, title: player.username})) : img({src: "/images/standins/chair.jpg"});
 }
 
 //TODO extract user timezone adjustment
-export function table(item, username){
+export function table(item, fallback){
   const seat = seated(item.seats);
   const winners = _.maybe(item.seats, _.sort(_.asc(_.get(_, "seat")), _), _.map(_.get(_, "place"), _), _.reducekv(function(memo, seat, place){
     return seat === 1 ? _.conj(memo, seat) : memo;
@@ -93,7 +93,7 @@ export function table(item, username){
         return span({"class": "seat", "data-username": seat?.player?.username || "", "data-seat": seat.seat},
           img({class: "pawn", src: "/images/pawn.svg"}),
           won ? img({class: "trophy", title: "Winner", alt: "trophy", src: "/images/trophy.svg"}) : null,
-          avatar(seat.seat, seat.player, username));
+          avatar(fallback || character(seat.seat), seat.player));
       }, _.sort(_.asc(_.get(_, "seat")), item.seats)),
       _.map(p, describe(item))));
 }

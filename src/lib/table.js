@@ -5,6 +5,7 @@ import t from "/lib/atomic_/transducers.js";
 import supabase from "/lib/supabase.js";
 import {presence} from "/lib/online.js";
 import {story, nav, hist, waypoint, refresh, atPresent} from "/lib/story.js";
+import {character} from "/components/table/index.js";
 
 const div = dom.tag('div'),
       h1 = dom.tag('h1'),
@@ -71,8 +72,8 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, el){
   }
 
   //render fixed player zones
-  _.eachIndexed(function(idx, {username, avatar}){
-    dom.append(els.players, zone(idx, username, avatar, [
+  _.eachIndexed(function(idx, {username, avatar_url}){
+    dom.append(els.players, zone(idx, username, avatar_url || character(idx), [
       div(span({class: "points"}, "0"), " pts."),
       div(span({class: "tricks"}, "-"), "/", span({class: "bid"}, "-"), span({class: "tip"}, " (taken/bid)")),
       div({class: "leads"}, "leads")
@@ -140,7 +141,7 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, el){
     dom.toggleClass(els.event, "automatic", !player);
 
     if (player) {
-      dom.attr(dom.sel1("img.who", els.event), "src", `${player.avatar}?=80`);
+      dom.attr(dom.sel1("img.who", els.event), "src", `${player.avatar_url}?=80`);
       dom.text(dom.sel1("p.who", els.event), player.username);
     }
 
@@ -173,16 +174,16 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, el){
   });
 }
 
-export function player(username, avatar, ...contents){
+export function player(username, avatar_url, ...contents){
   return div({class: "player"},
-    div({class: "avatar"}, img({src: `${avatar}?s=104`})),
+    div({class: "avatar"}, img({src: `${avatar_url}?s=104`})),
     div(a({class: "username", "href": `/profiles/?username=${username}`}, h1(username)), contents),
     img({"data-action": "", src: "/images/pawn.svg"}));
 }
 
-export function zone(seat, username, avatar, contents){
+export function zone(seat, username, avatar_url, contents){
   return div({class: "zone", "data-seat": seat, "data-username": username, "data-presence": ""},
-    player(username, avatar, contents),
+    player(username, avatar_url, contents),
     div({class: "area"}));
 }
 
@@ -212,10 +213,10 @@ export function outcome(seated, {places, metrics}){
 
 export function victor(player){
   return div({class: "victor"},
-    img({alt: player.username, src: `${player.avatar}?s=150`}),
+    img({alt: player.username, src: `${player.avatar_url}?s=150`}),
     `${player.username} wins!`);
 }
 
 export function subject(player){
-  return img({class: "subject", alt: player.username, src: `${player.avatar}?s=50`});
+  return img({class: "subject", alt: player.username, src: `${player.avatar_url}?s=50`});
 }

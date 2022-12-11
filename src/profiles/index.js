@@ -58,7 +58,7 @@ function getTables(statuses, sort, el, none){
     })
     .then(_.see("tables"))
     .then(_.sort(sort, _))
-    .then(_.map(x => table(x, username), _))
+    .then(_.map(x => table(x, "/images/standins/purpleon.svg"), _))
     .then(_.seq)
     .then(_.either(_, none))
     .then(dom.html(el, _));

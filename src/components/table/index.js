@@ -92,7 +92,7 @@ export function table(item, fallback){
         const won = _.includes(winners, seat.seat);
         return span({"class": "seat", "data-username": seat?.player?.username || "", "data-seat": seat.seat},
           img({class: "pawn", src: "/images/pawn.svg"}),
-          won ? img({class: "trophy", title: "Winner", alt: "trophy", src: "/images/trophy.svg"}) : null,
+          won ? img({class: "won", title: "Winner", alt: "Winner", src: "/images/star.svg"}) : null,
           avatar(fallback || character(seat.seat), seat.player));
       }, _.sort(_.asc(_.get(_, "seat")), item.seats)),
       _.map(p, describe(item))));

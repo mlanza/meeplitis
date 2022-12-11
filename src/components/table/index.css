@@ -76,7 +76,7 @@
 .touched {
   opacity: .5;
 }
-img.trophy,
+img.won,
 img.pawn {
   position: absolute;
   border: none;
@@ -84,10 +84,10 @@ img.pawn {
   z-index: 99;
   visibility: hidden;
 }
-img.trophy {
-  bottom: 11px;
-  right: 4px;
-  height: 32px;
+img.won {
+  top: 3px;
+  right: 3px;
+  height: 25px;
 }
 img.pawn {
   right: 0;
@@ -98,7 +98,7 @@ img.pawn {
   animation-fill-mode: both;
   animation-iteration-count: infinite;
 }
-[data-table-status="finished"] img.trophy {
+[data-table-status="finished"] img.won {
   visibility: visible;
 }
 [data-up~="0"][data-seated="0"] .game img,

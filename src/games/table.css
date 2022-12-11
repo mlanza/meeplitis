@@ -107,7 +107,7 @@ body[data-ready="false"] {
   padding: 0 1em;
   background: rgba(62, 80, 92, .95);
   box-shadow: -3px 5px 5px -3px rgba(0, 0, 0, 0.6);
-  border-radius: 1em;
+  border-radius: 1.1em;
   transition: height .5s, width .5s;
 }
 #event[data-type="scoring"],

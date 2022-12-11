@@ -16,15 +16,20 @@ declare
   _content json;
 begin
 
+  raise log '$ notifying';
+
   select type, title, slug, table_id, recipients, outcome, status
   from notices
   where seq = _seq
   into _type, _title, _slug, _table_id, _recipients, _outcome, _job_status;
 
   if _job_status in ('pending'::job_status, 'failed'::job_status) then
+
+    raise log '$ notify type %, title %, slug %, table_id %, outcome %, recipients %', _type, _title, _slug, _table_id, _outcome, _recipients;
+
     select status, content
     from http_post('https://notify.workers.yourmove.cc',
-                  '{"type": "' || _type || '", "title": "' || _title || '", "slug": "' || _slug || '", "table_id": "' || _table_id || '" ,"outcome": ' || _outcome || ' ,"recipients": ' || _recipients || '}', 'application/json')
+                  '{"type": "' || _type || '", "title": "' || _title || '", "slug": "' || _slug || '", "table_id": "' || _table_id || '" ,"outcome": ' || coalesce(_outcome, 'null') || ' ,"recipients": ' || _recipients || '}', 'application/json')
     into _status, _content;
 
     update jobs
@@ -32,6 +37,8 @@ begin
         executed_at = now(),
         tries = tries + 1
     where seq = _seq;
+
+    raise log '$ notified %', _status;
 
     return ('{"status": ' || _status::varchar || ', "recipients": ' || _recipients::varchar || ', "content": ' || _content || '}')::json;
 

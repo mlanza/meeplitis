@@ -4,15 +4,12 @@ import {session, $online} from "/lib/session.js";
 const params = new URLSearchParams(document.location.search),
       dest   = params.get('dest') ? decodeURIComponent(params.get('dest')) : null;
 
-const username = session?.username;
-
-if (username) {
-  location.href = `/profiles/?username=${username}`;
+if (session) {
+  location.href = session?.username ? `/profiles/?username=${session.username}` : '/profiles/edit';
 }
 
 function redirects(ms, fallback){
   return function redirect(){
-    console.log("->", arguments);
     const href = dest || fallback;
     if (href != null) {
       setTimeout(function(){

@@ -86,6 +86,7 @@ body[data-ready="false"] {
   clear: both;
   display: block;
   animation: arise .6s forwards;
+  height: 150px;
 }
 .victor {
   font-size: 1.3em;

@@ -21,7 +21,7 @@ _.chain(profile.username, _.str(_, " | ", "Your Move"), dom.text(dom.sel1("head 
 _.chain(profile.username, dom.text(dom.sel1(".banner h1"), _));
 _.chain(profile.headline || "Mysteriously quiet", dom.text(dom.sel1(".banner .headline"), _));
 _.chain(profile.description || "Has not chosen to share any details.", dom.html(dom.sel1(".about > p"), _));
-_.chain(profile.avatar_url, _.collapse(_, "?s=200"), _.either(_, "/images/anon.svg"), dom.attr(dom.sel1(".banner img"), "src", _));
+_.chain(profile.avatar_url, _.collapse(_, "?s=200"), _.either(_, you ? "/images/standins/you.jpg" : "/images/standins/purpleon.svg"), dom.attr(dom.sel1(".banner img"), "src", _));
 
 function getTables(statuses, sort, el, none){
   return supabase
@@ -58,7 +58,7 @@ function getTables(statuses, sort, el, none){
     })
     .then(_.see("tables"))
     .then(_.sort(sort, _))
-    .then(_.map(table, _))
+    .then(_.map(x => table(x, username), _))
     .then(_.seq)
     .then(_.either(_, none))
     .then(dom.html(el, _));

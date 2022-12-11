@@ -11,8 +11,9 @@ const img = dom.tag('img'),
       div = dom.tag('div'),
       span = dom.tag('span');
 
-const params = new URLSearchParams(document.location.search),
-      username = params.get('username');
+if (session && !session?.username) {
+  dom.addClass(dom.sel1("#unidentified-user"), "reveal");
+}
 
 function game(item){
   return a({href: `/games/${item.slug}`},

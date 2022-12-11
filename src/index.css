@@ -126,8 +126,11 @@ span.controls a {
   border-radius: 5px;
   margin-top: -5px;
 }
-[data-you="true"] span.controls {
-  visibility: visible;
+[data-you="true"] span.controls, .reveal {
+  visibility: visible !important;
+}
+#unidentified-user p {
+  color: red;
 }
 footer {
   background: url(/images/backgrounds/carbon_fibre.webp);

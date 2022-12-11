@@ -61,12 +61,8 @@ function character(seat){
   return `/images/standins/${_.nth(["pinkie.svg", "yellowen.svg", "greenfu.svg", "bleugene.svg", "redmund.svg", "purpleon.svg"], seat)}`;
 }
 
-const standin = session ? function(seat, player){
-  return session.userId === player?.id ? "/images/standins/you.jpg" : character(seat);
-} : character;
-
 function avatar(seat, player, username){
-  const src = username && player?.username === username && !player?.avatar_url ? '/images/standins/purpleon.svg' : player?.avatar_url ? `${player.avatar_url}?s=80` : standin(seat, player);
+  const src = session?.userId === player?.id && !session?.avatar_url ? "/images/standins/you.jpg" : username && player?.username === username && !player?.avatar_url ? '/images/standins/purpleon.svg' : player?.avatar_url ? `${player.avatar_url}?s=80` : character(seat);
   return player ? a({href: `/profiles/?username=${player.username}`}, img({src, title: player.username})) : img({src: "/images/standins/chair.jpg"});
 }
 

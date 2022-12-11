@@ -7,10 +7,11 @@ declare
 _seat_id varchar;
 begin
 
-_seat_id = (select id from seats where table_id = _table_id and player_id is null limit 1);
+_seat_id = (select id from seats where table_id = _table_id and player_id is null order by seat limit 1);
 
 update seats
-set player_id = _player_id
+set player_id = _player_id,
+    joined_at = now()
 where table_id = _table_id
 and id = _seat_id;
 

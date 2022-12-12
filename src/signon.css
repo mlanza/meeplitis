@@ -20,6 +20,9 @@
   margin: 1em auto;
   display: block;
 }
+.signon input[type='submit'][value~="Password"]{
+  width: 10em;
+}
 .signon p {
   margin-top: 3em;
   text-align: center;

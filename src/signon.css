@@ -1,5 +1,4 @@
 .signon form {
-  margin-top: 5em !important;
   scale: 1.25;
 }
 .signon label {
@@ -24,8 +23,11 @@
   width: 10em;
 }
 .signon p {
-  margin-top: 3em;
+  margin-top: 1em;
   text-align: center;
+}
+.signon form {
+  margin-bottom: 3em !important;
 }
 .signup,
 .signon form,
@@ -35,4 +37,7 @@
 }
 .signup {
   text-align: center;
+}
+.signon {
+  margin-top: 3em;
 }

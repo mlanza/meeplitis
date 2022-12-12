@@ -4,9 +4,12 @@ async function resetPassword(e){
   e.preventDefault();
   const email = this[0].value;
   const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: '/update-password',
+    redirectTo: 'https://yourmove.cc/update-password',
   });
-  console.log(data, error);
+  if (error) {
+    throw error;
+  }
+  console.log(data);
   alert("You will receive an email with a link to reset your password shortly.");
 }
 

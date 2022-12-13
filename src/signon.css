@@ -2,7 +2,7 @@
   scale: 1.25;
 }
 .signon label {
-  width: 5em;
+  width: 15em;
   display: inline-block;
   font-size: .8em;
 }
@@ -22,22 +22,19 @@
 .signon input[type='submit'][value~="Password"]{
   width: 10em;
 }
-.signon p {
-  margin-top: 1em;
-  text-align: center;
-}
 .signon form {
   margin-bottom: 3em !important;
 }
-.signup,
+.signon p,
 .signon form,
 .signon {
   width: 15em;
   margin: 0 auto;
 }
-.signup {
+.signon p {
+  margin-top: 1em;
   text-align: center;
 }
 .signon {
-  margin-top: 3em;
+  margin-top: 5em;
 }

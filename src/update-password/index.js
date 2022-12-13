@@ -2,14 +2,20 @@ import supabase from "/lib/supabase.js";
 
 async function updatePassword(e){
   e.preventDefault();
-  const password = this[0].value;
-  const { data, error } = await supabase.auth
-    .updateUser({password});
-  if (error) {
-    throw error;
+  const password = this[0],
+        confirmPassword = this[1];
+  if (password.value === confirmPassword.value) {
+    confirmPassword.setCustomValidity();
+    const { data, error } = await supabase.auth
+      .updateUser({password: password.value});
+    if (error) {
+      throw error;
+    }
+    alert("Your password has been reset.");
+    location.href = "/";
+  } else {
+    confirmPassword.setCustomValidity("Passwords don't match");
   }
-  alert("Your password has been reset.");
-  location.href = "/";
 }
 
 const signInForm = document.querySelector('#signin');

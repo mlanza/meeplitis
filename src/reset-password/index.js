@@ -10,7 +10,7 @@ async function resetPassword(e){
     throw error;
   }
   console.log(data);
-  alert("You will receive an email with a link to reset your password shortly.");
+  alert("If your email address was registered, you will receive an email with a link to reset your password shortly.");
 }
 
 const signInForm = document.querySelector('#signin');

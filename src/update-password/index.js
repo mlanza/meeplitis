@@ -1,11 +1,16 @@
 import supabase from "/lib/supabase.js";
 
+const form = document.getElementById('signin'),
+      password = form[0],
+      confirmPassword = form[1];
+
+function passwordsMatch(e){
+  confirmPassword.setCustomValidity(password.value === confirmPassword.value ? "" : "Passwords don't match");
+}
+
 async function updatePassword(e){
   e.preventDefault();
-  const password = this[0],
-        confirmPassword = this[1];
-  if (password.value === confirmPassword.value) {
-    confirmPassword.setCustomValidity();
+  if (password.validity.valid && confirmPassword.validity.valid) {
     const { data, error } = await supabase.auth
       .updateUser({password: password.value});
     if (error) {
@@ -13,10 +18,10 @@ async function updatePassword(e){
     }
     alert("Your password has been reset.");
     location.href = "/";
-  } else {
-    confirmPassword.setCustomValidity("Passwords don't match");
   }
+  return false;
 }
 
-const signInForm = document.querySelector('#signin');
-document.querySelector('#signin').onsubmit = updatePassword.bind(signInForm);
+password.addEventListener("input", passwordsMatch);
+confirmPassword.addEventListener("input", passwordsMatch);
+form.addEventListener("submit", updatePassword);

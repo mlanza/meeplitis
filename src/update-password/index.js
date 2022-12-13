@@ -9,6 +9,7 @@ async function updatePassword(e){
     throw error;
   }
   alert("Your password has been reset.");
+  location.href = "/";
 }
 
 const signInForm = document.querySelector('#signin');

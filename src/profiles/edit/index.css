@@ -39,6 +39,13 @@ textarea {
   width: 40em;
   resize: none;
 }
+p small {
+  opacity: .4;
+  transition: opacity .5s;
+}
+p:has(input:focus) small {
+  opacity: 1;
+}
 form {
   break-inside: avoid;
 }

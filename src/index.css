@@ -57,6 +57,7 @@ body.borderless-img .banner img {
   display: inline-block;
   margin-top: 0;
   margin-left: 125px;
+  min-height: 1em;
 }
 .banner .headline {
   padding: 0;

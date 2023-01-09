@@ -20,8 +20,13 @@ function ohhell(config){
   return descriptors;
 }
 
+function mexica(config){
+  return [];
+}
+
 const games = {
-  "8Mj1": ohhell
+  "8Mj1": ohhell,
+  "SopC": mexica
 };
 
 export function seated(seats){
@@ -82,7 +87,7 @@ export function table(item, fallback){
       "data-up": `${ _.join(" ", item.up) }`
     },
       span({class: "id"},
-        link({href: `/games/oh-hell/table/?id=${item.id}`}, item.game.title, " - ", item.id), " ",
+        link({href: `/games/${item.game.slug}/table/?id=${item.id}`}, item.game.title, " - ", item.id), " ",
         span({class: "touched"}, _.maybe(age, _.join("", _), _.str("touched ", _, " ago")))),
       div({class: "game"},
         a({href: `/games/${item.game.slug}`}, img({src: item.game.thumbnail_url, alt: item.game.title})),

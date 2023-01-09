@@ -1,0 +1,113 @@
+.moves {
+  position: fixed;
+  left: 1em;
+  bottom: 1em;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: .7em;
+  z-index: 99;
+  padding: 1px;
+}
+.leads {
+  visibility: hidden;
+}
+[data-lead="0"] [data-seat="0"] .leads,
+[data-lead="1"] [data-seat="1"] .leads,
+[data-lead="2"] [data-seat="2"] .leads,
+[data-lead="3"] [data-seat="3"] .leads,
+[data-lead="4"] [data-seat="4"] .leads,
+[data-lead="5"] [data-seat="5"] .leads,
+[data-lead="6"] [data-seat="6"] .leads {
+  visibility: visible;
+}
+button {
+  font-size: 1.1em;
+  min-width: 4em;
+  padding: 5px;
+  border-radius: .5em;
+  margin: 2px;
+  min-width: 2em;
+  text-align: center;
+  transition: background-color .5s, color .5s;
+  display: none;
+}
+button.active,
+button.selected {
+  display: initial;
+}
+[data-tense="present"] button {
+  cursor: default;
+}
+[data-tense="present"] button:hover {
+  background-color: orange;
+  color: snow;
+}
+.hand {
+  position: fixed;
+  right: 1em;
+  bottom: -11em;
+  height: 17.5em;
+  width: 30em;
+  transition: bottom .5s;
+  padding: 0;
+  list-style: none;
+  display: inline-flex;
+  z-index: 99;
+}
+[data-tense="present"][data-status="playing"] .hand:hover {
+  bottom: -8em;
+}
+.hand li {
+  transition: padding-top .25s;
+  margin-right: -8.5em;
+  height: 18em;
+  padding-top: 2em;
+}
+.hand li,
+.hand li img {
+  width: 10em;
+  height: 16em;
+}
+[data-tense="present"][data-status="playing"] .hand li img {
+  cursor: pointer;
+}
+[data-tense="present"][data-status="playing"] .hand li:hover {
+  padding-top: 0;
+}
+.trump, .deck {
+  min-height: 14em;
+}
+.deck img,
+.trump img {
+  width: 9em;
+  margin: 5px;
+}
+.broken {
+  visibility: hidden;
+  margin-top: -.8em;
+  margin-bottom: 1em;
+}
+body[data-broken="true"] .broken {
+  visibility: visible;
+}
+.upkeep {
+  -border: solid 1px purple;
+  width: 10em;
+  position: absolute;
+  right: 0;
+  text-align: center;
+}
+.cards {
+  text-align: center;
+  display: block;
+  margin: .5em auto 0;
+}
+[data-anonymous="true"] img[data-nav="last-move"] {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .moves {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+}

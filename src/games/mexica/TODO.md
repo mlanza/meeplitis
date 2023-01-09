@@ -1,0 +1,12 @@
+# Events
+- `{type: "start"}`
+- `{type: "place-pilli", at: "A2"}`
+- `{type: "move", by: "foot"/"boat"/"teleportation", to: "A4", cost: 1}`
+- `{type: "construct-canal", size: 2, at: ["A1","A2"]}`
+- `{type: "construct-bridge", at: "A2"}`
+- `{type: "relocate-bridge", from: "B2", to: "A2"}`
+- `{type: "build-temple", levels: 4, at: "A1"}`
+- `{type: "found-district", size: 12, at: "A2", points: [6, 0, 0, 3]}`
+- `{type: "bank"}`
+- `{type: "score-period", period: 1, districts: [{at: "A2", size: 12, points: [12, 0, 0, 3]}]}`
+- `{type: "finish"}`

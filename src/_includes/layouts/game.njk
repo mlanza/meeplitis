@@ -7,7 +7,8 @@ stylesheets:
 - ./index.css
 ---
 <div class="byline">
-  <span>Published By:</span> {{ publisher }},
+
+  <span>Published By:</span> {% if publisher_url %}<a href='{{ publisher_url }}'>{{ publisher }}</a> {% else %}{{ publisher }}{% endif %},
   <span>Designed By:</span> {{ designers }},
   <span>Implemented By:</span> {{ developers }}
 </div>

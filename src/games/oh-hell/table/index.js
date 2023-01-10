@@ -10,7 +10,9 @@ import {getSeated, getSeat, story, nav, waypoint, hist} from "/lib/story.js";
 import {describe} from "/components/table/index.js";
 
 const img = dom.tag('img'),
-      li = dom.tag('li');
+      li = dom.tag('li'),
+      div = dom.tag('div'),
+      span = dom.tag('span');
 
 const params = new URLSearchParams(document.location.search),
       tableId = params.get('id');
@@ -29,6 +31,14 @@ const els = {
   cards: dom.sel1(".cards b", el),
   deck: dom.sel1(".deck", el),
   hand: dom.sel1(".hand", el)
+}
+
+function zoned(){
+  return [
+    div(span({class: "points"}, "0"), " pts."),
+    div(span({class: "tricks"}, "-"), "/", span({class: "bid"}, "-"), span({class: "tip"}, " (taken/bid)")),
+    div({class: "leads"}, "leads")
+  ];
 }
 
 const [seated, seat] = await Promise.all([
@@ -99,10 +109,10 @@ const $table = table(tableId),
       $hist = hist($story);
 
 //universal ui
-ui($table, $story, $hist, $online, seated, seat, desc, el);
+ui($table, $story, $hist, $online, seated, seat, desc, zoned, el);
 
 $.sub($table, _.comp(t.compact(), t.map(describe), t.map(_.join("\n", _))), function(descriptors){
-  dom.attr(dom.sel1("#title"), "title", descriptors || "Typical play");
+  dom.attr(dom.sel1("#title"), "title", descriptors || "Up and Down");
 });
 
 $.sub($hist, function([curr, prior]){

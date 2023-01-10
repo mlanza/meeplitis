@@ -10,7 +10,9 @@ import {getSeated, getSeat, story, nav, waypoint, hist} from "/lib/story.js";
 import {describe} from "/components/table/index.js";
 
 const img = dom.tag('img'),
-      li = dom.tag('li');
+      li = dom.tag('li'),
+      div = dom.tag('div'),
+      span = dom.tag('span');
 
 const params = new URLSearchParams(document.location.search),
       tableId = params.get('id');
@@ -100,11 +102,18 @@ const $table = table(tableId),
       $story = story(session, tableId, seat, seated, dom.attr(el, "data-ready", _)),
       $hist = hist($story);
 
+function zoned(){
+  return [
+    div(span({class: "points"}, "0"), " pts."),
+    div(span({class: "actions"}, "-"), "/", span({class: "bid"}, "-")),
+  ];
+}
+
 //universal ui
-ui($table, $story, $hist, $online, seated, seat, desc, el);
+ui($table, $story, $hist, $online, seated, seat, desc, zoned, el);
 
 $.sub($table, _.comp(t.compact(), t.map(describe), t.map(_.join("\n", _))), function(descriptors){
-  dom.attr(dom.sel1("#title"), "title", descriptors || "Typical play");
+  dom.attr(dom.sel1("#title"), "title", descriptors || "Normal game");
 });
 
 $.sub($hist, function([curr, prior]){

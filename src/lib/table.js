@@ -39,7 +39,7 @@ export function table(tableId){
   return $.pipe($t, t.compact());
 }
 
-export function ui($table, $story, $hist, $online, seated, seat, desc, el){
+export function ui($table, $story, $hist, $online, seated, seat, desc, zoned, el){
   const $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), t.compact()),
         $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table),
         $status = $.map(_.get(_, "status"), $table),
@@ -72,11 +72,7 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, el){
 
   //render fixed player zones
   _.eachIndexed(function(idx, {username, avatar_url}){
-    dom.append(els.players, zone(idx, username, avatar_url, [
-      div(span({class: "points"}, "0"), " pts."),
-      div(span({class: "tricks"}, "-"), "/", span({class: "bid"}, "-"), span({class: "tip"}, " (taken/bid)")),
-      div({class: "leads"}, "leads")
-    ]));
+    dom.append(els.players, zone(idx, username, avatar_url, zoned()));
   }, seated);
 
   dom.attr(el, "data-perspective", seat);
@@ -88,7 +84,6 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, el){
   $.sub($story, _.see("$story"));
   $.sub($hist, _.see("$hist"));
 
-  $.sub($scored, dom.attr(el, "data-scored", _));
   $.sub($status, dom.attr(el, "data-table-status", _));
   $.sub($up, dom.attr(el, "data-up", _));
 

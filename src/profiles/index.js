@@ -20,7 +20,7 @@ _.chain(you, dom.attr(document.body, "data-you", _));
 _.chain(profile.username, _.str(_, " | ", "Your Move"), dom.text(dom.sel1("head title"), _));
 _.chain(profile.username, dom.text(dom.sel1(".banner h1"), _));
 _.chain(profile.headline || "Mysteriously quiet", dom.text(dom.sel1(".banner .headline"), _));
-_.chain(profile.description || "Has not chosen to share any details.", dom.html(dom.sel1(".about > p"), _));
+_.chain(profile.description || "Has not shared any details.", dom.html(dom.sel1(".about > p"), _));
 _.chain(profile.avatar_url, _.collapse(_, "?s=200"), _.either(_, you ? "/images/standins/you.jpg" : "/images/standins/purpleon.svg"), dom.attr(dom.sel1(".banner img"), "src", _));
 
 function getTables(statuses, sort, el, none){

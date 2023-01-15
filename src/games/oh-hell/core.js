@@ -153,8 +153,9 @@ function irreversible(self, command){
   return _.includes(["start", "deal", "bid", "commit", "finish"], command.type);
 }
 
-function execute(self, command, seat){
+function execute(self, command, s){
   const state = _.deref(self);
+  const seat = s == null ? command.seat : s;
   const valid = _.detect(_.eq(_, _.chain(command, _.compact, _.dissoc(_, "id"))), g.moves(self, [seat]));
   const {type, details} = command;
   const automatic = _.includes(["start", "award", "scoring", "finish", "deal"], type);

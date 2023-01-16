@@ -56,20 +56,12 @@ const temples = [
 ];
 
 function init(seats){
-  const xs = _.chain(_.range(15), _.shuffle, _.take(8, _), _.sort);
-  const partitioned = _.chain(capulli, _.mapkv(function(k, v){
-    return [k, v];
-  }, _), _.groupBy(function([k, v]){
-    return _.includes(xs, k);
-  }, _), _.reducekv(function(memo, k, v){
-    return _.assoc(memo, k === "true" ? 0 : 1, _.mapa(_.second, v));
-  }, [], _), _.toArray);
   return Object.assign({
     board,
     period: 0,
     up: 0
   }, {
-    capulli: partitioned,
+    capulli: null,
     seated: _.toArray(_.repeat(seats, {
       pilli: null,
       temples,
@@ -92,3 +84,151 @@ export default function mexica(seats, config, events, journal){
   }
   return new Mexica(_.toArray(seats), config, events || [], journal || _.chain(seats, _.count, init, _.journal));
 }
+
+function setup(self){
+  const partitioned = _.chain(capulli, _.mapkv(function(k, v){
+    return [k, v];
+  }, _), _.groupBy(function([k, v]){
+    return _.includes(xs, k);
+  }, _), _.reducekv(function(memo, k, v){
+    return _.assoc(memo, k === "true" ? 0 : 1, _.mapa(_.second, v));
+  }, [], _), _.toArray);
+
+
+
+}
+
+export function execute(self, command, s){
+  const state = _.deref(self);
+  const seat = s == null ? command.seat : s;
+  //const valid = _.detect(_.eq(_, _.chain(command, _.compact, _.dissoc(_, "id"))), g.moves(self, [seat]));
+  const {type, details} = command;
+  const automatic = _.includes(["start"], type);
+
+  if (!automatic && !valid){
+    throw new Error(`Invalid ${type}`);
+  }
+
+  if (automatic && seat != null) {
+    throw new Error(`Cannot invoke automatic command ${type}`);
+  }
+
+  if (!_.seq(g.events(self)) && type != "start") {
+    throw new Error(`Cannot ${type} unless the game is first started.`);
+  }
+
+  switch (type) {
+    case "start":
+      const xs = _.chain(_.range(15), _.shuffle, _.take(8, _), _.sort);
+      const _capulli = _.chain(capulli,
+        _.mapkv(function(k, v){
+          return [k, v];
+        }, _),
+        _.groupBy(function([k, v]){
+          return _.includes(xs, k);
+        }, _),
+        _.reducekv(function(memo, k, v){
+          return _.assoc(memo, k === "true" ? 0 : 1, _.mapa(_.second, v));
+        }, Array(2), _),
+        _.toArray);
+      return _.chain(self, g.fold(_, _.assoc(command, "details", {capulli: _capulli})));
+  }
+}
+
+function fold2(self, event){
+  const state = _.deref(self);
+  const {type, details, seat} = event;
+  switch (type) {
+    case "start":
+      return (function(){
+        return g.fold(self, event, _.fmap(_, _.merge(_, details)));
+      })();
+  }
+}
+
+function fold3(self, event, f){
+  return mexica(self.seats,
+    self.config,
+    event ? _.append(self.events, event) : self.events,
+    _.chain(self.journal,
+      f,
+      g.incidental(event) ? g.crunch : _.identity, //improve undo/redo from user perspective
+      g.irreversible(self, event) ? _.flush : _.identity));
+}
+
+const fold = _.overload(null, null, fold2, fold3);
+
+function up(self){  //TODO
+  const state = _.deref(self);
+  return [0];
+}
+
+function may(self){ //TODO
+  return _.unique(_.map(function({seat}){
+    return seat;
+  }, g.moves(self, g.seated(self))));
+}
+
+function moves(self){ //TODO
+  return [];
+}
+
+function metrics(self){
+  const state = _.deref(self);
+  return _.mapa(function({scored}){
+    const points = _.sum(_.map(_.get(_, "points"), scored));
+    return {points};
+  }, state.seated);
+}
+
+function perspective(self, _seen){ //TODO
+  const seen = _.chain(_seen, _.filtera(_.isSome, _));
+  const up = g.up(self);
+  const may = g.may(self);
+  const seated = g.seated(self);
+  const metrics = g.metrics(self);
+  const all = _.eq(seen, g.everyone(self));
+  const state = _.chain(self, _.deref);
+  const moves = _.chain(self, g.moves(_, seen), _.toArray);
+  const events = self.events;
+  return {seen, seated, up, may, state, moves, events, metrics};
+}
+
+function irreversible(self, command){
+  return _.includes(["commit", "finish"], command.type);
+}
+
+function events(self){
+  return self.events;
+}
+
+function seats(self){
+  return self.seats;
+}
+
+function deref(self){
+  return _.deref(self.journal);
+}
+
+function undoable(self){
+  return _.undoable(self.journal);
+}
+
+function redoable(self){
+  return _.redoable(self.journal);
+}
+
+function flushable(self){
+  return _.flushable(self.journal);
+}
+
+function resettable(self){
+  return _.resettable(self.journal);
+}
+
+_.doto(Mexica,
+  _.implement(_.IDeref, {deref}),
+  _.implement(_.IResettable, {resettable}),
+  _.implement(_.IRevertible, {undoable, redoable, flushable}),
+  _.implement(IGame, {perspective, up, may, seats, moves, events, irreversible, metrics, /*comparator, textualizer,*/ execute, fold}));
+

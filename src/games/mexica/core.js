@@ -85,17 +85,20 @@ export default function mexica(seats, config, events, journal){
   return new Mexica(_.toArray(seats), config, events || [], journal || _.chain(seats, _.count, init, _.journal));
 }
 
-function setup(self){
-  const partitioned = _.chain(capulli, _.mapkv(function(k, v){
-    return [k, v];
-  }, _), _.groupBy(function([k, v]){
-    return _.includes(xs, k);
-  }, _), _.reducekv(function(memo, k, v){
-    return _.assoc(memo, k === "true" ? 0 : 1, _.mapa(_.second, v));
-  }, [], _), _.toArray);
-
-
-
+function dealCapulli(self){
+  const xs = _.chain(_.range(15), _.shuffle, _.take(8, _), _.sort);
+  const _capulli = _.chain(capulli,
+    _.mapkv(function(k, v){
+      return [k, v];
+    }, _),
+    _.groupBy(function([k, v]){
+      return _.includes(xs, k);
+    }, _),
+    _.reducekv(function(memo, k, v){
+      return _.assoc(memo, k === "true" ? 0 : 1, _.mapa(_.second, v));
+    }, Array(2), _),
+    _.toArray);
+  return _.chain(self, g.fold(_, {type: "deal-capulli", details: {capulli: _capulli}, seat: null}));
 }
 
 export function execute(self, command, s){
@@ -119,19 +122,7 @@ export function execute(self, command, s){
 
   switch (type) {
     case "start":
-      const xs = _.chain(_.range(15), _.shuffle, _.take(8, _), _.sort);
-      const _capulli = _.chain(capulli,
-        _.mapkv(function(k, v){
-          return [k, v];
-        }, _),
-        _.groupBy(function([k, v]){
-          return _.includes(xs, k);
-        }, _),
-        _.reducekv(function(memo, k, v){
-          return _.assoc(memo, k === "true" ? 0 : 1, _.mapa(_.second, v));
-        }, Array(2), _),
-        _.toArray);
-      return _.chain(self, g.fold(_, _.assoc(command, "details", {capulli: _capulli})));
+      return _.chain(self, g.fold(_, command), dealCapulli);
   }
 }
 
@@ -139,10 +130,12 @@ function fold2(self, event){
   const state = _.deref(self);
   const {type, details, seat} = event;
   switch (type) {
-    case "start":
+    case "deal-capulli":
       return (function(){
         return g.fold(self, event, _.fmap(_, _.merge(_, details)));
       })();
+    default:
+      return g.fold(self, event, _.fmap(_, _.merge(_, details))); //vanilla commands
   }
 }
 

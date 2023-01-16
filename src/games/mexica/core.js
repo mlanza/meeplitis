@@ -48,7 +48,8 @@ const capulli = [
 const bits = {
   canal1: Array(6),
   canal2: Array(37),
-  bridges: Array(11)
+  bridges: Array(11),
+  tokens: 12
 }
 
 const temples = [
@@ -58,16 +59,19 @@ const temples = [
 
 function init(seats){
   return Object.assign({
+    phase: null,
     board,
     period: 0,
-    up: 0
+    up: 0,
+    spent: 0,
+    banked: 0
   }, {
     capulli: null,
     seated: _.toArray(_.repeat(seats, {
       pilli: null,
       temples,
       bank: 0,
-      score: 0
+      points: 0
     }))
   }, bits);
 }
@@ -88,12 +92,15 @@ export default function mexica(seats, config, events, journal){
 
 function pass(state){
   const seats = _.count(state.seated);
-  return _.update(state, "up", function(up){
-    return _.chain(seats, _.range, _.cycle, _.dropWhile(_.notEq(_, up), _), _.second);
-  });
+  return _.chain(state,
+    _.update(_, "up", function(up){
+      return _.chain(seats, _.range, _.cycle, _.dropWhile(_.notEq(_, up), _), _.second);
+    }),
+    _.assoc(_, "spent", 0),
+    _.assoc(_, "banked", 0));
 }
 
-function dealCapulli(self){
+function dealCapulli(){
   const xs = _.chain(_.range(15), _.shuffle, _.take(8, _), _.sort);
   const _capulli = _.chain(capulli,
     _.mapkv(function(k, v){
@@ -106,7 +113,7 @@ function dealCapulli(self){
       return _.assoc(memo, k === "true" ? 0 : 1, _.mapa(_.second, v));
     }, Array(2), _),
     _.toArray);
-  return _.chain(self, g.fold(_, {type: "deal-capulli", details: {capulli: _capulli}, seat: null}));
+  return {type: "dealt-capulli", details: {capulli: _capulli}, seat: null};
 }
 
 export function execute(self, command, s){
@@ -130,10 +137,56 @@ export function execute(self, command, s){
 
   switch (type) {
     case "start":
-      return _.chain(self, g.fold(_, command), dealCapulli);
+      return _.chain(self,
+        g.fold(_, command),
+        g.execute(_, {type: "deal-capulli"}));
+
+    case "deal-capulli":
+      return _.chain(self, g.fold(_, dealCapulli()));
+
     case "place-pilli":
-      //TODO validate
-      return _.chain(self, g.fold(_, command));
+      //TODO validate via suggested moves
+      return _.chain(self, g.fold(_, _.assoc(command, "type", "placed-pilli")));
+
+    case "bank":
+      return (function(){
+        const {banked, tokens} = _.deref(self);
+        if (banked > 1) {
+          throw new Error("Cannot take any further action point tokens");
+        }
+        if (tokens < 1) {
+          throw new Error("No action point tokens are available.");
+        }
+        return _.chain(self, g.fold(_, {type: "banked", seat}));
+
+      })();
+
+    case "move":
+      return self; //TODO `{type: "move", by: "foot"/"boat"/"teleportation", to: "A4", cost: 1}`
+
+    case "construct-canal":
+      return self; // `{type: "construct-canal", size: 2, at: ["A1","A2"]}`
+
+    case "build-temple":
+      return self; //TODO `{type: "build-temple", levels: 4, at: "A1"}`
+
+    case "construct-bridge":
+      return self; //TODO `{type: "construct-bridge", at: "A2"}`
+
+    case "relocate-bridge":
+      return self; //TODO `{type: "relocate-bridge", from: "B2", to: "A2"}`
+
+    case "found-district":
+      return self; //TODO `{type: "found-district", size: 12, at: "A2", points: [6, 0, 0, 3]}`
+
+    case "score-period":
+      return self; //TODO `{type: "score-period", period: 1, districts: [{at: "A2", size: 12, points: [12, 0, 0, 3]}]}`
+
+    case "commit":
+      return self; //TODO
+
+    case "finish":
+      return self; //TODO
   }
 }
 
@@ -141,19 +194,37 @@ function fold2(self, event){
   const state = _.deref(self);
   const {type, details, seat} = event;
   switch (type) {
-    case "deal-capulli":
+    case "dealt-capulli":
       return (function(){
-        return g.fold(self, event, _.fmap(_, _.merge(_, details)));
+        return g.fold(self, event,
+          _.fmap(_,
+            _.pipe(
+              _.merge(_, details),
+              _.assoc(_, "phase", "Placing Pilli Mexicas"))));
       })();
-    case "place-pilli":
+
+    case "placed-pilli":
       return (function(){
         const {at} = details;
         return g.fold(self, event, _.fmap(_, function(state){
           return _.chain(state, _.assocIn(_, ["seated", seat, "pilli"], at), pass);
         }));
       })();
+
+    case "banked":
+      return (function(){
+        return g.fold(self, event, _.fmap(_, function(state){
+          return _.chain(state,
+            _.update(_, "spent", _.inc),
+            _.update(_, "banked", _.inc),
+            _.update(_, "tokens", _.dec),
+            _.updateIn(_, ["seated", seat, "bank"], _.inc));
+        }));
+      })();
+
     default:
       return g.fold(self, event, _.fmap(_, _.merge(_, details))); //vanilla commands
+
   }
 }
 
@@ -170,14 +241,8 @@ function fold3(self, event, f){
 const fold = _.overload(null, null, fold2, fold3);
 
 function up(self){  //TODO
-  const state = _.deref(self);
-  return [0];
-}
-
-function may(self){ //TODO
-  return _.unique(_.map(function({seat}){
-    return seat;
-  }, g.moves(self, g.seated(self))));
+  const {up} = _.deref(self);
+  return [up];
 }
 
 function moves(self){ //TODO
@@ -198,10 +263,10 @@ function perspective(self, _seen){ //TODO
   const may = g.may(self);
   const seated = g.seated(self);
   const metrics = g.metrics(self);
-  const all = _.eq(seen, g.everyone(self));
+  const all = _.eq(seen, g.everyone(self)); //TODO unused
   const state = _.chain(self, _.deref);
   const moves = _.chain(self, g.moves(_, seen), _.toArray);
-  const events = self.events;
+  const events = g.events(self);
   return {seen, seated, up, may, state, moves, events, metrics};
 }
 
@@ -211,5 +276,5 @@ function irreversible(self, command){
 
 _.doto(Mexica,
   g.behave,
-  _.implement(IGame, {perspective, up, may, moves, irreversible, metrics, /*comparator, textualizer,*/ execute, fold}));
+  _.implement(IGame, {perspective, up, may: up, moves, irreversible, metrics, /*comparator, textualizer,*/ execute, fold}));
 

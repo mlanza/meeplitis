@@ -14,7 +14,9 @@ const commands = [
   {type: "place-pilli", details: {at: "I7"}, seat: 0},
   {type: "place-pilli", details: {at: "I9"}, seat: 1},
   {type: "place-pilli", details: {at: "H8"}, seat: 2},
-  {type: "place-pilli", details: {at: "J8"}, seat: 3}
+  {type: "place-pilli", details: {at: "J8"}, seat: 3},
+  {type: "bank", seat: 0},
+  {type: "bank", seat: 0}
 ];
 g.batch($game, g.run, commands);
 

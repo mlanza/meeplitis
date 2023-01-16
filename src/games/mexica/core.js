@@ -8,6 +8,7 @@ const w = 0, //water
       p = 2; //palace
 
 const board = [
+       /*A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W*/
   /*1*/ [w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w],
   /*2*/ [w,w,l,w,w,w,l,l,l,l,l,w,w,w,w,w,w,w,w,w,w,w,w],
   /*3*/ [w,w,l,l,l,l,l,l,l,l,l,l,l,w,w,w,w,w,w,w,w,w,w],
@@ -85,6 +86,13 @@ export default function mexica(seats, config, events, journal){
   return new Mexica(_.toArray(seats), config, events || [], journal || _.chain(seats, _.count, init, _.journal));
 }
 
+function pass(state){
+  const seats = _.count(state.seated);
+  return _.update(state, "up", function(up){
+    return _.chain(seats, _.range, _.cycle, _.dropWhile(_.notEq(_, up), _), _.second);
+  });
+}
+
 function dealCapulli(self){
   const xs = _.chain(_.range(15), _.shuffle, _.take(8, _), _.sort);
   const _capulli = _.chain(capulli,
@@ -104,7 +112,7 @@ function dealCapulli(self){
 export function execute(self, command, s){
   const state = _.deref(self);
   const seat = s == null ? command.seat : s;
-  //const valid = _.detect(_.eq(_, _.chain(command, _.compact, _.dissoc(_, "id"))), g.moves(self, [seat]));
+  const valid = true;//_.detect(_.eq(_, _.chain(command, _.compact, _.dissoc(_, "id"))), g.moves(self, [seat]));
   const {type, details} = command;
   const automatic = _.includes(["start"], type);
 
@@ -123,6 +131,9 @@ export function execute(self, command, s){
   switch (type) {
     case "start":
       return _.chain(self, g.fold(_, command), dealCapulli);
+    case "place-pilli":
+      //TODO validate
+      return _.chain(self, g.fold(_, command));
   }
 }
 
@@ -133,6 +144,13 @@ function fold2(self, event){
     case "deal-capulli":
       return (function(){
         return g.fold(self, event, _.fmap(_, _.merge(_, details)));
+      })();
+    case "place-pilli":
+      return (function(){
+        const {at} = details;
+        return g.fold(self, event, _.fmap(_, function(state){
+          return _.chain(state, _.assocIn(_, ["seated", seat, "pilli"], at), pass);
+        }));
       })();
     default:
       return g.fold(self, event, _.fmap(_, _.merge(_, details))); //vanilla commands
@@ -191,37 +209,7 @@ function irreversible(self, command){
   return _.includes(["commit", "finish"], command.type);
 }
 
-function events(self){
-  return self.events;
-}
-
-function seats(self){
-  return self.seats;
-}
-
-function deref(self){
-  return _.deref(self.journal);
-}
-
-function undoable(self){
-  return _.undoable(self.journal);
-}
-
-function redoable(self){
-  return _.redoable(self.journal);
-}
-
-function flushable(self){
-  return _.flushable(self.journal);
-}
-
-function resettable(self){
-  return _.resettable(self.journal);
-}
-
 _.doto(Mexica,
-  _.implement(_.IDeref, {deref}),
-  _.implement(_.IResettable, {resettable}),
-  _.implement(_.IRevertible, {undoable, redoable, flushable}),
-  _.implement(IGame, {perspective, up, may, seats, moves, events, irreversible, metrics, /*comparator, textualizer,*/ execute, fold}));
+  g.behave,
+  _.implement(IGame, {perspective, up, may, moves, irreversible, metrics, /*comparator, textualizer,*/ execute, fold}));
 

@@ -220,3 +220,37 @@ function singular(xs){
 export function simulate(self, events, commands, seen){
   return _.chain(self, x => load(x, events), _.seq(commands) ? x => whatif(x, commands, singular(seen)) : x => perspective(x, seen));
 }
+
+function _events(self){
+  return self.events;
+}
+
+function _seats(self){
+  return self.seats;
+}
+
+function deref(self){
+  return _.deref(self.journal);
+}
+
+function undoable(self){
+  return _.undoable(self.journal);
+}
+
+function redoable(self){
+  return _.redoable(self.journal);
+}
+
+function flushable(self){
+  return _.flushable(self.journal);
+}
+
+function resettable(self){
+  return _.resettable(self.journal);
+}
+
+export const behave = _.does(
+  _.implement(_.IDeref, {deref}),
+  _.implement(_.IResettable, {resettable}),
+  _.implement(_.IRevertible, {undoable, redoable, flushable}),
+  _.implement(IGame, {seats: _seats, events: _events}));

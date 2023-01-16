@@ -452,28 +452,6 @@ function perspective(self, _seen){
   return {seen, seated, up, may, state, moves, events, metrics};
 }
 
-function deref(self){
-  return _.deref(self.journal);
-}
-
-function undoable(self){
-  return _.undoable(self.journal);
-}
-
-function redoable(self){
-  return _.redoable(self.journal);
-}
-
-function flushable(self){
-  return _.flushable(self.journal);
-}
-
-function resettable(self){
-  return _.resettable(self.journal);
-}
-
 _.doto(OhHell,
-  _.implement(_.IDeref, {deref}),
-  _.implement(_.IResettable, {resettable}),
-  _.implement(_.IRevertible, {undoable, redoable, flushable}),
-  _.implement(IGame, {perspective, up, may, seats, moves, events, irreversible, metrics, comparator, textualizer, execute: _.comp(compel, execute), fold}));
+  g.behave,
+  _.implement(IGame, {perspective, up, may, moves, irreversible, metrics, comparator, textualizer, execute: _.comp(compel, execute), fold}));

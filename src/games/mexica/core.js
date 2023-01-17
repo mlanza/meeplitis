@@ -5,7 +5,11 @@ const IGame = g.IGame;
 
 const w = 0, //water
       l = 1, //land
-      p = 2; //palace
+      e = 2, //emperor's palace
+      b = 3, //bridge
+      c = 4, //capulli
+      t = 5, //temple
+      p = 9; //pilli
 
 const board = [
        /*A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W*/
@@ -15,9 +19,9 @@ const board = [
   /*4*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,w,w,w,w,w,w,w],
   /*5*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,w,w,w,w,w],
   /*6*/ [w,w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,w,w,w],
-  /*7*/ [w,w,l,l,l,l,l,l,p,l,l,l,l,l,l,w,l,l,l,w,l,l,w],
-  /*8*/ [w,w,l,l,l,l,l,p,p,p,l,l,l,l,l,w,l,l,l,l,l,l,w],
-  /*9*/ [w,w,l,l,l,l,l,l,p,l,l,l,l,l,l,w,l,l,l,l,l,l,w],
+  /*7*/ [w,w,l,l,l,l,l,l,e,l,l,l,l,l,l,w,l,l,l,w,l,l,w],
+  /*8*/ [w,w,l,l,l,l,l,e,e,e,l,l,l,l,l,w,l,l,l,l,l,l,w],
+  /*9*/ [w,w,l,l,l,l,l,l,e,l,l,l,l,l,l,w,l,l,l,l,l,l,w],
  /*10*/ [w,w,w,l,l,l,l,l,l,l,l,l,l,l,l,w,l,l,l,l,l,w,w],
  /*11*/ [w,w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,w,w],
  /*12*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,w,w,w,w],
@@ -57,6 +61,14 @@ const temples = [
   {1: Array(3), 2: Array(2), 3: Array(2), 4: Array(2)}
 ];
 
+const coords = _.braid(function(y, x){
+  return [x, y];
+}, _.range(1, 16), _.map(function(i){
+  return String.fromCharCode(i);
+}, _.range(65, 65 + 23)));
+
+export const spots = _.map(_.str, coords);
+
 function init(seats){
   return Object.assign({
     phase: null,
@@ -67,6 +79,7 @@ function init(seats){
     banked: 0
   }, {
     capulli: null,
+    contents: {},
     seated: _.toArray(_.repeat(seats, {
       pilli: null,
       temples,
@@ -90,6 +103,31 @@ export default function mexica(seats, config, events, journal){
   return new Mexica(_.toArray(seats), config, events || [], journal || _.chain(seats, _.count, init, _.journal));
 }
 
+const cat = _.mapcat(_.identity, _);
+
+function placements({canal1, canal2, bridges, capulli, seated}){
+  return _.concat(
+    _.chain(canal1, _.compact, _.map(_.array(_, w), _)),
+    _.chain(canal2, cat, _.compact, _.map(_.array(_, w), _)),
+    _.chain(bridges, _.compact, _.map(_.array(_, b), _)),
+    _.chain(capulli, cat, _.map(_.get(_, "at"), _), _.compact, _.map(_.array(_, c), _)),
+    _.chain(seated, _.map(_.get(_, "pilli"), _), _.compact, _.map(_.array(_, p), _)),
+    _.chain(seated, _.map(_.get(_, "temples"), _), cat, _.mapa(_.vals, _), cat, cat, _.compact, _.map(_.array(_, t), _)));
+}
+
+function contents(state){
+  return _.chain(state, placements, _.toArray, _.fold(function(memo, [at, what]){
+    memo[at] = _.conj(memo[at] || [], what);
+    return memo;
+  }, {}, _));
+}
+
+function look(state, at){
+  const column = at.charCodeAt(0) - 65,
+        row = _.chain(at, _.split(_, ''), _.rest, _.join('', _), parseInt, _.dec);
+  return _.toArray(_.concat([_.getIn(state.board, [row, column])], _.get(state.contents, at, [])));
+}
+
 function pass(state){
   const seats = _.count(state.seated);
   return _.chain(state,
@@ -99,6 +137,14 @@ function pass(state){
     _.assoc(_, "spent", 0),
     _.assoc(_, "banked", 0));
 }
+
+function reflectContents(state){
+  return _.assoc(state, "contents", _.chain(state, contents));
+}
+
+const place = _.partly(function place(state, at, what){
+  return _.updateIn(state, ["contents", at], _.pipe(_.either(_, []), _.conj(_, what)));
+});
 
 function dealCapulli(){
   const xs = _.chain(_.range(15), _.shuffle, _.take(8, _), _.sort);
@@ -139,6 +185,8 @@ export function execute(self, command, s){
     case "start":
       return _.chain(self,
         g.fold(_, command),
+        g.execute(_, {type: "construct-canal", details: {size: 2, at: ["P7", "P8"]}}),
+        g.execute(_, {type: "construct-canal", details: {size: 2, at: ["P9", "P10"]}}),
         g.execute(_, {type: "deal-capulli"}));
 
     case "deal-capulli":
@@ -165,7 +213,7 @@ export function execute(self, command, s){
       return self; //TODO `{type: "move", by: "foot"/"boat"/"teleportation", to: "A4", cost: 1}`
 
     case "construct-canal":
-      return self; // `{type: "construct-canal", size: 2, at: ["A1","A2"]}`
+      return _.chain(self, g.fold(_, _.assoc(command, "type", "constructed-canal")));
 
     case "build-temple":
       return self; //TODO `{type: "build-temple", levels: 4, at: "A1"}`
@@ -200,14 +248,14 @@ function fold2(self, event){
           _.fmap(_,
             _.pipe(
               _.merge(_, details),
-              _.assoc(_, "phase", "Placing Pilli Mexicas"))));
+              _.assoc(_, "phase", "placing-pilli"))));
       })();
 
     case "placed-pilli":
       return (function(){
         const {at} = details;
         return g.fold(self, event, _.fmap(_, function(state){
-          return _.chain(state, _.assocIn(_, ["seated", seat, "pilli"], at), pass);
+          return _.chain(state, _.assocIn(_, ["seated", seat, "pilli"], at), pass, place(_, at, p));
         }));
       })();
 
@@ -220,6 +268,18 @@ function fold2(self, event){
             _.update(_, "tokens", _.dec),
             _.updateIn(_, ["seated", seat, "bank"], _.inc));
         }));
+      })();
+
+    case "constructed-canal":
+      return (function(){
+        const {size, at} = details;
+        return g.fold(self, event, _.fmap(_,
+          _.pipe(
+            _.update(_, `canal${size}`, function(ats){
+              const len = _.count(ats);
+              return _.chain(ats, _.concat(at, _), _.take(len, _), _.toArray);
+            }),
+            _.reduce(place(_, _, w), _, at))));
       })();
 
     default:

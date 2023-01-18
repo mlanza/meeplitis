@@ -67,7 +67,7 @@ const coords = _.braid(function(y, x){
   return String.fromCharCode(i);
 }, _.range(65, 65 + 23)));
 
-export const spots = _.map(_.str, coords);
+export const spots = _.map(_.spread(_.str), coords);
 
 function init(seats){
   return Object.assign({
@@ -122,11 +122,43 @@ function contents(state){
   }, {}, _));
 }
 
-function look(state, at){
+function coord(at){
   const column = at.charCodeAt(0) - 65,
         row = _.chain(at, _.split(_, ''), _.rest, _.join('', _), parseInt, _.dec);
-  return _.toArray(_.concat([_.getIn(state.board, [row, column])], _.get(state.contents, at, [])));
+  return [row, column];
 }
+
+function spot([row, column]){
+  const c = String.fromCharCode(column + 65),
+        r = row + 1;
+  return c + r;
+}
+
+function left(at){
+  const [row, column] = coord(at);
+  return spot([row, column - 1]);
+}
+
+function right(at){
+  const [row, column] = coord(at);
+  return spot([row, column + 1]);
+}
+
+function above(at){
+  const [row, column] = coord(at);
+  return spot([row - 1, column]);
+}
+
+function below(at){
+  const [row, column] = coord(at);
+  return spot([row + 1, column]);
+}
+
+const drawn = _.pipe(coord, _.getIn(board, _));
+
+const palaceSpots = ['I7', 'H8', 'J8', 'I9']; /* _.chain(spots, _.filter(function(at){
+  return _.getIn(board, coord(at)) === e;
+}, _), _.splice(_, 2, 1, []), _.toArray); */
 
 function pass(state){
   const seats = _.count(state.seated);
@@ -162,12 +194,22 @@ function dealCapulli(){
   return {type: "dealt-capulli", details: {capulli: _capulli}, seat: null};
 }
 
+function isVacant(board, contents, at){
+  const what = _.getIn(board, coord(at)),
+        cts  = _.get(contents, at);
+  return what === l && !cts;
+}
+
 export function execute(self, command, s){
   const state = _.deref(self);
   const seat = s == null ? command.seat : s;
   const valid = true;//_.detect(_.eq(_, _.chain(command, _.compact, _.dissoc(_, "id"))), g.moves(self, [seat]));
   const {type, details} = command;
-  const automatic = _.includes(["start"], type);
+  const automatic = _.includes(["start", "deal-capulli"], type);
+  const seated = seat == null ? {pilli: null, bank: 0} : state.seated[seat];
+  const {spent, board, contents, period, banked, tokens} = state;
+  const {bank} = seated;
+  const unspent = (6 + bank) - spent;
 
   if (!automatic && !valid){
     throw new Error(`Invalid ${type}`);
@@ -185,43 +227,65 @@ export function execute(self, command, s){
     case "start":
       return _.chain(self,
         g.fold(_, command),
-        g.execute(_, {type: "construct-canal", details: {size: 2, at: ["P7", "P8"]}}),
-        g.execute(_, {type: "construct-canal", details: {size: 2, at: ["P9", "P10"]}}),
+        g.fold(_, {type: "constructed-canal", details: {size: 2, at: ["P7", "P8"]}}),
+        g.fold(_, {type: "constructed-canal", details: {size: 2, at: ["P9", "P10"]}}),
         g.execute(_, {type: "deal-capulli"}));
 
     case "deal-capulli":
       return _.chain(self, g.fold(_, dealCapulli()));
 
     case "place-pilli":
-      //TODO validate via suggested moves
+      const validPlacement = _.detect(_.eq(_, _.chain(command, _.compact, _.dissoc(_, "id"))), g.moves(self, [seat]));
+      if (!validPlacement) {
+        throw new Error("Invalid placement of Pilli Mexica");
+      }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "placed-pilli")));
 
     case "bank":
-      return (function(){
-        const {banked, tokens} = _.deref(self);
-        if (banked > 1) {
-          throw new Error("Cannot take any further action point tokens");
-        }
-        if (tokens < 1) {
-          throw new Error("No action point tokens are available.");
-        }
-        return _.chain(self, g.fold(_, {type: "banked", seat}));
-
-      })();
+      if (banked > 1) {
+        throw new Error("Cannot take any further action point tokens");
+      }
+      if (tokens < 1) {
+        throw new Error("No action point tokens are available.");
+      }
+      return _.chain(self, g.fold(_, {type: "banked", seat}));
 
     case "move":
       return self; //TODO `{type: "move", by: "foot"/"boat"/"teleportation", to: "A4", cost: 1}`
 
     case "construct-canal":
+      for(const canalAt of details.at){
+        if (!isVacant(board, contents, canalAt)) {
+          throw new Error("Invalid canal location");
+        }
+      }
+      if (unspent < 1) {
+        throw new Error("Not enough action points to construct a canal");
+      }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "constructed-canal")));
 
     case "build-temple":
-      return self; //TODO `{type: "build-temple", levels: 4, at: "A1"}`
+      if (!isVacant(board, contents, details.at)) {
+        throw new Error("Invalid temple location");
+      }
+      if (!_.chain(state, _.getIn(_, ["seated", seat, "temples", period, details.level]), _.filter(_.isNil, _), _.count)){
+        throw new Error(`No level ${details.level} temples available`);
+      }
+      if (unspent < details.level) {
+        throw new Error(`Not enough action points to construct a level ${details.level} temple`);
+      }
+      return _.chain(self, g.fold(_, _.assoc(command, "type", "built-temple")));
 
     case "construct-bridge":
+      if (unspent < 1) {
+        throw new Error("Not enough action points to construct a bridge");
+      }
       return self; //TODO `{type: "construct-bridge", at: "A2"}`
 
     case "relocate-bridge":
+      if (unspent < 1) {
+        throw new Error("Not enough action points to relocate a bridge");
+      }
       return self; //TODO `{type: "relocate-bridge", from: "B2", to: "A2"}`
 
     case "found-district":
@@ -240,47 +304,49 @@ export function execute(self, command, s){
 
 function fold2(self, event){
   const state = _.deref(self);
+  const {period} = state;
   const {type, details, seat} = event;
   switch (type) {
     case "dealt-capulli":
-      return (function(){
-        return g.fold(self, event,
-          _.fmap(_,
-            _.pipe(
-              _.merge(_, details),
-              _.assoc(_, "phase", "placing-pilli"))));
-      })();
+      return g.fold(self, event,
+        _.fmap(_,
+          _.pipe(
+            _.merge(_, details),
+            _.assoc(_, "phase", "placing-pilli"))));
 
     case "placed-pilli":
-      return (function(){
-        const {at} = details;
-        return g.fold(self, event, _.fmap(_, function(state){
-          return _.chain(state, _.assocIn(_, ["seated", seat, "pilli"], at), pass, place(_, at, p));
-        }));
-      })();
+      return g.fold(self, event, _.fmap(_, function(state){
+        return _.chain(state, _.assocIn(_, ["seated", seat, "pilli"], details.at), pass, place(_, details.at, p));
+      }));
 
     case "banked":
-      return (function(){
-        return g.fold(self, event, _.fmap(_, function(state){
-          return _.chain(state,
-            _.update(_, "spent", _.inc),
-            _.update(_, "banked", _.inc),
-            _.update(_, "tokens", _.dec),
-            _.updateIn(_, ["seated", seat, "bank"], _.inc));
-        }));
-      })();
+      return g.fold(self, event, _.fmap(_, function(state){
+        return _.chain(state,
+          _.update(_, "spent", _.inc),
+          _.update(_, "banked", _.inc),
+          _.update(_, "tokens", _.dec),
+          _.updateIn(_, ["seated", seat, "bank"], _.inc));
+      }));
 
     case "constructed-canal":
-      return (function(){
-        const {size, at} = details;
-        return g.fold(self, event, _.fmap(_,
-          _.pipe(
-            _.update(_, `canal${size}`, function(ats){
-              const len = _.count(ats);
-              return _.chain(ats, _.concat(at, _), _.take(len, _), _.toArray);
-            }),
-            _.reduce(place(_, _, w), _, at))));
-      })();
+      return g.fold(self, event, _.fmap(_,
+        _.pipe(
+          _.update(_, "spent", _.inc),
+          _.update(_, `canal${details.size}`, function(ats){
+            const len = _.count(ats);
+            return _.chain(ats, _.concat(details.at, _), _.take(len, _), _.toArray);
+          }),
+          _.reduce(place(_, _, w), _, details.at))));
+
+    case "built-temple":
+      return g.fold(self, event, _.fmap(_,
+        _.pipe(
+          _.update(_, "spent", _.add(_, details.level)),
+          _.updateIn(_, ["seated", seat, "temples", period, details.level], function(ats){
+            const len = _.count(ats);
+            return _.chain(ats, _.cons(details.at, _), _.take(len, _), _.toArray);
+          }),
+          _.reduce(place(_, _, t), _, details.at))));
 
     default:
       return g.fold(self, event, _.fmap(_, _.merge(_, details))); //vanilla commands
@@ -306,6 +372,14 @@ function up(self){  //TODO
 }
 
 function moves(self){ //TODO
+  const [seat] = g.up(self);
+  const {contents, phase, seated} = _.deref(self);
+  if (phase === "placing-pilli") {
+    const occupied = _.chain(seated, _.map(_.get(_, "pilli"), _), _.compact, _.toArray);
+    return _.chain(palaceSpots, _.remove(_.includes(occupied, _), _), _.map(function(at){
+      return {type: "place-pilli", details: {at}, seat};
+    }, _));
+  }
   return [];
 }
 
@@ -338,3 +412,5 @@ _.doto(Mexica,
   g.behave,
   _.implement(IGame, {perspective, up, may: up, moves, irreversible, metrics, /*comparator, textualizer,*/ execute, fold}));
 
+
+Object.assign(window, {spots, coords})

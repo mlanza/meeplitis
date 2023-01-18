@@ -178,6 +178,10 @@ const place = _.partly(function place(state, at, what){
   return _.updateIn(state, ["contents", at], _.pipe(_.either(_, []), _.conj(_, what)));
 });
 
+const relocate = _.partly(function relocate(state, at, what){
+  return _.updateIn(state, ["contents", at], _.pipe(_.either(_, []), _.filtera(_.notEq(what, _), _)));
+});
+
 function dealCapulli(){
   const xs = _.chain(_.range(15), _.shuffle, _.take(8, _), _.sort);
   const _capulli = _.chain(capulli,
@@ -198,6 +202,34 @@ function isVacant(board, contents, at){
   const what = _.getIn(board, coord(at)),
         cts  = _.get(contents, at);
   return what === l && !cts;
+}
+
+function dry(board, contents, at){
+  const cts = _.get(contents, at);
+  const what = _.getIn(board, coord(at));
+  return what === l && !_.includes(cts, w);
+}
+
+function wet(board, contents, at){
+  const cts = _.get(contents, at);
+  const what = _.getIn(board, coord(at));
+  return what === w || _.includes(cts, w);
+}
+
+function orientBridge(board, contents, at){
+  return dry(board, contents, above(at)) && dry(board, contents, below(at)) ? "vertical" :
+         dry(board, contents, left(at))  && dry(board, contents, right(at)) ? "horizontal" : null;
+}
+
+function hasFreeBridge(contents, at){
+  const cts = _.get(contents, at);
+  return _.includes(cts, b) && !_.includes(cts, p);
+}
+
+function isBridgable(board, contents, at){
+  const what = _.getIn(board, coord(at)),
+        cts  = _.get(contents, at);
+  return _.eq([w], cts) ? orientBridge(board, at) : null;
 }
 
 export function execute(self, command, s){
@@ -256,7 +288,7 @@ export function execute(self, command, s){
     case "construct-canal":
       for(const canalAt of details.at){
         if (!isVacant(board, contents, canalAt)) {
-          throw new Error("Invalid canal location");
+          throw new Error("Invalid canal placement");
         }
       }
       if (unspent < 1) {
@@ -266,27 +298,36 @@ export function execute(self, command, s){
 
     case "build-temple":
       if (!isVacant(board, contents, details.at)) {
-        throw new Error("Invalid temple location");
+        throw new Error("Invalid temple placement");
       }
       if (!_.chain(state, _.getIn(_, ["seated", seat, "temples", period, details.level]), _.filter(_.isNil, _), _.count)){
         throw new Error(`No level ${details.level} temples available`);
       }
       if (unspent < details.level) {
-        throw new Error(`Not enough action points to construct a level ${details.level} temple`);
+        throw new Error(`Not enough action points to construct level ${details.level} temples`);
       }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "built-temple")));
 
     case "construct-bridge":
-      if (unspent < 1) {
-        throw new Error("Not enough action points to construct a bridge");
+      if (!isBridgable(board, contents, details.at)) {
+        throw new Error("Invalid bridge placement");
       }
-      return self; //TODO `{type: "construct-bridge", at: "A2"}`
+      if (unspent < 1) {
+        throw new Error("Not enough action points to construct bridges");
+      }
+      return _.chain(self, g.fold(_, _.assoc(command, "type", "constructed-bridge")));
 
     case "relocate-bridge":
-      if (unspent < 1) {
-        throw new Error("Not enough action points to relocate a bridge");
+      if (!isBridgable(board, contents, details.to)) {
+        throw new Error("Invalid bridge placement");
       }
-      return self; //TODO `{type: "relocate-bridge", from: "B2", to: "A2"}`
+      if (!hasFreeBridge(contents, details.from)){
+        throw new Error("Can only relocate free bridges");
+      }
+      if (unspent < 1) {
+        throw new Error("Not enough action points to relocate bridges");
+      }
+      return _.chain(self, g.fold(_, _.assoc(command, "type", "relocated-bridge")));
 
     case "found-district":
       return self; //TODO `{type: "found-district", size: 12, at: "A2", points: [6, 0, 0, 3]}`
@@ -338,6 +379,23 @@ function fold2(self, event){
           }),
           _.reduce(place(_, _, w), _, details.at))));
 
+    case "constructed-bridge":
+      return g.fold(self, event, _.fmap(_,
+        _.pipe(
+          _.update(_, "spent", _.inc),
+          _.update(_, "bridges", function(ats){
+            const len = _.count(ats);
+            return _.chain(ats, _.cons(details.at, _), _.take(len, _), _.toArray);
+          }),
+          place(_, details.at, b))));
+
+    case "relocated-bridge":
+      return g.fold(self, event, _.fmap(_,
+        _.pipe(
+          _.update(_, "spent", _.inc),
+          remove(_, details.from, b),
+          place(_, details.to, b))));
+
     case "built-temple":
       return g.fold(self, event, _.fmap(_,
         _.pipe(
@@ -346,7 +404,7 @@ function fold2(self, event){
             const len = _.count(ats);
             return _.chain(ats, _.cons(details.at, _), _.take(len, _), _.toArray);
           }),
-          _.reduce(place(_, _, t), _, details.at))));
+          place(_, details.at, t))));
 
     default:
       return g.fold(self, event, _.fmap(_, _.merge(_, details))); //vanilla commands

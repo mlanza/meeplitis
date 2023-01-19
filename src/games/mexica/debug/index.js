@@ -3,7 +3,7 @@ import $ from "/lib/atomic_/reactives.js";
 import t from "/lib/atomic_/transducers.js";
 import g from "/lib/game_.js";
 import mexica from "../core.js";
-import {gather, dry} from "../core.js";
+import {districts, canals} from "../core.js";
 
 const params = new URLSearchParams(document.location.search),
       split  = params.get('split') || null;
@@ -37,9 +37,12 @@ const commands = [
 g.batch($game, g.run, commands);
 
 const state = _.chain($game, _.deref, _.deref);
-const coll = districts(state.board, state.contents);
+const land = districts(state.board, state.contents);
+const water = canals(state.board, state.contents);
 
-_.log("coll", coll);
+_.log("land", land);
+_.log("water", water);
+
 
 Object.assign(window, {$game});
 

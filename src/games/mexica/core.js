@@ -236,7 +236,7 @@ const touching = _.partly(function touching(at, other){
   return above(at) === other || below(at) === other || left(at) === other || right(at) === other;
 });
 
-export function gather(coll, f, i){
+function gather(coll, f, i){
   const idx = i || 0;
   const at = _.nth(coll, idx);
   const xs = _.reduce(function(coll, at){
@@ -245,31 +245,22 @@ export function gather(coll, f, i){
   return _.nth(xs, idx + 1) ? gather(xs, f, idx + 1) : _.sort(_.asc(_.pipe(coord, _.second)), _.asc(_.pipe(coord, _.first)), xs);
 }
 
-function districts(board, contents){
+export function districts(board, contents){
+  const f = dry(board, contents, _);
   return _.chain(spots,
-    _.filter(dry(board, contents, _), _),
+    _.filter(f, _),
     _.reduce(function(memo, spot){
-      return _.detect(_.eq(spot, _), cat(memo)) ? memo : _.conj(memo, gather([spot], dry(board, contents, _)));
+      return _.detect(_.eq(spot, _), cat(memo)) ? memo : _.conj(memo, gather([spot], f));
     }, [], _));
 }
 
-function districts2(board, contents){
+export function canals(board, contents){
+  const f = wet(board, contents, _);
   return _.chain(spots,
-    _.filter(dry(board, contents, _), _),
+    _.filter(f, _),
     _.reduce(function(memo, spot){
-      const idx = _.foldkv(function(memo, idx, district, reduced){
-        return _.detect(touching(spot, _), district) ? reduced(idx) : memo;
-      }, null, memo);
-      return idx == null ? _.conj(memo, [spot]) : _.update(memo, idx, _.conj(_, spot));
+      return _.detect(_.eq(spot, _), cat(memo)) ? memo : _.conj(memo, gather([spot], f));
     }, [], _));
-}
-
-function recombine(groups){
-  _.reduce(function(memo, group){
-    return _.detect(function(spot){
-
-    }, )
-  }, [_.first(groups)], _.rest(groups));
 }
 
 export function execute(self, command, s){

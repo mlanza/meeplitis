@@ -123,8 +123,8 @@ function contents(state){
 }
 
 function coord(at){
-  const column = at.charCodeAt(0) - 65,
-        row = _.chain(at, _.split(_, ''), _.rest, _.join('', _), parseInt, _.dec);
+  const row = _.chain(at, _.split(_, ''), _.rest, _.join('', _), parseInt, _.dec),
+        column = at.charCodeAt(0) - 65;
   return [row, column];
 }
 
@@ -160,7 +160,7 @@ const palaceSpots = ['I7', 'H8', 'J8', 'I9']; /* _.chain(spots, _.filter(functio
   return _.getIn(board, coord(at)) === e;
 }, _), _.splice(_, 2, 1, []), _.toArray); */
 
-function pass(state){
+function commit(state){
   const seats = _.count(state.seated);
   return _.chain(state,
     _.update(_, "up", function(up){
@@ -204,17 +204,17 @@ function isVacant(board, contents, at){
   return what === l && !cts;
 }
 
-function dry(board, contents, at){
+export const dry = _.partly(function dry(board, contents, at){
   const cts = _.get(contents, at);
   const what = _.getIn(board, coord(at));
-  return what === l && !_.includes(cts, w);
-}
+  return _.includes([l,e], what) && !_.includes(cts, w);
+})
 
-function wet(board, contents, at){
+export const wet = _.partly(function wet(board, contents, at){
   const cts = _.get(contents, at);
   const what = _.getIn(board, coord(at));
   return what === w || _.includes(cts, w);
-}
+});
 
 function orientBridge(board, contents, at){
   return dry(board, contents, above(at)) && dry(board, contents, below(at)) ? "vertical" :
@@ -230,6 +230,46 @@ function isBridgable(board, contents, at){
   const what = _.getIn(board, coord(at)),
         cts  = _.get(contents, at);
   return _.eq([w], cts) ? orientBridge(board, at) : null;
+}
+
+const touching = _.partly(function touching(at, other){
+  return above(at) === other || below(at) === other || left(at) === other || right(at) === other;
+});
+
+export function gather(coll, f, i){
+  const idx = i || 0;
+  const at = _.nth(coll, idx);
+  const xs = _.reduce(function(coll, at){
+    return _.includes(coll, at) ? coll : _.conj(coll, at);
+  }, coll, _.filter(f, [above(at), right(at), below(at), left(at)]));
+  return _.nth(xs, idx + 1) ? gather(xs, f, idx + 1) : _.sort(_.asc(_.pipe(coord, _.second)), _.asc(_.pipe(coord, _.first)), xs);
+}
+
+function districts(board, contents){
+  return _.chain(spots,
+    _.filter(dry(board, contents, _), _),
+    _.reduce(function(memo, spot){
+      return _.detect(_.eq(spot, _), cat(memo)) ? memo : _.conj(memo, gather([spot], dry(board, contents, _)));
+    }, [], _));
+}
+
+function districts2(board, contents){
+  return _.chain(spots,
+    _.filter(dry(board, contents, _), _),
+    _.reduce(function(memo, spot){
+      const idx = _.foldkv(function(memo, idx, district, reduced){
+        return _.detect(touching(spot, _), district) ? reduced(idx) : memo;
+      }, null, memo);
+      return idx == null ? _.conj(memo, [spot]) : _.update(memo, idx, _.conj(_, spot));
+    }, [], _));
+}
+
+function recombine(groups){
+  _.reduce(function(memo, group){
+    return _.detect(function(spot){
+
+    }, )
+  }, [_.first(groups)], _.rest(groups));
 }
 
 export function execute(self, command, s){
@@ -259,8 +299,8 @@ export function execute(self, command, s){
     case "start":
       return _.chain(self,
         g.fold(_, command),
-        g.fold(_, {type: "constructed-canal", details: {size: 2, at: ["P7", "P8"]}}),
-        g.fold(_, {type: "constructed-canal", details: {size: 2, at: ["P9", "P10"]}}),
+        g.fold(_, {type: "constructed-canal", details: {at: ["P7", "P8"]}}),
+        g.fold(_, {type: "constructed-canal", details: {at: ["P9", "P10"]}}),
         g.execute(_, {type: "deal-capulli"}));
 
     case "deal-capulli":
@@ -272,6 +312,9 @@ export function execute(self, command, s){
         throw new Error("Invalid placement of Pilli Mexica");
       }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "placed-pilli")));
+
+    case "commit":
+      return _.chain(self, g.fold(_, _.assoc(command, "type", "committed")));
 
     case "bank":
       if (banked > 1) {
@@ -356,26 +399,33 @@ function fold2(self, event){
             _.assoc(_, "phase", "placing-pilli"))));
 
     case "placed-pilli":
-      return g.fold(self, event, _.fmap(_, function(state){
-        return _.chain(state, _.assocIn(_, ["seated", seat, "pilli"], details.at), pass, place(_, details.at, p));
-      }));
+      return g.fold(self, event,
+        _.fmap(_, function(state){
+          return _.chain(state, _.assocIn(_, ["seated", seat, "pilli"], details.at), place(_, details.at, p));
+        }));
+
+    case "committed":
+      return g.fold(self, event,
+        _.fmap(_, commit));
 
     case "banked":
-      return g.fold(self, event, _.fmap(_, function(state){
-        return _.chain(state,
-          _.update(_, "spent", _.inc),
-          _.update(_, "banked", _.inc),
-          _.update(_, "tokens", _.dec),
-          _.updateIn(_, ["seated", seat, "bank"], _.inc));
-      }));
+      return g.fold(self, event,
+        _.fmap(_, function(state){
+          return _.chain(state,
+            _.update(_, "spent", _.inc),
+            _.update(_, "banked", _.inc),
+            _.update(_, "tokens", _.dec),
+            _.updateIn(_, ["seated", seat, "bank"], _.inc));
+        }));
 
     case "constructed-canal":
+      const size = _.count(details.at);
       return g.fold(self, event, _.fmap(_,
         _.pipe(
           _.update(_, "spent", _.inc),
-          _.update(_, `canal${details.size}`, function(ats){
+          _.update(_, `canal${size}`, function(ats){
             const len = _.count(ats);
-            return _.chain(ats, _.concat(details.at, _), _.take(len, _), _.toArray);
+            return _.chain(ats, _.cons(details.at, _), _.take(len, _), _.toArray);
           }),
           _.reduce(place(_, _, w), _, details.at))));
 
@@ -471,4 +521,4 @@ _.doto(Mexica,
   _.implement(IGame, {perspective, up, may: up, moves, irreversible, metrics, /*comparator, textualizer,*/ execute, fold}));
 
 
-Object.assign(window, {spots, coords})
+Object.assign(window, {spots, coords, districts})

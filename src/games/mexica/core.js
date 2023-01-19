@@ -226,23 +226,29 @@ function hasFreeBridge(contents, at){
   return _.includes(cts, b) && !_.includes(cts, p);
 }
 
+const noBridge = _.partly(function noBridge(contents, at){
+  const cts = _.get(contents, at);
+  return !_.includes(cts, b);
+});
+
 function isBridgable(board, contents, at){
   const what = _.getIn(board, coord(at)),
         cts  = _.get(contents, at);
-  return _.eq([w], cts) ? orientBridge(board, at) : null;
+  return _.eq([w], cts) ? orientBridge(board, contents, at) : null;
 }
 
 const touching = _.partly(function touching(at, other){
   return above(at) === other || below(at) === other || left(at) === other || right(at) === other;
 });
 
-function gather(coll, f, i){
+function gather(coll, f, g, i){
   const idx = i || 0;
   const at = _.nth(coll, idx);
+  const around = g(at);
   const xs = _.reduce(function(coll, at){
     return _.includes(coll, at) ? coll : _.conj(coll, at);
-  }, coll, _.filter(f, [above(at), right(at), below(at), left(at)]));
-  return _.nth(xs, idx + 1) ? gather(xs, f, idx + 1) : _.sort(_.asc(_.pipe(coord, _.second)), _.asc(_.pipe(coord, _.first)), xs);
+  }, coll, around ? _.filter(f, [above(at), right(at), below(at), left(at)]) : []);
+  return _.nth(xs, idx + 1) ? gather(xs, f, g, idx + 1) : _.sort(_.asc(_.pipe(coord, _.second)), _.asc(_.pipe(coord, _.first)), xs);
 }
 
 export function districts(board, contents){
@@ -250,7 +256,7 @@ export function districts(board, contents){
   return _.chain(spots,
     _.filter(f, _),
     _.reduce(function(memo, spot){
-      return _.detect(_.eq(spot, _), cat(memo)) ? memo : _.conj(memo, gather([spot], f));
+      return _.detect(_.eq(spot, _), cat(memo)) ? memo : _.conj(memo, gather([spot], f, _.constantly(true)));
     }, [], _));
 }
 
@@ -259,7 +265,7 @@ export function canals(board, contents){
   return _.chain(spots,
     _.filter(f, _),
     _.reduce(function(memo, spot){
-      return _.detect(_.eq(spot, _), cat(memo)) ? memo : _.conj(memo, gather([spot], f));
+      return _.detect(_.eq(spot, _), cat(memo)) ? memo : _.conj(memo, gather([spot], f, noBridge(contents, _)));
     }, [], _));
 }
 

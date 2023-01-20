@@ -156,9 +156,7 @@ function below(at){
 
 const drawn = _.pipe(coord, _.getIn(board, _));
 
-const palaceSpots = ['I7', 'H8', 'J8', 'I9']; /* _.chain(spots, _.filter(function(at){
-  return _.getIn(board, coord(at)) === e;
-}, _), _.splice(_, 2, 1, []), _.toArray); */
+const palaceSpots = ['I7', 'H8', 'J8', 'I9'];
 
 function commit(state){
   const seats = _.count(state.seated);
@@ -231,6 +229,11 @@ const noBridge = _.partly(function noBridge(contents, at){
   return !_.includes(cts, b);
 });
 
+const hasBridge = _.partly(function hasBridge(contents, at){
+  const cts = _.get(contents, at);
+  return _.includes(cts, b);
+});
+
 function isBridgable(board, contents, at){
   const what = _.getIn(board, coord(at)),
         cts  = _.get(contents, at);
@@ -244,7 +247,7 @@ const touching = _.partly(function touching(at, other){
 function gather(coll, f, g, i){
   const idx = i || 0;
   const at = _.nth(coll, idx);
-  const around = g(at);
+  const around = /*_.count(coll) === 1 ||*/ g(at);
   const xs = _.reduce(function(coll, at){
     return _.includes(coll, at) ? coll : _.conj(coll, at);
   }, coll, around ? _.filter(f, [above(at), right(at), below(at), left(at)]) : []);
@@ -265,7 +268,7 @@ export function canals(board, contents){
   return _.chain(spots,
     _.filter(f, _),
     _.reduce(function(memo, spot){
-      return _.detect(_.eq(spot, _), cat(memo)) ? memo : _.conj(memo, gather([spot], f, noBridge(contents, _)));
+      return _.detect(_.eq(spot, _), cat(memo)) ? memo : _.conj(memo, gather([spot], f, _.constantly(true)));
     }, [], _));
 }
 

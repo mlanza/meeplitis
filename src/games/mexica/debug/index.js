@@ -33,7 +33,8 @@ const commands = [
   {type: "construct-canal", details: {at: ["D6","E6"]}, seat: 2},
   {type: "construct-canal", details: {at: ["C6"]}, seat: 2},
   {type: "commit", seat: 2},
-  {type: "construct-bridge", details: {at: "P8"}, seat: 3}
+  {type: "construct-bridge", details: {at: "P8"}, seat: 3},
+  {type: "construct-bridge", details: {at: "P9"}, seat: 3}
 ];
 g.batch($game, g.run, commands);
 

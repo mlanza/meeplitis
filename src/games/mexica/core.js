@@ -244,14 +244,18 @@ const touching = _.partly(function touching(at, other){
   return above(at) === other || below(at) === other || left(at) === other || right(at) === other;
 });
 
+function coordOrder(xs){
+  return _.sort(_.asc(_.pipe(coord, _.second)), _.asc(_.pipe(coord, _.first)), xs)
+}
+
 function gather(coll, f, g, i){
   const idx = i || 0;
   const at = _.nth(coll, idx);
-  const around = /*_.count(coll) === 1 ||*/ g(at);
+  const around = _.count(coll) === 1 || g(at);
   const xs = _.reduce(function(coll, at){
     return _.includes(coll, at) ? coll : _.conj(coll, at);
   }, coll, around ? _.filter(f, [above(at), right(at), below(at), left(at)]) : []);
-  return _.nth(xs, idx + 1) ? gather(xs, f, g, idx + 1) : _.sort(_.asc(_.pipe(coord, _.second)), _.asc(_.pipe(coord, _.first)), xs);
+  return _.nth(xs, idx + 1) ? gather(xs, f, g, idx + 1) : coordOrder(xs);
 }
 
 export function districts(board, contents){
@@ -269,7 +273,16 @@ export function canals(board, contents){
     _.filter(f, _),
     _.reduce(function(memo, spot){
       return _.detect(_.eq(spot, _), cat(memo)) ? memo : _.conj(memo, gather([spot], f, _.constantly(true)));
-    }, [], _));
+    }, [], _),
+    _.reduce(function(memo, pool){
+      const bridges = _.filter(hasBridge(contents, _), pool);
+      return _.concat(memo, _.seq(bridges) ? _.mapa(function(bridgeAt){
+        return gather([bridgeAt], f, noBridge(contents, _));
+      }, bridges) : [pool]);
+    }, [], _),
+    _.sort(_.asc(_.hash), _),
+    _.dedupe,
+    _.toArray);
 }
 
 export function execute(self, command, s){

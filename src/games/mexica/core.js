@@ -9,26 +9,27 @@ const w = 0, //water
       b = 3, //bridge
       c = 4, //capulli
       t = 5, //temple
-      p = 9; //pilli
+      p = 9, //pilli
+      x = null; //nothing
 
 const board = [
        /*A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W*/
-  /*1*/ [w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w],
-  /*2*/ [w,w,l,w,w,w,l,l,l,l,l,w,w,w,w,w,w,w,w,w,w,w,w],
-  /*3*/ [w,w,l,l,l,l,l,l,l,l,l,l,l,w,w,w,w,w,w,w,w,w,w],
-  /*4*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,w,w,w,w,w,w,w],
-  /*5*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,w,w,w,w,w],
+  /*1*/ [x,w,w,w,w,w,w,w,w,w,w,w,x,x,x,x,x,x,x,x,x,x,x],
+  /*2*/ [x,w,l,w,w,w,l,l,l,l,l,w,w,x,x,x,x,x,x,x,x,x,x],
+  /*3*/ [w,w,l,l,l,l,l,l,l,l,l,l,l,w,x,x,x,x,x,x,x,x,x],
+  /*4*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,x,x,x,x,x,x,x],
+  /*5*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,x,x,x,x,x],
   /*6*/ [w,w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,w,w,w],
-  /*7*/ [w,w,l,l,l,l,l,l,e,l,l,l,l,l,l,w,l,l,l,w,l,l,w],
-  /*8*/ [w,w,l,l,l,l,l,e,e,e,l,l,l,l,l,w,l,l,l,l,l,l,w],
-  /*9*/ [w,w,l,l,l,l,l,l,e,l,l,l,l,l,l,w,l,l,l,l,l,l,w],
- /*10*/ [w,w,w,l,l,l,l,l,l,l,l,l,l,l,l,w,l,l,l,l,l,w,w],
- /*11*/ [w,w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,w,w],
- /*12*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,w,w,w,w],
- /*13*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,w,w,w,w,w,w],
- /*14*/ [w,l,l,l,l,l,l,l,l,l,l,l,w,w,w,w,w,w,w,w,w,w,w],
- /*15*/ [w,w,w,l,l,l,l,w,w,l,l,w,w,w,w,w,w,w,w,w,w,w,w],
- /*16*/ [w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w]
+  /*7*/ [x,w,l,l,l,l,l,l,e,l,l,l,l,l,l,w,l,l,l,w,l,l,w],
+  /*8*/ [x,w,l,l,l,l,l,e,x,e,l,l,l,l,l,w,l,l,l,l,l,l,w],
+  /*9*/ [x,w,l,l,l,l,l,l,e,l,l,l,l,l,l,w,l,l,l,l,l,l,w],
+ /*10*/ [x,w,w,l,l,l,l,l,l,l,l,l,l,l,l,w,l,l,l,l,l,w,w],
+ /*11*/ [w,w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,w,x],
+ /*12*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,x,x,x,x],
+ /*13*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,x,x,x,x,x,x],
+ /*14*/ [w,l,l,l,l,l,l,l,l,l,l,l,w,w,w,x,x,x,x,x,x,x,x],
+ /*15*/ [w,w,w,l,l,l,l,w,w,l,l,w,w,x,x,x,x,x,x,x,x,x,x],
+ /*16*/ [x,x,w,w,w,w,w,w,w,w,w,w,x,x,x,x,x,x,x,x,x,x,x]
 ]
 
 const capulli = [
@@ -154,16 +155,22 @@ function below(at){
   return spot([row + 1, column]);
 }
 
+const around = _.juxt(above, right, below, left);
+const stop = _.constantly([]);
+
 const drawn = _.pipe(coord, _.getIn(board, _));
 
 const palaceSpots = ['I7', 'H8', 'J8', 'I9'];
 
 function commit(state){
-  const seats = _.count(state.seated);
+  const {phase, seated} = state;
+  const seats = _.count(seated);
+  const absent = !!_.seq(_.remove(_.get(_, "pilli"), seated));
   return _.chain(state,
     _.update(_, "up", function(up){
       return _.chain(seats, _.range, _.cycle, _.dropWhile(_.notEq(_, up), _), _.second);
     }),
+    phase === "placing-pilli" && !absent ? _.assoc(_, "phase", "actions") : _.identity,
     _.assoc(_, "spent", 0),
     _.assoc(_, "banked", 0));
 }
@@ -224,20 +231,26 @@ function hasFreeBridge(contents, at){
   return _.includes(cts, b) && !_.includes(cts, p);
 }
 
-const noBridge = _.partly(function noBridge(contents, at){
+const occupied = _.partly(function occupied(contents, at){
   const cts = _.get(contents, at);
-  return !_.includes(cts, b);
+  return _.includes(cts, p) || _.includes(cts, t) || _.includes(cts, c);
 });
 
-const hasBridge = _.partly(function hasBridge(contents, at){
+const unoccupied = _.partly(_.pipe(occupied, _.not));
+
+const has = _.partly(function has(what, contents, at){
   const cts = _.get(contents, at);
-  return _.includes(cts, b);
+  return _.includes(cts, what);
 });
+
+const lacks = _.partly(_.pipe(has, _.not));
+const lacksBridge = lacks(b, _, _);
+const hasBridge = has(b, _, _);
 
 function isBridgable(board, contents, at){
   const what = _.getIn(board, coord(at)),
         cts  = _.get(contents, at);
-  return _.eq([w], cts) ? orientBridge(board, contents, at) : null;
+  return what === w || _.eq([w], cts) ? orientBridge(board, contents, at) : null;
 }
 
 const touching = _.partly(function touching(at, other){
@@ -251,10 +264,10 @@ function coordOrder(xs){
 function gather(coll, f, g, i){
   const idx = i || 0;
   const at = _.nth(coll, idx);
-  const around = _.count(coll) === 1 || g(at);
-  const xs = _.reduce(function(coll, at){
+  const look = g(at, coll) ? around : stop;
+  const xs = _.chain(at, look, _.filter(f, _), _.reduce(function(coll, at){
     return _.includes(coll, at) ? coll : _.conj(coll, at);
-  }, coll, around ? _.filter(f, [above(at), right(at), below(at), left(at)]) : []);
+  }, coll, _));
   return _.nth(xs, idx + 1) ? gather(xs, f, g, idx + 1) : coordOrder(xs);
 }
 
@@ -267,22 +280,44 @@ export function districts(board, contents){
     }, [], _));
 }
 
-export function canals(board, contents){
-  const f = wet(board, contents, _);
-  return _.chain(spots,
-    _.filter(f, _),
-    _.reduce(function(memo, spot){
-      return _.detect(_.eq(spot, _), cat(memo)) ? memo : _.conj(memo, gather([spot], f, _.constantly(true)));
-    }, [], _),
-    _.reduce(function(memo, pool){
-      const bridges = _.filter(hasBridge(contents, _), pool);
-      return _.concat(memo, _.seq(bridges) ? _.mapa(function(bridgeAt){
-        return gather([bridgeAt], f, noBridge(contents, _));
-      }, bridges) : [pool]);
-    }, [], _),
-    _.sort(_.asc(_.hash), _),
-    _.dedupe,
-    _.toArray);
+const nodupes = _.pipe(
+  _.mapa(coordOrder, _),
+  _.sort(_.asc(_.hash), _),
+  _.dedupe,
+  _.toArray);
+
+export function waterways(board, contents, bridges){
+  return _.chain(bridges,
+    _.mapcat(function(spot){
+      return _.mapa(_.array(spot, _), _.filter(wet(board, contents, _), around(spot)));
+    }, _),
+    _.mapa(function(pair){
+      const connected = _.count(_.filter(hasBridge(contents, _), pair)) === 2;
+      return _.chain(
+        connected ? pair :
+        gather(pair, wet(board, contents, _), function(at, coll){
+          return _.count(coll) <3 || lacksBridge(contents, at);
+        }, 1),
+        _.pipe(
+            _.filter(hasBridge(contents, _), _),
+            _.branch(_.pipe(_.count, _.gt(_, 1)), _.identity, _.constantly([]))),
+        _.unique);
+    }, _),
+    _.filter(_.seq, _),
+    nodupes,
+    //_.see("pools"),
+    _.mapcat(function(pool){
+      return _.mapcat(function(x){
+        return _.filtera(_.pipe(_.count, _.dec), _.mapa(function(y){
+          return _.unique([x, y]);
+        }, pool));
+      }, pool);
+    }, _),
+    nodupes);
+}
+
+function remaining(spent, bank){
+  return (6 + bank) - spent;
 }
 
 export function execute(self, command, s){
@@ -294,7 +329,7 @@ export function execute(self, command, s){
   const seated = seat == null ? {pilli: null, bank: 0} : state.seated[seat];
   const {spent, board, contents, period, banked, tokens} = state;
   const {bank} = seated;
-  const unspent = (6 + bank) - spent;
+  const unspent = remaining(spent, bank);
 
   if (!automatic && !valid){
     throw new Error(`Invalid ${type}`);
@@ -339,7 +374,8 @@ export function execute(self, command, s){
       return _.chain(self, g.fold(_, {type: "banked", seat}));
 
     case "move":
-      return self; //TODO `{type: "move", by: "foot"/"boat"/"teleportation", to: "A4", cost: 1}`
+      const {by} = command.details;
+      return _.chain(self, g.fold(_, _.assoc(command, "type", "moved")));
 
     case "construct-canal":
       for(const canalAt of details.at){
@@ -401,8 +437,9 @@ export function execute(self, command, s){
 
 function fold2(self, event){
   const state = _.deref(self);
-  const {period} = state;
+  const {period, phase} = state;
   const {type, details, seat} = event;
+  const {pilli, bank} = _.nth(state.seated, seat) || {pilli: null, bank: null};
   switch (type) {
     case "dealt-capulli":
       return g.fold(self, event,
@@ -456,7 +493,7 @@ function fold2(self, event){
       return g.fold(self, event, _.fmap(_,
         _.pipe(
           _.update(_, "spent", _.inc),
-          remove(_, details.from, b),
+          relocate(_, details.from, b),
           place(_, details.to, b))));
 
     case "built-temple":
@@ -469,8 +506,17 @@ function fold2(self, event){
           }),
           place(_, details.at, t))));
 
+    case "moved":
+      const cost = details.by === "teleport" ? 5 : 1;
+      return g.fold(self, event, _.fmap(_,
+        _.pipe(
+          _.update(_, "spent", _.add(_, cost)),
+          _.assocIn(_, ["seated", seat, "pilli"], details.to),
+          relocate(_, pilli, p),
+          place(_, details.to, p))));
+
     default:
-      return g.fold(self, event, _.fmap(_, _.merge(_, details))); //vanilla commands
+      return g.fold(self, event, _.fmap(_, _.merge(_, details))); //plain events
 
   }
 }
@@ -494,12 +540,31 @@ function up(self){  //TODO
 
 function moves(self){ //TODO
   const [seat] = g.up(self);
-  const {contents, phase, seated} = _.deref(self);
+  const {board, contents, phase, spent, banked, seated} = _.deref(self);
+  const {pilli, bank} = _.nth(seated, seat);
+  const unspent = remaining(spent, bank);
+
   if (phase === "placing-pilli") {
-    const occupied = _.chain(seated, _.map(_.get(_, "pilli"), _), _.compact, _.toArray);
-    return _.chain(palaceSpots, _.remove(_.includes(occupied, _), _), _.map(function(at){
+    const taken = _.chain(seated, _.map(_.get(_, "pilli"), _), _.compact, _.toArray);
+    return _.chain(palaceSpots, _.remove(_.includes(taken, _), _), _.map(function(at){
       return {type: "place-pilli", details: {at}, seat};
     }, _));
+  } else if (pilli) {
+    const onBridge = hasBridge(contents, pilli);
+    if (onBridge){
+      /*const boat = _.chain(
+        canals(board, contents),
+        _.mapa(_.filtera(hasBridge(contents, _), _), _),
+        _.filtera(_.includes(_, pilli), _),
+        _.see("waterways"),
+        cat,
+        _.filtera(_.and(unoccupied(contents, _), hasBridge(contents, _)), _));
+      _.log("boat", boat)*/
+    }
+    const foot = unspent > 0 ? _.chain(around(pilli), _.filter(_.and(dry(board, contents, _), unoccupied(contents, _)), _), _.mapa(function(to){
+      return {type: "move", details: {by: "foot", to}, seat};
+    }, _)) : [];
+    return foot;
   }
   return [];
 }

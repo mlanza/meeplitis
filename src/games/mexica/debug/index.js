@@ -3,7 +3,7 @@ import $ from "/lib/atomic_/reactives.js";
 import t from "/lib/atomic_/transducers.js";
 import g from "/lib/game_.js";
 import mexica from "../core.js";
-import {districts, canals} from "../core.js";
+import {districts, waterways} from "../core.js";
 
 const params = new URLSearchParams(document.location.search),
       split  = params.get('split') || null;
@@ -34,17 +34,19 @@ const commands = [
   {type: "construct-canal", details: {at: ["C6"]}, seat: 2},
   {type: "commit", seat: 2},
   {type: "construct-bridge", details: {at: "P8"}, seat: 3},
-  {type: "construct-bridge", details: {at: "P9"}, seat: 3}
+  {type: "construct-bridge", details: {at: "P9"}, seat: 3},
+  {type: "construct-bridge", details: {at: "I6"}, seat: 3},
+  {type: "commit", seat: 3},
+  {type: "move", details: {by: "foot", to: "I6"}, seat: 0},
+  {type: "construct-canal", details: {at: ["P6"]}, seat: 0},
+  {type: "construct-bridge", details: {at: "P6"}, seat: 0},
+  {type: "construct-bridge", details: {at: "C10"}, seat: 0}
 ];
 g.batch($game, g.run, commands);
 
 const state = _.chain($game, _.deref, _.deref);
-const land = districts(state.board, state.contents);
-const water = canals(state.board, state.contents);
-
-_.log("land", land);
-_.log("water", water);
-
+_.log("districts", districts(state.board, state.contents));
+_.log("waterways", waterways(state.board, state.contents, _.compact(state.bridges)));
 
 Object.assign(window, {$game});
 

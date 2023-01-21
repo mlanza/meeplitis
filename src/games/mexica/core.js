@@ -316,6 +316,48 @@ export function waterways(board, contents, bridges){
     nodupes);
 }
 
+function travel(waterways, canals, size, reach){
+  return _.chain(canals,
+    _.filtera(_.pipe(_.count, _.eq(_, size - 1)), _),
+    _.mapcat(function(canal){
+      const excludes = _.toArray(_.scan(2, canal));
+      const wws = _.toArray(_.remove(function(waterway){
+        return _.detect(function([x, y]){
+          return _.eq(waterway, [x, y]) || _.eq(waterway, [y, x]);
+        }, excludes);
+      }, waterways));
+      const from = _.last(canal);
+      const nexts = _.chain(wws,
+        _.filter(function(waterway){
+          return _.includes(waterway, from);
+        }, _),
+        cat,
+        _.remove(_.eq(_, from), _),
+        _.map(function(spot){
+          return _.includes(canal, spot) ? canal : _.toArray(_.concat(canal, [spot]));
+        }, _));
+      return size <= reach ? travel(wws, nexts, size + 1) : nexts;
+    }, _),
+    _.concat(canals, _),
+    _.toArray);
+}
+
+export function boats(waterways, from, max, seat){
+  return _.chain(
+    travel(waterways, [[from]], 2, max),
+    _.filtera(_.pipe(_.count, _.gt(_, 1)), _),
+    _.see("travel"),
+    _.groupBy(_.last, _),
+    _.mapVals(_, _.pipe(_.sort(_.asc(_.count), _), _.first)),
+    _.vals,
+    _.mapa(function(waterway){
+      const from = _.first(waterway),
+            to = _.last(waterway),
+            cost = _.count(waterway) - 1;
+      return {type: "move", details: {by: "boat", from, to, cost}, seat};
+    }, _));
+}
+
 function remaining(spent, bank){
   return (6 + bank) - spent;
 }
@@ -540,7 +582,7 @@ function up(self){  //TODO
 
 function moves(self){ //TODO
   const [seat] = g.up(self);
-  const {board, contents, phase, spent, banked, seated} = _.deref(self);
+  const {board, contents, bridges, phase, spent, banked, seated} = _.deref(self);
   const {pilli, bank} = _.nth(seated, seat);
   const unspent = remaining(spent, bank);
 
@@ -550,21 +592,13 @@ function moves(self){ //TODO
       return {type: "place-pilli", details: {at}, seat};
     }, _));
   } else if (pilli) {
-    const onBridge = hasBridge(contents, pilli);
-    if (onBridge){
-      /*const boat = _.chain(
-        canals(board, contents),
-        _.mapa(_.filtera(hasBridge(contents, _), _), _),
-        _.filtera(_.includes(_, pilli), _),
-        _.see("waterways"),
-        cat,
-        _.filtera(_.and(unoccupied(contents, _), hasBridge(contents, _)), _));
-      _.log("boat", boat)*/
-    }
+    const water = waterways(board, contents, _.toArray(_.compact(bridges)));
     const foot = unspent > 0 ? _.chain(around(pilli), _.filter(_.and(dry(board, contents, _), unoccupied(contents, _)), _), _.mapa(function(to){
       return {type: "move", details: {by: "foot", to}, seat};
     }, _)) : [];
-    return foot;
+    const teleport = unspent > 4 ? [{type: "move", details: {by: "teleport"}, seat}] : [];
+    const boat = hasBridge(contents, pilli) ? boats(water, pilli, _.min(unspent, 5), 0) : [];
+    return _.toArray(_.concat(foot, boat, teleport));
   }
   return [];
 }

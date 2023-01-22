@@ -5,11 +5,13 @@ import g from "/lib/game_.js";
 import ohHell from "../core.js";
 
 const params = new URLSearchParams(document.location.search),
-      split  = params.get('split') || null;
+      split  = params.get('split') || null,
+      options = (params.get('options') ?? "").split(','),
+      monitor = !_.includes(options, "nomonitor");
 
 const $game = $.cell(ohHell(_.repeat(4, {}), {start: 1, end: 2}));
 
-$.sub($.hist($game), t.map(g.summarize), _.log);
+$.sub($.hist($game), t.map(monitor ? g.summarize : _.identity), _.log);
 const commands = _.take(50, _.concat([{type: "start"}], _.repeat({type: "~"})));
 g.batch($game, g.run, commands);
 //_.swap($game, g.run(_, [{type: "~"}]))

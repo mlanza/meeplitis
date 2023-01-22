@@ -363,7 +363,8 @@ function remaining(spent, bank){
 export function execute(self, command, s){
   const state = _.deref(self);
   const seat = s == null ? command.seat : s;
-  const valid = true;//_.detect(_.eq(_, _.chain(command, _.compact, _.dissoc(_, "id"))), g.moves(self, [seat]));
+  const moves = g.moves(self, [seat]);
+  const valid = _.includes(["build-temple", "construct-canal", "construct-bridge"], command.type) ? true : _.detect(_.eq(_, _.chain(command, _.compact, _.dissoc(_, "id"))), moves);
   const {type, details} = command;
   const automatic = _.includes(["start", "deal-capulli"], type);
   const seated = seat == null ? {pilli: null, bank: 0} : state.seated[seat];
@@ -405,18 +406,17 @@ export function execute(self, command, s){
       return _.chain(self, g.fold(_, _.assoc(command, "type", "committed")));
 
     case "bank":
-      if (banked > 1) {
-        throw new Error("Cannot take any further action point tokens");
-      }
       if (tokens < 1) {
         throw new Error("No action point tokens are available.");
       }
+      if (banked > 1) {
+        throw new Error("Cannot take any further action point tokens");
+      }
       return _.chain(self, g.fold(_, {type: "banked", seat}));
 
+    //TODO validate teleport
     case "move":
       const {by} = command.details;
-      const moves = g.moves(self, [seat]);
-      const valid = _.detect(_.eq(_, _.chain(command, _.compact, _.dissoc(_, "id"))), moves);
       if (!valid) {
         throw new Error("Invalid move");
       }
@@ -433,6 +433,7 @@ export function execute(self, command, s){
       }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "constructed-canal")));
 
+    //TODO validate location, confirm temple and pilli are in same district
     case "build-temple":
       if (!isVacant(board, contents, details.at)) {
         throw new Error("Invalid temple placement");
@@ -466,6 +467,7 @@ export function execute(self, command, s){
       }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "relocated-bridge")));
 
+    //TODO confirm pilli is in district
     case "found-district":
       return self; //TODO `{type: "found-district", size: 12, at: "A2", points: [6, 0, 0, 3]}`
 
@@ -588,21 +590,20 @@ function moves(self){ //TODO
   const {pilli, bank} = _.nth(seated, seat);
   const unspent = remaining(spent, bank);
 
-  if (phase === "placing-pilli") {
-    const taken = _.chain(seated, _.map(_.get(_, "pilli"), _), _.compact, _.toArray);
-    return _.chain(palaceSpots, _.remove(_.includes(taken, _), _), _.map(function(at){
-      return {type: "place-pilli", details: {at}, seat};
-    }, _));
-  } else if (pilli) {
+  if (pilli) {
+    const banking = _.map(_.constantly({type: "bank", seat}), _.range(2 - banked));
     const water = waterways(board, contents, _.compact(bridges));
     const foot = unspent > 0 ? _.chain(around(pilli), _.filter(_.and(_.or(dry(board, contents, _), hasBridge(contents, _)), unoccupied(contents, _)), _), _.mapa(function(to){
       return {type: "move", details: {by: "foot", from: pilli, to}, seat};
     }, _)) : [];
     const teleport = unspent > 4 ? [{type: "move", details: {by: "teleport", cost: 5, from: pilli}, seat}] : [];
     const boat = hasBridge(contents, pilli) ? boats(water, pilli, _.min(unspent, 5), 0) : [];
-    return _.concat(foot, boat, teleport);
+    return _.concat([{type: "commit", seat}], banking, foot, boat, teleport);
   } else {
-    return [];
+    const taken = _.chain(seated, _.map(_.get(_, "pilli"), _), _.compact, _.toArray);
+    return _.chain(palaceSpots, _.remove(_.includes(taken, _), _), _.map(function(at){
+      return {type: "place-pilli", details: {at}, seat};
+    }, _));
   }
 }
 

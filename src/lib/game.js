@@ -26,23 +26,11 @@ export const metrics = IGame.metrics;
 export const comparator = IGame.comparator;
 export const textualizer = IGame.textualizer;
 
-const perspective3 = _.chain(IGame.perspective,
-  _.post(_,
-    _.and(
-      _.contains(_, "seen"),
-      _.contains(_, "seated"),
-      _.contains(_, "state"),
-      _.contains(_, "events"),
-      _.contains(_, "moves"),
-      _.contains(_, "metrics"),
-      _.contains(_, "up"))));
-
-function perspective2(self, _seen){
-  const seen = _.chain(_seen, _.filtera(_.isSome, _));
-  return perspective3(self, seen, reality(self));
+function perspective2(self, seen){
+  return perspective3(self, _.chain(seen, _.filtera(_.isSome, _)), reality(self));
 }
 
-export const perspective = _.overload(null, null, perspective2, perspective3);
+export const perspective = _.overload(null, null, perspective2, IGame.perspective);
 
 export function seated(self){
   return _.chain(self, numSeats, _.range, _.toArray);
@@ -201,8 +189,8 @@ export function perspectives(self, reality){
     _.mapa(_.pipe(_.array, function(seen){
       return _.chain(
         perspective(self, seen, reality),
-        _.update(_, "moves", movesAt(seen)),
-        _.assoc(_, "seen", seen));
+        _.assoc(_, "seen", seen),
+        _.update(_, "moves", movesAt(seen)));
     }), _));
 }
 

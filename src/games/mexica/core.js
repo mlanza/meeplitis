@@ -1,8 +1,6 @@
 import _ from "/lib/atomic_/core.js";
 import g from "/lib/game_.js";
 
-const IGame = g.IGame;
-
 const w = 0, //water
       l = 1, //land
       e = 2, //emperor's palace
@@ -157,10 +155,7 @@ function below(at){
 
 const around = _.juxt(above, right, below, left);
 const stop = _.constantly([]);
-
-const drawn = _.pipe(coord, _.getIn(board, _));
-
-const palaceSpots = ['I7', 'H8', 'J8', 'I9'];
+const palaceSpots = around('I8');
 
 function commit(state){
   const {phase, seated} = state;
@@ -213,7 +208,7 @@ export const dry = _.partly(function dry(board, contents, at){
   const cts = _.get(contents, at);
   const what = _.getIn(board, coord(at));
   return _.includes([l,e], what) && !_.includes(cts, w);
-})
+});
 
 export const wet = _.partly(function wet(board, contents, at){
   const cts = _.get(contents, at);
@@ -253,9 +248,9 @@ function isBridgable(board, contents, at){
   return what === w || _.eq([w], cts) ? orientBridge(board, contents, at) : null;
 }
 
-const touching = _.partly(function touching(at, other){
+/*const touching = _.partly(function touching(at, other){
   return above(at) === other || below(at) === other || left(at) === other || right(at) === other;
-});
+});*/
 
 function coordOrder(xs){
   return _.sort(_.asc(_.pipe(coord, _.second)), _.asc(_.pipe(coord, _.first)), xs)
@@ -269,6 +264,10 @@ function gather(coll, f, g, i){
     return _.includes(coll, at) ? coll : _.conj(coll, at);
   }, coll, _));
   return _.nth(xs, idx + 1) ? gather(xs, f, g, idx + 1) : coordOrder(xs);
+}
+
+function district(board, contents, spot){
+  return gather([spot], dry(board, contents, _), _.constantly(true));
 }
 
 export function districts(board, contents){
@@ -585,6 +584,8 @@ function up(self){  //TODO
   return [up];
 }
 
+const may = up;
+
 function moves(self){ //TODO
   const [seat] = g.up(self);
   const {board, contents, bridges, phase, spent, banked, seated} = _.deref(self);
@@ -592,12 +593,13 @@ function moves(self){ //TODO
   const unspent = remaining(spent, bank);
 
   if (pilli) {
+    const from = pilli;
     const banking = _.map(_.constantly({type: "bank", seat}), _.range(2 - banked));
     const water = waterways(board, contents, _.compact(bridges));
     const foot = unspent > 0 ? _.chain(around(pilli), _.filter(_.and(_.or(dry(board, contents, _), hasBridge(contents, _)), unoccupied(contents, _)), _), _.mapa(function(to){
-      return {type: "move", details: {by: "foot", from: pilli, to}, seat};
+      return {type: "move", details: {by: "foot", from, to}, seat};
     }, _)) : [];
-    const teleport = unspent > 4 ? [{type: "move", details: {by: "teleport", cost: 5, from: pilli}, seat}] : [];
+    const teleport = unspent > 4 ? [{type: "move", details: {by: "teleport", from, cost: 5}, seat}] : [];
     const boat = hasBridge(contents, pilli) ? boats(water, pilli, _.min(unspent, 5), 0) : [];
     return _.concat([{type: "commit", seat}], banking, foot, boat, teleport);
   } else {
@@ -626,7 +628,6 @@ function irreversible(self, command){
 
 _.doto(Mexica,
   g.behave,
-  _.implement(IGame, {perspective, up, may: up, moves, irreversible, metrics, /*comparator, textualizer,*/ execute, fold}));
-
+  _.implement(g.IGame, {perspective, up, may, moves, irreversible, metrics, /*comparator, textualizer,*/ execute, fold}));
 
 Object.assign(window, {spots, coords, districts})

@@ -428,28 +428,35 @@ function obscure(seen){
   }
 }
 
-function perspective(self, _seen){
-  const seen = _.chain(_seen, _.filtera(_.isSome, _));
-  const up = g.up(self);
-  const may = g.may(self);
-  const seated = g.seated(self);
-  const metrics = g.metrics(self);
+function obscureState(seen, all){
+  return function(state){
+    const {status} = state;
+    const bidding = status === "bidding";
+    return _.chain(state,
+      all ? _.identity :
+      _.pipe(
+        _.update(_, "deck", obscureCards),
+        _.update(_, "seated", _.pipe(_.mapIndexed(function(idx, seated){ //can only see your own hand
+          return _.includes(seen, idx) ? seated : _.chain(seated,
+            _.update(_, "hand", obscureCards),
+            bidding ? _.update(_, "bid", function(bid){
+              return bid == null ? null : "";
+            }) : _.identity);
+          }, _), _.toArray))));
+  }
+}
+
+function obscureEvents(seen, all){
+  return function(events){
+    return all ? events : _.mapa(obscure(seen), events);
+  }
+}
+
+function perspective(self, seen, reality){
   const all = _.eq(seen, g.everyone(self));
-  const bidding = _.chain(self, _.deref, _.get(_, "status"), _.eq(_, "bidding"));
-  const state = _.chain(self, _.deref,
-    all ? _.identity :
-    _.pipe(
-      _.update(_, "deck", obscureCards),
-      _.update(_, "seated", _.pipe(_.mapIndexed(function(idx, seated){ //can only see your own hand
-        return _.includes(seen, idx) ? seated : _.chain(seated,
-          _.update(_, "hand", obscureCards),
-          bidding ? _.update(_, "bid", function(bid){
-            return bid == null ? null : "";
-          }) : _.identity);
-        }, _), _.toArray))));
-  const moves = _.chain(self, g.moves(_, seen), _.toArray);
-  const events = all ? self.events : _.mapa(obscure(seen), self.events);
-  return {seen, seated, up, may, state, moves, events, metrics};
+  return _.chain(reality,
+    _.update(_, "state", obscureState(seen, all)),
+    _.update(_, "events", obscureEvents(seen, all)))
 }
 
 _.doto(OhHell,

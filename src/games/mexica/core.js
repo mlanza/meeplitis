@@ -364,6 +364,7 @@ export function execute(self, command, s){
   const state = _.deref(self);
   const seat = s == null ? command.seat : s;
   const moves = g.moves(self, [seat]);
+  //TODO expose validations below to ui
   const valid = _.includes(["build-temple", "construct-canal", "construct-bridge"], command.type) ? true : _.detect(_.eq(_, _.chain(command, _.compact, _.dissoc(_, "id"))), moves);
   const {type, details} = command;
   const automatic = _.includes(["start", "deal-capulli"], type);
@@ -615,17 +616,8 @@ function metrics(self){
   }, state.seated);
 }
 
-function perspective(self, _seen){ //TODO
-  const seen = _.chain(_seen, _.filtera(_.isSome, _));
-  const up = g.up(self);
-  const may = g.may(self);
-  const seated = g.seated(self);
-  const metrics = g.metrics(self);
-  const all = _.eq(seen, g.everyone(self)); //TODO unused
-  const state = _.chain(self, _.deref);
-  const moves = _.chain(self, g.moves(_, seen), _.toArray);
-  const events = g.events(self);
-  return {seen, seated, up, may, state, moves, events, metrics};
+function perspective(self, seen, reality){
+  return reality; //no hidden info.
 }
 
 function irreversible(self, command){

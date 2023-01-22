@@ -25,7 +25,8 @@ export const events = IGame.events;
 export const metrics = IGame.metrics;
 export const comparator = IGame.comparator;
 export const textualizer = IGame.textualizer;
-export const perspective = _.chain(IGame.perspective,
+
+const perspective3 = _.chain(IGame.perspective,
   _.post(_,
     _.and(
       _.contains(_, "seen"),
@@ -35,6 +36,13 @@ export const perspective = _.chain(IGame.perspective,
       _.contains(_, "moves"),
       _.contains(_, "metrics"),
       _.contains(_, "up"))));
+
+function perspective2(self, _seen){
+  const seen = _.chain(_seen, _.filtera(_.isSome, _));
+  return perspective3(self, seen, reality(self));
+}
+
+export const perspective = _.overload(null, null, perspective2, perspective3);
 
 export function seated(self){
   return _.chain(self, numSeats, _.range, _.toArray);
@@ -177,16 +185,25 @@ export function added(curr, prior){
   return prior ? _.chain(events(curr), _.last(_.count(events(curr)) - _.count(events(prior)), _), _.toArray) : [];
 }
 
+function movesAt(seats){
+  return _.filtera(_.pipe(_.get(_, "seat"), _.includes(seats, _)), _); //TODO `filter` for `filtera`
+}
+
 function moves2(self, seats){
-  return _.chain(self, IGame.moves, _.filter(_.pipe(_.get(_, "seat"), _.includes(seats, _)), _));
+  return _.chain(self, IGame.moves, movesAt(seats));
 }
 
 export const moves = _.overload(null, IGame.moves, moves2);
 
-export function perspectives(self){
+export function perspectives(self, reality){
   return _.chain(self,
     seated,
-    _.mapa(_.pipe(_.array, _.partial(perspective, self)), _));
+    _.mapa(_.pipe(_.array, function(seen){
+      return _.chain(
+        perspective(self, seen, reality),
+        _.update(_, "moves", movesAt(seen)),
+        _.assoc(_, "seen", seen));
+    }), _));
 }
 
 export function notify(curr, prior){
@@ -197,14 +214,28 @@ export function everyone(self){
   return _.toArray(_.mapIndexed(_.identity, seated(self)));
 }
 
-export function summarize([curr, prior]){ //use $.hist
+export function reality(self){
+  const seen = seated(self);
+  return {
+    seen,
+    seated: seen,
+    state: _.deref(self),
+    up: up(self),
+    may: may(self),
+    moves: moves(self),
+    events: events(self),
+    metrics: metrics(self)};
+}
+
+export function summarize([curr, prior]){ //uses $.hist
+  const _reality = _.chain(curr, reality, _.update(_, "moves", _.toArray));
   return {
     up: up(curr),
     may: may(curr),
     notify: notify(curr, prior),
     added: added(curr, prior),
-    perspectives: perspectives(curr),
-    reality: _.compact(perspective(curr, everyone(curr))),
+    perspectives: perspectives(curr, _reality),
+    reality: _reality,
     game: curr
   };
 }

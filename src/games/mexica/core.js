@@ -1,14 +1,14 @@
 import _ from "/lib/atomic_/core.js";
 import g from "/lib/game_.js";
 
-const w = 0, //water
-      l = 1, //land
-      e = 2, //emperor's palace
-      b = 3, //bridge
-      c = 4, //capulli
-      t = 5, //temple
-      p = 9, //pilli
-      x = null; //nothing
+const w = "w", //water
+      l = "l", //land
+      e = "e", //emperor's palace
+      b = "b", //bridge
+      c = "c", //capulli
+      t = "t", //temple
+      p = "p", //pilli
+      x = "-"; //nothing
 
 const board = [
        /*A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W*/
@@ -198,11 +198,11 @@ function dealCapulli(){
   return {type: "dealt-capulli", details: {capulli: _capulli}, seat: null};
 }
 
-function isVacant(board, contents, at){
+const isVacant = _.partly(function isVacant(board, contents, at){
   const what = _.getIn(board, coord(at)),
         cts  = _.get(contents, at);
   return what === l && !cts;
-}
+});
 
 export const dry = _.partly(function dry(board, contents, at){
   const cts = _.get(contents, at);
@@ -221,9 +221,9 @@ function orientBridge(board, contents, at){
          dry(board, contents, left(at))  && dry(board, contents, right(at)) ? "horizontal" : null;
 }
 
-function hasFreeBridge(contents, at){
+function isPinned(contents, at){
   const cts = _.get(contents, at);
-  return _.includes(cts, b) && !_.includes(cts, p);
+  return _.includes(cts, p);
 }
 
 const occupied = _.partly(function occupied(contents, at){
@@ -247,10 +247,6 @@ function isBridgable(board, contents, at){
         cts  = _.get(contents, at);
   return what === w || _.eq([w], cts) ? orientBridge(board, contents, at) : null;
 }
-
-/*const touching = _.partly(function touching(at, other){
-  return above(at) === other || below(at) === other || left(at) === other || right(at) === other;
-});*/
 
 function coordOrder(xs){
   return _.sort(_.asc(_.pipe(coord, _.second)), _.asc(_.pipe(coord, _.first)), xs)
@@ -359,17 +355,29 @@ function remaining(spent, bank){
   return (6 + bank) - spent;
 }
 
+function hasCapulli(contents, spots){
+  return _.some(function(spot){
+    return _.includes(_.get(contents, spot), c) ? spot : null;
+  }, spots);
+}
+
 export function execute(self, command, s){
   const state = _.deref(self);
+  const {type, details} = command;
   const seat = s == null ? command.seat : s;
   const moves = g.moves(self, [seat]);
   //TODO expose validations below to ui
-  const valid = _.includes(["build-temple", "construct-canal", "construct-bridge"], command.type) ? true : _.detect(_.eq(_, _.chain(command, _.compact, _.dissoc(_, "id"))), moves);
-  const {type, details} = command;
+  const valid = _.includes(["build-temple", "construct-canal", "construct-bridge"], command.type) ||
+    _.detect(_.or(_.eq(_, _.chain(command, _.compact, _.dissoc(_, "id"))), function(cmd){
+      switch(cmd.type){
+        case "move":
+          return cmd?.details?.by === "teleport" && cmd.type === details.type && cmd?.details?.by === details.by;
+      }
+    }), moves);
   const automatic = _.includes(["start", "deal-capulli"], type);
   const seated = seat == null ? {pilli: null, bank: 0} : state.seated[seat];
   const {spent, board, contents, period, banked, tokens} = state;
-  const {bank} = seated;
+  const {bank, pilli} = seated;
   const unspent = remaining(spent, bank);
 
   if (!automatic && !valid){
@@ -396,8 +404,7 @@ export function execute(self, command, s){
       return _.chain(self, g.fold(_, dealCapulli()));
 
     case "place-pilli":
-      const validPlacement = _.detect(_.eq(_, _.chain(command, _.compact, _.dissoc(_, "id"))), g.moves(self, [seat]));
-      if (!validPlacement) {
+      if (!valid) {
         throw new Error("Invalid placement of Pilli Mexica");
       }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "placed-pilli")));
@@ -414,9 +421,7 @@ export function execute(self, command, s){
       }
       return _.chain(self, g.fold(_, {type: "banked", seat}));
 
-    //TODO validate teleport
     case "move":
-      const {by} = command.details;
       if (!valid) {
         throw new Error("Invalid move");
       }
@@ -424,6 +429,9 @@ export function execute(self, command, s){
 
     case "construct-canal":
       for(const canalAt of details.at){
+        if (hasCapulli(contents, district(board, contents, canalAt))){
+          throw new Error("Cannot carve a founded district");
+        }
         if (!isVacant(board, contents, canalAt)) {
           throw new Error("Invalid canal placement");
         }
@@ -433,8 +441,14 @@ export function execute(self, command, s){
       }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "constructed-canal")));
 
-    //TODO validate location, confirm temple and pilli are in same district
     case "build-temple":
+      const present = _.detect(function(spot){
+        return spot === details.at;
+      }, district(board, contents, pilli));
+
+      if (!present){
+        throw new Error("Cannot place a temple where your Mexica Pilli is not present");
+      }
       if (!isVacant(board, contents, details.at)) {
         throw new Error("Invalid temple placement");
       }
@@ -459,7 +473,7 @@ export function execute(self, command, s){
       if (!isBridgable(board, contents, details.to)) {
         throw new Error("Invalid bridge placement");
       }
-      if (!hasFreeBridge(contents, details.from)){
+      if (hasBridge(contents, details.from) && !isPinned(contents, details.from)){
         throw new Error("Can only relocate free bridges");
       }
       if (unspent < 1) {
@@ -467,15 +481,12 @@ export function execute(self, command, s){
       }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "relocated-bridge")));
 
-    //TODO confirm pilli is in district
     case "found-district":
-      return self; //TODO `{type: "found-district", size: 12, at: "A2", points: [6, 0, 0, 3]}`
+      //TODO determine points for seats adding details `points: [6, 0, 0, 3]`
+      return _.chain(self, g.fold(_, _.assoc(command, "type", "founded-district")));
 
     case "score-period":
       return self; //TODO `{type: "score-period", period: 1, districts: [{at: "A2", size: 12, points: [12, 0, 0, 3]}]}`
-
-    case "commit":
-      return self; //TODO
 
     case "finish":
       return self; //TODO
@@ -579,21 +590,55 @@ function fold3(self, event, f){
 
 const fold = _.overload(null, null, fold2, fold3);
 
-function up(self){  //TODO
+function up(self){
   const {up} = _.deref(self);
   return [up];
 }
 
 const may = up;
 
-function moves(self){ //TODO
+export function foundable(board, contents, markers, pilli){
+  const dist = district(board, contents, pilli);
+  const size = _.count(dist);
+  const unfounded = _.filter(function({at}){
+    return !at;
+  }, markers);
+  const founded = _.filter(function({at}){
+    return !!at;
+  }, markers);
+  const fixed = _.detect(function(at){
+    return _.detect(function(c){
+      return c.at === at;
+    }, founded);
+  }, dist);
+  const avail = size < 14 && _.detect(function({rank}){
+    return rank === size;
+  }, unfounded);
+  return _.seq(_.map(function(at){
+    return {size, at};
+  }, avail ? _.filter(isVacant(board, contents, _), dist) : null));
+}
+
+function canalable(board, contents){
+  return _.filter(isVacant(board, contents, _), cat(_.remove(function(dist){
+    return _.detect(function(at){
+      return _.includes(_.get(contents, at), c); //capulli?
+    }, dist)
+  }, districts(board, contents))));
+}
+
+function moves(self){
   const [seat] = g.up(self);
-  const {board, contents, bridges, phase, spent, banked, seated} = _.deref(self);
+  const {board, contents, capulli, bridges, period, phase, spent, banked, seated} = _.deref(self);
   const {pilli, bank} = _.nth(seated, seat);
   const unspent = remaining(spent, bank);
 
   if (pilli) {
     const from = pilli;
+    const markers = _.nth(capulli, period);
+    const found = _.mapa(function(details){
+      return {type: "found-district", seat, details};
+    }, foundable(board, contents, markers, pilli));
     const banking = _.map(_.constantly({type: "bank", seat}), _.range(2 - banked));
     const water = waterways(board, contents, _.compact(bridges));
     const foot = unspent > 0 ? _.chain(around(pilli), _.filter(_.and(_.or(dry(board, contents, _), hasBridge(contents, _)), unoccupied(contents, _)), _), _.mapa(function(to){
@@ -601,7 +646,7 @@ function moves(self){ //TODO
     }, _)) : [];
     const teleport = unspent > 4 ? [{type: "move", details: {by: "teleport", from, cost: 5}, seat}] : [];
     const boat = hasBridge(contents, pilli) ? boats(water, pilli, _.min(unspent, 5), 0) : [];
-    return _.concat([{type: "commit", seat}], banking, foot, boat, teleport);
+    return _.concat([{type: "commit", seat}], banking, foot, boat, teleport, found);
   } else {
     const taken = _.chain(seated, _.map(_.get(_, "pilli"), _), _.compact, _.toArray);
     return _.chain(palaceSpots, _.remove(_.includes(taken, _), _), _.map(function(at){

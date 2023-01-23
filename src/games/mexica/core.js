@@ -48,13 +48,6 @@ const capulli = [
   {rank: 3, at: null}
 ];
 
-const bits = {
-  canal1: Array(6),
-  canal2: Array(37),
-  bridges: Array(11),
-  tokens: 12
-}
-
 const temples = {1: Array(3), 2: Array(3), 3: Array(2), 4: Array(1)};
 const reserve = {1: Array(3), 2: Array(2), 3: Array(2), 4: Array(2)};
 const addReserveTemples = _.reducekv(function(temples, level, added){ //TODO use after period 0 ends
@@ -72,23 +65,26 @@ const coords = _.braid(function(y, x){
 export const spots = _.map(_.spread(_.str), coords);
 
 function init(seats){
-  return Object.assign({
+  return {
+    up: 0,
     phase: null,
     board,
-    period: 0,
-    up: 0,
-    spent: 0,
-    banked: 0
-  }, {
-    capulli: null,
     contents: {},
+    period: 0,
+    spent: 0,
+    banked: 0,
+    tokens: 12,
+    canal1: Array(6),
+    canal2: Array(37),
+    bridges: Array(11),
+    capulli: null,
     seated: _.toArray(_.repeat(seats, {
       pilli: null,
       temples,
       bank: 0,
       points: 0
     }))
-  }, bits);
+  };
 }
 
 function Mexica(seats, config, events, journal){
@@ -106,23 +102,6 @@ export default function mexica(seats, config, events, journal){
 }
 
 const cat = _.mapcat(_.identity, _);
-
-function placements({canal1, canal2, bridges, capulli, seated}){
-  return _.concat(
-    _.chain(canal1, _.compact, _.map(_.array(_, w), _)),
-    _.chain(canal2, cat, _.compact, _.map(_.array(_, w), _)),
-    _.chain(bridges, _.compact, _.map(_.array(_, b), _)),
-    _.chain(capulli, cat, _.map(_.get(_, "at"), _), _.compact, _.map(_.array(_, c), _)),
-    _.chain(seated, _.map(_.get(_, "pilli"), _), _.compact, _.map(_.array(_, p), _)),
-    _.chain(seated, _.map(_.get(_, "temples"), _), _.mapa(_.vals, _), cat, cat, _.compact, _.map(_.array(_, t), _)));
-}
-
-function contents(state){
-  return _.chain(state, placements, _.toArray, _.fold(function(memo, [at, what]){
-    memo[at] = _.conj(memo[at] || [], what);
-    return memo;
-  }, {}, _));
-}
 
 function coord(at){
   const row = _.chain(at, _.split(_, ''), _.rest, _.join('', _), parseInt, _.dec),
@@ -223,7 +202,7 @@ function orientBridge(board, contents, at){
          dry(board, contents, left(at))  && dry(board, contents, right(at)) ? "horizontal" : null;
 }
 
-function isPinned(contents, at){
+function hasPilli(contents, at){
   const cts = _.get(contents, at);
   return _.includes(cts, p);
 }
@@ -533,7 +512,7 @@ export function execute(self, command, s){
       if (!isBridgable(board, contents, details.to)) {
         throw new Error("Invalid bridge placement");
       }
-      if (hasBridge(contents, details.from) && !isPinned(contents, details.from)){
+      if (hasBridge(contents, details.from) && !hasPilli(contents, details.from)){
         throw new Error("Can only relocate free bridges");
       }
       if (unspent < 1) {

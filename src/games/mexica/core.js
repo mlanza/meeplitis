@@ -721,8 +721,8 @@ function moves(self){
 
 function metrics(self){
   const {seated} = _.deref(self);
-  return _.mapa(function({points}){
-    return {points};
+  return _.mapa(function({points, bank}){
+    return {points, bank};
   }, seated);
 }
 

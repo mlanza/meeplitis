@@ -218,8 +218,6 @@ export function reality(self){
 export function summarize([curr, prior]){ //uses $.hist
   const _reality = _.chain(curr, reality, _.update(_, "moves", _.toArray));
   return {
-    up: up(curr),
-    may: may(curr),
     notify: notify(curr, prior),
     added: added(curr, prior),
     perspectives: perspectives(curr, _reality),

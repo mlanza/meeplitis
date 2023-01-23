@@ -50,11 +50,23 @@ const capulli = [
 
 const temples = {1: Array(3), 2: Array(3), 3: Array(2), 4: Array(1)};
 const reserve = {1: Array(3), 2: Array(2), 3: Array(2), 4: Array(2)};
-const addReserveTemples = _.reducekv(function(temples, level, added){ //TODO use after period 0 ends
+const resupplyTemples = _.reducekv(function(temples, level, added){
   return _.update(temples, level, function(spots){
     return _.toArray(_.concat(spots, added));
   });
 }, _, reserve);
+
+function templesDepleted(temples){
+  return !_.chain(temples, _.vals, cat, _.remove(_.isSome, _), _.seq);
+}
+
+function capulliDepleted(capulli, period){
+  return !_.chain(capulli, _.nth(_, period), _.map(_.get(_, "at"), _), _.remove(_.isSome, _), _.seq);
+}
+
+function endOfPeriod(capulli, period, temples){
+  return capulliDepleted(capulli, period) && _.detect(templesDepleted, temples);
+}
 
 const coords = _.braid(function(y, x){
   return [x, y];
@@ -75,7 +87,7 @@ function init(seats){
     banked: 0,
     tokens: 12,
     canal1: Array(6),
-    canal2: Array(37),
+    canal2: _.toArray(_.concat([["P7", "P8"], ["P9", "P10"]], Array(35))),
     bridges: Array(11),
     capulli: null,
     seated: _.toArray(_.repeat(seats, {
@@ -139,8 +151,8 @@ const around = _.juxt(above, right, below, left);
 const stop = _.constantly([]);
 const palaceSpots = around('I8');
 
-function commit(state){
-  const {phase, seated} = state;
+function committed(state){
+  const {phase, seated, capulli, period} = state;
   const seats = _.count(seated);
   const absent = !!_.seq(_.remove(_.get(_, "pilli"), seated));
   return _.chain(state,
@@ -391,8 +403,8 @@ function score(size, place){
   return f(size);
 }
 
-function grandeur(temples, contents, period, dists){
-  return _.mapa(function(dist){
+function scoreGrandeur(temples, contents, period, dists, pillis){
+  const scored = _.mapa(function(dist){
     const marker = hasCapulli(contents, dist);
     const size = _.count(dist);
     const at = marker || _.first(dist);
@@ -401,8 +413,12 @@ function grandeur(temples, contents, period, dists){
       return score(size, _.nth(plcs, seat));
     }, _.range(_.count(temples))) : null;
     return  {at, size, points};
-  }, dists);
+  }, dists)
+  const palace = bonus(palaceSpots, pillis);
+  return {type: "scored-grandeur", details: {period, palace, districts: scored}}
 }
+
+const hasAvailableBridge = _.comp(_.seq, _.filter(_.isNil, _));
 
 export function execute(self, command, s){
   const state = _.deref(self);
@@ -416,11 +432,11 @@ export function execute(self, command, s){
           return cmd?.details?.by === "teleport" && cmd.type === details.type && cmd?.details?.by === details.by;
       }
     }), moves);
-  const automatic = _.includes(["start", "deal-capulli"], type);
+  const automatic = _.includes(["start"], type);
   const seated = seat == null ? {pilli: null, bank: 0} : state.seated[seat];
   const temples = _.map(_.get(_, "temples"), seated);
   const pillis = _.map(_.get(_, "pilli"), seated);
-  const {spent, board, contents, period, banked, tokens} = state;
+  const {spent, board, contents, period, capulli, banked, tokens} = state;
   const {bank, pilli} = seated;
   const unspent = remaining(spent, bank);
 
@@ -440,19 +456,21 @@ export function execute(self, command, s){
     case "start":
       return _.chain(self,
         g.fold(_, command),
-        g.fold(_, {type: "constructed-canal", details: {at: ["P7", "P8"]}}),
-        g.fold(_, {type: "constructed-canal", details: {at: ["P9", "P10"]}}),
-        g.execute(_, {type: "deal-capulli"}));
-
-    case "deal-capulli":
-      const capulli = dealCapulli();
-      return _.chain(self, g.fold(_, {type: "dealt-capulli", details: {capulli}, seat: null}));
+        g.fold(_, {type: "dealt-capulli", details: {capulli: dealCapulli()}, seat: null}));
 
     case "place-pilli":
       return _.chain(self, g.fold(_, _.assoc(command, "type", "placed-pilli")));
 
+    //TODO provide UI cue when scoring will happen on commit
     case "commit":
-      return _.chain(self, g.fold(_, _.assoc(command, "type", "committed")));
+      const eop = endOfPeriod(capulli, period, temples);
+      return _.chain(self,
+        g.fold(_, _.assoc(command, "type", "committed")),
+        eop
+          ? _.pipe(
+              g.fold(_, scoreGrandeur(temples, contents, period, districts(board, contents), pillis)),
+              g.fold(_, period === 0 ? {type: "started-2nd-period"} : {type: "finished"}))
+          : _.identity);
 
     case "bank":
       if (tokens < 1) {
@@ -509,6 +527,9 @@ export function execute(self, command, s){
       return _.chain(self, g.fold(_, _.assoc(command, "type", "constructed-bridge")));
 
     case "relocate-bridge":
+      if (hasAvailableBridge(bridges)) {
+        throw new Error("Cannot relocate bridges while unconstructed bridges remain");
+      }
       if (!isBridgable(board, contents, details.to)) {
         throw new Error("Invalid bridge placement");
       }
@@ -523,12 +544,6 @@ export function execute(self, command, s){
     case "found-district":
       const points = founded(temples, pillis, seat, district(board, contents, pilli));
       return _.chain(self, g.fold(_, {type: "founded-district", details: {points}}));
-
-    case "score-grandeur":
-      //TODO is a command really needed for something like this? just identify end of period
-      const scored = grandeur(temples, contents, period, districts(board, contents));
-      const palace = bonus(palaceSpots, pillis);
-      return _.chain(self, g.fold(_, {type: "scored-granduer", details: {period, palace, districts: scored}}));
 
     case "finish":
       return self; //TODO
@@ -557,7 +572,7 @@ function fold2(self, event){
 
     case "committed":
       return g.fold(self, event,
-        _.fmap(_, commit));
+        _.fmap(_, committed));
 
     case "banked":
       return g.fold(self, event,
@@ -614,6 +629,25 @@ function fold2(self, event){
           _.assocIn(_, ["seated", seat, "pilli"], details.to),
           relocate(_, pilli, p),
           place(_, details.to, p))));
+
+    case "scored-grandeur":
+      return g.fold(self, event, _.fmap(_,
+        _.update(_, ["seated"], _.pipe(_.mapIndexed(function(seat, seated){
+          debugger
+          const {districts, palace} = event.details;
+          const points = _.sum(_.cons(_.nth(palace, seat), _.map(function({at, points}){
+            return _.nth(points, seat);
+          }, districts)));
+          return _.update(seated, "points", _.add(_, points));
+        }, _), _.toArray))));
+
+    case "started-2nd-period":
+      return g.fold(self, event, _.fmap(_,
+        _.pipe(
+          _.update(_, "period", _.inc),
+          _.update(_, ["seated"], _.mapa(function(seated){
+            return _.update(seated, "temples", resupplyTemples);
+          }, _)))));
 
     default:
       return g.fold(self, event, _.fmap(_, _.merge(_, details))); //plain events

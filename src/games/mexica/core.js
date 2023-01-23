@@ -55,10 +55,13 @@ const bits = {
   tokens: 12
 }
 
-const temples = [
-  {1: Array(3), 2: Array(3), 3: Array(2), 4: Array(1)},
-  {1: Array(3), 2: Array(2), 3: Array(2), 4: Array(2)}
-];
+const temples = {1: Array(3), 2: Array(3), 3: Array(2), 4: Array(1)};
+const reserve = {1: Array(3), 2: Array(2), 3: Array(2), 4: Array(2)};
+const addReserveTemples = _.reducekv(function(temples, level, added){ //TODO use after period 0 ends
+  return _.update(temples, level, function(spots){
+    return _.toArray(_.concat(spots, added));
+  });
+}, _, reserve);
 
 const coords = _.braid(function(y, x){
   return [x, y];
@@ -111,7 +114,7 @@ function placements({canal1, canal2, bridges, capulli, seated}){
     _.chain(bridges, _.compact, _.map(_.array(_, b), _)),
     _.chain(capulli, cat, _.map(_.get(_, "at"), _), _.compact, _.map(_.array(_, c), _)),
     _.chain(seated, _.map(_.get(_, "pilli"), _), _.compact, _.map(_.array(_, p), _)),
-    _.chain(seated, _.map(_.get(_, "temples"), _), cat, _.mapa(_.vals, _), cat, cat, _.compact, _.map(_.array(_, t), _)));
+    _.chain(seated, _.map(_.get(_, "temples"), _), _.mapa(_.vals, _), cat, cat, _.compact, _.map(_.array(_, t), _)));
 }
 
 function contents(state){
@@ -184,7 +187,7 @@ const relocate = _.partly(function relocate(state, at, what){
 
 function dealCapulli(){
   const xs = _.chain(_.range(15), _.shuffle, _.take(8, _), _.sort);
-  const _capulli = _.chain(capulli,
+  return _.chain(capulli,
     _.mapkv(function(k, v){
       return [k, v];
     }, _),
@@ -195,7 +198,6 @@ function dealCapulli(){
       return _.assoc(memo, k === "true" ? 0 : 1, _.mapa(_.second, v));
     }, Array(2), _),
     _.toArray);
-  return {type: "dealt-capulli", details: {capulli: _capulli}, seat: null};
 }
 
 const isVacant = _.partly(function isVacant(board, contents, at){
@@ -361,12 +363,73 @@ function hasCapulli(contents, spots){
   }, spots);
 }
 
+function levels(temples, dist){
+  return _.mapa(function(temples){
+    return _.sum(_.mapkv(function(level, spots){
+      return _.count(_.filter(_.includes(dist, _), spots)) * level;
+    }, temples));
+  }, temples);
+}
+
+function places(temples, dist){
+  const size = _.count(dist);
+  const lvls = levels(temples, dist);
+  const ranks = _.unique(_.sort(_.desc(_.identity), lvls));
+  return _.chain(lvls, _.mapkv(function(seat, levels){
+    const idx = _.indexOf(ranks, levels);
+    return idx >= 0 ? idx + 1 : null;
+  }, _), _.toArray);
+}
+
+//TODO
+function tieBumps(places){
+  return places;
+}
+
+const full = _.identity;
+
+function half(size){
+  return Math.round(size / 2);
+}
+
+const quarter = _.comp(half, half);
+
+function founded(temples, pillis, founder, dist){
+  const size = _.count(dist);
+  return _.mapkv(function(seat, spot){
+    return seat === founder ? half(size) : _.includes(dist, spot) ? quarter(size) : 0;
+  }, pillis);
+}
+
+function bonus(spots, pillis){
+  return _.mapa(function(pilli){
+    return _.includes(spots, pilli) ? 5 : 0;
+  }, pillis);
+}
+
+function score(size, place){
+  const f = _.get([full, half, quarter], place - 1, _.constantly(0));
+  return f(size);
+}
+
+function grandeur(temples, contents, period, dists){
+  return _.mapa(function(dist){
+    const marker = hasCapulli(contents, dist);
+    const size = _.count(dist);
+    const at = marker || _.first(dist);
+    const plcs = tieBumps(places(temples, dist));
+    const points = marker || period ? _.mapa(function(seat){
+      return score(size, _.nth(plcs, seat));
+    }, _.range(_.count(temples))) : null;
+    return  {at, size, points};
+  }, dists);
+}
+
 export function execute(self, command, s){
   const state = _.deref(self);
   const {type, details} = command;
   const seat = s == null ? command.seat : s;
   const moves = g.moves(self, [seat]);
-  //TODO expose validations below to ui
   const valid = _.includes(["build-temple", "construct-canal", "construct-bridge"], command.type) ||
     _.detect(_.or(_.eq(_, _.chain(command, _.compact, _.dissoc(_, "id"))), function(cmd){
       switch(cmd.type){
@@ -376,6 +439,8 @@ export function execute(self, command, s){
     }), moves);
   const automatic = _.includes(["start", "deal-capulli"], type);
   const seated = seat == null ? {pilli: null, bank: 0} : state.seated[seat];
+  const temples = _.map(_.get(_, "temples"), seated);
+  const pillis = _.map(_.get(_, "pilli"), seated);
   const {spent, board, contents, period, banked, tokens} = state;
   const {bank, pilli} = seated;
   const unspent = remaining(spent, bank);
@@ -401,12 +466,10 @@ export function execute(self, command, s){
         g.execute(_, {type: "deal-capulli"}));
 
     case "deal-capulli":
-      return _.chain(self, g.fold(_, dealCapulli()));
+      const capulli = dealCapulli();
+      return _.chain(self, g.fold(_, {type: "dealt-capulli", details: {capulli}, seat: null}));
 
     case "place-pilli":
-      if (!valid) {
-        throw new Error("Invalid placement of Pilli Mexica");
-      }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "placed-pilli")));
 
     case "commit":
@@ -422,9 +485,6 @@ export function execute(self, command, s){
       return _.chain(self, g.fold(_, {type: "banked", seat}));
 
     case "move":
-      if (!valid) {
-        throw new Error("Invalid move");
-      }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "moved")));
 
     case "construct-canal":
@@ -447,12 +507,12 @@ export function execute(self, command, s){
       }, district(board, contents, pilli));
 
       if (!present){
-        throw new Error("Cannot place a temple where your Mexica Pilli is not present");
+        throw new Error("Cannot place temples where your Mexica Pilli is not present");
       }
       if (!isVacant(board, contents, details.at)) {
         throw new Error("Invalid temple placement");
       }
-      if (!_.chain(state, _.getIn(_, ["seated", seat, "temples", period, details.level]), _.filter(_.isNil, _), _.count)){
+      if (!_.chain(state, _.getIn(_, ["seated", seat, "temples", details.level]), _.filter(_.isNil, _), _.count)){
         throw new Error(`No level ${details.level} temples available`);
       }
       if (unspent < details.level) {
@@ -482,11 +542,14 @@ export function execute(self, command, s){
       return _.chain(self, g.fold(_, _.assoc(command, "type", "relocated-bridge")));
 
     case "found-district":
-      //TODO determine points for seats adding details `points: [6, 0, 0, 3]`
-      return _.chain(self, g.fold(_, _.assoc(command, "type", "founded-district")));
+      const points = founded(temples, pillis, seat, district(board, contents, pilli));
+      return _.chain(self, g.fold(_, {type: "founded-district", details: {points}}));
 
-    case "score-period":
-      return self; //TODO `{type: "score-period", period: 1, districts: [{at: "A2", size: 12, points: [12, 0, 0, 3]}]}`
+    case "score-grandeur":
+      //TODO is a command really needed for something like this? just identify end of period
+      const scored = grandeur(temples, contents, period, districts(board, contents));
+      const palace = bonus(palaceSpots, pillis);
+      return _.chain(self, g.fold(_, {type: "scored-granduer", details: {period, palace, districts: scored}}));
 
     case "finish":
       return self; //TODO
@@ -498,6 +561,7 @@ function fold2(self, event){
   const {period, phase} = state;
   const {type, details, seat} = event;
   const {pilli, bank} = _.nth(state.seated, seat) || {pilli: null, bank: null};
+
   switch (type) {
     case "dealt-capulli":
       return g.fold(self, event,
@@ -558,7 +622,7 @@ function fold2(self, event){
       return g.fold(self, event, _.fmap(_,
         _.pipe(
           _.update(_, "spent", _.add(_, details.level)),
-          _.updateIn(_, ["seated", seat, "temples", period, details.level], function(ats){
+          _.updateIn(_, ["seated", seat, "temples", details.level], function(ats){
             const len = _.count(ats);
             return _.chain(ats, _.cons(details.at, _), _.take(len, _), _.toArray);
           }),
@@ -650,17 +714,16 @@ function moves(self){
   } else {
     const taken = _.chain(seated, _.map(_.get(_, "pilli"), _), _.compact, _.toArray);
     return _.chain(palaceSpots, _.remove(_.includes(taken, _), _), _.map(function(at){
-      return {type: "place-pilli", details: {at}, seat};
+      return {type: "place-pilli", details: {at}, seat}; //TODO compel 4th player to last position
     }, _));
   }
 }
 
 function metrics(self){
-  const state = _.deref(self);
-  return _.mapa(function({scored}){
-    const points = _.sum(_.map(_.get(_, "points"), scored));
+  const {seated} = _.deref(self);
+  return _.mapa(function({points}){
     return {points};
-  }, state.seated);
+  }, seated);
 }
 
 function perspective(self, seen, reality){
@@ -668,7 +731,7 @@ function perspective(self, seen, reality){
 }
 
 function irreversible(self, command){
-  return _.includes(["commit", "finish"], command.type);
+  return _.includes(["commited", "finished"], command.type);
 }
 
 _.doto(Mexica,

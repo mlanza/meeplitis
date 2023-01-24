@@ -372,9 +372,16 @@ function places(temples, dist){
   }, _), _.toArray);
 }
 
-//TODO
 function tieBumps(places){
-  return places;
+  const firsts = _.count(_.filter(_.eq(1, _), places));
+  const seconds = _.count(_.filter(_.eq(2, _), places));
+  return firsts > 2 ? _.mapa(function(place){
+    return place === 1 ? 1 : 0;
+  }, places) : firsts ===  2 ? _.mapa(function(place){
+    return place === 1 ? 1 : place === 2 ? 3 : 0;
+  }, places) : seconds > 1 ? _.mapa(function(place){
+    return place === 1 || place === 2 ? place : 0;
+  }, places) : places;
 }
 
 const full = _.identity;
@@ -455,7 +462,7 @@ export function execute(self, command, s){
   switch (type) {
     case "start":
       return _.chain(self,
-        g.fold(_, command),
+        g.fold(_, {type: "started"}),
         g.fold(_, {type: "dealt-capulli", details: {capulli: dealCapulli()}, seat: null}));
 
     case "place-pilli":
@@ -545,8 +552,6 @@ export function execute(self, command, s){
       const points = founded(temples, pillis, seat, district(board, contents, pilli));
       return _.chain(self, g.fold(_, {type: "founded-district", details: {points}}));
 
-    case "finish":
-      return self; //TODO
   }
 }
 
@@ -648,6 +653,9 @@ function fold2(self, event){
           _.update(_, ["seated"], _.mapa(function(seated){
             return _.update(seated, "temples", resupplyTemples);
           }, _)))));
+
+    case "finished":
+      return g.fold(self, event, _.fmap(_, _.pipe(_.dissoc(_, "up"), _.assoc(_, "status", "finished"))));
 
     default:
       return g.fold(self, event, _.fmap(_, _.merge(_, details))); //plain events

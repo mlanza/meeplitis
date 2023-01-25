@@ -16,19 +16,15 @@ function last(n) {
     let prior = [];
     return _.overload(rf, function (memo) {
       let acc = memo;
-
       for (let x of prior) {
         acc = rf(acc, x);
       }
-
       return rf(acc);
     }, function (memo, value) {
       prior.push(value);
-
       while (prior.length > size) {
         prior.shift();
       }
-
       return memo;
     });
   };
@@ -50,7 +46,6 @@ function scan(step, init) {
     });
   };
 }
-
 function best2(better, init) {
   return function (rf) {
     let result = init;
@@ -62,13 +57,11 @@ function best2(better, init) {
     });
   };
 }
-
 function best1(better) {
   return function (rf) {
     return _.overload(rf, rf, better);
   };
 }
-
 const best = _.overload(null, best1, best2);
 function constantly(value) {
   return function (rf) {
@@ -120,15 +113,12 @@ function detect(pred) {
 function compact() {
   return filter(_.identity);
 }
-
 function dedupe0() {
   return dedupe1(_.identity);
 }
-
 function dedupe1(f) {
   return dedupe2(f, _.equiv);
 }
-
 function dedupe2(f, equiv) {
   const nil = {};
   return function (rf) {
@@ -140,7 +130,6 @@ function dedupe2(f, equiv) {
     });
   };
 }
-
 const dedupe = _.overload(dedupe0, dedupe1, dedupe2);
 function take(n) {
   return function (rf) {
@@ -149,11 +138,9 @@ function take(n) {
       switch (taking) {
         case 0:
           return _.reduced(memo);
-
         case 1:
           taking--;
           return _.reduced(rf(memo, value));
-
         default:
           taking--;
           return rf(memo, value);
@@ -221,7 +208,6 @@ function distinct() {
       if (seen.has(value)) {
         return memo;
       }
-
       seen.add(value);
       return rf(memo, value);
     });
@@ -237,19 +223,17 @@ function hist(limit) {
     let history = [];
     return _.overload(rf, rf, function (memo, value) {
       const revised = _.clone(history);
-
       revised.unshift(value);
-
       if (revised.length > limit) {
         revised.pop();
       }
-
       history = revised;
       return rf(memo, history);
     });
   };
-} //regulates message processing so, if there are side effects, each is processed before the next begins
+}
 
+//regulates message processing so, if there are side effects, each is processed before the next begins
 function isolate() {
   return function (rf) {
     let queue = [];
@@ -257,7 +241,6 @@ function isolate() {
       let acc = memo;
       const ready = queue.length === 0;
       queue.push(value);
-
       if (ready) {
         while (queue.length) {
           try {
@@ -267,7 +250,6 @@ function isolate() {
           }
         }
       }
-
       return acc;
     });
   };

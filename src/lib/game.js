@@ -44,12 +44,6 @@ export function incidental({seat}){
   return seat == null;
 }
 
-export function crunch(self){
-  const history = _.clone(self.history); //TODO fix `splice`
-  history.splice(_.count(history) - 1, 1);
-  return new _.Journal(self.pos, self.max, history, self.state);
-}
-
 export function reversibility(self){
   const state = _.deref(self);
   const seat = state.up;

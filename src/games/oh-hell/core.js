@@ -393,7 +393,7 @@ function fold3(self, event, f){
     event ? _.append(self.events, event) : self.events,
     _.chain(self.journal,
       f,
-      g.incidental(event) ? g.crunch : _.identity, //improve undo/redo from user perspective
+      g.incidental(event) ? _.crunch : _.identity, //improve undo/redo from user perspective
       g.irreversible(self, event) ? _.flush : _.identity));
 }
 

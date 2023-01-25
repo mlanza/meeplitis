@@ -293,7 +293,7 @@ function textualizer(self){
   }
 }
 
-function fold2(self, event){
+function fold(self, event){
   const state = _.deref(self);
   const {type, details, seat} = event;
   switch (type) {
@@ -387,17 +387,19 @@ function fold2(self, event){
   }
 }
 
-function fold3(self, event, f){
+function append(self, event){
   return ohHell(self.seats,
     self.config,
-    event ? _.append(self.events, event) : self.events,
-    _.chain(self.journal,
-      f,
-      g.incidental(event) ? _.crunch : _.identity, //improve undo/redo from user perspective
-      g.irreversible(self, event) ? _.flush : _.identity));
+    _.append(self.events, event),
+    self.journal);
 }
 
-const fold = _.overload(null, null, fold2, fold3);
+function fmap(self, f){
+  return ohHell(self.seats,
+    self.config,
+    self.events,
+    f(self.journal));
+}
 
 function seats(self){
   return self.seats;
@@ -460,4 +462,6 @@ function perspective(self, seen, reality){
 
 _.doto(OhHell,
   g.behave,
+  _.implement(_.IAppendable, {append}),
+  _.implement(_.IFunctor, {fmap}),
   _.implement(g.IGame, {perspective, up, may, moves, irreversible, metrics, comparator, textualizer, execute: _.comp(compel, execute), fold}));

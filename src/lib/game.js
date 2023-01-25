@@ -20,7 +20,6 @@ export const irreversible = IGame.irreversible;
 export const up = IGame.up;
 export const may = IGame.may;
 export const seats = IGame.seats;
-export const fold = IGame.fold;
 export const events = IGame.events;
 export const metrics = IGame.metrics;
 export const comparator = IGame.comparator;
@@ -31,6 +30,17 @@ function perspective2(self, seen){
 }
 
 export const perspective = _.overload(null, null, perspective2, IGame.perspective);
+
+function fold3(self, event, f){
+  return _.chain(self,
+    _.append(_, event),
+    _.fmap(_,
+      _.pipe(f,
+        incidental(event) ? _.crunch : _.identity, //improve undo/redo from user perspective
+        irreversible(self, event) ? _.flush : _.identity)));
+}
+
+export const fold = _.overload(null, IGame.fold, IGame.fold, fold3);
 
 export function seated(self){
   return _.chain(self, numSeats, _.range, _.toArray);

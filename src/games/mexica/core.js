@@ -56,6 +56,14 @@ const resupplyTemples = _.reducekv(function(temples, level, added){
   });
 }, _, reserve);
 
+function bridgesDepleted(bridges){
+  return !_.chain(bridges, _.remove(_.isSome, _), _.seq);
+}
+
+function canalsDepleted(canal1, canal2){
+  return !_.chain(canal1, _.concat(_, canal2), cat, _.remove(_.isSome, _), _.seq);
+}
+
 function templesDepleted(temples){
   return !_.chain(temples, _.vals, cat, _.remove(_.isSome, _), _.seq);
 }
@@ -79,7 +87,7 @@ export const spots = _.map(_.spread(_.str), coords);
 function init(seats){
   return {
     up: 0,
-    phase: null,
+    status: null,
     board,
     contents: {},
     period: 0,
@@ -152,14 +160,14 @@ const stop = _.constantly([]);
 const palaceSpots = around('I8');
 
 function committed(state){
-  const {phase, seated, capulli, period} = state;
+  const {status, seated, capulli, period} = state;
   const seats = _.count(seated);
   const absent = !!_.seq(_.remove(_.get(_, "pilli"), seated));
   return _.chain(state,
     _.update(_, "up", function(up){
       return _.chain(seats, _.range, _.cycle, _.dropWhile(_.notEq(_, up), _), _.second);
     }),
-    phase === "placing-pilli" && !absent ? _.assoc(_, "phase", "actions") : _.identity,
+    status === "placing-pilli" && !absent ? _.assoc(_, "status", "actions") : _.identity,
     _.assoc(_, "spent", 0),
     _.assoc(_, "banked", 0));
 }
@@ -193,7 +201,7 @@ function dealCapulli(){
 
 const isVacant = _.partly(function isVacant(board, contents, at){
   const what = _.getIn(board, coord(at)),
-        cts  = _.get(contents, at);
+        cts  = _.seq(_.get(contents, at));
   return what === l && !cts;
 });
 
@@ -432,9 +440,14 @@ export function execute(self, command, s){
   const {type, details} = command;
   const seat = s == null ? command.seat : s;
   const moves = g.moves(self, [seat]);
-  const valid = _.includes(["build-temple", "construct-canal", "construct-bridge"], command.type) ||
+  const valid =
     _.detect(_.or(_.eq(_, _.chain(command, _.compact, _.dissoc(_, "id"))), function(cmd){
       switch(cmd.type){
+        case "build-temple":
+        case "construct-canal":
+        case "construct-bridge":
+        case "relocate-bridge":
+          return true;
         case "move":
           return cmd?.details?.by === "teleport" && cmd.type === details.type && cmd?.details?.by === details.by;
       }
@@ -443,7 +456,7 @@ export function execute(self, command, s){
   const seated = seat == null ? {pilli: null, bank: 0} : state.seated[seat];
   const temples = _.map(_.get(_, "temples"), seated);
   const pillis = _.map(_.get(_, "pilli"), seated);
-  const {spent, board, contents, period, capulli, banked, tokens} = state;
+  const {spent, board, contents, period, canal1, canal2, capulli, banked, tokens} = state;
   const {bank, pilli} = seated;
   const unspent = remaining(spent, bank);
 
@@ -549,15 +562,22 @@ export function execute(self, command, s){
       return _.chain(self, g.fold(_, _.assoc(command, "type", "relocated-bridge")));
 
     case "found-district":
-      const points = founded(temples, pillis, seat, district(board, contents, pilli));
-      return _.chain(self, g.fold(_, {type: "founded-district", details: {points}}));
+      const dist = district(board, contents, pilli);
+      if (hasCapulli(contents, dist)){
+        throw new Error("This district was already founded");
+      }
+      if (!isVacant(board, contents, details.at)) {
+        throw new Error("Invalid capulli placement");
+      }
+      const points = founded(temples, pillis, seat, dist);
+      return _.chain(self, g.fold(_, {type: "founded-district", details: {at: details.at, points}}));
 
   }
 }
 
 function fold2(self, event){
   const state = _.deref(self);
-  const {period, phase} = state;
+  const {period, status} = state;
   const {type, details, seat} = event;
   const {pilli, bank} = _.nth(state.seated, seat) || {pilli: null, bank: null};
 
@@ -567,7 +587,7 @@ function fold2(self, event){
         _.fmap(_,
           _.pipe(
             _.merge(_, details),
-            _.assoc(_, "phase", "placing-pilli"))));
+            _.assoc(_, "status", "placing-pilli"))));
 
     case "placed-pilli":
       return g.fold(self, event,
@@ -654,6 +674,9 @@ function fold2(self, event){
             return _.update(seated, "temples", resupplyTemples);
           }, _)))));
 
+    case "founded-district":
+      return self; //TODO
+
     case "finished":
       return g.fold(self, event, _.fmap(_, _.pipe(_.dissoc(_, "up"), _.assoc(_, "status", "finished"))));
 
@@ -714,7 +737,7 @@ function canalable(board, contents){
 
 function moves(self){
   const [seat] = g.up(self);
-  const {board, contents, capulli, bridges, period, phase, spent, banked, seated} = _.deref(self);
+  const {board, contents, capulli, canal1, canal2, bridges, period, status, spent, banked, seated} = _.deref(self);
   const {pilli, bank} = _.nth(seated, seat);
   const unspent = remaining(spent, bank);
 
@@ -731,7 +754,9 @@ function moves(self){
     }, _)) : [];
     const teleport = unspent > 4 ? [{type: "move", details: {by: "teleport", from, cost: 5}, seat}] : [];
     const boat = hasBridge(contents, pilli) ? boats(water, pilli, _.min(unspent, 5), 0) : [];
-    return _.concat([{type: "commit", seat}], banking, foot, boat, teleport, found);
+    const constructBridge = [{type: bridgesDepleted(bridges) ? "relocate-bridge": "construct-bridge", seat}];
+    const constructCanal = canalsDepleted(canal1, canal2) ? [] : [{type: "construct-canal", seat}];
+    return _.concat([{type: "commit", seat}], banking, constructCanal, constructBridge, foot, boat, teleport, found);
   } else {
     const taken = _.chain(seated, _.map(_.get(_, "pilli"), _), _.compact, _.toArray);
     return _.chain(palaceSpots, _.remove(_.includes(taken, _), _), _.map(function(at){
@@ -747,6 +772,20 @@ function metrics(self){
   }, seated);
 }
 
+function comparator(self){
+  return function(a, b){
+    const points = (b.points - a.points) * 100;
+    const bank = b.bank - a.bank;
+    return points + bank;
+  };
+}
+
+function textualizer(self){
+  return function({points, bank}){
+    return `${points} pts., ${bank} banked actions`;
+  }
+}
+
 function perspective(self, seen, reality){
   return reality; //no hidden info.
 }
@@ -757,6 +796,6 @@ function irreversible(self, command){
 
 _.doto(Mexica,
   g.behave,
-  _.implement(g.IGame, {perspective, up, may, moves, irreversible, metrics, /*comparator, textualizer,*/ execute, fold}));
+  _.implement(g.IGame, {perspective, up, may, moves, irreversible, metrics, comparator, textualizer, execute, fold}));
 
 Object.assign(window, {spots, coords, districts})

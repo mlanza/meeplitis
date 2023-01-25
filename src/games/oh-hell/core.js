@@ -1,7 +1,6 @@
 import _ from "/lib/atomic_/core.js";
 import g from "/lib/game_.js";
 
-const IGame = g.IGame;
 const ranks = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "K", "Q", "A"];
 const suits = ["♥️", "♠️", "♦️", "♣️"];
 
@@ -461,4 +460,4 @@ function perspective(self, seen, reality){
 
 _.doto(OhHell,
   g.behave,
-  _.implement(IGame, {perspective, up, may, moves, irreversible, metrics, comparator, textualizer, execute: _.comp(compel, execute), fold}));
+  _.implement(g.IGame, {perspective, up, may, moves, irreversible, metrics, comparator, textualizer, execute: _.comp(compel, execute), fold}));

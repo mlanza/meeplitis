@@ -184,7 +184,7 @@ const relocate = _.partly(function relocate(state, at, what){
   return _.updateIn(state, ["contents", at], _.pipe(_.either(_, []), _.filtera(_.notEq(what, _), _)));
 });
 
-function dealCapulli(){
+function dealCapulli1(){
   const xs = _.chain(_.range(15), _.shuffle, _.take(8, _), _.sort);
   return _.chain(capulli,
     _.mapkv(function(k, v){
@@ -197,6 +197,28 @@ function dealCapulli(){
       return _.assoc(memo, k === "true" ? 0 : 1, _.mapa(_.second, v));
     }, Array(2), _),
     _.toArray);
+}
+
+//temp override to aid interactive development
+function dealCapulli(){
+return [
+ [{rank: 13, at: null},
+  {rank: 11, at: null},
+  {rank: 9, at: null},
+  {rank: 6, at: null},
+  {rank: 5, at: null},
+  {rank: 4, at: null},
+  {rank: 4, at: null},
+  {rank: 3, at: null}],
+ [{rank: 12, at: null},
+  {rank: 10, at: null},
+  {rank: 8, at: null},
+  {rank: 7, at: null},
+  {rank: 6, at: null},
+  {rank: 5, at: null},
+  {rank: 3, at: null}
+ ]
+]
 }
 
 const isVacant = _.partly(function isVacant(board, contents, at){
@@ -591,9 +613,10 @@ function fold(self, event){
 
     case "placed-pilli":
       return g.fold(self, event,
-        _.fmap(_, function(state){
-          return _.chain(state, _.assocIn(_, ["seated", seat, "pilli"], details.at), place(_, details.at, p));
-        }));
+        _.fmap(_,
+          _.pipe(
+            _.assocIn(_, ["seated", seat, "pilli"], details.at),
+            place(_, details.at, p))));
 
     case "committed":
       return g.fold(self, event,
@@ -601,78 +624,84 @@ function fold(self, event){
 
     case "banked":
       return g.fold(self, event,
-        _.fmap(_, function(state){
-          return _.chain(state,
+        _.fmap(_,
+          _.pipe(
             _.update(_, "spent", _.inc),
             _.update(_, "banked", _.inc),
             _.update(_, "tokens", _.dec),
-            _.updateIn(_, ["seated", seat, "bank"], _.inc));
-        }));
+            _.updateIn(_, ["seated", seat, "bank"], _.inc))));
 
     case "constructed-canal":
       const size = _.count(details.at);
-      return g.fold(self, event, _.fmap(_,
-        _.pipe(
-          _.update(_, "spent", _.inc),
-          _.update(_, `canal${size}`, function(ats){
-            const len = _.count(ats);
-            return _.chain(ats, _.cons(details.at, _), _.take(len, _), _.toArray);
-          }),
-          _.reduce(place(_, _, w), _, details.at))));
+      return g.fold(self, event,
+        _.fmap(_,
+          _.pipe(
+            _.update(_, "spent", _.inc),
+            _.update(_, `canal${size}`, function(ats){
+              const len = _.count(ats);
+              return _.chain(ats, _.cons(details.at, _), _.take(len, _), _.toArray);
+            }),
+            _.reduce(place(_, _, w), _, details.at))));
 
     case "constructed-bridge":
-      return g.fold(self, event, _.fmap(_,
-        _.pipe(
-          _.update(_, "spent", _.inc),
-          _.update(_, "bridges", function(ats){
-            const len = _.count(ats);
-            return _.chain(ats, _.cons(details.at, _), _.take(len, _), _.toArray);
-          }),
-          place(_, details.at, b))));
+      return g.fold(self, event,
+        _.fmap(_,
+          _.pipe(
+            _.update(_, "spent", _.inc),
+            _.update(_, "bridges", function(ats){
+              const len = _.count(ats);
+              return _.chain(ats, _.cons(details.at, _), _.take(len, _), _.toArray);
+            }),
+            place(_, details.at, b))));
 
     case "relocated-bridge":
-      return g.fold(self, event, _.fmap(_,
-        _.pipe(
-          _.update(_, "spent", _.inc),
-          relocate(_, details.from, b),
-          place(_, details.to, b))));
+      return g.fold(self, event,
+        _.fmap(_,
+          _.pipe(
+            _.update(_, "spent", _.inc),
+            relocate(_, details.from, b),
+            place(_, details.to, b))));
 
     case "built-temple":
-      return g.fold(self, event, _.fmap(_,
-        _.pipe(
-          _.update(_, "spent", _.add(_, details.level)),
-          _.updateIn(_, ["seated", seat, "temples", details.level], function(ats){
-            const len = _.count(ats);
-            return _.chain(ats, _.cons(details.at, _), _.take(len, _), _.toArray);
-          }),
-          place(_, details.at, t))));
+      return g.fold(self, event,
+        _.fmap(_,
+          _.pipe(
+            _.update(_, "spent", _.add(_, details.level)),
+            _.updateIn(_, ["seated", seat, "temples", details.level], function(ats){
+              const len = _.count(ats);
+              return _.chain(ats, _.cons(details.at, _), _.take(len, _), _.toArray);
+            }),
+            place(_, details.at, t))));
 
     case "moved":
-      return g.fold(self, event, _.fmap(_,
-        _.pipe(
-          _.update(_, "spent", _.add(_, details.cost || 1)),
-          _.assocIn(_, ["seated", seat, "pilli"], details.to),
-          relocate(_, pilli, p),
-          place(_, details.to, p))));
+      return g.fold(self, event,
+        _.fmap(_,
+          _.pipe(
+            _.update(_, "spent", _.add(_, details.cost || 1)),
+            _.assocIn(_, ["seated", seat, "pilli"], details.to),
+            relocate(_, pilli, p),
+            place(_, details.to, p))));
 
     case "scored-grandeur":
-      return g.fold(self, event, _.fmap(_,
-        _.update(_, ["seated"], _.pipe(_.mapIndexed(function(seat, seated){
-          debugger
-          const {districts, palace} = event.details;
-          const points = _.sum(_.cons(_.nth(palace, seat), _.map(function({at, points}){
-            return _.nth(points, seat);
-          }, districts)));
-          return _.update(seated, "points", _.add(_, points));
-        }, _), _.toArray))));
+      return g.fold(self, event,
+        _.fmap(_,
+          _.update(_, ["seated"], _.pipe(_.mapIndexed(function(seat, seated){
+            debugger
+            const {districts, palace} = event.details;
+            const points = _.sum(_.cons(_.nth(palace, seat), _.map(function({at, points}){
+              return _.nth(points, seat);
+            }, districts)));
+            return _.update(seated, "points", _.add(_, points));
+          }, _), _.toArray))));
 
     case "started-2nd-period":
-      return g.fold(self, event, _.fmap(_,
-        _.pipe(
-          _.update(_, "period", _.inc),
-          _.update(_, ["seated"], _.mapa(function(seated){
-            return _.update(seated, "temples", resupplyTemples);
-          }, _)))));
+      return g.fold(self, event,
+        _.fmap(_,
+          _.pipe(
+            _.update(_, "period", _.inc),
+            _.update(_, ["seated"], _.mapa(function(seated){
+              return _.update(seated, "temples", resupplyTemples);
+            }, _)))));
 
     case "founded-district":
       return self; //TODO

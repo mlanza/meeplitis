@@ -26,10 +26,16 @@ export const comparator = IGame.comparator;
 export const textualizer = IGame.textualizer;
 
 function perspective2(self, seen){
-  return perspective3(self, _.chain(seen, _.filtera(_.isSome, _)), reality(self));
+  return perspective3(self, seen, reality(self));
 }
 
-export const perspective = _.overload(null, null, perspective2, IGame.perspective);
+function perspective3(self, seen, reality){
+  return _.chain(IGame.perspective(self, seen, reality),
+    _.assoc(_, "seen", seen),
+    _.update(_, "moves", movesAt(seen)));
+}
+
+export const perspective = _.overload(null, null, perspective2, perspective3);
 
 function fold3(self, event, f){
   return _.chain(self,
@@ -191,10 +197,7 @@ export function perspectives(self, reality){
   return _.chain(self,
     seated,
     _.mapa(_.pipe(_.array, function(seen){
-      return _.chain(
-        perspective(self, seen, reality),
-        _.assoc(_, "seen", seen),
-        _.update(_, "moves", movesAt(seen)));
+      return perspective(self, seen, reality);
     }), _));
 }
 

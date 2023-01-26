@@ -474,7 +474,7 @@ export function execute(self, command, s){
           return cmd?.details?.by === "teleport" && cmd.type === details.type && cmd?.details?.by === details.by;
       }
     }), moves);
-  const automatic = _.includes(["start"], type);
+  const automatic = _.includes(["start", "deal-capulli"], type);
   const seated = seat == null ? {pilli: null, bank: 0} : state.seated[seat];
   const temples = _.map(_.get(_, "temples"), seated);
   const pillis = _.map(_.get(_, "pilli"), seated);
@@ -498,6 +498,10 @@ export function execute(self, command, s){
     case "start":
       return _.chain(self,
         g.fold(_, {type: "started"}),
+        g.execute(_, {type: "deal-capulli", seat: null}));
+
+    case "deal-capulli":
+      return _.chain(self,
         g.fold(_, {type: "dealt-capulli", details: {capulli: dealCapulli()}, seat: null}));
 
     case "place-pilli":

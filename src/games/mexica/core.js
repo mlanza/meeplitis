@@ -704,7 +704,20 @@ function fold(self, event){
             }, _)))));
 
     case "founded-district":
-      return self; //TODO
+      return g.fold(self, event,
+        _.fmap(_,
+          _.updateIn(_, ["capulli", period], function(capulli){
+            debugger
+            const idx = _.keepIndexed(function(idx, {at}){
+              return at === details.at ? idx : null;
+            }, capulli);
+            return _.update(capulli, idx, _.assoc(_, "at", details.at));
+          }),
+          _.update(_, ["seated"], _.pipe(_.mapIndexed(function(seat, seated){
+            debugger
+            const points = _.nth(details.points, seat);
+            return _.update(seated, "points", _.add(_, points));
+          }, _), _.toArray))));
 
     case "finished":
       return g.fold(self, event, _.fmap(_, _.pipe(_.dissoc(_, "up"), _.assoc(_, "status", "finished"))));

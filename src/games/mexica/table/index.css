@@ -38,7 +38,7 @@ div[data-spot] img {
 }
 div[data-spot] img[data-size="2"] {
   height: 61px;
-  z-index: 45;
+  z-index: -45;
 }
 
 div[data-spot] img[data-orientation="vertical"] {
@@ -147,11 +147,11 @@ div[data-spot="V10"],
 div[data-spot="V11"] {
   pointer-events: none;
 }
-
-div[data-spot] img:hover,
-div[data-spot] img[data-foo="bar"] {
+div[data-spot]:hover {
+  z-index: 11 !important;
+}
+div[data-spot] img:hover {
   border-color: red;
-  z-index: 99;
 }
 
 .leads {

@@ -7,6 +7,153 @@
   z-index: 99;
   padding: 1px;
 }
+#board {
+  position: relative;
+  margin: 10em 2em;
+  height: 494px;
+  width: 702px;
+  padding-top: 6px;
+  padding-left: .5px;
+  box-shadow: -3px 8px 8px -3px rgba(0, 0, 0, 0.6);
+  z-index: 0;
+  overflow-x: visible;
+}
+div[data-spot] {
+  position: relative;
+  border: solid 2px transparent;
+  height: 26.55px;
+  width: 26.5px;
+  z-index: 10;
+  float: left;
+  overflow: visible;
+}
+div[data-spot] img {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  width: 30.5px;
+  height: 30.5px;
+  border: solid 2px transparent;
+  z-index: 40;
+}
+div[data-spot] img[data-size="2"] {
+  height: 61px;
+  z-index: 45;
+}
+
+div[data-spot] img[data-orientation="vertical"] {
+  transform: rotate(90deg);
+}
+ol#capullis {
+  position: absolute !important;
+  bottom: 33px;
+  right: 27px;
+  width: 170px;
+  height: 75px;
+  border: solid 1px transparent;
+  position: relative;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+ol#capullis li {
+  border: solid 1px red;
+  width: 35px;
+  height: 35px;
+  float: left;
+  margin-right: 5px;
+  margin-top: 2px;
+}
+div[data-spot]:hover {
+  border-color: white;
+  cursor: pointer;
+}
+div[data-spot^="W"]:hover {
+  border-color: red;
+  clear: right;
+}
+div[data-what="-"],
+div[data-spot^="A"],
+div[data-spot="B1"],
+div[data-spot="C1"],
+div[data-spot="D1"],
+div[data-spot="D1"],
+div[data-spot="D2"],
+div[data-spot="E1"],
+div[data-spot="E2"],
+div[data-spot="F1"],
+div[data-spot="F2"],
+div[data-spot="G1"],
+div[data-spot="H1"],
+div[data-spot="I1"],
+div[data-spot="J1"],
+div[data-spot="K1"],
+div[data-spot="L1"],
+div[data-spot="M1"],
+div[data-spot="N1"],
+div[data-spot="O1"],
+div[data-spot="P1"],
+div[data-spot="Q1"],
+div[data-spot="R1"],
+div[data-spot="S1"],
+div[data-spot="T1"],
+div[data-spot="U1"],
+div[data-spot="V1"],
+div[data-spot$="16"],
+div[data-spot^="W"],
+div[data-spot="B2"],
+div[data-spot="B3"],
+div[data-spot="B6"],
+div[data-spot="B7"],
+div[data-spot="B8"],
+div[data-spot="B9"],
+div[data-spot="B10"],
+div[data-spot="B11"],
+div[data-spot="B15"],
+div[data-spot="C10"],
+div[data-spot="C15"],
+div[data-spot="H15"],
+div[data-spot="I15"],
+div[data-spot="L2"],
+div[data-spot="L15"],
+div[data-spot="M2"],
+div[data-spot="M14"],
+div[data-spot="M15"],
+div[data-spot="N3"],
+div[data-spot="N4"],
+div[data-spot="N14"],
+div[data-spot="O4"],
+div[data-spot="O13"],
+div[data-spot="O14"],
+div[data-spot="P4"],
+div[data-spot="P5"],
+div[data-spot="P13"],
+div[data-spot="Q5"],
+div[data-spot="Q12"],
+div[data-spot="Q13"],
+div[data-spot="R5"],
+div[data-spot="R6"],
+div[data-spot="R12"],
+div[data-spot="S6"],
+div[data-spot="S11"],
+div[data-spot="S12"],
+div[data-spot="T6"],
+div[data-spot="T7"],
+div[data-spot="T11"],
+div[data-spot="U6"],
+div[data-spot="U11"],
+div[data-spot="V6"],
+div[data-spot="V10"],
+div[data-spot="V11"] {
+  pointer-events: none;
+}
+
+div[data-spot] img:hover,
+div[data-spot] img[data-foo="bar"] {
+  border-color: red;
+  z-index: 99;
+}
+
 .leads {
   visibility: hidden;
 }

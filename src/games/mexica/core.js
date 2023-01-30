@@ -8,26 +8,26 @@ const w = "w", //water
       c = "c", //capulli
       t = "t", //temple
       p = "p", //pilli
-      x = "-"; //nothing
+      n = "-"; //nothing
 
 const board = [
        /*A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W*/
-  /*1*/ [x,w,w,w,w,w,w,w,w,w,w,w,x,x,x,x,x,x,x,x,x,x,x],
-  /*2*/ [x,w,l,w,w,w,l,l,l,l,l,w,w,x,x,x,x,x,x,x,x,x,x],
-  /*3*/ [w,w,l,l,l,l,l,l,l,l,l,l,l,w,x,x,x,x,x,x,x,x,x],
-  /*4*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,x,x,x,x,x,x,x],
-  /*5*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,x,x,x,x,x],
+  /*1*/ [n,w,w,w,w,w,w,w,w,w,w,w,n,n,n,n,n,n,n,n,n,n,n],
+  /*2*/ [n,w,l,w,w,w,l,l,l,l,l,w,w,n,n,n,n,n,n,n,n,n,n],
+  /*3*/ [w,w,l,l,l,l,l,l,l,l,l,l,l,w,n,n,n,n,n,n,n,n,n],
+  /*4*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,n,n,n,n,n,n,n],
+  /*5*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,n,n,n,n,n],
   /*6*/ [w,w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,w,w,w],
-  /*7*/ [x,w,l,l,l,l,l,l,e,l,l,l,l,l,l,w,l,l,l,w,l,l,w],
-  /*8*/ [x,w,l,l,l,l,l,e,x,e,l,l,l,l,l,w,l,l,l,l,l,l,w],
-  /*9*/ [x,w,l,l,l,l,l,l,e,l,l,l,l,l,l,w,l,l,l,l,l,l,w],
- /*10*/ [x,w,w,l,l,l,l,l,l,l,l,l,l,l,l,w,l,l,l,l,l,w,w],
- /*11*/ [w,w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,w,x],
- /*12*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,x,x,x,x],
- /*13*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,x,x,x,x,x,x],
- /*14*/ [w,l,l,l,l,l,l,l,l,l,l,l,w,w,w,x,x,x,x,x,x,x,x],
- /*15*/ [w,w,w,l,l,l,l,w,w,l,l,w,w,x,x,x,x,x,x,x,x,x,x],
- /*16*/ [x,x,w,w,w,w,w,w,w,w,w,w,x,x,x,x,x,x,x,x,x,x,x]
+  /*7*/ [n,w,l,l,l,l,l,l,e,l,l,l,l,l,l,w,l,l,l,w,l,l,w],
+  /*8*/ [n,w,l,l,l,l,l,e,n,e,l,l,l,l,l,w,l,l,l,l,l,l,w],
+  /*9*/ [n,w,l,l,l,l,l,l,e,l,l,l,l,l,l,w,l,l,l,l,l,l,w],
+ /*10*/ [n,w,w,l,l,l,l,l,l,l,l,l,l,l,l,w,l,l,l,l,l,w,w],
+ /*11*/ [w,w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,w,n],
+ /*12*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,n,n,n,n],
+ /*13*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,n,n,n,n,n,n],
+ /*14*/ [w,l,l,l,l,l,l,l,l,l,l,l,w,w,w,n,n,n,n,n,n,n,n],
+ /*15*/ [w,w,w,l,l,l,l,w,w,l,l,w,w,n,n,n,n,n,n,n,n,n,n],
+ /*16*/ [n,n,w,w,w,w,w,w,w,w,w,w,n,n,n,n,n,n,n,n,n,n,n]
 ]
 
 const capulli = [
@@ -78,11 +78,19 @@ function endOfPeriod(capulli, period, temples){
 
 const coords = _.braid(function(y, x){
   return [x, y];
-}, _.range(1, 16), _.map(function(i){
-  return String.fromCharCode(i);
-}, _.range(65, 65 + 23)));
+}, _.range(0, 16), _.range(0, 23));
 
-export const spots = _.map(_.spread(_.str), coords);
+export const spots = _.map(function([x, y]){
+  const letter = String.fromCharCode(x + 65),
+        row = y + 1;
+  return `${letter}${row}`;
+}, coords);
+
+export const boardSpots = _.map(function([x, y]){
+  const letter = String.fromCharCode(x + 65),
+        row = y + 1;
+  return [`${letter}${row}`, _.getIn(board, [y, x])];
+}, coords);
 
 function init(seats){
   return {

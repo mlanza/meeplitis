@@ -8,8 +8,10 @@ import {session, $online} from "/lib/session.js";
 import {table, ui, scored, outcome, subject} from "/lib/table.js";
 import {getSeated, getSeat, story, nav, waypoint, hist} from "/lib/story.js";
 import {describe} from "/components/table/index.js";
+import {boardSpots} from "../core.js";
 
 const img = dom.tag('img'),
+      ol = dom.tag('ol'),
       li = dom.tag('li'),
       div = dom.tag('div'),
       span = dom.tag('span');
@@ -28,12 +30,38 @@ const [roundNum, roundMax] = dom.sel(".round b", el);
 const els = {
   roundNum,
   roundMax,
+  board: dom.sel1("#board", el),
+  capullis: dom.sel1("#capullis", el),
   moves: dom.sel1(".moves", el),
   trump: dom.sel1(".trump img", el),
   cards: dom.sel1(".cards b", el),
   deck: dom.sel1(".deck", el),
   hand: dom.sel1(".hand", el)
 }
+
+_.each(function([spot, what]){
+  dom.append(els.board, div({"title": spot, "data-spot": spot, "data-what": what}));
+}, boardSpots);
+
+_.each(function(idx){
+  dom.append(els.capullis, li({"data-capulli": idx}));
+}, _.range(8));
+
+_.doto(dom.sel1("[data-spot='Q7']"),
+  dom.append(_, img({src: "./images/bridge.svg", "data-orientation": "vertical"})),
+  dom.append(_, img({src: "./images/meeple.svg"})));
+
+_.doto(dom.sel1("[data-spot='Q9']"),
+  dom.append(_, img({src: "./images/1.svg"})));
+
+_.doto(dom.sel1("[data-spot='R9']"),
+  dom.append(_, img({src: "./images/2.svg"})));
+
+_.doto(dom.sel1("[data-spot='P7']"),
+  dom.append(_, img({src: "./images/canal2.png", "data-size": 2, "data-foo": "bar"})));
+
+_.doto(dom.sel1("[data-spot='P9']"),
+  dom.append(_, img({src: "./images/canal2.png", "data-size": 2})));
 
 const [seated, seat] = await Promise.all([
   getSeated(tableId),

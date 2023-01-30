@@ -1,5 +1,6 @@
 import _ from "/lib/atomic_/core.js";
 import dom from "/lib/atomic_/dom.js";
+import svg from "/lib/atomic_/svg.js";
 import $ from "/lib/atomic_/reactives.js";
 import t from "/lib/atomic_/transducers.js";
 import sh from "/lib/atomic_/shell.js";
@@ -10,11 +11,30 @@ import {getSeated, getSeat, story, nav, waypoint, hist} from "/lib/story.js";
 import {describe} from "/components/table/index.js";
 import {boardSpots} from "../core.js";
 
+async function tpl(size){
+  return await fetch(`../table/images/${size}.svg`).then(function(resp){
+    return resp.text();
+  });
+}
+
+const ts = [await tpl(1), await tpl(2), await tpl(3), await tpl(4)]
+
+function temple({size, seat}){
+  var parser = new DOMParser();
+  const el = parser.parseFromString(ts[size - 1], "image/svg+xml").childNodes[1];
+  dom.attr(el, "data-seat", seat);
+  return el;
+}
+
+const p2 = temple({size: 1, seat: 1});
+
+_.log("p2", p2)
 const img = dom.tag('img'),
       ol = dom.tag('ol'),
       li = dom.tag('li'),
       div = dom.tag('div'),
-      span = dom.tag('span');
+      span = dom.tag('span'),
+      obj = dom.tag('object', {type: "image/svg+xml"});
 
 const params = new URLSearchParams(document.location.search),
       tableId = params.get('id');
@@ -51,11 +71,14 @@ _.doto(dom.sel1("[data-spot='Q7']"),
   dom.append(_, img({src: "./images/bridge.svg", "data-orientation": "vertical"})),
   dom.append(_, img({src: "./images/meeple.svg"})));
 
+_.doto(dom.sel1("[data-spot='Q8']"),
+  dom.append(_, temple({size: 3, seat: 0})));
+
 _.doto(dom.sel1("[data-spot='Q9']"),
-  dom.append(_, img({src: "./images/1.svg"})));
+  dom.append(_, temple({size: 1, seat: 1})));
 
 _.doto(dom.sel1("[data-spot='R9']"),
-  dom.append(_, img({src: "./images/2.svg"})));
+  dom.append(_, temple({size: 2, seat: 3})));
 
 _.doto(dom.sel1("[data-spot='P7']"),
   dom.append(_, img({src: "./images/canal2.png", "data-size": 2, "data-foo": "bar"})));

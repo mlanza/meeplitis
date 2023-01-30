@@ -27,7 +27,7 @@ div[data-spot] {
   float: left;
   overflow: visible;
 }
-div[data-spot] img {
+div[data-spot] > * {
   position: absolute;
   top: -4px;
   left: -4px;
@@ -36,6 +36,19 @@ div[data-spot] img {
   border: solid 2px transparent;
   z-index: 40;
 }
+div[data-spot] svg[data-seat="0"] rect {
+  fill: orange;
+}
+div[data-spot] svg[data-seat="1"] rect {
+  fill: olivedrab;
+}
+div[data-spot] svg[data-seat="2"] rect {
+  fill: maroon;
+}
+div[data-spot] svg[data-seat="3"] rect {
+  fill: gray;
+}
+
 div[data-spot] img[data-size="2"] {
   height: 61px;
   z-index: -45;
@@ -150,7 +163,7 @@ div[data-spot="V11"] {
 div[data-spot]:hover {
   z-index: 11 !important;
 }
-div[data-spot] img:hover {
+div[data-spot] > *:hover {
   border-color: red;
 }
 

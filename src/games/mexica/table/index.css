@@ -50,6 +50,7 @@ div.temples ol {
   padding: 0;
   list-style: none;
   float: left;
+  cursor: pointer;
 }
 div.player {
   max-width: 22em;
@@ -65,15 +66,54 @@ div.temples li {
   vertical-align: sub;
   margin-left: -25px;
 }
-div.temples[data-remaining="4"] li:nth-child(5),
-div.temples[data-remaining="4"] li:nth-child(6) {
+
+div.temples[data-remaining="0"] li:nth-child(1) {
+  opacity: .3;
+}
+div.temples[data-remaining] div span {
   display: none;
+}
+div.temples[data-remaining="0"] div span:nth-child(1),
+div.temples[data-remaining="1"] div span:nth-child(2),
+div.temples[data-remaining="2"] div span:nth-child(3),
+div.temples[data-remaining="3"] div span:nth-child(4),
+div.temples[data-remaining="4"] div span:nth-child(5),
+div.temples[data-remaining="5"] div span:nth-child(6),
+div.temples[data-remaining="6"] div span:nth-child(7) {
+  display: inline;
+}
+div.temples[data-remaining="0"] li:nth-child(2),
+div.temples[data-remaining="0"] li:nth-child(3),
+div.temples[data-remaining="0"] li:nth-child(4),
+div.temples[data-remaining="0"] li:nth-child(5),
+div.temples[data-remaining="0"] li:nth-child(6),
+div.temples[data-remaining="1"] li:nth-child(2),
+div.temples[data-remaining="1"] li:nth-child(3),
+div.temples[data-remaining="1"] li:nth-child(4),
+div.temples[data-remaining="1"] li:nth-child(5),
+div.temples[data-remaining="1"] li:nth-child(6),
+div.temples[data-remaining="2"] li:nth-child(3),
+div.temples[data-remaining="2"] li:nth-child(4),
+div.temples[data-remaining="2"] li:nth-child(5),
+div.temples[data-remaining="2"] li:nth-child(6),
+div.temples[data-remaining="3"] li:nth-child(4),
+div.temples[data-remaining="3"] li:nth-child(5),
+div.temples[data-remaining="3"] li:nth-child(6),
+div.temples[data-remaining="4"] li:nth-child(5),
+div.temples[data-remaining="4"] li:nth-child(6),
+div.temples[data-remaining="5"] li:nth-child(6) {
+  display: none;
+}
+div.temples li:not([style*="display: none"]):last-child svg:hover,
+div.temples li:last-child svg:hover {
+  cursor: pointer;
+  opacity: 1;
 }
 div.temples > div {
   margin-right: 24px;
   float: left;
-  line-height: 2.5em;
   font-size: 12px;
+  vertical-align: super;
 }
 .area [data-piece="temple"] {
   height: 30.5px;

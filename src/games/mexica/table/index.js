@@ -90,24 +90,25 @@ dom.append(els.board,
 dom.append(els.capullis,
   _.map(capulli, _.range(8)));
 
-_.doto(at("Q7"),
-  dom.append(_, bridge("vertical")),
-  dom.append(_, pilli({seat: 0})));
+dom.append(at("Q7"),
+  canal(1),
+  bridge("vertical"),
+  pilli({seat: 0}));
 
-_.doto(at("Q8"),
-  dom.append(_, temple({size: 3, seat: 0})));
+dom.append(at("Q8"),
+  temple({size: 3, seat: 0}));
 
-_.doto(at("Q9"),
-  dom.append(_, temple({size: 1, seat: 1})));
+dom.append(at("Q9"),
+  temple({size: 1, seat: 1}));
 
-_.doto(at("R9"),
-  dom.append(_, temple({size: 2, seat: 3})));
+dom.append(at("R9"),
+  temple({size: 2, seat: 3}));
 
-_.doto(at("P7"),
-  dom.append(_, canal(2, "vertical")));
+dom.append(at("P7"),
+  canal(2, "vertical"));
 
-_.doto(at("P9"),
-  dom.append(_, canal(2, "vertical")));
+dom.append(at("P9"),
+  canal(2, "vertical"));
 
 const [seated, seat] = await Promise.all([
   getSeated(tableId),
@@ -189,7 +190,7 @@ ui($table, $story, $hist, $online, seated, seat, desc, zoned, el);
 function temples(attrs, count){
   return div({class: "temples", "data-remaining": count}, ol(_.repeatedly(count, function(x){
     return li(temple(attrs));
-  })), div(":", count),);
+  })), div(span(0), span(1), span(2), span(3), span(4), span(5), span(6)));
 }
 
 _.chain(seated, _.count, _.range, _.each(function(seat){

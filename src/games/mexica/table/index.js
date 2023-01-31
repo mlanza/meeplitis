@@ -187,8 +187,8 @@ function zoned(){
 //universal ui
 ui($table, $story, $hist, $online, seated, seat, desc, zoned, el);
 
-function temples(attrs, count){
-  return div({class: "temples", "data-remaining": count}, ol(_.repeatedly(count, function(x){
+function temples(attrs, count, max){
+  return div({class: "temples", "data-remaining": count}, ol(_.repeatedly(max, function(x){
     return li(temple(attrs));
   })), div(span(0), span(1), span(2), span(3), span(4), span(5), span(6)));
 }
@@ -196,10 +196,10 @@ function temples(attrs, count){
 _.chain(seated, _.count, _.range, _.each(function(seat){
   const area = dom.sel1(`[data-seat='${seat}'] .area`);
   dom.append(area,
-    temples({size: 1, seat}, 6),
-    temples({size: 2, seat}, 5),
-    temples({size: 3, seat}, 4),
-    temples({size: 4, seat}, 3));
+    temples({size: 1, seat}, 3, 6),
+    temples({size: 2, seat}, 3, 5),
+    temples({size: 3, seat}, 2, 4),
+    temples({size: 4, seat}, 1, 3));
 }, _));
 
 $.sub($table, _.comp(t.compact(), t.map(describe), t.map(_.join("\n", _))), function(descriptors){

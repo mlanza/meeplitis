@@ -40,9 +40,9 @@ div[data-spot] > * {
   z-index: 40;
 }
 div.temples {
-  margin: 0;
   padding: 0;
-  margin-right: 7px;
+  margin: 0 7px -7px 0;
+  display: inline;
   float: left;
 }
 div.temples ol {
@@ -57,14 +57,14 @@ div.player {
   width: 22em;
 }
 .area {
-  width: 14em;
+  width: 16em;
 }
 div.temples li {
   padding: 0;
   margin: 0;
   float: left;
   vertical-align: sub;
-  margin-left: -25px;
+  margin-right: -25px;
 }
 
 div.temples[data-remaining="0"] li:nth-child(1) {
@@ -110,7 +110,7 @@ div.temples li:last-child svg:hover {
   opacity: 1;
 }
 div.temples > div {
-  margin-right: 24px;
+  margin-left: 22px;
   float: left;
   font-size: 12px;
   vertical-align: super;

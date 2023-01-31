@@ -1,6 +1,5 @@
 import _ from "/lib/atomic_/core.js";
 import dom from "/lib/atomic_/dom.js";
-import svg from "/lib/atomic_/svg.js";
 import $ from "/lib/atomic_/reactives.js";
 import t from "/lib/atomic_/transducers.js";
 import sh from "/lib/atomic_/shell.js";
@@ -11,30 +10,56 @@ import {getSeated, getSeat, story, nav, waypoint, hist} from "/lib/story.js";
 import {describe} from "/components/table/index.js";
 import {boardSpots} from "../core.js";
 
-async function tpl(size){
-  return await fetch(`../table/images/${size}.svg`).then(function(resp){
+async function svg(what){
+  return await fetch(`../table/images/${what}.svg`).then(function(resp){
     return resp.text();
   });
 }
 
-const ts = [await tpl(1), await tpl(2), await tpl(3), await tpl(4)]
+const _temple = [await svg(1), await svg(2), await svg(3), await svg(4)],
+      _pilli = await svg("pilli");
 
 function temple({size, seat}){
-  var parser = new DOMParser();
-  const el = parser.parseFromString(ts[size - 1], "image/svg+xml").childNodes[1];
+  const parser = new DOMParser();
+  const el = parser.parseFromString(_temple[size - 1], "image/svg+xml").childNodes[1];
   dom.attr(el, "data-seat", seat);
+  dom.attr(el, "data-piece", "temple");
   return el;
 }
 
-const p2 = temple({size: 1, seat: 1});
+function pilli({seat}){
+  const parser = new DOMParser();
+  const el = parser.parseFromString(_pilli, "image/svg+xml").childNodes[0];
+  dom.attr(el, "data-seat", seat);
+  dom.attr(el, "data-piece", "pilli");
+  return el;
+}
 
-_.log("p2", p2)
+function canal(size, orientation){
+  return img({src: `./images/canal${size}.png`, "data-piece": "canal", "data-size": size, "data-orientation": orientation});
+}
+
+function bridge(orientation){
+  return img({src: "./images/bridge.svg", "data-piece": "bridge", "data-orientation": orientation});
+}
+
+function capulli(idx){
+  return li({"data-capulli": idx});
+}
+
+function at(spot){
+  return dom.sel1(`[data-spot='${spot}']`);
+}
+
+function spot([spot, terrain]){
+  return div({"title": spot, "data-spot": spot, "data-terrain": terrain});
+}
+
 const img = dom.tag('img'),
       ol = dom.tag('ol'),
       li = dom.tag('li'),
       div = dom.tag('div'),
-      span = dom.tag('span'),
-      obj = dom.tag('object', {type: "image/svg+xml"});
+      span = dom.tag('span');
 
 const params = new URLSearchParams(document.location.search),
       tableId = params.get('id');
@@ -59,32 +84,30 @@ const els = {
   hand: dom.sel1(".hand", el)
 }
 
-_.each(function([spot, what]){
-  dom.append(els.board, div({"title": spot, "data-spot": spot, "data-what": what}));
-}, boardSpots);
+dom.append(els.board,
+  _.map(spot, boardSpots));
 
-_.each(function(idx){
-  dom.append(els.capullis, li({"data-capulli": idx}));
-}, _.range(8));
+dom.append(els.capullis,
+  _.map(capulli, _.range(8)));
 
-_.doto(dom.sel1("[data-spot='Q7']"),
-  dom.append(_, img({src: "./images/bridge.svg", "data-orientation": "vertical"})),
-  dom.append(_, img({src: "./images/meeple.svg"})));
+_.doto(at("Q7"),
+  dom.append(_, bridge("vertical")),
+  dom.append(_, pilli({seat: 0})));
 
-_.doto(dom.sel1("[data-spot='Q8']"),
+_.doto(at("Q8"),
   dom.append(_, temple({size: 3, seat: 0})));
 
-_.doto(dom.sel1("[data-spot='Q9']"),
+_.doto(at("Q9"),
   dom.append(_, temple({size: 1, seat: 1})));
 
-_.doto(dom.sel1("[data-spot='R9']"),
+_.doto(at("R9"),
   dom.append(_, temple({size: 2, seat: 3})));
 
-_.doto(dom.sel1("[data-spot='P7']"),
-  dom.append(_, img({src: "./images/canal2.png", "data-size": 2, "data-foo": "bar"})));
+_.doto(at("P7"),
+  dom.append(_, canal(2, "vertical")));
 
-_.doto(dom.sel1("[data-spot='P9']"),
-  dom.append(_, img({src: "./images/canal2.png", "data-size": 2})));
+_.doto(at("P9"),
+  dom.append(_, canal(2, "vertical")));
 
 const [seated, seat] = await Promise.all([
   getSeated(tableId),
@@ -162,6 +185,21 @@ function zoned(){
 
 //universal ui
 ui($table, $story, $hist, $online, seated, seat, desc, zoned, el);
+
+function temples(attrs, count){
+  return div({class: "temples", "data-remaining": count}, ol(_.repeatedly(count, function(x){
+    return li(temple(attrs));
+  })), div(":", count),);
+}
+
+_.chain(seated, _.count, _.range, _.each(function(seat){
+  const area = dom.sel1(`[data-seat='${seat}'] .area`);
+  dom.append(area,
+    temples({size: 1, seat}, 6),
+    temples({size: 2, seat}, 5),
+    temples({size: 3, seat}, 4),
+    temples({size: 4, seat}, 3));
+}, _));
 
 $.sub($table, _.comp(t.compact(), t.map(describe), t.map(_.join("\n", _))), function(descriptors){
   dom.attr(dom.sel1("#title"), "title", descriptors || "Normal game");

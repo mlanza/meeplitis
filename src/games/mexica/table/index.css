@@ -8,6 +8,9 @@
   padding: 1px;
 }
 #board {
+  background-image: url(./images/mexicab.png);
+  background-size: 700px 500px;
+  background-repeat: no-repeat;
   position: relative;
   margin: 10em 2em;
   height: 494px;
@@ -36,16 +39,61 @@ div[data-spot] > * {
   border: solid 2px transparent;
   z-index: 40;
 }
-div[data-spot] svg[data-seat="0"] rect {
+div.temples {
+  margin: 0;
+  padding: 0;
+  margin-right: 7px;
+  float: left;
+}
+div.temples ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  float: left;
+}
+div.player {
+  max-width: 22em;
+  width: 22em;
+}
+.area {
+  width: 14em;
+}
+div.temples li {
+  padding: 0;
+  margin: 0;
+  float: left;
+  vertical-align: sub;
+  margin-left: -25px;
+}
+div.temples[data-remaining="4"] li:nth-child(5),
+div.temples[data-remaining="4"] li:nth-child(6) {
+  display: none;
+}
+div.temples > div {
+  margin-right: 24px;
+  float: left;
+  line-height: 2.5em;
+  font-size: 12px;
+}
+.area [data-piece="temple"] {
+  height: 30.5px;
+  width: 30.5px;
+}
+
+svg[data-seat="0"][data-piece="temple"] rect,
+svg[data-seat="0"][data-piece="pilli"] path {
   fill: orange;
 }
-div[data-spot] svg[data-seat="1"] rect {
+svg[data-seat="1"][data-piece="temple"] rect,
+svg[data-seat="1"][data-piece="pilli"] path {
   fill: olivedrab;
 }
-div[data-spot] svg[data-seat="2"] rect {
+svg[data-seat="2"][data-piece="temple"] rect,
+svg[data-seat="2"][data-piece="pilli"] path {
   fill: maroon;
 }
-div[data-spot] svg[data-seat="3"] rect {
+svg[data-seat="3"][data-piece="temple"] rect,
+svg[data-seat="3"][data-piece="pilli"] path {
   fill: gray;
 }
 
@@ -54,7 +102,7 @@ div[data-spot] img[data-size="2"] {
   z-index: -45;
 }
 
-div[data-spot] img[data-orientation="vertical"] {
+div[data-spot] img[data-piece="bridge"][data-orientation="vertical"] {
   transform: rotate(90deg);
 }
 ol#capullis {
@@ -85,7 +133,7 @@ div[data-spot^="W"]:hover {
   border-color: red;
   clear: right;
 }
-div[data-what="-"],
+div[data-terrain="-"],
 div[data-spot^="A"],
 div[data-spot="B1"],
 div[data-spot="C1"],

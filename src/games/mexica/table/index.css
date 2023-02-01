@@ -131,10 +131,6 @@ div[data-remaining] div {
 div[data-remaining] div span {
   display: none;
 }
-div[data-remaining] div span {
-  display: none;
-}
-
 div[data-remaining="0"] div span:nth-child(1),
 div[data-remaining="1"] div span:nth-child(2),
 div[data-remaining="2"] div span:nth-child(3),
@@ -173,26 +169,42 @@ div[data-remaining="34"] div span:nth-child(35),
 div[data-remaining="35"] div span:nth-child(36) {
   display: inline;
 }
-div[data-remaining="0"] li:nth-child(2),
-div[data-remaining="0"] li:nth-child(3),
-div[data-remaining="0"] li:nth-child(4),
-div[data-remaining="0"] li:nth-child(5),
-div[data-remaining="0"] li:nth-child(6),
-div[data-remaining="1"] li:nth-child(2),
-div[data-remaining="1"] li:nth-child(3),
-div[data-remaining="1"] li:nth-child(4),
-div[data-remaining="1"] li:nth-child(5),
-div[data-remaining="1"] li:nth-child(6),
-div[data-remaining="2"] li:nth-child(3),
-div[data-remaining="2"] li:nth-child(4),
-div[data-remaining="2"] li:nth-child(5),
-div[data-remaining="2"] li:nth-child(6),
-div[data-remaining="3"] li:nth-child(4),
-div[data-remaining="3"] li:nth-child(5),
-div[data-remaining="3"] li:nth-child(6),
-div[data-remaining="4"] li:nth-child(5),
-div[data-remaining="4"] li:nth-child(6),
-div[data-remaining="5"] li:nth-child(6) {
+div[data-remaining="0"] li:nth-child(n+2),
+div[data-remaining="1"] li:nth-child(n+2),
+div[data-remaining="2"] li:nth-child(n+3),
+div[data-remaining="3"] li:nth-child(n+4),
+div[data-remaining="4"] li:nth-child(n+5),
+div[data-remaining="5"] li:nth-child(n+6),
+div[data-remaining="6"] li:nth-child(n+7),
+div[data-remaining="7"] li:nth-child(n+8),
+div[data-remaining="8"] li:nth-child(n+9),
+div[data-remaining="9"] li:nth-child(n+10),
+div[data-remaining="10"] li:nth-child(n+11),
+div[data-remaining="11"] li:nth-child(n+12),
+div[data-remaining="12"] li:nth-child(n+13),
+div[data-remaining="13"] li:nth-child(n+14),
+div[data-remaining="14"] li:nth-child(n+15),
+div[data-remaining="15"] li:nth-child(n+16),
+div[data-remaining="16"] li:nth-child(n+17),
+div[data-remaining="17"] li:nth-child(n+18),
+div[data-remaining="18"] li:nth-child(n+19),
+div[data-remaining="19"] li:nth-child(n+20),
+div[data-remaining="20"] li:nth-child(n+21),
+div[data-remaining="21"] li:nth-child(n+22),
+div[data-remaining="22"] li:nth-child(n+23),
+div[data-remaining="23"] li:nth-child(n+24),
+div[data-remaining="24"] li:nth-child(n+25),
+div[data-remaining="25"] li:nth-child(n+26),
+div[data-remaining="26"] li:nth-child(n+27),
+div[data-remaining="27"] li:nth-child(n+28),
+div[data-remaining="28"] li:nth-child(n+29),
+div[data-remaining="29"] li:nth-child(n+30),
+div[data-remaining="30"] li:nth-child(n+31),
+div[data-remaining="31"] li:nth-child(n+32),
+div[data-remaining="32"] li:nth-child(n+33),
+div[data-remaining="33"] li:nth-child(n+34),
+div[data-remaining="34"] li:nth-child(n+35),
+div[data-remaining="35"] li:nth-child(n+36) {
   display: none;
 }
 div[data-remaining] li:not([style*="display: none"]):last-child svg:hover,
@@ -221,11 +233,11 @@ svg[data-seat="1"][data-piece="pilli"] path {
 }
 svg[data-seat="2"][data-piece="temple"] rect,
 svg[data-seat="2"][data-piece="pilli"] path {
-  fill: maroon;
+  fill: #CFBD8F;
 }
 svg[data-seat="3"][data-piece="temple"] rect,
 svg[data-seat="3"][data-piece="pilli"] path {
-  fill: gray;
+  fill: #65647C;
 }
 
 div[data-spot] img[data-size="2"] {

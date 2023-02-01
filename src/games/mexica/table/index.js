@@ -35,11 +35,11 @@ function pilli({seat}){
   return el;
 }
 
-function canal(size, orientation){
+function canal({size, orientation}){
   return img({src: `./images/canal${size}.png`, "data-piece": "canal", "data-size": size, "data-orientation": orientation});
 }
 
-function bridge(orientation){
+function bridge({orientation}){
   return img({src: "./images/bridge.svg", "data-piece": "bridge", "data-orientation": orientation});
 }
 
@@ -76,6 +76,7 @@ const els = {
   roundNum,
   roundMax,
   board: dom.sel1("#board", el),
+  supplies: dom.sel1("#supplies"),
   capullis: dom.sel1("#capullis", el),
   moves: dom.sel1(".moves", el),
   trump: dom.sel1(".trump img", el),
@@ -91,8 +92,8 @@ dom.append(els.capullis,
   _.map(capulli, _.range(8)));
 
 dom.append(at("Q7"),
-  canal(1),
-  bridge("vertical"),
+  canal({size: 1, orientation: "vertical"}),
+  bridge({orientation: "vertical"}),
   pilli({seat: 0}));
 
 dom.append(at("Q8"),
@@ -105,10 +106,10 @@ dom.append(at("R9"),
   temple({size: 2, seat: 3}));
 
 dom.append(at("P7"),
-  canal(2, "vertical"));
+  canal({size: 2, orientation: "vertical"}));
 
 dom.append(at("P9"),
-  canal(2, "vertical"));
+  canal({size: 2, orientation: "vertical"}));
 
 const [seated, seat] = await Promise.all([
   getSeated(tableId),
@@ -188,10 +189,23 @@ function zoned(){
 ui($table, $story, $hist, $online, seated, seat, desc, zoned, el);
 
 function temples(attrs, count, max){
-  return div({class: "temples", "data-remaining": count}, ol(_.repeatedly(max, function(x){
+  return div({class: "temples", "data-remaining": count}, ol(_.repeatedly(max, function(){
     return li(temple(attrs));
   })), div(span(0), span(1), span(2), span(3), span(4), span(5), span(6)));
 }
+
+function resources(title, resource, attrs, count, max){
+  const {size, orientation} = Object.assign({orientation: "vertical", size: 1}, attrs);
+  return div({class: title, "data-size": size, "data-remaining": count},
+    div(_.map(span, _.range(0, max + 1))),
+    ol({title}, _.repeatedly(max, function(){
+      return li(resource({size, orientation}));
+    })));
+}
+
+dom.append(supplies, resources("canals", canal, {size: 2}, 35, 35));
+dom.append(supplies, resources("canals", canal, {size: 1}, 6, 6));
+dom.append(supplies, resources("bridges", bridge, {size: 1}, 11, 11));
 
 _.chain(seated, _.count, _.range, _.each(function(seat){
   const area = dom.sel1(`[data-seat='${seat}'] .area`);

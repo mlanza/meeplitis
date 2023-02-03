@@ -43,8 +43,16 @@ function bridge({orientation}){
   return img({src: "./images/bridge.svg", "data-piece": "bridge", "data-orientation": orientation});
 }
 
-function capulli(idx){
-  return li({"data-capulli": idx});
+function token(){
+  return img({src: "./images/token.png", "data-piece": "token"});
+}
+
+function capulli({size}){
+  return img({src: `./images/c${size}.png`, "data-piece": "capulli", "data-size": size});
+}
+
+function demand(idx){
+  return li({"data-demand": idx});
 }
 
 function at(spot){
@@ -77,7 +85,7 @@ const els = {
   roundMax,
   board: dom.sel1("#board", el),
   supplies: dom.sel1("#supplies"),
-  capullis: dom.sel1("#capullis", el),
+  demands: dom.sel1("#demands", el),
   moves: dom.sel1(".moves", el),
   trump: dom.sel1(".trump img", el),
   cards: dom.sel1(".cards b", el),
@@ -88,8 +96,8 @@ const els = {
 dom.append(els.board,
   _.map(spot, boardSpots));
 
-dom.append(els.capullis,
-  _.map(capulli, _.range(8)));
+dom.append(els.demands,
+  _.map(demand, _.range(8)));
 
 dom.append(at("Q7"),
   canal({size: 1, orientation: "vertical"}),
@@ -110,6 +118,11 @@ dom.append(at("P7"),
 
 dom.append(at("P9"),
   canal({size: 2, orientation: "vertical"}));
+
+_.each(function(pos){
+  dom.append(dom.sel1(`[data-demand='${pos}']`),
+    capulli({size: 3}));
+}, _.range(0, 8));
 
 const [seated, seat] = await Promise.all([
   getSeated(tableId),
@@ -206,6 +219,7 @@ function resources(title, resource, attrs, count, max){
 dom.append(supplies, resources("canals", canal, {size: 2}, 35, 35));
 dom.append(supplies, resources("canals", canal, {size: 1}, 6, 6));
 dom.append(supplies, resources("bridges", bridge, {size: 1}, 11, 11));
+dom.append(supplies, resources("tokens", token, {}, 12, 12));
 
 _.chain(seated, _.count, _.range, _.each(function(seat){
   const area = dom.sel1(`[data-seat='${seat}'] .area`);

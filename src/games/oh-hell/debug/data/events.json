@@ -2,13 +2,13 @@
   {
     "id": "jgU3T",
     "seat": null,
-    "type": "start",
+    "type": "started",
     "details": null
   },
   {
     "id": "eA6cX",
     "seat": null,
-    "type": "deal",
+    "type": "dealt",
     "details": {
       "deck": [
         {
@@ -268,7 +268,7 @@
   {
     "id": "nldFj",
     "seat": 0,
-    "type": "play",
+    "type": "played",
     "details": {
       "card": {
         "rank": "5",
@@ -279,13 +279,13 @@
   {
     "id": "KMgh0",
     "seat": 0,
-    "type": "commit",
+    "type": "committed",
     "details": null
   },
   {
     "id": "bxKAq",
     "seat": 1,
-    "type": "play",
+    "type": "played",
     "details": {
       "card": {
         "rank": "Q",
@@ -296,19 +296,19 @@
   {
     "id": "9FHOm",
     "seat": null,
-    "type": "broken",
+    "type": "broke",
     "details": null
   },
   {
     "id": "9hVav",
     "seat": 1,
-    "type": "commit",
+    "type": "committed",
     "details": null
   },
   {
     "id": "edtwN",
     "seat": 2,
-    "type": "play",
+    "type": "played",
     "details": {
       "card": {
         "rank": "J",
@@ -319,13 +319,13 @@
   {
     "id": "pQCoG",
     "seat": 2,
-    "type": "commit",
+    "type": "committed",
     "details": null
   },
   {
     "id": "rVk4h",
     "seat": 3,
-    "type": "play",
+    "type": "played",
     "details": {
       "card": {
         "rank": "10",
@@ -336,7 +336,7 @@
   {
     "id": "jJhET",
     "seat": null,
-    "type": "award",
+    "type": "awarded",
     "details": {
       "trick": [
         {
@@ -362,7 +362,7 @@
   {
     "id": "s4WdR",
     "seat": null,
-    "type": "scoring",
+    "type": "scored",
     "details": {
       "scoring": [
         {
@@ -391,13 +391,13 @@
   {
     "id": "uYgLM",
     "seat": 3,
-    "type": "commit",
+    "type": "committed",
     "details": null
   },
   {
     "id": "XTrbj",
     "seat": null,
-    "type": "deal",
+    "type": "dealt",
     "details": {
       "deck": [
         {
@@ -657,7 +657,7 @@
   {
     "id": "CfLAN",
     "seat": 1,
-    "type": "play",
+    "type": "played",
     "details": {
       "card": {
         "rank": "9",
@@ -668,13 +668,13 @@
   {
     "id": "t5xd7",
     "seat": 1,
-    "type": "commit",
+    "type": "committed",
     "details": null
   },
   {
     "id": "qAM0g",
     "seat": 2,
-    "type": "play",
+    "type": "played",
     "details": {
       "card": {
         "rank": "A",
@@ -685,25 +685,25 @@
   {
     "id": "TyOJu",
     "seat": 2,
-    "type": "undo",
+    "type": "undid",
     "details": null
   },
   {
     "id": "Fs5VH",
     "seat": 2,
-    "type": "redo",
+    "type": "redid",
     "details": null
   },
   {
     "id": "AuqzJ",
     "seat": 2,
-    "type": "commit",
+    "type": "committed",
     "details": null
   },
   {
     "id": "t43fO",
     "seat": 3,
-    "type": "play",
+    "type": "played",
     "details": {
       "card": {
         "rank": "10",
@@ -714,19 +714,19 @@
   {
     "id": "AWAev",
     "seat": null,
-    "type": "broken",
+    "type": "broke",
     "details": null
   },
   {
     "id": "vgRPr",
     "seat": 3,
-    "type": "commit",
+    "type": "committed",
     "details": null
   },
   {
     "id": "BjLtq",
     "seat": 0,
-    "type": "play",
+    "type": "played",
     "details": {
       "card": {
         "rank": "7",
@@ -737,7 +737,7 @@
   {
     "id": "Vh8tT",
     "seat": null,
-    "type": "award",
+    "type": "awarded",
     "details": {
       "trick": [
         {
@@ -763,13 +763,13 @@
   {
     "id": "dtyPT",
     "seat": 0,
-    "type": "commit",
+    "type": "committed",
     "details": null
   },
   {
     "id": "RDt4d",
     "seat": 1,
-    "type": "play",
+    "type": "played",
     "details": {
       "card": {
         "rank": "10",
@@ -780,13 +780,13 @@
   {
     "id": "wuRTB",
     "seat": 1,
-    "type": "commit",
+    "type": "committed",
     "details": null
   },
   {
     "id": "5uVMY",
     "seat": 2,
-    "type": "play",
+    "type": "played",
     "details": {
       "card": {
         "rank": "5",
@@ -797,13 +797,13 @@
   {
     "id": "aRT9k",
     "seat": 2,
-    "type": "commit",
+    "type": "committed",
     "details": null
   },
   {
     "id": "KMsHX",
     "seat": 3,
-    "type": "play",
+    "type": "played",
     "details": {
       "card": {
         "rank": "J",
@@ -814,13 +814,13 @@
   {
     "id": "lfxSi",
     "seat": 3,
-    "type": "commit",
+    "type": "committed",
     "details": null
   },
   {
     "id": "xrJOK",
     "seat": 0,
-    "type": "play",
+    "type": "played",
     "details": {
       "card": {
         "rank": "K",
@@ -831,7 +831,7 @@
   {
     "id": "nuUbn",
     "seat": null,
-    "type": "award",
+    "type": "awarded",
     "details": {
       "trick": [
         {
@@ -857,7 +857,7 @@
   {
     "id": "xrwyk",
     "seat": null,
-    "type": "scoring",
+    "type": "scored",
     "details": {
       "scoring": [
         {
@@ -886,13 +886,13 @@
   {
     "id": "CdTMh",
     "seat": 0,
-    "type": "commit",
+    "type": "committed",
     "details": null
   },
   {
     "id": "QqhRq",
     "seat": null,
-    "type": "deal",
+    "type": "dealt",
     "details": {
       "deck": [
         {

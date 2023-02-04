@@ -28,7 +28,7 @@ begin
           jsonb_array_elements(details->'briefs') as brief,
           jsonb_array_elements(details->'places')::smallint as place
         from events
-        where type = 'finish' and table_id = new.table_id
+        where type = 'finished' and table_id = new.table_id
       ) as e
     ) e on s.table_id = new.table_id and e.seat = s.seat
   ) as x
@@ -47,5 +47,5 @@ $$ language plpgsql;
 drop trigger if exists on_finished_event_added on events;
 
 create trigger on_finished_event_added
-after insert on events for each row when (new.type = 'finish')
+after insert on events for each row when (new.type = 'finished')
 execute function finish_game();

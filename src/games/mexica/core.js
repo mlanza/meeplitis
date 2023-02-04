@@ -855,5 +855,3 @@ _.doto(Mexica,
   _.implement(_.IAppendable, {append}),
   _.implement(_.IFunctor, {fmap}),
   _.implement(g.IGame, {perspective, up, may, moves, irreversible, metrics, comparator, textualizer, execute, fold}));
-
-Object.assign(window, {spots, coords, districts})

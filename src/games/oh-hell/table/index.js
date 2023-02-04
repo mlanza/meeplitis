@@ -48,40 +48,40 @@ const [seated, seat] = await Promise.all([
 
 function desc(event){
   switch(event.type) {
-    case "start":
+    case "started":
       return "Starts game.";
 
-    case "deal":
+    case "dealt":
       return "Deals cards.";
 
-    case "commit":
+    case "committed":
       return "I'm done.";
 
-    case "undo":
+    case "undid":
       return "Undoes.";
 
-    case "redo":
+    case "redid":
       return "Redoes.";
 
     case "reset":
       return "Resets.";
 
-    case "broken":
+    case "broke":
       return "Breaks trump!";
 
     case "bid":
       return `Bids.`;
 
-    case "play":
+    case "played":
       return `Plays ${event.details.card.rank} of ${event.details.card.suit}.`;
 
-    case "scoring":
+    case "scored":
       return scored(seated, event.details);
 
-    case "finish":
+    case "finished":
       return outcome(seated, event.details);
 
-    case "award":
+    case "awarded":
       return ["Awards trick to ", subject(_.nth(seated, event.details.winner)), "."];
 
     default:
@@ -121,7 +121,7 @@ $.sub($hist, function([curr, prior]){
   const event = _.last(events);
   const cnt = _.count(seated);
   const leadSuit = _.maybe(seated, _.nth(_, lead), _.getIn(_, ["played", "suit"])) || "";
-  const awarded = event.type == "award" ? _.toArray(_.take(cnt, _.drop(cnt - event.details.lead, _.cycle(event.details.trick)))) : null;
+  const awarded = event.type == "awarded" ? _.toArray(_.take(cnt, _.drop(cnt - event.details.lead, _.cycle(event.details.trick)))) : null;
 
   _.each(_.doto(_,
     dom.removeClass(_, "active"),

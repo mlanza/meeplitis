@@ -79,9 +79,45 @@ if (!tableId) {
 }
 
 const el = document.body;
+const board = dom.sel1("#board", el);
+const supplies = dom.sel1("#supplies", el);
+
+const [seated, seat] = await Promise.all([
+  getSeated(tableId),
+  getSeat(tableId, session)
+]);
+
+function resources(title, resource, _attrs, supply){
+  const attrs = Object.assign({orientation: "vertical", size: 1}, _attrs);
+  const {size} = attrs;
+  return div({class: title, "data-size": size, "data-remaining": supply},
+    div(_.map(span, _.range(0, supply + 1))),
+    ol({title}, _.repeatedly(supply, function(){
+      return li(resource(attrs));
+    })));
+}
+
+const supply = {
+  canal2: _.partial(resources, "canals", canal, {size: 2}, 35),
+  canal1: _.partial(resources, "canals", canal, {size: 1}, 6),
+  bridges: _.partial(resources, "bridges", bridge, {size: 1}, 11),
+  tokens: _.partial(resources, "tokens", token, null, 12),
+  temples: _.partial(resources, "temples", temple)
+}
+
+dom.append(supplies,
+  supply.canal2(),
+  supply.canal1(),
+  supply.bridges(),
+  supply.tokens());
+
 const els = {
-  board: dom.sel1("#board", el),
-  supplies: dom.sel1("#supplies"),
+  board,
+  supplies,
+  tokens: dom.sel1(".tokens", supplies),
+  bridges: dom.sel1(".bridges", supplies),
+  canal2: dom.sel1(".canals[data-size='2']", supplies),
+  canal1: dom.sel1(".canals[data-size='1']", supplies),
   demands: dom.sel1("#demands", el)
 }
 
@@ -91,6 +127,7 @@ dom.append(els.board,
 dom.append(els.demands,
   _.map(demand, _.range(8)));
 
+/*
 dom.append(at("Q7"),
   canal({size: 1, orientation: "vertical"}),
   bridge({orientation: "vertical"}),
@@ -110,16 +147,7 @@ dom.append(at("P7"),
 
 dom.append(at("P9"),
   canal({size: 2, orientation: "vertical"}));
-
-_.each(function(pos){
-  dom.append(dom.sel1(`[data-demand='${pos}']`),
-    capulli({size: pos + 6}));
-}, _.range(0, 8));
-
-const [seated, seat] = await Promise.all([
-  getSeated(tableId),
-  getSeat(tableId, session)
-]);
+*/
 
 function desc(event){
   switch(event.type) {
@@ -138,47 +166,58 @@ function zoned(){
   ];
 }
 
+//TODO create arg like `zoned` for providing area contents
+
 //universal ui
 ui($table, $story, $hist, $online, seated, seat, desc, zoned, el);
 
-function resources(title, resource, _attrs, max, count){
-  const attrs = Object.assign({orientation: "vertical", size: 1}, _attrs);
-  const remaining = count == null ? max : count,
-        {size} = attrs;
-  return div({class: title, "data-size": size, "data-remaining": remaining},
-    div(_.map(span, _.range(0, max + 1))),
-    ol({title}, _.repeatedly(max, function(){
-      return li(resource(attrs));
-    })));
-}
+_.eachkv(function(seat){
+  const zone = dom.sel1(`[data-seat='${seat}']`, el),
+        area = dom.sel1(".area", zone);
 
-const x2canals = _.partial(resources, "canals", canal, {size: 2}, 35),
-      canals = _.partial(resources, "canals", canal, {size: 1}, 6),
-      bridges = _.partial(resources, "bridges", bridge, {size: 1}, 11),
-      tokens = _.partial(resources, "tokens", token, null, 12),
-      temples = _.partial(resources, "temples", temple);
-
-dom.append(supplies,
-  x2canals(),
-  canals(),
-  bridges(),
-  tokens());
-
-_.chain(seated, _.count, _.range, _.each(function(seat){
-  const area = dom.sel1(`[data-seat='${seat}'] .area`);
   dom.append(area,
-    temples({size: 1, seat}, 6, 3),
-    temples({size: 2, seat}, 5, 3),
-    temples({size: 3, seat}, 4, 2),
-    temples({size: 4, seat}, 3, 1),
-    tokens());
-}, _));
+    supply.temples({size: 1, seat}, 6),
+    supply.temples({size: 2, seat}, 5),
+    supply.temples({size: 3, seat}, 4),
+    supply.temples({size: 4, seat}, 3),
+    supply.tokens());
+}, seated);
 
 $.sub($table, _.comp(t.compact(), t.map(describe), t.map(_.join("\n", _))), function(descriptors){
   dom.attr(dom.sel1("#title"), "title", descriptors || "Normal game");
 });
 
-$.sub($hist, t.tee(_.see("hist")), function([curr, prior]){
+function remaining(slots){
+  return _.count(_.filter(_.isNil, slots));
+}
+
+$.sub($hist, function([curr, prior]){
+  const {state} = curr;
+  const {seated, tokens, canal1, canal2, bridges, period} = state;
+  const tiles = _.nth(state.capulli, period);
+
+  _.eachkv(function(pos, {rank, at}){
+    dom.html(dom.sel1(`[data-demand='${pos}']`, el),
+      capulli({size: rank}));
+  }, tiles);
+
+  dom.attr(els.tokens, "data-remaining", tokens);
+  dom.attr(els.bridges, "data-remaining", remaining(bridges));
+  dom.attr(els.canal1, "data-remaining", remaining(canal1));
+  dom.attr(els.canal2, "data-remaining", remaining(canal2));
+
+  _.eachkv(function(seat, {bank, temples, pilli, points}){
+    const zone = dom.sel1(`[data-seat='${seat}']`, el),
+          area = dom.sel1(".area", zone);
+
+    dom.text(dom.sel1(".points", zone), points);
+    dom.attr(dom.sel1(".tokens", area), "data-remaining", bank);
+
+    _.eachkv(function(level, spots){
+      dom.attr(dom.sel1(`.temples[data-size='${level}'`, area), "data-remaining", remaining(spots));
+    }, temples);
+  }, seated);
+
 });
 
 Object.assign(window, {$, _, sh, session, $story, $table, $online, supabase});

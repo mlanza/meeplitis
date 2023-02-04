@@ -194,7 +194,6 @@ const $table = table(tableId),
 function zoned(){
   return [
     div(span({class: "points"}, "0"), " pts."),
-    div(span({class: "actions"}, "-"), "/", span({class: "bid"}, "-")),
   ];
 }
 
@@ -204,7 +203,13 @@ ui($table, $story, $hist, $online, seated, seat, desc, zoned, el);
 function temples(attrs, count, max){
   return div({class: "temples", "data-remaining": count}, ol(_.repeatedly(max, function(){
     return li(temple(attrs));
-  })), div(span(0), span(1), span(2), span(3), span(4), span(5), span(6)));
+  })), div(_.map(span, _.range(0, max + 1))));
+}
+
+function tokens(attrs, count, max){
+  return div({class: "tokens", "data-remaining": count}, ol(_.repeatedly(max, function(){
+    return li(token(attrs));
+  })), div(_.map(span, _.range(0, max + 1))));
 }
 
 function resources(title, resource, attrs, count, max){
@@ -227,7 +232,8 @@ _.chain(seated, _.count, _.range, _.each(function(seat){
     temples({size: 1, seat}, 3, 6),
     temples({size: 2, seat}, 3, 5),
     temples({size: 3, seat}, 2, 4),
-    temples({size: 4, seat}, 1, 3));
+    temples({size: 4, seat}, 1, 3),
+    tokens({}, 12, 12));
 }, _));
 
 $.sub($table, _.comp(t.compact(), t.map(describe), t.map(_.join("\n", _))), function(descriptors){

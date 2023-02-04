@@ -15,8 +15,9 @@
   position: relative;
 }
 .area {
-  width: 16em;
+  width: auto;
   height: auto;
+  max-width: 20em;
   min-height: 2em;
 }
 .zone {
@@ -80,7 +81,7 @@
 #supplies li [data-size="1"] {
   transform: rotate(5deg);
 }
-#supplies li [data-piece="token"] {
+[data-piece="token"] {
   border-radius: 50%;
   border: solid 1px white;
 }
@@ -113,13 +114,13 @@ div[data-spot] > * {
   border: solid 2px transparent;
   z-index: 40;
 }
-div.temples {
+div.temples, div.tokens {
   padding: 0;
-  margin: 0 7px -7px 0;
+  margin: 2px;
   display: inline;
   float: left;
 }
-div.temples ol {
+div.temples ol, div.tokens ol {
   margin: 0;
   padding: 0;
   list-style: none;
@@ -130,14 +131,19 @@ div.player {
   max-width: 22em;
   width: 22em;
 }
-div.temples li {
+.area div.temples li, .area div.tokens li {
   padding: 0;
   margin: 0;
   float: left;
   vertical-align: sub;
   margin-right: -25px;
 }
-
+.area div.tokens li {
+  margin-right: -28px;
+}
+div.tokens {
+  margin-left: .5em;
+}
 div[data-remaining="0"] li:nth-child(1) {
   opacity: .3;
 }
@@ -228,16 +234,23 @@ div[data-remaining] li:last-child svg:hover {
   cursor: pointer;
   opacity: 1;
 }
-div.temples > div {
+.area div.temples > div, .area div.tokens > div {
   margin-left: 24px;
   float: left;
   font-size: 12px;
   vertical-align: super;
 }
-.area [data-piece="temple"] {
+.area [data-piece] {
   height: 30.5px;
   width: 30.5px;
 }
+#supplies [data-piece="token"],
+.area [data-piece="token"] {
+  height: 23px;
+  width: 23px;
+  margin: 4px;
+}
+
 
 svg[data-seat="0"][data-piece="temple"] rect,
 svg[data-seat="0"][data-piece="pilli"] path {

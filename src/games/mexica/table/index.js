@@ -48,11 +48,11 @@ function token(){
 }
 
 function capulli({size}){
-  return img({src: `./images/c${size}.png`, "data-piece": "capulli", "data-size": size});
+  return img({src: `./images/c${size}.png`, "title": `capulli for district size ${size}`, "data-piece": "capulli", "data-size": size});
 }
 
-function demand(idx){
-  return li({"data-demand": idx});
+function demand(pos){
+  return li({"data-demand": pos});
 }
 
 function at(spot){
@@ -72,25 +72,17 @@ const img = dom.tag('img'),
 const params = new URLSearchParams(document.location.search),
       tableId = params.get('id');
 
-dom.addClass(document.body, "initialized");
+dom.addClass(document.body, "initialized"); //TODO temporary
 
 if (!tableId) {
   document.location.href = "../";
 }
 
 const el = document.body;
-const [roundNum, roundMax] = dom.sel(".round b", el);
 const els = {
-  roundNum,
-  roundMax,
   board: dom.sel1("#board", el),
   supplies: dom.sel1("#supplies"),
-  demands: dom.sel1("#demands", el),
-  moves: dom.sel1(".moves", el),
-  trump: dom.sel1(".trump img", el),
-  cards: dom.sel1(".cards b", el),
-  deck: dom.sel1(".deck", el),
-  hand: dom.sel1(".hand", el)
+  demands: dom.sel1("#demands", el)
 }
 
 dom.append(els.board,
@@ -121,7 +113,7 @@ dom.append(at("P9"),
 
 _.each(function(pos){
   dom.append(dom.sel1(`[data-demand='${pos}']`),
-    capulli({size: 3}));
+    capulli({size: pos + 6}));
 }, _.range(0, 8));
 
 const [seated, seat] = await Promise.all([
@@ -131,60 +123,9 @@ const [seated, seat] = await Promise.all([
 
 function desc(event){
   switch(event.type) {
-    case "start":
-      return "Starts game.";
-
-    case "deal":
-      return "Deals cards.";
-
-    case "commit":
-      return "I'm done.";
-
-    case "undo":
-      return "Undoes.";
-
-    case "redo":
-      return "Redoes.";
-
-    case "reset":
-      return "Resets.";
-
-    case "broken":
-      return "Breaks trump!";
-
-    case "bid":
-      return `Bids.`;
-
-    case "play":
-      return `Plays ${event.details.card.rank} of ${event.details.card.suit}.`;
-
-    case "scoring":
-      return scored(seated, event.details);
-
-    case "finish":
-      return outcome(seated, event.details);
-
-    case "award":
-      return ["Awards trick to ", subject(_.nth(seated, event.details.winner)), "."];
-
     default:
       return event.type;
   }
-}
-
-function moveSel(move){
-  const {details} = move;
-  switch(move.type){
-    case "bid":
-      return `[data-bid="${details.bid == null ? '' : details.bid}"]`;
-    default:
-      return "";
-  }
-}
-
-function cardSrc({suit, rank}){
-  const suits = {"♥️": "H", "♦️": "D", "♣️": "C", "♠️": "S"};
-  return `/images/deck/${rank}${suits[suit]}.svg`;
 }
 
 const $table = table(tableId),
@@ -200,114 +141,44 @@ function zoned(){
 //universal ui
 ui($table, $story, $hist, $online, seated, seat, desc, zoned, el);
 
-function temples(attrs, count, max){
-  return div({class: "temples", "data-remaining": count}, ol(_.repeatedly(max, function(){
-    return li(temple(attrs));
-  })), div(_.map(span, _.range(0, max + 1))));
-}
-
-function tokens(attrs, count, max){
-  return div({class: "tokens", "data-remaining": count}, ol(_.repeatedly(max, function(){
-    return li(token(attrs));
-  })), div(_.map(span, _.range(0, max + 1))));
-}
-
-function resources(title, resource, attrs, count, max){
-  const {size, orientation} = Object.assign({orientation: "vertical", size: 1}, attrs);
-  return div({class: title, "data-size": size, "data-remaining": count},
+function resources(title, resource, _attrs, max, count){
+  const attrs = Object.assign({orientation: "vertical", size: 1}, _attrs);
+  const remaining = count == null ? max : count,
+        {size} = attrs;
+  return div({class: title, "data-size": size, "data-remaining": remaining},
     div(_.map(span, _.range(0, max + 1))),
     ol({title}, _.repeatedly(max, function(){
-      return li(resource({size, orientation}));
+      return li(resource(attrs));
     })));
 }
 
-dom.append(supplies, resources("canals", canal, {size: 2}, 35, 35));
-dom.append(supplies, resources("canals", canal, {size: 1}, 6, 6));
-dom.append(supplies, resources("bridges", bridge, {size: 1}, 11, 11));
-dom.append(supplies, resources("tokens", token, {}, 12, 12));
+const x2canals = _.partial(resources, "canals", canal, {size: 2}, 35),
+      canals = _.partial(resources, "canals", canal, {size: 1}, 6),
+      bridges = _.partial(resources, "bridges", bridge, {size: 1}, 11),
+      tokens = _.partial(resources, "tokens", token, null, 12),
+      temples = _.partial(resources, "temples", temple);
+
+dom.append(supplies,
+  x2canals(),
+  canals(),
+  bridges(),
+  tokens());
 
 _.chain(seated, _.count, _.range, _.each(function(seat){
   const area = dom.sel1(`[data-seat='${seat}'] .area`);
   dom.append(area,
-    temples({size: 1, seat}, 3, 6),
-    temples({size: 2, seat}, 3, 5),
-    temples({size: 3, seat}, 2, 4),
-    temples({size: 4, seat}, 1, 3),
-    tokens({}, 12, 12));
+    temples({size: 1, seat}, 6, 3),
+    temples({size: 2, seat}, 5, 3),
+    temples({size: 3, seat}, 4, 2),
+    temples({size: 4, seat}, 3, 1),
+    tokens());
 }, _));
 
 $.sub($table, _.comp(t.compact(), t.map(describe), t.map(_.join("\n", _))), function(descriptors){
   dom.attr(dom.sel1("#title"), "title", descriptors || "Normal game");
 });
 
-$.sub($hist, function([curr, prior]){
-  const {up, may, seen, events, moves, metrics, state, state: {trump, round, status, seated, deck, lead, broken, deals}} = curr;
-  const {hand, bid} = _.nth(seated, seat) || {hand: null, bid: -1};
-  const event = _.last(events);
-  const cnt = _.count(seated);
-  const leadSuit = _.maybe(seated, _.nth(_, lead), _.getIn(_, ["played", "suit"])) || "";
-  const awarded = event.type == "award" ? _.toArray(_.take(cnt, _.drop(cnt - event.details.lead, _.cycle(event.details.trick)))) : null;
-
-  _.each(_.doto(_,
-    dom.removeClass(_, "active"),
-    dom.removeClass(_, "selected"),
-    dom.prop(_, "disabled", false)),
-      dom.sel("button", els.moves));
-
-  _.chain(moves, _.map(function(move){
-    return dom.sel1(`button[data-type="${move.type}"]${moveSel(move)}`, els.moves);
-  }, _), _.compact, _.each(dom.addClass(_, "active"), _));
-
-  if (status === "bidding") {
-    _.maybe(dom.sel1(`button[data-type="bid"][data-bid="${bid == null ? '' : bid}"]`),
-      _.doto(_,
-        dom.addClass(_, "selected"),
-        dom.prop(_, "disabled", true)));
-  }
-
-  dom.attr(el, "data-lead", lead);
-  dom.attr(el, "data-played", event.type == "play" ? event.seat : "");
-
-  _.eachIndexed(function(idx, {bid, tricks, hand, played, scored}){
-    const plyd = _.nth(awarded, idx) || played;
-    const seat = dom.sel1(`[data-seat="${idx}"]`);
-    _.includes(seen, idx) && _.doto(seat,
-      dom.addClass(_, "yours"));
-    dom.text(dom.sel1(".points", seat), _.chain(metrics, _.nth(_, idx), _.get(_, "points")));
-    dom.attr(dom.sel1("[data-action]", seat), "data-action", _.includes(up, idx) ? "must" : (_.includes(may, idx) ? "may" : ""));
-    dom.text(dom.sel1(".tricks", seat), _.count(tricks));
-    dom.text(dom.sel1(".bid", seat), bid === null ? "?" : (bid === "" ? "X" : bid));
-    dom.html(dom.sel1(".area", seat), _.maybe(plyd, cardSrc, function(src){
-      return img({src});
-    }));
-  }, seated);
-
-  dom.text(dom.sel1("#phase", game), {"bidding": "Bidding", "playing": `Playing ${leadSuit}`, "confirming": "Playing", "finished": "Finished"}[status]);
-  dom.attr(el, "data-status", status);
-  dom.attr(el, "data-broken", broken);
-  dom.text(els.cards, _.count(deck) || 52);
-  dom.attr(els.trump, "src", _.maybe(trump, cardSrc) || "");
-  dom.text(els.roundNum, round + 1);
-  dom.text(els.roundMax, _.count(deals));
-  dom.html(els.hand, _.map(function(card){
-    return li(img({src: cardSrc(card), "data-suit": card.suit, "data-rank": card.rank}));
-  }, hand));
-});
-
-$.on(el, "click", '[data-tense="present"][data-ready="true"] .moves button[data-type="bid"]', function(e){
-  const bid = _.maybe(e.target, dom.attr(_, "data-bid"), _.blot, parseInt);
-  sh.dispatch($story, {type: "bid", "details": {bid}});
-});
-
-$.on(el, "click", '[data-tense="present"][data-ready="true"] .moves button[data-type="reset"], [data-tense="present"][data-ready="true"] .moves button[data-type="undo"], [data-tense="present"][data-ready="true"] .moves button[data-type="redo"], [data-tense="present"][data-ready="true"] .moves button[data-type="commit"]', function(e){
-  const type = dom.attr(e.target, "data-type");
-  sh.dispatch($story, {type});
-});
-
-$.on(el, "click", '[data-tense="present"][data-ready="true"] .hand img', function(e){
-  const suit = dom.attr(this, "data-suit"),
-        rank = dom.attr(this, "data-rank");
-  sh.dispatch($story, {type: "play", details: {card: {suit, rank}}});
+$.sub($hist, t.tee(_.see("hist")), function([curr, prior]){
 });
 
 Object.assign(window, {$, _, sh, session, $story, $table, $online, supabase});

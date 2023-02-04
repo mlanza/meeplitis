@@ -123,6 +123,9 @@ div.temples, div.tokens {
   display: inline;
   float: left;
 }
+.area div.temples div, .area div.tokens div {
+  float: right;
+}
 div.temples ol, div.tokens ol {
   margin: 0;
   padding: 0;
@@ -239,7 +242,7 @@ div[data-remaining] li:last-child svg:hover {
 }
 .area div.temples > div, .area div.tokens > div {
   margin-left: 24px;
-  float: left;
+  float: right;
   font-size: 12px;
   vertical-align: super;
 }

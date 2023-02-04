@@ -339,7 +339,7 @@ function fold(self, event){
               }, _, details.hands))));
       })();
 
-    case "break":
+    case "broke":
       return g.fold(self, event, _.fmap(_, _.assoc(_, "broke", true)));
 
     case "bid":
@@ -395,7 +395,7 @@ function fold(self, event){
       return g.fold(self, event, _.fmap(_, _.pipe(_.dissoc(_, "up"), _.assoc(_, "status", "finished"))));
 
     default:
-      throw new Error("Unknown event");
+      throw new Error(`Unknown event ${type}`);
   }
 }
 

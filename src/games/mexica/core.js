@@ -479,7 +479,7 @@ export function execute(self, command, s){
         case "relocate-bridge":
           return true;
         case "move":
-          return cmd?.details?.by === "teleport" && cmd.type === details.type && cmd?.details?.by === details.by;
+          return _.getIn(cmd, ["details", "by"]) === "teleport" && cmd.type === details.type && _.getIn(cmd, ["details", "by"]) === details.by;
       }
     }), moves);
   const automatic = _.includes(["start", "deal-capulli"], type);

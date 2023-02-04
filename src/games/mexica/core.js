@@ -1,6 +1,8 @@
 import _ from "/lib/atomic_/core.js";
 import g from "/lib/game_.js";
 
+const slots = _.pipe(_.repeat(_, null), _.toArray);
+
 const w = "w", //water
       l = "l", //land
       e = "e", //emperor's palace
@@ -48,8 +50,8 @@ const capulli = [
   {rank: 3, at: null}
 ];
 
-const temples = {1: Array(3), 2: Array(3), 3: Array(2), 4: Array(1)};
-const reserve = {1: Array(3), 2: Array(2), 3: Array(2), 4: Array(2)};
+const temples = {1: slots(3), 2: slots(3), 3: slots(2), 4: slots(1)};
+const reserve = {1: slots(3), 2: slots(2), 3: slots(2), 4: slots(2)};
 const resupplyTemples = _.reducekv(function(temples, level, added){
   return _.update(temples, level, function(spots){
     return _.toArray(_.concat(spots, added));
@@ -102,9 +104,9 @@ function init(seats){
     spent: 0,
     banked: 0,
     tokens: 12,
-    canal1: Array(6),
-    canal2: _.toArray(_.concat([["P7", "P8"], ["P9", "P10"]], Array(35))),
-    bridges: Array(11),
+    canal1: slots(6),
+    canal2: _.toArray(_.concat([["P7", "P8"], ["P9", "P10"]], slots(35))),
+    bridges: slots(11),
     capulli: null,
     seated: _.toArray(_.repeat(seats, {
       pilli: null,
@@ -203,7 +205,7 @@ function dealCapulli1(){
     }, _),
     _.reducekv(function(memo, k, v){
       return _.assoc(memo, k === "true" ? 0 : 1, _.mapa(_.second, v));
-    }, Array(2), _),
+    }, slots(2), _),
     _.toArray);
 }
 
@@ -852,7 +854,7 @@ function perspective(self, seen, reality){
 }
 
 function irreversible(self, command){
-  return _.includes(["commited", "finished"], command.type);
+  return _.includes(["committed", "finished"], command.type);
 }
 
 _.doto(Mexica,

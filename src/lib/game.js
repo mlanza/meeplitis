@@ -29,7 +29,8 @@ function perspective2(self, seen){
   return perspective3(self, seen, reality(self));
 }
 
-function perspective3(self, seen, reality){
+function perspective3(self, _seen, reality){
+  const seen = _.filtera(_.isSome, _seen);
   return _.chain(IGame.perspective(self, seen, reality),
     _.assoc(_, "seen", seen),
     _.update(_, "moves", movesAt(seen)));

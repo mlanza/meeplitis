@@ -10,7 +10,30 @@ const params = new URLSearchParams(document.location.search),
       options = params.get('options')?.split(',') || [],
       monitor = !_.includes(options, "nomonitor");
 
-const $game = $.cell(mexica(_.repeat(4, {}), {}));
+function dealCapulli(){
+  return [
+    [
+      {rank: 13, at: null},
+      {rank: 11, at: null},
+      {rank: 9, at: null},
+      {rank: 6, at: null},
+      {rank: 5, at: null},
+      {rank: 4, at: null},
+      {rank: 4, at: null},
+      {rank: 3, at: null}
+    ],[
+      {rank: 12, at: null},
+      {rank: 10, at: null},
+      {rank: 8, at: null},
+      {rank: 7, at: null},
+      {rank: 6, at: null},
+      {rank: 5, at: null},
+      {rank: 3, at: null}
+    ]
+  ];
+}
+
+const $game = $.cell(mexica(_.repeat(4, {}), {dealCapulli}));
 
 $.sub($.hist($game), t.map(monitor ? g.summarize : _.identity), _.log);
 

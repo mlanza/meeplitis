@@ -400,14 +400,14 @@ function fold(self, event){
 }
 
 function append(self, event){
-  return ohHell(self.seats,
+  return new OhHell(self.seats,
     self.config,
     _.append(self.events, event),
     self.journal);
 }
 
 function fmap(self, f){
-  return ohHell(self.seats,
+  return new OhHell(self.seats,
     self.config,
     self.events,
     f(self.journal));

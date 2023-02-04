@@ -124,10 +124,11 @@ function Mexica(seats, config, events, journal){
   this.journal = journal;
 }
 
-export default function mexica(seats, config, events, journal){
+export default function mexica(seats, _config, events, journal){
   if (!_.count(seats)) {
     throw new Error("Cannot play a game with no one seated at the table");
   }
+  const config = _.merge({dealCapulli}, _config);
   return new Mexica(_.toArray(seats), config, events || [], journal || _.chain(seats, _.count, init, _.journal));
 }
 
@@ -194,7 +195,7 @@ const relocate = _.partly(function relocate(state, at, what){
   return _.updateIn(state, ["contents", at], _.pipe(_.either(_, []), _.filtera(_.notEq(what, _), _)));
 });
 
-function dealCapulli1(){
+function dealCapulli(){
   const xs = _.chain(_.range(15), _.shuffle, _.take(8, _), _.sort);
   return _.chain(capulli,
     _.mapkv(function(k, v){
@@ -207,28 +208,6 @@ function dealCapulli1(){
       return _.assoc(memo, k === "true" ? 0 : 1, _.mapa(_.second, v));
     }, slots(2), _),
     _.toArray);
-}
-
-//temp override to aid interactive development
-function dealCapulli(){
-return [
- [{rank: 13, at: null},
-  {rank: 11, at: null},
-  {rank: 9, at: null},
-  {rank: 6, at: null},
-  {rank: 5, at: null},
-  {rank: 4, at: null},
-  {rank: 4, at: null},
-  {rank: 3, at: null}],
- [{rank: 12, at: null},
-  {rank: 10, at: null},
-  {rank: 8, at: null},
-  {rank: 7, at: null},
-  {rank: 6, at: null},
-  {rank: 5, at: null},
-  {rank: 3, at: null}
- ]
-]
 }
 
 const isVacant = _.partly(function isVacant(board, contents, at){
@@ -511,6 +490,7 @@ export function execute(self, command, s){
         g.execute(_, {type: "deal-capulli", seat: null}));
 
     case "deal-capulli":
+      const {dealCapulli} = self.config;
       return _.chain(self,
         g.fold(_, {type: "dealt-capulli", details: {capulli: dealCapulli()}, seat: null}));
 
@@ -748,14 +728,14 @@ function fold(self, event){
 }
 
 function append(self, event){
-  return mexica(self.seats,
+  return new Mexica(self.seats,
     self.config,
     _.append(self.events, event),
     self.journal);
 }
 
 function fmap(self, f){
-  return mexica(self.seats,
+  return new Mexica(self.seats,
     self.config,
     self.events,
     f(self.journal));

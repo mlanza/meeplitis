@@ -470,7 +470,8 @@ export function execute(self, command, s){
   const {type, details} = command;
   const seat = s == null ? command.seat : s;
   const moves = g.moves(self, [seat]);
-  const valid =
+  const automatic = _.includes(["start", "deal-capulli"], type);
+  const valid = automatic ||
     _.detect(_.or(_.eq(_, _.chain(command, _.compact, _.dissoc(_, "id"))), function(cmd){
       switch(cmd.type){
         case "build-temple":
@@ -482,7 +483,6 @@ export function execute(self, command, s){
           return _.getIn(cmd, ["details", "by"]) === "teleport" && cmd.type === details.type && _.getIn(cmd, ["details", "by"]) === details.by;
       }
     }), moves);
-  const automatic = _.includes(["start", "deal-capulli"], type);
   const seated = seat == null ? {pilli: null, bank: 0} : state.seated[seat];
   const temples = _.map(_.get(_, "temples"), seated);
   const pillis = _.map(_.get(_, "pilli"), seated);
@@ -616,6 +616,9 @@ function fold(self, event){
   const {pilli, bank} = _.nth(state.seated, seat) || {pilli: null, bank: null};
 
   switch (type) {
+    case "started":
+      return g.fold(self, event, _.identity);
+
     case "dealt-capulli":
       return g.fold(self, event,
         _.fmap(_,
@@ -632,7 +635,9 @@ function fold(self, event){
 
     case "committed":
       return g.fold(self, event,
-        _.fmap(_, committed));
+        _.pipe(
+          _.fmap(_, committed),
+          _.flush));
 
     case "banked":
       return g.fold(self, event,

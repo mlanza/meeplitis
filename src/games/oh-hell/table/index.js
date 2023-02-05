@@ -149,8 +149,6 @@ $.sub($hist, function([curr, prior]){
   _.eachIndexed(function(idx, {bid, tricks, hand, played, scored}){
     const plyd = _.nth(awarded, idx) || played;
     const seat = dom.sel1(`[data-seat="${idx}"]`);
-    _.includes(seen, idx) && _.doto(seat,
-      dom.addClass(_, "yours"));
     dom.text(dom.sel1(".points", seat), _.chain(metrics, _.nth(_, idx), _.get(_, "points")));
     dom.attr(dom.sel1("[data-action]", seat), "data-action", _.includes(up, idx) ? "must" : (_.includes(may, idx) ? "may" : ""));
     dom.text(dom.sel1(".tricks", seat), _.count(tricks));

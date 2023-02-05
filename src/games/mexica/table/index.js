@@ -199,11 +199,6 @@ $.sub($hist, function([curr, prior]){
   dom.attr(els.canal1, "data-remaining", remaining(canal1));
   dom.attr(els.canal2, "data-remaining", remaining(canal2));
 
-  _.each(function(seat){
-    const zone = dom.sel1(`[data-seat='${seat}']`, el);
-    dom.addClass(zone, "yours");
-  }, seen);
-
   _.eachkv(function(seat, {bank, temples, pilli, points}){
     const zone = dom.sel1(`[data-seat='${seat}']`, el),
           area = dom.sel1(".area", zone);

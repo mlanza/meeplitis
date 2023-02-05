@@ -368,9 +368,6 @@ div.player {
   position: relative;
   z-index: 99;
 }
-.yours .username {
-  text-decoration: underline;
-}
 .yours {
   background-color: rgba(135, 125, 138, .1);
 }

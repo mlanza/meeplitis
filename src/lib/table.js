@@ -75,6 +75,7 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, template,
     dom.append(els.players, zone(seat, username, avatar_url, template(seat)));
   }, seated);
 
+  dom.addClass(dom.sel1(`[data-seat='${seat}']`, el), "yours");
   dom.attr(el, "data-perspective", seat);
   dom.attr(el, "data-seats", _.count(seated));
 
@@ -120,7 +121,7 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, template,
 
   //configure event
   $.sub($hist, function([curr, prior]){
-    const {events} = curr;
+    const {events, seen} = curr;
     const event = _.last(events),
           player = eventFor(event);
 

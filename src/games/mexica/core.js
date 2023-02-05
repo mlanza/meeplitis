@@ -228,6 +228,16 @@ export const wet = _.partly(function wet(board, contents, at){
   return what === w || _.includes(cts, w);
 });
 
+function consume(spot){
+  return function(pieces){
+    const n = _.count(pieces);
+    return _.chain(
+      _.concat(_.filter(_.isSome, pieces), [spot], _.repeat(null)),
+      _.take(n, _),
+      _.toArray);
+  }
+}
+
 function orientBridge(board, contents, at){
   return dry(board, contents, above(at)) && dry(board, contents, below(at)) ? "vertical" :
          dry(board, contents, left(at))  && dry(board, contents, right(at)) ? "horizontal" : null;
@@ -636,10 +646,7 @@ function fold(self, event){
         _.fmap(_,
           _.pipe(
             _.update(_, "spent", _.inc),
-            _.update(_, `canal${size}`, function(ats){
-              const len = _.count(ats);
-              return _.chain(ats, _.cons(details.at, _), _.take(len, _), _.toArray);
-            }),
+            _.update(_, `canal${size}`, consume(details.at)),
             _.reduce(place(_, _, w), _, details.at))));
 
     case "constructed-bridge":
@@ -647,10 +654,7 @@ function fold(self, event){
         _.fmap(_,
           _.pipe(
             _.update(_, "spent", _.inc),
-            _.update(_, "bridges", function(ats){
-              const len = _.count(ats);
-              return _.chain(ats, _.cons(details.at, _), _.take(len, _), _.toArray);
-            }),
+            _.update(_, "bridges", consume(details.at)),
             place(_, details.at, b))));
 
     case "relocated-bridge":
@@ -658,6 +662,7 @@ function fold(self, event){
         _.fmap(_,
           _.pipe(
             _.update(_, "spent", _.inc),
+            _.update(_, "bridges", consume(details.to)), //TODO remit
             relocate(_, details.from, b),
             place(_, details.to, b))));
 
@@ -666,10 +671,7 @@ function fold(self, event){
         _.fmap(_,
           _.pipe(
             _.update(_, "spent", _.add(_, details.level)),
-            _.updateIn(_, ["seated", seat, "temples", details.level], function(ats){
-              const len = _.count(ats);
-              return _.chain(ats, _.cons(details.at, _), _.take(len, _), _.toArray);
-            }),
+            _.updateIn(_, ["seated", seat, "temples", details.level], consume(details.at)),
             place(_, details.at, t))));
 
     case "moved":

@@ -402,6 +402,9 @@ div[data-spot] > *:hover {
 
 @media (prefers-color-scheme: light) {
   .area, #supplies {
-    background-color: rgba(200, 200, 200, .3);
+    background-color: rgba(135, 125, 138, .1);
+  }
+  .yours .area {
+    background-color: transparent;
   }
 }

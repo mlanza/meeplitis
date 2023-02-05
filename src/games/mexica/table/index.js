@@ -152,6 +152,10 @@ dom.append(at("P9"),
 
 function desc(event){
   switch(event.type) {
+    case "started":
+      return "Starts game.";
+    case "dealt-capulli":
+      return "Deals initial capulli tiles.";
     default:
       return event.type;
   }

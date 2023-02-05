@@ -8,7 +8,7 @@ import {session, $online} from "/lib/session.js";
 import {table, ui, scored, outcome, subject} from "/lib/table.js";
 import {getSeated, getSeat, story, nav, waypoint, hist} from "/lib/story.js";
 import {describe} from "/components/table/index.js";
-import {boardSpots} from "../core.js";
+import {boardSpots, right, below} from "../core.js";
 
 async function svg(what){
   return await fetch(`../table/images/${what}.svg`).then(function(resp){
@@ -56,7 +56,7 @@ function demand(pos){
 }
 
 function at(spot){
-  return dom.sel1(`[data-spot='${spot}']`);
+  return dom.sel1(`[data-spot='${spot}']`, el);
 }
 
 function spot([spot, terrain]){
@@ -81,6 +81,7 @@ if (!tableId) {
 const el = document.body;
 const board = dom.sel1("#board", el);
 const supplies = dom.sel1("#supplies", el);
+const demands = dom.sel1("#demands", el);
 
 const [seated, seat] = await Promise.all([
   getSeated(tableId),
@@ -114,11 +115,11 @@ dom.append(supplies,
 const els = {
   board,
   supplies,
+  demands,
   tokens: dom.sel1(".tokens", supplies),
   bridges: dom.sel1(".bridges", supplies),
   canal2: dom.sel1(".canals[data-size='2']", supplies),
-  canal1: dom.sel1(".canals[data-size='1']", supplies),
-  demands: dom.sel1("#demands", el)
+  canal1: dom.sel1(".canals[data-size='1']", supplies)
 }
 
 dom.append(els.board,
@@ -173,6 +174,23 @@ function template(seat){
   };
 }
 
+function diffs(curr, prior, key, f){
+  _.chain(
+    _.map(_.array,
+      _.getIn(curr, ["state", key]) || _.repeat(37, null),
+      _.getIn(prior, ["state", key]) || _.repeat(37, null)),
+    _.filter(_.spread(_.notEq), _),
+    _.each(_.spread(f), _));
+}
+
+function diff(curr, prior, path, f){ //for pilli
+  const c = _.getIn(curr, path);
+  const p = _.getIn(prior, path);
+  if (_.notEq(c, p)) {
+    f(c, p);
+  }
+}
+
 //universal ui
 ui($table, $story, $hist, $online, seated, seat, desc, template, el);
 
@@ -188,6 +206,31 @@ $.sub($hist, function([curr, prior]){
   const {state, seen} = curr;
   const {seated, tokens, canal1, canal2, bridges, period} = state;
   const tiles = _.nth(state.capulli, period);
+
+  diffs(curr, prior, "canal2", function(curr, prior){
+    if (prior) {
+      debugger
+      const el = at(prior[0]);
+      const piece = dom.sel1("[data-piece='canal']", el);
+      dom.omit(el, piece);
+    }
+    if (curr) {
+      const orientation = below(curr[0]) == curr[1] ? "vertical" : "horizontal";
+      dom.append(at(curr[0]), canal({size: 2, orientation}));
+    }
+  });
+
+  diffs(curr, prior, "canal1", function(curr, prior){
+    if (prior) {
+      debugger
+      const el = at(prior);
+      const piece = dom.sel1("[data-piece='canal']", el);
+      dom.omit(el, piece);
+    }
+    if (curr) {
+      dom.append(at(curr), canal({size: 1}));
+    }
+  });
 
   _.eachkv(function(pos, attrs){
     dom.html(dom.sel1(`[data-demand='${pos}']`, el),
@@ -209,6 +252,10 @@ $.sub($hist, function([curr, prior]){
     _.eachkv(function(level, spots){
       dom.attr(dom.sel1(`.temples[data-size='${level}'`, area), "data-remaining", remaining(spots));
     }, temples);
+
+    diff(curr, prior, ["state", "seated", seat, "pilli"], function(curr, prior){
+      debugger
+    });
   }, seated);
 
 });

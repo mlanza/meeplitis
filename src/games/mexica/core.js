@@ -146,22 +146,22 @@ function spot([row, column]){
   return c + r;
 }
 
-function left(at){
+export function left(at){
   const [row, column] = coord(at);
   return spot([row, column - 1]);
 }
 
-function right(at){
+export function right(at){
   const [row, column] = coord(at);
   return spot([row, column + 1]);
 }
 
-function above(at){
+export function above(at){
   const [row, column] = coord(at);
   return spot([row - 1, column]);
 }
 
-function below(at){
+export function below(at){
   const [row, column] = coord(at);
   return spot([row + 1, column]);
 }

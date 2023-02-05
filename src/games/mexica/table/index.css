@@ -12,6 +12,8 @@
   max-width: 20em;
   min-height: 2em;
   margin: 5px auto 0;
+  border-radius: 1em;
+  padding: 5px;
 }
 .zone {
   min-height: auto;
@@ -394,9 +396,12 @@ div[data-spot] > *:hover {
   display: none;
 }
 
+.zone, #supplies {
+  border-radius: 1.6em;
+}
+
 @media (prefers-color-scheme: light) {
-  .zone, #supplies {
+  .area, #supplies {
     background-color: rgba(200, 200, 200, .3);
-    border-radius: 1.6em;
   }
 }

@@ -185,7 +185,7 @@ function remaining(slots){
 }
 
 $.sub($hist, function([curr, prior]){
-  const {state} = curr;
+  const {state, seen} = curr;
   const {seated, tokens, canal1, canal2, bridges, period} = state;
   const tiles = _.nth(state.capulli, period);
 
@@ -198,6 +198,11 @@ $.sub($hist, function([curr, prior]){
   dom.attr(els.bridges, "data-remaining", remaining(bridges));
   dom.attr(els.canal1, "data-remaining", remaining(canal1));
   dom.attr(els.canal2, "data-remaining", remaining(canal2));
+
+  _.each(function(seat){
+    const zone = dom.sel1(`[data-seat='${seat}']`, el);
+    dom.addClass(zone, "yours");
+  }, seen);
 
   _.eachkv(function(seat, {bank, temples, pilli, points}){
     const zone = dom.sel1(`[data-seat='${seat}']`, el),

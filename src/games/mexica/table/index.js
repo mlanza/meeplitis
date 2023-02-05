@@ -174,20 +174,22 @@ function template(seat){
   };
 }
 
-function diffs(curr, prior, key, f){
-  _.chain(
-    _.map(_.array,
-      _.getIn(curr, ["state", key]) || _.repeat(37, null),
-      _.getIn(prior, ["state", key]) || _.repeat(37, null)),
-    _.filter(_.spread(_.notEq), _),
-    _.each(_.spread(f), _));
-}
-
-function diff(curr, prior, path, f){ //for pilli
-  const c = _.getIn(curr, path);
-  const p = _.getIn(prior, path);
+function diff(curr, prior, path, f){
+  const c = _.getIn(curr, path),
+        p = _.getIn(prior, path);
   if (_.notEq(c, p)) {
     f(c, p);
+  }
+}
+
+function diffEach(f){
+  return function(curr, prior){
+    _.chain(
+      _.map(_.array,
+        curr || _.repeat(37, null),
+        prior || _.repeat(37, null)),
+      _.filter(_.spread(_.notEq), _),
+      _.each(_.spread(f), _));
   }
 }
 
@@ -207,7 +209,7 @@ $.sub($hist, function([curr, prior]){
   const {seated, tokens, canal1, canal2, bridges, period} = state;
   const tiles = _.nth(state.capulli, period);
 
-  diffs(curr, prior, "canal2", function(curr, prior){
+  diff(curr, prior, ["state", "canal2"], diffEach(function(curr, prior){
     if (prior) {
       debugger
       const el = at(prior[0]);
@@ -218,9 +220,9 @@ $.sub($hist, function([curr, prior]){
       const orientation = below(curr[0]) == curr[1] ? "vertical" : "horizontal";
       dom.append(at(curr[0]), canal({size: 2, orientation}));
     }
-  });
+  }));
 
-  diffs(curr, prior, "canal1", function(curr, prior){
+  diff(curr, prior, ["state", "canal1"], diffEach(function(curr, prior){
     if (prior) {
       debugger
       const el = at(prior);
@@ -230,7 +232,7 @@ $.sub($hist, function([curr, prior]){
     if (curr) {
       dom.append(at(curr), canal({size: 1}));
     }
-  });
+  }));
 
   _.eachkv(function(pos, attrs){
     dom.html(dom.sel1(`[data-demand='${pos}']`, el),

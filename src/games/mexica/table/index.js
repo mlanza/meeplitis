@@ -191,7 +191,7 @@ $.sub($hist, function([curr, prior]){
 
   _.eachkv(function(pos, attrs){
     dom.html(dom.sel1(`[data-demand='${pos}']`, el),
-      capulli(attrs)));
+      capulli(attrs));
   }, tiles);
 
   dom.attr(els.tokens, "data-remaining", tokens);

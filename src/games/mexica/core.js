@@ -105,7 +105,7 @@ function init(seats){
     banked: 0,
     tokens: 12,
     canal1: slots(6),
-    canal2: _.toArray(_.concat([["P7", "P8"], ["P9", "P10"]], slots(35))),
+    canal2: _.assoc(slots(35), 0, ["P7", "P8"], 1, ["P9", "P10"]),
     bridges: slots(11),
     capulli: null,
     seated: _.toArray(_.repeat(seats, {

@@ -189,9 +189,9 @@ $.sub($hist, function([curr, prior]){
   const {seated, tokens, canal1, canal2, bridges, period} = state;
   const tiles = _.nth(state.capulli, period);
 
-  _.eachkv(function(pos, {rank, at}){
+  _.eachkv(function(pos, attrs){
     dom.html(dom.sel1(`[data-demand='${pos}']`, el),
-      capulli({size: rank}));
+      capulli(attrs)));
   }, tiles);
 
   dom.attr(els.tokens, "data-remaining", tokens);

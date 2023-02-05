@@ -33,21 +33,21 @@ const board = [
 ]
 
 const capulli = [
-  {rank: 13, at: null},
-  {rank: 12, at: null},
-  {rank: 11, at: null},
-  {rank: 10, at: null},
-  {rank: 9, at: null},
-  {rank: 8, at: null},
-  {rank: 7, at: null},
-  {rank: 6, at: null},
-  {rank: 6, at: null},
-  {rank: 5, at: null},
-  {rank: 5, at: null},
-  {rank: 4, at: null},
-  {rank: 4, at: null},
-  {rank: 3, at: null},
-  {rank: 3, at: null}
+  {size: 13, at: null},
+  {size: 12, at: null},
+  {size: 11, at: null},
+  {size: 10, at: null},
+  {size: 9, at: null},
+  {size: 8, at: null},
+  {size: 7, at: null},
+  {size: 6, at: null},
+  {size: 6, at: null},
+  {size: 5, at: null},
+  {size: 5, at: null},
+  {size: 4, at: null},
+  {size: 4, at: null},
+  {size: 3, at: null},
+  {size: 3, at: null}
 ];
 
 const temples = {1: slots(3), 2: slots(3), 3: slots(2), 4: slots(1)};
@@ -187,14 +187,6 @@ function reflectContents(state){
   return _.assoc(state, "contents", _.chain(state, contents));
 }
 
-const place = _.partly(function place(state, at, what){
-  return _.updateIn(state, ["contents", at], _.pipe(_.either(_, []), _.conj(_, what)));
-});
-
-const relocate = _.partly(function relocate(state, at, what){
-  return _.updateIn(state, ["contents", at], _.pipe(_.either(_, []), _.filtera(_.notEq(what, _), _)));
-});
-
 function dealCapulli(){
   const xs = _.chain(_.range(15), _.shuffle, _.take(8, _), _.sort);
   return _.chain(capulli,
@@ -230,12 +222,24 @@ export const wet = _.partly(function wet(board, contents, at){
 
 function consume(spot){
   return function(pieces){
-    const n = _.count(pieces);
-    return _.chain(
-      _.concat(_.filter(_.isSome, pieces), [spot], _.repeat(null)),
-      _.take(n, _),
-      _.toArray);
+    const idx = _.indexOf(pieces, null);
+    return idx > -1 ? _.assoc(pieces, idx, spot) : pieces;
   }
+}
+
+function remit(spot){
+  return function(pieces){
+    const idx = _.indexOf(pieces, spot);
+    return idx > -1 ? _.assoc(pieces, idx, null) : pieces;
+  }
+}
+
+function place(what, at){
+  return _.update(_, at, _.pipe(_.either(_, []), _.conj(_, what)));
+}
+
+function displace(what, at){
+  return _.update(_, at, _.pipe(_.either(_, []), _.conj(_, what)));
 }
 
 function orientBridge(board, contents, at){
@@ -623,7 +627,7 @@ function fold(self, event){
         _.fmap(_,
           _.pipe(
             _.assocIn(_, ["seated", seat, "pilli"], details.at),
-            place(_, details.at, p))));
+            _.update(_, "contents", place(p, details.at)))));
 
     case "committed":
       return g.fold(self, event,
@@ -647,7 +651,7 @@ function fold(self, event){
           _.pipe(
             _.update(_, "spent", _.inc),
             _.update(_, `canal${size}`, consume(details.at)),
-            _.reduce(place(_, _, w), _, details.at))));
+            _.update(_, "contents", _.reduce(_.partial(place, w), _, details.at)))));
 
     case "constructed-bridge":
       return g.fold(self, event,
@@ -655,16 +659,15 @@ function fold(self, event){
           _.pipe(
             _.update(_, "spent", _.inc),
             _.update(_, "bridges", consume(details.at)),
-            place(_, details.at, b))));
+            _.update(_, "contents", place(b, details.at)))));
 
     case "relocated-bridge":
       return g.fold(self, event,
         _.fmap(_,
           _.pipe(
             _.update(_, "spent", _.inc),
-            _.update(_, "bridges", consume(details.to)), //TODO remit
-            relocate(_, details.from, b),
-            place(_, details.to, b))));
+            _.update(_, "bridges", _.pipe(remit(details.from), consume(details.to))),
+            _.update(_, "contents", _.pipe(displace(b, details.from), place(b, details.to))))));
 
     case "built-temple":
       return g.fold(self, event,
@@ -672,7 +675,7 @@ function fold(self, event){
           _.pipe(
             _.update(_, "spent", _.add(_, details.level)),
             _.updateIn(_, ["seated", seat, "temples", details.level], consume(details.at)),
-            place(_, details.at, t))));
+            _.update(_, "contents", place(t, details.at)))));
 
     case "moved":
       return g.fold(self, event,
@@ -680,8 +683,7 @@ function fold(self, event){
           _.pipe(
             _.update(_, "spent", _.add(_, details.cost || 1)),
             _.assocIn(_, ["seated", seat, "pilli"], details.to),
-            relocate(_, pilli, p),
-            place(_, details.to, p))));
+            _.update(_, "contents", _.pipe(displace(p, pilli), place(p, details.to))))));
 
     case "scored-grandeur":
       return g.fold(self, event,
@@ -764,8 +766,8 @@ export function foundable(board, contents, markers, pilli){
       return c.at === at;
     }, founded);
   }, dist);
-  const avail = size < 14 && _.detect(function({rank}){
-    return rank === size;
+  const avail = size < 14 && _.detect(function({size}){
+    return size === size;
   }, unfounded);
   return _.seq(_.map(function(at){
     return {size, at};

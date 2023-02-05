@@ -11,22 +11,22 @@ const params = new URLSearchParams(document.location.search),
 
 const capulli = [
   [
-    {rank: 13, at: null},
-    {rank: 11, at: null},
-    {rank: 9, at: null},
-    {rank: 6, at: null},
-    {rank: 5, at: null},
-    {rank: 4, at: null},
-    {rank: 4, at: null},
-    {rank: 3, at: null}
+    {size: 13, at: null},
+    {size: 11, at: null},
+    {size: 9, at: null},
+    {size: 6, at: null},
+    {size: 5, at: null},
+    {size: 4, at: null},
+    {size: 4, at: null},
+    {size: 3, at: null}
   ],[
-    {rank: 12, at: null},
-    {rank: 10, at: null},
-    {rank: 8, at: null},
-    {rank: 7, at: null},
-    {rank: 6, at: null},
-    {rank: 5, at: null},
-    {rank: 3, at: null}
+    {size: 12, at: null},
+    {size: 10, at: null},
+    {size: 8, at: null},
+    {size: 7, at: null},
+    {size: 6, at: null},
+    {size: 5, at: null},
+    {size: 3, at: null}
   ]
 ];
 

@@ -33,12 +33,15 @@ const els = {
   hand: dom.sel1(".hand", el)
 }
 
-function zoned(){
-  return [
-    div(span({class: "points"}, "0"), " pts."),
-    div(span({class: "tricks"}, "-"), "/", span({class: "bid"}, "-"), span({class: "tip"}, " (taken/bid)")),
-    div({class: "leads"}, "leads")
-  ];
+function template(){
+  return {
+    stats: [
+      div(span({class: "points"}, "0"), " pts."),
+      div(span({class: "tricks"}, "-"), "/", span({class: "bid"}, "-"), span({class: "tip"}, " (taken/bid)")),
+      div({class: "leads"}, "leads")
+    ],
+    resources: null
+  };
 }
 
 const [seated, seat] = await Promise.all([
@@ -109,7 +112,7 @@ const $table = table(tableId),
       $hist = hist($story);
 
 //universal ui
-ui($table, $story, $hist, $online, seated, seat, desc, zoned, el);
+ui($table, $story, $hist, $online, seated, seat, desc, template, el);
 
 $.sub($table, _.comp(t.compact(), t.map(describe), t.map(_.join("\n", _))), function(descriptors){
   dom.attr(dom.sel1("#title"), "title", descriptors || "Up and Down");

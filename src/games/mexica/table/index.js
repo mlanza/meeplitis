@@ -160,28 +160,21 @@ const $table = table(tableId),
       $story = story(session, tableId, seat, seated, dom.attr(el, "data-ready", _)),
       $hist = hist($story);
 
-function zoned(){
-  return [
-    div(span({class: "points"}, "0"), " pts."),
-  ];
+function template(seat){
+  return {
+    stats: div(span({class: "points"}, "0"), " pts."),
+    resources: [
+      supply.temples({size: 1, seat}, 6),
+      supply.temples({size: 2, seat}, 5),
+      supply.temples({size: 3, seat}, 4),
+      supply.temples({size: 4, seat}, 3),
+      supply.tokens()
+    ]
+  };
 }
 
-//TODO create arg like `zoned` for providing area contents
-
 //universal ui
-ui($table, $story, $hist, $online, seated, seat, desc, zoned, el);
-
-_.eachkv(function(seat){
-  const zone = dom.sel1(`[data-seat='${seat}']`, el),
-        area = dom.sel1(".area", zone);
-
-  dom.append(area,
-    supply.temples({size: 1, seat}, 6),
-    supply.temples({size: 2, seat}, 5),
-    supply.temples({size: 3, seat}, 4),
-    supply.temples({size: 4, seat}, 3),
-    supply.tokens());
-}, seated);
+ui($table, $story, $hist, $online, seated, seat, desc, template, el);
 
 $.sub($table, _.comp(t.compact(), t.map(describe), t.map(_.join("\n", _))), function(descriptors){
   dom.attr(dom.sel1("#title"), "title", descriptors || "Normal game");

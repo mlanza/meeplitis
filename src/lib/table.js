@@ -39,7 +39,7 @@ export function table(tableId){
   return $.pipe($t, t.compact());
 }
 
-export function ui($table, $story, $hist, $online, seated, seat, desc, zoned, el){
+export function ui($table, $story, $hist, $online, seated, seat, desc, template, el){
   const $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), t.compact()),
         $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table),
         $status = $.map(_.get(_, "status"), $table),
@@ -71,8 +71,8 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, zoned, el
   }
 
   //render fixed player zones
-  _.eachIndexed(function(idx, {username, avatar_url}){
-    dom.append(els.players, zone(idx, username, avatar_url, zoned()));
+  _.eachIndexed(function(seat, {username, avatar_url}){
+    dom.append(els.players, zone(seat, username, avatar_url, template(seat)));
   }, seated);
 
   dom.attr(el, "data-perspective", seat);
@@ -175,10 +175,10 @@ export function player(username, avatar_url, ...contents){
     img({"data-action": "", src: "/images/pawn.svg"}));
 }
 
-export function zone(seat, username, avatar_url, contents){
+export function zone(seat, username, avatar_url, {stats, resources}){
   return div({class: "zone", "data-seat": seat, "data-username": username, "data-presence": ""},
-    player(username, avatar_url, contents),
-    div({class: "area"}));
+    player(username, avatar_url, stats),
+    div({class: "area"}, resources));
 }
 
 function score(player, points){

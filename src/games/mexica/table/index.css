@@ -1,17 +1,9 @@
-.moves {
-  position: fixed;
-  left: 1em;
-  bottom: 1em;
-  background-color: rgba(255, 255, 255, 0.8);
-  border-radius: .7em;
-  z-index: 99;
-  padding: 1px;
-}
 .players {
   width: 20em;
   height: auto;
   z-index: 99;
   float: right;
+  margin-top: .5em;
   position: relative;
 }
 .area {
@@ -19,9 +11,11 @@
   height: auto;
   max-width: 20em;
   min-height: 2em;
+  margin: 0 auto;
 }
 .zone {
   min-height: auto;
+  margin-bottom: .5em;
 }
 #board {
   background-image: url(./images/mexicab.png);
@@ -39,11 +33,14 @@
   float: left;
 }
 #supplies {
-  height: 497px;
+  height: 310px;
   width: auto;
-  padding: 0;
+  padding: 5px;
   padding-top: 1em;
-  min-width: 3em;
+  min-width: 5.7em;
+  max-width: 11.25em;
+  float: left;
+  margin-top: 1em;
 }
 #supplies ol {
   list-style: none;
@@ -119,8 +116,7 @@ div[data-spot] > * {
 }
 div.temples, div.tokens {
   padding: 0;
-  margin: 2px;
-  display: inline;
+  margin: 0 2px 0 0;
   float: left;
 }
 .area div.temples div, .area div.tokens div {
@@ -128,6 +124,7 @@ div.temples, div.tokens {
 }
 div.temples ol, div.tokens ol {
   margin: 0;
+  margin-bottom: -5px;
   padding: 0;
   list-style: none;
   float: left;
@@ -149,6 +146,7 @@ div.player {
 }
 div.tokens {
   margin-left: .5em;
+  margin-bottom: -.5em;
 }
 div[data-remaining="0"] li:nth-child(1) {
   opacity: .3;
@@ -256,7 +254,6 @@ div[data-remaining] li:last-child svg:hover {
   width: 23px;
   margin: 4px;
 }
-
 
 svg[data-seat="0"][data-piece="temple"] rect,
 svg[data-seat="0"][data-piece="pilli"] path {
@@ -390,83 +387,16 @@ div[data-spot]:hover {
   z-index: 11 !important;
 }
 div[data-spot] > *:hover {
-  border-color: red;
+  border-color: purple;
 }
 
-[data-tense="present"] button {
-  cursor: default;
-}
-[data-tense="present"] button:hover {
-  background-color: orange;
-  color: snow;
-}
-.hand {
-  position: fixed;
-  right: 1em;
-  bottom: -11em;
-  height: 17.5em;
-  width: 30em;
-  transition: bottom .5s;
-  padding: 0;
-  list-style: none;
-  display: inline-flex;
-  z-index: 99;
-}
-[data-tense="present"][data-status="playing"] .hand:hover {
-  bottom: -8em;
-}
-.hand li {
-  transition: padding-top .25s;
-  margin-right: -8.5em;
-  height: 18em;
-  padding-top: 2em;
-}
-.hand li,
-.hand li img {
-  width: 10em;
-  height: 16em;
-}
-[data-tense="present"][data-status="playing"] .hand li img {
-  cursor: pointer;
-}
-[data-tense="present"][data-status="playing"] .hand li:hover {
-  padding-top: 0;
-}
-.trump, .deck {
-  min-height: 14em;
-}
-.deck img,
-.trump img {
-  width: 9em;
-  margin: 5px;
-}
-.broken {
-  visibility: hidden;
-  margin-top: -.8em;
-  margin-bottom: 1em;
-}
-body[data-broken="true"] .broken {
-  visibility: visible;
-}
-.upkeep {
-  -border: solid 1px purple;
-  width: 10em;
-  position: absolute;
-  right: 0;
-  text-align: center;
-}
-.cards {
-  text-align: center;
-  display: block;
-  margin: .5em auto 0;
-}
 [data-anonymous="true"] img[data-nav="last-move"] {
   display: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  .moves {
-    color: white;
-    background-color: rgba(255, 255, 255, 0.1);
+@media (prefers-color-scheme: light) {
+  .zone, #supplies {
+    background-color: rgba(200, 200, 200, .3);
+    border-radius: 1.6em;
   }
 }

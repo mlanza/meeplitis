@@ -32,7 +32,7 @@ const board = [
  /*16*/ [n,n,w,w,w,w,w,w,w,w,w,w,n,n,n,n,n,n,n,n,n,n,n]
 ]
 
-const capulli = [
+const capullis = [
   {size: 13, at: null},
   {size: 12, at: null},
   {size: 11, at: null},
@@ -187,9 +187,9 @@ function reflectContents(state){
   return _.assoc(state, "contents", _.chain(state, contents));
 }
 
-function dealCapulli(){
+function dealCapulli(capullis){
   const xs = _.chain(_.range(15), _.shuffle, _.take(8, _), _.sort);
-  return _.chain(capulli,
+  return _.chain(capullis,
     _.mapkv(function(k, v){
       return [k, v];
     }, _),
@@ -507,7 +507,7 @@ export function execute(self, command, s){
     case "deal-capulli":
       const {dealCapulli} = self.config;
       return _.chain(self,
-        g.fold(_, {type: "dealt-capulli", details: {capulli: dealCapulli()}, seat: null}));
+        g.fold(_, {type: "dealt-capulli", details: {capulli: dealCapulli(capullis)}, seat: null}));
 
     case "place-pilli":
       return _.chain(self, g.fold(_, _.assoc(command, "type", "placed-pilli")));

@@ -274,18 +274,19 @@ function isBridgable(board, contents, at){
   return what === w || _.eq([w], cts) ? orientBridge(board, contents, at) : null;
 }
 
-function coordOrder(xs){
-  return _.sort(_.asc(_.pipe(coord, _.second)), _.asc(_.pipe(coord, _.first)), xs)
-}
+const sortSpots = _.sort(
+  _.asc(_.pipe(coord, _.second)),
+  _.asc(_.pipe(coord, _.first)),
+  _);
 
 function gather(coll, f, g, i){
   const idx = i || 0;
   const at = _.nth(coll, idx);
   const look = g(at, coll) ? around : stop;
-  const xs = _.chain(at, look, _.filter(f, _), _.reduce(function(coll, at){
+  const spots = _.chain(at, look, _.filter(f, _), _.reduce(function(coll, at){
     return _.includes(coll, at) ? coll : _.conj(coll, at);
   }, coll, _));
-  return _.nth(xs, idx + 1) ? gather(xs, f, g, idx + 1) : coordOrder(xs);
+  return _.nth(spots, idx + 1) ? gather(spots, f, g, idx + 1) : sortSpots(spots);
 }
 
 function district(board, contents, spot){
@@ -302,7 +303,7 @@ export function districts(board, contents){
 }
 
 const nodupes = _.pipe(
-  _.mapa(coordOrder, _),
+  _.mapa(sortSpots, _),
   _.sort(_.asc(_.hash), _),
   _.dedupe);
 
@@ -546,7 +547,7 @@ export function execute(self, command, s){
       if (unspent < 1) {
         throw new Error("Not enough action points to construct a canal");
       }
-      return _.chain(self, g.fold(_, _.assoc(command, "type", "constructed-canal")));
+      return _.chain(self, g.fold(_, {type: "constructed-canal", seat, details: {at: sortSpots(details.at)}}));
 
     case "build-temple":
       const present = _.detect(function(spot){

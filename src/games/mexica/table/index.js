@@ -229,12 +229,12 @@ $.sub($hist, function([curr, prior]){
   diff(curr, prior, ["state", "canal1"], diffEach(function(curr, prior){
     if (prior) {
       debugger
-      const el = at(prior);
+      const el = at(prior[0]);
       const piece = dom.sel1("[data-piece='canal']", el);
       dom.omit(el, piece);
     }
     if (curr) {
-      dom.append(at(curr), canal({size: 1}));
+      dom.append(at(curr[0]), canal({size: 1}));
     }
   }));
 

@@ -229,9 +229,16 @@ function consume(spot){
 
 function remit(spot){
   return function(pieces){
-    const idx = _.indexOf(pieces, spot);
+    const idx = indexDetect(_.eq(_, spot), pieces);
     return idx > -1 ? _.assoc(pieces, idx, null) : pieces;
   }
+}
+
+function indexDetect(pred, xs){
+  const [idx, item] = _.detect(function([_, x]){
+    return pred(x);
+  }, _.mapIndexed(_.array, xs)) || [-1, null];
+  return idx;
 }
 
 function place(what, at){

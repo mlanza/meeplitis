@@ -4,6 +4,7 @@
     "build": "deno task lume",
     "serve": "deno task lume -s",
     "ohhell": "deno bundle ./sim/bundle/ohhell.js ./sim/src/ohhell.js",
+    "mexica": "deno bundle ./sim/bundle/mexica.js ./sim/src/mexica.js",
     "lume": "deno eval \"import 'lume/task.ts'\" --"
   }
 }

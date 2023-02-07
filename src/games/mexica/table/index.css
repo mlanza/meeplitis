@@ -55,6 +55,7 @@
 }
 #supplies .canals[data-size="2"] {
   height: 285px;
+  z-index: 15;
 }
 #supplies .canals[data-size="1"] {
   height: 90px;

@@ -155,7 +155,7 @@ function desc(event){
     case "started":
       return "Starts game.";
     case "dealt-capulli":
-      return "Deals initial capulli tiles.";
+      return "Deals capulli tiles.";
     default:
       return event.type;
   }

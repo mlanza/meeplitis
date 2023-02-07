@@ -108,6 +108,12 @@ div[data-spot] {
   float: left;
   overflow: visible;
 }
+div[data-spot] .contents, div[data-spot] .propose {
+  height: 30.5px;
+  width: 30.5px;
+  z-index: 11;
+  overflow: visible;
+}
 div[data-spot] > * {
   position: absolute;
   top: -4px;
@@ -306,6 +312,15 @@ ol#demands li {
 div[data-spot]:hover {
   border-color: white;
   cursor: pointer;
+}
+div[data-spot]:hover div.propose {
+  background-repeat: no-repeat;
+  background-size: 30.5px 30.5px;
+  background-position: 0 0;
+}
+[data-propose="canal"] div[data-spot]:hover div.propose {
+  background-image: url(./images/spot.svg);
+  opacity: .5;
 }
 div[data-spot^="W"]:hover {
   border-color: red;

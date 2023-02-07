@@ -56,11 +56,13 @@ function demand(pos){
 }
 
 function at(spot){
-  return dom.sel1(`[data-spot='${spot}']`, el);
+  return dom.sel1(`[data-spot='${spot}'] .contents`, el);
 }
 
 function spot([spot, terrain]){
-  return div({"title": spot, "data-spot": spot, "data-terrain": terrain});
+  return div({"title": spot, "data-spot": spot, "data-terrain": terrain},
+    div({class: "contents"}),
+    div({class: "propose"}));
 }
 
 const img = dom.tag('img'),
@@ -82,6 +84,8 @@ const el = document.body;
 const board = dom.sel1("#board", el);
 const supplies = dom.sel1("#supplies", el);
 const demands = dom.sel1("#demands", el);
+
+dom.attr(board, "data-propose", "canal");
 
 const [seated, seat] = await Promise.all([
   getSeated(tableId),

@@ -75,7 +75,7 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, template,
     dom.append(els.players, zone(seat, username, avatar_url, template(seat)));
   }, seated);
 
-  dom.addClass(dom.sel1(`[data-seat='${seat}']`, el), "yours");
+  _.maybe(dom.sel1(`[data-seat='${seat}']`, el), dom.addClass(_, "yours"));
   dom.attr(el, "data-perspective", seat);
   dom.attr(el, "data-seats", _.count(seated));
 

@@ -289,6 +289,10 @@ div[data-spot] img[data-size="2"] {
 div[data-spot] img[data-piece="bridge"][data-orientation="vertical"] {
   transform: rotate(90deg);
 }
+[data-piece="canal"][data-orientation="horizontal"] {
+  transform: rotate(90deg);
+  transform-origin: 100% 50%;
+}
 ol#demands {
   position: absolute !important;
   bottom: 33px;
@@ -414,7 +418,7 @@ div[data-spot] > *:hover {
 }
 
 [data-piece] {
-  animation: fade-in 0.25s ease-out forwards;
+  animation: fade-in 0.25s ease-out;
 }
 [data-piece].gone {
   animation: fade-out .25s ease-out forwards;

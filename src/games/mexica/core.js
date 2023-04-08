@@ -435,11 +435,11 @@ function half(size){
 
 const quarter = _.comp(half, half);
 
-function founded(temples, pillis, founder, dist){
+function founded(pillis, founder, dist){
   const size = _.count(dist);
-  return _.mapkv(function(seat, spot){
+  return _.toArray(_.mapkv(function(seat, spot){
     return seat === founder ? half(size) : _.includes(dist, spot) ? quarter(size) : 0;
-  }, pillis);
+  }, pillis));
 }
 
 function bonus(spots, pillis){
@@ -479,8 +479,8 @@ export function execute(self, command, s){
   const automatic = _.includes(["start", "deal-capulli"], type);
   const matched = _.detect(_.eq(_, _.chain(command, _.compact, _.dissoc(_, "id"))), moves);
   const seated = seat == null ? {pilli: null, bank: 0} : state.seated[seat];
-  const temples = _.map(_.get(_, "temples"), seated);
-  const pillis = _.map(_.get(_, "pilli"), seated);
+  const temples = _.map(_.get(_, "temples"), state.seated);
+  const pillis = _.map(_.get(_, "pilli"), state.seated);
   const {spent, board, contents, period, canal1, canal2, capulli, banked, tokens} = state;
   const {bank, pilli} = seated;
   const unspent = remaining(spent, bank);
@@ -607,8 +607,8 @@ export function execute(self, command, s){
       if (!isVacant(board, contents, details.at)) {
         throw new Error("Invalid capulli placement");
       }
-      const points = founded(temples, pillis, seat, dist);
-      return _.chain(self, g.fold(_, {type: "founded-district", details: {at: details.at, points}}));
+      const points = founded(_.toArray(pillis), seat, dist);
+      return _.chain(self, g.fold(_, {type: "founded-district", details: {at: details.at, size: _.count(dist), points}}));
 
   }
 }
@@ -690,7 +690,6 @@ function fold(self, event){
             _.update(_, "contents", place(t, details.at)))));
 
     case "moved":
-      debugger
       return g.fold(self, event,
         _.fmap(_,
           _.pipe(
@@ -723,14 +722,12 @@ function fold(self, event){
       return g.fold(self, event,
         _.fmap(_,
           _.updateIn(_, ["capulli", period], function(capulli){
-            debugger
-            const idx = _.keepIndexed(function(idx, {at}){
-              return at === details.at ? idx : null;
-            }, capulli);
+            const idx = _.first(_.keepIndexed(function(idx, {at, size}){
+              return at == null && size === details.size ? idx : null;
+            }, capulli));
             return _.update(capulli, idx, _.assoc(_, "at", details.at));
           }),
           _.update(_, ["seated"], _.pipe(_.mapIndexed(function(seat, seated){
-            debugger
             const points = _.nth(details.points, seat);
             return _.update(seated, "points", _.add(_, points));
           }, _), _.toArray))));

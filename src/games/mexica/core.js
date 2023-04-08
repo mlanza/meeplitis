@@ -608,7 +608,7 @@ export function execute(self, command, s){
         throw new Error("Invalid capulli placement");
       }
       const points = founded(_.toArray(pillis), seat, dist);
-      return _.chain(self, g.fold(_, {type: "founded-district", details: {at: details.at, size: _.count(dist), points}}));
+      return _.chain(self, g.fold(_, {type: "founded-district", seat, details: {at: details.at, size: _.count(dist), points}}));
 
   }
 }

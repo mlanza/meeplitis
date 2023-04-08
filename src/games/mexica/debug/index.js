@@ -2,9 +2,12 @@ import _ from "/lib/atomic_/core.js";
 import $ from "/lib/atomic_/reactives.js";
 import t from "/lib/atomic_/transducers.js";
 import g from "/lib/game_.js";
+import supabase from "/lib/supabase.js";
 import mexica, {districts, waterways, boats} from "../core.js";
 
 const params = new URLSearchParams(document.location.search),
+      tableId = params.get('id'),
+      hash = document.location.hash.substr(1),
       split  = params.get('split') || null,
       options = params.get('options')?.split(',') || [],
       monitor = !_.includes(options, "nomonitor");
@@ -30,49 +33,29 @@ const capulli = [
   ]
 ];
 
-const $game = $.cell(mexica(_.repeat(4, {}), {dealCapulli: _.constantly(capulli)}));
+Promise.all([
+  supabase.rpc('seated', {_table_id: tableId}),
+  supabase.rpc('evented', {_table_id: tableId}),
+  fetch("../data/commands.json").then(function(resp){
+    return resp.json();
+  })
+]).then(function([seated, evented, commands]){
+  const count = hash ? _.maybe(evented.data, _.keepIndexed(function(idx, event){
+    return event.id === hash ? idx : null;
+  }, _), _.first, _.inc) : _.count(evented.data);
+  const seats = _.count(seated.data) || 4,
+        events = count == null ?  evented.data : _.chain(evented.data, _.take(count, _), _.toArray),
+        $game = $.cell(mexica(_.repeat(seats, {}), {dealCapulli: _.constantly(capulli)}));
 
-$.sub($.hist($game), t.map(monitor ? g.summarize : _.identity), _.log);
+  _.log($game)
 
-const commands = [
-  {type: "start"},
-  {type: "place-pilli", details: {at: "H6"}, seat: 0},
-  {type: "commit", seat: 0},
-  {type: "place-pilli", details: {at: "H8"}, seat: 1},
-  {type: "commit", seat: 1},
-  {type: "place-pilli", details: {at: "G7"}, seat: 2},
-  {type: "commit", seat: 2},
-  {type: "place-pilli", details: {at: "I7"}, seat: 3},
-  {type: "commit", seat: 3},
-  {type: "bank", seat: 0},
-  {type: "bank", seat: 0},
-  {type: "build-temple", details: {level: 4, at: "K7"}, seat: 0},
-  {type: "commit", seat: 0},
-  {type: "construct-canal", details: {at: ["I1","I2"]}, seat: 1},
-  {type: "construct-canal", details: {at: ["I3","I4"]}, seat: 1},
-  {type: "construct-canal", details: {at: ["I5","I6"]}, seat: 1},
-  {type: "construct-canal", details: {at: ["H5","G5"]}, seat: 1},
-  {type: "construct-canal", details: {at: ["E5","F5"]}, seat: 1},
-  {type: "construct-canal", details: {at: ["C5","D5"]}, seat: 1},
-  {type: "commit", seat: 1},
-  {type: "construct-canal", details: {at: ["B5"]}, seat: 2},
-  {type: "construct-bridge", details: {at: "O7"}, seat: 2},
-  {type: "construct-bridge", details: {at: "O8"}, seat: 2},
-  {type: "construct-canal", details: {at: ["O5"]}, seat: 2},
-  {type: "bank", seat: 2},
-  {type: "bank", seat: 2},
-  {type: "commit", seat: 2},
-  {type: "construct-bridge", details: {at: "O5"}, seat: 3},
-  {type: "construct-bridge", details: {at: "B9"}, seat: 3},
-  {type: "move", details: {by: "foot", from: "I7", to: "J7"}, seat: 3},
-  {type: "bank", seat: 3},
-  {type: "bank", seat: 3},
-  {type: "commit", seat: 3},
-  {type: "move", details: {by: "foot", from: "H6", to: "G6"}, seat: 0}
-];
+  $.sub($.hist($game), t.map(monitor ? g.summarize : _.identity), _.log);
 
-g.batch($game, g.run, commands);
+  g.batch($game, g.load, events);
 
-_.log($game)
+  const exec = g.batch($game, g.run, _);
 
-Object.assign(window, {$game});
+  Object.assign(window, {$game, exec, commands});
+
+  //=> exec(commands) // on a blank game
+});

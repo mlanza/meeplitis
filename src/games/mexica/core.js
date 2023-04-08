@@ -472,30 +472,16 @@ export function execute(self, command, s){
   const state = _.deref(self);
   const {type, details} = command;
   const seat = s == null ? command.seat : s;
-  const moves = g.moves(self, [seat]);
+  const _moves = g.moves(self, [seat]);
+  const moves = _.filtera(_.comp(_.eq(_, command.type), _.get(_, "type")), _moves);
   const automatic = _.includes(["start", "deal-capulli"], type);
-  const valid = automatic ||
-    _.detect(_.or(_.eq(_, _.chain(command, _.compact, _.dissoc(_, "id"))), function(cmd){
-      switch(cmd.type){
-        case "build-temple":
-        case "construct-canal":
-        case "construct-bridge":
-        case "relocate-bridge":
-          return true;
-        case "move":
-          return _.getIn(cmd, ["details", "by"]) === "teleport" && cmd.type === details.type && _.getIn(cmd, ["details", "by"]) === details.by;
-      }
-    }), moves);
+  const matched = _.detect(_.eq(_, _.chain(command, _.compact, _.dissoc(_, "id"))), moves);
   const seated = seat == null ? {pilli: null, bank: 0} : state.seated[seat];
   const temples = _.map(_.get(_, "temples"), seated);
   const pillis = _.map(_.get(_, "pilli"), seated);
   const {spent, board, contents, period, canal1, canal2, capulli, banked, tokens} = state;
   const {bank, pilli} = seated;
   const unspent = remaining(spent, bank);
-
-  if (!automatic && !valid){
-    throw new Error(`Invalid ${type}`);
-  }
 
   if (automatic && seat != null) {
     throw new Error(`Cannot invoke automatic command ${type}`);
@@ -517,10 +503,16 @@ export function execute(self, command, s){
         g.fold(_, {type: "dealt-capulli", details: {capulli: dealCapulli(capullis)}, seat: null}));
 
     case "place-pilli":
+      if (!matched) {
+        throw new Error("Invalid pilli placement");
+      }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "placed-pilli")));
 
     //TODO provide UI cue when scoring will happen on commit
     case "commit":
+      if (!matched) {
+        throw new Error("Cannot commit");
+      }
       const eop = endOfPeriod(capulli, period, temples);
       return _.chain(self,
         g.fold(_, _.assoc(command, "type", "committed")),
@@ -537,9 +529,15 @@ export function execute(self, command, s){
       if (banked > 1) {
         throw new Error("Cannot take any further action point tokens");
       }
+      if (!matched) {
+        throw new Error("Cannot bank");
+      }
       return _.chain(self, g.fold(_, {type: "banked", seat}));
 
     case "move":
+      if (!matched && _.getIn(command, ["details", "by"]) !== "teleport"){
+        throw new Error("Invalid move");
+      }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "moved")));
 
     case "construct-canal":
@@ -557,6 +555,7 @@ export function execute(self, command, s){
       return _.chain(self, g.fold(_, {type: "constructed-canal", seat, details: {at: sortSpots(details.at)}}));
 
     case "build-temple":
+      //TODO validate
       const present = _.detect(function(spot){
         return spot === details.at;
       }, district(board, contents, pilli));
@@ -659,7 +658,11 @@ function fold(self, event){
           _.pipe(
             _.update(_, "spent", _.inc),
             _.update(_, `canal${size}`, consume(details.at)),
-            _.update(_, "contents", _.reduce(_.partial(place, w), _, details.at)))));
+            _.update(_, "contents", function(contents){
+              return _.reduce(function(memo, at){
+                return place(w, at)(memo);
+              }, contents, details.at);
+            }))));
 
     case "constructed-bridge":
       return g.fold(self, event,

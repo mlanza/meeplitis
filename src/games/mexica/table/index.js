@@ -230,14 +230,20 @@ function remaining(slots){
   return _.count(_.filter(_.isNil, slots));
 }
 
+function omit(el){
+  dom.addClass(el, "gone");
+}
+
 $.sub($hist, function([curr, prior]){
   const {state, seen} = curr;
   const {seated, tokens, canal1, canal2, bridges, period} = state;
   const tiles = _.nth(state.capulli, period);
 
+  _.each(dom.omit, dom.sel(".gone", el));
+
   diff(curr, prior, ["state", "canal2"], diffEach(function(curr, prior){
     if (prior) {
-      dom.omit(dom.sel1("[data-piece='canal']", at(prior[0])));
+      omit(dom.sel1("[data-piece='canal']", at(prior[0])));
     }
     if (curr) {
       const orientation = below(curr[0]) == curr[1] ? "vertical" : "horizontal";
@@ -247,7 +253,7 @@ $.sub($hist, function([curr, prior]){
 
   diff(curr, prior, ["state", "canal1"], diffEach(function(curr, prior){
     if (prior) {
-      dom.omit(dom.sel1("[data-piece='canal']", at(prior[0])));
+      omit(dom.sel1("[data-piece='canal']", at(prior[0])));
     }
     if (curr) {
       dom.append(at(curr[0]), canal({size: 1}));
@@ -277,7 +283,7 @@ $.sub($hist, function([curr, prior]){
 
     diff(curr, prior, ["state", "seated", seat, "pilli"], function(curr, prior){
       if (prior){
-        dom.omit(dom.sel1("[data-piece='pilli']", at(prior)));
+        omit(dom.sel1("[data-piece='pilli']", at(prior)));
       }
       if (curr){
         dom.append(at(curr), pilli({seat}));

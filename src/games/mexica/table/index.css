@@ -413,6 +413,12 @@ div[data-spot] > *:hover {
   border-radius: 1.6em;
 }
 
+[data-piece] {
+  animation: fade-in 0.25s ease-out forwards;
+}
+[data-piece].gone {
+  animation: fade-out .25s ease-out forwards;
+}
 @media (prefers-color-scheme: light) {
   .area, #supplies {
     background-color: rgba(135, 125, 138, .1);

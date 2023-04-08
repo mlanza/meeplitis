@@ -3,6 +3,8 @@ import g from "/lib/game_.js";
 
 const slots = _.pipe(_.repeat(_, null), _.toArray);
 
+const COL = 64, ROW = 0;
+
 const w = "w", //water
       l = "l", //land
       e = "e", //emperor's palace
@@ -13,23 +15,23 @@ const w = "w", //water
       n = "-"; //nothing
 
 const board = [
-       /*A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W*/
-  /*1*/ [n,w,w,w,w,w,w,w,w,w,w,w,n,n,n,n,n,n,n,n,n,n,n],
-  /*2*/ [n,w,l,w,w,w,l,l,l,l,l,w,w,n,n,n,n,n,n,n,n,n,n],
-  /*3*/ [w,w,l,l,l,l,l,l,l,l,l,l,l,w,n,n,n,n,n,n,n,n,n],
-  /*4*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,n,n,n,n,n,n,n],
-  /*5*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,n,n,n,n,n],
-  /*6*/ [w,w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,w,w,w],
-  /*7*/ [n,w,l,l,l,l,l,l,e,l,l,l,l,l,l,w,l,l,l,w,l,l,w],
-  /*8*/ [n,w,l,l,l,l,l,e,n,e,l,l,l,l,l,w,l,l,l,l,l,l,w],
-  /*9*/ [n,w,l,l,l,l,l,l,e,l,l,l,l,l,l,w,l,l,l,l,l,l,w],
- /*10*/ [n,w,w,l,l,l,l,l,l,l,l,l,l,l,l,w,l,l,l,l,l,w,w],
- /*11*/ [w,w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,w,n],
- /*12*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,n,n,n,n],
- /*13*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,n,n,n,n,n,n],
- /*14*/ [w,l,l,l,l,l,l,l,l,l,l,l,w,w,w,n,n,n,n,n,n,n,n],
- /*15*/ [w,w,w,l,l,l,l,w,w,l,l,w,w,n,n,n,n,n,n,n,n,n,n],
- /*16*/ [n,n,w,w,w,w,w,w,w,w,w,w,n,n,n,n,n,n,n,n,n,n,n]
+       /*@,A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V*/
+  /*0*/ [n,w,w,w,w,w,w,w,w,w,w,w,n,n,n,n,n,n,n,n,n,n,n],
+  /*1*/ [n,w,l,w,w,w,l,l,l,l,l,w,w,n,n,n,n,n,n,n,n,n,n],
+  /*2*/ [w,w,l,l,l,l,l,l,l,l,l,l,l,w,n,n,n,n,n,n,n,n,n],
+  /*3*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,n,n,n,n,n,n,n],
+  /*4*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,n,n,n,n,n],
+  /*5*/ [w,w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,w,w,w],
+  /*6*/ [n,w,l,l,l,l,l,l,e,l,l,l,l,l,l,w,l,l,l,w,l,l,w],
+  /*7*/ [n,w,l,l,l,l,l,e,n,e,l,l,l,l,l,w,l,l,l,l,l,l,w],
+  /*8*/ [n,w,l,l,l,l,l,l,e,l,l,l,l,l,l,w,l,l,l,l,l,l,w],
+  /*9*/ [n,w,w,l,l,l,l,l,l,l,l,l,l,l,l,w,l,l,l,l,l,w,w],
+ /*10*/ [w,w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,w,n],
+ /*11*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,n,n,n,n],
+ /*12*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,n,n,n,n,n,n],
+ /*13*/ [w,l,l,l,l,l,l,l,l,l,l,l,w,w,w,n,n,n,n,n,n,n,n],
+ /*14*/ [w,w,w,l,l,l,l,w,w,l,l,w,w,n,n,n,n,n,n,n,n,n,n],
+ /*15*/ [n,n,w,w,w,w,w,w,w,w,w,w,n,n,n,n,n,n,n,n,n,n,n]
 ]
 
 const capullis = [
@@ -83,14 +85,14 @@ const coords = _.braid(function(y, x){
 }, _.range(0, 16), _.range(0, 23));
 
 export const spots = _.map(function([x, y]){
-  const letter = String.fromCharCode(x + 65),
-        row = y + 1;
+  const letter = String.fromCharCode(x + COL),
+        row = y + ROW;
   return `${letter}${row}`;
 }, coords);
 
 export const boardSpots = _.map(function([x, y]){
-  const letter = String.fromCharCode(x + 65),
-        row = y + 1;
+  const letter = String.fromCharCode(x + COL),
+        row = y + ROW;
   return [`${letter}${row}`, _.getIn(board, [y, x])];
 }, coords);
 
@@ -105,7 +107,7 @@ function init(seats){
     banked: 0,
     tokens: 12,
     canal1: slots(6),
-    canal2: _.assoc(slots(35), 0, ["P7", "P8"], 1, ["P9", "P10"]),
+    canal2: _.assoc(slots(35), 0, ["O6", "O7"], 1, ["O8", "O9"]),
     bridges: slots(11),
     capulli: null,
     seated: _.toArray(_.repeat(seats, {
@@ -135,14 +137,14 @@ export default function mexica(seats, _config, events, journal){
 const cat = _.mapcat(_.identity, _);
 
 function coord(at){
-  const row = _.chain(at, _.split(_, ''), _.rest, _.join('', _), parseInt, _.dec),
-        column = at.charCodeAt(0) - 65;
+  const row = _.chain(at, _.split(_, ''), _.rest, _.join('', _), parseInt, _.subtract(_, ROW)),
+        column = at.charCodeAt(0) - COL;
   return [row, column];
 }
 
 function spot([row, column]){
-  const c = String.fromCharCode(column + 65),
-        r = row + 1;
+  const c = String.fromCharCode(column + COL),
+        r = row + ROW;
   return c + r;
 }
 
@@ -168,7 +170,7 @@ export function below(at){
 
 const around = _.juxt(above, right, below, left);
 const stop = _.constantly([]);
-const palaceSpots = around('I8');
+const palaceSpots = around('H7');
 
 function committed(state){
   const {status, seated, capulli, period} = state;
@@ -246,7 +248,7 @@ function place(what, at){
 }
 
 function displace(what, at){
-  return _.update(_, at, _.pipe(_.either(_, []), _.conj(_, what)));
+  return _.update(_, at, _.pipe(_.either(_, []), _.filtera(_.notEq(what, _), _)));
 }
 
 function orientBridge(board, contents, at){
@@ -555,7 +557,6 @@ export function execute(self, command, s){
       return _.chain(self, g.fold(_, {type: "constructed-canal", seat, details: {at: sortSpots(details.at)}}));
 
     case "build-temple":
-      //TODO validate
       const present = _.detect(function(spot){
         return spot === details.at;
       }, district(board, contents, pilli));
@@ -689,6 +690,7 @@ function fold(self, event){
             _.update(_, "contents", place(t, details.at)))));
 
     case "moved":
+      debugger
       return g.fold(self, event,
         _.fmap(_,
           _.pipe(

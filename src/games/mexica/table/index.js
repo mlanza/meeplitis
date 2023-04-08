@@ -160,6 +160,10 @@ function desc(event){
       return "Starts game.";
     case "dealt-capulli":
       return "Deals capulli tiles.";
+    case "placed-pilli":
+      return `Places Pilli Mexica at ${event.details.at}.`;
+    case "committed":
+      return "I'm done.";
     default:
       return event.type;
   }
@@ -252,7 +256,7 @@ $.sub($hist, function([curr, prior]){
   dom.attr(els.canal1, "data-remaining", remaining(canal1));
   dom.attr(els.canal2, "data-remaining", remaining(canal2));
 
-  _.eachkv(function(seat, {bank, temples, pilli, points}){
+  _.eachkv(function(seat, {bank, temples, points}){
     const zone = dom.sel1(`[data-seat='${seat}']`, el),
           area = dom.sel1(".area", zone);
 
@@ -264,7 +268,12 @@ $.sub($hist, function([curr, prior]){
     }, temples);
 
     diff(curr, prior, ["state", "seated", seat, "pilli"], function(curr, prior){
-      debugger
+      if (curr && !prior){
+        dom.append(at(curr), pilli({seat}));
+      }
+      if (!curr && prior){
+        dom.omit(dom.sel1("[data-piece='pilli']", at(prior)));
+      }
     });
   }, seated);
 

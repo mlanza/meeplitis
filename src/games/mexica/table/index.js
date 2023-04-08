@@ -155,6 +155,7 @@ dom.append(at("P9"),
 */
 
 function desc(event){
+  const details = event.details;
   switch(event.type) {
     case "started":
       return "Starts game.";
@@ -162,8 +163,21 @@ function desc(event){
       return "Deals capulli tiles.";
     case "placed-pilli":
       return `Places Pilli Mexica at ${event.details.at}.`;
+    case "constructed-canal":
+        return `Constructs canal at ${_.join(' & ', event.details.at)}.`;
+    case "banked":
+      return "Banks an action point.";
     case "committed":
       return "I'm done.";
+    case "moved":
+      switch(details.by){
+        case "foot":
+          return `Moved from ${details.from} to ${details.to}.`;
+        case "teleport":
+        case "boat":
+        default:
+          return "Moved";
+      }
     default:
       return event.type;
   }
@@ -223,10 +237,7 @@ $.sub($hist, function([curr, prior]){
 
   diff(curr, prior, ["state", "canal2"], diffEach(function(curr, prior){
     if (prior) {
-      debugger
-      const el = at(prior[0]);
-      const piece = dom.sel1("[data-piece='canal']", el);
-      dom.omit(el, piece);
+      dom.omit(dom.sel1("[data-piece='canal']", at(prior[0])));
     }
     if (curr) {
       const orientation = below(curr[0]) == curr[1] ? "vertical" : "horizontal";
@@ -236,10 +247,7 @@ $.sub($hist, function([curr, prior]){
 
   diff(curr, prior, ["state", "canal1"], diffEach(function(curr, prior){
     if (prior) {
-      debugger
-      const el = at(prior[0]);
-      const piece = dom.sel1("[data-piece='canal']", el);
-      dom.omit(el, piece);
+      dom.omit(dom.sel1("[data-piece='canal']", at(prior[0])));
     }
     if (curr) {
       dom.append(at(curr[0]), canal({size: 1}));
@@ -268,11 +276,11 @@ $.sub($hist, function([curr, prior]){
     }, temples);
 
     diff(curr, prior, ["state", "seated", seat, "pilli"], function(curr, prior){
-      if (curr && !prior){
-        dom.append(at(curr), pilli({seat}));
-      }
-      if (!curr && prior){
+      if (prior){
         dom.omit(dom.sel1("[data-piece='pilli']", at(prior)));
+      }
+      if (curr){
+        dom.append(at(curr), pilli({seat}));
       }
     });
   }, seated);

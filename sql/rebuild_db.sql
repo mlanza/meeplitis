@@ -87,7 +87,7 @@ CREATE TABLE events(
     id varchar(5) not null default generate_uid(5),
     seq bigserial not null, -- guarantees order
     seat_id varchar(3),
-    type varchar(15) not null,
+    type varchar(25) not null,
     details jsonb,
     created_at timestamp not null default now(),
     CONSTRAINT fk_events_seats

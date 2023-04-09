@@ -730,7 +730,8 @@ function fold(self, event){
           _.update(_, ["seated"], _.pipe(_.mapIndexed(function(seat, seated){
             const points = _.nth(details.points, seat);
             return _.update(seated, "points", _.add(_, points));
-          }, _), _.toArray))));
+          }, _), _.toArray)),
+          _.update(_, "contents", place(c, details.at))));
 
     case "finished":
       return g.fold(self, event, _.fmap(_, _.pipe(_.dissoc(_, "up"), _.assoc(_, "status", "finished"))));
@@ -762,13 +763,15 @@ function up(self){
 
 const may = up;
 
+function sift(pred, xs){ //TODO promote
+  const sifted = _.groupBy(pred, xs);
+  return [sifted["true"] || null, sifted["false"] || null];
+}
+
 export function foundable(board, contents, markers, pilli){
   const dist = district(board, contents, pilli);
   const size = _.count(dist);
-  const unfounded = _.filter(function({at}){
-    return !at;
-  }, markers);
-  const founded = _.filter(function({at}){
+  const [founded, unfounded] = sift(function({at}){
     return !!at;
   }, markers);
   const fixed = _.detect(function(at){
@@ -776,12 +779,12 @@ export function foundable(board, contents, markers, pilli){
       return c.at === at;
     }, founded);
   }, dist);
-  const avail = size < 14 && _.detect(function({size}){
-    return size === size;
+  const avail = size < 14 && _.detect(function(marker){
+    return marker.size === size;
   }, unfounded);
   return _.seq(_.map(function(at){
     return {size, at};
-  }, avail ? _.filter(isVacant(board, contents, _), dist) : null));
+  }, avail && !fixed ? _.filter(isVacant(board, contents, _), dist) : null));
 }
 
 function canalable(board, contents){

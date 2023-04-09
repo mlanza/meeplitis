@@ -204,22 +204,11 @@ function template(seat){
   };
 }
 
-function diff(curr, prior, path, f){
+function diff(curr, prior, path, f){ //TODO promote
   const c = _.getIn(curr, path),
         p = _.getIn(prior, path);
   if (_.notEq(c, p)) {
     f(c, p);
-  }
-}
-
-function diffEach(f){
-  return function(curr, prior){
-    _.chain(
-      _.map(_.array,
-        curr || _.repeat(37, null),
-        prior || _.repeat(37, null)),
-      _.filter(_.spread(_.notEq), _),
-      _.each(_.spread(f), _));
   }
 }
 
@@ -244,6 +233,22 @@ $.sub($hist, function([curr, prior]){
 
   _.each(dom.omit, dom.sel(".gone", el));
 
+  _.doseq(function(seat, level){
+    diff(curr, prior, ["state", "seated", seat, "temples", level], function(curr, prior){
+      const ns = _.count(curr || prior);
+      _.each(function(n){
+        diff(curr, prior, [n], function(curr, prior){
+          if (curr){
+            dom.append(at(curr), temple({size: level, seat}));
+          }
+          if (prior){
+            omit(dom.sel1("[data-piece='temple']", at(prior)));
+          }
+        });
+      }, _.range(0, ns));
+    });
+  },  _.range(0, _.count(seated)), _.range(1, 5));
+
   _.each(function(pos){
     diff(curr, prior, ["state", "capulli", period, pos], function(curr, prior){
       dom.html(
@@ -258,24 +263,34 @@ $.sub($hist, function([curr, prior]){
     });
   }, _.range(0, 8));
 
-  diff(curr, prior, ["state", "canal2"], diffEach(function(curr, prior){
-    if (prior) {
-      omit(dom.sel1("[data-piece='canal']", at(prior[0])));
-    }
-    if (curr) {
-      const orientation = below(curr[0]) == curr[1] ? "vertical" : "horizontal";
-      dom.append(at(curr[0]), canal({size: 2, orientation}));
-    }
-  }));
+  diff(curr, prior, ["state", "canal2"], function(curr, prior){
+    const ns = _.count(curr || prior);
+    _.each(function(n){
+      diff(curr, prior, [n], function(curr, prior){
+        if (prior) {
+          omit(dom.sel1("[data-piece='canal']", at(prior[0])));
+        }
+        if (curr) {
+          const orientation = below(curr[0]) == curr[1] ? "vertical" : "horizontal";
+          dom.append(at(curr[0]), canal({size: 2, orientation}));
+        }
+      });
+    }, _.range(0, ns));
+  });
 
-  diff(curr, prior, ["state", "canal1"], diffEach(function(curr, prior){
-    if (prior) {
-      omit(dom.sel1("[data-piece='canal']", at(prior[0])));
-    }
-    if (curr) {
-      dom.append(at(curr[0]), canal({size: 1}));
-    }
-  }));
+  diff(curr, prior, ["state", "canal1"], function(curr, prior){
+    const ns = _.count(curr || prior);
+    _.each(function(n){
+      diff(curr, prior, [n], function(curr, prior){
+        if (prior) {
+          omit(dom.sel1("[data-piece='canal']", at(prior[0])));
+        }
+        if (curr) {
+          dom.append(at(curr[0]), canal({size: 1}));
+        }
+      });
+    }, _.range(0, ns));
+  });
 
   dom.attr(els.tokens, "data-remaining", tokens);
   dom.attr(els.bridges, "data-remaining", remaining(bridges));

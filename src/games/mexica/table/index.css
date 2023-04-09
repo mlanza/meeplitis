@@ -43,6 +43,7 @@
   max-width: 11.25em;
   float: left;
   margin-top: 1em;
+  display: contents;
 }
 #supplies ol {
   list-style: none;
@@ -338,121 +339,121 @@ div[data-spot^="W"]:hover {
 
 
 div[data-spot^="@"] {
-  left: calc(30.5px * 0);
+  left: calc(30.5px * 0 + .5px);
 }
 div[data-spot^="A"] {
-  left: calc(30.5px * 1);
+  left: calc(30.5px * 1 + .5px);
 }
 div[data-spot^="B"] {
-  left: calc(30.5px * 2);
+  left: calc(30.5px * 2 + .5px);
 }
 div[data-spot^="C"] {
-  left: calc(30.5px * 3);
+  left: calc(30.5px * 3 + .5px);
 }
 div[data-spot^="D"] {
-  left: calc(30.5px * 4);
+  left: calc(30.5px * 4 + .5px);
 }
 div[data-spot^="E"] {
-  left: calc(30.5px * 5);
+  left: calc(30.5px * 5 + .5px);
 }
 div[data-spot^="F"] {
-  left: calc(30.5px * 6);
+  left: calc(30.5px * 6 + .5px);
 }
 div[data-spot^="G"] {
-  left: calc(30.5px * 7);
+  left: calc(30.5px * 7 + .5px);
 }
 div[data-spot^="H"] {
-  left: calc(30.5px * 8);
+  left: calc(30.5px * 8 + .5px);
 }
 div[data-spot^="I"] {
-  left: calc(30.5px * 9);
+  left: calc(30.5px * 9 + .5px);
 }
 div[data-spot^="J"] {
-  left: calc(30.5px * 10);
+  left: calc(30.5px * 10 + .5px);
 }
 div[data-spot^="K"] {
-  left: calc(30.5px * 11);
+  left: calc(30.5px * 11 + .5px);
 }
 div[data-spot^="L"] {
-  left: calc(30.5px * 12);
+  left: calc(30.5px * 12 + .5px);
 }
 div[data-spot^="M"] {
-  left: calc(30.5px * 13);
+  left: calc(30.5px * 13 + .5px);
 }
 div[data-spot^="N"] {
-  left: calc(30.5px * 14);
+  left: calc(30.5px * 14 + .5px);
 }
 div[data-spot^="O"] {
-  left: calc(30.5px * 15);
+  left: calc(30.5px * 15 + .5px);
 }
 div[data-spot^="P"] {
-  left: calc(30.5px * 16);
+  left: calc(30.5px * 16 + .5px);
 }
 div[data-spot^="Q"] {
-  left: calc(30.5px * 17);
+  left: calc(30.5px * 17 + .5px);
 }
 div[data-spot^="R"] {
-  left: calc(30.5px * 18);
+  left: calc(30.5px * 18 + .5px);
 }
 div[data-spot^="S"] {
-  left: calc(30.5px * 19);
+  left: calc(30.5px * 19 + .5px);
 }
 div[data-spot^="T"] {
-  left: calc(30.5px * 20);
+  left: calc(30.5px * 20 + .5px);
 }
 div[data-spot^="U"] {
-  left: calc(30.5px * 21);
+  left: calc(30.5px * 21 + .5px);
 }
 div[data-spot^="V"] {
-  left: calc(30.5px * 22);
+  left: calc(30.5px * 22 + .5px);
 }
 div[data-spot$="0"] {
-  top: calc(30.5px * 0 + 6px);
+  top: calc(30.5px * 0 + 6.5px);
 }
 div[data-spot$="1"] {
-  top: calc(30.5px * 1 + 6px);
+  top: calc(30.5px * 1 + 6.5px);
 }
 div[data-spot$="2"] {
-  top: calc(30.5px * 2 + 6px);
+  top: calc(30.5px * 2 + 6.5px);
 }
 div[data-spot$="3"] {
-  top: calc(30.5px * 3 + 6px);
+  top: calc(30.5px * 3 + 6.5px);
 }
 div[data-spot$="4"] {
-  top: calc(30.5px * 4 + 6px);
+  top: calc(30.5px * 4 + 6.5px);
 }
 div[data-spot$="5"] {
-  top: calc(30.5px * 5 + 6px);
+  top: calc(30.5px * 5 + 6.5px);
 }
 div[data-spot$="6"] {
-  top: calc(30.5px * 6 + 6px);
+  top: calc(30.5px * 6 + 6.5px);
 }
 div[data-spot$="7"] {
-  top: calc(30.5px * 7 + 6px);
+  top: calc(30.5px * 7 + 6.5px);
 }
 div[data-spot$="8"] {
-  top: calc(30.5px * 8 + 6px);
+  top: calc(30.5px * 8 + 6.5px);
 }
 div[data-spot$="9"] {
-  top: calc(30.5px * 9 + 6px);
+  top: calc(30.5px * 9 + 6.5px);
 }
 div[data-spot$="10"] {
-  top: calc(30.5px * 10 + 6px);
+  top: calc(30.5px * 10 + 6.5px);
 }
 div[data-spot$="11"] {
-  top: calc(30.5px * 11 + 6px);
+  top: calc(30.5px * 11 + 6.5px);
 }
 div[data-spot$="12"] {
-  top: calc(30.5px * 12 + 6px);
+  top: calc(30.5px * 12 + 6.5px);
 }
 div[data-spot$="13"] {
-  top: calc(30.5px * 13 + 6px);
+  top: calc(30.5px * 13 + 6.5px);
 }
 div[data-spot$="14"] {
-  top: calc(30.5px * 14 + 6px);
+  top: calc(30.5px * 14 + 6.5px);
 }
 div[data-spot$="15"] {
-  top: calc(30.5px * 15 + 6px);
+  top: calc(30.5px * 15 + 6.5px);
 }
 
 div[data-terrain="-"],

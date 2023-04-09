@@ -334,10 +334,6 @@ div[data-spot^="W"]:hover {
   border-color: red;
   clear: right;
 }
-
-
-
-
 div[data-spot^="@"] {
   left: calc(30.5px * 0 + .5px);
 }
@@ -408,52 +404,52 @@ div[data-spot^="V"] {
   left: calc(30.5px * 22 + .5px);
 }
 div[data-spot$="0"] {
-  top: calc(30.5px * 0 + 6.5px);
+  top: calc(30.5px * 0 + 6px);
 }
 div[data-spot$="1"] {
-  top: calc(30.5px * 1 + 6.5px);
+  top: calc(30.5px * 1 + 6px);
 }
 div[data-spot$="2"] {
-  top: calc(30.5px * 2 + 6.5px);
+  top: calc(30.5px * 2 + 6px);
 }
 div[data-spot$="3"] {
-  top: calc(30.5px * 3 + 6.5px);
+  top: calc(30.5px * 3 + 6px);
 }
 div[data-spot$="4"] {
-  top: calc(30.5px * 4 + 6.5px);
+  top: calc(30.5px * 4 + 6px);
 }
 div[data-spot$="5"] {
-  top: calc(30.5px * 5 + 6.5px);
+  top: calc(30.5px * 5 + 6px);
 }
 div[data-spot$="6"] {
-  top: calc(30.5px * 6 + 6.5px);
+  top: calc(30.5px * 6 + 6px);
 }
 div[data-spot$="7"] {
-  top: calc(30.5px * 7 + 6.5px);
+  top: calc(30.5px * 7 + 6px);
 }
 div[data-spot$="8"] {
-  top: calc(30.5px * 8 + 6.5px);
+  top: calc(30.5px * 8 + 6px);
 }
 div[data-spot$="9"] {
-  top: calc(30.5px * 9 + 6.5px);
+  top: calc(30.5px * 9 + 6px);
 }
 div[data-spot$="10"] {
-  top: calc(30.5px * 10 + 6.5px);
+  top: calc(30.5px * 10 + 6px);
 }
 div[data-spot$="11"] {
-  top: calc(30.5px * 11 + 6.5px);
+  top: calc(30.5px * 11 + 6px);
 }
 div[data-spot$="12"] {
-  top: calc(30.5px * 12 + 6.5px);
+  top: calc(30.5px * 12 + 6px);
 }
 div[data-spot$="13"] {
-  top: calc(30.5px * 13 + 6.5px);
+  top: calc(30.5px * 13 + 6px);
 }
 div[data-spot$="14"] {
-  top: calc(30.5px * 14 + 6.5px);
+  top: calc(30.5px * 14 + 6px);
 }
 div[data-spot$="15"] {
-  top: calc(30.5px * 15 + 6.5px);
+  top: calc(30.5px * 15 + 6px);
 }
 
 div[data-terrain="-"],

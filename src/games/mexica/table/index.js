@@ -167,6 +167,8 @@ function desc(event){
         return `Constructs canal at ${_.join(' & ', event.details.at)}.`;
     case "banked":
       return "Banks an action point.";
+    case "founded-district":
+      return `Founds ${event.details.size} district at ${event.details.at}.`;
     case "committed":
       return "I'm done.";
     case "moved":
@@ -237,9 +239,22 @@ function omit(el){
 $.sub($hist, function([curr, prior]){
   const {state, seen} = curr;
   const {seated, tokens, canal1, canal2, bridges, period} = state;
-  const tiles = _.nth(state.capulli, period);
 
   _.each(dom.omit, dom.sel(".gone", el));
+
+  _.each(function(pos){
+    diff(curr, prior, ["state", "capulli", period, pos], function(curr, prior){
+      dom.html(
+        dom.sel1(`[data-demand='${pos}']`, el),
+        curr && !curr.at ? capulli(curr) : null);
+      if (curr?.at && !prior?.at){
+        dom.append(at(curr.at), capulli(curr));
+      }
+      if (prior?.at && !curr?.at) {
+        omit(dom.sel1("[data-piece='capulli']", at(prior.at)));
+      }
+    });
+  }, _.range(0, 8));
 
   diff(curr, prior, ["state", "canal2"], diffEach(function(curr, prior){
     if (prior) {
@@ -259,11 +274,6 @@ $.sub($hist, function([curr, prior]){
       dom.append(at(curr[0]), canal({size: 1}));
     }
   }));
-
-  _.eachkv(function(pos, attrs){
-    dom.html(dom.sel1(`[data-demand='${pos}']`, el),
-      capulli(attrs));
-  }, tiles);
 
   dom.attr(els.tokens, "data-remaining", tokens);
   dom.attr(els.bridges, "data-remaining", remaining(bridges));

@@ -100,7 +100,7 @@
   float: left;
 }
 div[data-spot] {
-  position: relative;
+  position: absolute;
   border: solid 2px transparent;
   height: 26.55px;
   width: 26.5px;
@@ -330,6 +330,128 @@ div[data-spot^="W"]:hover {
   border-color: red;
   clear: right;
 }
+
+
+
+
+div[data-spot^="@"] {
+  left: calc(30.5px * 0);
+}
+div[data-spot^="A"] {
+  left: calc(30.5px * 1);
+}
+div[data-spot^="B"] {
+  left: calc(30.5px * 2);
+}
+div[data-spot^="C"] {
+  left: calc(30.5px * 3);
+}
+div[data-spot^="D"] {
+  left: calc(30.5px * 4);
+}
+div[data-spot^="E"] {
+  left: calc(30.5px * 5);
+}
+div[data-spot^="F"] {
+  left: calc(30.5px * 6);
+}
+div[data-spot^="G"] {
+  left: calc(30.5px * 7);
+}
+div[data-spot^="H"] {
+  left: calc(30.5px * 8);
+}
+div[data-spot^="I"] {
+  left: calc(30.5px * 9);
+}
+div[data-spot^="J"] {
+  left: calc(30.5px * 10);
+}
+div[data-spot^="K"] {
+  left: calc(30.5px * 11);
+}
+div[data-spot^="L"] {
+  left: calc(30.5px * 12);
+}
+div[data-spot^="M"] {
+  left: calc(30.5px * 13);
+}
+div[data-spot^="N"] {
+  left: calc(30.5px * 14);
+}
+div[data-spot^="O"] {
+  left: calc(30.5px * 15);
+}
+div[data-spot^="P"] {
+  left: calc(30.5px * 16);
+}
+div[data-spot^="Q"] {
+  left: calc(30.5px * 17);
+}
+div[data-spot^="R"] {
+  left: calc(30.5px * 18);
+}
+div[data-spot^="S"] {
+  left: calc(30.5px * 19);
+}
+div[data-spot^="T"] {
+  left: calc(30.5px * 20);
+}
+div[data-spot^="U"] {
+  left: calc(30.5px * 21);
+}
+div[data-spot^="V"] {
+  left: calc(30.5px * 22);
+}
+div[data-spot$="0"] {
+  top: calc(30.5px * 0 + 6px);
+}
+div[data-spot$="1"] {
+  top: calc(30.5px * 1 + 6px);
+}
+div[data-spot$="2"] {
+  top: calc(30.5px * 2 + 6px);
+}
+div[data-spot$="3"] {
+  top: calc(30.5px * 3 + 6px);
+}
+div[data-spot$="4"] {
+  top: calc(30.5px * 4 + 6px);
+}
+div[data-spot$="5"] {
+  top: calc(30.5px * 5 + 6px);
+}
+div[data-spot$="6"] {
+  top: calc(30.5px * 6 + 6px);
+}
+div[data-spot$="7"] {
+  top: calc(30.5px * 7 + 6px);
+}
+div[data-spot$="8"] {
+  top: calc(30.5px * 8 + 6px);
+}
+div[data-spot$="9"] {
+  top: calc(30.5px * 9 + 6px);
+}
+div[data-spot$="10"] {
+  top: calc(30.5px * 10 + 6px);
+}
+div[data-spot$="11"] {
+  top: calc(30.5px * 11 + 6px);
+}
+div[data-spot$="12"] {
+  top: calc(30.5px * 12 + 6px);
+}
+div[data-spot$="13"] {
+  top: calc(30.5px * 13 + 6px);
+}
+div[data-spot$="14"] {
+  top: calc(30.5px * 14 + 6px);
+}
+div[data-spot$="15"] {
+  top: calc(30.5px * 15 + 6px);
+}
+
 div[data-terrain="-"],
 div[data-spot^="@"],
 div[data-spot="A0"],

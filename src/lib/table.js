@@ -88,6 +88,13 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, template,
   $.sub($status, dom.attr(el, "data-table-status", _));
   $.sub($up, dom.attr(el, "data-up", _));
 
+  //manage data-action
+  $.sub($hist, function([{up, may}]){
+    _.eachIndexed(function(seat){
+      dom.attr(dom.sel1(`[data-seat="${seat}"] [data-action]`, els.players), "data-action", _.includes(up, seat) ? "must" : (_.includes(may, seat) ? "may" : ""));
+    }, seated);
+  });
+
   $.sub($presence, t.tee(_.see("presence")), function(presence){
     _.eachkv(function(username, presence){
       const zone = dom.sel1(`.zone[data-username="${username}"]`);

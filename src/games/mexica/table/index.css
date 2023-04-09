@@ -80,6 +80,9 @@
   height: 30.5px;
   width: 30.5px;
 }
+[data-piece="canal"] {
+  pointer-events: none;
+}
 #supplies li [data-piece="bridge"],
 #supplies li [data-size="1"] {
   transform: rotate(5deg);

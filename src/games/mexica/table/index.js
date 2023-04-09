@@ -162,13 +162,15 @@ function desc(event){
     case "dealt-capulli":
       return "Deals capulli tiles.";
     case "placed-pilli":
-      return `Places Pilli Mexica at ${event.details.at}.`;
+      return `Places Pilli Mexica at ${details.at}.`;
     case "constructed-canal":
-        return `Constructs canal at ${_.join(' & ', event.details.at)}.`;
+        return `Constructs canal at ${_.join(' & ', details.at)}.`;
     case "banked":
       return "Banks an action point.";
     case "founded-district":
-      return `Founds ${event.details.size} district at ${event.details.at}.`;
+      return `Founds ${details.size} district at ${details.at}.`;
+    case "built-temple":
+      return `Builds level ${details.level} temple at ${details.at}.`;
     case "committed":
       return "I'm done.";
     case "moved":

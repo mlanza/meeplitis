@@ -326,6 +326,36 @@ div[data-spot]:hover div.propose {
   background-size: 30.5px 30.5px;
   background-position: 0 0;
 }
+#board[data-foundable="3"] #demands img[data-piece="capulli"][data-size="3"],
+#board[data-foundable="4"] #demands img[data-piece="capulli"][data-size="4"],
+#board[data-foundable="5"] #demands img[data-piece="capulli"][data-size="5"],
+#board[data-foundable="6"] #demands img[data-piece="capulli"][data-size="6"],
+#board[data-foundable="7"] #demands img[data-piece="capulli"][data-size="7"],
+#board[data-foundable="8"] #demands img[data-piece="capulli"][data-size="8"],
+#board[data-foundable="9"] #demands img[data-piece="capulli"][data-size="9"],
+#board[data-foundable="10"] #demands img[data-piece="capulli"][data-size="10"],
+#board[data-foundable="11"] #demands img[data-piece="capulli"][data-size="11"],
+#board[data-foundable="12"] #demands img[data-piece="capulli"][data-size="12"],
+#board[data-foundable="13"] #demands img[data-piece="capulli"][data-size="13"] {
+  animation-name: heartbeat;
+  animation-duration: 1s;
+  animation-fill-mode: both;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-out;
+}
+#board[data-foundable="3"] #demands img[data-piece="capulli"][data-size="3"]:hover,
+#board[data-foundable="4"] #demands img[data-piece="capulli"][data-size="4"]:hover,
+#board[data-foundable="5"] #demands img[data-piece="capulli"][data-size="5"]:hover,
+#board[data-foundable="6"] #demands img[data-piece="capulli"][data-size="6"]:hover,
+#board[data-foundable="7"] #demands img[data-piece="capulli"][data-size="7"]:hover,
+#board[data-foundable="8"] #demands img[data-piece="capulli"][data-size="8"]:hover,
+#board[data-foundable="9"] #demands img[data-piece="capulli"][data-size="9"]:hover,
+#board[data-foundable="10"] #demands img[data-piece="capulli"][data-size="10"]:hover,
+#board[data-foundable="11"] #demands img[data-piece="capulli"][data-size="11"]:hover,
+#board[data-foundable="12"] #demands img[data-piece="capulli"][data-size="12"]:hover,
+#board[data-foundable="13"] #demands img[data-piece="capulli"][data-size="13"]:hover {
+  animation-iteration-count: 2;
+}
 [data-propose="canal"] div[data-spot]:hover div.propose {
   background-image: url(./images/spot.svg);
   opacity: .5;

@@ -223,19 +223,28 @@ function remaining(slots){
   return _.count(_.filter(_.isNil, slots));
 }
 
+function indices(xs){
+  return _.range(0, _.count(xs));
+}
+
 function omit(el){
   dom.addClass(el, "gone");
 }
+function dropPriorOmissions(el){
+  _.each(dom.omit, dom.sel(".gone", el));
+}
 
 $.sub($hist, function([curr, prior]){
-  const {state, seen} = curr;
+  const {state, seen, moves} = curr;
   const {seated, tokens, canal1, canal2, bridges, period} = state;
 
-  _.each(dom.omit, dom.sel(".gone", el));
+  dropPriorOmissions(el);
+
+  const foundable = _.maybe(moves, _.filter(_.includes(_, ["type", "found-district"]), _), _.seq, _.mapa(_.getIn(_, ["details", "size"]), _), _.first);
+  dom.attr(board, "data-foundable", foundable);
 
   _.doseq(function(seat, level){
     diff(curr, prior, ["state", "seated", seat, "temples", level], function(curr, prior){
-      const ns = _.count(curr || prior);
       _.each(function(n){
         diff(curr, prior, [n], function(curr, prior){
           if (curr){
@@ -245,9 +254,9 @@ $.sub($hist, function([curr, prior]){
             omit(dom.sel1("[data-piece='temple']", at(prior)));
           }
         });
-      }, _.range(0, ns));
+      }, indices(curr || prior));
     });
-  },  _.range(0, _.count(seated)), _.range(1, 5));
+  },  indices(seated), _.range(1, 5));
 
   _.each(function(pos){
     diff(curr, prior, ["state", "capulli", period, pos], function(curr, prior){
@@ -264,7 +273,6 @@ $.sub($hist, function([curr, prior]){
   }, _.range(0, 8));
 
   diff(curr, prior, ["state", "canal2"], function(curr, prior){
-    const ns = _.count(curr || prior);
     _.each(function(n){
       diff(curr, prior, [n], function(curr, prior){
         if (prior) {
@@ -275,11 +283,10 @@ $.sub($hist, function([curr, prior]){
           dom.append(at(curr[0]), canal({size: 2, orientation}));
         }
       });
-    }, _.range(0, ns));
+    }, indices(curr || prior));
   });
 
   diff(curr, prior, ["state", "canal1"], function(curr, prior){
-    const ns = _.count(curr || prior);
     _.each(function(n){
       diff(curr, prior, [n], function(curr, prior){
         if (prior) {
@@ -289,7 +296,7 @@ $.sub($hist, function([curr, prior]){
           dom.append(at(curr[0]), canal({size: 1}));
         }
       });
-    }, _.range(0, ns));
+    }, indices(curr || prior));
   });
 
   dom.attr(els.tokens, "data-remaining", tokens);

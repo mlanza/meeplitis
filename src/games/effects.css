@@ -17,6 +17,17 @@
     }
   0% { box-shadow: none; }
 }
+@keyframes heartbeat {
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.5);
+  }
+  60% {
+    transform: scale(1);
+  }
+}
 @keyframes fade-in {
   0% {
     display: none;

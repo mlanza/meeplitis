@@ -23,7 +23,7 @@ const board = [
   /*4*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,n,n,n,n,n],
   /*5*/ [w,w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,w,w,w],
   /*6*/ [n,w,l,l,l,l,l,l,e,l,l,l,l,l,l,w,l,l,l,w,l,l,w],
-  /*7*/ [n,w,l,l,l,l,l,e,n,e,l,l,l,l,l,w,l,l,l,l,l,l,w],
+  /*7*/ [n,w,l,l,l,l,l,e,e,e,l,l,l,l,l,w,l,l,l,l,l,l,w],
   /*8*/ [n,w,l,l,l,l,l,l,e,l,l,l,l,l,l,w,l,l,l,l,l,l,w],
   /*9*/ [n,w,w,l,l,l,l,l,l,l,l,l,l,l,l,w,l,l,l,l,l,w,w],
  /*10*/ [w,w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,w,n],

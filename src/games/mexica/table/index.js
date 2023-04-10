@@ -129,6 +129,14 @@ const els = {
 dom.append(els.board,
   _.map(spot, boardSpots));
 
+dom.append(els.board, _.map(_.pipe(_.add(_, 64), String.fromCharCode, function(letter){
+  return div({"data-column": letter}, letter);
+}), _.range(0, 23)))
+
+dom.append(els.board, _.map(function(number){
+  return div({"data-row": number}, number);
+}, _.range(1, 15)))
+
 dom.append(els.demands,
   _.map(demand, _.range(8)));
 

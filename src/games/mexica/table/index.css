@@ -356,6 +356,155 @@ div[data-spot]:hover div.propose {
 #board[data-foundable="13"] #demands img[data-piece="capulli"][data-size="13"]:hover {
   animation-iteration-count: 2;
 }
+[data-column],
+[data-row] {
+  position: absolute;
+  z-index: 99;
+  color: white;
+  font-weight: 500;
+  font-size: .8em;
+  text-shadow: 1px 1px 1px black;
+}
+#board [data-column],
+#board [data-row] {
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+#board:hover [data-column],
+#board:hover [data-row] {
+  opacity: 1;
+  transition: opacity 0.5s ease-in-out;
+}
+[data-column] {
+  top: 5px;
+  height: 1em;
+  width: 30.5px;
+  text-align: center;
+}
+[data-column="@"] {
+  left: calc(30.5px * 0);
+  visibility: hidden;
+}
+[data-column="A"] {
+  left: calc(30.5px * 1);
+}
+[data-column="B"] {
+  left: calc(30.5px * 2);
+}
+[data-column="C"] {
+  left: calc(30.5px * 3);
+}
+[data-column="D"] {
+  left: calc(30.5px * 4);
+}
+[data-column="E"] {
+  left: calc(30.5px * 5);
+}
+[data-column="F"] {
+  left: calc(30.5px * 6);
+}
+[data-column="G"] {
+  left: calc(30.5px * 7);
+}
+[data-column="H"] {
+  left: calc(30.5px * 8);
+}
+[data-column="I"] {
+  left: calc(30.5px * 9);
+}
+[data-column="J"] {
+  left: calc(30.5px * 10);
+}
+[data-column="K"] {
+  left: calc(30.5px * 11);
+}
+[data-column="L"] {
+  left: calc(30.5px * 12);
+}
+[data-column="M"] {
+  left: calc(30.5px * 13);
+}
+[data-column="N"] {
+  left: calc(30.5px * 14);
+}
+[data-column="O"] {
+  left: calc(30.5px * 15);
+}
+[data-column="P"] {
+  left: calc(30.5px * 16);
+}
+[data-column="Q"] {
+  left: calc(30.5px * 17);
+}
+[data-column="R"] {
+  left: calc(30.5px * 18);
+}
+[data-column="S"] {
+  left: calc(30.5px * 19);
+}
+[data-column="T"] {
+  left: calc(30.5px * 20);
+}
+[data-column="U"] {
+  left: calc(30.5px * 21);
+}
+[data-column="V"] {
+  left: calc(30.5px * 22);
+  visibility: hidden;
+}
+[data-row] {
+  left: 0;
+  height: 30.5px;
+  line-height: 30.5px;
+  width: 1.5em;
+  text-align: right;
+  vertical-align: middle;
+}
+[data-row="1"] {
+  top: calc(30.5px * 1 + 5px);
+}
+[data-row="2"] {
+  top: calc(30.5px * 2 + 5px);
+}
+[data-row="3"] {
+  top: calc(30.5px * 3 + 5px);
+}
+[data-row="4"] {
+  top: calc(30.5px * 4 + 5px);
+}
+[data-row="5"] {
+  top: calc(30.5px * 5 + 5px);
+}
+[data-row="6"] {
+  top: calc(30.5px * 6 + 5px);
+}
+[data-row="7"] {
+  top: calc(30.5px * 7 + 5px);
+}
+[data-row="8"] {
+  top: calc(30.5px * 8 + 5px);
+}
+[data-row="9"] {
+  top: calc(30.5px * 9 + 5px);
+}
+[data-row="10"] {
+  top: calc(30.5px * 10 + 5px);
+}
+[data-row="11"] {
+  top: calc(30.5px * 11 + 5px);
+}
+[data-row="12"] {
+  top: calc(30.5px * 12 + 5px);
+}
+[data-row="13"] {
+  top: calc(30.5px * 13 + 5px);
+}
+[data-row="14"] {
+  top: calc(30.5px * 14 + 5px);
+}
+[data-row="15"] {
+  top: calc(30.5px * 15 + 5px);
+}
 [data-propose="canal"] div[data-spot]:hover div.propose {
   background-image: url(./images/spot.svg);
   opacity: .5;

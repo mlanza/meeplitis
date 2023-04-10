@@ -8,7 +8,7 @@ import {session, $online} from "/lib/session.js";
 import {table, ui, scored, outcome, subject} from "/lib/table.js";
 import {getSeated, getSeat, story, nav, waypoint, hist} from "/lib/story.js";
 import {describe} from "/components/table/index.js";
-import {boardSpots, right, below} from "../core.js";
+import {boardSpots, right, below, above, dry} from "../core.js";
 
 async function svg(what){
   return await fetch(`../table/images/${what}.svg`).then(function(resp){
@@ -84,8 +84,6 @@ const el = document.body;
 const board = dom.sel1("#board", el);
 const supplies = dom.sel1("#supplies", el);
 const demands = dom.sel1("#demands", el);
-
-dom.attr(board, "data-propose", "canal");
 
 const [seated, seat] = await Promise.all([
   getSeated(tableId),
@@ -173,6 +171,8 @@ function desc(event){
       return `Places Pilli Mexica at ${details.at}.`;
     case "constructed-canal":
         return `Constructs canal at ${_.join(' & ', details.at)}.`;
+    case "constructed-bridge":
+      return `Constructs bridge at ${details.at}.`;
     case "banked":
       return "Banks an action point.";
     case "founded-district":
@@ -244,12 +244,13 @@ function dropPriorOmissions(el){
 
 $.sub($hist, function([curr, prior]){
   const {state, seen, moves} = curr;
-  const {seated, tokens, canal1, canal2, bridges, period} = state;
+  const {seated, tokens, canal1, canal2, bridges, period, board, contents} = state;
 
   dropPriorOmissions(el);
 
   const foundable = _.maybe(moves, _.filter(_.includes(_, ["type", "found-district"]), _), _.seq, _.mapa(_.getIn(_, ["details", "size"]), _), _.first);
-  dom.attr(board, "data-foundable", foundable);
+  dom.attr(els.board, "data-foundable", foundable);
+  dom.attr(els.board, "data-propose", "canal");
 
   _.doseq(function(seat, level){
     diff(curr, prior, ["state", "seated", seat, "temples", level], function(curr, prior){
@@ -302,6 +303,20 @@ $.sub($hist, function([curr, prior]){
         }
         if (curr) {
           dom.append(at(curr[0]), canal({size: 1}));
+        }
+      });
+    }, indices(curr || prior));
+  });
+
+  diff(curr, prior, ["state", "bridges"], function(curr, prior){
+    _.each(function(n){
+      diff(curr, prior, [n], function(curr, prior){
+        if (prior) {
+          omit(dom.sel1("[data-piece='bridge']", at(prior)));
+        }
+        if (curr) {
+          const orientation = dry(board, contents, above(curr)) || dry(board, contents, below(curr)) ? "vertical" : "horizontal";
+          dom.append(at(curr), bridge({orientation}));
         }
       });
     }, indices(curr || prior));

@@ -112,6 +112,15 @@ div[data-spot] {
   float: left;
   overflow: visible;
 }
+div[data-spot] .contents {
+  position: relative;
+}
+
+div[data-spot] .contents > * {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
 div[data-spot] .contents, div[data-spot] .propose {
   height: 30.5px;
   width: 30.5px;

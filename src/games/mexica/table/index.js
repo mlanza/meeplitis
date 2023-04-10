@@ -69,6 +69,7 @@ const img = dom.tag('img'),
       ol = dom.tag('ol'),
       li = dom.tag('li'),
       div = dom.tag('div'),
+      kbd = dom.tag('kbd'),
       span = dom.tag('span');
 
 const params = new URLSearchParams(document.location.search),
@@ -89,6 +90,8 @@ const [seated, seat] = await Promise.all([
   getSeated(tableId),
   getSeat(tableId, session)
 ]);
+
+//dom.append(el, kbd({class: "named"}, "esc"));
 
 function resources(title, resource, _attrs, supply){
   const attrs = Object.assign({orientation: "vertical", size: 1}, _attrs);

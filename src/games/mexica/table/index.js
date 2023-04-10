@@ -91,7 +91,21 @@ const [seated, seat] = await Promise.all([
   getSeat(tableId, session)
 ]);
 
-//dom.append(el, kbd({class: "named"}, "esc"));
+dom.append(el,
+  _.doto(
+    span(
+    _.doto(kbd({class: "symbol"}), dom.html(_, "&#8593")),
+    " ",
+    _.doto(kbd({class: "symbol"}), dom.html(_, "&#8595")),
+    " ",
+    _.doto(kbd({class: "symbol"}), dom.html(_, "&#8592")),
+    " ",
+    _.doto(kbd({class: "symbol"}), dom.html(_, "&#8594")),
+    " ",
+    kbd({class: "named wide"}, "return"),
+    " ",
+    _.doto(kbd({class: "symbol"}), dom.html(_, "&#8593"))),
+    dom.addClass(_, "keys")));
 
 function resources(title, resource, _attrs, supply){
   const attrs = Object.assign({orientation: "vertical", size: 1}, _attrs);

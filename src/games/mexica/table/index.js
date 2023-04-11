@@ -245,9 +245,11 @@ function dropPriorOmissions(el){
 
 $.sub($hist, function([curr, prior]){
   const {state, seen, moves} = curr;
-  const {seated, tokens, canal1, canal2, bridges, period, board, contents} = state;
+  const {seated, tokens, canal1, canal2, bridges, period, board, contents, status, round} = state;
 
   dropPriorOmissions(el);
+
+  dom.text(dom.sel1("#phase", el), {"placing-pilli": `Choosing Starting Spaces`, "actions": `Round ${round}`, "finished": "Finished"}[status]);
 
   const foundable = _.maybe(moves, _.filter(_.includes(_, ["type", "found-district"]), _), _.seq, _.mapa(_.getIn(_, ["details", "size"]), _), _.first);
   dom.attr(els.board, "data-foundable", foundable);

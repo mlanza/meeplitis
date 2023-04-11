@@ -103,6 +103,7 @@ function init(seats){
     board,
     contents: {},
     period: 0,
+    round: 0,
     spent: 0,
     banked: 0,
     tokens: 12,
@@ -173,10 +174,12 @@ const stop = _.constantly([]);
 const palaceSpots = around('H7');
 
 function committed(state){
-  const {status, seated, capulli, period} = state;
+  const {status, seated, capulli, period, up} = state;
   const seats = _.count(seated);
+  const endRound = seats - 1 === up;
   const absent = !!_.seq(_.remove(_.get(_, "pilli"), seated));
   return _.chain(state,
+    _.update(_, "round", endRound ? _.inc : _.identity),
     _.update(_, "up", function(up){
       return _.chain(seats, _.range, _.cycle, _.dropWhile(_.notEq(_, up), _), _.second);
     }),
@@ -556,10 +559,7 @@ export function execute(self, command){
       return _.chain(self, g.fold(_, {type: "constructed-canal", seat, details: {at: sortSpots(details.at)}}));
 
     case "build-temple":
-      const present = _.detect(function(spot){
-        return spot === details.at;
-      }, district(board, contents, pilli));
-
+      const present = _.detect(_.eq(details.at, _), district(board, contents, pilli));
       if (!present){
         throw new Error("Cannot place temples where your Mexica Pilli is not present");
       }

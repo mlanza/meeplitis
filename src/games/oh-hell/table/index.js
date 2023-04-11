@@ -157,7 +157,7 @@ $.sub($hist, function([curr, prior]){
     }));
   }, seated);
 
-  dom.text(dom.sel1("#phase", game), {"bidding": "Bidding", "playing": `Playing ${leadSuit}`, "confirming": "Playing", "finished": "Finished"}[status]);
+  dom.text(dom.sel1("#phase", el), {"bidding": "Bidding", "playing": `Playing ${leadSuit}`, "confirming": "Playing", "finished": "Finished"}[status]);
   dom.attr(el, "data-status", status);
   dom.attr(el, "data-broken", broken);
   dom.text(els.cards, _.count(deck) || 52);

@@ -68,7 +68,7 @@ function deal(self){
 
 function award(lead, best, winner, trick){
   return function(self)  {
-    return g.execute(self, {type: "award", details: {lead, best, winner, trick}});
+    return g.self, {type: "award", details: {lead, best, winner, trick}}, null);
   }
 }
 
@@ -152,11 +152,10 @@ function irreversible(self, command){
   return _.includes(["started", "dealt", "bid", "committed", "finished"], command.type);
 }
 
-function execute(self, command, s){
+function execute(self, command){
   const state = _.deref(self);
-  const seat = s == null ? command.seat : s;
+  const {type, details, seat} = command;
   const valid = _.detect(_.eq(_, _.chain(command, _.compact, _.dissoc(_, "id"))), g.moves(self, [seat]));
-  const {type, details} = command;
   const automatic = _.includes(["start", "award", "score", "finish", "deal"], type);
 
   if (!automatic && !valid){
@@ -282,7 +281,7 @@ function scoring(self){
           points = tricks === bid ? 10 + tricks : 0;
     return {bid, tricks, points};
   }, _));
-  return g.execute(self, {type: "score", details: {scoring}}, null);
+  return g.execute(self, {type: "score", details: {scoring}});
 }
 
 function metrics(self){

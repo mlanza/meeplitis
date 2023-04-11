@@ -470,10 +470,9 @@ function scoreGrandeur(temples, contents, period, dists, pillis){
 
 const hasAvailableBridge = _.comp(_.seq, _.filter(_.isNil, _));
 
-export function execute(self, command, s){
+export function execute(self, command){
   const state = _.deref(self);
-  const {type, details} = command;
-  const seat = s == null ? command.seat : s;
+  const {type, details, seat} = command;
   const _moves = g.moves(self, [seat]);
   const moves = _.filtera(_.comp(_.eq(_, command.type), _.get(_, "type")), _moves);
   const automatic = _.includes(["start", "deal-capulli"], type);

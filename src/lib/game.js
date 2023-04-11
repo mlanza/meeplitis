@@ -93,10 +93,12 @@ function briefs(self){
   return _.mapa(textualizer(self), metrics(self));
 }
 
-function execute3(self, command, s){
-  const {type} = command;
-  const seat = s == null ? null : s;
-  const event = Object.assign({seat}, command);
+function execute3(self, command, seat){
+  return execute2(self, seat == null ? command : _.merge(command, {seat}));
+}
+
+function execute2(self, command){
+  const {type, seat} = command;
   if (seat == null) {
   } else if (!_.isInt(seat)) {
     throw new Error("Seat must be an integer");
@@ -136,12 +138,12 @@ function execute3(self, command, s){
         _.array,
         x => moves(self, x),
         _.last,
-        x => execute(self, x, seat)) || self;
+        x => execute3(self, x, seat)) || self;
   }
-  return IGame.execute(self, event, seat);
+  return IGame.execute(self, command);
 }
 
-export const execute = _.overload(null, null, execute3, execute3);
+export const execute = _.overload(null, null, execute2, execute3);
 
 export function finish(self){
   return execute(self, {type: "finish", details: {

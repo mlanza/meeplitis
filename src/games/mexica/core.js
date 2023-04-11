@@ -812,7 +812,7 @@ function moves(self){
       return {type: "move", details: {by: "foot", from, to}, seat};
     }, _)) : [];
     const teleport = unspent > 4 ? [{type: "move", details: {by: "teleport", from, cost: 5}, seat}] : [];
-    const boat = hasBridge(contents, pilli) ? boats(water, pilli, _.min(unspent, 5), 0) : [];
+    const boat = hasBridge(contents, pilli) ? boats(water, pilli, _.min(unspent, 5), seat) : [];
     const constructBridge = [{type: bridgesDepleted(bridges) ? "relocate-bridge": "construct-bridge", seat}];
     const constructCanal = canalsDepleted(canal1, canal2) ? [] : [{type: "construct-canal", seat}];
     return _.concat([{type: "commit", seat}], banking, constructCanal, constructBridge, foot, boat, teleport, found);

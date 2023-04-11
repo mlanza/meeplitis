@@ -249,7 +249,7 @@ $.sub($hist, function([curr, prior]){
 
   dropPriorOmissions(el);
 
-  dom.text(dom.sel1("#phase", el), {"placing-pilli": `Choosing Starting Spaces`, "actions": `Round ${round}`, "finished": "Finished"}[status]);
+  dom.text(dom.sel1("#phase", el), {"placing-pilli": `Choose Starting Spaces`, "actions": `Round ${round}`, "finished": "Finished"}[status]);
 
   const foundable = _.maybe(moves, _.filter(_.includes(_, ["type", "found-district"]), _), _.seq, _.mapa(_.getIn(_, ["details", "size"]), _), _.first);
   dom.attr(els.board, "data-foundable", foundable);
@@ -318,7 +318,7 @@ $.sub($hist, function([curr, prior]){
           omit(dom.sel1("[data-piece='bridge']", at(prior)));
         }
         if (curr) {
-          const orientation = dry(board, contents, above(curr)) || dry(board, contents, below(curr)) ? "vertical" : "horizontal";
+          const orientation = dry(board, contents, above(curr)) && dry(board, contents, below(curr)) ? "vertical" : "horizontal";
           dom.append(at(curr), bridge({orientation}));
         }
       });

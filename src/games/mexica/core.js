@@ -400,6 +400,14 @@ function hasCapulli(contents, spots){
   }, spots);
 }
 
+function footsBridge(contents, spots){
+  return _.detect(_.eq(_, b), _.mapcat(_.get(contents, _), spots));
+}
+
+function breaksBridge(contents, canal){
+  return footsBridge(contents, _.mapcat(around, canal));
+}
+
 function levels(temples, dist){
   return _.mapa(function(temples){
     return _.sum(_.mapkv(function(level, spots){
@@ -530,8 +538,8 @@ export function execute(self, command){
       if (tokens < 1) {
         throw new Error("No action point tokens are available.");
       }
-      if (banked > 1) {
-        throw new Error("Cannot take any further action point tokens");
+      if (banked === 2) {
+        throw new Error("Cannot bank more than 2 action points.");
       }
       if (!matched) {
         throw new Error("Cannot bank");
@@ -539,8 +547,12 @@ export function execute(self, command){
       return _.chain(self, g.fold(_, {type: "banked", seat}));
 
     case "move":
-      if (!matched && _.getIn(command, ["details", "by"]) !== "teleport"){
+      const {by, cost} = details;
+      if (!matched && by !== "teleport"){
         throw new Error("Invalid move");
+      }
+      if (unspent - (cost || 1) < 0) {
+        throw new Error("Not enough action points");
       }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "moved")));
 
@@ -555,6 +567,9 @@ export function execute(self, command){
       }
       if (unspent < 1) {
         throw new Error("Not enough action points to construct a canal");
+      }
+      if (breaksBridge(contents, details.at)) {
+        throw new Error("Cannot construct canal at the foot of a bridge");
       }
       return _.chain(self, g.fold(_, {type: "constructed-canal", seat, details: {at: sortSpots(details.at)}}));
 

@@ -105,6 +105,7 @@ function init(seats){
     period: 0,
     round: 0,
     spent: 0,
+    redeemed: 0,
     banked: 0,
     tokens: 12,
     canal1: slots(6),
@@ -185,6 +186,7 @@ function committed(state){
     }),
     status === "placing-pilli" && !absent ? _.assoc(_, "status", "actions") : _.identity,
     _.assoc(_, "spent", 0),
+    _.assoc(_, "redeemed", 0),
     _.assoc(_, "banked", 0));
 }
 
@@ -394,6 +396,14 @@ function remaining(spent, bank){
   return (6 + bank) - spent;
 }
 
+function spend(spent, bank, cost){
+  const unspent = 6 - spent;
+  const overage = unspent < 0;
+  const deficit = unspent + bank < cost;
+  const redeemed = deficit ? 0 : (overage ? cost : (unspent > cost ? 0 : Math.abs(unspent - cost)));
+  return {deficit, redeemed};
+}
+
 function hasCapulli(contents, spots){
   return _.some(function(spot){
     return _.includes(_.get(contents, spot), c) ? spot : null;
@@ -481,9 +491,39 @@ function scoreGrandeur(temples, contents, period, dists, pillis){
 
 const hasAvailableBridge = _.comp(_.seq, _.filter(_.isNil, _));
 
+function redeem(seat, amount){
+  return _.pipe(
+    _.update(_, "redeemed", _.add(_, amount)),
+    _.update(_, "tokens", _.add(_, amount)),
+    _.updateIn(_, ["seated", seat, "bank"], _.subtract(_, amount)))
+}
+
+function price(command){
+  const {details, type} = command;
+  switch (type) {
+    case "bank":
+    case "banked":
+    case "construct-canal":
+    case "constructed-canal":
+    case "construct-bridge":
+    case "relocate-bridge":
+    case "relocated-bridge":
+      return 1;
+    case "build-temple":
+    case "built-temple":
+      return details.level;
+    case "move":
+    case "moved":
+      return details.cost || 1;
+    default:
+      return 0;
+  }
+}
+
 export function execute(self, command){
   const state = _.deref(self);
   const {type, details, seat} = command;
+  const cost = price(command);
   const _moves = g.moves(self, [seat]);
   const moves = _.filtera(_.comp(_.eq(_, command.type), _.get(_, "type")), _moves);
   const automatic = _.includes(["start", "deal-capulli"], type);
@@ -493,7 +533,11 @@ export function execute(self, command){
   const pillis = _.map(_.get(_, "pilli"), state.seated);
   const {spent, board, contents, period, canal1, canal2, capulli, banked, tokens} = state;
   const {bank, pilli} = seated;
-  const unspent = remaining(spent, bank);
+  const {deficit} = spend(spent, bank, cost);
+
+  if (deficit) {
+    throw new Error("Not enough action points.");
+  }
 
   if (automatic && seat != null) {
     throw new Error(`Cannot invoke automatic command ${type}`);
@@ -547,12 +591,9 @@ export function execute(self, command){
       return _.chain(self, g.fold(_, {type: "banked", seat}));
 
     case "move":
-      const {by, cost} = details;
+      const {by} = details;
       if (!matched && by !== "teleport"){
         throw new Error("Invalid move");
-      }
-      if (unspent - (cost || 1) < 0) {
-        throw new Error("Not enough action points");
       }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "moved")));
 
@@ -564,9 +605,6 @@ export function execute(self, command){
         if (!isVacant(board, contents, canalAt)) {
           throw new Error("Invalid canal placement");
         }
-      }
-      if (unspent < 1) {
-        throw new Error("Not enough action points to construct a canal");
       }
       if (breaksBridge(contents, details.at)) {
         throw new Error("Cannot construct canal at the foot of a bridge");
@@ -584,17 +622,11 @@ export function execute(self, command){
       if (!_.chain(state, _.getIn(_, ["seated", seat, "temples", details.level]), _.filter(_.isNil, _), _.count)){
         throw new Error(`No level ${details.level} temples available`);
       }
-      if (unspent < details.level) {
-        throw new Error(`Not enough action points to construct level ${details.level} temples`);
-      }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "built-temple")));
 
     case "construct-bridge":
       if (!isBridgable(board, contents, details.at)) {
         throw new Error("Invalid bridge placement");
-      }
-      if (unspent < 1) {
-        throw new Error("Not enough action points to construct bridges");
       }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "constructed-bridge")));
 
@@ -607,9 +639,6 @@ export function execute(self, command){
       }
       if (hasBridge(contents, details.from) && !hasPilli(contents, details.from)){
         throw new Error("Can only relocate free bridges");
-      }
-      if (unspent < 1) {
-        throw new Error("Not enough action points to relocate bridges");
       }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "relocated-bridge")));
 
@@ -629,9 +658,11 @@ export function execute(self, command){
 
 function fold(self, event){
   const state = _.deref(self);
-  const {period, status} = state;
+  const {period, spent, status} = state;
   const {type, details, seat} = event;
   const {pilli, bank} = _.nth(state.seated, seat) || {pilli: null, bank: null};
+  const cost = price(event);
+  const {redeemed} = spend(spent, bank, cost);
 
   switch (type) {
     case "started":
@@ -661,6 +692,7 @@ function fold(self, event){
       return g.fold(self, event,
         _.fmap(_,
           _.pipe(
+            redeem(seat, redeemed),
             _.update(_, "spent", _.inc),
             _.update(_, "banked", _.inc),
             _.update(_, "tokens", _.dec),
@@ -671,6 +703,7 @@ function fold(self, event){
       return g.fold(self, event,
         _.fmap(_,
           _.pipe(
+            redeem(seat, redeemed),
             _.update(_, "spent", _.inc),
             _.update(_, `canal${size}`, consume(details.at)),
             _.update(_, "contents", function(contents){
@@ -683,6 +716,7 @@ function fold(self, event){
       return g.fold(self, event,
         _.fmap(_,
           _.pipe(
+            redeem(seat, redeemed),
             _.update(_, "spent", _.inc),
             _.update(_, "bridges", consume(details.at)),
             _.update(_, "contents", place(b, details.at)))));
@@ -691,6 +725,7 @@ function fold(self, event){
       return g.fold(self, event,
         _.fmap(_,
           _.pipe(
+            redeem(seat, redeemed),
             _.update(_, "spent", _.inc),
             _.update(_, "bridges", _.pipe(remit(details.from), consume(details.to))),
             _.update(_, "contents", _.pipe(displace(b, details.from), place(b, details.to))))));
@@ -699,6 +734,7 @@ function fold(self, event){
       return g.fold(self, event,
         _.fmap(_,
           _.pipe(
+            redeem(seat, redeemed),
             _.update(_, "spent", _.add(_, details.level)),
             _.updateIn(_, ["seated", seat, "temples", details.level], consume(details.at)),
             _.update(_, "contents", place(t, details.at)))));
@@ -707,7 +743,8 @@ function fold(self, event){
       return g.fold(self, event,
         _.fmap(_,
           _.pipe(
-            _.update(_, "spent", _.add(_, details.cost || 1)),
+            redeem(seat, redeemed),
+            _.update(_, "spent", _.add(_, cost)),
             _.assocIn(_, ["seated", seat, "pilli"], details.to),
             _.update(_, "contents", _.pipe(displace(p, pilli), place(p, details.to))))));
 

@@ -185,11 +185,12 @@ function desc(event){
     case "moved":
       switch(details.by){
         case "foot":
-          return `Moved from ${details.from} to ${details.to}.`;
+          return `Moves from ${details.from} to ${details.to}.`;
         case "boat":
-          return `Moved by boat from ${details.from} to ${details.to}.`;
+          return `Moves by boat from ${details.from} to ${details.to}.`;
         case "teleport":
-          default:
+          return `Teleports from ${details.from} to ${details.to}.`;
+        default:
           return "Moved";
       }
     default:

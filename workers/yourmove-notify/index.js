@@ -117,13 +117,12 @@ function finished(table_id, url){
 }
 
 function getSubject(type, table_id, title){
-  const identifier = `[Your Move] ${title} '${table_id}'`;
   switch (type) {
-      case "up:notice":
-          return identifier + " awaits your move";
-      case "started:notice":
-          return identifier + " has started";
-      case "finished:notice":
-          return identifier + " is finished";
+    case "up:notice":
+      return `${title} awaits your move - ${table_id}`;
+    case "started:notice":
+      return `${title} has started - ${table_id}`;
+    case "finished:notice":
+      return `${title} is finished - ${table_id}`;
   }
 }

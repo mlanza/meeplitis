@@ -83,6 +83,7 @@ if (!tableId) {
 
 const el = document.body;
 const board = dom.sel1("#board", el);
+const actions = dom.sel1("#actions", el);
 const supplies = dom.sel1("#supplies", el);
 const demands = dom.sel1("#demands", el);
 
@@ -119,6 +120,7 @@ const els = {
   board,
   supplies,
   demands,
+  actions,
   tokens: dom.sel1(".tokens", supplies),
   bridges: dom.sel1(".bridges", supplies),
   canal2: dom.sel1(".canals[data-size='2']", supplies),
@@ -247,13 +249,14 @@ function dropPriorOmissions(el){
 
 $.sub($hist, function([curr, prior]){
   const {state, seen, moves} = curr;
-  const {seated, tokens, canal1, canal2, bridges, period, board, contents, status, round} = state;
+  const {seated, tokens, canal1, canal2, bridges, period, board, contents, status, round, spent} = state;
 
   dropPriorOmissions(el);
   _.each(dom.removeClass(_, "foundable"), dom.sel(".foundable", demands));
 
   dom.text(dom.sel1("#phase", el), {"placing-pilli": `Choose Starting Spaces`, "actions": `Round ${round}`, "finished": "Finished"}[status]);
   dom.attr(els.board, "data-propose", "canal");
+  dom.attr(els.actions, "data-remaining", status == "actions" ? _.max(6 - spent, 0) : 0);
 
   _.doseq(function(seat, level){
     diff(curr, prior, ["state", "seated", seat, "temples", level], function(curr, prior){

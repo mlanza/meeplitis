@@ -12,40 +12,37 @@ const params = new URLSearchParams(document.location.search),
       monitor = !_.includes(options, "nomonitor");
 
 //=> exec(commands) // on a blank game
-Promise.all([
+const [tables, seated, evented] = await Promise.all([
   supabase.from("tables").select('*,game_id(fn,slug)').eq("id", tableId),
   supabase.rpc('seated', {_table_id: tableId}),
   supabase.rpc('evented', {_table_id: tableId})
-]).then(function([tables, seated, evented]){
-  const table = tables.data[0],
-        slug = table.game_id.slug,
-        config = table.config;
+]);
 
-  Promise.all([
-    import(`/games/${slug}/core.js`),
-    fetch(`./data/${slug}.json`).then(function(resp){
-      return resp.json();
-    })
-  ]).then(function([{make}, commands]){
-    const count = hash ? _.maybe(evented.data, _.keepIndexed(function(idx, event){
-      return event.id === hash ? idx : null;
-    }, _), _.first, _.inc) : _.count(evented.data);
+const table = tables.data[0],
+      slug = table.game_id.slug,
+      config = table.config;
 
-    const seats = _.count(seated.data) || 4,
-          events = count == null ?  evented.data : _.chain(evented.data, _.take(count, _), _.toArray),
-          $game = $.cell(make(_.repeat(seats, {}), config));
+const [{make}, commands] = await Promise.all([
+  import(`/games/${slug}/core.js`),
+  fetch(`./data/${slug}.json`).then(function(resp){
+    return resp.json();
+  })
+]);
 
-    _.log($game)
+const count = hash ? _.maybe(evented.data, _.keepIndexed(function(idx, event){
+  return event.id === hash ? idx : null;
+}, _), _.first, _.inc) : _.count(evented.data);
 
-    $.sub($.hist($game), t.map(monitor ? g.summarize : _.identity), _.log);
+const seats = _.count(seated.data) || 4,
+      events = count == null ?  evented.data : _.chain(evented.data, _.take(count, _), _.toArray),
+      $game = $.cell(make(_.repeat(seats, {}), config));
 
-    g.batch($game, g.load, events);
+_.log($game)
 
-    const exec = g.batch($game, g.run, _);
+$.sub($.hist($game), t.map(monitor ? g.summarize : _.identity), _.log);
 
-    Object.assign(window, {$game, exec, commands});
+g.batch($game, g.load, events);
 
-  });
-});
+const exec = g.batch($game, g.run, _);
 
-
+Object.assign(window, {$game, exec, commands});

@@ -136,6 +136,30 @@ export default function mexica(seats, _config, events, journal){
   return new Mexica(_.toArray(seats), config, events || [], journal || _.chain(seats, _.count, init, _.journal));
 }
 
+export const make = mexica;
+
+const capulli = [
+  [
+    {size: 13, at: null},
+    {size: 11, at: null},
+    {size: 9, at: null},
+    {size: 6, at: null},
+    {size: 5, at: null},
+    {size: 4, at: null},
+    {size: 4, at: null},
+    {size: 3, at: null}
+  ],[
+    {size: 12, at: null},
+    {size: 10, at: null},
+    {size: 8, at: null},
+    {size: 7, at: null},
+    {size: 6, at: null},
+    {size: 5, at: null},
+    {size: 3, at: null}
+  ]
+];
+
+
 const cat = _.mapcat(_.identity, _);
 
 function coord(at){

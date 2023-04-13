@@ -141,28 +141,6 @@ dom.append(els.board, _.map(function(number){
 dom.append(els.demands,
   _.map(demand, _.range(8)));
 
-/*
-dom.append(at("Q7"),
-  canal({size: 1, orientation: "vertical"}),
-  bridge({orientation: "vertical"}),
-  pilli({seat: 0}));
-
-dom.append(at("Q8"),
-  temple({size: 3, seat: 0}));
-
-dom.append(at("Q9"),
-  temple({size: 1, seat: 1}));
-
-dom.append(at("R9"),
-  temple({size: 2, seat: 3}));
-
-dom.append(at("P7"),
-  canal({size: 2, orientation: "vertical"}));
-
-dom.append(at("P9"),
-  canal({size: 2, orientation: "vertical"}));
-*/
-
 function desc(event){
   const details = event.details;
   switch(event.type) {
@@ -252,6 +230,7 @@ $.sub($hist, function([curr, prior]){
   const {seated, tokens, canal1, canal2, bridges, period, board, contents, status, round, spent} = state;
 
   dropPriorOmissions(el);
+
   _.each(dom.removeClass(_, "foundable"), dom.sel(".foundable", demands));
 
   dom.text(dom.sel1("#phase", el), {"placing-pilli": `Choose Starting Spaces`, "actions": `Round ${round}`, "finished": "Finished"}[status]);

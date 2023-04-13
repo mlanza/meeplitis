@@ -250,11 +250,9 @@ $.sub($hist, function([curr, prior]){
   const {seated, tokens, canal1, canal2, bridges, period, board, contents, status, round} = state;
 
   dropPriorOmissions(el);
+  _.each(dom.removeClass(_, "foundable"), dom.sel(".foundable", demands));
 
   dom.text(dom.sel1("#phase", el), {"placing-pilli": `Choose Starting Spaces`, "actions": `Round ${round}`, "finished": "Finished"}[status]);
-
-  const foundable = _.maybe(moves, _.filter(_.includes(_, ["type", "found-district"]), _), _.seq, _.mapa(_.getIn(_, ["details", "size"]), _), _.first);
-  dom.attr(els.board, "data-foundable", foundable);
   dom.attr(els.board, "data-propose", "canal");
 
   _.doseq(function(seat, level){
@@ -285,6 +283,9 @@ $.sub($hist, function([curr, prior]){
       }
     });
   }, _.range(0, 8));
+
+  const foundable = _.maybe(moves, _.filter(_.includes(_, ["type", "found-district"]), _), _.seq, _.mapa(_.getIn(_, ["details", "size"]), _), _.first);
+  _.maybe(dom.sel1(`img[data-piece='capulli'][data-size='${foundable}']`, demands), dom.addClass(_, "foundable"));
 
   diff(curr, prior, ["state", "canal2"], function(curr, prior){
     _.each(function(n){

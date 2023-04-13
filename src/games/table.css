@@ -368,6 +368,9 @@ div.player {
   position: relative;
   z-index: 99;
 }
+div.player.scored {
+  animation: bump .3s ease-out;
+}
 .yours {
   background-color: rgba(135, 125, 138, .1);
 }

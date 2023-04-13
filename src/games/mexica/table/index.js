@@ -357,6 +357,14 @@ $.sub($hist, function([curr, prior]){
     });
   }, seated);
 
+  _.each(dom.removeClass(_, "scored"), dom.sel(".scored", el));
+  _.each(function(seat){
+    diff(curr, prior, ["state", "seated", seat, "points"], function(curr, prior){
+      if (prior != null && curr != null && curr > prior) {
+        dom.addClass(dom.sel1(`.zone[data-seat='${seat}'] div.player`, el), "scored");
+      }
+    });
+  },  indices(seated));
 });
 
 Object.assign(window, {$, _, sh, session, $story, $table, $online, supabase});

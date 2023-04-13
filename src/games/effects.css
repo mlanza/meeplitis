@@ -59,3 +59,41 @@
     display: none;
   }
 }
+@keyframes spin {
+  0% {
+    transform: rotateX(0rad);
+  }
+  20% {
+    transform: rotateX(1.27rad);
+  }
+  40% {
+    transform: rotateX(0rad);
+  }
+  100% {
+    transform: rotateX(0rad);
+  }
+}
+@keyframes bump {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  15% {
+    transform: translate3d(0, -8px, 0);
+  }
+  30% {
+    transform: translate3d(0, 0, 0);
+  }
+  45% {
+    transform: translate3d(0, -5px, 0);
+  }
+  60% {
+    transform: translate3d(0, 0, 0);
+  }
+  85% {
+    transform: translate3d(0, -2px, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+

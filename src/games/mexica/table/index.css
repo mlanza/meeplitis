@@ -405,6 +405,25 @@ div[data-spot]:hover div.propose {
   opacity: 1;
   transition: opacity 0.5s ease-in-out;
 }
+#board [data-piece="emperor"] {
+  position: absolute;
+  top: 30px;
+  right: 25px;
+  scale: 2.5;
+  opacity: 0;
+  transform: scaleX(-1);
+  transition: opacity .25s ease-out;
+}
+#board [data-piece="emperor"] path {
+  fill: #D4AF37;
+}
+.scoring-round #board .contents img[data-piece="capulli"] {
+  animation: bump .25s ease-in;
+}
+.scoring-round #board [data-piece="emperor"] {
+  opacity: 1;
+  transition: opacity .25s ease-in;
+}
 [data-column] {
   top: 5px;
   height: 1em;

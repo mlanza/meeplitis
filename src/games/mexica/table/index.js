@@ -17,7 +17,8 @@ async function svg(what){
 }
 
 const _temple = [await svg(1), await svg(2), await svg(3), await svg(4)],
-      _pilli = await svg("pilli");
+      _pilli = await svg("pilli"),
+      _emperor = await svg("tonacacihuatl");
 
 function temple({size, seat}){
   const parser = new DOMParser();
@@ -33,6 +34,16 @@ function pilli({seat}){
   dom.attr(el, "data-seat", seat);
   dom.attr(el, "data-piece", "pilli");
   return el;
+}
+
+function emperor(){
+  const parser = new DOMParser();
+  const el = parser.parseFromString(_emperor, "image/svg+xml").childNodes[0];
+  dom.attr(el, "data-piece", "emperor");
+  return el;
+  return _.doto(pilli({seat: -1}),
+    dom.removeAttr(_, "data-seat"),
+    dom.attr(_, "data-piece", "emperor"));
 }
 
 function canal({size, orientation}){
@@ -128,7 +139,8 @@ const els = {
 }
 
 dom.append(els.board,
-  _.map(spot, boardSpots));
+  _.map(spot, boardSpots),
+  emperor());
 
 dom.append(els.board, _.map(_.pipe(_.add(_, 64), String.fromCharCode, function(letter){
   return div({"data-column": letter}, letter);
@@ -233,6 +245,7 @@ $.sub($hist, function([curr, prior, step]){
 
   _.each(dom.removeClass(_, "foundable"), dom.sel(".foundable", demands));
 
+  dom.toggleClass(el, "scoring-round", _.get(state, "scoring-round"));
   dom.text(dom.sel1("#phase", el), {"placing-pilli": `Choose Starting Spaces`, "actions": `Round ${round}`, "finished": "Finished"}[status]);
   dom.attr(els.board, "data-propose", "canal");
   dom.attr(els.actions, "data-remaining", status == "actions" ? _.max(6 - spent, 0) : 0);

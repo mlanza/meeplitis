@@ -76,8 +76,10 @@ function capulliDepleted(capulli, period){
   return !_.chain(capulli, _.nth(_, period), _.map(_.get(_, "at"), _), _.remove(_.isSome, _), _.seq);
 }
 
-function endOfPeriod(capulli, period, temples){
-  return capulliDepleted(capulli, period) && _.detect(templesDepleted, temples);
+function markScoringRound(state){
+  const {capulli, period, seated} = state;
+  const temples = _.map(_.get(_, "temples"), seated);
+  return capulliDepleted(capulli, period) && _.detect(templesDepleted, temples) ? _.assoc(state, "scoring-round", true) : state;
 }
 
 const coords = _.braid(function(y, x){
@@ -104,6 +106,7 @@ function init(seats){
     contents: {},
     period: 0,
     round: 0,
+    "scoring-round": false,
     spent: 0,
     redeemed: 0,
     banked: 0,
@@ -424,7 +427,7 @@ function remaining(spent, bank){
 function spend(spent, bank, cost){
   const unspent = 6 - spent;
   const overage = unspent < 0;
-  const deficit = unspent + bank < cost;
+  const deficit = cost > 0 && unspent + bank < cost;
   const redeemed = deficit ? 0 : (overage ? cost : (unspent > cost ? 0 : Math.abs(unspent - cost)));
   return {deficit, redeemed};
 }
@@ -594,10 +597,9 @@ export function execute(self, command){
       if (!matched) {
         throw new Error("Cannot commit");
       }
-      const eop = endOfPeriod(capulli, period, temples);
       return _.chain(self,
         g.fold(_, _.assoc(command, "type", "committed")),
-        eop
+        _.get(state, "scoring-round")
           ? _.pipe(
               g.fold(_, scoreGrandeur(temples, contents, period, districts(board, contents), pillis)),
               g.fold(_, period === 0 ? {type: "started-2nd-period"} : {type: "finished"}))
@@ -762,7 +764,8 @@ function fold(self, event){
             redeem(seat, redeemed),
             _.update(_, "spent", _.add(_, details.level)),
             _.updateIn(_, ["seated", seat, "temples", details.level], consume(details.at)),
-            _.update(_, "contents", place(t, details.at)))));
+            _.update(_, "contents", place(t, details.at)),
+            markScoringRound)));
 
     case "moved":
       return g.fold(self, event,
@@ -807,7 +810,8 @@ function fold(self, event){
             const points = _.nth(details.points, seat);
             return _.update(seated, "points", _.add(_, points));
           }, _), _.toArray)),
-          _.update(_, "contents", place(c, details.at))));
+          _.update(_, "contents", place(c, details.at)),
+          markScoringRound));
 
     case "finished":
       return g.fold(self, event, _.fmap(_, _.pipe(_.dissoc(_, "up"), _.assoc(_, "status", "finished"))));

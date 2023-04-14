@@ -271,11 +271,16 @@ $.sub($hist, function([curr, prior, step]){
     });
   },  [0, 1], indices(seated), _.range(1, 5));
 
-  _.doseq(function(period, pos){
+  _.each(function(pos){
     diff(curr, prior, ["state", "capulli", period, pos], function(curr, prior){
       dom.html(
         dom.sel1(`[data-demand='${pos}']`, el),
         curr && !curr.at ? capulli(curr) : null);
+    });
+  }, _.range(0, 8));
+
+  _.doseq(function(period, pos){
+    diff(curr, prior, ["state", "capulli", period, pos], function(curr, prior){
       if (curr?.at && !prior?.at){
         dom.append(at(curr.at), capulli(curr));
       }

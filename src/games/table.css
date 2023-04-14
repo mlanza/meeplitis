@@ -164,6 +164,10 @@ body[data-ready="false"] {
 #event p {
   display: block;
   font-size: 1.2em;
+  max-width: 16em;
+}
+#event.automatic p {
+  max-width: initial;
 }
 #event.automatic .who {
   visibility: hidden;

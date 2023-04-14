@@ -251,7 +251,7 @@ $.sub($hist, function([curr, prior, step]){
 
   _.each(dom.removeClass(_, "foundable"), dom.sel(".foundable", demands));
 
-  dom.toggleClass(el, "scoring-round", _.get(state, "scoring-round"));
+  dom.toggleClass(el, "scoring-round", step === 1 && _.get(state, "scoring-round"));
   dom.text(dom.sel1("#phase", el), {"placing-pilli": `Choose Starting Spaces`, "actions": `Round ${round}`, "finished": "Finished"}[status]);
   dom.attr(els.board, "data-propose", "canal");
   dom.attr(els.actions, "data-remaining", status == "actions" ? _.max(6 - spent, 0) : 0);

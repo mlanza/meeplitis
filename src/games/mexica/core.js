@@ -806,10 +806,12 @@ function fold(self, event){
           _.pipe(
             redeem(seat, redeemed),
             _.update(_, "spent", _.add(_, details.level)),
-            _.updateIn(_, ["seated", seat, "temples"], function(temples){
+            _.updateIn(_, ["seated", seat, "temples"], _.post(function(temples){
               const idx = _.includes(_.getIn(temples, [0, details.level]), null) ? 0 : 1;
               return _.updateIn(temples, [idx, details.level], consume(details.at));
-            }),
+            }, function(temples){
+              return _.isArray(temples) && _.count(temples) === 2;
+            })),
             _.update(_, "contents", place(t, details.at)),
             markScoringRound)));
 

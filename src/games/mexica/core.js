@@ -427,7 +427,8 @@ function remaining(spent, bank){
 function spend(spent, bank, cost){
   const unspent = 6 - spent;
   const overage = unspent < 0;
-  const deficit = cost > 0 && unspent + bank < cost;
+  const remaining = _.max(unspent, 0);
+  const deficit = cost > 0 && remaining + bank < cost;
   const redeemed = deficit ? 0 : (overage ? cost : (unspent > cost ? 0 : Math.abs(unspent - cost)));
   return {deficit, redeemed};
 }
@@ -517,7 +518,7 @@ function scoreGrandeur(temples, contents, period, dists, pillis){
   return {type: "scored-grandeur", details: {period, palace, districts: scored}}
 }
 
-const hasAvailableBridge = _.comp(_.seq, _.filter(_.isNil, _));
+const hasUnconstructedBridge = _.comp(_.seq, _.filter(_.isNil, _));
 
 function redeem(seat, amount){
   return _.pipe(
@@ -568,7 +569,7 @@ export function execute(self, command){
   const seated = seat == null ? {pilli: null, bank: 0} : state.seated[seat];
   const temples = _.map(_.get(_, "temples"), state.seated);
   const pillis = _.map(_.get(_, "pilli"), state.seated);
-  const {spent, board, contents, period, canal1, canal2, capulli, banked, tokens} = state;
+  const {spent, board, contents, period, canal1, canal2, capulli, bridges, banked, tokens} = state;
   const {bank, pilli} = seated;
   const {deficit} = spend(spent, bank, cost);
 
@@ -676,13 +677,16 @@ export function execute(self, command){
       return _.chain(self, g.fold(_, _.assoc(command, "type", "constructed-bridge")));
 
     case "relocate-bridge":
-      if (hasAvailableBridge(bridges)) {
+      if (hasUnconstructedBridge(bridges)) {
         throw new Error("Cannot relocate bridges while unconstructed bridges remain");
       }
       if (!isBridgable(board, contents, details.to)) {
         throw new Error("Invalid bridge placement");
       }
-      if (hasBridge(contents, details.from) && !hasPilli(contents, details.from)){
+      if (!hasBridge(contents, details.from)){
+        throw new Error("No bridge at from location");
+      }
+      if (hasPilli(contents, details.from)){
         throw new Error("Can only relocate free bridges");
       }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "relocated-bridge")));

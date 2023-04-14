@@ -166,6 +166,8 @@ function desc(event){
         return `Constructs canal at ${_.join(' & ', details.at)}.`;
     case "constructed-bridge":
       return `Constructs bridge at ${details.at}.`;
+    case "relocated-bridge":
+      return `Relocates bridge from ${details.from} to ${details.to}.`;
     case "banked":
       return "Banks an action point.";
     case "founded-district":

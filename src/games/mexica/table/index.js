@@ -174,6 +174,10 @@ function desc(event){
       return `Builds level ${details.level} temple at ${details.at}.`;
     case "committed":
       return "I'm done.";
+    case "scored-grandeur":
+      return "Emperor awards spiritual grandeur!";
+    case "concluded-period":
+      return "The 2nd period begins!";
     case "moved":
       switch(details.by){
         case "foot":
@@ -265,7 +269,7 @@ $.sub($hist, function([curr, prior, step]){
     });
   },  indices(seated), _.range(1, 5));
 
-  _.each(function(pos){
+  _.doseq(function(period, pos){
     diff(curr, prior, ["state", "capulli", period, pos], function(curr, prior){
       dom.html(
         dom.sel1(`[data-demand='${pos}']`, el),
@@ -277,7 +281,7 @@ $.sub($hist, function([curr, prior, step]){
         omit(dom.sel1("[data-piece='capulli']", at(prior.at)));
       }
     });
-  }, _.range(0, 8));
+  }, _.range(0, 2), _.range(0, 8));
 
   const foundable = _.maybe(moves, _.filter(_.includes(_, ["type", "found-district"]), _), _.seq, _.mapa(_.getIn(_, ["details", "size"]), _), _.first);
   _.maybe(dom.sel1(`img[data-piece='capulli'][data-size='${foundable}']`, demands), dom.addClass(_, "foundable"));
@@ -349,8 +353,8 @@ $.sub($hist, function([curr, prior, step]){
     });
   }, seated);
 
+  _.each(dom.removeClass(_, "scored"), dom.sel(".scored", el));
   if (step === 1) {
-    _.each(dom.removeClass(_, "scored"), dom.sel(".scored", el));
     _.each(function(seat){
       diff(curr, prior, ["state", "seated", seat, "points"], function(curr, prior){
         if (prior != null && curr != null && curr > prior) {

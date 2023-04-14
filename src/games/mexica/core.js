@@ -550,6 +550,12 @@ function price(command){
   }
 }
 
+function contiguous(at){
+  return _.count(at) < 2 || _.reduce(function(memo, [a, b]){
+    return memo && _.includes(around(a), b);
+  }, true, _.scan(2, at));
+}
+
 export function execute(self, command){
   const state = _.deref(self);
   const {type, details, seat} = command;
@@ -634,6 +640,9 @@ export function execute(self, command){
       return _.chain(self, g.fold(_, _.assoc(command, "type", "moved")));
 
     case "construct-canal":
+      if (!contiguous(details.at)){
+        throw new Error("Invalid canal tile");
+      }
       for(const canalAt of details.at){
         if (hasCapulli(contents, district(board, contents, canalAt))){
           throw new Error("Cannot carve a founded district");
@@ -795,7 +804,6 @@ function fold(self, event){
       return g.fold(self, event,
         _.fmap(_,
           _.update(_, ["seated"], _.pipe(_.mapIndexed(function(seat, seated){
-            debugger
             const {districts, palace} = event.details;
             const points = _.sum(_.cons(_.nth(palace, seat), _.map(function({at, points}){
               return _.nth(points, seat);
@@ -808,6 +816,7 @@ function fold(self, event){
         _.fmap(_,
           _.pipe(
             _.update(_, "period", _.inc),
+            _.assoc(_, "scoring-round", false),
             _.update(_, ["seated"], _.mapa(function(seated){
               return _.update(seated, "temples", resupplyTemples);
             }, _)))));

@@ -56,10 +56,12 @@ export function Story(session, tableId, seat, seated, ready, $state, $story){
 }
 
 export function hist(self){
-  const $snapshot = $.map(function({history, at}){
-    return _.nth(history, at);
-  }, self.$story);
-  return $.pipe($.hist($snapshot), t.filter(_.first));
+  const nada = {history: [], at: null};
+  return $.pipe($.map(function(hist){
+    const curr  = _.nth(hist, 0) || nada,
+          prior = _.nth(hist, 1) || nada;
+    return [_.nth(curr.history, curr.at), _.nth(prior.history, prior.at), curr.at - prior.at];
+  }, $.hist(self.$story)), t.filter(_.first));
 }
 
 function deref(self){
@@ -124,7 +126,7 @@ export function story(session, tableId, seat, seated, ready){
 
   return new Story(session, tableId, seat, seated, ready, $state, $.pipe($state,  t.filter(function({touches, history, at}){ //TODO cleanup
     return touches && history && at != null;
-  })));
+  }), t.dedupe(_.get(_, "at"))));
 }
 
 function expand(idx){

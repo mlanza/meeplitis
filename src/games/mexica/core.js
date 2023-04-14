@@ -553,6 +553,7 @@ function price(command){
 export function execute(self, command){
   const state = _.deref(self);
   const {type, details, seat} = command;
+  const endOfRound = seat === _.count(state.seated) - 1;
   const cost = price(command);
   const _moves = g.moves(self, [seat]);
   const moves = _.filtera(_.comp(_.eq(_, command.type), _.get(_, "type")), _moves);
@@ -607,10 +608,10 @@ export function execute(self, command){
       }
       return _.chain(self,
         g.fold(_, _.assoc(command, "type", "committed")),
-        _.get(state, "scoring-round")
+        _.get(state, "scoring-round") && endOfRound
           ? _.pipe(
               g.fold(_, scoreGrandeur(temples, contents, period, districts(board, contents), pillis)),
-              g.fold(_, period === 0 ? {type: "started-2nd-period"} : {type: "finished"}))
+              g.fold(_, period === 0 ? {type: "concluded-period"} : {type: "finished"}))
           : _.identity);
 
     case "bank":
@@ -802,7 +803,7 @@ function fold(self, event){
             return _.update(seated, "points", _.add(_, points));
           }, _), _.toArray))));
 
-    case "started-2nd-period":
+    case "concluded-period":
       return g.fold(self, event,
         _.fmap(_,
           _.pipe(

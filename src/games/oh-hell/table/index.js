@@ -6,7 +6,7 @@ import sh from "/lib/atomic_/shell.js";
 import supabase from "/lib/supabase.js";
 import {session, $online} from "/lib/session.js";
 import {table, ui, scored, outcome, subject} from "/lib/table.js";
-import {getSeated, getSeat, story, nav, waypoint, hist} from "/lib/story.js";
+import {getSeated, getSeat, story, hist} from "/lib/story.js";
 import {describe} from "/components/table/index.js";
 
 const img = dom.tag('img'),
@@ -118,7 +118,7 @@ $.sub($table, _.comp(t.compact(), t.map(describe), t.map(_.join("\n", _))), func
   dom.attr(dom.sel1("#title"), "title", descriptors || "Up and Down");
 });
 
-$.sub($hist, function([curr, prior]){
+$.sub($hist, function([curr, prior, step]){
   const {seen, events, moves, metrics, state, state: {trump, round, status, seated, deck, lead, broken, deals}} = curr;
   const {hand, bid} = _.nth(seated, seat) || {hand: null, bid: -1};
   const event = _.last(events);

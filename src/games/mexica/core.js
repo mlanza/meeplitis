@@ -194,9 +194,10 @@ export function below(at){
   return spot([row + 1, column]);
 }
 
+const CENTER = 'H7';
 const around = _.juxt(above, right, below, left);
 const stop = _.constantly([]);
-const palaceSpots = around('H7');
+const palaceSpots = around(CENTER);
 
 function committed(state){
   const {status, seated, capulli, period, up} = state;
@@ -884,7 +885,7 @@ function moves(self){
     }, foundable(board, contents, markers, pilli));
     const banking = _.map(_.constantly({type: "bank", seat}), _.range(2 - banked));
     const water = waterways(board, contents, _.compact(bridges));
-    const foot = unspent > 0 ? _.chain(around(pilli), _.filter(_.and(_.or(dry(board, contents, _), hasBridge(contents, _)), unoccupied(contents, _)), _), _.mapa(function(to){
+    const foot = unspent > 0 ? _.chain(around(pilli), _.filter(_.and(_.notEq(_, CENTER), _.or(dry(board, contents, _), hasBridge(contents, _)), unoccupied(contents, _)), _), _.mapa(function(to){
       return {type: "move", details: {by: "foot", from, to}, seat};
     }, _)) : [];
     const teleport = unspent > 4 ? [{type: "move", details: {by: "teleport", from, cost: 5}, seat}] : [];

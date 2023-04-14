@@ -225,7 +225,7 @@ function dropPriorOmissions(el){
   _.each(dom.omit, dom.sel(".gone", el));
 }
 
-$.sub($hist, function([curr, prior]){
+$.sub($hist, function([curr, prior, step]){
   const {state, seen, moves} = curr;
   const {seated, tokens, canal1, canal2, bridges, period, board, contents, status, round, spent} = state;
 
@@ -336,14 +336,16 @@ $.sub($hist, function([curr, prior]){
     });
   }, seated);
 
-  _.each(dom.removeClass(_, "scored"), dom.sel(".scored", el));
-  _.each(function(seat){
-    diff(curr, prior, ["state", "seated", seat, "points"], function(curr, prior){
-      if (prior != null && curr != null && curr > prior) {
-        dom.addClass(dom.sel1(`.zone[data-seat='${seat}'] div.player`, el), "scored");
-      }
-    });
-  },  indices(seated));
+  if (step === 1) {
+    _.each(dom.removeClass(_, "scored"), dom.sel(".scored", el));
+    _.each(function(seat){
+      diff(curr, prior, ["state", "seated", seat, "points"], function(curr, prior){
+        if (prior != null && curr != null && curr > prior) {
+          dom.addClass(dom.sel1(`.zone[data-seat='${seat}'] div.player`, el), "scored");
+        }
+      });
+    },  indices(seated));
+  }
 });
 
 Object.assign(window, {$, _, sh, session, $story, $table, $online, supabase});

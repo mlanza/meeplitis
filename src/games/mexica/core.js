@@ -65,7 +65,7 @@ function bridgesDepleted(bridges){
 }
 
 function canalsDepleted(canal1, canal2){
-  return !_.chain(canal1, _.concat(_, canal2), cat, _.remove(_.isSome, _), _.seq);
+  return !_.chain(_.concat(canal1, canal2), _.remove(_.isSome, _), _.seq);
 }
 
 function templesDepleted(temples){
@@ -603,7 +603,7 @@ export function execute(self, command){
     //TODO provide UI cue when scoring will happen on commit
     case "commit":
       if (!matched) {
-        throw new Error("Cannot commit");
+        throw new Error("Cannot commit while actions remain");
       }
       return _.chain(self,
         g.fold(_, _.assoc(command, "type", "committed")),
@@ -901,7 +901,7 @@ function moves(self){
     const found = _.mapa(function(details){
       return {type: "found-district", seat, details};
     }, foundable(board, contents, markers, pilli));
-    const banking = _.map(_.constantly({type: "bank", seat}), _.range(2 - banked));
+    const banking = banked < 2 && spent < 6 ? [{type: "bank", seat}] : [];
     const water = waterways(board, contents, _.compact(bridges));
     const foot = unspent > 0 ? _.chain(around(pilli), _.filter(_.and(_.notEq(_, CENTER), _.or(dry(board, contents, _), hasBridge(contents, _)), unoccupied(contents, _)), _), _.mapa(function(to){
       return {type: "move", details: {by: "foot", from, to}, seat};
@@ -910,8 +910,9 @@ function moves(self){
     const boat = hasBridge(contents, pilli) ? boats(water, pilli, _.min(unspent, 5), seat) : [];
     const constructBridge = [{type: bridgesDepleted(bridges) ? "relocate-bridge": "construct-bridge", seat}];
     const constructCanal = canalsDepleted(canal1, canal2) ? [] : [{type: "construct-canal", seat}];
-    const pass = unspent > 0 ? [{type: "pass", seat}] : [];
-    return _.concat([{type: "commit", seat}], pass, banking, constructCanal, constructBridge, foot, boat, teleport, found);
+    const pass = spent < 6 ? [{type: "pass", seat}] : [];
+    const commit = spent > 5 ? [{type: "commit", seat}] : [];
+    return _.concat(commit, pass, banking, constructCanal, constructBridge, foot, boat, teleport, found);
   } else {
     const taken = _.chain(seated, _.map(_.get(_, "pilli"), _), _.compact, _.toArray);
     return _.chain(palaceSpots, _.remove(_.includes(taken, _), _), _.map(function(at){

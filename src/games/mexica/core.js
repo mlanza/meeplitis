@@ -531,6 +531,8 @@ function price(command){
   switch (type) {
     case "bank":
     case "banked":
+    case "pass":
+    case "passed":
     case "construct-canal":
     case "constructed-canal":
     case "construct-bridge":
@@ -585,6 +587,12 @@ export function execute(self, command){
       const {dealCapulli} = self.config;
       return _.chain(self,
         g.fold(_, {type: "dealt-capulli", details: {capulli: dealCapulli(capullis)}, seat: null}));
+
+    case "pass":
+      if (!matched){
+        throw new Error("Cannot pass once initial actions are spent");
+      }
+      return _.chain(self, g.fold(_, _.assoc(command, "type", "passed")));
 
     case "place-pilli":
       if (!matched) {
@@ -714,6 +722,12 @@ function fold(self, event){
         _.pipe(
           _.fmap(_, committed),
           _.flush));
+
+    case "passed":
+      return g.fold(self, event,
+        _.fmap(_,
+          _.pipe(
+            _.update(_, "spent", _.inc))));
 
     case "banked":
       return g.fold(self, event,
@@ -896,7 +910,8 @@ function moves(self){
     const boat = hasBridge(contents, pilli) ? boats(water, pilli, _.min(unspent, 5), seat) : [];
     const constructBridge = [{type: bridgesDepleted(bridges) ? "relocate-bridge": "construct-bridge", seat}];
     const constructCanal = canalsDepleted(canal1, canal2) ? [] : [{type: "construct-canal", seat}];
-    return _.concat([{type: "commit", seat}], banking, constructCanal, constructBridge, foot, boat, teleport, found);
+    const pass = unspent > 0 ? [{type: "pass", seat}] : [];
+    return _.concat([{type: "commit", seat}], pass, banking, constructCanal, constructBridge, foot, boat, teleport, found);
   } else {
     const taken = _.chain(seated, _.map(_.get(_, "pilli"), _), _.compact, _.toArray);
     return _.chain(palaceSpots, _.remove(_.includes(taken, _), _), _.map(function(at){

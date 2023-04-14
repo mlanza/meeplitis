@@ -8,7 +8,7 @@ import {session, $online} from "/lib/session.js";
 import {table, ui, scored, outcome, subject} from "/lib/table.js";
 import {getSeated, getSeat, story, nav, waypoint, hist} from "/lib/story.js";
 import {describe} from "/components/table/index.js";
-import {boardSpots, right, below, above, dry} from "../core.js";
+import {boardSpots, right, below, above, dry, consolidateTemples} from "../core.js";
 
 async function svg(what){
   return await fetch(`../table/images/${what}.svg`).then(function(resp){
@@ -254,8 +254,8 @@ $.sub($hist, function([curr, prior, step]){
   dom.attr(els.board, "data-propose", "canal");
   dom.attr(els.actions, "data-remaining", status == "actions" ? _.max(6 - spent, 0) : 0);
 
-  _.doseq(function(seat, level){
-    diff(curr, prior, ["state", "seated", seat, "temples", level], function(curr, prior){
+  _.doseq(function(period, seat, level){
+    diff(curr, prior, ["state", "seated", seat, "temples", period, level], function(curr, prior){
       _.each(function(n){
         diff(curr, prior, [n], function(curr, prior){
           if (curr){
@@ -267,7 +267,7 @@ $.sub($hist, function([curr, prior, step]){
         });
       }, indices(curr || prior));
     });
-  },  indices(seated), _.range(1, 5));
+  },  [0, 1], indices(seated), _.range(1, 5));
 
   _.doseq(function(period, pos){
     diff(curr, prior, ["state", "capulli", period, pos], function(curr, prior){
@@ -339,9 +339,9 @@ $.sub($hist, function([curr, prior, step]){
     dom.text(dom.sel1(".points", zone), points);
     dom.attr(dom.sel1(".tokens", area), "data-remaining", bank);
 
-    _.eachkv(function(level, spots){
+    _.chain(temples, _.take(period + 1, _), consolidateTemples, _.eachkv(function(level, spots){
       dom.attr(dom.sel1(`.temples[data-size='${level}'`, area), "data-remaining", remaining(spots));
-    }, temples);
+    }, _));
 
     diff(curr, prior, ["state", "seated", seat, "pilli"], function(curr, prior){
       if (prior){

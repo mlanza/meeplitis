@@ -52,13 +52,20 @@ const capullis = [
   {size: 3, at: null}
 ];
 
-const temples = {1: slots(3), 2: slots(3), 3: slots(2), 4: slots(1)};
-const reserve = {1: slots(3), 2: slots(2), 3: slots(2), 4: slots(2)};
-const resupplyTemples = _.reducekv(function(temples, level, added){
-  return _.update(temples, level, function(spots){
-    return _.toArray(_.concat(spots, added));
-  });
-}, _, reserve);
+const temples = [
+  {1: slots(3), 2: slots(3), 3: slots(2), 4: slots(1)},
+  {1: slots(3), 2: slots(2), 3: slots(2), 4: slots(2)}
+];
+
+export function consolidateTemples(temples){
+  return _.reduce(function(memo, temples){
+    return _.reducekv(function(temples, level, added){
+      return _.update(temples, level, function(spots){
+        return _.toArray(_.concat(spots, added));
+      });
+    }, memo, temples);
+  }, _.first(temples), _.rest(temples))
+}
 
 function bridgesDepleted(bridges){
   return !_.chain(bridges, _.remove(_.isSome, _), _.seq);
@@ -78,8 +85,16 @@ function capulliDepleted(capulli, period){
 
 function markScoringRound(state){
   const {capulli, period, seated} = state;
-  const temples = _.map(_.get(_, "temples"), seated);
-  return capulliDepleted(capulli, period) && _.detect(templesDepleted, temples) ? _.assoc(state, "scoring-round", true) : state;
+  return capulliDepleted(capulli, period) &&
+    _.chain(seated,
+      _.mapa(
+        _.pipe(
+          _.get(_, "temples"),
+          _.take(period + 1, _),
+          consolidateTemples,
+          templesDepleted),
+      _),
+      _.some(_.identity, _)) ? _.assoc(state, "scoring-round", true) : state;
 }
 
 const coords = _.braid(function(y, x){
@@ -448,11 +463,11 @@ function breaksBridge(contents, canal){
 }
 
 function levels(temples, dist){
-  return _.mapa(function(temples){
+  return _.chain(temples, consolidateTemples, _.mapa(function(temples){
     return _.sum(_.mapkv(function(level, spots){
       return _.count(_.filter(_.includes(dist, _), spots)) * level;
     }, temples));
-  }, temples);
+  }, _));
 }
 
 function places(temples, dist){
@@ -567,11 +582,11 @@ export function execute(self, command){
   const automatic = _.includes(["start", "deal-capulli"], type);
   const matched = _.detect(_.eq(_, _.chain(command, _.compact, _.dissoc(_, "id"))), moves);
   const seated = seat == null ? {pilli: null, bank: 0} : state.seated[seat];
-  const temples = _.map(_.get(_, "temples"), state.seated);
-  const pillis = _.map(_.get(_, "pilli"), state.seated);
   const {spent, board, contents, period, canal1, canal2, capulli, bridges, banked, tokens} = state;
   const {bank, pilli} = seated;
   const {deficit} = spend(spent, bank, cost);
+  const temples = _.map(_.get(_, "temples"), state.seated);
+  const pillis = _.map(_.get(_, "pilli"), state.seated);
 
   if (deficit) {
     throw new Error("Not enough action points.");
@@ -617,7 +632,7 @@ export function execute(self, command){
         g.fold(_, _.assoc(command, "type", "committed")),
         _.get(state, "scoring-round") && endOfRound
           ? _.pipe(
-              g.fold(_, scoreGrandeur(temples, contents, period, districts(board, contents), pillis)),
+              g.fold(_, scoreGrandeur(consolidateTemples(temples), contents, period, districts(board, contents), pillis)),
               g.fold(_, period === 0 ? {type: "concluded-period"} : {type: "finished"}))
           : _.identity);
 
@@ -665,7 +680,7 @@ export function execute(self, command){
       if (!isVacant(board, contents, details.at)) {
         throw new Error("Invalid temple placement");
       }
-      if (!_.chain(state, _.getIn(_, ["seated", seat, "temples", details.level]), _.filter(_.isNil, _), _.count)){
+      if (!_.chain(state, _.getIn(_, ["seated", seat, "temples"]), _.take(period + 1, _), consolidateTemples, _.get(_, details.level), _.filter(_.isNil, _), _.count)){
         throw new Error(`No level ${details.level} temples available`);
       }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "built-temple")));
@@ -791,7 +806,10 @@ function fold(self, event){
           _.pipe(
             redeem(seat, redeemed),
             _.update(_, "spent", _.add(_, details.level)),
-            _.updateIn(_, ["seated", seat, "temples", details.level], consume(details.at)),
+            _.updateIn(_, ["seated", seat, "temples"], function(temples){
+              const idx = _.includes(_.getIn(temples, [0, details.level]), null) ? 0 : 1;
+              return _.updateIn(temples, [idx, details.level], consume(details.at));
+            }),
             _.update(_, "contents", place(t, details.at)),
             markScoringRound)));
 
@@ -820,10 +838,7 @@ function fold(self, event){
         _.fmap(_,
           _.pipe(
             _.update(_, "period", _.inc),
-            _.assoc(_, "scoring-round", false),
-            _.update(_, ["seated"], _.mapa(function(seated){
-              return _.update(seated, "temples", resupplyTemples);
-            }, _)))));
+            _.assoc(_, "scoring-round", false))));
 
     case "founded-district":
       return g.fold(self, event,

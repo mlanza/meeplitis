@@ -440,12 +440,11 @@ function obscure(seen){
   }
 }
 
-function obscureState(seen, all){
+function obscureState(seen){
   return function(state){
     const {status} = state;
     const bidding = status === "bidding";
     return _.chain(state,
-      all ? _.identity :
       _.pipe(
         _.update(_, "deck", obscureCards),
         _.update(_, "seated", _.pipe(_.mapIndexed(function(idx, seated){ //can only see your own hand
@@ -458,17 +457,14 @@ function obscureState(seen, all){
   }
 }
 
-function obscureEvents(seen, all){
-  return function(events){
-    return all ? events : _.mapa(obscure(seen), events);
-  }
+function obscureEvents(seen){
+  return _.mapa(obscure(seen), _);
 }
 
 function perspective(self, seen, reality){
-  const all = _.eq(seen, g.everyone(self));
   return _.chain(reality,
-    _.update(_, "state", obscureState(seen, all)),
-    _.update(_, "events", obscureEvents(seen, all)))
+    _.update(_, "state", obscureState(seen)),
+    _.update(_, "events", obscureEvents(seen)));
 }
 
 _.doto(OhHell,

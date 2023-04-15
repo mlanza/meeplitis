@@ -31,9 +31,12 @@ function perspective2(self, seen){
 
 function perspective3(self, _seen, reality){
   const seen = _.filtera(_.isSome, _seen);
-  return _.chain(IGame.perspective(self, seen, reality),
-    _.assoc(_, "seen", seen),
-    _.update(_, "moves", movesAt(seen)));
+  const all = _.eq(seen, everyone(self));
+  return all ?
+    reality :
+    _.chain(IGame.perspective(self, seen, reality),
+      _.assoc(_, "seen", seen),
+      _.update(_, "moves", movesAt(seen)));
 }
 
 export const perspective = _.overload(null, null, perspective2, perspective3);
@@ -241,9 +244,13 @@ export function batch($state, f, xs){
 
 export function simulate(make){
   return function simulate(seats, config, events, commands, seen){
-    return _.chain(make(seats, config), x => _.reduce(fold, x, events), _.seq(commands) ? x => whatif(x, commands, singular(seen)) : x => perspective(x, seen));
+    return _.chain(
+      make(seats, config),
+      self => _.reduce(fold, self, events),
+      _.seq(commands) ?
+        self => whatif(self, commands, singular(seen)) :
+        self => perspective(self, seen));
   }
-}
 
 function _events(self){
   return self.events;

@@ -454,12 +454,15 @@ function hasCapulli(contents, spots){
   }, spots);
 }
 
-function footsBridge(contents, spots){
-  return _.detect(_.eq(_, b), _.mapcat(_.get(contents, _), spots));
-}
-
-function breaksBridge(contents, canal){
-  return footsBridge(contents, _.mapcat(around, canal));
+function breaksBridge(board, contents, canal){
+  const footers = _.chain(canal,
+    _.mapcat(around, _),
+    _.filter(_.partial(hasBridge, contents), _),
+    _.mapcat(function(at){
+      return orientBridge(board, contents, at) === "horizontal" ? [left(at), right(at)] : [above(at), below(at)];
+    }, _),
+    _.toArray);
+  return !!_.detect(_.includes(footers, _), canal);
 }
 
 function levels(temples, dist){
@@ -667,7 +670,7 @@ export function execute(self, command){
           throw new Error("Invalid canal placement");
         }
       }
-      if (breaksBridge(contents, details.at)) {
+      if (breaksBridge(board, contents, details.at)) {
         throw new Error("Cannot construct canal at the foot of a bridge");
       }
       return _.chain(self, g.fold(_, {type: "constructed-canal", seat, details: {at: sortSpots(details.at)}}));

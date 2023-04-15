@@ -154,17 +154,9 @@ export function finish(self){
   });
 }
 
-export function load(self, events){
-  return _.reduce(fold, self, events);
-}
-
-export function run(self, commands, seat){
-  return _.reduce((x, y) => execute(x, y, seat), self, commands);
-}
-
 export function whatif(self, commands, seat){
   const prior = self;
-  const curr = _.reduce((x, y) => execute(x, y, seat), prior, commands);
+  const curr = _.reduce((self, command) => execute(self, command, seat), prior, commands);
   return {
     added: added(curr, prior),
     up: up(curr),
@@ -172,9 +164,12 @@ export function whatif(self, commands, seat){
   };
 }
 
+//triggers on discrete updates, like reduce but with side effects for each item
 export function batch($state, f, xs){
   _.each(function(x){
-    _.swap($state, f(_, [x]));
+    _.swap($state, function(state){
+      return f(state, x);
+    });
   }, xs);
 }
 
@@ -245,7 +240,7 @@ function singular(xs){
 }
 
 export function simulate(self, events, commands, seen){
-  return _.chain(self, x => load(x, events), _.seq(commands) ? x => whatif(x, commands, singular(seen)) : x => perspective(x, seen));
+  return _.chain(self, x => _.reduce(g.fold, x, events), _.seq(commands) ? x => whatif(x, commands, singular(seen)) : x => perspective(x, seen));
 }
 
 function _events(self){

@@ -37,12 +37,12 @@ const seats = _.count(seated.data) || 4,
       events = count == null ?  evented.data : _.chain(evented.data, _.take(count, _), _.toArray),
       $game = $.cell(make(_.repeat(seats, {}), config));
 
-_.log($game)
+_.log($game);
 
 $.sub($.hist($game), t.map(monitor ? g.summarize : _.identity), _.log);
 
-g.batch($game, g.load, events);
+g.batch($game, g.fold, events);
 
-const exec = g.batch($game, g.run, _);
+const exec = g.batch($game, g.execute, _);
 
 Object.assign(window, {$game, exec, commands});

@@ -17,7 +17,7 @@ const w = "w", //water
 const board = [
        /*@,A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V*/
   /*0*/ [n,w,w,w,w,w,w,w,w,w,w,w,n,n,n,n,n,n,n,n,n,n,n],
-  /*1*/ [n,w,l,w,w,w,l,l,l,l,l,w,w,n,n,n,n,n,n,n,n,n,n],
+  /*1*/ [n,w,l,w,w,w,l,l,l,l,l,w,w,w,n,n,n,n,n,n,n,n,n],
   /*2*/ [w,w,l,l,l,l,l,l,l,l,l,l,l,w,n,n,n,n,n,n,n,n,n],
   /*3*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,n,n,n,n,n,n,n],
   /*4*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,n,n,n,n,n],

@@ -164,15 +164,6 @@ export function whatif(self, commands, seat){
   };
 }
 
-//triggers on discrete updates, like reduce but with side effects for each item
-export function batch($state, f, xs){
-  _.each(function(x){
-    _.swap($state, function(state){
-      return f(state, x);
-    });
-  }, xs);
-}
-
 export function transact($state, f, xs){
   _.swap($state, f(_, xs));
 }
@@ -220,7 +211,7 @@ export function reality(self){
     metrics: metrics(self)};
 }
 
-export function summarize([curr, prior]){ //uses $.hist
+export function summarize([curr, prior]){ //uses `hist`
   const _reality = _.chain(curr, reality, _.update(_, "moves", _.toArray));
   return {
     notify: notify(curr, prior),
@@ -240,7 +231,7 @@ function singular(xs){
 }
 
 export function simulate(self, events, commands, seen){
-  return _.chain(self, x => _.reduce(g.fold, x, events), _.seq(commands) ? x => whatif(x, commands, singular(seen)) : x => perspective(x, seen));
+  return _.chain(self, x => _.reduce(fold, x, events), _.seq(commands) ? x => whatif(x, commands, singular(seen)) : x => perspective(x, seen));
 }
 
 function _events(self){

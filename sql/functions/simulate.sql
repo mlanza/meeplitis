@@ -94,3 +94,49 @@ return _result;
 end;
 $$ language plpgsql;
 
+
+create or replace function simulate(_table_id varchar, _event_id varchar, _seats int[]) returns jsonb
+security definer
+set search_path = public
+as $$
+declare
+_fn text;
+_result jsonb;
+_seats int;
+_events jsonb;
+_config jsonb;
+_seat_configs jsonb;
+_sql text;
+begin
+
+select evented
+from evented(_table_id, _event_id)
+into _events;
+
+select config
+from tables
+where id = _table_id
+into _config;
+
+select seat_configs(_table_id)
+into _seat_configs;
+
+select fn
+from tables
+where id = _table_id
+into _fn;
+
+raise log '$ simulating %, config %, events %, commands %', _seats, _config, _events, _commands;
+
+select case _fn
+      when 'ohhell' then ohhell(_seat_configs, _config, _events, '[]'::jsonb, _seats)
+      when 'mexica' then mexica(_seat_configs, _config, _events, '[]'::jsonb, _seats)
+      else null end
+into _result;
+
+return _result;
+end;
+$$ language plpgsql;
+
+
+

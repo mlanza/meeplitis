@@ -251,6 +251,7 @@ export function simulate(make){
         self => whatif(self, commands, singular(seen)) :
         self => perspective(self, seen));
   }
+}
 
 function _events(self){
   return self.events;

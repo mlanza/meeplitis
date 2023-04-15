@@ -9,3 +9,5 @@ CREATE TABLE snapshots(
       FOREIGN KEY(table_id, seq)
 	    REFERENCES events(table_id, seq) ON DELETE CASCADE,
     PRIMARY KEY (table_id, seq));
+
+ALTER TABLE snapshots ADD CONSTRAINT uniq_snapshot_table_seq UNIQUE (table_id, seq);

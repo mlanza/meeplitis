@@ -230,8 +230,19 @@ function singular(xs){
   return _.first(xs);
 }
 
-export function simulate(self, events, commands, seen){
-  return _.chain(self, x => _.reduce(fold, x, events), _.seq(commands) ? x => whatif(x, commands, singular(seen)) : x => perspective(x, seen));
+//triggers on discrete updates, like reduce but with side effects for each item
+export function batch($state, f, xs){
+  _.each(function(x){
+    _.swap($state, function(state){
+      return f(state, x);
+    });
+  }, xs);
+}
+
+export function simulate(make){
+  return function simulate(seats, config, events, commands, seen){
+    return _.chain(make(seats, config), x => _.reduce(fold, x, events), _.seq(commands) ? x => whatif(x, commands, singular(seen)) : x => perspective(x, seen));
+  }
 }
 
 function _events(self){

@@ -36,7 +36,11 @@ into _fn;
 
 raise log '$ simulating %, config %, events %, commands %', _seats, _config, _events, _commands;
 
-select case _fn when 'ohhell' then ohhell(_seats_config, _config, _events, _commands, array[_seat]) else null end into _result;
+select case _fn
+      when 'ohhell' then ohhell(_seat_configs, _config, _events, _commands, array[_seat])
+      when 'mexica' then mexica(_seat_configs, _config, _events, _commands, array[_seat])
+      else null end
+into _result;
 
 return _result;
 end;
@@ -80,8 +84,13 @@ into _fn;
 
 raise log '$ simulating %, config %, events %, commands %', _seats, _config, _events, _commands;
 
-select case _fn when 'ohhell' then ohhell(_seats_config, _config, _events, _commands, array[_seat]) else null end into _result;
+select case _fn
+      when 'ohhell' then ohhell(_seat_configs, _config, _events, _commands, array[_seat])
+      when 'mexica' then mexica(_seat_configs, _config, _events, _commands, array[_seat])
+      else null end
+into _result;
 
 return _result;
 end;
 $$ language plpgsql;
+

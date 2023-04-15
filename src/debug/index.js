@@ -4,15 +4,6 @@ import t from "/lib/atomic_/transducers.js";
 import g from "/lib/game_.js";
 import supabase from "/lib/supabase.js";
 
-//triggers on discrete updates, like reduce but with side effects for each item
-function batch($state, f, xs){
-  _.each(function(x){
-    _.swap($state, function(state){
-      return f(state, x);
-    });
-  }, xs);
-}
-
 const params = new URLSearchParams(document.location.search),
       tableId = params.get('id'),
       hash = document.location.hash.substr(1),
@@ -50,8 +41,8 @@ _.log($game);
 
 $.sub($.hist($game), t.map(monitor ? g.summarize : _.identity), _.log);
 
-batch($game, g.fold, events);
+g.batch($game, g.fold, events);
 
-const exec = _.partly(batch, $game, g.execute);
+const exec = g.batch($game, g.execute, _);
 
-Object.assign(window, {$game, exec, commands});
+Object.assign(window, {$game, exec, commands, supabase});

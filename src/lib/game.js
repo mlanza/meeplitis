@@ -242,15 +242,46 @@ export function batch($state, f, xs){
   }, xs);
 }
 
+export function detectIndex(pred, xs){ //TODO promote
+  const found = _.detect(function([idx, x]){
+    return pred(x);
+  }, _.mapIndexed(function(idx, x){
+    return [idx, x];
+  }, xs));
+  return found ? found[0] : null;
+}
+
+function splitAt(idx, xs){
+  return [xs.slice(0, idx), xs.slice(idx)];
+}
+
 export function simulate(make){
-  return function simulate(seats, config, events, commands, seen){
+  function restoreMoment(seats, config, events, options){
+    const idx = _.maybe(detectIndex(_.pipe(_.get(_, "id"), _.eq(_, options.id)), events), _.inc);
+    const [folded, unfolded] = splitAt(idx, events);
+    return _.chain(
+      make(seats, config, folded, _.journal(options.snapshot)),
+      self => _.reduce(fold, self, unfolded));
+  }
+  function restore(seats, config, events){
     return _.chain(
       make(seats, config),
-      self => _.reduce(fold, self, events),
-      _.seq(commands) ?
-        self => whatif(self, commands, singular(seen)) :
-        self => perspective(self, seen));
+      self => _.reduce(fold, self, events));
   }
+  return function(seats, config, events, commands, seen, options){
+    const f = options ? restoreMoment : restore,
+          prior = f(seats, config, events, options),
+          curr = _.reduce((self, command) => execute(self, command, singular(seen)), prior, commands);
+    return [curr, prior, seen];
+  }
+}
+
+export function effects([curr, prior, seen]){
+  return curr === prior ? perspective(curr, seen) : {
+    added: added(curr, prior),
+    up: up(curr),
+    notify: notify(curr, prior)
+  };
 }
 
 function _events(self){

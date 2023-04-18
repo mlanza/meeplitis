@@ -157,8 +157,8 @@ export function finish(self){
   });
 }
 
-export function transact($state, f, xs){
-  _.swap($state, f(_, xs));
+export function added(curr, prior){
+  return prior ? _.chain(events(curr), _.last(_.count(events(curr)) - _.count(events(prior)), _), _.toArray) : [];
 }
 
 function movesAt(seats){

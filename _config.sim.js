@@ -6,13 +6,13 @@ function simulation(page){
   const contents = page.content.split("\n").filter(function(line){
     return !line.startsWith("//") && !line.startsWith("export");
   });
-  page.content = `create or replace function ${named}(_seats jsonb, _config jsonb, _events jsonb, _commands jsonb, _seen int[], _options jsonb)
+  page.content = `create or replace function ${named}(_seats jsonb, _config jsonb, _events jsonb, _commands jsonb, _seen int[], _snapshot jsonb)
 returns jsonb as $$
   const simulate1 = (function(){
     ${contents.join("\n")}
     return simulate1;
   })();
-return simulate1(_seats, _config || {}, _events || [], _commands || [], _seen || [], _options);
+return simulate1(_seats, _config || {}, _events || [], _commands || [], _seen || [], _snapshot);
 
 $$ language plv8 immutable;`;
 

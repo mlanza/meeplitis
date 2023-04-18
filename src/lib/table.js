@@ -128,9 +128,8 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, template,
 
   //configure event
   $.sub($hist, function([curr, prior]){
-    const {events, seen} = curr;
-    const event = _.last(events),
-          player = eventFor(event);
+    const {event, seen} = curr;
+    const player = eventFor(event);
 
     _.doto(els.event,
       dom.attr(_, "data-type", event.type),

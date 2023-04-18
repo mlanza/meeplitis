@@ -157,22 +157,8 @@ export function finish(self){
   });
 }
 
-export function whatif(self, commands, seat){
-  const prior = self;
-  const curr = _.reduce((self, command) => execute(self, command, seat), prior, commands);
-  return {
-    added: added(curr, prior),
-    up: up(curr),
-    notify: notify(curr, prior)
-  };
-}
-
 export function transact($state, f, xs){
   _.swap($state, f(_, xs));
-}
-
-export function added(curr, prior){
-  return prior ? _.chain(events(curr), _.last(_.count(events(curr)) - _.count(events(prior)), _), _.toArray) : [];
 }
 
 function movesAt(seats){
@@ -210,7 +196,7 @@ export function reality(self){
     up: up(self),
     may: may(self),
     moves: moves(self),
-    events: events(self),
+    event: _.chain(self, events, _.last),
     metrics: metrics(self)};
 }
 
@@ -218,7 +204,7 @@ export function summarize([curr, prior]){ //uses `hist`
   const _reality = _.chain(curr, reality, _.update(_, "moves", _.toArray));
   return {
     notify: notify(curr, prior),
-    added: added(curr, prior),
+    added: events(curr),
     perspectives: perspectives(curr, _reality),
     reality: _reality,
     game: curr
@@ -256,21 +242,11 @@ function splitAt(idx, xs){
 }
 
 export function simulate(make){
-  function restoreMoment(seats, config, events, options){
-    const idx = _.maybe(detectIndex(_.pipe(_.get(_, "id"), _.eq(_, options.id)), events), _.inc);
-    const [folded, unfolded] = splitAt(idx, events);
-    return _.chain(
-      make(seats, config, folded, _.journal(options.snapshot)),
-      self => _.reduce(fold, self, unfolded));
-  }
-  function restore(seats, config, events){
-    return _.chain(
-      make(seats, config),
-      self => _.reduce(fold, self, events));
-  }
-  return function(seats, config, events, commands, seen, options){
-    const f = options ? restoreMoment : restore,
-          prior = f(seats, config, events, options),
+  return function(seats, config, events, commands, seen, snapshot){
+    if (!_.seq(seats)) {
+      throw new Error("Cannot play a game with no one seated at the table");
+    }
+    const prior = _.chain(make(seats, config, events, _.maybe(snapshot, _.journal)), _.seq(commands) ? _.compact : _.identity),
           curr = _.reduce((self, command) => execute(self, command, singular(seen)), prior, commands);
     return [curr, prior, seen];
   }
@@ -278,7 +254,7 @@ export function simulate(make){
 
 export function effects([curr, prior, seen]){
   return curr === prior ? perspective(curr, seen) : {
-    added: added(curr, prior),
+    added: events(curr),
     up: up(curr),
     notify: notify(curr, prior)
   };

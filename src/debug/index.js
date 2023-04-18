@@ -20,27 +20,27 @@ const [tables, moments, seated, evented] = await Promise.all([
 ]);
 
 const table = tables.data[0],
-      moment = cache ? _.getIn(moments.data, [0, "moment"]) : null,
+      snapshot = null, // cache ? _.getIn(moments.data, [0, "moment", "snapshot"]) : null,
+      events = evented.data,
       commands = [],
       slug = table.game_id.slug,
       config = table.config;
 
 const {make} = await import(`/games/${slug}/core.js`);
 
-const count = eventId ? _.maybe(evented.data, g.detectIndex(_.pipe(_.get(_, "id"), _.eq(_, eventId)), _), _.inc) : null,
-      seats = _.repeat(_.count(seated.data) || 4, {}),
+const seats = _.repeat(_.count(seated.data) || 4, {}),
       seen = _.toArray(_.range(0, _.count(seats))),
-      events = count == null ?  evented.data : _.chain(evented.data, _.take(count, _), _.toArray),
-      [preEvents, postEvents] = monitor && !cache ? [[], events] : [events, []],
       simulate = g.simulate(make),
-      [curr, prior] = simulate(seats, config, preEvents, commands, seen, moment),
+      [curr, prior] = simulate(seats, config, monitor ? [] : events, [], seen, snapshot),
       $game = $.cell(curr);
 
 _.log($game, "seen", seen);
 
 $.sub($.hist($game), t.map(g.summarize), _.log);
 
-g.batch($game, g.fold, postEvents);
+g.batch($game, g.fold, monitor ? events : []);
+
+_.swap($game, _.compact);
 
 const exec = g.batch($game, g.execute, _);
 

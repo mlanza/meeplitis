@@ -56,10 +56,8 @@ function OhHell(seats, config, events, journal){
 }
 
 export default function ohHell(seats, config, events, journal){
-  if (!_.count(seats)) {
-    throw new Error("Cannot play a game with no one seated at the table");
-  }
-  return new OhHell(_.toArray(seats), config, events || [], journal || _.journal({deals: deals(config.start || 1, config.end || 7)}));
+  return _.chain(new OhHell(_.toArray(seats), config, [], journal || _.journal({deals: deals(config.start || 1, config.end || 7)})),
+    _.reduce(fold, _, events));
 }
 
 function deal(self){
@@ -68,7 +66,7 @@ function deal(self){
 
 function award(lead, best, winner, trick){
   return function(self)  {
-    return g.self, {type: "award", details: {lead, best, winner, trick}}, null);
+    return g.execute(self, {type: "award", details: {lead, best, winner, trick}}, null);
   }
 }
 
@@ -166,9 +164,9 @@ function execute(self, command){
     throw new Error(`Cannot invoke automatic command ${type}`);
   }
 
-  if (!_.seq(g.events(self)) && type != "start") {
+  /*TODO if (!_.seq(g.events(self)) && type != "start") {
     throw new Error(`Cannot ${type} unless the game is first started.`);
-  }
+  }*/
 
   switch (type) {
     case "start":
@@ -398,6 +396,13 @@ function fold(self, event){
   }
 }
 
+function compact(self){
+  return new OhHell(self.seats,
+    self.config,
+    [],
+    self.journal);
+}
+
 function append(self, event){
   return new OhHell(self.seats,
     self.config,
@@ -457,18 +462,15 @@ function obscureState(seen){
   }
 }
 
-function obscureEvents(seen){
-  return _.mapa(obscure(seen), _);
-}
-
 function perspective(self, seen, reality){
   return _.chain(reality,
     _.update(_, "state", obscureState(seen)),
-    _.update(_, "events", obscureEvents(seen)));
+    _.update(_, "event", obscure(seen)));
 }
 
 _.doto(OhHell,
   g.behave,
+  _.implement(_.ICompactible, {compact}),
   _.implement(_.IAppendable, {append}),
   _.implement(_.IFunctor, {fmap}),
   _.implement(g.IGame, {perspective, up, may, moves, irreversible, metrics, comparator, textualizer, execute: _.comp(compel, execute), fold}));

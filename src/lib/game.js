@@ -228,15 +228,6 @@ export function batch($state, f, xs){
   }, xs);
 }
 
-export function detectIndex(pred, xs){ //TODO promote
-  const found = _.detect(function([idx, x]){
-    return pred(x);
-  }, _.mapIndexed(function(idx, x){
-    return [idx, x];
-  }, xs));
-  return found ? found[0] : null;
-}
-
 function splitAt(idx, xs){
   return [xs.slice(0, idx), xs.slice(idx)];
 }

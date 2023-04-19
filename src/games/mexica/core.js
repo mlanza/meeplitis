@@ -873,15 +873,10 @@ function up(self){
 
 const may = up;
 
-function sift(pred, xs){ //TODO promote
-  const sifted = _.groupBy(pred, xs);
-  return [sifted["true"] || null, sifted["false"] || null];
-}
-
 export function foundable(board, contents, markers, pilli){
   const dist = district(board, contents, pilli);
   const size = _.count(dist);
-  const [founded, unfounded] = sift(function({at}){
+  const [founded, unfounded] = _.sift(function({at}){
     return !!at;
   }, markers);
   const fixed = _.detect(function(at){

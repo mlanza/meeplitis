@@ -7,7 +7,7 @@ import {
   redirect,
   contentType,
 } from "https://denopkg.com/syumai/dinatra/mod.ts";
-import {comp} from "https://yourmove.cc/lib/atomic/core.js";
+import {comp, uident, date, period, elapsed} from "https://yourmove.cc/lib/atomic/core.js";
 import * as g from "https://yourmove.cc/lib/game.js";
 
 const headers = {
@@ -20,18 +20,23 @@ const headers = {
 };
 
 app(
-  post("/mind/:game", function(req){
+  post("/mind/:game", async function(req){
     const {params} = req;
     const {game, seats, config, events, commands, seen, snapshot} = params;
-    //console.log("req", JSON.stringify(req));
-    return import(`https://yourmove.cc/games/${game}/core.js`).then(function({make}){
-      const simulate = comp(g.effects, g.simulate(make));
+    const id = uident(5);
+    const start = date();
+    _.log("req", id, JSON.stringify(req));
+    const {make} = await import(`https://yourmove.cc/games/${game}/core.js`);
+    const simulate = comp(g.effects, g.simulate(make));
+    try {
       const results = simulate(seats, config || {}, events || [], commands || [], seen || [], snapshot || null)
-      return [
-        200,
-        headers,
-        JSON.stringify(results)];
-    });
+      const stop = date();
+      const ms = elapsed(period(start, stop)).valueOf();
+      _.log("resp", id, `${ms}ms`, JSON.stringify(results));
+      return [200, headers, JSON.stringify(results)];
+    } catch (ex) {
+      return [500, headers, JSON.stringify(ex)];
+    }
   }),
   options("/mind/:game", function(){
     return [200, headers, ""];
@@ -44,4 +49,4 @@ app(
   ])
 );
 
-console.log("The Game Mind lives!");
+_.log("The Game Mind lives!");

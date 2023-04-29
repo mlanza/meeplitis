@@ -10,11 +10,17 @@ console.log("The mind of Mexica!");
 
 serve(async (req) => {
   const { seats, config, events, commands, seen, snapshot } = await req.json();
-  const data = simulate(seats, config || {}, events || [], commands || [], seen || [], snapshot);
-  return new Response(
-    JSON.stringify(data),
-    { headers: { "Content-Type": "application/json" } },
-  )
+  console.log(`Got ${seats.length} seats and ${commands.length} commands`);
+  if (snapshot) {
+    console.log(`Got snapshot plus ${events.length} events`);
+  } else {
+    console.log(`Got ${events.length} events`);
+  }
+  const data = simulate1(seats, config || {}, events || [], commands || [], seen || [], snapshot);
+  console.log(`Processed simulation`);
+  return new Response(JSON.stringify(data), {
+    headers: { "Content-Type": "application/json" },
+    status: 200
+  });
 });
-
 // To invoke: curl -i --location --request POST 'https://miwfiwpgvfhggfnqtfso.functions.supabase.co/mexica' --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTYzODUwMzIzMywiZXhwIjoxOTU0MDc5MjMzfQ.i1l7NNGYF7mChifi8X-Cn_tis-us1Zq1ntyVW-Amdf8' --header 'Content-Type: application/json' --data '{"seats": [{}, {}, {}], "config": {}, "events": [{"type": "started"},{"type": "dealt-capulli", "details": {"capulli": [[{"at": null,"size": 13},{"at": null,"size": 11},{"at": null,"size": 9},{"at": null,"size": 6},{"at": null,"size": 5},{"at": null,"size": 4},{"at": null,"size": 4},{"at": null,"size": 3}],[{"at": null,"size": 12},{"at": null,"size": 10},{"at": null,"size": 8},{"at": null,"size": 7},{"at": null,"size": 6},{"at": null,"size": 5},{"at": null,"size": 3}]]}}], "commands": [], "seen": [1], "snapshot": null}'

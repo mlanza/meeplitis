@@ -60,6 +60,8 @@ export default function ohHell(seats, config, events, journal){
     _.reduce(fold, _, events));
 }
 
+export const make = ohHell;
+
 function deal(self){
   return g.execute(self, {type: "deal"});
 }

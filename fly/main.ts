@@ -7,7 +7,7 @@ import {
   redirect,
   contentType,
 } from "https://denopkg.com/syumai/dinatra/mod.ts";
-import {comp, uident, date, period, elapsed} from "https://yourmove.cc/lib/atomic/core.js";
+import {log, count, comp, uident, date, period, elapsed} from "https://yourmove.cc/lib/atomic/core.js";
 import * as g from "https://yourmove.cc/lib/game.js";
 
 const headers = {
@@ -25,14 +25,14 @@ app(
     const {game, seats, config, events, commands, seen, snapshot} = params;
     const id = uident(5);
     const start = date();
-    _.log("req", id, JSON.stringify(req));
+    log("req", id, count(events), snapshot ? "snapshot" : "", JSON.stringify(req), "\n\n");
     const {make} = await import(`https://yourmove.cc/games/${game}/core.js`);
     const simulate = comp(g.effects, g.simulate(make));
     try {
-      const results = simulate(seats, config || {}, events || [], commands || [], seen || [], snapshot || null)
+      const results = simulate(seats, config, events, commands, seen, snapshot);
       const stop = date();
       const ms = elapsed(period(start, stop)).valueOf();
-      _.log("resp", id, `${ms}ms`, JSON.stringify(results));
+      log("resp", id, `${ms}ms`, JSON.stringify(results), "\n\n");
       return [200, headers, JSON.stringify(results)];
     } catch (ex) {
       return [500, headers, JSON.stringify(ex)];
@@ -49,4 +49,4 @@ app(
   ])
 );
 
-_.log("The Game Mind lives!");
+log("The Game Mind lives!");

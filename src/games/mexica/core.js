@@ -117,7 +117,6 @@ function init(seats){
   return {
     up: 0,
     status: null,
-    board,
     contents: {},
     period: 0,
     round: 0,
@@ -560,7 +559,7 @@ export function execute(self, command){
   const automatic = _.includes(["start", "deal-capulli"], type);
   const matched = _.detect(_.eq(_, _.chain(command, _.compact, _.dissoc(_, "id"))), moves);
   const seated = seat == null ? {pilli: null, bank: 0} : state.seated[seat];
-  const {spent, board, contents, period, canal1, canal2, capulli, bridges, banked, tokens} = state;
+  const {spent, contents, period, canal1, canal2, capulli, bridges, banked, tokens} = state;
   const {bank, pilli} = seated;
   const {deficit} = spend(spent, bank, cost);
   const temples = _.map(_.get(_, "temples"), state.seated);
@@ -902,7 +901,7 @@ function canalable(board, contents){
 
 function moves(self){
   const [seat] = g.up(self);
-  const {board, contents, capulli, canal1, canal2, bridges, period, status, spent, banked, seated} = _.deref(self);
+  const {contents, capulli, canal1, canal2, bridges, period, status, spent, banked, seated} = _.deref(self);
   const {pilli, bank} = _.nth(seated, seat);
   const unspent = remaining(spent, bank);
 

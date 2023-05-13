@@ -7,9 +7,8 @@ import {
   redirect,
   contentType,
 } from "https://denopkg.com/syumai/dinatra/mod.ts";
-import {log} from "https://yourmove.cc/lib/atomic/core.js";
 import * as g from "https://yourmove.cc/lib/game.js";
-import {count, uident, date, period, elapsed} from "https://yourmove.cc/lib/atomic/core.js";
+import {log, count, uident, date, period, elapsed} from "https://yourmove.cc/lib/atomic/core.js";
 
 function routes(path){
   return function handles(id, params){
@@ -50,12 +49,12 @@ app(
   post("/mind/:game", async function({params}){
     const id = uident(5);
     const spawn = games[params.game];
-    log("received", id, JSON.stringify(params));
+    log("req", id, JSON.stringify(params));
     return spawn(id, params).then(function({start, stop, ms, n, data}){
-      log("handled", id, n, start, stop, `${ms}ms`, JSON.stringify(data));
+      log("resp", id, JSON.stringify(data), n, start, stop, `${ms}ms`);
       return [200, headers, JSON.stringify(data)];
     }).catch(function(ex){
-      log("failed", ex);
+      log("error", ex);
       return [500, headers, JSON.stringify(ex)];
     });
   }),
@@ -66,7 +65,7 @@ app(
   get("/info", () => [
     200,
     contentType("json"),
-    JSON.stringify({ app: "mind", version: "1.1.0" })
+    JSON.stringify({ app: "mind", version: "1.2.0" })
   ])
 );
 

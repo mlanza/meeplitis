@@ -6,3 +6,4 @@ dist
 sim/dist
 sim/src
 secrets.md
+deno.lock

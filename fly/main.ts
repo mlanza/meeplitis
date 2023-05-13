@@ -10,16 +10,17 @@ import {
 import * as g from "https://yourmove.cc/lib/game.js";
 import {log, count, uident, date, period, elapsed} from "https://yourmove.cc/lib/atomic/core.js";
 
+const sep = '->';
+
 function routes(path){
   return function handles(id, params){
-    const {events} = params, n = count(events);
     return new Promise((resolve, reject) => {
       const start = date();
       const worker = new Worker(new URL(path, import.meta.url).href, { type: "module" });
       worker.addEventListener('message', function({data}){
         const stop = date();
         const ms = elapsed(period(start, stop)).valueOf();
-        resolve({start, stop, ms, n, data});
+        resolve({start, stop, ms, data});
       });
       worker.addEventListener('error', reject);
       worker.addEventListener('exit', (code) => {
@@ -49,13 +50,17 @@ app(
   post("/mind/:game", async function({params}){
     const id = uident(5);
     const spawn = games[params.game];
-    log("req", id, JSON.stringify(params));
-    return spawn(id, params).then(function({start, stop, ms, n, data}){
-      log("resp", id, JSON.stringify(data), n, start, stop, `${ms}ms`);
-      return [200, headers, JSON.stringify(data)];
+    const body = JSON.stringify(params);
+    const {events, commands} = params;
+    log("req", params.game, id, sep, body);
+    return spawn(id, params).then(function({ms, data}){
+      const body = JSON.stringify(data);
+      log("resp", params.game, id, `${count(events)}e`, `${count(commands)}c`, `${ms}ms`, sep, body);
+      return [200, headers, body];
     }).catch(function(ex){
-      log("error", ex);
-      return [500, headers, JSON.stringify(ex)];
+      const body = JSON.stringify(ex);
+      log("error", params.game, id, sep, body);
+      return [500, headers, body];
     });
   }),
   options("/mind/:game", function(){

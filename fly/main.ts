@@ -7,36 +7,34 @@ import {
   redirect,
   contentType,
 } from "https://denopkg.com/syumai/dinatra/mod.ts";
-import {log} from "https://yourmove.cc/lib/atomic/core.js";
 import * as g from "https://yourmove.cc/lib/game.js";
-import {count, uident, date, period, elapsed} from "https://yourmove.cc/lib/atomic/core.js";
+import {make as mexica} from "https://yourmove.cc/games/mexica/core.js";
+import {make as ohHell} from "https://yourmove.cc/games/oh-hell/core.js";
+import {log, comp, count, uident, date, period, elapsed} from "https://yourmove.cc/lib/atomic/core.js";
 
-
-function routes(path){
-  return function handles(params){
-    const {events} = params, n = count(events);
+function routes(make){
+  const simulate = comp(g.effects, g.simulate(make));
+  return function handles({game, seats, config, events, commands, seen, snapshot}){
+    const id = uident(5);
+    const start = date();
+    const n = count(events);
+    log("request", id, n);
     return new Promise((resolve, reject) => {
-      const id = uident(5);
-      const start = date();
-      const worker = new Worker(new URL(path, import.meta.url).href, { type: "module" });
-      worker.addEventListener('message', function(data){
+      try {
+        const data = simulate(seats, config, events, commands, seen, snapshot);
         const stop = date();
         const ms = elapsed(period(start, stop)).valueOf();
         resolve({id, start, stop, ms, n, data});
-      });
-      worker.addEventListener('error', reject);
-      worker.addEventListener('exit', (code) => {
-        if (code !== 0)
-          reject(new Error(`Worker stopped with exit code ${code}`));
-      });
-      worker.postMessage(params);
+      } catch (ex) {
+        reject({id, n, ex});
+      }
     });
   }
 }
 
 const games = {
-  "mexica": routes("./games/mexica.ts"),
-  "oh-hell": routes("./games/oh-hell.ts")
+  "mexica": routes(mexica),
+  "oh-hell": routes(ohHell)
 }
 
 const headers = {
@@ -52,10 +50,10 @@ app(
   post("/mind/:game", async function({params}){
     const spawn = games[params.game];
     return spawn(params).then(function(resp){
-      log("handled^", resp);
+      log("handled", resp);
       return [200, headers, JSON.stringify(resp.data)];
     }).catch(function(ex){
-      log("failed^", ex);
+      log("failed", ex);
       return [500, headers, JSON.stringify(ex)];
     });
   }),

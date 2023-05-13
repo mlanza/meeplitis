@@ -7,14 +7,36 @@ import {
   redirect,
   contentType,
 } from "https://denopkg.com/syumai/dinatra/mod.ts";
-import {log, count, comp, uident, date, period, elapsed} from "https://yourmove.cc/lib/atomic/core.js";
+import {log} from "https://yourmove.cc/lib/atomic/core.js";
 import * as g from "https://yourmove.cc/lib/game.js";
-import mexica from "https://yourmove.cc/games/mexica/core.js";
-import ohHell from "https://yourmove.cc/games/oh-hell/core.js";
+import {count, uident, date, period, elapsed} from "https://yourmove.cc/lib/atomic/core.js";
+
+
+function routes(path){
+  return function handles(params){
+    const {events} = params, n = count(events);
+    return new Promise((resolve, reject) => {
+      const id = uident(5);
+      const start = date();
+      const worker = new Worker(new URL(path, import.meta.url).href, { type: "module" });
+      worker.addEventListener('message', function(data){
+        const stop = date();
+        const ms = elapsed(period(start, stop)).valueOf();
+        resolve({id, start, stop, ms, n, data});
+      });
+      worker.addEventListener('error', reject);
+      worker.addEventListener('exit', (code) => {
+        if (code !== 0)
+          reject(new Error(`Worker stopped with exit code ${code}`));
+      });
+      worker.postMessage(params);
+    });
+  }
+}
 
 const games = {
-  "mexica": mexica,
-  "oh-hell": ohHell
+  "mexica": routes("./games/mexica.ts"),
+  "oh-hell": routes("./games/oh-hell.ts")
 }
 
 const headers = {
@@ -27,22 +49,15 @@ const headers = {
 };
 
 app(
-  post("/mind/:game", async function(req){
-    const {params} = req;
-    const {game, seats, config, events, commands, seen, snapshot} = params;
-    const id = uident(5);
-    const start = date();
-    log("req", game, id, count(events), snapshot ? "snapshot" : "", JSON.stringify(req), "\n\n");
-    const simulate = comp(g.effects, g.simulate(games[game]));
-    try {
-      const results = simulate(seats, config, events, commands, seen, snapshot);
-      const stop = date();
-      const ms = elapsed(period(start, stop)).valueOf();
-      log("resp", game, id, `${ms}ms`, JSON.stringify(results), "\n\n");
-      return [200, headers, JSON.stringify(results)];
-    } catch (ex) {
+  post("/mind/:game", async function({params}){
+    const spawn = games[params.game];
+    return spawn(params).then(function(resp){
+      log("handled^", resp);
+      return [200, headers, JSON.stringify(resp.data)];
+    }).catch(function(ex){
+      log("failed^", ex);
       return [500, headers, JSON.stringify(ex)];
-    }
+    });
   }),
   options("/mind/:game", function(){
     return [200, headers, ""];

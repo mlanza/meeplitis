@@ -1,6 +1,6 @@
 {
   "imports": {
-    "lume/": "https://deno.land/x/lume@v1.12.0/",
+    "lume/": "https://deno.land/x/lume@v1.17.3/",
     "/lib/atomic_/core.js": "./src/lib/atomic_/core.js",
     "/lib/atomic_/reactives.js": "./src/lib/atomic_/reactives.js",
     "/lib/game.js": "./src/lib/game.js",

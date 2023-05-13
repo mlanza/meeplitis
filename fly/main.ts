@@ -53,9 +53,9 @@ app(
     const body = JSON.stringify(params);
     const {events, commands} = params;
     log("req", params.game, id, sep, body);
-    return spawn(id, params).then(function({start, stop, ms, data}){
+    return spawn(id, params).then(function({ms, data}){
       const body = JSON.stringify(data);
-      log("resp", params.game, id, `${count(events)}e`, `${count(commands)}c`, start, stop, `${ms}ms`, sep, body);
+      log("resp", params.game, id, `${count(events)}e`, `${count(commands)}c`, `${ms}ms`, sep, body);
       return [200, headers, body];
     }).catch(function(ex){
       const body = JSON.stringify(ex);

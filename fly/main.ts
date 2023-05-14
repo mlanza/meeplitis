@@ -66,7 +66,7 @@ app(
   options("/mind/:game", function(){
     return [200, headers, ""];
   }),
-  get("/", () => "<h1>The Game Mind lives!</h1>"),
+  get("/", () => "<h1>Your Move Compute lives!</h1>"),
   get("/info", () => [
     200,
     contentType("json"),
@@ -74,4 +74,4 @@ app(
   ])
 );
 
-log("The Game Mind lives!");
+log("Your Move Compute lives!");

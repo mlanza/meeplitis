@@ -4,6 +4,7 @@
 #
 
 app = "yourmove"
+app_name = "Your Move Compute"
 primary_region = "atl"
 
 [env]

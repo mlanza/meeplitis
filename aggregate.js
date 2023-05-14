@@ -5,7 +5,7 @@ import g from "./src/lib/game_.js";
 import supabase from "./src/lib/supabase.js";
 
 const tableId = Deno.args[0],
-      limit   = Deno.args[1] || 200;
+      limit   = Deno.args[1] || 10000;
 
 const [_tables, _seated, _events] = await Promise.all([
   supabase.from("tables").select('*,game_id(slug)').eq("id", tableId),
@@ -32,6 +32,6 @@ let snapshot = null;
 for(const event of events){
   const [curr, prior] = simulate(seats, config, [event], commands, seen, snapshot);
   const data = {seats, config, events: [event], commands, seen, snapshot};
-  _.log(`time curl -i --location --request POST $site/mind/${slug} --header 'Content-Type: application/json' --data '${JSON.stringify(data)}'`);
+  _.log(`time curl -i --location --request POST $site/simulate/${slug} --header 'Content-Type: application/json' --data '${JSON.stringify(data)}'`);
   snapshot = _.deref(curr);
 }

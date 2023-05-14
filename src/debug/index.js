@@ -39,7 +39,7 @@ const table = tables.data[0],
       slug = table.game_id.slug,
       config = table.config,
       source = server == "local" ? "http://0.0.0.0:8090" : "https://yourmove.fly.dev",
-      url = `${source}/mind/${slug}`,
+      url = `${source}/simulate/${slug}`,
       {make} = await import(`/games/${slug}/core.js`),
       simulate = g.simulate(make);
 

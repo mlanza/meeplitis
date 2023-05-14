@@ -12,11 +12,11 @@ import {log, count, uident, date, period, elapsed} from "https://yourmove.cc/lib
 
 const sep = '->';
 
-function routes(path){
-  return function handles(id, params){
-    return new Promise((resolve, reject) => {
-      const start = date();
-      const worker = new Worker(new URL(path, import.meta.url).href, { type: "module" });
+function spawn(id, params){
+  return new Promise(function(resolve, reject){
+    const start = date();
+    try {
+      const worker = new Worker(new URL("./game.ts", import.meta.url).href, { type: "module" });
       worker.addEventListener('message', function({data}){
         const stop = date();
         const ms = elapsed(period(start, stop)).valueOf();
@@ -28,13 +28,10 @@ function routes(path){
           reject(new Error(`Worker stopped with exit code ${code}`));
       });
       worker.postMessage(params);
-    });
-  }
-}
-
-const games = {
-  "mexica": routes("./games/mexica.ts"),
-  "oh-hell": routes("./games/oh-hell.ts")
+    } catch (ex) {
+      reject(ex);
+    }
+  });
 }
 
 const headers = {
@@ -47,9 +44,8 @@ const headers = {
 };
 
 app(
-  post("/mind/:game", async function({params}){
+  post("/simulate/:game", async function({params}){
     const id = uident(5);
-    const spawn = games[params.game];
     const body = JSON.stringify(params);
     const {events, commands} = params;
     log("req", params.game, id, sep, body);
@@ -63,14 +59,14 @@ app(
       return [500, headers, body];
     });
   }),
-  options("/mind/:game", function(){
+  options("/simulate/:game", function(){
     return [200, headers, ""];
   }),
   get("/", () => "<h1>Your Move Compute lives!</h1>"),
   get("/info", () => [
     200,
     contentType("json"),
-    JSON.stringify({ app: "mind", version: "1.2.0" })
+    JSON.stringify({ app: "yourmove", appname: "Your Move Compute", version: "1.2.0" })
   ])
 );
 

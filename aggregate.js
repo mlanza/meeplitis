@@ -1,6 +1,4 @@
 import _ from "./src/lib/atomic_/core.js";
-import $ from "./src/lib/atomic_/reactives.js";
-import t from "./src/lib/atomic_/transducers.js";
 import g from "./src/lib/game_.js";
 import supabase from "./src/lib/supabase.js";
 

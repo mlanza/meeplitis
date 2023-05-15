@@ -24,9 +24,8 @@ const params = new URLSearchParams(document.location.search),
       cache = !_.includes(options, "nocache");
 
 //=> exec(commands) // on a blank game
-const [tables, moments, seated, evented] = await Promise.all([
+const [tables, seated, evented] = await Promise.all([
   supabase.from("tables").select('*,game_id(slug)').eq("id", tableId),
-  supabase.from("moments").select('moment').eq("table_id", tableId).limit(1),
   supabase.rpc('seated', {_table_id: tableId}),
   supabase.rpc('evented', {_table_id: tableId})
 ]);
@@ -79,4 +78,6 @@ _.log(...await sim(seats, config, added, commands, seen, snapshot));
 
 _.swap($game, _.compact);
 
-Object.assign(window, {$game, exec, commands, supabase});
+Object.assign(window, {$game, mexica, g, exec, commands, supabase});
+
+

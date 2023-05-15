@@ -89,6 +89,7 @@ CREATE TABLE events(
     seat_id varchar(3),
     type varchar(25) not null,
     details jsonb,
+    snapshot jsonb,
     created_at timestamp not null default now(),
     CONSTRAINT fk_events_seats
       FOREIGN KEY(table_id, seat_id)

@@ -8,13 +8,19 @@ function simulation(page){
     return !line.startsWith("//") && !line.startsWith("export");
   }).join("\n").replace("export{simulate1 as simulate};", "");
 
-  page.content = `create or replace function ${named}(_seats jsonb, _config jsonb, _events jsonb, _commands jsonb, _seen int[], _snapshot jsonb)
+  page.content = `create or replace function ${named}(_payload jsonb)
 returns jsonb as $$
   const simulate1 = (function(){
     ${contents}
     return simulate1;
   })();
-return simulate1(_seats, _config || {}, _events || [], _commands || [], _seen || [], _snapshot);
+  const seats = _payload.seats,
+        config = _payload.config || {},
+        events = _payload.events || [],
+        commands = _payload.commands || [],
+        seen = _payload.seen || [],
+        snapshot = _payload.snapshot || null;
+return simulate1(seats, config, events, commands, seen, snapshot);
 
 $$ language plv8 immutable;`;
 

@@ -200,8 +200,10 @@ export function reality(self){
     metrics: metrics(self)};
 }
 
+const realize = _.update(_, "moves", _.toArray);
+
 export function summarize([curr, prior]){ //uses `hist`
-  const _reality = _.chain(curr, reality, _.update(_, "moves", _.toArray));
+  const _reality = _.chain(curr, reality, realize);
   return {
     notify: notify(curr, prior),
     added: events(curr),
@@ -233,7 +235,10 @@ function splitAt(idx, xs){
 }
 
 export function simulate(make){
-  return function(seats, config, events, commands, seen, snapshot){
+  function sim1({seats, config, events, commands, seen, snapshot}){
+    return sim6(seats, config, events, commands, seen, snapshot);
+  }
+  function sim6(seats, config = {}, events = [], commands = [], seen = [], snapshot = null){
     if (!_.seq(seats)) {
       throw new Error("Cannot play a game with no one seated at the table");
     }
@@ -241,10 +246,11 @@ export function simulate(make){
           curr = _.reduce((self, command) => execute(self, command, singular(seen)), prior, commands);
     return [curr, prior, seen];
   }
+  return _.overload(null, sim1, sim6);
 }
 
 export function effects([curr, prior, seen]){
-  return curr === prior ? perspective(curr, seen) : {
+  return curr === prior ? _.chain(perspective(curr, seen), realize) : {
     added: events(curr),
     up: up(curr),
     notify: notify(curr, prior)

@@ -14,13 +14,7 @@ returns jsonb as $$
     ${contents}
     return simulate1;
   })();
-  const seats = _payload.seats,
-        config = _payload.config || {},
-        events = _payload.events || [],
-        commands = _payload.commands || [],
-        seen = _payload.seen || [],
-        snapshot = _payload.snapshot || null;
-return simulate1(seats, config, events, commands, seen, snapshot);
+return simulate1(_payload);
 
 $$ language plv8 immutable;`;
 

@@ -1,1 +1,1 @@
-docker build -t game-mind ./fly
+docker build -t yourmove ./fly

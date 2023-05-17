@@ -6,9 +6,9 @@ import {
   options,
   redirect,
   contentType,
-} from "https://denopkg.com/syumai/dinatra/mod.ts";
-import * as g from "https://yourmove.cc/lib/game.js";
-import {log, count, uident, date, period, elapsed} from "https://yourmove.cc/lib/atomic/core.js";
+} from "dinatra";
+import * as g from "game";
+import {log, count, uident, date, period, elapsed} from "atomic/core";
 
 const sep = '->';
 

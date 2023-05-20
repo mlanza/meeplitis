@@ -27,7 +27,10 @@ where table_id = _table_id and snapshot is null and seq < (select seq from event
 order by seq
 into _from_event_id;
 
-select evented(_table_id, coalesce(_from_event_id, _event_id), _event_id)
+select coalesce(_from_event_id, _event_id)
+into _from_event_id;
+
+select evented(_table_id, _from_event_id, _event_id)
 into _events;
 
 select snapshot --first previous available snapshot

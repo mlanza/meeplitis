@@ -1,3 +1,58 @@
+create or replace function simulate(_table_id varchar, _event_id varchar, _commands jsonb, _seats int[]) returns jsonb
+security definer
+set search_path = public
+as $$
+declare
+_fn text;
+_result jsonb;
+_events jsonb;
+_config jsonb;
+_seat_configs jsonb;
+_payload jsonb;
+_snapshot jsonb;
+_from_event_id varchar;
+begin
+
+select config, fn
+from tables
+where id = _table_id
+into _config, _fn;
+
+select seat_configs(_table_id)
+into _seat_configs;
+
+select id
+from events
+where table_id = _table_id and snapshot is null and seq < (select seq from events where table_id = _table_id and id = _event_id)
+order by seq
+into _from_event_id;
+
+select evented(_table_id, coalesce(_from_event_id, _event_id), _event_id)
+into _events;
+
+select snapshot --first previous available snapshot
+from events
+where table_id = _table_id and id = (
+  select id
+  from events
+  where table_id = _table_id and seq < (
+    select seq
+    from events
+    where table_id = _table_id and id = _from_event_id)
+  order by seq desc
+  limit 1)
+into _snapshot;
+
+raise log '$ simulate at % for % from event id % to % with %', _table_id, _seats, _from_event_id, _event_id, _snapshot;
+
+select '{"game": "' || _fn || '", "seats": ' || _seat_configs::varchar || ', "config": ' || _config::varchar || ', "events": ' || _events::varchar || ', "commands": ' || _commands::varchar || ', "seen": ' || array_to_json(_seats) || ', "snapshot": ' || coalesce(_snapshot, 'null')::varchar || '}'
+into _payload;
+
+return (select simulate(_fn, _payload));
+
+end;
+$$ language plpgsql;
+
 create or replace function simulate(_game varchar, _payload jsonb)
 returns jsonb
 security definer
@@ -19,8 +74,8 @@ select case _game
       when 'mexica' then mexica(_payload)
       else null end
 into _result;
-
 /*
+
 SET statement_timeout = 10000;
 
 select status, content
@@ -40,7 +95,7 @@ $$ language plpgsql;
 
 create or replace function simulate(_table_id varchar, _commands jsonb, _seat int) returns jsonb
 security definer
-set search_path = public,extensions
+set search_path = public
 as $$
 declare
 _event_id varchar;
@@ -60,95 +115,40 @@ $$ language plpgsql;
 
 create or replace function simulate(_table_id varchar, _event_id varchar, _commands jsonb, _seat int) returns jsonb
 security definer
-set search_path = public,extensions
+set search_path = public
 as $$
-declare
-_fn text;
-_result jsonb;
-_seats int;
-_events jsonb;
-_config jsonb;
-_seat_configs jsonb;
-_payload jsonb;
-_snapshot jsonb;
-_seen int[];
 begin
 
-select config, fn, array[_seat]
-from tables
-where id = _table_id
-into _config, _fn, _seen;
-
-select count(*)
-from seats
-where table_id = _table_id
-into _seats;
-
-select seat_configs(_table_id)
-into _seat_configs;
-
-/*
-select evented
-from evented(_table_id, _event_id)
-into _events;
-*/
-
-select '[]' into _events;
-
-select snapshot
-from events
-where table_id = _table_id and id = _event_id
-into _snapshot;
-
-select '{"game": ' || _fn || ', "seats": ' || _seat_configs::varchar || ', "config": ' || _config::varchar || ', "events": ' || _events::varchar || ', "commands": ' || array_to_json(_commands)::varchar || ', "seen": ' || array_to_json(_seen) || ', "snapshot": ' || coalesce(_snapshot, 'null')::varchar || '}'
-into _payload;
-
-return (select simulate(_fn, _payload));
+return (select simulate(_table_id, _event_id, _commands, array[_seat]));
 
 end;
 $$ language plpgsql;
 
 create or replace function simulate(_table_id varchar, _event_id varchar, _seats int[]) returns jsonb
 security definer
-set search_path = public,extensions
+set search_path = public
 as $$
-declare
-_fn text;
-_result jsonb;
-_config jsonb;
-_events jsonb;
-_payload jsonb;
-_snapshot jsonb;
-_seat_configs jsonb;
 begin
 
-select seat_configs(_table_id)
-into _seat_configs;
+return (select simulate(_table_id, _event_id, '[]'::jsonb, _seats));
 
-/*
-select evented
-from evented(_table_id, _event_id)
-into _events;
-*/
+end;
+$$ language plpgsql;
 
-select '[]' into _events;
+create or replace function simulate(_table_id varchar, _event_id varchar) returns jsonb
+security definer
+set search_path = public
+as $$
+declare
+_seats int[];
+begin
 
-select snapshot
-from events
-where table_id = _table_id and id = _event_id
-into _snapshot;
+select array_agg(seat)
+from seats
+where table_id = _table_id
+into _seats;
 
-select config, fn
-from tables
-where id = _table_id
-into _config, _fn;
-
-select '{"game": "' || _fn::varchar || '", "seats": ' || _seat_configs::varchar || ', "config": ' || _config::varchar || ', "events": ' || _events::varchar || ', "commands": [], "seen": ' || array_to_json(_seats)::varchar || ', "snapshot": ' || coalesce(_snapshot, 'null')::varchar || '}'
-into _payload;
-
-raise log '$ payload -> %', _payload;
-
-return (select simulate(_fn, _payload));
+return (select simulate(_table_id, _event_id, '[]'::jsonb, _seats));
 
 end;
 $$ language plpgsql;

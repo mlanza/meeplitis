@@ -42,7 +42,7 @@ const table = tables.data[0],
       {make} = await import(`/games/${slug}/core.js`),
       simulate = g.simulate(make);
 
-function remote(seats, config, events, commands, seen, snapshot){
+function remote({seats, config = {}, loaded = [], events = [], commands = [], seen, snapshot = null}){
   return fetch(url, {
     method: "POST",
     mode: "cors",
@@ -51,7 +51,7 @@ function remote(seats, config, events, commands, seen, snapshot){
       'Accept': 'application/json',
       "Content-Type": "application/json"
     },
-    body: JSON.stringify({seats, events, commands, config, seen, snapshot})
+    body: JSON.stringify({seats, loaded, events, commands, config, seen, snapshot})
   }).then(function(resp){
     return resp.json();
   });
@@ -64,20 +64,30 @@ const loaded = cut ? _.chain(events, _.take(cut, _), _.toArray) : events,
       loadedUnseen = monitor ? [] : loaded,
       loadedSeen = monitor ? loaded : [];
 
-const [curr, prior] = simulate(seats, config, loadedUnseen, [], seen, null),
+function augment(f, ...added){
+  return function(args){
+    return args.length == 1 ? f([...args, null, ...added]) : f([...args, ...added]);
+  }
+}
+
+const [curr, prior] = simulate({
+        seats,
+        config,
+        seen
+      }),
       $game = $.cell(curr),
       exec = g.batch($game, g.execute, _);
 
-$.sub($.hist($game), t.map(g.summarize), _.log);
+$.sub($.hist($game), t.map(augment(g.effects, seen)), _.log);
 
 g.batch($game, g.fold, loadedSeen);
 
 const snapshot = _.chain($game, _.deref, _.deref);
 
-_.log(...await sim(seats, config, added, commands, seen, snapshot));
+_.log(...await sim({seats, config, added, commands, seen, snapshot}));
 
 _.swap($game, _.compact);
 
-Object.assign(window, {$game, mexica, g, exec, commands, supabase});
+Object.assign(window, {$game, g, exec, commands, supabase});
 
 

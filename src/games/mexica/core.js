@@ -138,16 +138,15 @@ function init(seats){
   };
 }
 
-function Mexica(seats, config, events, journal){
+function Mexica(seats, config, events, state){
   this.seats = seats;
   this.config = config;
   this.events = events;
-  this.journal = journal;
+  this.state = state;
 }
 
-export default function mexica(seats, config, events, journal){
-  return _.chain(new Mexica(_.toArray(seats), _.merge({dealCapulli}, config), [], journal || _.chain(seats, _.count, init, _.journal)),
-    _.reduce(fold, _, events));
+export default function mexica(seats, config, events, state){
+  return new Mexica(seats, _.merge({dealCapulli}, config), events, state || _.chain(seats, _.count, init));
 }
 
 export const make = mexica;
@@ -711,117 +710,103 @@ function fold(self, event){
 
     case "dealt-capulli":
       return g.fold(self, event,
-        _.fmap(_,
-          _.pipe(
-            _.merge(_, details),
-            _.assoc(_, "status", "placing-pilli"))));
+        _.pipe(
+          _.merge(_, details),
+          _.assoc(_, "status", "placing-pilli")));
 
     case "placed-pilli":
       return g.fold(self, event,
-        _.fmap(_,
-          _.pipe(
-            _.assocIn(_, ["seated", seat, "pilli"], details.at),
-            _.update(_, "contents", place(p, details.at)))));
+        _.pipe(
+          _.assocIn(_, ["seated", seat, "pilli"], details.at),
+          _.update(_, "contents", place(p, details.at))));
 
     case "committed":
-      return g.fold(self, event,
-        _.pipe(
-          _.fmap(_, committed),
-          _.flush));
+      return g.fold(self, event, committed);
 
     case "passed":
       return g.fold(self, event,
-        _.fmap(_,
-          _.pipe(
-            _.update(_, "spent", _.inc))));
+        _.pipe(
+          _.update(_, "spent", _.inc)));
 
     case "banked":
       return g.fold(self, event,
-        _.fmap(_,
-          _.pipe(
-            redeem(seat, redeemed),
-            _.update(_, "spent", _.inc),
-            _.update(_, "banked", _.inc),
-            _.update(_, "tokens", _.dec),
-            _.updateIn(_, ["seated", seat, "bank"], _.inc))));
+        _.pipe(
+          redeem(seat, redeemed),
+          _.update(_, "spent", _.inc),
+          _.update(_, "banked", _.inc),
+          _.update(_, "tokens", _.dec),
+          _.updateIn(_, ["seated", seat, "bank"], _.inc)));
 
     case "constructed-canal":
       const size = _.count(details.at);
       return g.fold(self, event,
-        _.fmap(_,
-          _.pipe(
-            redeem(seat, redeemed),
-            _.update(_, "spent", _.inc),
-            _.update(_, `canal${size}`, consume(details.at)),
-            _.update(_, "contents", function(contents){
-              return _.reduce(function(memo, at){
-                return place(w, at)(memo);
-              }, contents, details.at);
-            }))));
+        _.pipe(
+          redeem(seat, redeemed),
+          _.update(_, "spent", _.inc),
+          _.update(_, `canal${size}`, consume(details.at)),
+          _.update(_, "contents", function(contents){
+            return _.reduce(function(memo, at){
+              return place(w, at)(memo);
+            }, contents, details.at);
+          })));
 
     case "constructed-bridge":
       return g.fold(self, event,
-        _.fmap(_,
-          _.pipe(
-            redeem(seat, redeemed),
-            _.update(_, "spent", _.inc),
-            _.update(_, "bridges", consume(details.at)),
-            _.update(_, "contents", place(b, details.at)))));
+        _.pipe(
+          redeem(seat, redeemed),
+          _.update(_, "spent", _.inc),
+          _.update(_, "bridges", consume(details.at)),
+          _.update(_, "contents", place(b, details.at))));
 
     case "relocated-bridge":
       return g.fold(self, event,
-        _.fmap(_,
-          _.pipe(
-            redeem(seat, redeemed),
-            _.update(_, "spent", _.inc),
-            _.update(_, "bridges", _.pipe(remit(details.from), consume(details.to))),
-            _.update(_, "contents", _.pipe(displace(b, details.from), place(b, details.to))))));
+        _.pipe(
+          redeem(seat, redeemed),
+          _.update(_, "spent", _.inc),
+          _.update(_, "bridges", _.pipe(remit(details.from), consume(details.to))),
+          _.update(_, "contents", _.pipe(displace(b, details.from), place(b, details.to)))));
 
     case "built-temple":
       return g.fold(self, event,
-        _.fmap(_,
-          _.pipe(
-            redeem(seat, redeemed),
-            _.update(_, "spent", _.add(_, details.level)),
-            _.updateIn(_, ["seated", seat, "temples"], _.post(function(temples){
-              const idx = _.includes(_.getIn(temples, [0, details.level]), null) ? 0 : 1;
-              return _.updateIn(temples, [idx, details.level], consume(details.at));
-            }, function(temples){
-              return _.isArray(temples) && _.count(temples) === 2;
-            })),
-            _.update(_, "contents", place(t, details.at)),
-            markScoringRound)));
+        _.pipe(
+          redeem(seat, redeemed),
+          _.update(_, "spent", _.add(_, details.level)),
+          _.updateIn(_, ["seated", seat, "temples"], _.post(function(temples){
+            const idx = _.includes(_.getIn(temples, [0, details.level]), null) ? 0 : 1;
+            return _.updateIn(temples, [idx, details.level], consume(details.at));
+          }, function(temples){
+            return _.isArray(temples) && _.count(temples) === 2;
+          })),
+          _.update(_, "contents", place(t, details.at)),
+          markScoringRound));
 
     case "moved":
       return g.fold(self, event,
-        _.fmap(_,
-          _.pipe(
-            redeem(seat, redeemed),
-            _.update(_, "spent", _.add(_, cost)),
-            _.assocIn(_, ["seated", seat, "pilli"], details.to),
-            _.update(_, "contents", _.pipe(displace(p, pilli), place(p, details.to))))));
+        _.pipe(
+          redeem(seat, redeemed),
+          _.update(_, "spent", _.add(_, cost)),
+          _.assocIn(_, ["seated", seat, "pilli"], details.to),
+          _.update(_, "contents", _.pipe(displace(p, pilli), place(p, details.to)))));
 
     case "scored-grandeur":
       return g.fold(self, event,
-        _.fmap(_,
-          _.update(_, ["seated"], _.pipe(_.mapIndexed(function(seat, seated){
-            const {districts, palace} = event.details;
-            const points = _.sum(_.cons(_.nth(palace, seat), _.map(function({at, points}){
-              return _.nth(points, seat);
-            }, districts)));
-            return _.update(seated, "points", _.add(_, points));
-          }, _), _.toArray))));
+        _.update(_, ["seated"], _.pipe(_.mapIndexed(function(seat, seated){
+          const {districts, palace} = event.details;
+          const points = _.sum(_.cons(_.nth(palace, seat), _.map(function({at, points}){
+            return _.nth(points, seat);
+          }, districts)));
+          return _.update(seated, "points", _.add(_, points));
+        }, _), _.toArray)));
 
     case "concluded-period":
       return g.fold(self, event,
-        _.fmap(_,
-          _.pipe(
-            _.update(_, "period", _.inc),
-            _.assoc(_, "scoring-round", false))));
+        _.pipe(
+          _.update(_, "period", _.inc),
+          _.assoc(_, "scoring-round", false)));
 
     case "founded-district":
       return g.fold(self, event,
-        _.fmap(_,
+        _.pipe(
           _.updateIn(_, ["capulli", period], function(capulli){
             const idx = _.first(_.keepIndexed(function(idx, {at, size}){
               return at == null && size === details.size ? idx : null;
@@ -836,10 +821,10 @@ function fold(self, event){
           markScoringRound));
 
     case "finished":
-      return g.fold(self, event, _.fmap(_, _.pipe(_.dissoc(_, "up"), _.assoc(_, "status", "finished"))));
+      return g.fold(self, event, _.pipe(_.dissoc(_, "up"), _.assoc(_, "status", "finished")));
 
     default:
-      return g.fold(self, event, _.fmap(_, _.merge(_, details))); //plain events
+      return g.fold(self, event, _.merge(_, details)); //plain events
 
   }
 }
@@ -848,21 +833,21 @@ function compact(self){
   return new Mexica(self.seats,
     self.config,
     [],
-    self.journal);
+    self.state);
 }
 
 function append(self, event){
   return new Mexica(self.seats,
     self.config,
     _.append(self.events, event),
-    self.journal);
+    self.state);
 }
 
 function fmap(self, f){
   return new Mexica(self.seats,
     self.config,
     self.events,
-    f(self.journal));
+    f(self.state));
 }
 
 function up(self){
@@ -956,8 +941,8 @@ function perspective(self, seen, reality){
   return reality; //no hidden info.
 }
 
-function irreversible(self, command){
-  return _.includes(["committed", "finished"], command.type);
+function undoable(self, {type}){
+  return !_.includes(["committed", "finished"], type);
 }
 
 _.doto(Mexica,
@@ -965,4 +950,4 @@ _.doto(Mexica,
   _.implement(_.ICompactible, {compact}),
   _.implement(_.IAppendable, {append}),
   _.implement(_.IFunctor, {fmap}),
-  _.implement(g.IGame, {perspective, up, may, moves, irreversible, metrics, comparator, textualizer, execute, fold}));
+  _.implement(g.IGame, {perspective, up, may, moves, undoable, metrics, comparator, textualizer, execute, fold}));

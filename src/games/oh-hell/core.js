@@ -48,16 +48,15 @@ function deck(){
   return _.braid(card, ranks, suits);
 }
 
-function OhHell(seats, config, events, journal){
+function OhHell(seats, config, events, state){
   this.seats = seats;
   this.config = config;
   this.events = events;
-  this.journal = journal;
+  this.state = state;
 }
 
-export default function ohHell(seats, config, events, journal){
-  return _.chain(new OhHell(_.toArray(seats), config, [], journal || _.journal({deals: deals(config.start || 1, config.end || 7)})),
-    _.reduce(fold, _, events));
+export default function ohHell(seats, config, events, state){
+  return new OhHell(seats, config, events, state || {deals: deals(config.start || 1, config.end || 7)});
 }
 
 export const make = ohHell;
@@ -130,26 +129,22 @@ function playable(state, seat){
 }
 
 function moves(self){
-  const state = _.deref(self),
-        reversibility = g.reversibility(self);
+  const state = _.deref(self);
   if (state.up != null) {
     switch(state.status){
-      case "confirming":
-        return reversibility;
-
       case "bidding":
-        return _.concat(reversibility, bids(state));
+        return bids(state);
 
       case "playing":
-        return _.concat(reversibility, state.trick ? [] : playable(state, state.up));
+        return state.trick ? [] : playable(state, state.up);
 
     }
   }
   return [];
 }
 
-function irreversible(self, command){
-  return _.includes(["started", "dealt", "bid", "committed", "finished"], command.type);
+function undoable(self, {type}){
+  return !_.includes(["started", "dealt", "bid", "committed", "finished"], type);
 }
 
 function execute(self, command){
@@ -366,15 +361,6 @@ function fold(self, event){
             _.updateIn(_, ["seated", details.winner, "tricks"], _.conj(_, details.trick)),
             _.assoc(_, "lead", details.winner))));
 
-    case "undid":
-      return g.fold(self, event, _.undo);
-
-    case "redid":
-      return g.fold(self, event, _.redo);
-
-    case "reset":
-      return g.fold(self, event, _.reset);
-
     case "committed":
       const empty = handsEmpty(state);
       const played = _.chain(state.seated, _.map(_.get(_, "played"), _), _.compact, _.first);
@@ -402,21 +388,21 @@ function compact(self){
   return new OhHell(self.seats,
     self.config,
     [],
-    self.journal);
+    self.state);
 }
 
 function append(self, event){
   return new OhHell(self.seats,
     self.config,
     _.append(self.events, event),
-    self.journal);
+    self.state);
 }
 
 function fmap(self, f){
   return new OhHell(self.seats,
     self.config,
     self.events,
-    f(self.journal));
+    f(self.state));
 }
 
 function seats(self){
@@ -475,4 +461,4 @@ _.doto(OhHell,
   _.implement(_.ICompactible, {compact}),
   _.implement(_.IAppendable, {append}),
   _.implement(_.IFunctor, {fmap}),
-  _.implement(g.IGame, {perspective, up, may, moves, irreversible, metrics, comparator, textualizer, execute: _.comp(compel, execute), fold}));
+  _.implement(g.IGame, {perspective, up, may, moves, undoable, metrics, comparator, textualizer, execute: _.comp(compel, execute), fold}));

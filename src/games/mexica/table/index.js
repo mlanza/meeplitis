@@ -244,6 +244,7 @@ function dropPriorOmissions(el){
 }
 
 $.sub($hist, function([curr, prior, step]){
+  //TODO compute moves locally, not from server; need config, seat_configs
   const {state, seen, moves} = curr;
   const {seated, tokens, canal1, canal2, bridges, period, board, contents, status, round, spent} = state;
 

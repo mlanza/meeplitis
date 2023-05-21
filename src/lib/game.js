@@ -106,19 +106,11 @@ function movesAt(seats){
   return _.filtera(_.pipe(_.get(_, "seat"), _.includes(seats, _)), _); //TODO `filter` for `filtera`
 }
 
-function moves2(self, seats){
-  return _.chain(self, IGame.moves, movesAt(seats));
+function moves1(self){
+  return IGame.moves(self, {type: null, seat: null});
 }
 
-export const moves = _.overload(null, IGame.moves, moves2);
-
-export function perspectives(self, reality){
-  return _.chain(self,
-    seated,
-    _.mapa(_.pipe(_.array, function(seen){
-      return perspective(self, seen, reality);
-    }), _));
-}
+export const moves = _.overload(null, moves1, IGame.moves);
 
 export function notify(curr, prior){
   return _.difference(_.chain(curr, up), _.maybe(prior, up) || []);
@@ -132,7 +124,6 @@ export function reality(self){
   return {
     event: _.maybe(self, events, _.last),
     state: _.deref(self),
-    //moves: moves(self),
     up: up(self),
     may: may(self),
     metrics: metrics(self)};

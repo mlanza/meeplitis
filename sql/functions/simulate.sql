@@ -11,6 +11,7 @@ _seat_configs jsonb;
 _payload jsonb;
 _snapshot jsonb;
 _from_event_id varchar;
+_seen varchar;
 begin
 
 select config, fn
@@ -33,7 +34,7 @@ into _from_event_id;
 select evented(_table_id, _from_event_id, _event_id)
 into _events;
 
-select snapshot --first previous available snapshot
+select snapshot->'state' --first previous available snapshot
 from events
 where table_id = _table_id and id = (
   select id
@@ -46,7 +47,9 @@ where table_id = _table_id and id = (
   limit 1)
 into _snapshot;
 
-raise log '$ simulate at % for % from event id % to % with %', _table_id, _seats, _from_event_id, _event_id, _snapshot;
+select case when array_to_json(_seats)::varchar = array_to_json(array[null])::varchar then 'anon' else array_to_json(_seats)::varchar end into _seen;
+
+raise log '$ simulate at % for % from event id % to % with %', _table_id, _seen, _from_event_id, _event_id, _snapshot;
 
 select '{"game": "' || _fn || '", "seats": ' || _seat_configs::varchar || ', "config": ' || _config::varchar || ', "events": ' || _events::varchar || ', "commands": ' || _commands::varchar || ', "seen": ' || array_to_json(_seats) || ', "snapshot": ' || coalesce(_snapshot, 'null')::varchar || '}'
 into _payload;

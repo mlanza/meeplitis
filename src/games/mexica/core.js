@@ -890,7 +890,7 @@ function moves(self, {type = null, seat = null}){
   const seats = seat == null ? g.up(self) : _.filter(_.eq(seat, _), g.up(self));
   const {contents, capulli, canal1, canal2, bridges, period, status, spent, banked, seated} = _.deref(self);
 
-  return new _.Concatenated(_.braid(function(type, seat){
+  return _.concatenated(_.braid(function(type, seat){
     const {pilli, bank} = _.nth(seated, seat);
     const from = pilli;
     const unspent = remaining(spent, bank);

@@ -26,7 +26,6 @@ function once4(self, key, selector, callback) {
   return off;
 }
 const once = _.overload(null, null, null, once3, once4);
-const one = _.called(once, "`one` is deprecated.  Use `once` instead.");
 
 const IPublish = _.protocol({
   pub: null,
@@ -60,7 +59,6 @@ var p = /*#__PURE__*/Object.freeze({
   chan: chan,
   trigger: trigger,
   once: once,
-  one: one,
   pub: pub$3,
   err: err$3,
   complete: complete$3,
@@ -106,7 +104,6 @@ Subject.prototype[Symbol.toStringTag] = "Subject";
 function subject(observers) {
   return new Subject(_.volatile(observers || []), null);
 }
-const broadcast = _.called(subject, "`broadcast` deprecated - use `subject` instead.");
 
 function Cell(state, observer, validate) {
   this.state = state;
@@ -659,9 +656,6 @@ const tick = shared(subject, Observable.tick);
 const when = shared(cell, Observable.when);
 const toggles = shared(cell, Observable.toggles);
 const hist = shared(cell, Observable.hist);
-const readonly = _.called(_.identity, "`readonly` is deprecated.");
-const event = _.called(fromEvent, "`event` is deprecated — use `fromEvent` instead.");
-const fromElement = _.called(interact, "`fromElement` is deprecated — use `interact` instead.");
 function fmap(source, f) {
   return map(f, source);
 }
@@ -674,43 +668,6 @@ function fromPromise2(promise, init) {
 const fromPromise = _.overload(null, (_fromPromise = fromPromise2, function fromPromise2(_argPlaceholder2) {
   return _fromPromise(_argPlaceholder2, null);
 }), fromPromise2);
-const join = _.called(function join(sink, ...sources) {
-  return share(_.merge(...sources), sink);
-}, "`join` is deprecated — use `merge` instead.");
-
-//enforce sequential nature of operations
-function isolate(f) {
-  //TODO treat operations as promises
-  const queue = [];
-  return function () {
-    const ready = queue.length === 0;
-    queue.push(arguments);
-    if (ready) {
-      while (queue.length) {
-        const args = _.first(queue);
-        try {
-          f.apply(null, args);
-          trigger(args[0], "mutate", {
-            bubbles: true
-          });
-        } finally {
-          queue.shift();
-        }
-      }
-    }
-  };
-}
-function mutate3(self, state, f) {
-  sub$4(state, _.partial(isolate(f), self));
-  return self;
-}
-function mutate2(state, f) {
-  var _state, _f, _mutate;
-  return _mutate = mutate3, _state = state, _f = f, function mutate3(_argPlaceholder3) {
-    return _mutate(_argPlaceholder3, _state, _f);
-  };
-}
-const mutate = _.called(_.overload(null, null, mutate2, mutate3), "`mutate` is deprecated — use `render` instead.");
 function render3(el, obs, f) {
   return sub$4(obs, t.isolate(), function (state) {
     f(el, state);
@@ -721,9 +678,9 @@ function render3(el, obs, f) {
 }
 
 function render2(state, f) {
-  var _state2, _f2, _render;
-  return _render = render3, _state2 = state, _f2 = f, function render3(_argPlaceholder4) {
-    return _render(_argPlaceholder4, _state2, _f2);
+  var _state, _f, _render;
+  return _render = render3, _state = state, _f = f, function render3(_argPlaceholder3) {
+    return _render(_argPlaceholder3, _state, _f);
   };
 }
 const render = _.overload(null, null, render2, render3);
@@ -738,9 +695,9 @@ function renderDiff3(el, obs, f) {
 }
 
 function renderDiff2(state, f) {
-  var _state3, _f3, _renderDiff;
-  return _renderDiff = renderDiff3, _state3 = state, _f3 = f, function renderDiff3(_argPlaceholder5) {
-    return _renderDiff(_argPlaceholder5, _state3, _f3);
+  var _state2, _f2, _renderDiff;
+  return _renderDiff = renderDiff3, _state2 = state, _f2 = f, function renderDiff3(_argPlaceholder4) {
+    return _renderDiff(_argPlaceholder4, _state2, _f2);
   };
 }
 
@@ -760,4 +717,4 @@ const renderDiff = _.overload(null, null, renderDiff2, renderDiff3);
   }));
 })();
 
-export { Cell, Cursor, IEvented, IPublish, ISubscribe, Observable, Observer, Subject, broadcast, cell, chan, closed$3 as closed, collect, complete$3 as complete, computed, connect, cursor, err$3 as err, event, fixed, fromElement, fromEvent, fromPromise, hist, interact, join, latest, map, mutate, observable, observer, on, once, one, pipe, pub$3 as pub, readonly, render, renderDiff, seed, share, shared, sharing, splay, sub$4 as sub, subject, then, tick, toObservable, toggles, trigger, when };
+export { Cell, Cursor, IEvented, IPublish, ISubscribe, Observable, Observer, Subject, cell, chan, closed$3 as closed, collect, complete$3 as complete, computed, connect, cursor, err$3 as err, fixed, fromEvent, fromPromise, hist, interact, latest, map, observable, observer, on, once, pipe, pub$3 as pub, render, renderDiff, seed, share, shared, sharing, splay, sub$4 as sub, subject, then, tick, toObservable, toggles, trigger, when };

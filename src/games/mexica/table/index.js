@@ -8,7 +8,8 @@ import {session, $online} from "/lib/session.js";
 import {table, ui, scored, outcome, subject} from "/lib/table.js";
 import {getSeated, getSeat, story, nav, waypoint, hist} from "/lib/story.js";
 import {describe} from "/components/table/index.js";
-import {boardSpots, right, below, above, dry, consolidateTemples} from "../core.js";
+import * as c from "../core.js";
+import * as g from "/lib/game.js";
 
 async function svg(what){
   return await fetch(`../table/images/${what}.svg`).then(function(resp){
@@ -139,7 +140,7 @@ const els = {
 }
 
 dom.append(els.board,
-  _.map(spot, boardSpots),
+  _.map(spot, c.boardSpots),
   emperor());
 
 dom.append(els.board, _.map(_.pipe(_.add(_, 64), String.fromCharCode, function(letter){
@@ -244,8 +245,9 @@ function dropPriorOmissions(el){
 }
 
 $.sub($hist, function([curr, prior, step]){
-  const {state, seen, moves} = curr;
-  const {seated, tokens, canal1, canal2, bridges, period, board, contents, status, round, spent} = state;
+  const {state, seen, event} = curr;
+  const {seated, tokens, canal1, canal2, bridges, period, contents, status, round, spent} = state;
+  const game = c.mexica(_.toArray(_.repeat(_.count(seated), {})), {}, [event], state);
 
   dropPriorOmissions(el);
 
@@ -290,7 +292,7 @@ $.sub($hist, function([curr, prior, step]){
     });
   }, _.range(0, 2), _.range(0, 8));
 
-  const foundable = _.maybe(moves, _.filter(_.includes(_, ["type", "found-district"]), _), _.seq, _.mapa(_.getIn(_, ["details", "size"]), _), _.first);
+  const foundable = _.maybe(g.moves(game, {type: "found-district"}), _.filter(_.includes(_, ["type", "found-district"]), _), _.seq, _.mapa(_.getIn(_, ["details", "size"]), _), _.first);
   _.maybe(dom.sel1(`img[data-piece='capulli'][data-size='${foundable}']`, demands), dom.addClass(_, "foundable"));
 
   diff(curr, prior, ["state", "canal2"], function(curr, prior){
@@ -300,7 +302,7 @@ $.sub($hist, function([curr, prior, step]){
           omit(dom.sel1("[data-piece='canal']", at(prior[0])));
         }
         if (curr) {
-          const orientation = below(curr[0]) == curr[1] ? "vertical" : "horizontal";
+          const orientation = c.below(curr[0]) == curr[1] ? "vertical" : "horizontal";
           dom.append(at(curr[0]), canal({size: 2, orientation}));
         }
       });
@@ -327,7 +329,7 @@ $.sub($hist, function([curr, prior, step]){
           omit(dom.sel1("[data-piece='bridge']", at(prior)));
         }
         if (curr) {
-          const orientation = dry(board, contents, above(curr)) && dry(board, contents, below(curr)) ? "vertical" : "horizontal";
+          const orientation = c.dry(c.board, contents, c.above(curr)) && c.dry(c.board, contents, c.below(curr)) ? "vertical" : "horizontal";
           dom.append(at(curr), bridge({orientation}));
         }
       });
@@ -346,7 +348,7 @@ $.sub($hist, function([curr, prior, step]){
     dom.text(dom.sel1(".points", zone), points);
     dom.attr(dom.sel1(".tokens", area), "data-remaining", bank);
 
-    _.chain(temples, _.take(period + 1, _), consolidateTemples, _.eachkv(function(level, spots){
+    _.chain(temples, _.take(period + 1, _), c.consolidateTemples, _.eachkv(function(level, spots){
       dom.attr(dom.sel1(`.temples[data-size='${level}'`, area), "data-remaining", remaining(spots));
     }, _));
 

@@ -14,7 +14,7 @@ const w = "w", //water
       p = "p", //pilli
       n = "-"; //nothing
 
-const board = [
+export const board = [
        /*@,A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V*/
   /*0*/ [n,w,w,w,w,w,w,w,w,w,w,w,n,n,n,n,n,n,n,n,n,n,n],
   /*1*/ [n,w,l,w,w,w,l,l,l,l,l,w,w,w,n,n,n,n,n,n,n,n,n],
@@ -138,19 +138,20 @@ function init(seats){
   };
 }
 
-function Mexica(seats, config, events, journal){
+function Mexica(seats, config, events, state){
   this.seats = seats;
   this.config = config;
   this.events = events;
-  this.journal = journal;
+  this.state = state;
 }
 
-export default function mexica(seats, config, events, journal){
-  return _.chain(new Mexica(_.toArray(seats), _.merge({dealCapulli}, config), [], journal || _.chain(seats, _.count, init, _.journal)),
-    _.reduce(fold, _, events));
+export function mexica(seats, config, events, state){
+  return new Mexica(seats, _.merge({dealCapulli}, config), events, state || _.chain(seats, _.count, init));
 }
 
 export const make = mexica;
+
+export default mexica;
 
 const cat = _.mapcat(_.identity, _);
 
@@ -554,8 +555,7 @@ export function execute(self, command){
   const {type, details, seat} = command;
   const endOfRound = seat === _.count(state.seated) - 1;
   const cost = price(command);
-  const _moves = g.moves(self, [seat]);
-  const moves = _.filtera(_.comp(_.eq(_, command.type), _.get(_, "type")), _moves);
+  const moves = g.moves(self, {type, seat});
   const automatic = _.includes(["start", "deal-capulli"], type);
   const matched = _.detect(_.eq(_, _.chain(command, _.compact, _.dissoc(_, "id"))), moves);
   const seated = seat == null ? {pilli: null, bank: 0} : state.seated[seat];
@@ -711,117 +711,103 @@ function fold(self, event){
 
     case "dealt-capulli":
       return g.fold(self, event,
-        _.fmap(_,
-          _.pipe(
-            _.merge(_, details),
-            _.assoc(_, "status", "placing-pilli"))));
+        _.pipe(
+          _.merge(_, details),
+          _.assoc(_, "status", "placing-pilli")));
 
     case "placed-pilli":
       return g.fold(self, event,
-        _.fmap(_,
-          _.pipe(
-            _.assocIn(_, ["seated", seat, "pilli"], details.at),
-            _.update(_, "contents", place(p, details.at)))));
+        _.pipe(
+          _.assocIn(_, ["seated", seat, "pilli"], details.at),
+          _.update(_, "contents", place(p, details.at))));
 
     case "committed":
-      return g.fold(self, event,
-        _.pipe(
-          _.fmap(_, committed),
-          _.flush));
+      return g.fold(self, event, committed);
 
     case "passed":
       return g.fold(self, event,
-        _.fmap(_,
-          _.pipe(
-            _.update(_, "spent", _.inc))));
+        _.pipe(
+          _.update(_, "spent", _.inc)));
 
     case "banked":
       return g.fold(self, event,
-        _.fmap(_,
-          _.pipe(
-            redeem(seat, redeemed),
-            _.update(_, "spent", _.inc),
-            _.update(_, "banked", _.inc),
-            _.update(_, "tokens", _.dec),
-            _.updateIn(_, ["seated", seat, "bank"], _.inc))));
+        _.pipe(
+          redeem(seat, redeemed),
+          _.update(_, "spent", _.inc),
+          _.update(_, "banked", _.inc),
+          _.update(_, "tokens", _.dec),
+          _.updateIn(_, ["seated", seat, "bank"], _.inc)));
 
     case "constructed-canal":
       const size = _.count(details.at);
       return g.fold(self, event,
-        _.fmap(_,
-          _.pipe(
-            redeem(seat, redeemed),
-            _.update(_, "spent", _.inc),
-            _.update(_, `canal${size}`, consume(details.at)),
-            _.update(_, "contents", function(contents){
-              return _.reduce(function(memo, at){
-                return place(w, at)(memo);
-              }, contents, details.at);
-            }))));
+        _.pipe(
+          redeem(seat, redeemed),
+          _.update(_, "spent", _.inc),
+          _.update(_, `canal${size}`, consume(details.at)),
+          _.update(_, "contents", function(contents){
+            return _.reduce(function(memo, at){
+              return place(w, at)(memo);
+            }, contents, details.at);
+          })));
 
     case "constructed-bridge":
       return g.fold(self, event,
-        _.fmap(_,
-          _.pipe(
-            redeem(seat, redeemed),
-            _.update(_, "spent", _.inc),
-            _.update(_, "bridges", consume(details.at)),
-            _.update(_, "contents", place(b, details.at)))));
+        _.pipe(
+          redeem(seat, redeemed),
+          _.update(_, "spent", _.inc),
+          _.update(_, "bridges", consume(details.at)),
+          _.update(_, "contents", place(b, details.at))));
 
     case "relocated-bridge":
       return g.fold(self, event,
-        _.fmap(_,
-          _.pipe(
-            redeem(seat, redeemed),
-            _.update(_, "spent", _.inc),
-            _.update(_, "bridges", _.pipe(remit(details.from), consume(details.to))),
-            _.update(_, "contents", _.pipe(displace(b, details.from), place(b, details.to))))));
+        _.pipe(
+          redeem(seat, redeemed),
+          _.update(_, "spent", _.inc),
+          _.update(_, "bridges", _.pipe(remit(details.from), consume(details.to))),
+          _.update(_, "contents", _.pipe(displace(b, details.from), place(b, details.to)))));
 
     case "built-temple":
       return g.fold(self, event,
-        _.fmap(_,
-          _.pipe(
-            redeem(seat, redeemed),
-            _.update(_, "spent", _.add(_, details.level)),
-            _.updateIn(_, ["seated", seat, "temples"], _.post(function(temples){
-              const idx = _.includes(_.getIn(temples, [0, details.level]), null) ? 0 : 1;
-              return _.updateIn(temples, [idx, details.level], consume(details.at));
-            }, function(temples){
-              return _.isArray(temples) && _.count(temples) === 2;
-            })),
-            _.update(_, "contents", place(t, details.at)),
-            markScoringRound)));
+        _.pipe(
+          redeem(seat, redeemed),
+          _.update(_, "spent", _.add(_, details.level)),
+          _.updateIn(_, ["seated", seat, "temples"], _.post(function(temples){
+            const idx = _.includes(_.getIn(temples, [0, details.level]), null) ? 0 : 1;
+            return _.updateIn(temples, [idx, details.level], consume(details.at));
+          }, function(temples){
+            return _.isArray(temples) && _.count(temples) === 2;
+          })),
+          _.update(_, "contents", place(t, details.at)),
+          markScoringRound));
 
     case "moved":
       return g.fold(self, event,
-        _.fmap(_,
-          _.pipe(
-            redeem(seat, redeemed),
-            _.update(_, "spent", _.add(_, cost)),
-            _.assocIn(_, ["seated", seat, "pilli"], details.to),
-            _.update(_, "contents", _.pipe(displace(p, pilli), place(p, details.to))))));
+        _.pipe(
+          redeem(seat, redeemed),
+          _.update(_, "spent", _.add(_, cost)),
+          _.assocIn(_, ["seated", seat, "pilli"], details.to),
+          _.update(_, "contents", _.pipe(displace(p, pilli), place(p, details.to)))));
 
     case "scored-grandeur":
       return g.fold(self, event,
-        _.fmap(_,
-          _.update(_, ["seated"], _.pipe(_.mapIndexed(function(seat, seated){
-            const {districts, palace} = event.details;
-            const points = _.sum(_.cons(_.nth(palace, seat), _.map(function({at, points}){
-              return _.nth(points, seat);
-            }, districts)));
-            return _.update(seated, "points", _.add(_, points));
-          }, _), _.toArray))));
+        _.update(_, ["seated"], _.pipe(_.mapIndexed(function(seat, seated){
+          const {districts, palace} = event.details;
+          const points = _.sum(_.cons(_.nth(palace, seat), _.map(function({at, points}){
+            return _.nth(points, seat);
+          }, districts)));
+          return _.update(seated, "points", _.add(_, points));
+        }, _), _.toArray)));
 
     case "concluded-period":
       return g.fold(self, event,
-        _.fmap(_,
-          _.pipe(
-            _.update(_, "period", _.inc),
-            _.assoc(_, "scoring-round", false))));
+        _.pipe(
+          _.update(_, "period", _.inc),
+          _.assoc(_, "scoring-round", false)));
 
     case "founded-district":
       return g.fold(self, event,
-        _.fmap(_,
+        _.pipe(
           _.updateIn(_, ["capulli", period], function(capulli){
             const idx = _.first(_.keepIndexed(function(idx, {at, size}){
               return at == null && size === details.size ? idx : null;
@@ -836,10 +822,10 @@ function fold(self, event){
           markScoringRound));
 
     case "finished":
-      return g.fold(self, event, _.fmap(_, _.pipe(_.dissoc(_, "up"), _.assoc(_, "status", "finished"))));
+      return g.fold(self, event, _.pipe(_.dissoc(_, "up"), _.assoc(_, "status", "finished")));
 
     default:
-      return g.fold(self, event, _.fmap(_, _.merge(_, details))); //plain events
+      return g.fold(self, event, _.merge(_, details)); //plain events
 
   }
 }
@@ -848,21 +834,21 @@ function compact(self){
   return new Mexica(self.seats,
     self.config,
     [],
-    self.journal);
+    self.state);
 }
 
 function append(self, event){
   return new Mexica(self.seats,
     self.config,
     _.append(self.events, event),
-    self.journal);
+    self.state);
 }
 
 function fmap(self, f){
   return new Mexica(self.seats,
     self.config,
     self.events,
-    f(self.journal));
+    f(self.state));
 }
 
 function up(self){
@@ -899,36 +885,79 @@ function canalable(board, contents){
   }, districts(board, contents))));
 }
 
-function moves(self){
-  const [seat] = g.up(self);
+function moves(self, {type = null, seat = null}){
+  const types = type ? [type] : ["construct-canal", "construct-bridge", "relocate-bridge", "found-district", "bank", "move", "pass", "commit", "place-pilli"];
+  const seats = seat == null ? g.up(self) : _.filter(_.eq(seat, _), g.up(self));
   const {contents, capulli, canal1, canal2, bridges, period, status, spent, banked, seated} = _.deref(self);
-  const {pilli, bank} = _.nth(seated, seat);
-  const unspent = remaining(spent, bank);
 
-  if (pilli) {
+  return _.concatenated(_.braid(function(type, seat){
+    const {pilli, bank} = _.nth(seated, seat);
     const from = pilli;
-    const markers = _.nth(capulli, period);
-    const found = _.mapa(function(details){
-      return {type: "found-district", seat, details};
-    }, foundable(board, contents, markers, pilli));
-    const banking = banked < 2 && spent < 6 ? [{type: "bank", seat}] : [];
-    const water = waterways(board, contents, _.compact(bridges));
-    const foot = unspent > 0 ? _.chain(around(pilli), _.filter(_.and(_.notEq(_, CENTER), _.or(dry(board, contents, _), hasBridge(contents, _)), unoccupied(contents, _)), _), _.mapa(function(to){
-      return {type: "move", details: {by: "foot", from, to}, seat};
-    }, _)) : [];
-    const teleport = unspent > 4 ? [{type: "move", details: {by: "teleport", from, cost: 5}, seat}] : [];
-    const boat = hasBridge(contents, pilli) ? boats(water, pilli, _.min(unspent, 5), seat) : [];
-    const constructBridge = [{type: bridgesDepleted(bridges) ? "relocate-bridge": "construct-bridge", seat}];
-    const constructCanal = canalsDepleted(canal1, canal2) ? [] : [{type: "construct-canal", seat}];
-    const pass = spent < 6 ? [{type: "pass", seat}] : [];
-    const commit = spent > 5 ? [{type: "commit", seat}] : [];
-    return _.concat(commit, pass, banking, constructCanal, constructBridge, foot, boat, teleport, found);
-  } else {
-    const taken = _.chain(seated, _.map(_.get(_, "pilli"), _), _.compact, _.toArray);
-    return _.chain(palaceSpots, _.remove(_.includes(taken, _), _), _.map(function(at){
-      return {type: "place-pilli", details: {at}, seat}; //TODO compel 4th player to last position
-    }, _));
-  }
+    const unspent = remaining(spent, bank);
+    const permit = [{type, seat}];
+
+    if (pilli) {
+      switch(type){
+        case "construct-canal": {
+          return canalsDepleted(canal1, canal2) ? [] : permit;
+        }
+
+        case "found-district": {
+          const markers = _.nth(capulli, period);
+          return _.map(function(details){
+            return {type, seat, details};
+          }, foundable(board, contents, markers, pilli));
+        }
+
+        case "construct-bridge": {
+          return bridgesDepleted(bridges) ? [] : permit;
+        }
+
+        case "relocate-bridge": {
+          return bridgesDepleted(bridges) ? permit : [];
+        }
+
+        case "bank": {
+          return banked < 2 && spent < 6 ? permit : [];
+        }
+
+        case "move": {
+          const foot = unspent > 0 ? _.chain(around(pilli), _.filter(_.and(_.notEq(_, CENTER), _.or(dry(board, contents, _), hasBridge(contents, _)), unoccupied(contents, _)), _), _.map(function(to){
+            return {type, details: {by: "foot", from, to}, seat};
+          }, _)) : [];
+          const water = waterways(board, contents, _.compact(bridges));
+          const boat = hasBridge(contents, pilli) ? boats(water, pilli, _.min(unspent, 5), seat) : [];
+          const teleport = unspent > 4 ? [{type: "move", details: {by: "teleport", from, cost: 5}, seat}] : [];
+          return _.concat(foot, boat, teleport);
+        }
+
+        case "pass": {
+          return spent < 6 ? permit : [];
+        }
+
+        case "commit": {
+          return spent > 5 ? permit : [];
+        }
+
+        default: {
+          return [];
+        }
+      }
+    } else {
+      switch(type){
+        case "place-pilli": {
+          const taken = _.chain(seated, _.map(_.get(_, "pilli"), _), _.compact);
+          return _.chain(palaceSpots, _.remove(_.includes(taken, _), _), _.map(function(at){
+            return {type, details: {at}, seat}; //TODO compel 4th player to last position
+          }, _));
+        }
+
+        default: {
+          return [];
+        }
+      }
+    }
+  }, types, seats));
 }
 
 function metrics(self){
@@ -956,8 +985,8 @@ function perspective(self, seen, reality){
   return reality; //no hidden info.
 }
 
-function irreversible(self, command){
-  return _.includes(["committed", "finished"], command.type);
+function undoable(self, {type}){
+  return !_.includes(["committed", "finished"], type);
 }
 
 _.doto(Mexica,
@@ -965,4 +994,4 @@ _.doto(Mexica,
   _.implement(_.ICompactible, {compact}),
   _.implement(_.IAppendable, {append}),
   _.implement(_.IFunctor, {fmap}),
-  _.implement(g.IGame, {perspective, up, may, moves, irreversible, metrics, comparator, textualizer, execute, fold}));
+  _.implement(g.IGame, {perspective, up, may, moves, undoable, metrics, comparator, textualizer, execute, fold}));

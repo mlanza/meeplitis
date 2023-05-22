@@ -1238,33 +1238,6 @@ const option = _.assume(isHTMLDocument, document, _.overload(null, null, functio
     value: key
   }, value);
 }));
-const select = _.called(_.assume(isHTMLDocument, document, function select(document, entries, ...args) {
-  var _document, _option;
-  return element(document, "select", _.map((_option = option, _document = document, function option(_argPlaceholder7) {
-    return _option(_document, _argPlaceholder7);
-  }), entries), ...args);
-}), "`select` is deprecated — use `select` tag with `option(key, value),...` or `map(option, entries)`.");
-const checkbox = _.called(_.assume(isHTMLDocument, document, function checkbox(document, ...args) {
-  const el = element(document, 'input', {
-    type: "checkbox"
-  }, ...args);
-  function value1(el) {
-    return el.checked;
-  }
-  function value2(el, checked) {
-    el.checked = checked;
-  }
-  const value = _.overload(null, value1, value2);
-  return _.doto(el, _.specify(IValue, {
-    value: value
-  }));
-}), "`checkbox` is deprecated — use `input` tag with {type: 'checkbox'} instead.");
-const input = _.called(_.assume(isHTMLDocument, document, function input(document, ...args) {
-  return element(document, 'input', {
-    type: "text"
-  }, ...args);
-}), "`input` is deprecated — use `input` tag with {type: 'text'}.");
-const textbox = input;
 _.extend(_.ICoercible, {
   toFragment: null
 });
@@ -1331,4 +1304,4 @@ function stylesheet1(href) {
 }
 const stylesheet = _.overload(null, stylesheet1, stylesheet2);
 
-export { Attrs, IContent, IEmbeddable, IHideable, IHtml, IMountable, ISelectable, IText, IValue, InvalidHostElementError, NestedAttrs, Props, SpaceSeparated, addClass, addStyle, assert, attr, attrs, behave, behaviors, checkbox, classes, click, contents$2 as contents, depressed, element, elementns, embed, embeddables$2 as embeddables, enable, focus, fragment, hasClass, hash, hide$1 as hide, hover, html$1 as html, input, isElement, isHTMLDocument, isMountable, isVisible, markup, matches, mount, mounts, nestedAttrs, option, prop, props, ready, removeAttr, removeClass, removeStyle, replaceWith, sel$2 as sel, sel1$1 as sel1, select, show$1 as show, spaceSep, style, stylesheet, tag, tags, text$2 as text, textbox, toFragment, toggle$1 as toggle, toggleClass, value$2 as value, wrap };
+export { Attrs, IContent, IEmbeddable, IHideable, IHtml, IMountable, ISelectable, IText, IValue, InvalidHostElementError, NestedAttrs, Props, SpaceSeparated, addClass, addStyle, assert, attr, attrs, behave, behaviors, classes, click, contents$2 as contents, depressed, element, elementns, embed, embeddables$2 as embeddables, enable, focus, fragment, hasClass, hash, hide$1 as hide, hover, html$1 as html, isElement, isHTMLDocument, isMountable, isVisible, markup, matches, mount, mounts, nestedAttrs, option, prop, props, ready, removeAttr, removeClass, removeStyle, replaceWith, sel$2 as sel, sel1$1 as sel1, show$1 as show, spaceSep, style, stylesheet, tag, tags, text$2 as text, toFragment, toggle$1 as toggle, toggleClass, value$2 as value, wrap };

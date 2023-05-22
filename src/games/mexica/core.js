@@ -14,7 +14,7 @@ const w = "w", //water
       p = "p", //pilli
       n = "-"; //nothing
 
-const board = [
+export const board = [
        /*@,A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V*/
   /*0*/ [n,w,w,w,w,w,w,w,w,w,w,w,n,n,n,n,n,n,n,n,n,n,n],
   /*1*/ [n,w,l,w,w,w,l,l,l,l,l,w,w,w,n,n,n,n,n,n,n,n,n],
@@ -145,11 +145,13 @@ function Mexica(seats, config, events, state){
   this.state = state;
 }
 
-export default function mexica(seats, config, events, state){
+export function mexica(seats, config, events, state){
   return new Mexica(seats, _.merge({dealCapulli}, config), events, state || _.chain(seats, _.count, init));
 }
 
 export const make = mexica;
+
+export default mexica;
 
 const cat = _.mapcat(_.identity, _);
 

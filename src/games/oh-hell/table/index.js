@@ -8,6 +8,8 @@ import {session, $online} from "/lib/session.js";
 import {table, ui, scored, outcome, subject} from "/lib/table.js";
 import {getSeated, getSeat, story, hist} from "/lib/story.js";
 import {describe} from "/components/table/index.js";
+import * as c from "../core.js";
+import * as g from "/lib/game.js";
 
 const img = dom.tag('img'),
       li = dom.tag('li'),
@@ -119,8 +121,11 @@ $.sub($table, _.comp(t.compact(), t.map(describe), t.map(_.join("\n", _))), func
 });
 
 $.sub($hist, function([curr, prior, step]){
-  const {seen, event, moves, metrics, state, state: {trump, round, status, seated, deck, lead, broken, deals}} = curr;
+  debugger
+  const {seen, event, metrics, state, state: {trump, round, status, seated, deck, lead, broken, deals}} = curr;
   const {hand, bid} = _.nth(seated, seat) || {hand: null, bid: -1};
+  const game = c.ohHell(_.toArray(_.repeat(_.count(seated), {})), {}, [event], state);
+  const moves = g.moves(game);
   const cnt = _.count(seated);
   const leadSuit = _.maybe(seated, _.nth(_, lead), _.getIn(_, ["played", "suit"])) || "";
   const awarded = event.type == "awarded" ? _.toArray(_.take(cnt, _.drop(cnt - event.details.lead, _.cycle(event.details.trick)))) : null;

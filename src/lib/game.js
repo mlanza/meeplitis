@@ -29,7 +29,8 @@ function perspective2(self, seen){
   return perspective3(self, seen, reality(self));
 }
 
-function perspective3(self, seen, reality){
+function perspective3(self, _seen, reality){
+  const seen = _.filtera(_.isSome, _seen); //remove the null of anonymous
   return {...(_.eq(seen, everyone(self)) ? reality : IGame.perspective(self, seen, reality)), seen};
 }
 

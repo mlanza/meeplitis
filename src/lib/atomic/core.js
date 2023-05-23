@@ -1895,7 +1895,8 @@ const idx$3 = IIndexed.idx;
 const reverse$4 = IReversible.reverse;
 
 function concatenated(xs) {
-  return new Concatenated(xs);
+  const colls = filter(seq$b, xs);
+  return seq$b(colls) ? new Concatenated(colls) : emptyList();
 }
 const concat = overload(emptyList, seq$b, unspread(concatenated));
 function map2(f, xs) {

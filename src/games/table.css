@@ -32,7 +32,7 @@ sub {
   display: none;
 }
 body[data-tense="past"],
-body[data-event-type="finish"] {
+body[data-event-type="finished"] {
   background-image: url(/images/backgrounds/pixel_weave.webp);
   transition: background-image .3s ease-in-out;
 }
@@ -111,8 +111,8 @@ body[data-ready="false"] {
   border-radius: 1.1em;
   transition: height .5s, width .5s;
 }
-#event[data-type="scoring"],
-#event[data-type="finish"] {
+#event[data-type="scored"],
+#event[data-type="finished"] {
   text-align: center;
   vertical-align: middle;
 }
@@ -121,8 +121,8 @@ body[data-ready="false"] {
   transition: background .25s ease-out;
   cursor: default;
 }
-#event[data-type="scoring"] > *,
-#event[data-type="finish"] > * {
+#event[data-type="scored"] > *,
+#event[data-type="finished"] > * {
   display: inline-block;
 }
 #event img.subject {
@@ -130,8 +130,8 @@ body[data-ready="false"] {
   border: solid 1px dimgray;
   margin-bottom: -25px;
 }
-#event[data-type="scoring"] span,
-#event[data-type="finish"] span {
+#event[data-type="scored"] span,
+#event[data-type="finished"] span {
   font-size: 1.2em;
   margin: 0 7px 0 2px;
   padding-bottom: 5px;
@@ -199,11 +199,11 @@ body[data-ready="false"] {
   height: 7.5em;
   transition: height .5s;
 }
-[data-event-type="finish"] #event {
+[data-event-type="finished"] #event {
   height: 14.5em;
   transition: height .5s;
 }
-[data-event-type="finish"] #game {
+[data-event-type="finished"] #game {
   background-color: rgba(116, 53, 59, .6);
 }
 #replay {
@@ -275,7 +275,7 @@ a#logo {
   background-color: #74353b;
 }
 [data-tense="past"] *,
-[data-event-type="finish"] * {
+[data-event-type="finished"] * {
   cursor: not-allowed;
 }
 #game {
@@ -490,7 +490,7 @@ kbd.wide {
     color: snow;
   }
   body[data-tense="past"],
-  body[data-event-type="finish"] {
+  body[data-event-type="finished"] {
     background-image: url(/images/backgrounds/denim.webp);
   }
   kbd {

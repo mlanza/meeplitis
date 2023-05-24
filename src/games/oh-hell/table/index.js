@@ -62,15 +62,6 @@ function desc(event){
     case "committed":
       return "I'm done.";
 
-    case "undid":
-      return "Undoes.";
-
-    case "redid":
-      return "Redoes.";
-
-    case "reset":
-      return "Resets.";
-
     case "broke":
       return "Breaks trump!";
 
@@ -121,7 +112,6 @@ $.sub($table, _.comp(t.compact(), t.map(describe), t.map(_.join("\n", _))), func
 });
 
 $.sub($hist, function([curr, prior, step]){
-  debugger
   const {seen, event, metrics, state, state: {trump, round, status, seated, deck, lead, broken, deals}} = curr;
   const {hand, bid} = _.nth(seated, seat) || {hand: null, bid: -1};
   const game = c.ohHell(_.toArray(_.repeat(_.count(seated), {})), {}, [event], state);
@@ -178,7 +168,7 @@ $.on(el, "click", '[data-tense="present"][data-ready="true"] .moves button[data-
   sh.dispatch($story, {type: "bid", "details": {bid}});
 });
 
-$.on(el, "click", '[data-tense="present"][data-ready="true"] .moves button[data-type="reset"], [data-tense="present"][data-ready="true"] .moves button[data-type="undo"], [data-tense="present"][data-ready="true"] .moves button[data-type="redo"], [data-tense="present"][data-ready="true"] .moves button[data-type="commit"]', function(e){
+$.on(el, "click", '[data-tense="present"][data-ready="true"] .moves button[data-type="commit"]', function(e){
   const type = dom.attr(e.target, "data-type");
   sh.dispatch($story, {type});
 });

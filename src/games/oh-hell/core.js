@@ -55,10 +55,11 @@ function OhHell(seats, config, events, state){
   this.state = state;
 }
 
-export default function ohHell(seats, config, events, state){
+export function ohHell(seats, config, events, state){
   return new OhHell(seats, config, events, state || {deals: deals(config.start || 1, config.end || 7)});
 }
 
+export default ohHell;
 export const make = ohHell;
 
 function deal(self){

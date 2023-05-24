@@ -184,7 +184,7 @@ function desc(event){
     case "passed":
       return "Passed.";
     case "finished":
-      return "Finished."; //TODO
+      return outcome(seated, event.details);
     case "moved":
       switch(details.by){
         case "foot":
@@ -366,7 +366,7 @@ $.sub($hist, function([curr, prior, step]){
     });
   }, seated);
 
-  _.each(dom.removeClass(_, "scored"), dom.sel(".scored", el));
+  _.each(dom.removeClass(_, "scored"), dom.sel(".zone[data-seat] .scored", el));
   if (step === 1) {
     _.each(function(seat){
       diff(curr, prior, ["state", "seated", seat, "points"], function(curr, prior){

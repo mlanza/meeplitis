@@ -206,10 +206,10 @@ export function outcome(seated, {places, metrics}){
   const ranked = _.chain(places, _.mapkv(function(k, v){
     return [k, v];
   }, _), _.toArray, _.sort(_.asc(_.second), _), _.mapa(_.first, _));
-  return ol({class: "scored"}, _.cons(victor(winner), _.mapa(function(seat){
+  return [victor(winner), ol({class: "scored"}, _.mapa(function(seat){
     const {points} = _.nth(metrics, seat);
     return score(seated[seat], points);
-  }, ranked)));
+  }, ranked))];
 }
 
 export function victor(player){

@@ -610,7 +610,7 @@ export function execute(self, command){
         _.get(state, "scoring-round") && endOfRound
           ? _.pipe(
               g.fold(_, scoreGrandeur(temples, contents, period, districts(board, contents), pillis)),
-              g.fold(_, period === 0 ? {type: "concluded-period"} : {type: "finished"}))
+              period === 0 ? g.fold(_, {type: "concluded-period"}) : g.finish)
           : _.identity);
 
     case "bank":
@@ -694,7 +694,11 @@ export function execute(self, command){
       const points = founded(_.toArray(pillis), seat, dist);
       return _.chain(self, g.fold(_, {type: "founded-district", seat, details: {at: details.at, size: _.count(dist), points}}));
 
+    case "finish": {
+      return g.fold(self, _.assoc(command, "type", "finished"));
+    }
   }
+
 }
 
 function fold(self, event){

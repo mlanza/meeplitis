@@ -30,11 +30,11 @@ function creates(open, game){
     const seats = _.maybe(el.elements["players"], _.detect(function(el){
       return el.checked;
     }, _), dom.attr(_, "value"), parseInt);
-    const variant = _.chain(el.elements["variant"], _.detect(function(el){
+    const variant = _.maybe(el.elements["variant"], _.detect(function(el){
       return el.checked;
     }, _), dom.attr(_, "value"));
     const remark = el.elements["remark"].value;
-    const config = _.get({"up-down": {start: 1, end: 7}, "down-up": {start: 7, end: 1}}, variant);
+    const config = {}; //_.get({"up-down": {start: 1, end: 7}, "down-up": {start: 7, end: 1}}, variant);
     open({seats, config, remark});
   });
   return el;

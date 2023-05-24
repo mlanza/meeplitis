@@ -64,7 +64,7 @@ export function consolidateTemples(temples){
         return _.toArray(_.concat(spots, added));
       });
     }, memo, temples);
-  }, _.first(temples), _.rest(temples))
+  }, _.first(temples), _.rest(temples));
 }
 
 function bridgesDepleted(bridges){
@@ -441,17 +441,17 @@ function breaksBridge(board, contents, canal){
 }
 
 function levels(temples, dist){
-  return _.chain(temples, consolidateTemples, _.mapa(function(temples){
+  return _.mapa(function(temples){
     return _.sum(_.mapkv(function(level, spots){
       return _.count(_.filter(_.includes(dist, _), spots)) * level;
     }, temples));
-  }, _));
+  }, temples);
 }
 
 function places(temples, dist){
   const size = _.count(dist);
   const lvls = levels(temples, dist);
-  const ranks = _.unique(_.sort(_.desc(_.identity), lvls));
+  const ranks = _.chain(lvls, _.vals, _.compact, _.sort(_.desc(_.identity), _), _.take(3, _), _.toArray);
   return _.chain(lvls, _.mapkv(function(seat, levels){
     const idx = _.indexOf(ranks, levels);
     return idx >= 0 ? idx + 1 : null;
@@ -505,7 +505,7 @@ function scoreGrandeur(temples, contents, period, dists, pillis){
     const points = marker || period ? _.mapa(function(seat){
       return score(size, _.nth(plcs, seat));
     }, _.range(_.count(temples))) : null;
-    return  {at, size, points};
+    return {at, size, points};
   }, dists)
   const palace = bonus(palaceSpots, pillis);
   return {type: "scored-grandeur", details: {period, palace, districts: scored}}
@@ -562,7 +562,7 @@ export function execute(self, command){
   const {spent, contents, period, canal1, canal2, capulli, bridges, banked, tokens} = state;
   const {bank, pilli} = seated;
   const {deficit} = spend(spent, bank, cost);
-  const temples = _.map(_.get(_, "temples"), state.seated);
+  const temples = _.map(_.pipe(_.get(_, "temples"), consolidateTemples), state.seated);
   const pillis = _.map(_.get(_, "pilli"), state.seated);
 
   if (deficit) {
@@ -609,7 +609,7 @@ export function execute(self, command){
         g.fold(_, _.assoc(command, "type", "committed")),
         _.get(state, "scoring-round") && endOfRound
           ? _.pipe(
-              g.fold(_, scoreGrandeur(consolidateTemples(temples), contents, period, districts(board, contents), pillis)),
+              g.fold(_, scoreGrandeur(temples, contents, period, districts(board, contents), pillis)),
               g.fold(_, period === 0 ? {type: "concluded-period"} : {type: "finished"}))
           : _.identity);
 
@@ -887,7 +887,7 @@ function canalable(board, contents){
 
 function moves(self, {type = null, seat = null}){
   const types = type ? [type] : ["construct-canal", "construct-bridge", "relocate-bridge", "found-district", "bank", "move", "pass", "commit", "place-pilli"];
-  const seats = seat == null ? g.up(self) : _.filter(_.eq(seat, _), g.up(self));
+  const seats = seat == null ? _.compact(g.up(self)) : _.filter(_.eq(seat, _), g.up(self));
   const {contents, capulli, canal1, canal2, bridges, period, status, spent, banked, seated} = _.deref(self);
 
   return new _.Concatenated(_.braid(function(type, seat){

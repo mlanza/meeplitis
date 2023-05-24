@@ -181,6 +181,10 @@ function desc(event){
       return "Emperor awards spiritual grandeur!";
     case "concluded-period":
       return "The 2nd period begins!";
+    case "passed":
+      return "Passed.";
+    case "finished":
+      return "Finished."; //TODO
     case "moved":
       switch(details.by){
         case "foot":

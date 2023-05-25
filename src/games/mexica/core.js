@@ -115,7 +115,6 @@ export const boardSpots = _.map(function([x, y]){
 
 function init(seats){
   return {
-    up: 0,
     status: null,
     contents: {},
     period: 0,
@@ -717,7 +716,8 @@ function fold(self, event){
       return g.fold(self, event,
         _.pipe(
           _.merge(_, details),
-          _.assoc(_, "status", "placing-pilli")));
+          _.assoc(_, "status", "placing-pilli"),
+          _.assoc(_, "up", 0)));
 
     case "placed-pilli":
       return g.fold(self, event,
@@ -857,7 +857,7 @@ function fmap(self, f){
 
 function up(self){
   const {up} = _.deref(self);
-  return [up];
+  return _.filtera(_.isSome, [up]);
 }
 
 const may = up;

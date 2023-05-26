@@ -58,9 +58,16 @@ export function Story(session, tableId, seat, seated, ready, $state, $story){
 export function hist(self){
   const nada = {history: [], at: null};
   return $.pipe($.map(function(hist){
-    const curr  = _.nth(hist, 0) || nada,
-          prior = _.nth(hist, 1) || nada;
-    return [_.nth(curr.history, curr.at), _.nth(prior.history, prior.at), curr.at - prior.at];
+    const cstory = _.nth(hist, 0),
+          pstory = _.nth(hist, 1);
+    const motion = cstory && pstory;
+    const at = cstory?.at;
+    const head = cstory ? _.count(cstory.touches) - 1 : null;
+    const curr  = cstory ? _.nth(cstory.history, cstory.at) : null,
+          prior = pstory ? _.nth(pstory.history, pstory.at) : null;
+    const step = motion ? cstory.at - pstory.at : null;
+    const offset = cstory ? at - head : null;
+    return [curr, prior, {step, at, head, offset}];
   }, $.hist(self.$story)), t.filter(_.first));
 }
 

@@ -248,7 +248,8 @@ function dropPriorOmissions(el){
   _.each(dom.omit, dom.sel(".gone", el));
 }
 
-$.sub($hist, function([curr, prior, step]){
+$.sub($hist, function([curr, prior, motion]){
+  const {step} = motion;
   const {state, seen, event} = curr;
   const {seated, tokens, canal1, canal2, bridges, period, contents, status, round, spent} = state;
   const game = c.mexica(_.toArray(_.repeat(_.count(seated), {})), {}, [event], state);

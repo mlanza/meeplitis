@@ -62,12 +62,13 @@ export function hist(self){
           pstory = _.nth(hist, 1);
     const motion = cstory && pstory;
     const at = cstory?.at;
-    const head = cstory ? _.count(cstory.touches) - 1 : null;
+    const head  = cstory ? _.count(cstory.touches) - 1 : null;
     const curr  = cstory ? _.nth(cstory.history, cstory.at) : null,
           prior = pstory ? _.nth(pstory.history, pstory.at) : null;
+    const touch = cstory ? _.nth(cstory.touches, cstory.at) : null;
     const step = motion ? cstory.at - pstory.at : null;
     const offset = cstory ? at - head : null;
-    return [curr, prior, {step, at, head, offset}];
+    return [curr, prior, {step, at, head, offset, touch}];
   }, $.hist(self.$story)), t.filter(_.first));
 }
 

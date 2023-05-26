@@ -154,9 +154,8 @@ dom.append(els.board, _.map(function(number){
 dom.append(els.demands,
   _.map(demand, _.range(8)));
 
-function desc(event){
-  const details = event.details;
-  switch(event.type) {
+function desc({type, details}){
+  switch(type) {
     case "started":
       return "Starts game.";
     case "dealt-capulli":
@@ -184,7 +183,7 @@ function desc(event){
     case "passed":
       return "Passed.";
     case "finished":
-      return outcome(seated, event.details);
+      return outcome(seated, details);
     case "moved":
       switch(details.by){
         case "foot":
@@ -197,13 +196,16 @@ function desc(event){
           return "Moved";
       }
     default:
-      return event.type;
+      return type;
   }
 }
 
 const $table = table(tableId),
       $story = story(session, tableId, seat, seated, dom.attr(el, "data-ready", _)),
-      $hist = hist($story);
+      $hist  = hist($story),
+      $doing = $.cell({});
+
+$.sub($doing, _.see('doing'));
 
 function template(seat){
   return {
@@ -244,21 +246,33 @@ function indices(xs){
 function omit(el){
   dom.addClass(el, "gone");
 }
+
 function dropPriorOmissions(el){
   _.each(dom.omit, dom.sel(".gone", el));
 }
 
 $.sub($hist, function([curr, prior, motion]){
-  const {step} = motion;
+  const {step, offset, touch} = motion;
   const {state, seen, event} = curr;
   const {seated, tokens, canal1, canal2, bridges, period, contents, status, round, spent} = state;
   const game = c.mexica(_.toArray(_.repeat(_.count(seated), {})), {}, [event], state);
+  const up = _.includes(g.up(game), seat);
+  const play = up && offset === 0;
+  const $touch = $.cursor($doing, [touch]);
+
+  if (play) {
+    if (status === "placing-pilli") {
+      _.swap($touch, _.assoc(_, "type", "place-pilli"));
+    }
+  } else {
+    _.reset($touch, null);
+  }
 
   dropPriorOmissions(el);
 
   _.each(dom.removeClass(_, "foundable"), dom.sel(".foundable", demands));
 
-  dom.toggleClass(el, "scoring-round", step === 1 && _.get(state, "scoring-round"));
+  dom.toggleClass(el, "scoring-round", step > 0 && _.get(state, "scoring-round"));
   dom.text(dom.sel1("#phase", el), {"placing-pilli": `Choose Starting Spaces`, "actions": `Round ${round}`, "finished": "Finished"}[status]);
   dom.attr(els.board, "data-propose", "canal");
   dom.attr(els.actions, "data-remaining", status == "actions" ? _.max(6 - spent, 0) : 0);

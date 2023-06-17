@@ -159,7 +159,7 @@ function persistent$1(self) {
   delete self.arr;
   return arr;
 }
-var behave$4 = _.does(_.keying("TransientArray"), transition(transientArray), _.forward("arr", _.IFind, _.IMapEntry, _.IAssociative, _.IMap, _.ICoercible, _.ILookup, _.IReducible, _.IKVReducible, _.IFunctor, _.IInclusive, _.ICounted, _.ISeq, _.INext), _.implement(_.ISequential), _.implement(_.IClonable, {
+var behave$4 = _.does(_.keying("TransientArray"), transition(transientArray), _.forward("arr", _.IFind, _.IMapEntry, _.IAssociative, _.IMap, _.ICoercible, _.ILookup, _.IReducible, _.IKVReducible, _.IFunctor, _.IInclusive, _.ICounted, _.ISeq, _.INext), _.implement(_.ISequential), _.implement(_.ICloneable, {
   clone: clone$2
 }), _.implement(_.ISeqable, {
   seq: seq$1
@@ -233,7 +233,7 @@ var behave$3 = _.does(_.keying("TransientObject"), transition(transientObject), 
   compare
 }), _.implement(_.IFn, {
   invoke: _.get
-}), _.implement(_.IClonable, {
+}), _.implement(_.ICloneable, {
   clone: clone$1
 }), _.implement(_.IEquiv, {
   equiv
@@ -352,7 +352,7 @@ var behave$1 = _.does(_.keying("Set"), _.implement(_.ISequential), _.implement(_
   seq
 }), _.implement(_.IInclusive, {
   includes
-}), _.implement(_.IClonable, {
+}), _.implement(_.ICloneable, {
   clone
 }), _.implement(_.ICounted, {
   count

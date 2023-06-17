@@ -1,6 +1,5 @@
 import _ from "/lib/atomic_/core.js";
 import $ from "/lib/atomic_/reactives.js";
-import t from "/lib/atomic_/transducers.js";
 import sh from "/lib/atomic_/shell.js";
 import supabase from "/lib/supabase.js";
 import {character} from "/components/table/index.js";
@@ -69,7 +68,7 @@ export function hist(self){
     const step = motion ? cstory.at - pstory.at : null;
     const offset = cstory ? at - head : null;
     return [curr, prior, {step, at, head, offset, touch}];
-  }, $.hist(self.$story)), t.filter(_.first));
+  }, $.hist(self.$story)), _.filter(_.first));
 }
 
 function deref(self){
@@ -132,9 +131,9 @@ export function story(session, tableId, seat, seated, ready){
 
   ready(true);
 
-  return new Story(session, tableId, seat, seated, ready, $state, $.pipe($state,  t.filter(function({touches, history, at}){ //TODO cleanup
+  return new Story(session, tableId, seat, seated, ready, $state, $.pipe($state,  _.filter(function({touches, history, at}){ //TODO cleanup
     return touches && history && at != null;
-  }), t.dedupe(_.get(_, "at"))));
+  }), _.thin(_.get(_, "at"), _.equiv)));
 }
 
 function expand(idx){

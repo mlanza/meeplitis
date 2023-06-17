@@ -1,6 +1,5 @@
 import * as _ from './core.js';
 import { protocol, implement, IMergable, IReducible, does } from './core.js';
-import * as t from './transducers.js';
 
 const IEvented = _.protocol({
   on: null,
@@ -65,6 +64,45 @@ var p = /*#__PURE__*/Object.freeze({
   closed: closed$3,
   sub: sub$4
 });
+
+function hist$2(limit) {
+  //transducer
+  return function (rf) {
+    let history = [];
+    return _.overload(rf, rf, function (memo, value) {
+      const revised = _.clone(history);
+      revised.unshift(value);
+      if (revised.length > limit) {
+        revised.pop();
+      }
+      history = revised;
+      return rf(memo, history);
+    });
+  };
+}
+
+//regulates message processing so, if there are side effects, each is processed before the next begins
+function isolate$1() {
+  //transducer
+  return function (rf) {
+    let queue = [];
+    return _.overload(rf, rf, function (memo, value) {
+      let acc = memo;
+      const ready = queue.length === 0;
+      queue.push(value);
+      if (ready) {
+        while (queue.length) {
+          try {
+            acc = rf(acc, queue[0]);
+          } finally {
+            queue.shift();
+          }
+        }
+      }
+      return acc;
+    });
+  };
+}
 
 function Observable(subscribe) {
   this.subscribe = subscribe;
@@ -218,7 +256,7 @@ function seed1(source) {
 //adds an immediate value upon subscription as with cells.
 const seed = _.overload(null, seed1, seed2);
 function computed$1(f, source) {
-  return seed(f, pipe(source, t.map(f)));
+  return seed(f, pipe(source, _.map(f)));
 }
 function interact$1(key, f, el) {
   return computed$1(function () {
@@ -272,7 +310,7 @@ function latest$1(sources) {
   });
 }
 function toggles$1(el, on, off, init) {
-  return seed(init, _.merge(pipe(chan(el, on), t.constantly(true)), pipe(chan(el, off), t.constantly(false))));
+  return seed(init, _.merge(pipe(chan(el, on), _.map(_.constantly(true))), pipe(chan(el, off), _.map(_.constantly(false)))));
 }
 function fixed$1(value) {
   return observable(function (observer) {
@@ -303,7 +341,7 @@ const when$1 = _.overload(null, (_when = when2, _time2 = time, function when2(_a
   return _when(_argPlaceholder5, _time2);
 }), when2);
 function map2(f, source) {
-  return pipe(source, t.map(f), t.dedupe());
+  return pipe(source, _.map(f), _.dedupe());
 }
 function mapN(f, ...sources) {
   return map2(_.spread(f), latest$1(sources));
@@ -332,7 +370,7 @@ function resolve(source) {
   });
 }
 function hist2(size, source) {
-  return pipe(source, t.hist(size));
+  return pipe(source, hist$2(size));
 }
 const hist$1 = _.overload(null, (_hist = hist2, function hist2(_argPlaceholder6) {
   return _hist(2, _argPlaceholder6);
@@ -643,7 +681,6 @@ function connectN(source) {
 }
 ISubscribe.transducing = connect3;
 const connect = _.overload(null, null, connect2, connect3, connectN); //returns `unsub` fn
-
 const map = shared(cell, Observable.map);
 const then = shared(cell, Observable.resolve, Observable.map);
 const interact = shared(cell, Observable.interact);
@@ -668,8 +705,32 @@ function fromPromise2(promise, init) {
 const fromPromise = _.overload(null, (_fromPromise = fromPromise2, function fromPromise2(_argPlaceholder2) {
   return _fromPromise(_argPlaceholder2, null);
 }), fromPromise2);
+
+//enforce sequential nature of operations
+function isolate1(f) {
+  //TODO treat operations as promises
+  const queue = [];
+  return function () {
+    const ready = queue.length === 0;
+    queue.push(arguments);
+    if (ready) {
+      while (queue.length) {
+        const args = _.first(queue);
+        try {
+          f.apply(null, args);
+          trigger(args[0], "mutate", {
+            bubbles: true
+          });
+        } finally {
+          queue.shift();
+        }
+      }
+    }
+  };
+}
+const isolate = _.overload(isolate$1, isolate1);
 function render3(el, obs, f) {
-  return sub$4(obs, t.isolate(), function (state) {
+  return sub$4(obs, isolate0(), function (state) {
     f(el, state);
     trigger(el, "mutate", {
       bubbles: true
@@ -685,7 +746,7 @@ function render2(state, f) {
 }
 const render = _.overload(null, null, render2, render3);
 function renderDiff3(el, obs, f) {
-  return sub$4(obs, t.isolate(), t.hist(2), function (history) {
+  return sub$4(obs, isolate$1(), hist$2(2), function (history) {
     const args = [el].concat(history);
     f.apply(this, args); //overload arity 2 & 3 for initial and diff rendering
     trigger(el, "mutate", {
@@ -717,4 +778,4 @@ const renderDiff = _.overload(null, null, renderDiff2, renderDiff3);
   }));
 })();
 
-export { Cell, Cursor, IEvented, IPublish, ISubscribe, Observable, Observer, Subject, cell, chan, closed$3 as closed, collect, complete$3 as complete, computed, connect, cursor, err$3 as err, fixed, fromEvent, fromPromise, hist, interact, latest, map, observable, observer, on, once, pipe, pub$3 as pub, render, renderDiff, seed, share, shared, sharing, splay, sub$4 as sub, subject, then, tick, toObservable, toggles, trigger, when };
+export { Cell, Cursor, IEvented, IPublish, ISubscribe, Observable, Observer, Subject, cell, chan, closed$3 as closed, collect, complete$3 as complete, computed, connect, cursor, err$3 as err, fixed, fromEvent, fromPromise, hist, interact, isolate, latest, map, observable, observer, on, once, pipe, pub$3 as pub, render, renderDiff, seed, share, shared, sharing, splay, sub$4 as sub, subject, then, tick, toObservable, toggles, trigger, when };

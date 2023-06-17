@@ -1,6 +1,5 @@
 import _ from "/lib/atomic_/core.js";
 import $ from "/lib/atomic_/reactives.js";
-import t from "/lib/atomic_/transducers.js";
 import g from "/lib/game_.js";
 import supabase from "/lib/supabase.js";
 
@@ -78,7 +77,7 @@ const [curr, prior] = simulate({
       $game = $.cell(curr),
       exec = g.batch($game, g.execute, _);
 
-$.sub($.hist($game), t.map(augment(g.effects, seen)), _.log);
+$.sub($.hist($game), _.map(augment(g.effects, seen)), _.log);
 
 g.batch($game, g.fold, loadedSeen);
 

@@ -1,7 +1,6 @@
 import _ from "/lib/atomic_/core.js";
 import dom from "/lib/atomic_/dom.js";
 import $ from "/lib/atomic_/reactives.js";
-import t from "/lib/atomic_/transducers.js";
 import sh from "/lib/atomic_/shell.js";
 import supabase from "/lib/supabase.js";
 import {session, $online} from "/lib/session.js";
@@ -231,7 +230,7 @@ function diff(curr, prior, path, f){ //TODO promote
 //universal ui
 ui($table, $story, $hist, $online, seated, seat, desc, template, el);
 
-$.sub($table, _.comp(t.compact(), t.map(describe), t.map(_.join("\n", _))), function(descriptors){
+$.sub($table, _.comp(_.compact(), _.map(describe), _.map(_.join("\n", _))), function(descriptors){
   dom.attr(dom.sel1("#title"), "title", descriptors || "Normal game");
 });
 

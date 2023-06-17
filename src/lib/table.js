@@ -1,7 +1,6 @@
 import _ from "/lib/atomic_/core.js";
 import dom from "/lib/atomic_/dom.js";
 import $ from "/lib/atomic_/reactives.js";
-import t from "/lib/atomic_/transducers.js";
 import supabase from "/lib/supabase.js";
 import {presence} from "/lib/online.js";
 import {story, nav, hist, waypoint, refresh, atPresent} from "/lib/story.js";
@@ -36,11 +35,11 @@ export function table(tableId){
     }).
     subscribe();
 
-  return $.pipe($t, t.compact());
+  return $.pipe($t, _.compact());
 }
 
 export function ui($table, $story, $hist, $online, seated, seat, desc, template, el){
-  const $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), t.compact()),
+  const $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), _.compact()),
         $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table),
         $status = $.map(_.get(_, "status"), $table),
         $scored = $.map(_.get(_, "scored"), $table),
@@ -95,7 +94,7 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, template,
     }, seated);
   });
 
-  $.sub($presence, t.tee(_.see("presence")), function(presence){
+  $.sub($presence, _.map(_.tee(_.see("presence"))), function(presence){
     _.eachkv(function(username, presence){
       const zone = dom.sel1(`.zone[data-username="${username}"]`);
       dom.attr(zone, "data-presence", presence ? "online" : "offline");
@@ -107,16 +106,16 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, template,
   });
 
   const init = _.once(function(startTouch){
-    $.sub(dom.hash(window), t.map(_.replace(_, "#", "")), function(touch){
+    $.sub(dom.hash(window), _.map(_.replace(_, "#", "")), function(touch){
       nav($story, touch || startTouch);
     });
   });
 
-  $.sub($story.$state, _.comp(t.map(function({touches}){ //TODO law of demeter
+  $.sub($story.$state, _.comp(_.map(function({touches}){ //TODO law of demeter
     return touches;
-  }), t.compact(), t.map(_.last)), init);
+  }), _.compact(), _.map(_.last)), init);
 
-  $.sub($story, t.compact(), function({touches, at}){
+  $.sub($story, _.compact(), function({touches, at}){
     if (touches && at != null) {
       dom.attr(el, "data-tense", _.count(touches) - 1 == at ? "present" : "past");
       dom.value(els.progress, at + 1);

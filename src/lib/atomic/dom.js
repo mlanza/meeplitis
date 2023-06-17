@@ -653,7 +653,7 @@ var ielement = _.does(ihierarchy, icontents, ievented, iselectable, _.keying("El
   toggle
 }), _.implement(mut.ITransientOmissible, {
   omit: omit$3
-}), _.implement(_.IClonable, {
+}), _.implement(_.ICloneable, {
   clone
 }), _.implement(mut.ITransientAppendable, {
   append
@@ -1091,8 +1091,18 @@ const click = $.shared($.subject, function (el) {
 const hover = $.shared($.cell, function (el) {
   return $.toggles(el, "mouseenter", "mouseleave", _.constantly(false));
 });
+function scan(step, init) {
+  //transducer
+  return function (rf) {
+    let acc = init;
+    return _.overload(rf, rf, function (memo, value) {
+      acc = step(acc, value);
+      return rf(memo, acc);
+    });
+  };
+}
 const depressed = $.shared($.cell, function (el) {
-  return $.seed(_.constantly([]), $.pipe($.chan(el, "keydown keyup"), t.scan(function (memo, e) {
+  return $.seed(_.constantly([]), $.pipe($.chan(el, "keydown keyup"), scan(function (memo, e) {
     if (e.type === "keyup") {
       var _e$key, _$notEq, _ref2;
       memo = _.filtera((_ref2 = _, _$notEq = _ref2.notEq, _e$key = e.key, function notEq(_argPlaceholder2) {
@@ -1102,7 +1112,7 @@ const depressed = $.shared($.cell, function (el) {
       memo = _.conj(memo, e.key);
     }
     return memo;
-  }, []), t.dedupe()));
+  }, []), _.dedupe()));
 });
 function attr2(self, key) {
   if (_.isString(key)) {
@@ -1214,18 +1224,31 @@ const markup = _.obj(function (name, ...contents) {
   return _.join("", _.concat(["<" + name + " " + _.join(" ", attrs) + ">"], content, "</" + name + ">"));
 }, Infinity);
 function tags0() {
-  return tags1(element(document));
+  return _.factory(element(document));
 }
-const tags1 = _.factory;
+function tags1(keys) {
+  return tags2(element(document), keys);
+}
 function tags2(engine, keys) {
   return tags3(engine, _.identity, keys);
 }
 function tags3(engine, f, keys) {
-  const tag = tags1(engine);
-  return _.reduce(function (memo, key) {
+  const tag = _.factory(engine);
+  return _.fold(function (memo, key) {
     memo[key] = f(tag(key));
     return memo;
   }, {}, keys);
+}
+function svg(doc = document, tags = ["svg", "g", "symbol", "defs", "clipPath", "metadata", "path", "line", "circle", "rect", "ellipse", "polygon", "polyline", "image", "text", "tspan"]) {
+  function use(link, ...contents) {
+    const ns = elementns(doc, "http://www.w3.org/2000/svg"),
+      el = ns("use", contents);
+    el.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', link);
+    return el;
+  }
+  return Object.assign(tags2(element(document), tags), {
+    use
+  });
 }
 const tags = _.overload(tags0, tags1, tags2, tags3);
 const tag = tags();
@@ -1304,4 +1327,4 @@ function stylesheet1(href) {
 }
 const stylesheet = _.overload(null, stylesheet1, stylesheet2);
 
-export { Attrs, IContent, IEmbeddable, IHideable, IHtml, IMountable, ISelectable, IText, IValue, InvalidHostElementError, NestedAttrs, Props, SpaceSeparated, addClass, addStyle, assert, attr, attrs, behave, behaviors, classes, click, contents$2 as contents, depressed, element, elementns, embed, embeddables$2 as embeddables, enable, focus, fragment, hasClass, hash, hide$1 as hide, hover, html$1 as html, isElement, isHTMLDocument, isMountable, isVisible, markup, matches, mount, mounts, nestedAttrs, option, prop, props, ready, removeAttr, removeClass, removeStyle, replaceWith, sel$2 as sel, sel1$1 as sel1, show$1 as show, spaceSep, style, stylesheet, tag, tags, text$2 as text, toFragment, toggle$1 as toggle, toggleClass, value$2 as value, wrap };
+export { Attrs, IContent, IEmbeddable, IHideable, IHtml, IMountable, ISelectable, IText, IValue, InvalidHostElementError, NestedAttrs, Props, SpaceSeparated, addClass, addStyle, assert, attr, attrs, behave, behaviors, classes, click, contents$2 as contents, depressed, element, elementns, embed, embeddables$2 as embeddables, enable, focus, fragment, hasClass, hash, hide$1 as hide, hover, html$1 as html, isElement, isHTMLDocument, isMountable, isVisible, markup, matches, mount, mounts, nestedAttrs, option, prop, props, ready, removeAttr, removeClass, removeStyle, replaceWith, sel$2 as sel, sel1$1 as sel1, show$1 as show, spaceSep, style, stylesheet, svg, tag, tags, text$2 as text, toFragment, toggle$1 as toggle, toggleClass, value$2 as value, wrap };

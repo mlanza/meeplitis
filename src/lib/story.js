@@ -133,7 +133,7 @@ export function story(session, tableId, seat, seated, ready){
 
   return new Story(session, tableId, seat, seated, ready, $state, $.pipe($state,  _.filter(function({touches, history, at}){ //TODO cleanup
     return touches && history && at != null;
-  }), _.thin(_.get(_, "at"), _.equiv)));
+  }), _.thin(_.mapArgs(_.get(_, "at"), _.equiv))));
 }
 
 function expand(idx){

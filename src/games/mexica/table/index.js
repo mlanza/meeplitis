@@ -76,12 +76,7 @@ function spot([spot, terrain]){
     div({class: "propose"}));
 }
 
-const img = dom.tag('img'),
-      ol = dom.tag('ol'),
-      li = dom.tag('li'),
-      div = dom.tag('div'),
-      kbd = dom.tag('kbd'),
-      span = dom.tag('span');
+const {img, ol, li, div, kbd, span} = dom.tags(['img', 'ol', 'li', 'div', 'kbd', 'span']);
 
 const params = new URLSearchParams(document.location.search),
       tableId = params.get('id');

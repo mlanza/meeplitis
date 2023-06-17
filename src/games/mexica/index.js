@@ -5,16 +5,7 @@ import supabase from "/lib/supabase.js";
 import {session} from "/lib/session.js";
 import {table, seated, ready, onUpdate} from "/components/table/index.js";
 
-const div = dom.tag('div'),
-      span = dom.tag('span'),
-      img = dom.tag('img'),
-      a = dom.tag('a'),
-      p = dom.tag('p'),
-      button = dom.tag('button'),
-      submit = dom.tag('submit'),
-      form = dom.tag('form'),
-      label = dom.tag('label'),
-      input = dom.tag('input'),
+const {div, span, img, a, p, button, submit, form, label, input} = dom.tags(['div', 'span', 'img', 'a', 'p', 'button', 'submit', 'form', 'label', 'input']),
       radio = dom.tag('input', {type: "radio"});
 
 function creates(open, game){

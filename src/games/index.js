@@ -4,11 +4,7 @@ import $ from "/lib/atomic_/reactives.js";
 import supabase from "/lib/supabase.js";
 import {session} from "/lib/session.js";
 
-const img = dom.tag('img'),
-      a = dom.tag('a'),
-      h2 = dom.tag('h2'),
-      div = dom.tag('div'),
-      span = dom.tag('span');
+const {img, a, h2, div, span} = dom.tags(['img', 'a', 'h2', 'div', 'span']);
 
 const params = new URLSearchParams(document.location.search),
       username = params.get('username');

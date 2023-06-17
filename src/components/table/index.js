@@ -4,12 +4,7 @@ import $ from "/lib/atomic_/reactives.js";
 import supabase from "/lib/supabase.js";
 import {session} from "/lib/session.js";
 
-const div = dom.tag('div'),
-      span = dom.tag('span'),
-      img = dom.tag('img'),
-      a = dom.tag('a'),
-      p = dom.tag('p'),
-      button = dom.tag('button');
+const {div, span, img, a, p, button} = dom.tags(['div', 'span', 'img', 'a', 'p', 'button']);
 
 function ohhell(config){
   const descriptors = [];

@@ -5,14 +5,7 @@ import supabase from "/lib/supabase.js";
 import {presence} from "/lib/online.js";
 import {story, nav, hist, waypoint, refresh, atPresent} from "/lib/story.js";
 
-const div = dom.tag('div'),
-      h1 = dom.tag('h1'),
-      a = dom.tag('a'),
-      span = dom.tag('span'),
-      img = dom.tag('img'),
-      ol = dom.tag('ol'),
-      ul = dom.tag('ul'),
-      li = dom.tag('li');
+const {div, h1, a, span, img, ol, ul, li} = dom.tags(['div', 'h1', 'a', 'span', 'img', 'ol', 'ul', 'li']);
 
 export function table(tableId){
   const $t = $.cell(null);

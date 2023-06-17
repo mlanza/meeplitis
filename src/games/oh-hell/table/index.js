@@ -10,10 +10,7 @@ import {describe} from "/components/table/index.js";
 import * as c from "../core.js";
 import * as g from "/lib/game.js";
 
-const img = dom.tag('img'),
-      li = dom.tag('li'),
-      div = dom.tag('div'),
-      span = dom.tag('span');
+const {img, li, div, span} = dom.tags(['img', 'li', 'div', 'span']);
 
 const params = new URLSearchParams(document.location.search),
       tableId = params.get('id');

@@ -220,14 +220,13 @@ function wip($story){
 
 function which($latest){ //which entry index changed?
   return $.share($.pipe($.hist($latest),
-    _.comp(
-      _.filter(_.isArray),
-      _.filter(function([curr, prior]){
-        return _.isArray(curr);
-      }),
-      _.map(function([curr, prior]){
-        return _.conj(curr, _.detectIndex(_.not, _.map(_.isIdentical, curr, prior)));
-      }))));
+    _.filter(_.isArray),
+    _.filter(function([curr, prior]){
+      return _.isArray(curr);
+    }),
+    _.map(function([curr, prior]){
+      return _.conj(curr, _.detectIndex(_.not, _.map(_.isIdentical, curr, prior)));
+    })));
 }
 
 const $table = table(tableId),

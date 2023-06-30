@@ -218,13 +218,22 @@ function wip($story){
   return $wip;
 }
 
+function both($hist, $wip){
+  const $both_ = $.latest([$hist, $wip]);
+  return $.pipe($.map(function(xs){
+    const curr  = _.nth(xs, 0),
+          prior = _.nth(xs, 1);
+    return _.isArray(curr) ? _.conj(curr, _.nth(curr, 0) != _.nth(prior, 0) ? "hist" : "wip") : null;
+  }, $.hist($both_)), _.filter(_.and(_.first, _.second)));
+}
+
 const $table = table(tableId),
       $story = story(session, tableId, seat, seated, dom.attr(el, "data-ready", _)),
       $hist  = hist(c.mexica, $story),
       $wip   = wip($story),
-      $both  = $.pipe($.latest([$hist, $wip]), _.filter(_.and(_.first, _.second)));
+      $both  = both($hist, $wip);
 
-$.sub($wip, _.see("$wip"));
+$.sub($both, _.see("$both"));
 
 function test(){
   sh.dispatch($wip, {type: "place-pilli"});
@@ -274,7 +283,7 @@ function dropPriorOmissions(el){
   _.each(dom.omit, dom.sel(".gone", el));
 }
 
-$.sub($both, function([[curr, prior, motion, game], wip]){
+$.sub($both, function([[curr, prior, motion, game], wip, which]){
   const {step, offset, touch} = motion;
   const {state} = curr;
   const {seated, tokens, canal1, canal2, bridges, period, contents, status, round, spent} = state;

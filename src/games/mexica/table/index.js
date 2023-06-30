@@ -204,7 +204,7 @@ function wip($story){
         $ctx   = $.map(function(data, head, at){
           return head == at ? _.get(data, at, {}) : null;
         }, $data, $head, $at),
-        $wip   = $.pipe($.hist($ctx), _.drop(2));
+        $wip   = $.hist($ctx); //, _.drop(2));
 
   function dispatch(self, command){
     _.swap($data, _.assoc(_, _.deref($at), command));
@@ -218,20 +218,23 @@ function wip($story){
   return $wip;
 }
 
-function both($hist, $wip){
-  const $both_ = $.latest([$hist, $wip]);
-  return $.pipe($.map(function(xs){
-    const curr  = _.nth(xs, 0),
-          prior = _.nth(xs, 1);
-    return _.isArray(curr) ? _.conj(curr, _.nth(curr, 0) != _.nth(prior, 0) ? "hist" : "wip") : null;
-  }, $.hist($both_)), _.filter(_.and(_.first, _.second)));
+function which($latest){ //which entry index changed?
+  return $.share($.pipe($.hist($latest),
+    _.comp(
+      _.filter(_.isArray),
+      _.filter(function([curr, prior]){
+        return _.isArray(curr);
+      }),
+      _.map(function([curr, prior]){
+        return _.conj(curr, _.detectIndex(_.not, _.map(_.isIdentical, curr, prior)));
+      }))));
 }
 
 const $table = table(tableId),
       $story = story(session, tableId, seat, seated, dom.attr(el, "data-ready", _)),
       $hist  = hist(c.mexica, $story),
       $wip   = wip($story),
-      $both  = both($hist, $wip);
+      $both  = which($.latest([$hist, $wip]));
 
 $.sub($both, _.see("$both"));
 

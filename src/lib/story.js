@@ -54,20 +54,23 @@ export function Story(session, tableId, seat, seated, ready, $state, $story){
   Object.assign(this, {session, tableId, seat, seated, ready, $state, $story});
 }
 
-export function hist(self){
-  const nada = {history: [], at: null};
+function stepping(make, cstory, pstory){
+  const motion = cstory && pstory;
+  const at = cstory?.at;
+  const head  = cstory ? _.count(cstory.touches) - 1 : null;
+  const curr  = cstory ? _.nth(cstory.history, cstory.at) : null,
+        prior = pstory ? _.nth(pstory.history, pstory.at) : null;
+  const touch = cstory ? _.nth(cstory.touches, cstory.at) : null;
+  const step = motion ? cstory.at - pstory.at : null;
+  const offset = cstory ? at - head : null;
+  //TODO curr.state.seated, num seats?
+  const game = curr ? make(_.toArray(_.repeat(_.count(curr.state.seated), {})), {}, [curr.event], curr.state) : null;
+  return [curr, prior, {step, at, head, offset, touch}, game];
+}
+
+export function hist(make, self){
   return $.pipe($.map(function(hist){
-    const cstory = _.nth(hist, 0),
-          pstory = _.nth(hist, 1);
-    const motion = cstory && pstory;
-    const at = cstory?.at;
-    const head  = cstory ? _.count(cstory.touches) - 1 : null;
-    const curr  = cstory ? _.nth(cstory.history, cstory.at) : null,
-          prior = pstory ? _.nth(pstory.history, pstory.at) : null;
-    const touch = cstory ? _.nth(cstory.touches, cstory.at) : null;
-    const step = motion ? cstory.at - pstory.at : null;
-    const offset = cstory ? at - head : null;
-    return [curr, prior, {step, at, head, offset, touch}];
+    return stepping(make, _.nth(hist, 0), _.nth(hist, 1));
   }, $.hist(self.$story)), _.filter(_.first));
 }
 

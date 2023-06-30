@@ -3,12 +3,12 @@ import dom from "/lib/atomic_/dom.js";
 import $ from "/lib/atomic_/reactives.js";
 import sh from "/lib/atomic_/shell.js";
 import supabase from "/lib/supabase.js";
+import * as c from "../core.js";
+import * as g from "/lib/game.js";
 import {session, $online} from "/lib/session.js";
 import {table, ui, scored, outcome, subject} from "/lib/table.js";
 import {getSeated, getSeat, story, nav, waypoint, hist} from "/lib/story.js";
 import {describe} from "/components/table/index.js";
-import * as c from "../core.js";
-import * as g from "/lib/game.js";
 
 async function svg(what){
   return await fetch(`../table/images/${what}.svg`).then(function(resp){
@@ -40,7 +40,7 @@ function emperor(){
   const parser = new DOMParser();
   const el = parser.parseFromString(_emperor, "image/svg+xml").childNodes[0];
   dom.attr(el, "data-piece", "emperor");
-  return el;
+  return el; //TODO need next bit?
   return _.doto(pilli({seat: -1}),
     dom.removeAttr(_, "data-seat"),
     dom.attr(_, "data-piece", "emperor"));
@@ -194,12 +194,41 @@ function desc({type, details}){
   }
 }
 
+//TODO when finished, port to `story` module
+function wip($story){
+  const $data  = $.cell({}),
+        $head  = $.map(_.comp(_.last, _.get(_, "touches")), $story),
+        $at    = $.map(function({at, touches}){
+          return _.get(touches, at);
+        }, $story),
+        $ctx   = $.map(function(data, head, at){
+          return head == at ? _.get(data, at, {}) : null;
+        }, $data, $head, $at),
+        $wip   = $.pipe($.hist($ctx), _.drop(2));
+
+  function dispatch(self, command){
+    _.swap($data, _.assoc(_, _.deref($at), command));
+  }
+
+  $.sub($at, _.see("$at"));
+  $.sub($head, _.see("$head"));
+
+  _.doto($wip, _.specify(sh.IDispatch, {dispatch}));
+
+  return $wip;
+}
+
 const $table = table(tableId),
       $story = story(session, tableId, seat, seated, dom.attr(el, "data-ready", _)),
-      $hist  = hist($story),
-      $doing = $.cell({});
+      $hist  = hist(c.mexica, $story),
+      $wip   = wip($story),
+      $both  = $.pipe($.latest([$hist, $wip]), _.filter(_.and(_.first, _.second)));
 
-$.sub($doing, _.see('doing'));
+$.sub($wip, _.see("$wip"));
+
+function test(){
+  sh.dispatch($wip, {type: "place-pilli"});
+}
 
 function template(seat){
   return {
@@ -245,22 +274,14 @@ function dropPriorOmissions(el){
   _.each(dom.omit, dom.sel(".gone", el));
 }
 
-$.sub($hist, function([curr, prior, motion]){
+$.sub($both, function([[curr, prior, motion, game], wip]){
   const {step, offset, touch} = motion;
-  const {state, seen, event} = curr;
+  const {state} = curr;
   const {seated, tokens, canal1, canal2, bridges, period, contents, status, round, spent} = state;
-  const game = c.mexica(_.toArray(_.repeat(_.count(seated), {})), {}, [event], state);
   const up = _.includes(g.up(game), seat);
   const play = up && offset === 0;
-  const $touch = $.cursor($doing, [touch]);
 
-  if (play) {
-    if (status === "placing-pilli") {
-      _.swap($touch, _.assoc(_, "type", "place-pilli"));
-    }
-  } else {
-    _.reset($touch, null);
-  }
+  _.chain(game, g.moves, _.toArray, _.see("moves")); //debugging only
 
   dropPriorOmissions(el);
 
@@ -383,8 +404,8 @@ $.sub($hist, function([curr, prior, motion]){
           dom.addClass(dom.sel1(`.zone[data-seat='${seat}'] div.player`, el), "scored");
         }
       });
-    },  indices(seated));
+    }, indices(seated));
   }
 });
 
-Object.assign(window, {$, _, sh, session, $story, $table, $online, supabase});
+Object.assign(window, {$, g, _, sh, test, session, $story, $table, $online, supabase});

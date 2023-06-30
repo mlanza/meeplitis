@@ -3,12 +3,12 @@ import dom from "/lib/atomic_/dom.js";
 import $ from "/lib/atomic_/reactives.js";
 import sh from "/lib/atomic_/shell.js";
 import supabase from "/lib/supabase.js";
+import * as c from "../core.js";
+import * as g from "/lib/game.js";
 import {session, $online} from "/lib/session.js";
 import {table, ui, scored, outcome, subject} from "/lib/table.js";
 import {getSeated, getSeat, story, hist} from "/lib/story.js";
 import {describe} from "/components/table/index.js";
-import * as c from "../core.js";
-import * as g from "/lib/game.js";
 
 const {img, li, div, span} = dom.tags(['img', 'li', 'div', 'span']);
 
@@ -98,7 +98,7 @@ function cardSrc({suit, rank}){
 
 const $table = table(tableId),
       $story = story(session, tableId, seat, seated, dom.attr(el, "data-ready", _)),
-      $hist = hist($story);
+      $hist = hist(c.ohHell, $story);
 
 //universal ui
 ui($table, $story, $hist, $online, seated, seat, desc, template, el);
@@ -107,10 +107,9 @@ $.sub($table, _.comp(_.compact(), _.map(describe), _.map(_.join("\n", _))), func
   dom.attr(dom.sel1("#title"), "title", descriptors || "Up and Down");
 });
 
-$.sub($hist, function([curr, prior, {step, offset}]){
+$.sub($hist, function([curr, prior, {step, offset}, game]){
   const {seen, event, metrics, state, state: {trump, round, status, seated, deck, lead, broken, deals}} = curr;
   const {hand, bid} = _.nth(seated, seat) || {hand: null, bid: -1};
-  const game = c.ohHell(_.toArray(_.repeat(_.count(seated), {})), {}, [event], state);
   const moves = g.moves(game);
   const cnt = _.count(seated);
   const leadSuit = _.maybe(seated, _.nth(_, lead), _.getIn(_, ["played", "suit"])) || "";

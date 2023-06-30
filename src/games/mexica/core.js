@@ -891,10 +891,10 @@ function canalable(board, contents){
 
 function moves(self, {type = null, seat = null}){
   const types = type ? [type] : ["construct-canal", "construct-bridge", "relocate-bridge", "found-district", "bank", "move", "pass", "commit", "place-pilli"];
-  const seats = seat == null ? _.compact(g.up(self)) : _.filter(_.eq(seat, _), g.up(self));
+  const seats = _.filtera(seat == null ? _.isSome : _.eq(seat, _), g.up(self));
   const {contents, capulli, canal1, canal2, bridges, period, status, spent, banked, seated} = _.deref(self);
 
-  return new _.Concatenated(_.braid(function(type, seat){
+  return _.flatten(_.braid(function(type, seat){
     const {pilli, bank} = _.nth(seated, seat);
     const from = pilli;
     const unspent = remaining(spent, bank);

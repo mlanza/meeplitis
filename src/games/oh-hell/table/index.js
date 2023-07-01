@@ -7,7 +7,7 @@ import * as c from "../core.js";
 import * as g from "/lib/game.js";
 import {session, $online} from "/lib/session.js";
 import {table, ui, scored, outcome, subject} from "/lib/table.js";
-import {getSeated, getSeat, story, hist} from "/lib/story.js";
+import {getSeated, getSeat, getConfig, story, hist} from "/lib/story.js";
 import {describe} from "/components/table/index.js";
 
 const {img, li, div, span} = dom.tags(['img', 'li', 'div', 'span']);
@@ -97,7 +97,7 @@ function cardSrc({suit, rank}){
 }
 
 const $table = table(tableId),
-      $story = story(session, tableId, seat, seated, dom.attr(el, "data-ready", _), c.ohHell),
+      $story = story(session, tableId, seat, seated, await getConfig(tableId), dom.attr(el, "data-ready", _), c.ohHell),
       $hist  = hist($story);
 
 //universal ui

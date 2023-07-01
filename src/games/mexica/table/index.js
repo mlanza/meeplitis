@@ -7,7 +7,7 @@ import * as c from "../core.js";
 import * as g from "/lib/game.js";
 import {session, $online} from "/lib/session.js";
 import {table, ui, scored, outcome, subject} from "/lib/table.js";
-import {getSeated, getSeat, story, nav, waypoint, hist, wip} from "/lib/story.js";
+import {getSeated, getSeat, getConfig, story, nav, waypoint, hist, wip} from "/lib/story.js";
 import {describe} from "/components/table/index.js";
 
 async function svg(what){
@@ -208,7 +208,7 @@ function which($latest){ //which entry index changed?
 const placePilli = {type: "place-pilli"};
 
 const $table = table(tableId),
-      $story = story(session, tableId, seat, seated, dom.attr(el, "data-ready", _), c.mexica),
+      $story = story(session, tableId, seat, seated, await getConfig(tableId), dom.attr(el, "data-ready", _), c.mexica),
       $hist  = hist($story),
       $wip   = wip($story, function(game){
         const {seated} = _.deref(game);
@@ -272,7 +272,7 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
   const active = _.includes(up, seat);
   const play = active && offset === 0;
 
-  which != 0 || _.chain(game, g.moves, _.toArray, _.see("moves")); //debugging only
+  which != 1 && _.chain(game, g.moves, _.toArray, _.see("moves")); //debugging only
 
   dropPriorOmissions(el);
 

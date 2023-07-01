@@ -13,6 +13,16 @@ function getTouches(tableId){
   return _.fmap(fetch(`https://touches.workers.yourmove.cc?table_id=${tableId}`), json);
 }
 
+export function getConfig(tableId){
+  return supabase
+    .from('tables')
+    .select('config')
+    .eq('id', tableId)
+    .then(function({data}){
+      return data[0].config;
+    });
+}
+
 export function getSeated(tableId){
   return _.fmap(fetch(`https://seated.workers.yourmove.cc?table_id=${tableId}`), json, _.reducekv(function(seated, idx, seat){
     return _.conj(seated, seat.avatar_url ? seat : _.assoc(seat, "avatar_url", session && session?.userId === seat.player_id ? "/images/standins/you.jpg" : character(idx)));
@@ -50,8 +60,8 @@ function move(_table_id, _seat, _commands, session){
   }), json);
 }
 
-export function Story(session, tableId, seat, seated, ready, make, $state, $story){
-  Object.assign(this, {session, tableId, seat, seated, ready, make, $state, $story});
+export function Story(session, tableId, seat, seated, config, ready, make, $state, $story){
+  Object.assign(this, {session, tableId, seat, seated, config, ready, make, $state, $story});
 }
 
 function stepping(self, cstory, pstory){
@@ -96,7 +106,7 @@ export function wip(self, f = _.noop){
 }
 
 function playing(self, {state, event}){
-  return self.make(_.toArray(_.repeat(_.count(self.seated), {})), {}, [event], state);
+  return self.make(self.seated, self.config, [event], state);
 }
 
 export function hist(self){
@@ -160,12 +170,12 @@ _.doto(Story,
   _.implement($.ISubscribe, {sub}),
   _.implement(_.IDeref, {deref}));
 
-export function story(session, tableId, seat, seated, ready, make){
+export function story(session, tableId, seat, seated, config, ready, make){
   const $state = $.cell({touches: null, history: null, at: null});
 
   ready(true);
 
-  return new Story(session, tableId, seat, seated, ready, make, $state, $.pipe($state,  _.filter(function({touches, history, at}){ //TODO cleanup
+  return new Story(session, tableId, seat, seated, config, ready, make, $state, $.pipe($state,  _.filter(function({touches, history, at}){ //TODO cleanup
     return touches && history && at != null;
   }), _.thin(_.mapArgs(_.get(_, "at"), _.equiv))));
 }

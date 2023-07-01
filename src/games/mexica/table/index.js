@@ -272,7 +272,18 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
   const active = _.includes(up, seat);
   const play = active && offset === 0;
 
-  which != 1 && _.chain(game, g.moves, _.toArray, _.see("moves")); //debugging only
+  if (which === 1) {
+    const type = _.chain(wip, _.nth(_, 0), _.get(_, "type"));
+    dom.attr(el, "data-command-type", type);
+    switch (type) {
+      case "place-pilli":
+        _.chain(g.moves(game, {type, seat}), _.map(_.getIn(_, ["details", "at"]), _), _.join(" ", _), dom.attr(el, "data-command-at", _));
+        break;
+    }
+    return;
+  }
+
+  _.chain(game, g.moves, _.toArray, _.see("moves")); //debugging only
 
   dropPriorOmissions(el);
 
@@ -397,6 +408,20 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
       });
     }, indices(seated));
   }
+});
+
+function noCommandReissues(){
+  dom.removeAttr(el, "data-command-type");
+}
+
+function getAt(el){
+  return dom.attr(_.closest(el, "[data-spot]"), "data-spot");
+}
+
+$.on(el, "click", "body[data-command-type='place-pilli'][data-command-at~='H6'] div[data-spot='H6'] div.propose, body[data-command-type='place-pilli'][data-command-at~='H8'] div[data-spot='H8'] div.propose, body[data-command-type='place-pilli'][data-command-at~='I7'] div[data-spot='I7'] div.propose, body[data-command-type='place-pilli'][data-command-at~='G7'] div[data-spot='G7'] div.propose", function(e){
+  noCommandReissues();
+  const at = getAt(this);
+  sh.dispatch($story, {type: "place-pilli", details: {at}});
 });
 
 Object.assign(window, {$, g, _, sh, session, $story, $table, $online, supabase});

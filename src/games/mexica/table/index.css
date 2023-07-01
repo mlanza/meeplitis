@@ -770,6 +770,13 @@ div[data-spot] > *:hover {
   border-radius: 1.6em;
 }
 
+body[data-command-type='place-pilli'][data-command-at~='H6'] div[data-spot='H6'] div.propose,
+body[data-command-type='place-pilli'][data-command-at~='H8'] div[data-spot='H8'] div.propose,
+body[data-command-type='place-pilli'][data-command-at~='I7'] div[data-spot='I7'] div.propose,
+body[data-command-type='place-pilli'][data-command-at~='G7'] div[data-spot='G7'] div.propose {
+  background-image: url(./images/pilli.svg);
+}
+
 [data-piece] {
   animation: fade-in 0.25s ease-out;
 }

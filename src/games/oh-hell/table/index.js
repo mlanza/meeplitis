@@ -97,8 +97,8 @@ function cardSrc({suit, rank}){
 }
 
 const $table = table(tableId),
-      $story = story(session, tableId, seat, seated, dom.attr(el, "data-ready", _)),
-      $hist = hist(c.ohHell, $story);
+      $story = story(session, tableId, seat, seated, dom.attr(el, "data-ready", _), c.ohHell),
+      $hist  = hist($story);
 
 //universal ui
 ui($table, $story, $hist, $online, seated, seat, desc, template, el);
@@ -107,10 +107,11 @@ $.sub($table, _.comp(_.compact(), _.map(describe), _.map(_.join("\n", _))), func
   dom.attr(dom.sel1("#title"), "title", descriptors || "Up and Down");
 });
 
-$.sub($hist, function([curr, prior, {step, offset}, {game, up, may, active}]){
+$.sub($hist, function([curr, prior, {step, offset}, game]){
   const {seen, event, metrics, state, state: {trump, round, status, seated, deck, lead, broken, deals}} = curr;
   const {hand, bid} = _.nth(seated, seat) || {hand: null, bid: -1};
   const moves = g.moves(game);
+  const gg =
   const cnt = _.count(seated);
   const leadSuit = _.maybe(seated, _.nth(_, lead), _.getIn(_, ["played", "suit"])) || "";
   const awarded = event.type == "awarded" ? _.toArray(_.take(cnt, _.drop(cnt - event.details.lead, _.cycle(event.details.trick)))) : null;

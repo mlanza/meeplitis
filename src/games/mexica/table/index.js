@@ -7,7 +7,7 @@ import * as c from "../core.js";
 import * as g from "/lib/game.js";
 import {session, $online} from "/lib/session.js";
 import {table, ui, scored, outcome, subject} from "/lib/table.js";
-import {getSeated, getSeat, story, nav, waypoint, hist} from "/lib/story.js";
+import {getSeated, getSeat, story, nav, waypoint, hist, wip} from "/lib/story.js";
 import {describe} from "/components/table/index.js";
 
 async function svg(what){
@@ -194,30 +194,6 @@ function desc({type, details}){
   }
 }
 
-//TODO when finished, port to `story` module
-function wip($story){
-  const $data  = $.cell({}),
-        $head  = $.map(_.comp(_.last, _.get(_, "touches")), $story),
-        $at    = $.map(function({at, touches}){
-          return _.get(touches, at);
-        }, $story),
-        $ctx   = $.map(function(data, head, at){
-          return head == at ? _.get(data, at, {}) : null;
-        }, $data, $head, $at),
-        $wip   = $.hist($ctx); //, _.drop(2));
-
-  function dispatch(self, command){
-    _.swap($data, _.assoc(_, _.deref($at), command));
-  }
-
-  $.sub($at, _.see("$at"));
-  $.sub($head, _.see("$head"));
-
-  _.doto($wip, _.specify(sh.IDispatch, {dispatch}));
-
-  return $wip;
-}
-
 function which($latest){ //which entry index changed?
   return $.share($.pipe($.hist($latest),
     _.filter(_.isArray),
@@ -229,17 +205,21 @@ function which($latest){ //which entry index changed?
     })));
 }
 
+const placePilli = {type: "place-pilli"};
+
 const $table = table(tableId),
-      $story = story(session, tableId, seat, seated, dom.attr(el, "data-ready", _)),
-      $hist  = hist(c.mexica, $story),
-      $wip   = wip($story),
+      $story = story(session, tableId, seat, seated, dom.attr(el, "data-ready", _), c.mexica),
+      $hist  = hist($story),
+      $wip   = wip($story, function(game){
+        const {seated} = _.deref(game);
+        const pilli = _.chain(seated, _.nth(_, seat), _.get(_, "pilli"));
+        if (_.isSome(seat) && _.isNil(pilli) && _.includes(g.up(game), seat)) {
+          sh.dispatch($wip, placePilli);
+        }
+      }),
       $both  = which($.latest([$hist, $wip]));
 
 $.sub($both, _.see("$both"));
-
-function test(){
-  sh.dispatch($wip, {type: "place-pilli"});
-}
 
 function template(seat){
   return {
@@ -285,13 +265,14 @@ function dropPriorOmissions(el){
   _.each(dom.omit, dom.sel(".gone", el));
 }
 
-$.sub($both, function([[curr, prior, motion, {game, up, may, active}], wip, which]){
+$.sub($both, function([[curr, prior, motion, game], wip, which]){
   const {step, offset, touch} = motion;
-  const {state} = curr;
+  const {state, up} = curr;
   const {seated, tokens, canal1, canal2, bridges, period, contents, status, round, spent} = state;
+  const active = _.includes(up, seat);
   const play = active && offset === 0;
 
-  _.chain(game, g.moves, _.toArray, _.see("moves")); //debugging only
+  which != 0 || _.chain(game, g.moves, _.toArray, _.see("moves")); //debugging only
 
   dropPriorOmissions(el);
 
@@ -418,4 +399,4 @@ $.sub($both, function([[curr, prior, motion, {game, up, may, active}], wip, whic
   }
 });
 
-Object.assign(window, {$, g, _, sh, test, session, $story, $table, $online, supabase});
+Object.assign(window, {$, g, _, sh, session, $story, $table, $online, supabase});

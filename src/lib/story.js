@@ -2,7 +2,6 @@ import _ from "/lib/atomic_/core.js";
 import $ from "/lib/atomic_/reactives.js";
 import sh from "/lib/atomic_/shell.js";
 import supabase from "/lib/supabase.js";
-import * as g from "/lib/game.js";
 import {character} from "/components/table/index.js";
 import {session} from "/lib/session.js";
 
@@ -51,11 +50,11 @@ function move(_table_id, _seat, _commands, session){
   }), json);
 }
 
-export function Story(session, tableId, seat, seated, ready, $state, $story){
-  Object.assign(this, {session, tableId, seat, seated, ready, $state, $story});
+export function Story(session, tableId, seat, seated, ready, make, $state, $story){
+  Object.assign(this, {session, tableId, seat, seated, ready, make, $state, $story});
 }
 
-function stepping(make, self, cstory, pstory){
+function stepping(self, cstory, pstory){
   const motion = cstory && pstory;
   const at = cstory?.at;
   const head  = cstory ? _.count(cstory.touches) - 1 : null;
@@ -64,16 +63,45 @@ function stepping(make, self, cstory, pstory){
   const touch = cstory ? _.nth(cstory.touches, cstory.at) : null;
   const step = motion ? cstory.at - pstory.at : null;
   const offset = cstory ? at - head : null;
-  const game = curr ? make(_.toArray(_.repeat(_.count(self.seated), {})), {}, [curr.event], curr.state) : null;
-  const up = _.maybe(game, g.up);
-  const may = _.maybe(game, g.may);
-  const active = _.includes(up, self.seat);
-  return [curr, prior, {step, at, head, offset, touch}, {game, up, may, active}];
+  const game = _.maybe(curr, _.partial(playing, self));
+  return [curr, prior, {step, at, head, offset, touch}, game];
 }
 
-export function hist(make, self){
+export function wip(self, f = _.noop){
+  const $data  = $.cell({}),
+        $head  = $.pipe(self, _.map(_.comp(_.last, _.get(_, "touches"))), _.filter(_.isSome)),
+        $at    = $.pipe(self, _.map(function({at, touches}){
+          return _.get(touches, at);
+        }), _.filter(_.isSome)),
+        $snapshot = $.pipe(self, _.filter(_.isSome), _.map(function({at, history}){
+          return playing(self, _.get(history, at));
+        })),
+        $ctx   = $.map(function(data, head, at){
+          return head == at ? _.get(data, at, {}) : null;
+        }, $data, $head, $at),
+        $wip   = $.hist($ctx);
+
+  function dispatch(self, command){
+    _.swap($data, _.assoc(_, _.deref($at), command));
+  }
+
+  $.sub($at, _.see("$at"));
+  $.sub($head, _.see("$head"));
+  $.sub($snapshot, _.see("$snapshot"));
+  $.sub($snapshot, f);
+
+  _.doto($wip, _.specify(sh.IDispatch, {dispatch}));
+
+  return $wip;
+}
+
+function playing(self, {state, event}){
+  return self.make(_.toArray(_.repeat(_.count(self.seated), {})), {}, [event], state);
+}
+
+export function hist(self){
   return $.pipe($.map(function(hist){
-    return stepping(make, self, _.nth(hist, 0), _.nth(hist, 1));
+    return stepping(self, _.nth(hist, 0), _.nth(hist, 1));
   }, $.hist(self.$story)), _.filter(_.first));
 }
 
@@ -132,12 +160,12 @@ _.doto(Story,
   _.implement($.ISubscribe, {sub}),
   _.implement(_.IDeref, {deref}));
 
-export function story(session, tableId, seat, seated, ready){
+export function story(session, tableId, seat, seated, ready, make){
   const $state = $.cell({touches: null, history: null, at: null});
 
   ready(true);
 
-  return new Story(session, tableId, seat, seated, ready, $state, $.pipe($state,  _.filter(function({touches, history, at}){ //TODO cleanup
+  return new Story(session, tableId, seat, seated, ready, make, $state, $.pipe($state,  _.filter(function({touches, history, at}){ //TODO cleanup
     return touches && history && at != null;
   }), _.thin(_.mapArgs(_.get(_, "at"), _.equiv))));
 }

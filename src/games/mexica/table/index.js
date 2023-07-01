@@ -285,12 +285,11 @@ function dropPriorOmissions(el){
   _.each(dom.omit, dom.sel(".gone", el));
 }
 
-$.sub($both, function([[curr, prior, motion, game], wip, which]){
+$.sub($both, function([[curr, prior, motion, {game, up, may, active}], wip, which]){
   const {step, offset, touch} = motion;
   const {state} = curr;
   const {seated, tokens, canal1, canal2, bridges, period, contents, status, round, spent} = state;
-  const up = _.includes(g.up(game), seat);
-  const play = up && offset === 0;
+  const play = active && offset === 0;
 
   _.chain(game, g.moves, _.toArray, _.see("moves")); //debugging only
 

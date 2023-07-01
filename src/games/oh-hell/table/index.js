@@ -107,7 +107,7 @@ $.sub($table, _.comp(_.compact(), _.map(describe), _.map(_.join("\n", _))), func
   dom.attr(dom.sel1("#title"), "title", descriptors || "Up and Down");
 });
 
-$.sub($hist, function([curr, prior, {step, offset}, game]){
+$.sub($hist, function([curr, prior, {step, offset}, {game, up, may, active}]){
   const {seen, event, metrics, state, state: {trump, round, status, seated, deck, lead, broken, deals}} = curr;
   const {hand, bid} = _.nth(seated, seat) || {hand: null, bid: -1};
   const moves = g.moves(game);

@@ -2,6 +2,7 @@ import _ from "/lib/atomic_/core.js";
 import $ from "/lib/atomic_/reactives.js";
 import sh from "/lib/atomic_/shell.js";
 import supabase from "/lib/supabase.js";
+import * as g from "/lib/game.js";
 import {character} from "/components/table/index.js";
 import {session} from "/lib/session.js";
 
@@ -54,7 +55,7 @@ export function Story(session, tableId, seat, seated, ready, $state, $story){
   Object.assign(this, {session, tableId, seat, seated, ready, $state, $story});
 }
 
-function stepping(make, cstory, pstory){
+function stepping(make, self, cstory, pstory){
   const motion = cstory && pstory;
   const at = cstory?.at;
   const head  = cstory ? _.count(cstory.touches) - 1 : null;
@@ -63,14 +64,16 @@ function stepping(make, cstory, pstory){
   const touch = cstory ? _.nth(cstory.touches, cstory.at) : null;
   const step = motion ? cstory.at - pstory.at : null;
   const offset = cstory ? at - head : null;
-  //TODO curr.state.seated, num seats?
-  const game = curr ? make(_.toArray(_.repeat(_.count(curr.state.seated), {})), {}, [curr.event], curr.state) : null;
-  return [curr, prior, {step, at, head, offset, touch}, game];
+  const game = curr ? make(_.toArray(_.repeat(_.count(self.seated), {})), {}, [curr.event], curr.state) : null;
+  const up = _.maybe(game, g.up);
+  const may = _.maybe(game, g.may);
+  const active = _.includes(up, self.seat);
+  return [curr, prior, {step, at, head, offset, touch}, {game, up, may, active}];
 }
 
 export function hist(make, self){
   return $.pipe($.map(function(hist){
-    return stepping(make, _.nth(hist, 0), _.nth(hist, 1));
+    return stepping(make, self, _.nth(hist, 0), _.nth(hist, 1));
   }, $.hist(self.$story)), _.filter(_.first));
 }
 

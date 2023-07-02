@@ -271,19 +271,27 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
   const {seated, tokens, canal1, canal2, bridges, period, contents, status, round, spent} = state;
   const active = _.includes(up, seat);
   const play = active && offset === 0;
+  const moves = g.moves(game, {seat});
+
+  dom.attr(el, "data-status", status);
 
   if (which === 1) {
-    const type = _.chain(wip, _.nth(_, 0), _.get(_, "type"));
+    const [curr, prior] = wip;
+    const type = curr?.type;
     dom.attr(el, "data-command-type", type);
     switch (type) {
       case "place-pilli":
         _.chain(g.moves(game, {type, seat}), _.map(_.getIn(_, ["details", "at"]), _), _.join(" ", _), dom.attr(el, "data-command-at", _));
         break;
+      case "construct-canal":
+        dom.attr(el, "data-command-size", curr.size);
+        break;
     }
     return;
   }
 
-  _.chain(game, g.moves, _.toArray, _.see("moves")); //debugging only
+  _.chain(moves, _.map(_.get(_, "type"), _), _.distinct, _.join(" ", _), dom.attr(el, "data-allow-commands", _));
+  _.chain(moves, _.toArray, _.see("moves")); //debugging only
 
   dropPriorOmissions(el);
 
@@ -291,7 +299,6 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
 
   dom.toggleClass(el, "scoring-round", step > 0 && _.get(state, "scoring-round"));
   dom.text(dom.sel1("#phase", el), {"placing-pilli": `Choose Starting Spaces`, "actions": `Round ${round}`, "finished": "Finished"}[status]);
-  dom.attr(els.board, "data-propose", "canal");
   dom.attr(els.actions, "data-remaining", status == "actions" ? _.max(6 - spent, 0) : 0);
 
   _.doseq(function(period, seat, level){
@@ -414,19 +421,41 @@ function noCommandReissues(){
   dom.removeAttr(el, "data-command-type");
 }
 
-function getAt(el){
-  return dom.attr(_.closest(el, "[data-spot]"), "data-spot");
+function getAttr(attr, el){
+  return _.maybe(el, _.closest(_, `[${attr}]`), dom.attr(_, attr));
 }
 
-$.on(el, "click", "body[data-command-type='place-pilli'][data-command-at~='H6'] div[data-spot='H6'] div.propose, body[data-command-type='place-pilli'][data-command-at~='H8'] div[data-spot='H8'] div.propose, body[data-command-type='place-pilli'][data-command-at~='I7'] div[data-spot='I7'] div.propose, body[data-command-type='place-pilli'][data-command-at~='G7'] div[data-spot='G7'] div.propose", function(e){
+$.on(el, "click", 'body[data-tense="present"][data-ready="true"][data-command-type="place-pilli"][data-command-at~="H6"] div[data-spot="H6"] div.propose, body[data-command-type="place-pilli"][data-command-at~="H8"] div[data-spot="H8"] div.propose, body[data-command-type="place-pilli"][data-command-at~="I7"] div[data-spot="I7"] div.propose, body[data-command-type="place-pilli"][data-command-at~="G7"] div[data-spot="G7"] div.propose', function(e){
   noCommandReissues();
-  const at = getAt(this);
-  sh.dispatch($story, {type: "place-pilli", details: {at}});
+
+  sh.dispatch($story, {type, details: {at}});
 });
 
-$.on(el, "click", '[data-tense="present"][data-ready="true"] .moves button[data-type="commit"]', function(e){
+$.on(el, "click", 'body[data-tense="present"][data-ready="true"] .moves button[data-type="commit"], body[data-tense="present"][data-ready="true"] .moves button[data-type="pass"]', function(e){
   const type = dom.attr(this, "data-type");
   sh.dispatch($story, {type});
 });
 
-Object.assign(window, {$, g, _, sh, session, $story, $table, $online, supabase});
+$.on(el, "click", 'body[data-tense="present"][data-ready="true"] #supplies div.tokens', function(e){
+  sh.dispatch($story, {type: "bank"});
+});
+
+$.on(el, "click", 'body[data-tense="present"][data-ready="true"][data-command-type="construct-canal"][data-command-size="1"] div[data-spot]', function(e){
+  const type = "construct-canal",
+        at = getAttr("data-spot", this);
+  sh.dispatch($story, {type, details: {at: [at]}});
+});
+
+$.on(el, "click", 'body[data-tense="present"][data-ready="true"] #supplies div.canals', function(e){
+  const type = "construct-canal",
+        size = parseInt(getAttr("data-size", this));
+  sh.dispatch($wip, {type, size});
+});
+
+$.on(el, "keydown", function(e){
+  if (e.key === "Escape") { //cancel a command in progress
+    sh.dispatch($wip, null);
+  }
+});
+
+Object.assign(window, {$, g, _, sh, session, $story, $wip, $table, $online, supabase});

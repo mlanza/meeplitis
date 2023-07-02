@@ -12,6 +12,32 @@
   z-index: 99;
   padding: 1px;
 }
+.moves button {
+  display: none;
+}
+body[data-tense="present"][data-ready="true"][data-allow-commands~='commit'] .moves button[data-type='commit'],
+body[data-tense="present"][data-ready="true"][data-allow-commands~='pass']   .moves button[data-type='pass'] {
+  display: inherit;
+}
+#guidance {
+  list-style: none;
+  position: absolute;
+  top: 550px;
+  left: 25px;
+  width: 700px;
+  padding: 0;
+  text-align: center;
+}
+#guidance li {
+  padding: 0;
+  margin: 0;
+  display: none;
+}
+body[data-command-type='place-pilli'] #guidance li[data-command-type='place-pilli'],
+body[data-command-type='construct-canal'][data-command-size='2'] #guidance li[data-command-type='construct-canal'][data-command-size='2'],
+body[data-command-type='construct-canal'][data-command-size='1'] #guidance li[data-command-type='construct-canal'][data-command-size='1'] {
+  display: inherit;
+}
 .players {
   width: 20em;
   height: auto;
@@ -361,7 +387,7 @@ div[data-spot]:hover div.propose {
 }
 #actions {
   position: absolute;
-  top: 565px;
+  top: 590px;
   left: 25px;
   width: 698px;
   text-align: center;
@@ -564,7 +590,7 @@ div[data-spot]:hover div.propose {
 [data-row="15"] {
   top: calc(var(--square-size) * 15 + var(--board-top-buffer));
 }
-[data-propose="canal"] div[data-spot]:hover div.propose {
+body[data-tense="present"][data-ready="true"][data-command-type="construct-canal"] div[data-spot][data-terrain='l']:hover div.propose {
   background-image: url(./images/spot.svg);
   opacity: .5;
 }

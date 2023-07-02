@@ -900,7 +900,24 @@ function moves(self, {type = null, seat = null}){
     const unspent = remaining(spent, bank);
     const permit = [{type, seat}];
 
-    if (pilli) {
+    if (status == "placing-pilli") {
+      switch(type){
+        case "place-pilli": {
+          const taken = _.chain(seated, _.map(_.get(_, "pilli"), _), _.compact);
+          return pilli ? [] : _.chain(palaceSpots, _.remove(_.includes(taken, _), _), _.map(function(at){
+            return {type, details: {at}, seat}; //TODO compel 4th player to last position
+          }, _));
+        }
+
+        case "commit": {
+          return pilli ? [{type, seat}] : [];
+        }
+
+        default: {
+          return [];
+        }
+      }
+    } else {
       switch(type){
         case "construct-canal": {
           return canalsDepleted(canal1, canal2) ? [] : permit;
@@ -941,19 +958,6 @@ function moves(self, {type = null, seat = null}){
 
         case "commit": {
           return spent > 5 ? permit : [];
-        }
-
-        default: {
-          return [];
-        }
-      }
-    } else {
-      switch(type){
-        case "place-pilli": {
-          const taken = _.chain(seated, _.map(_.get(_, "pilli"), _), _.compact);
-          return _.chain(palaceSpots, _.remove(_.includes(taken, _), _), _.map(function(at){
-            return {type, details: {at}, seat}; //TODO compel 4th player to last position
-          }, _));
         }
 
         default: {

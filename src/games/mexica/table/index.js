@@ -424,4 +424,9 @@ $.on(el, "click", "body[data-command-type='place-pilli'][data-command-at~='H6'] 
   sh.dispatch($story, {type: "place-pilli", details: {at}});
 });
 
+$.on(el, "click", '[data-tense="present"][data-ready="true"] .moves button[data-type="commit"]', function(e){
+  const type = dom.attr(this, "data-type");
+  sh.dispatch($story, {type});
+});
+
 Object.assign(window, {$, g, _, sh, session, $story, $table, $online, supabase});

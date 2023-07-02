@@ -39,7 +39,8 @@ const table = tables.data[0],
       source = server == "local" ? "http://0.0.0.0:8090" : "https://yourmove.fly.dev",
       url = `${source}/simulate/${slug}`,
       {make} = await import(`/games/${slug}/core.js`),
-      simulate = g.simulate(make);
+      simulate = g.simulate(make),
+      effects = _.comp(g.effects, simulate);
 
 function remote({seats, config = {}, loaded = [], events = [], commands = [], seen, snapshot = null}){
   return fetch(url, {
@@ -87,6 +88,4 @@ _.log(...await sim({seats, config, added, commands, seen, snapshot}));
 
 _.swap($game, _.compact);
 
-Object.assign(window, {$game, g, exec, commands, supabase});
-
-
+Object.assign(window, {$game, effects, g, exec, commands, supabase});

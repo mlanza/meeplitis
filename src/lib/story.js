@@ -78,7 +78,7 @@ function stepping(self, cstory, pstory){
   const touch = cstory ? _.nth(cstory.touches, cstory.at) : null;
   const step = motion ? cstory.at - pstory.at : null;
   const offset = cstory ? at - head : null;
-  const game = _.maybe(curr, _.partial(playing, self));
+  const game = _.maybe(curr, _.partial(moment2, self));
   return [curr, prior, {step, at, head, offset, touch}, game];
 }
 
@@ -89,7 +89,7 @@ export function wip(self, f = _.noop){
           return _.get(touches, at);
         }), _.filter(_.isSome)),
         $snapshot = $.pipe(self, _.filter(_.isSome), _.map(function({at, history}){
-          return playing(self, _.get(history, at));
+          return moment(self, _.get(history, at));
         })),
         $ctx   = $.map(function(data, head, at){
           return head == at ? _.get(data, at, {}) : null;
@@ -110,9 +110,16 @@ export function wip(self, f = _.noop){
   return $wip;
 }
 
-function playing(self, {state, event}){
+function moment2(self, {state, event}){
   return self.make(self.seated, self.config, [event], state);
 }
+
+function moment1(self){
+  const {history, at} = _.deref(self);
+  return moment2(self, _.get(history, at));
+}
+
+export const moment = _.overload(null, moment1, moment2)
 
 export function hist(self){
   return $.pipe($.map(function(hist){

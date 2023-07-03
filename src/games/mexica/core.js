@@ -273,7 +273,7 @@ function displace(what, at){
   return _.update(_, at, _.pipe(_.either(_, []), _.filtera(_.notEq(what, _), _)));
 }
 
-function orientBridge(board, contents, at){
+export function orientBridge(board, contents, at){
   return dry(board, contents, above(at)) && dry(board, contents, below(at)) ? "vertical" :
          dry(board, contents, left(at))  && dry(board, contents, right(at)) ? "horizontal" : null;
 }

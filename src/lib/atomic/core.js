@@ -2565,7 +2565,7 @@ function scan(n, xs) {
   //TODO add transducer
   return lazySeq(function () {
     const ys = take2(n, xs);
-    return count$c(ys) === n ? cons(ys, scan2(n, rest$e(xs))) : emptyList();
+    return count$c(ys) === n ? cons(ys, scan(n, rest$e(xs))) : emptyList();
   });
 }
 function isDistinct1(coll) {

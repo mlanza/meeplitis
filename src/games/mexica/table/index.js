@@ -7,7 +7,7 @@ import * as c from "../core.js";
 import * as g from "/lib/game.js";
 import {session, $online} from "/lib/session.js";
 import {table, ui, scored, outcome, subject} from "/lib/table.js";
-import {getSeated, getSeat, getConfig, story, nav, waypoint, hist, wip} from "/lib/story.js";
+import {getSeated, getSeat, getConfig, story, nav, waypoint, hist, moment, wip} from "/lib/story.js";
 import {describe} from "/components/table/index.js";
 
 async function svg(what){
@@ -288,15 +288,41 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
   if (which === 1) {
     const [curr, prior] = wip;
     const type = curr?.type;
-    dom.attr(el, "data-command-type", type);
+    const attrs = {
+      "data-command-type": type,
+      "data-command-spots": null,
+      "data-command-horizontal-spots": null,
+      "data-command-vertical-spots": null,
+      "data-command-size": null,
+      "data-command-at": null
+    };
     switch (type) {
-      case "place-pilli":
-        _.chain(g.moves(game, {type, seat}), _.map(_.getIn(_, ["details", "at"]), _), _.join(" ", _), dom.attr(el, "data-command-at", _));
+      case "place-pilli": {
+        attrs["data-command-at"] = _.chain(g.moves(game, {type, seat}), _.map(_.getIn(_, ["details", "at"]), _), _.join(" ", _));
         break;
-      case "construct-canal":
-        dom.attr(el, "data-command-size", curr.size);
+      }
+      case "construct-canal": {
+        const {details} = curr;
+        const spots = _.filter(_.partial(c.dry, c.board, contents), c.spots);
+        attrs["data-command-spots"] = _.join(" ", spots);
+        attrs["data-command-size"] = details.size;
+        attrs["data-command-at"] = details.at;
         break;
+      }
+      case "construct-bridge": {
+        const {horizontal, vertical} = _.chain(c.spots, _.filter(_.partial(c.wet, c.board, contents), _), _.groupBy(spot => c.orientBridge(c.board, contents, spot), _), _.merge({horizontal: [], vertical: []}, _));
+        attrs["data-command-horizontal-spots"] = _.join(" ", horizontal);
+        attrs["data-command-vertical-spots"] = _.join(" ", vertical);
+        break;
+      }
     }
+    _.eachkv(function(key, value){
+      if (value == null) {
+        dom.removeAttr(el, key);
+      } else {
+        dom.attr(el, key, value);
+      }
+    }, attrs);
     return;
   }
 
@@ -445,16 +471,37 @@ $.on(el, "click", 'body[data-tense="present"][data-ready="true"] #supplies div.t
   sh.dispatch($story, {type: "bank"});
 });
 
+$.on(el, "click", 'body[data-tense="present"][data-ready="true"] #supplies div.bridges', function(e){
+  sh.dispatch($wip, {type: "construct-bridge"});
+});
+
+$.on(el, "click", 'body[data-tense="present"][data-ready="true"][data-command-type="construct-bridge"] div[data-spot]', function(e){
+  const type = "construct-bridge",
+        at   = getAttr(this, "data-spot");
+  sh.dispatch($story, {type, details: {at}});
+});
+
 $.on(el, "click", 'body[data-tense="present"][data-ready="true"][data-command-type="construct-canal"][data-command-size="1"] div[data-spot]', function(e){
   const type = "construct-canal",
         at   = getAttr(this, "data-spot");
   sh.dispatch($story, {type, details: {at: [at]}});
 });
 
+$.on(el, "click", 'body[data-tense="present"][data-ready="true"][data-command-type="construct-canal"][data-command-size="2"] div[data-spot]', function(e){
+  const type = "construct-canal",
+        at   = _.distinct(_.compact([getAttr(this, "data-command-at"), getAttr(this, "data-spot")])),
+        size = parseInt(getAttr(this, "data-command-size"));
+  if(_.count(at) == 2) {
+    sh.dispatch($story, {type, details: {at}});
+  } else {
+    sh.dispatch($wip, {type, details: {size: 2, at}});
+  }
+});
+
 $.on(el, "click", 'body[data-tense="present"][data-ready="true"] #supplies div.canals', function(e){
   const type = "construct-canal",
         size = parseInt(getAttr(this, "data-size"));
-  sh.dispatch($wip, {type, size});
+  sh.dispatch($wip, {type, details: {size}});
 });
 
 $.on(el, "keydown", 'body[data-tense="present"][data-ready="true"]', function(e){
@@ -464,4 +511,4 @@ $.on(el, "keydown", 'body[data-tense="present"][data-ready="true"]', function(e)
   }
 });
 
-Object.assign(window, {$, g, _, sh, session, $story, $wip, $table, $online, supabase});
+Object.assign(window, {$, g, _, sh, c, moment, session, $story, $wip, $table, $online, supabase});

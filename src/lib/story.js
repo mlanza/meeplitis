@@ -51,17 +51,22 @@ function getPerspective(tableId, session, eventId, seat){
 }
 
 function move(_table_id, _seat, _commands, session){
-  return _.fmap(fetch("https://move.workers.yourmove.cc", {
+  return fetch("https://move.workers.yourmove.cc", {
     method: "POST",
     body: JSON.stringify({_table_id, _seat, _commands}),
     headers: {
       accessToken: session.accessToken
     }
-  }), json);
+  }).then(json).then(function(result){
+    const code  = result?.code,
+          error = code == null ? null : result,
+          data  = code == null ? result : null;
+    return {error, data};
+  });
 }
 
-export function Story(session, tableId, seat, seated, config, ready, make, $state, $story){
-  Object.assign(this, {session, tableId, seat, seated, config, ready, make, $state, $story});
+export function Story(session, tableId, seat, seated, config, ready, fail, make, $state, $story){
+  Object.assign(this, {session, tableId, seat, seated, config, ready, fail, make, $state, $story});
 }
 
 function stepping(self, cstory, pstory){
@@ -148,20 +153,22 @@ export function waypoint(self, how){
 }
 
 async function dispatch(self, command){
-  if (self.seat == null) {
-    throw new Error("Spectators are not permitted to issue moves");
-  }
+  try {
+    self.ready(false); //protect users from accidentally reissuing commands; one at a time
 
-  self.ready(false); //protect users from accidentally reissuing commands; one at a time
+    if (self.seat == null) {
+      throw new Error("Spectators are not permitted to issue moves");
+    }
 
-  const {error, data} = await move(self.tableId, self.seat, [command], self.session);
+    const {error, data} = await move(self.tableId, self.seat, [command], self.session);
 
-  _.log(`moved @ ${self.tableId} from ${self.seat}`, command, {error, data});
+    _.log('moved', {tableId: self.tableId, command, seat: self.seat}, '->', {error, data});
 
-  self.ready(true);
-
-  if (error) {
-    throw error;
+    if (error) {
+      self.fail(error);
+    }
+  } finally {
+    self.ready(true);
   }
 }
 
@@ -170,12 +177,12 @@ _.doto(Story,
   _.implement($.ISubscribe, {sub}),
   _.implement(_.IDeref, {deref}));
 
-export function story(session, tableId, seat, seated, config, ready, make){
+export function story(session, tableId, seat, seated, config, ready, fail, make){
   const $state = $.cell({touches: null, history: null, at: null});
 
   ready(true);
 
-  return new Story(session, tableId, seat, seated, config, ready, make, $state, $.pipe($state,  _.filter(function({touches, history, at}){ //TODO cleanup
+  return new Story(session, tableId, seat, seated, config, ready, fail ,make, $state, $.pipe($state,  _.filter(function({touches, history, at}){ //TODO cleanup
     return touches && history && at != null;
   }), _.thin(_.mapArgs(_.get(_, "at"), _.equiv))));
 }

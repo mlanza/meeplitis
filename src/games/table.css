@@ -63,10 +63,19 @@ body[data-ready="false"] {
 [data-table-status="finished"] #replay .touches::after {
   content: "!";
 }
-#event {
+#event, #error {
   animation: updown 3s ease-out infinite;
 }
-#event:hover {
+#error {
+  position: relative;
+}
+#error .icon {
+  font-size: 2em;
+  position: absolute;
+  right: .75em;
+  top: .6em;
+}
+#event:hover, #error:hover {
   animation-duration: 60s;
 }
 #event.acknowledged {
@@ -77,6 +86,7 @@ body[data-ready="false"] {
   100% { transform: translateY(0)}
 }
 .hidden {
+  display: none;
   visibility: hidden;
 }
 .victor img {
@@ -92,7 +102,7 @@ body[data-ready="false"] {
   font-size: 1.3em;
   margin: -100px 0 .5em;
 }
-#event {
+#event, #error {
   position: fixed;
   vertical-align: middle;
   bottom: 1em;
@@ -110,6 +120,15 @@ body[data-ready="false"] {
   box-shadow: -3px 5px 5px -3px rgba(0, 0, 0, 0.6);
   border-radius: 1.1em;
   transition: height .5s, width .5s;
+}
+#error {
+  visibility: hidden;
+}
+body[data-show-error="true"] #error {
+  visibility: visible;
+}
+body[data-show-error="true"] #event {
+  visibility: hidden;
 }
 #event[data-type="scored"],
 #event[data-type="finished"] {
@@ -161,7 +180,7 @@ body[data-ready="false"] {
 #event img.subject {
   height: 50px;
 }
-#event p {
+#event p, #error p {
   display: block;
   font-size: 1.2em;
   max-width: 16em;

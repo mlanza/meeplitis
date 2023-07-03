@@ -158,6 +158,11 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, template,
     replay(dom.attr(e.target, "data-nav"));
   });
 
+  $.on(el, "click", "#error", function(e){
+    const self = this;
+    dom.attr(el, "data-show-error", false);
+  });
+
   $.on(el, "click", "#event", function(e){
     const self = this;
     dom.addClass(self, "acknowledged");

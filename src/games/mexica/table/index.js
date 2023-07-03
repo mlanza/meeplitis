@@ -205,10 +205,19 @@ function which($latest){ //which entry index changed?
     })));
 }
 
+function fail(error){
+  const {message} = error;
+  sh.dispatch($wip, null);
+  dom.text(dom.sel1("#error p", el), message);
+  dom.attr(el, "data-show-error", true);
+}
+
+const ready = dom.attr(el, "data-ready", _);
+
 const placePilli = {type: "place-pilli"};
 
 const $table = table(tableId),
-      $story = story(session, tableId, seat, seated, await getConfig(tableId), dom.attr(el, "data-ready", _), c.mexica),
+      $story = story(session, tableId, seat, seated, await getConfig(tableId), ready, fail, c.mexica),
       $hist  = hist($story),
       $wip   = wip($story, function(game){
         const {seated} = _.deref(game);
@@ -274,6 +283,7 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
   const moves = g.moves(game, {seat});
 
   dom.attr(el, "data-status", status);
+  dom.attr(el, "data-show-error", false);
 
   if (which === 1) {
     const [curr, prior] = wip;
@@ -417,17 +427,12 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
   }
 });
 
-function noCommandReissues(){
-  dom.removeAttr(el, "data-command-type");
-}
-
-function getAttr(attr, el){
+function getAttr(el, attr){
   return _.maybe(el, _.closest(_, `[${attr}]`), dom.attr(_, attr));
 }
 
 $.on(el, "click", 'body[data-tense="present"][data-ready="true"][data-command-type="place-pilli"][data-command-at~="H6"] div[data-spot="H6"] div.propose, body[data-command-type="place-pilli"][data-command-at~="H8"] div[data-spot="H8"] div.propose, body[data-command-type="place-pilli"][data-command-at~="I7"] div[data-spot="I7"] div.propose, body[data-command-type="place-pilli"][data-command-at~="G7"] div[data-spot="G7"] div.propose', function(e){
-  noCommandReissues();
-
+  const at = getAttr(this, "data-spot");
   sh.dispatch($story, {type, details: {at}});
 });
 
@@ -442,19 +447,20 @@ $.on(el, "click", 'body[data-tense="present"][data-ready="true"] #supplies div.t
 
 $.on(el, "click", 'body[data-tense="present"][data-ready="true"][data-command-type="construct-canal"][data-command-size="1"] div[data-spot]', function(e){
   const type = "construct-canal",
-        at = getAttr("data-spot", this);
+        at   = getAttr(this, "data-spot");
   sh.dispatch($story, {type, details: {at: [at]}});
 });
 
 $.on(el, "click", 'body[data-tense="present"][data-ready="true"] #supplies div.canals', function(e){
   const type = "construct-canal",
-        size = parseInt(getAttr("data-size", this));
+        size = parseInt(getAttr(this, "data-size"));
   sh.dispatch($wip, {type, size});
 });
 
-$.on(el, "keydown", function(e){
+$.on(el, "keydown", 'body[data-tense="present"][data-ready="true"]', function(e){
   if (e.key === "Escape") { //cancel a command in progress
     sh.dispatch($wip, null);
+    dom.attr(el, "data-show-error", false);
   }
 });
 

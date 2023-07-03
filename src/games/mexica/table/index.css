@@ -7,10 +7,10 @@
   position: fixed;
   left: 1em;
   bottom: 1em;
-  background-color: rgba(255, 255, 255, 0.8);
-  border-radius: .7em;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: .3em;
   z-index: 99;
-  padding: 1px;
+  padding: 3px;
 }
 .moves button {
   display: none;
@@ -594,10 +594,6 @@ body[data-tense="present"][data-ready="true"][data-command-type="construct-canal
   background-image: url(./images/spot.svg);
   opacity: .5;
 }
-div[data-spot^="W"]:hover {
-  border-color: red;
-  clear: right;
-}
 div[data-spot^="@"] {
   left: calc(var(--square-size) * 0 + var(--board-left-buffer));
 }
@@ -795,9 +791,6 @@ div[data-spot="U10"] {
 div[data-spot]:hover {
   z-index: 11 !important;
 }
-div[data-spot] > *:hover {
-  border-color: purple;
-}
 [data-anonymous="true"] img[data-nav="last-move"] {
   display: none;
 }
@@ -819,6 +812,9 @@ body[data-command-type='place-pilli'][data-command-at~='G7'] div[data-spot='G7']
   animation: fade-out .25s ease-out forwards;
 }
 @media (prefers-color-scheme: light) {
+  .moves {
+    background-color: rgba(255, 255, 255, 0.8);
+  }
   .area, #supplies {
     background-color: rgba(135, 125, 138, .1);
   }

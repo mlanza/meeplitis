@@ -455,9 +455,18 @@ function perspective(self, seen, reality){
     _.update(_, "event", obscure(seen)));
 }
 
+function status(self){
+  const {status, round} = _.deref(self);
+  if (round != null) {
+    return status === "finished" ? [status] : _.chain(["started", status], _.compact, _.toArray);
+  } else {
+    return ["pending"];
+  }
+}
+
 _.doto(OhHell,
   g.behave,
   _.implement(_.ICompactible, {compact}),
   _.implement(_.IAppendable, {append}),
   _.implement(_.IFunctor, {fmap}),
-  _.implement(g.IGame, {perspective, up, may, moves, undoable, metrics, comparator, textualizer, execute: _.comp(compel, execute), fold}));
+  _.implement(g.IGame, {perspective, status, up, may, moves, undoable, metrics, comparator, textualizer, execute: _.comp(compel, execute), fold}));

@@ -125,7 +125,7 @@ function init(seats){
     banked: 0,
     tokens: 12,
     canal1: slots(6),
-    canal2: _.assoc(slots(35), 0, ["O6", "O7"], 1, ["O8", "O9"]),
+    canal2: slots(35),
     bridges: slots(11),
     capulli: null,
     seated: _.toArray(_.repeat(seats, {
@@ -572,10 +572,6 @@ export function execute(self, command){
     throw new Error(`Cannot invoke automatic command ${type}.`);
   }
 
-  /*TODO if (!_.seq(g.events(self)) && type != "start") {
-    throw new Error(`Cannot ${type} unless the game is first started.`);
-  }*/
-
   switch (type) {
     case "start":
       return _.chain(self,
@@ -709,7 +705,7 @@ function fold(self, event){
 
   switch (type) {
     case "started":
-      return g.fold(self, event, _.identity);
+      return g.fold(self, event, _.update(_, "canal2", _.assoc(_, 0, ["O6", "O7"], 1, ["O8", "O9"])));
 
     case "dealt-capulli":
       return g.fold(self, event,
@@ -996,9 +992,18 @@ function undoable(self, {type}){
   return !_.includes(["committed", "finished"], type);
 }
 
+function status(self){
+  const {canal2, status} = _.deref(self);
+  if (_.chain(canal2, _.first, _.isSome)) {
+    return status === "finished" ? [status] : _.chain(["started", status], _.compact, _.toArray);
+  } else {
+    return ["pending"];
+  }
+}
+
 _.doto(Mexica,
   g.behave,
   _.implement(_.ICompactible, {compact}),
   _.implement(_.IAppendable, {append}),
   _.implement(_.IFunctor, {fmap}),
-  _.implement(g.IGame, {perspective, up, may, moves, undoable, metrics, comparator, textualizer, execute, fold}));
+  _.implement(g.IGame, {perspective, status, up, may, moves, undoable, metrics, comparator, textualizer, execute, fold}));

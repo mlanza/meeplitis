@@ -3,6 +3,7 @@ import $ from "./atomic_/reactives.js";
 
 export const IGame = _.protocol({
   perspective: null,
+  status: null,
   up: null, //returns the seat(s) which are required to move
   may: null, //returns the seat(s) which have the option to move
   seats: null,
@@ -17,6 +18,7 @@ export const IGame = _.protocol({
 });
 
 export const undoable = IGame.undoable;
+export const status = IGame.status;
 export const up = IGame.up;
 export const may = IGame.may;
 export const seats = IGame.seats;
@@ -84,6 +86,21 @@ function execute2(self, command){
     throw new Error("Seat must be an integer");
   } else if (!_.includes(everyone(self), seat)) {
     throw new Error("Invalid seat");
+  }
+  switch (_.first(status(self))) {
+    case "pending":
+      if (type != "start") {
+        throw new Error(`Cannot issue '${type}' unless the game has started.`);
+      }
+      break;
+    case "started":
+      if (type == "start") {
+        throw new Error(`Cannot restart the game.`);
+      }
+      break;
+    case "finished":
+      throw new Error(`Cannot issue commands once the game is finished.`);
+      break;
   }
   return IGame.execute(self, command);
 }

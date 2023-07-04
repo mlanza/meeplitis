@@ -97,7 +97,7 @@ function cardSrc({suit, rank}){
 }
 
 const $table = table(tableId),
-      $story = story(session, tableId, seat, seated, await getConfig(tableId), dom.attr(el, "data-ready", _), c.ohHell),
+      $story = story(session, tableId, seat, seated, await getConfig(tableId), dom.attr(el, "data-ready", _), _.noop, c.ohHell),
       $hist  = hist($story);
 
 //universal ui

@@ -469,14 +469,14 @@ function getAttr(el, attr){
   return _.maybe(el, _.closest(_, `[${attr}]`), dom.attr(_, attr));
 }
 
-function marking(options, which, target){
+function focal(options, what, target){
   _.each(function(id){
     _.maybe(el, dom.sel1(`#${id}`, _), dom.removeAttr(_, "id"));
   }, options);
-  _.maybe(which, dom.attr(target, "id", _));
+  _.maybe(what, dom.attr(target, "id", _));
 }
 
-const mark = _.partial(marking, ["pilli", "bridge"]);
+const moving = _.partial(focal, ["pilli", "bridge"]);
 
 const ctx = 'body[data-tense="present"][data-ready="true"]'; //ensure actionable context
 
@@ -487,12 +487,12 @@ $.on(el, "keydown", ctx, function(e){
   }
 });
 
-$.on(el, "mouseover", `${ctx} div[data-spot]`, function(e){
+$.on(el, "mouseover", `${ctx} div[data-spot]`, function(e){ //workaround since layering prevents mouseover on contents
   const bridge = dom.sel1(".contents > [data-piece='bridge']", this),
         pilli  = dom.sel1(".contents > [data-piece='pilli']", this),
         you    = _.maybe(pilli, dom.attr(_, "data-seat"), parseInt, _.eq(seat, _)),
-        id     = you ? "pilli" : bridge ? "bridge" : null;
-  mark(id, this);
+        what   = you ? "pilli" : bridge ? "bridge" : null;
+  moving(what, this);
 });
 
 $.on(el, "click", `${ctx} #pilli[data-spot]`, function(e){
@@ -514,7 +514,7 @@ $.on(el, "click", `${ctx}[data-command-type="build-temple"] div[data-spot]`, fun
   sh.dispatch($story, {type, details: {level, at}});
 });
 
-$.on(el, "click", `${ctx}[data-command-type="relocate-bridge"][data-command-from] [data-spot]`, function(e){
+$.on(el, "click", `${ctx}[data-command-type="relocate-bridge"][data-command-from] div[data-spot]`, function(e){
   const type = "relocate-bridge",
         from = getAttr(this, "data-command-from"),
         to   = getAttr(this, "data-spot");

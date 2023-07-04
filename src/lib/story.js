@@ -82,7 +82,7 @@ function stepping(self, cstory, pstory){
   return [curr, prior, {step, at, head, offset, touch}, game];
 }
 
-export function wip(self, f = _.noop){
+export function wip(self, f = _.noop){ //work in progress
   const $data  = $.cell({}),
         $head  = $.pipe(self, _.map(_.comp(_.last, _.get(_, "touches"))), _.filter(_.isSome)),
         $at    = $.pipe(self, _.map(function({at, touches}){

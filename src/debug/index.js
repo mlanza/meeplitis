@@ -59,8 +59,8 @@ function remote({seats, config = {}, loaded = [], events = [], commands = [], se
 
 const sim = timing(server == "browser" ? simulate : remote);
 
-const loaded = cut ? _.chain(events, _.take(cut, _), _.toArray) : events,
-      added  = cut ? _.chain(events, _.drop(cut, _), _.toArray) : [],
+const loaded = cut == null ? events : _.chain(events, _.take(cut, _), _.toArray),
+      added  = cut == null ? [] : _.chain(events, _.drop(cut, _), _.toArray),
       loadedUnseen = monitor ? [] : loaded,
       loadedSeen = monitor ? loaded : [];
 

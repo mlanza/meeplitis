@@ -119,6 +119,10 @@ body[data-ready="false"] {
   border-radius: 1.1em;
   transition: height .5s, width .5s;
 }
+.message p {
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
 #error {
   visibility: hidden;
 }

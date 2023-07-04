@@ -28,6 +28,15 @@ body[data-tense="present"][data-ready="true"][data-allow-commands~='pass']   .mo
 #guidance, #guidance p {
   display: none;
 }
+#guidance .esc {
+  position: absolute;
+  bottom: .5em;
+  font-size: .6em;
+  font-family: Arial, Helvetica, sans-serif;
+  width: calc(100% - 2em);
+  text-align: center;
+  opacity: .5;
+}
 body[data-command-type='place-pilli'] #guidance p[data-command-type='place-pilli'],
 body[data-command-type='move'] #guidance p[data-command-type='move'],
 body[data-command-type='construct-bridge'] #guidance p[data-command-type='construct-bridge'],

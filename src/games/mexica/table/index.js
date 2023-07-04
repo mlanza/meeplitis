@@ -320,6 +320,12 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
       case "relocate-bridge": {
         const {details} = curr;
         attrs["data-command-from"] = details.from;
+        break;
+      }
+      case "build-temple": {
+        const {details} = curr;
+        attrs["data-command-size"] = details.size;
+        break;
       }
     }
     _.eachkv(function(key, value){
@@ -472,6 +478,13 @@ function marking(options, which, target){
 
 const mark = _.partial(marking, ["pilli", "bridge"]);
 
+$.on(el, "keydown", 'body[data-tense="present"][data-ready="true"]', function(e){
+  if (e.key === "Escape") { //cancel a command in progress
+    sh.dispatch($wip, null);
+    dom.attr(el, "data-show-error", false);
+  }
+});
+
 $.on(el, "mouseover", 'body[data-tense="present"][data-ready="true"] div[data-spot]', function(e){
   const bridge = dom.sel1(".contents > [data-piece='bridge']", this),
         pilli  = dom.sel1(".contents > [data-piece='pilli']", this),
@@ -484,6 +497,26 @@ $.on(el, "click", 'body[data-tense="present"][data-ready="true"] #pilli[data-spo
   const type = "move",
         from = getAttr(this, "data-spot");
   sh.dispatch($wip, {type, details: {from}});
+});
+
+$.on(el, "click", 'body[data-tense="present"][data-ready="true"] .zone.yours .area div.temples:not([data-remaining="0"])', function(e){
+  const type = "build-temple",
+        size = parseInt(getAttr(this, "data-size"));
+  sh.dispatch($wip, {type, details: {size}});
+});
+
+$.on(el, "click", 'body[data-tense="present"][data-ready="true"][data-command-type="build-temple"] div[data-spot]', function(e){
+  const type = "build-temple",
+        at   = getAttr(this, "data-spot"),
+        level = parseInt(getAttr(this, "data-command-size"));
+  sh.dispatch($story, {type, details: {level, at}});
+});
+
+$.on(el, "click", 'body[data-tense="present"][data-ready="true"][data-command-type="relocate-bridge"][data-command-from] [data-spot]', function(e){
+  const type = "relocate-bridge",
+        from = getAttr(this, "data-command-from"),
+        to   = getAttr(this, "data-spot");
+  sh.dispatch($story, {type, details: {from, to}});
 });
 
 $.on(el, "click", 'body[data-tense="present"][data-ready="true"] #bridge[data-spot]', function(e){
@@ -506,14 +539,14 @@ $.on(el, "click", 'body[data-tense="present"][data-ready="true"] #supplies div.t
   sh.dispatch($story, {type: "bank"});
 });
 
-$.on(el, "click", 'body[data-tense="present"][data-ready="true"] #supplies div.bridges', function(e){
-  sh.dispatch($wip, {type: "construct-bridge"});
-});
-
 $.on(el, "click", 'body[data-tense="present"][data-ready="true"][data-command-type="construct-bridge"] div[data-spot]', function(e){
   const type = "construct-bridge",
         at   = getAttr(this, "data-spot");
   sh.dispatch($story, {type, details: {at}});
+});
+
+$.on(el, "click", 'body[data-tense="present"][data-ready="true"] #supplies div.bridges', function(e){
+  sh.dispatch($wip, {type: "construct-bridge"});
 });
 
 $.on(el, "click", 'body[data-tense="present"][data-ready="true"][data-command-type="construct-canal"][data-command-size="1"] div[data-spot]', function(e){
@@ -537,13 +570,6 @@ $.on(el, "click", 'body[data-tense="present"][data-ready="true"] #supplies div.c
   const type = "construct-canal",
         size = parseInt(getAttr(this, "data-size"));
   sh.dispatch($wip, {type, details: {size}});
-});
-
-$.on(el, "keydown", 'body[data-tense="present"][data-ready="true"]', function(e){
-  if (e.key === "Escape") { //cancel a command in progress
-    sh.dispatch($wip, null);
-    dom.attr(el, "data-show-error", false);
-  }
 });
 
 Object.assign(window, {$, g, _, sh, c, moment, session, $story, $wip, $table, $online, supabase});

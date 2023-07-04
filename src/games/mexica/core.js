@@ -565,11 +565,11 @@ export function execute(self, command){
   const pillis = _.map(_.get(_, "pilli"), state.seated);
 
   if (deficit) {
-    throw new Error("Not enough action points.");
+    throw new Error("Cannot perform action.  Insufficient action points.");
   }
 
   if (automatic && seat != null) {
-    throw new Error(`Cannot invoke automatic command ${type}`);
+    throw new Error(`Cannot invoke automatic command ${type}.`);
   }
 
   /*TODO if (!_.seq(g.events(self)) && type != "start") {
@@ -589,20 +589,20 @@ export function execute(self, command){
 
     case "pass":
       if (!matched){
-        throw new Error("Cannot pass once initial actions are spent");
+        throw new Error("Cannot pass once initial actions are spent.");
       }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "passed")));
 
     case "place-pilli":
       if (!matched) {
-        throw new Error("Invalid pilli placement");
+        throw new Error("Cannot place Mexica Pilli there.");
       }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "placed-pilli")));
 
     //TODO provide UI cue when scoring will happen on commit
     case "commit":
       if (!matched) {
-        throw new Error("Cannot commit while actions remain");
+        throw new Error("Cannot end turn while actions remain.");
       }
       return _.chain(self,
         g.fold(_, _.assoc(command, "type", "committed")),
@@ -614,81 +614,81 @@ export function execute(self, command){
 
     case "bank":
       if (tokens < 1) {
-        throw new Error("No action point tokens are available.");
+        throw new Error("Cannot bank actions while tokens are exhausted.");
       }
       if (banked === 2) {
-        throw new Error("Cannot bank more than 2 action points.");
+        throw new Error("Cannot bank more than 2 action points a turn.");
       }
       if (!matched) {
-        throw new Error("Cannot bank");
+        throw new Error("Cannot bank actions at this time.");
       }
       return _.chain(self, g.fold(_, {type: "banked", seat}));
 
     case "move":
       const {by} = details;
       if (!matched && by !== "teleport"){
-        throw new Error("Invalid move");
+        throw new Error("Cannot move there.");
       }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "moved")));
 
     case "construct-canal":
       if (!contiguous(details.at)){
-        throw new Error("Invalid canal tile");
+        throw new Error("Cannot place canals on nonadjacent spaces.");
       }
       for(const canalAt of details.at){
         if (hasCapulli(contents, district(board, contents, canalAt))){
-          throw new Error("Cannot carve a founded district");
+          throw new Error("Cannot place canals in a founded district.");
         }
         if (!isVacant(board, contents, canalAt)) {
-          throw new Error("Invalid canal placement");
+          throw new Error("Cannot place canals on occupied spaces.");
         }
       }
       if (breaksBridge(board, contents, details.at)) {
-        throw new Error("Cannot construct canal at the foot of a bridge");
+        throw new Error("Cannot place canals at the foot of a bridge.");
       }
       return _.chain(self, g.fold(_, {type: "constructed-canal", seat, details: {at: sortSpots(details.at)}}));
 
     case "build-temple":
       const present = _.detect(_.eq(details.at, _), district(board, contents, pilli));
       if (!present){
-        throw new Error("Cannot place temples where your Mexica Pilli is not present");
+        throw new Error("Cannot place temples in districts where you're not present.");
       }
       if (!isVacant(board, contents, details.at)) {
-        throw new Error("Invalid temple placement");
+        throw new Error("Cannot place temples on occupied spaces.");
       }
       if (!_.chain(state, _.getIn(_, ["seated", seat, "temples"]), _.take(period + 1, _), consolidateTemples, _.get(_, details.level), _.filter(_.isNil, _), _.count)){
-        throw new Error(`No level ${details.level} temples available`);
+        throw new Error(`Cannot build level-${details.level} temples.  Supply depleted.`);
       }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "built-temple")));
 
     case "construct-bridge":
       if (!isBridgable(board, contents, details.at)) {
-        throw new Error("Invalid bridge placement");
+        throw new Error("Cannot construct bridge there.");
       }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "constructed-bridge")));
 
     case "relocate-bridge":
       if (hasUnconstructedBridge(bridges)) {
-        throw new Error("Cannot relocate bridges while unconstructed bridges remain");
+        throw new Error("Cannot relocate bridges while the supply has bridges.");
       }
       if (!isBridgable(board, contents, details.to)) {
-        throw new Error("Invalid bridge placement");
+        throw new Error("Cannot relocate bridge there.");
       }
       if (!hasBridge(contents, details.from)){
-        throw new Error("No bridge at from location");
+        throw new Error("Cannot relocate bridge from that location.");
       }
       if (hasPilli(contents, details.from)){
-        throw new Error("Can only relocate free bridges");
+        throw new Error("Cannot relocate occupied bridges.");
       }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "relocated-bridge")));
 
     case "found-district":
       const dist = district(board, contents, pilli);
       if (hasCapulli(contents, dist)){
-        throw new Error("This district was already founded");
+        throw new Error("Cannot found a founded district.");
       }
       if (!isVacant(board, contents, details.at)) {
-        throw new Error("Invalid capulli placement");
+        throw new Error("Cannot place capulli on an occupied space.");
       }
       const points = founded(_.toArray(pillis), seat, dist);
       return _.chain(self, g.fold(_, {type: "founded-district", seat, details: {at: details.at, size: _.count(dist), points}}));
@@ -697,7 +697,6 @@ export function execute(self, command){
       return g.fold(self, _.assoc(command, "type", "finished"));
     }
   }
-
 }
 
 function fold(self, event){

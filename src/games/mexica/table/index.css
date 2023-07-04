@@ -39,6 +39,7 @@ body[data-tense="present"][data-ready="true"][data-allow-commands~='pass']   .mo
 }
 body[data-command-type='place-pilli'] #guidance p[data-command-type='place-pilli'],
 body[data-command-type='move'] #guidance p[data-command-type='move'],
+body[data-command-type='build-temple'] #guidance p[data-command-type='build-temple'],
 body[data-command-type='construct-bridge'] #guidance p[data-command-type='construct-bridge'],
 body[data-command-type='relocate-bridge'] #guidance p[data-command-type='relocate-bridge'],
 body[data-command-type='construct-canal'][data-command-size='2']:not([data-command-at]) #guidance p[data-command-type='construct-canal'][data-command-size='2'][data-which='first'],
@@ -814,6 +815,20 @@ body[data-tense="present"][data-ready="true"][data-command-type="construct-canal
   background-image: url(./images/spot.svg);
 }
 body[data-tense='present'][data-ready="true"] {
+  &[data-command-type='build-temple'] {
+    &[data-command-size='1'] .zone.yours .area .temples[data-size='1']:not([data-remaining='0']) ol {
+      animation: heartbeat 1s infinite;
+    }
+    &[data-command-size='2'] .zone.yours .area .temples[data-size='2']:not([data-remaining='0']) ol {
+      animation: heartbeat 1s infinite;
+    }
+    &[data-command-size='3'] .zone.yours .area .temples[data-size='3']:not([data-remaining='0']) ol {
+      animation: heartbeat 1s infinite;
+    }
+    &[data-command-size='4'] .zone.yours .area .temples[data-size='4']:not([data-remaining='0']) ol {
+      animation: heartbeat 1s infinite;
+    }
+  }
   &[data-command-type='move'] {
     &[data-command-from='I7'] [data-spot='I7'] [data-piece='pilli'] {
       animation: heartbeat 1s infinite;

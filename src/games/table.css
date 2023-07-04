@@ -68,10 +68,10 @@ body[data-ready="false"] {
   position: relative;
 }
 .message .icon {
-  font-size: 2em;
+  font-size: 3em;
   position: absolute;
-  right: .75em;
-  top: .6em;
+  right: .25em;
+  top: .25em;
 }
 .message:hover {
   animation-duration: 60s;

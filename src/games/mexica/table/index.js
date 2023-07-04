@@ -294,6 +294,7 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
       "data-command-horizontal-spots": null,
       "data-command-vertical-spots": null,
       "data-command-size": null,
+      "data-command-from": null,
       "data-command-at": null
     };
     switch (type) {
@@ -314,6 +315,11 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
         attrs["data-command-horizontal-spots"] = _.join(" ", horizontal);
         attrs["data-command-vertical-spots"] = _.join(" ", vertical);
         break;
+      }
+      case "move":
+      case "relocate-bridge": {
+        const {details} = curr;
+        attrs["data-command-from"] = details.from;
       }
     }
     _.eachkv(function(key, value){
@@ -456,6 +462,35 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
 function getAttr(el, attr){
   return _.maybe(el, _.closest(_, `[${attr}]`), dom.attr(_, attr));
 }
+
+function marking(options, which, target){
+  _.each(function(id){
+    _.maybe(el, dom.sel1(`#${id}`, _), dom.removeAttr(_, "id"));
+  }, options);
+  _.maybe(which, dom.attr(target, "id", _));
+}
+
+const mark = _.partial(marking, ["pilli", "bridge"]);
+
+$.on(el, "mouseover", 'body[data-tense="present"][data-ready="true"] div[data-spot]', function(e){
+  const bridge = dom.sel1(".contents > [data-piece='bridge']", this),
+        pilli  = dom.sel1(".contents > [data-piece='pilli']", this),
+        you    = _.maybe(pilli, dom.attr(_, "data-seat"), parseInt, _.eq(seat, _)),
+        id     = you ? "pilli" : bridge ? "bridge" : null;
+  mark(id, this);
+});
+
+$.on(el, "click", 'body[data-tense="present"][data-ready="true"] #pilli[data-spot]', function(e){
+  const type = "move",
+        from = getAttr(this, "data-spot");
+  sh.dispatch($wip, {type, details: {from}});
+});
+
+$.on(el, "click", 'body[data-tense="present"][data-ready="true"] #bridge[data-spot]', function(e){
+  const type = "relocate-bridge",
+        from = getAttr(this, "data-spot");
+  sh.dispatch($wip, {type, details: {from}});
+});
 
 $.on(el, "click", 'body[data-tense="present"][data-ready="true"][data-command-type="place-pilli"][data-command-at~="H6"] div[data-spot="H6"] div.propose, body[data-command-type="place-pilli"][data-command-at~="H8"] div[data-spot="H8"] div.propose, body[data-command-type="place-pilli"][data-command-at~="I7"] div[data-spot="I7"] div.propose, body[data-command-type="place-pilli"][data-command-at~="G7"] div[data-spot="G7"] div.propose', function(e){
   const at = getAttr(this, "data-spot");

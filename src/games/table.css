@@ -63,22 +63,20 @@ body[data-ready="false"] {
 [data-table-status="finished"] #replay .touches::after {
   content: "!";
 }
-#event, #error {
+.message {
   animation: updown 3s ease-out infinite;
-}
-#error {
   position: relative;
 }
-#error .icon {
+.message .icon {
   font-size: 2em;
   position: absolute;
   right: .75em;
   top: .6em;
 }
-#event:hover, #error:hover {
+.message:hover {
   animation-duration: 60s;
 }
-#event.acknowledged {
+.message.acknowledged {
   animation: .5s ease 0s normal forwards 1 fadeout;
 }
 @keyframes arise {
@@ -102,7 +100,7 @@ body[data-ready="false"] {
   font-size: 1.3em;
   margin: -100px 0 .5em;
 }
-#event, #error {
+.message {
   position: fixed;
   vertical-align: middle;
   bottom: 1em;
@@ -127,7 +125,8 @@ body[data-ready="false"] {
 body[data-show-error="true"] #error {
   visibility: visible;
 }
-body[data-show-error="true"] #event {
+body[data-show-error="true"] #event,
+body[data-show-error="true"] #guidance {
   visibility: hidden;
 }
 #event[data-type="scored"],
@@ -135,7 +134,7 @@ body[data-show-error="true"] #event {
   text-align: center;
   vertical-align: middle;
 }
-#event:hover {
+.message:hover {
   background: rgba(62, 80, 92, 1);
   transition: background .25s ease-out;
   cursor: default;
@@ -180,15 +179,15 @@ body[data-show-error="true"] #event {
 #event img.subject {
   height: 50px;
 }
-#event p, #error p {
+.message p {
   display: block;
   font-size: 1.2em;
   max-width: 16em;
 }
-#event.automatic p {
+.message.automatic p {
   max-width: initial;
 }
-#event.automatic .who {
+.message.automatic .who {
   visibility: hidden;
 }
 .scored {

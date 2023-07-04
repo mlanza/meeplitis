@@ -15,30 +15,33 @@
 .moves button {
   display: none;
 }
+body[data-tense="present"][data-ready="true"][data-command-type="move"] .proposed:empty {
+  pointer-events: none;
+}
+body[data-tense="present"][data-ready="true"][data-perspective="0"] [data-piece="pilli"][data-seat="0"]:hover {
+  background-color: black;
+}
 body[data-tense="present"][data-ready="true"][data-allow-commands~='commit'] .moves button[data-type='commit'],
 body[data-tense="present"][data-ready="true"][data-allow-commands~='pass']   .moves button[data-type='pass'] {
   display: inherit;
 }
-#guidance {
-  list-style: none;
-  position: absolute;
-  top: 550px;
-  left: 25px;
-  width: 700px;
-  padding: 0;
-  text-align: center;
-}
-#guidance li {
-  padding: 0;
-  margin: 0;
+#guidance, #guidance p {
   display: none;
 }
-body[data-command-type='place-pilli'] #guidance li[data-command-type='place-pilli'],
-body[data-command-type='construct-bridge'] #guidance li[data-command-type='construct-bridge'],
-body[data-command-type='construct-canal'][data-command-size='2'][data-command-at=''] #guidance li[data-command-type='construct-canal'][data-command-size='2'][data-which='first'],
-body[data-command-type='construct-canal'][data-command-size='2']:not([data-command-at='']) #guidance li[data-command-type='construct-canal'][data-command-size='2'][data-which='second'],
-body[data-command-type='construct-canal'][data-command-size='1'] #guidance li[data-command-type='construct-canal'][data-command-size='1'] {
+body[data-command-type='place-pilli'] #guidance p[data-command-type='place-pilli'],
+body[data-command-type='move'] #guidance p[data-command-type='move'],
+body[data-command-type='construct-bridge'] #guidance p[data-command-type='construct-bridge'],
+body[data-command-type='relocate-bridge'] #guidance p[data-command-type='relocate-bridge'],
+body[data-command-type='construct-canal'][data-command-size='2']:not([data-command-at]) #guidance p[data-command-type='construct-canal'][data-command-size='2'][data-which='first'],
+body[data-command-type='construct-canal'][data-command-size='2'][data-command-at] #guidance p[data-command-type='construct-canal'][data-command-size='2'][data-which='second'],
+body[data-command-type='construct-canal'][data-command-size='1'] #guidance p[data-command-type='construct-canal'][data-command-size='1'] {
   display: inherit;
+}
+body[data-command-type] #guidance {
+  display: inherit;
+}
+body[data-command-type] #event {
+  display: none;
 }
 .players {
   width: 20em;
@@ -394,7 +397,7 @@ div[data-spot]:hover div.propose {
 }
 #actions {
   position: absolute;
-  top: 590px;
+  top: 580px;
   left: 25px;
   width: 698px;
   text-align: center;
@@ -597,9 +600,6 @@ div[data-spot]:hover div.propose {
 [data-row="15"] {
   top: calc(var(--square-size) * 15 + var(--board-top-buffer));
 }
-body[data-tense="present"][data-ready="true"][data-command-type="construct-canal"] div[data-spot][data-terrain='l'] div.propose {
-  background-image: url(./images/spot.svg);
-}
 div[data-spot^="@"] {
   left: calc(var(--square-size) * 0 + var(--board-left-buffer));
 }
@@ -801,8 +801,20 @@ div[data-spot]:hover {
 .zone, #supplies {
   border-radius: 1.6em;
 }
-
-body[data-tense='present'] {
+body[data-tense="present"][data-ready="true"][data-command-type="construct-canal"] div[data-spot][data-terrain='l'] div.propose {
+  background-image: url(./images/spot.svg);
+}
+body[data-tense='present'][data-ready="true"] {
+  &[data-command-type='move'] {
+    &[data-command-from='I7'] [data-spot='I7'] [data-piece='pilli'] {
+      animation: heartbeat 1s infinite;
+    }
+  }
+  &[data-command-type='relocate-bridge'] {
+    &[data-command-from='S6'] [data-spot='S6'] [data-piece='bridge'] {
+      animation: heartbeat 1s infinite;
+    }
+  }
   &[data-command-type='place-pilli'] {
     &[data-command-at~='H6'] div[data-spot='H6'] div.propose,
     &[data-command-at~='H8'] div[data-spot='H8'] div.propose,
@@ -812,6 +824,12 @@ body[data-tense='present'] {
     }
   }
   &[data-command-type='construct-canal'] {
+    &[data-command-size='1'] .canals[data-size='1'] ol {
+      animation: ping 2s infinite;
+    }
+    &[data-command-size='2'] .canals[data-size='2'] ol {
+      animation: lesser-ping 2s infinite;
+    }
     &[data-command-at~='B1'] div[data-spot='B1'] div.propose,
     &[data-command-at~='F1'] div[data-spot='F1'] div.propose,
     &[data-command-at~='G1'] div[data-spot='G1'] div.propose,
@@ -1004,10 +1022,14 @@ body[data-tense='present'] {
     &[data-command-at~='F14'] div[data-spot='F14'] div.propose,
     &[data-command-at~='I14'] div[data-spot='I14'] div.propose,
     &[data-command-at~='J14'] div[data-spot='J14'] div.propose {
+      visibility: visible;
       background-image: url(./images/spot.svg);
     }
   }
   &[data-command-type='construct-bridge'] {
+    .bridges ol {
+      animation: ping 2s infinite;
+    }
     &[data-command-vertical-spots~='S6'] div[data-spot='S6'] div.propose,
     &[data-command-vertical-spots~='B9'] div[data-spot='B9'] div.propose,
     &[data-command-vertical-spots~='B1'] div[data-spot='B1'] div.propose,

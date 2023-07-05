@@ -151,6 +151,15 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, template,
     } else if (e.key == "ArrowRight") {
       e.preventDefault();
       replay(e.shiftKey ? "present": "forward");
+    } else if (e.shiftKey && e.key == "Backspace") {
+      e.preventDefault();
+      const {touches, at, undoables} = _.deref($story);
+      const _event_id = _.nth(touches, at);
+      if (_.includes(undoables, _event_id)){
+        _.chain($table, _.deref, _.get(_, "id"), async function(_table_id){
+          supabase.rpc('undo', {_table_id, _event_id});
+        });
+      }
     }
   });
 

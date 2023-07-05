@@ -257,6 +257,13 @@ img#up {
   margin: 2px 2px 0;
   cursor: default;
 }
+#replay img[data-nav="do-over"] {
+  margin-right: 7px;
+  visibility: hidden;
+}
+[data-undoable="true"] #replay img[data-nav="do-over"] {
+  visibility: visible;
+}
 #replay span {
   width: 2em;
   display: inline-block;

@@ -120,10 +120,6 @@ export function added(curr, prior){
   return prior ? _.chain(events(curr), _.last(_.count(events(curr)) - _.count(events(prior)), _), _.toArray) : [];
 }
 
-function movesAt(seats){
-  return _.filtera(_.pipe(_.get(_, "seat"), _.includes(seats, _)), _); //TODO `filter` for `filtera`
-}
-
 function moves1(self){
   return IGame.moves(self, {type: null, seat: null});
 }

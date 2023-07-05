@@ -12,11 +12,16 @@ _up smallint[];
 _seat int;
 begin
 
+raise log '$ move (a)';
+
+
 select seat as seats
 from seats s
 where s.table_id = _table_id
 and player_id = auth.uid()
 into _seat;
+
+raise log '$ move (b)';
 
 if _seat is null then
   raise exception 'only players may issue moves';
@@ -48,8 +53,8 @@ if _recipients > 0 then
 end if;
 
 return query
-insert into events (table_id, type, details, seat_id)
-select s.table_id, e.type, e.details, s.id as seat_id
+insert into events (table_id, type, details, undoable, seat_id)
+select s.table_id, e.type, e.details, e.undoable, s.id as seat_id
 from addable_events(_simulated->'added') e
 left join seats s on s.table_id = _table_id and s.seat = e.seat
 returning events.id, events.table_id, events.type, events.seat_id;
@@ -71,8 +76,6 @@ begin
 select count(*)
 from jsonb_array_elements_text(_commands)
 into _count;
-
-raise log '$ here';
 
 if _count = 0 then
   raise exception 'must provide command(s)';
@@ -96,8 +99,8 @@ if _recipients > 0 then
 end if;
 
 return query
-insert into events (table_id, type, details, seat_id)
-select _table_id as table_id, e.type, e.details, s.id as seat_id
+insert into events (table_id, type, details, undoable, seat_id)
+select _table_id as table_id, e.type, e.details, e.undoable, s.id as seat_id
 from addable_events(_simulated->'added') e
 left join seats s on s.table_id = _table_id and s.seat = e.seat
 returning events.id, events.table_id, events.type, events.seat_id;

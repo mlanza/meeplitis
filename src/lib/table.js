@@ -157,7 +157,8 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, template,
       const _event_id = _.nth(touches, at);
       if (_.includes(undoables, _event_id)){
         _.chain($table, _.deref, _.get(_, "id"), async function(_table_id){
-          supabase.rpc('undo', {_table_id, _event_id});
+          const resp = await supabase.rpc('undo', {_table_id, _event_id});
+          _.log("undo", resp);
         });
       }
     }

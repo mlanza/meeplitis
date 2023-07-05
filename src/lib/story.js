@@ -203,7 +203,7 @@ function expand(idx){
 
 export function refresh(self, ...fs){
   return _.fmap(getTouches(self.tableId), function(touches){
-    return _.assoc(_, "touches", touches);
+    return _.merge(_, touches);
   }, _.swap(self.$state, _), ...fs);
 }
 

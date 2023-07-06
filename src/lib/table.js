@@ -3,7 +3,7 @@ import dom from "/lib/atomic_/dom.js";
 import $ from "/lib/atomic_/reactives.js";
 import supabase from "/lib/supabase.js";
 import {presence} from "/lib/online.js";
-import {story, nav, hist, waypoint, refresh, atPresent} from "/lib/story.js";
+import {story, nav, hist, waypoint, refresh, atPresent, inPast} from "/lib/story.js";
 
 const {div, h1, a, span, img, ol, ul, li} = dom.tags(['div', 'h1', 'a', 'span', 'img', 'ol', 'ul', 'li']);
 
@@ -38,6 +38,8 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, template,
         $scored = $.map(_.get(_, "scored"), $table),
         $presence = presence($online, _.mapa(_.get(_, "username"), seated));
 
+  let replays = 0;
+
   const els = {
     progress: dom.sel1("progress", el),
     touch: dom.sel1("#replay .touch", el),
@@ -48,13 +50,14 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, template,
   }
 
   function replay(how){
+    replays++;
     location.hash = waypoint($story, _.deref($up), how) || location.hash;
   }
 
-  function toPresent(){
-    replay("forward");
-    if (!atPresent($story)) {
-      setTimeout(toPresent, 3000);
+  function toPresent(was){
+    if ((was == null || was === replays) && !atPresent($story)) { //did the user navigate since timer started?
+      replay("forward");
+      setTimeout(_.partial(toPresent, replays), 3000);
     }
   }
 
@@ -94,8 +97,8 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, template,
     }, presence);
   });
 
-  $.sub($touch, function(){
-    refresh($story, atPresent($story) ? toPresent : _.noop);
+  $.sub($touch, function(touch){
+    refresh($story, inPast($story, touch) ? _.partial(replay, "present") : atPresent($story) ? toPresent : _.noop);
   });
 
   const init = _.once(function(startTouch){

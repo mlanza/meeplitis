@@ -224,6 +224,12 @@ export function atPresent(self){
   return at === max;
 }
 
+export function inPast(self, touch){
+  const {$state} = self;
+  const {touches} = _.deref($state);
+  return _.includes(touches, touch);
+}
+
 export function nav(self, _at){
   const {tableId, session, seat, $state} = self;
   const {at, history, touches} = _.deref($state);

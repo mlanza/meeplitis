@@ -76,10 +76,11 @@ function stepping(self, cstory, pstory){
   const curr  = cstory ? _.nth(cstory.history, cstory.at) : null,
         prior = pstory ? _.nth(pstory.history, pstory.at) : null;
   const touch = cstory ? _.nth(cstory.touches, cstory.at) : null;
+  const undoable = _.includes(cstory?.undoables, touch);
   const step = motion ? cstory.at - pstory.at : null;
   const offset = cstory ? at - head : null;
   const game = _.maybe(curr, _.partial(moment2, self));
-  return [curr, prior, {step, at, head, offset, touch}, game];
+  return [curr, prior, {step, at, head, offset, touch, undoable}, game];
 }
 
 export function wip(self, f = _.noop){ //work in progress
@@ -135,9 +136,18 @@ function sub(self, obs){
   return $.ISubscribe.sub(self.$story, obs);
 }
 
-export function waypoint(self, how){
-  const {at, touches, history} = _.deref(self.$story);
+export function waypoint(self, up, how){
+  const {at, touches, history, undoables} = _.deref(self.$story);
   switch(how) {
+    case "do-over":
+      const _table_id = self.tableId,
+            _event_id = _.nth(touches, at);
+      if (up && _.includes(undoables, _event_id)){
+        supabase.rpc('undo', {_table_id, _event_id}).then(_.see("undo"));
+        //return _.nth(touches, at - 1);
+      }
+      return null;
+
     case "last-move":
       const {events} = _.nth(history, at);
       return self.seat == null ? null : _.chain(events, _.take(at + 1, _), _.reverse, _.rest, _.detect(function({seat}){

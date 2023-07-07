@@ -143,8 +143,10 @@ export function waypoint(self, up, how){
       const _table_id = self.tableId,
             _event_id = _.nth(touches, at);
       if (up && _.includes(undoables, _event_id)){
-        supabase.rpc('undo', {_table_id, _event_id}).then(_.see("undo"));
-        //return _.nth(touches, at - 1);
+        supabase.rpc('undo', {_table_id, _event_id}).then(function(undo){
+          _.log("undo", undo);
+          _.swap(self.$state, _.update(_, "history", _.pipe(_.take(at -1, _), _.toArray)));
+        });
       }
       return null;
 

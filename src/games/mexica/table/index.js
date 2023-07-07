@@ -295,6 +295,8 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
       "data-command-vertical-spots": null,
       "data-command-size": null,
       "data-command-from": null,
+      "data-command-to": null,
+      "data-command-teleport": null,
       "data-command-at": null
     };
     switch (type) {
@@ -317,6 +319,14 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
         break;
       }
       case "move":
+        const {details} = curr;
+        const moves = g.moves(game, {seat, type});
+        const to = _.maybe(moves, _.filter(_.comp(_.includes(["foot", "boat"], _), _.getIn(_, ["details", "by"])), _), _.mapa(_.getIn(_, ["details", "to"]), _), _.seq, _.join(" ", _));
+        const teleport = _.chain(moves, _.detect(_.comp(_.eq(_, "teleport"), _.getIn(_, ["details", "by"])), _), _.not, _.not);
+        attrs["data-command-from"] = details.from;
+        attrs["data-command-to"] = to;
+        attrs["data-command-teleport"] = teleport;
+        break;
       case "relocate-bridge": {
         const {details} = curr;
         attrs["data-command-from"] = details.from;
@@ -493,6 +503,20 @@ $.on(el, "mouseover", `${ctx} div[data-spot]`, function(e){ //workaround since l
         you    = _.maybe(pilli, dom.attr(_, "data-seat"), parseInt, _.eq(seat, _)),
         what   = you ? "pilli" : bridge ? "bridge" : null;
   moving(what, this);
+});
+
+$.on(el, "click", `${ctx}[data-command-type="move"][data-command-from] div[data-spot]`, function(e){
+  const type = "move",
+        from = getAttr(this, "data-command-from"),
+        to   = getAttr(this, "data-spot"),
+        game = moment($story),
+        moves = g.moves(game, {type}),
+        move = _.maybe(moves, _.detect(function({details}){
+          return (details.from === from && details.to === to) || details.by === "teleport"
+        }, _), _.update(_, "details", _.merge(_, {from, to}))); //merge completes teleport
+  if (move) {
+    sh.dispatch($story, move);
+  }
 });
 
 $.on(el, "click", `${ctx} #pilli[data-spot]`, function(e){

@@ -545,7 +545,7 @@ $.on(el, "click", `${ctx}[data-command-type="relocate-bridge"][data-command-from
   sh.dispatch($story, {type, details: {from, to}});
 });
 
-$.on(el, "click", `${ctx} #bridge[data-spot]`, function(e){
+$.on(el, "click", `${ctx}:not([data-command-type="move"]) #bridge[data-spot]`, function(e){
   const type = "relocate-bridge",
         from = getAttr(this, "data-spot");
   sh.dispatch($wip, {type, details: {from}});

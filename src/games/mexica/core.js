@@ -188,6 +188,8 @@ export function below(at){
 
 const CENTER = 'H7';
 const around = _.juxt(above, right, below, left);
+const vertically = _.juxt(above, below);
+const horizontally = _.juxt(left, right);
 const stop = _.constantly([]);
 const palaceSpots = around(CENTER);
 
@@ -225,12 +227,6 @@ function dealCapulli(capullis){
     }, slots(2), _),
     _.toArray);
 }
-
-const isVacant = _.partly(function isVacant(board, contents, at){
-  const what = _.getIn(board, coord(at)),
-        cts  = _.seq(_.get(contents, at));
-  return what === l && !cts;
-});
 
 export const dry = _.partly(function dry(board, contents, at){
   const cts = _.get(contents, at);
@@ -278,26 +274,23 @@ export function orientBridge(board, contents, at){
          dry(board, contents, left(at))  && dry(board, contents, right(at)) ? "horizontal" : null;
 }
 
-function hasPilli(contents, at){
-  const cts = _.get(contents, at);
-  return _.includes(cts, p);
-}
-
-const occupied = _.partly(function occupied(contents, at){
-  const cts = _.get(contents, at);
-  return _.includes(cts, p) || _.includes(cts, t) || _.includes(cts, c);
+export const isVacant = _.partly(function isVacant(board, contents, at){
+  const what = _.getIn(board, coord(at)),
+        cts  = _.seq(_.get(contents, at));
+  return what === l && !cts;
 });
 
-const unoccupied = _.partly(_.pipe(occupied, _.not));
-
-const has = _.partly(function has(what, contents, at){
-  const cts = _.get(contents, at);
-  return _.includes(cts, what);
+export const contains = _.partly(function contains(obstructions, contents, at){
+  return _.seq(_.intersection(_.get(contents, at), obstructions));
 });
 
-const lacks = _.partly(_.pipe(has, _.not));
-const lacksBridge = lacks(b, _, _);
-const hasBridge = has(b, _, _);
+export const lacks = _.partly(_.pipe(contains, _.not));
+
+export const has = _.partly(function has(obstructions, contents, spots){
+  return _.some(function(spot){
+    return contains(obstructions, contents, spot) ? spot : null;
+  }, spots);
+});
 
 function isBridgable(board, contents, at){
   const what = _.getIn(board, coord(at)),
@@ -344,14 +337,14 @@ export function waterways(board, contents, bridges){
       return _.mapa(_.array(spot, _), _.filter(wet(board, contents, _), around(spot)));
     }, _),
     _.map(function(pair){
-      const connected = _.count(_.filter(hasBridge(contents, _), pair)) === 2;
+      const connected = _.count(_.filter(contains([b], contents, _), pair)) === 2;
       return _.chain(
         connected ? pair :
         gather(pair, wet(board, contents, _), function(at, coll){
-          return _.count(coll) <3 || lacksBridge(contents, at);
+          return _.count(coll) <3 || lacks([b], contents, at);
         }, 1),
         _.pipe(
-            _.filter(hasBridge(contents, _), _),
+            _.filter(contains([b], contents, _), _),
             _.branch(_.pipe(_.count, _.gt(_, 1)), _.identity, _.constantly([]))),
         _.unique);
     }, _),
@@ -422,16 +415,10 @@ function spend(spent, bank, cost){
   return {deficit, redeemed};
 }
 
-function hasCapulli(contents, spots){
-  return _.some(function(spot){
-    return _.includes(_.get(contents, spot), c) ? spot : null;
-  }, spots);
-}
-
 function breaksBridge(board, contents, canal){
   const footers = _.chain(canal,
     _.mapcat(around, _),
-    _.filter(_.partial(hasBridge, contents), _),
+    _.filter(contains([b], contents, _), _),
     _.mapcat(function(at){
       return orientBridge(board, contents, at) === "horizontal" ? [left(at), right(at)] : [above(at), below(at)];
     }, _),
@@ -497,7 +484,7 @@ function score(size, place){
 
 function scoreGrandeur(temples, contents, period, dists, pillis){
   const scored = _.mapa(function(dist){
-    const marker = hasCapulli(contents, dist);
+    const marker = has([c], contents, dist);
     const size = _.count(dist);
     const at = marker || _.first(dist);
     const plcs = tieBumps(places(temples, dist));
@@ -573,30 +560,30 @@ export function execute(self, command){
   }
 
   switch (type) {
-    case "start":
+    case "start": {
       return _.chain(self,
         g.fold(_, {type: "started"}),
         g.execute(_, {type: "deal-capulli", seat: null}));
-
-    case "deal-capulli":
+    }
+    case "deal-capulli": {
       const {dealCapulli} = self.config;
       return _.chain(self,
         g.fold(_, {type: "dealt-capulli", details: {capulli: dealCapulli(capullis)}, seat: null}));
-
-    case "pass":
+    }
+    case "pass": {
       if (!matched){
         throw new Error("Cannot pass once initial actions are spent.");
       }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "passed")));
-
-    case "place-pilli":
+    }
+    case "place-pilli": {
       if (!matched) {
         throw new Error("Cannot place Mexica Pilli there.");
       }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "placed-pilli")));
-
+    }
     //TODO provide UI cue when scoring will happen on commit
-    case "commit":
+    case "commit": {
       if (!matched) {
         throw new Error("Cannot end turn while actions remain.");
       }
@@ -607,8 +594,8 @@ export function execute(self, command){
               g.fold(_, scoreGrandeur(temples, contents, period, districts(board, contents), pillis)),
               period === 0 ? g.fold(_, {type: "concluded-period"}) : g.finish)
           : _.identity);
-
-    case "bank":
+    }
+    case "bank": {
       if (tokens < 1) {
         throw new Error("Cannot bank actions while tokens are exhausted.");
       }
@@ -619,76 +606,82 @@ export function execute(self, command){
         throw new Error("Cannot bank actions at this time.");
       }
       return _.chain(self, g.fold(_, {type: "banked", seat}));
-
-    case "move":
-      const {by} = details;
+    }
+    case "move": {
+      const {by, from, to} = details;
+      if (from === to) {
+        throw new Error("Cannot move to the same space.");
+      }
+      if (contains([p, t, c], contents, to)) {
+        throw new Error("Cannot move to obstructed spaces.");
+      }
       if (!matched && by !== "teleport"){
-        throw new Error("Cannot move there.");
+        throw new Error("Cannot reach that space directly.");
       }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "moved")));
-
-    case "construct-canal":
+    }
+    case "construct-canal": {
       if (!contiguous(details.at)){
         throw new Error("Cannot place canals on nonadjacent spaces.");
       }
       for(const canalAt of details.at){
-        if (hasCapulli(contents, district(board, contents, canalAt))){
+        if (has([c], contents, district(board, contents, canalAt))){
           throw new Error("Cannot place canals in a founded district.");
         }
         if (!isVacant(board, contents, canalAt)) {
-          throw new Error("Cannot place canals on occupied spaces.");
+          throw new Error("Cannot place canals except on empty land spaces.");
         }
       }
       if (breaksBridge(board, contents, details.at)) {
         throw new Error("Cannot place canals at the foot of a bridge.");
       }
       return _.chain(self, g.fold(_, {type: "constructed-canal", seat, details: {at: sortSpots(details.at)}}));
-
-    case "build-temple":
+    }
+    case "build-temple": {
       const present = _.detect(_.eq(details.at, _), district(board, contents, pilli));
       if (!present){
         throw new Error("Cannot place temples in districts where you're not present.");
       }
       if (!isVacant(board, contents, details.at)) {
-        throw new Error("Cannot place temples on occupied spaces.");
+        throw new Error("Cannot place temples except on empty land spaces.");
       }
       if (!_.chain(state, _.getIn(_, ["seated", seat, "temples"]), _.take(period + 1, _), consolidateTemples, _.get(_, details.level), _.filter(_.isNil, _), _.count)){
         throw new Error(`Cannot build level-${details.level} temples.  Supply depleted.`);
       }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "built-temple")));
-
-    case "construct-bridge":
+    }
+    case "construct-bridge": {
       if (!isBridgable(board, contents, details.at)) {
         throw new Error("Cannot construct bridge there.");
       }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "constructed-bridge")));
-
-    case "relocate-bridge":
+    }
+    case "relocate-bridge": {
       if (hasUnconstructedBridge(bridges)) {
         throw new Error("Cannot relocate bridges while the supply has bridges.");
       }
       if (!isBridgable(board, contents, details.to)) {
         throw new Error("Cannot relocate bridge there.");
       }
-      if (!hasBridge(contents, details.from)){
+      if (!contains([b], contents, details.from)){
         throw new Error("Cannot relocate bridge from that location.");
       }
-      if (hasPilli(contents, details.from)){
+      if (contains([p], contents, details.from)){
         throw new Error("Cannot relocate occupied bridges.");
       }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "relocated-bridge")));
-
-    case "found-district":
+    }
+    case "found-district": {
       const dist = district(board, contents, pilli);
-      if (hasCapulli(contents, dist)){
+      if (has([c], contents, dist)){
         throw new Error("Cannot found a founded district.");
       }
       if (!isVacant(board, contents, details.at)) {
-        throw new Error("Cannot place capulli on an occupied space.");
+        throw new Error("Cannot place capulli except on empty land spaces.");
       }
       const points = founded(_.toArray(pillis), seat, dist);
       return _.chain(self, g.fold(_, {type: "founded-district", seat, details: {at: details.at, size: _.count(dist), points}}));
-
+    }
     case "finish": {
       return g.fold(self, _.assoc(command, "type", "finished"));
     }
@@ -884,6 +877,27 @@ function canalable(board, contents){
   }, districts(board, contents))));
 }
 
+export const accessibleBridge = _.partly(function accessibleBridge(contents, pilli, at){
+  if (contains([b], contents, at)) {
+    const orient = orientBridge(board, contents, at);
+    const f = orient === "horizontal" ? horizontally : orient === "vertical" ? vertically : _.constantly([]);
+    return _.includes(f(pilli), at);
+  } else {
+    return false;
+  }
+});
+
+export const accessibleLand = _.partly(function accessibleLand(contents, pilli, at){
+  if (contains([b], contents, pilli)) {
+    const orient = orientBridge(board, contents, pilli);
+    const f = orient === "horizontal" ? horizontally : orient === "vertical" ? vertically : _.constantly([]);
+    return _.includes(f(pilli), at);
+  } else {
+    return true;
+  }
+});
+
+
 function moves(self, {type = null, seat = null}){
   const types = type ? [type] : ["construct-canal", "construct-bridge", "relocate-bridge", "found-district", "bank", "move", "pass", "commit", "place-pilli"];
   const seats = _.filtera(seat == null ? _.isSome : _.eq(seat, _), g.up(self));
@@ -938,11 +952,23 @@ function moves(self, {type = null, seat = null}){
         }
 
         case "move": {
-          const foot = unspent > 0 ? _.chain(around(pilli), _.filter(_.and(_.notEq(_, CENTER), _.or(dry(board, contents, _), hasBridge(contents, _)), unoccupied(contents, _)), _), _.map(function(to){
-            return {type, details: {by: "foot", from, to}, seat};
-          }, _)) : [];
+          const foot = unspent > 0 ?
+            _.chain(pilli,
+              around,
+              _.filter(
+                _.and(
+                  _.notEq(_, CENTER),
+                  _.or(
+                    _.and(
+                      dry(board, contents, _),
+                      accessibleLand(contents, pilli, _)),
+                    accessibleBridge(contents, pilli, _)),
+                  lacks([p, t, c], contents, _)), _),
+              _.map(function(to){
+                return {type, details: {by: "foot", from, to}, seat};
+              }, _)) : [];
           const water = waterways(board, contents, _.compact(bridges));
-          const boat = hasBridge(contents, pilli) ? boats(water, pilli, _.min(unspent, 5), seat) : [];
+          const boat = contains([b], contents, pilli) ? boats(water, pilli, _.min(unspent, 5), seat) : [];
           const teleport = unspent > 4 ? [{type: "move", details: {by: "teleport", from, cost: 5}, seat}] : [];
           return _.concat(foot, boat, teleport);
         }

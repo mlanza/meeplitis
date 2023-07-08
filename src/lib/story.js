@@ -62,8 +62,8 @@ function move(_table_id, _seat, _commands, session){
   });
 }
 
-export function Story(session, tableId, seat, seated, config, ready, fail, make, $state, $story){
-  Object.assign(this, {session, tableId, seat, seated, config, ready, fail, make, $state, $story});
+export function Story(session, tableId, seat, seated, config, $ready, fail, make, $state, $story){
+  Object.assign(this, {session, tableId, seat, seated, config, $ready, fail, make, $state, $story});
 }
 
 function stepping(self, cstory, pstory){
@@ -170,7 +170,7 @@ export function waypoint(self, up, how){
 
 async function dispatch(self, command){
   try {
-    self.ready(false); //protect users from accidentally reissuing commands; one at a time
+    _.reset(self.$ready, false); //protect users from accidentally reissuing commands; one at a time
 
     if (self.seat == null) {
       throw new Error("Spectators are not permitted to issue moves");
@@ -184,7 +184,7 @@ async function dispatch(self, command){
       self.fail(error);
     }
   } finally {
-    self.ready(true);
+    _.reset(self.$ready, true)
   }
 }
 
@@ -193,12 +193,12 @@ _.doto(Story,
   _.implement($.ISubscribe, {sub}),
   _.implement(_.IDeref, {deref}));
 
-export function story(session, tableId, seat, seated, config, ready, fail, make){
+export function story(session, tableId, seat, seated, config, $ready, fail, make){
   const $state = $.cell({touches: null, history: null, at: null});
 
-  ready(true);
+  _.reset($ready, true);
 
-  return new Story(session, tableId, seat, seated, config, ready, fail ,make, $state, $.pipe($state,  _.filter(function({touches, history, at}){ //TODO cleanup
+  return new Story(session, tableId, seat, seated, config, $ready, fail ,make, $state, $.pipe($state, _.filter(function({touches, history, at}){ //TODO cleanup
     return touches && history && at != null;
   }), _.thin(_.mapArgs(_.get(_, "at"), _.equiv))));
 }

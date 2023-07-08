@@ -18,6 +18,17 @@ const retainAttr = _.partly(function retainAttr(el, key, value){
   value == null ? dom.removeAttr(el, key) : dom.attr(el, key, value);
 });
 
+function which($latest){ //which entry index changed?
+  return $.share($.pipe($.hist($latest),
+    _.filter(_.isArray),
+    _.filter(function([curr, prior]){
+      return _.isArray(curr);
+    }),
+    _.map(function([curr, prior]){
+      return _.conj(curr, _.detectIndex(_.not, _.map(_.isIdentical, curr, prior)));
+    })));
+}
+
 async function svg(what){
   return await fetch(`../table/images/${what}.svg`).then(function(resp){
     return resp.text();
@@ -202,17 +213,6 @@ function desc({type, details}){
   }
 }
 
-function which($latest){ //which entry index changed?
-  return $.share($.pipe($.hist($latest),
-    _.filter(_.isArray),
-    _.filter(function([curr, prior]){
-      return _.isArray(curr);
-    }),
-    _.map(function([curr, prior]){
-      return _.conj(curr, _.detectIndex(_.not, _.map(_.isIdentical, curr, prior)));
-    })));
-}
-
 function fail(error){
   const {message} = error;
   sh.dispatch($wip, null);
@@ -220,12 +220,11 @@ function fail(error){
   dom.attr(el, "data-show-error", true);
 }
 
-const ready = dom.attr(el, "data-ready", _);
-
 const placePilli = {type: "place-pilli"};
 
 const $table = table(tableId),
-      $story = story(session, tableId, seat, seated, await getConfig(tableId), ready, fail, c.mexica),
+      $ready = $.cell(false),
+      $story = story(session, tableId, seat, seated, await getConfig(tableId), $ready, fail, c.mexica),
       $hist  = hist($story),
       $wip   = wip($story, function(game){
         const {seated} = _.deref(game);
@@ -235,8 +234,6 @@ const $table = table(tableId),
         }
       }),
       $both  = which($.latest([$hist, $wip]));
-
-$.sub($both, _.see("$both"));
 
 function template(seat){
   return {
@@ -260,7 +257,7 @@ function diff(curr, prior, path, f){ //TODO promote
 }
 
 //universal ui
-ui($table, $story, $hist, $online, seated, seat, desc, template, el);
+ui($table, $story, $ready, $hist, $online, seated, seat, desc, template, el);
 
 $.sub($table, _.comp(_.compact(), _.map(describe), _.map(_.join("\n", _))), function(descriptors){
   dom.attr(dom.sel1("#title"), "title", descriptors || "Normal game");
@@ -282,7 +279,7 @@ function dropPriorOmissions(el){
   _.each(dom.omit, dom.sel(".gone", el));
 }
 
-$.sub($both, function([[curr, prior, motion, game], wip, which]){
+$.sub($both, _.map(_.see("$both")), function([[curr, prior, motion, game], wip, which]){
   const {step, offset, touch} = motion;
   const {state, up} = curr;
   const {seated, tokens, canal1, canal2, bridges, period, contents, status, round, spent} = state;
@@ -489,7 +486,7 @@ function focal(options, what, target){
 
 const moving = _.partial(focal, ["pilli", "bridge"]);
 
-const ctx = 'body[data-tense="present"][data-up="true"][data-ready="true"]'; //ensure actionable context
+const ctx = 'body.ui.act'; //ensure actionable context
 
 $.on(el, "keydown", ctx, function(e){
   if (e.key === "Escape") { //cancel a command in progress

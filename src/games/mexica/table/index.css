@@ -15,14 +15,14 @@
 .moves button {
   display: none;
 }
-body[data-tense="present"][data-ready="true"][data-command-type="move"] .proposed:empty {
+body.ui.act[data-command-type="move"] .proposed:empty {
   pointer-events: none;
 }
-body[data-tense="present"][data-ready="true"][data-perspective="0"] [data-piece="pilli"][data-seat="0"]:hover {
+body.ui.act[data-perspective="0"] [data-piece="pilli"][data-seat="0"]:hover {
   background-color: black;
 }
-body[data-tense="present"][data-ready="true"][data-allow-commands~='commit'] .moves button[data-type='commit'],
-body[data-tense="present"][data-ready="true"][data-allow-commands~='pass']   .moves button[data-type='pass'] {
+body.ui.act[data-allow-commands~='commit'] .moves button[data-type='commit'],
+body.ui.act[data-allow-commands~='pass']   .moves button[data-type='pass'] {
   display: inherit;
 }
 #guidance, #guidance p {
@@ -800,7 +800,7 @@ div[data-spot]:hover {
 .zone, #supplies {
   border-radius: 1.6em;
 }
-body[data-tense="present"][data-up="true"][data-ready="true"] {
+body.ui.act {
   &[data-command-type="construct-canal"] div[data-spot][data-terrain="l"] div.propose {
     background-image: url(./images/spot.svg);
   }

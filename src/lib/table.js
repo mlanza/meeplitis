@@ -31,12 +31,16 @@ export function table(tableId){
   return $.pipe($t, _.compact());
 }
 
-export function ui($table, $story, $hist, $online, seated, seat, desc, template, el){
+export function ui($table, $story, $ready, $hist, $online, seated, seat, desc, template, el){
   const $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), _.compact()),
         $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table),
         $status = $.map(_.get(_, "status"), $table),
         $scored = $.map(_.get(_, "scored"), $table),
-        $presence = presence($online, _.mapa(_.get(_, "username"), seated));
+        $presence = presence($online, _.mapa(_.get(_, "username"), seated)),
+        $present = $.pipe($story, _.map(function({touches, at}){
+          return _.count(touches) - 1 == at;
+        }), _.dedupe()),
+        $act = $.map(_.all, $present, $up, $ready);
 
   let replays = 0;
 
@@ -78,10 +82,18 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, template,
   $.sub($status, _.see("$status"));
   $.sub($touch, _.see("$touch"));
   $.sub($story, _.see("$story"));
+  $.sub($ready, _.see("$ready"));
+  $.sub($present, _.see("$present"));
+  $.sub($act, _.see("$act"));
   $.sub($hist, _.see("$hist"));
 
   $.sub($status, dom.attr(el, "data-table-status", _));
+  $.sub($present, _.map(present => present ? "present" : "past"), dom.attr(el, "data-tense", _));
   $.sub($up, dom.attr(el, "data-up", _));
+  $.sub($ready, dom.attr(el, "data-ready", _));
+  $.sub($act, dom.toggleClass(el, "act", _));
+
+  dom.addClass(el, "ui");
 
   //manage data-action
   $.sub($hist, function([{up, may}]){
@@ -107,18 +119,13 @@ export function ui($table, $story, $hist, $online, seated, seat, desc, template,
     });
   });
 
-  $.sub($story.$state, _.comp(_.map(function({touches}){ //TODO law of demeter
-    return touches;
-  }), _.compact(), _.map(_.last)), init);
+  $.sub($story.$state, _.comp(_.map(_.get(_, "touches")), _.compact(), _.map(_.last)), init);
 
-  $.sub($story, _.compact(), function({touches, at}){
-    if (touches && at != null) {
-      dom.attr(el, "data-tense", _.count(touches) - 1 == at ? "present" : "past");
-      dom.value(els.progress, at + 1);
-      dom.attr(els.progress, "max", _.count(touches));
-      dom.text(els.touch, at + 1);
-      dom.text(els.touches, _.count(touches));
-    }
+  $.sub($story, function({touches, at}){
+    dom.value(els.progress, at + 1);
+    dom.attr(els.progress, "max", _.count(touches));
+    dom.text(els.touch, at + 1);
+    dom.text(els.touches, _.count(touches));
   });
 
   //configure event

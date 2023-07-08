@@ -97,11 +97,12 @@ function cardSrc({suit, rank}){
 }
 
 const $table = table(tableId),
-      $story = story(session, tableId, seat, seated, await getConfig(tableId), dom.attr(el, "data-ready", _), _.noop, c.ohHell),
+      $ready = $.cell(false),
+      $story = story(session, tableId, seat, seated, await getConfig(tableId), $ready, _.noop, c.ohHell),
       $hist  = hist($story);
 
 //universal ui
-ui($table, $story, $hist, $online, seated, seat, desc, template, el);
+ui($table, $story, $ready, $hist, $online, seated, seat, desc, template, el);
 
 $.sub($table, _.comp(_.compact(), _.map(describe), _.map(_.join("\n", _))), function(descriptors){
   dom.attr(dom.sel1("#title"), "title", descriptors || "Up and Down");

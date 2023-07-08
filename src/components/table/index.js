@@ -50,9 +50,9 @@ function aged(dt, asof){
       return lessThan(_.hours(n + 1));
     }, _.range(24)), "h"];
   } else {
-    return [_.detect(function(n){
+    return _.maybe(_.range(50), _.detect(function(n){
       return lessThan(_.days(n + 1));
-    }, _.range(50)), "d"]; //abandoned tables closed after 30 days
+    }, _), _.array, _.conj(_, "d")); //abandoned tables closed after 30 days
   }
 }
 

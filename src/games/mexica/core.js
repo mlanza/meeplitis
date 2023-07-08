@@ -672,6 +672,9 @@ export function execute(self, command){
       return _.chain(self, g.fold(_, _.assoc(command, "type", "relocated-bridge")));
     }
     case "found-district": {
+      if (!matched){
+        throw new Error("Cannot found a district where your Mexica Pilli is not present.");
+      }
       const dist = district(board, contents, pilli);
       if (has([c], contents, dist)){
         throw new Error("Cannot found a founded district.");

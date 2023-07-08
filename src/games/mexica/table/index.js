@@ -10,6 +10,14 @@ import {table, ui, scored, outcome, subject} from "/lib/table.js";
 import {getSeated, getSeat, getConfig, story, nav, waypoint, hist, moment, wip} from "/lib/story.js";
 import {describe} from "/components/table/index.js";
 
+function closestAttr(el, attr){
+  return _.maybe(el, _.closest(_, `[${attr}]`), dom.attr(_, attr));
+}
+
+const retainAttr = _.partly(function retainAttr(el, key, value){
+  value == null ? dom.removeAttr(el, key) : dom.attr(el, key, value);
+});
+
 async function svg(what){
   return await fetch(`../table/images/${what}.svg`).then(function(resp){
     return resp.text();
@@ -281,6 +289,7 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
   const active = _.includes(up, seat);
   const play = active && offset === 0;
   const moves = g.moves(game, {seat});
+  const foundables = g.moves(game, {type: "found-district"});
 
   dom.attr(el, "data-status", status);
   dom.attr(el, "data-show-error", false);
@@ -299,7 +308,7 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
       "data-command-teleport": null,
       "data-command-at": null
     };
-    switch (type) {
+    switch (type) { //only multi-step commands appear here
       case "place-pilli": {
         attrs["data-command-at"] = _.chain(g.moves(game, {type, seat}), _.map(_.getIn(_, ["details", "at"]), _), _.join(" ", _));
         break;
@@ -338,13 +347,7 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
         break;
       }
     }
-    _.eachkv(function(key, value){
-      if (value == null) {
-        dom.removeAttr(el, key);
-      } else {
-        dom.attr(el, key, value);
-      }
-    }, attrs);
+    _.eachkv(retainAttr(el, _, _), attrs);
     return;
   }
 
@@ -393,8 +396,10 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
     });
   }, _.range(0, 2), _.range(0, 8));
 
-  const foundable = _.maybe(g.moves(game, {type: "found-district"}), _.filter(_.includes(_, ["type", "found-district"]), _), _.seq, _.mapa(_.getIn(_, ["details", "size"]), _), _.first);
+  const foundable = _.maybe(foundables, _.filter(_.includes(_, ["type", "found-district"]), _), _.first, _.getIn(_, ["details", "size"]));
   _.maybe(dom.sel1(`img[data-piece='capulli'][data-size='${foundable}']`, demands), dom.addClass(_, "foundable"));
+  retainAttr(el, "data-foundable", foundable);
+  _.chain(foundables, _.map(_.getIn(_, ["details", "at"]), _), _.seq, _.join(" ", _), _.blot, retainAttr(el, "data-found-at", _));
 
   diff(curr, prior, ["state", "canal2"], function(curr, prior){
     _.each(function(n){
@@ -475,10 +480,6 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
   }
 });
 
-function getAttr(el, attr){
-  return _.maybe(el, _.closest(_, `[${attr}]`), dom.attr(_, attr));
-}
-
 function focal(options, what, target){
   _.each(function(id){
     _.maybe(el, dom.sel1(`#${id}`, _), dom.removeAttr(_, "id"));
@@ -488,12 +489,22 @@ function focal(options, what, target){
 
 const moving = _.partial(focal, ["pilli", "bridge"]);
 
-const ctx = 'body[data-tense="present"][data-ready="true"]'; //ensure actionable context
+const ctx = 'body[data-tense="present"][data-up="true"][data-ready="true"]'; //ensure actionable context
 
 $.on(el, "keydown", ctx, function(e){
   if (e.key === "Escape") { //cancel a command in progress
     sh.dispatch($wip, null);
     dom.attr(el, "data-show-error", false);
+  }
+});
+
+$.on(el, "click", `${ctx}[data-foundable]:not([data-command-type]) div[data-spot]`, function(e){
+  const type  = "found-district",
+        at    = closestAttr(this, "data-spot"),
+        size  = _.maybe(dom.attr(el, "data-foundable"), _.blot, parseInt),
+        spots = _.chain(dom.attr(el, "data-found-at"), _.split(_, " "));
+  if (size && _.includes(spots, at)) {
+    sh.dispatch($story, {type, details: {size, at}});
   }
 });
 
@@ -507,8 +518,8 @@ $.on(el, "mouseover", `${ctx} div[data-spot]`, function(e){ //workaround since l
 
 $.on(el, "click", `${ctx}[data-command-type="move"][data-command-from] div[data-spot]`, function(e){
   const type = "move",
-        from = getAttr(this, "data-command-from"),
-        to   = getAttr(this, "data-spot"),
+        from = closestAttr(this, "data-command-from"),
+        to   = closestAttr(this, "data-spot"),
         game = moment($story),
         moves = g.moves(game, {type}),
         move = _.maybe(moves, _.detect(function({details}){
@@ -521,38 +532,38 @@ $.on(el, "click", `${ctx}[data-command-type="move"][data-command-from] div[data-
 
 $.on(el, "click", `${ctx} #pilli[data-spot]`, function(e){
   const type = "move",
-        from = getAttr(this, "data-spot");
+        from = closestAttr(this, "data-spot");
   sh.dispatch($wip, {type, details: {from}});
 });
 
 $.on(el, "click", `${ctx} .zone.yours .area div.temples:not([data-remaining="0"])`, function(e){
   const type = "build-temple",
-        size = parseInt(getAttr(this, "data-size"));
+        size = parseInt(closestAttr(this, "data-size"));
   sh.dispatch($wip, {type, details: {size}});
 });
 
 $.on(el, "click", `${ctx}[data-command-type="build-temple"] div[data-spot]`, function(e){
   const type = "build-temple",
-        at   = getAttr(this, "data-spot"),
-        level = parseInt(getAttr(this, "data-command-size"));
+        at   = closestAttr(this, "data-spot"),
+        level = parseInt(closestAttr(this, "data-command-size"));
   sh.dispatch($story, {type, details: {level, at}});
 });
 
 $.on(el, "click", `${ctx}[data-command-type="relocate-bridge"][data-command-from] div[data-spot]`, function(e){
   const type = "relocate-bridge",
-        from = getAttr(this, "data-command-from"),
-        to   = getAttr(this, "data-spot");
+        from = closestAttr(this, "data-command-from"),
+        to   = closestAttr(this, "data-spot");
   sh.dispatch($story, {type, details: {from, to}});
 });
 
 $.on(el, "click", `${ctx}:not([data-command-type="move"]) #bridge[data-spot]`, function(e){
   const type = "relocate-bridge",
-        from = getAttr(this, "data-spot");
+        from = closestAttr(this, "data-spot");
   sh.dispatch($wip, {type, details: {from}});
 });
 
 $.on(el, "click", `${ctx}[data-command-type="place-pilli"][data-command-at~="H6"] div[data-spot="H6"] div.propose, ${ctx}[data-command-type="place-pilli"][data-command-at~="H8"] div[data-spot="H8"] div.propose, ${ctx}[data-command-type="place-pilli"][data-command-at~="I7"] div[data-spot="I7"] div.propose, ${ctx}[data-command-type="place-pilli"][data-command-at~="G7"] div[data-spot="G7"] div.propose`, function(e){
-  const at = getAttr(this, "data-spot");
+  const at = closestAttr(this, "data-spot");
   sh.dispatch($story, {type, details: {at}});
 });
 
@@ -567,7 +578,7 @@ $.on(el, "click", `${ctx} #supplies div.tokens`, function(e){
 
 $.on(el, "click", `${ctx}[data-command-type="construct-bridge"] div[data-spot]`, function(e){
   const type = "construct-bridge",
-        at   = getAttr(this, "data-spot");
+        at   = closestAttr(this, "data-spot");
   sh.dispatch($story, {type, details: {at}});
 });
 
@@ -577,14 +588,14 @@ $.on(el, "click", `${ctx} #supplies div.bridges`, function(e){
 
 $.on(el, "click", `${ctx}[data-command-type="construct-canal"][data-command-size="1"] div[data-spot]`, function(e){
   const type = "construct-canal",
-        at   = getAttr(this, "data-spot");
+        at   = closestAttr(this, "data-spot");
   sh.dispatch($story, {type, details: {at: [at]}});
 });
 
 $.on(el, "click", `${ctx}[data-command-type="construct-canal"][data-command-size="2"] div[data-spot]`, function(e){
   const type = "construct-canal",
-        at   = _.distinct(_.compact([getAttr(this, "data-command-at"), getAttr(this, "data-spot")])),
-        size = parseInt(getAttr(this, "data-command-size"));
+        at   = _.distinct(_.compact([closestAttr(this, "data-command-at"), closestAttr(this, "data-spot")])),
+        size = parseInt(closestAttr(this, "data-command-size"));
   if(_.count(at) == 2) {
     sh.dispatch($story, {type, details: {at}});
   } else {
@@ -594,7 +605,7 @@ $.on(el, "click", `${ctx}[data-command-type="construct-canal"][data-command-size
 
 $.on(el, "click", `${ctx} #supplies div.canals`, function(e){
   const type = "construct-canal",
-        size = parseInt(getAttr(this, "data-size"));
+        size = parseInt(closestAttr(this, "data-size"));
   sh.dispatch($wip, {type, details: {size}});
 });
 

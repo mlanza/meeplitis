@@ -2,7 +2,6 @@ import _ from "/lib/atomic_/core.js";
 import $ from "/lib/atomic_/reactives.js";
 import sh from "/lib/atomic_/shell.js";
 import supabase from "/lib/supabase.js";
-import {character} from "/components/table/index.js";
 import {session} from "/lib/session.js";
 
 function json(resp){
@@ -24,9 +23,7 @@ export function getConfig(tableId){
 }
 
 export function getSeated(tableId){
-  return _.fmap(fetch(`https://seated.workers.yourmove.cc?table_id=${tableId}`), json, _.reducekv(function(seated, idx, seat){
-    return _.conj(seated, seat.avatar_url ? seat : _.assoc(seat, "avatar_url", session && session?.userId === seat.player_id ? "/images/standins/you.jpg" : character(idx)));
-  }, [], _));
+  return _.fmap(fetch(`https://seated.workers.yourmove.cc?table_id=${tableId}`), json);
 }
 
 export function getSeat(tableId, session){

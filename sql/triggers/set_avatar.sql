@@ -12,11 +12,14 @@ begin
   from http_get(concat(_avatar_url, '?s=5&d=404')) -- does this user have an avatar?
   into _status;
 
-  update profiles
-  set avatar_url = case _status when 200 then _avatar_url else null end
-  where profiles.id = new.id;
+  if _status = 200 then
+    update profiles
+    set avatar_url = _avatar_url
+    where profiles.id = new.id
+    and _status = 200;
 
-  raise log '$ updated avatar for `%` (%) with status %', new.username, new.id, _status;
+    raise log '$ updated avatar for `%`', new.username;
+  end if;
 
   return new;
 

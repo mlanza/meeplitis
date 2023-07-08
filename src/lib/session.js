@@ -27,6 +27,6 @@ export const session = data.session;
 export const $online = o.online(session?.username);
 
 dom.attr(document.body, "data-anonymous", !user);
-session && dom.html(you, img({src: session?.avatar_url ? `${session?.avatar_url}?s=50` : "/images/standins/you.jpg"}));
+session && dom.html(you, img({src: `${session?.avatar_url}?s=50`}));
 
 Object.assign(window, {$online, session});

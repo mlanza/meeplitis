@@ -56,17 +56,13 @@ function aged(dt, asof){
   }
 }
 
-export function character(seat){
-  return `/images/standins/${_.nth(["pinkie.svg", "yellowen.svg", "greenfu.svg", "bleugene.svg", "redmund.svg", "purpleon.svg"], seat)}`;
-}
-
-function avatar(fallback, player){
-  const src = session?.userId === player?.id && !session?.avatar_url ? "/images/standins/you.jpg" : _.collapse(player?.avatar_url, "?s=80") || fallback;
-  return player ? a({href: `/profiles/?username=${player.username}`}, img({src, title: player.username})) : img({src: "/images/standins/chair.jpg", title: "Vacant Seat"});
+function avatar(player){
+  const src = _.str(player?.avatar_url, "?s=80");
+  return player ? a({href: `/profiles/?username=${player.username}`}, img({src, title: player.username})) : img({src: "/images/chair.jpg", title: "Vacant Seat"});
 }
 
 //TODO extract user timezone adjustment
-export function table(item, fallback){
+export function table(item){
   const seat = seated(item.seats);
   const winners = _.maybe(item.seats, _.sort(_.asc(_.get(_, "seat")), _), _.map(_.get(_, "place"), _), _.reducekv(function(memo, seat, place){
     return seat === 1 ? _.conj(memo, seat) : memo;
@@ -92,7 +88,7 @@ export function table(item, fallback){
         return span({"class": "seat", "data-username": seat?.player?.username || "", "data-seat": seat.seat},
           img({class: "pawn", src: "/images/pawn.svg"}),
           won ? img({class: "won", title: "Winner", alt: "Winner", src: "/images/star.svg"}) : null,
-          avatar(fallback || character(seat.seat), seat.player));
+          avatar(seat.player));
       }, _.sort(_.asc(_.get(_, "seat")), item.seats)),
       _.map(p, describe(item))));
 }

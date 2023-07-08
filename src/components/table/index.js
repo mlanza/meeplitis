@@ -85,7 +85,7 @@ export function table(item){
         seat && item.status === "open" ? button({value: "leave"}, "Leave") : null),
       div({class: "seats"}, _.map(function(seat){
         const won = _.includes(winners, seat.seat);
-        return span({"class": "seat", "data-username": seat?.player?.username || "", "data-seat": seat.seat},
+        return span({"class": "seat avatar", "data-username": seat?.player?.username || "", "data-seat": seat.seat},
           img({class: "pawn", src: "/images/pawn.svg"}),
           won ? img({class: "won", title: "Winner", alt: "Winner", src: "/images/star.svg"}) : null,
           avatar(seat.player));

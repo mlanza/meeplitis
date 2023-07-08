@@ -1,3 +1,4 @@
+@import url(/common.css);
 @import url(/fonts.css);
 @import url(/you.css);
 html {
@@ -36,9 +37,6 @@ a#logo img {
   width: 7em;
   height: 7em;
   margin: 0;
-  overflow: hidden;
-  display: inline-flex;
-  justify-content: center;
   border: solid 2px #3E505C;
   border-radius: 1em;
   box-shadow: -3px 5px 5px -3px rgba(0, 0, 0, 0.6);
@@ -78,7 +76,7 @@ body.borderless-img .banner .headline {
 body.borderless-img .banner h1 {
   font-size: 2.5em;
 }
-body.borderless-img .banner figure img {
+body.borderless-img .banner figure {
   border: none;
   box-shadow: none;
 }

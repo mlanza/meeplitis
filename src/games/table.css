@@ -1,3 +1,4 @@
+@import url(/common.css);
 @import url(/fonts.css);
 @import url(/you.css);
 @import url(/games/effects.css);
@@ -172,13 +173,14 @@ body[data-show-error="true"] #guidance {
   margin-right: 85px;
   opacity: .6;
 }
-#event img.who {
+#event figure {
   position: absolute;
   right: -1px;
   bottom: -1px;
   border-radius: 0 1em 1em 0;
   border: solid 1px transparent;
   height: 80px;
+  width: 80px;
 }
 #event img.subject {
   height: 50px;
@@ -428,23 +430,14 @@ div.player:hover {
   position: relative;
   opacity: 1;
 }
-.avatar img {
-  margin: auto;
-  height: 100%;
-}
 div.player img {
   margin: 0;
-  float: left;
 }
 div.player .avatar {
-  position: relative;
-  display: inline-flex;
   margin: -1px;
   float: left;
   width: 6em;
   height: 6em;
-  overflow: hidden;
-  justify-content: center;
 }
 div.player div {
   white-space: nowrap;

@@ -1,3 +1,4 @@
+@import url(../../games/effects.css);
 .table {
   position: relative;
   border: solid 1px black;
@@ -19,8 +20,14 @@
 }
 .table img {
   height: 5em;
+}
+.table :is(.seat, .game img) {
   border-radius: 1em;
   border: solid 3px white;
+}
+.table .seat a img {
+  min-height: 4em;
+  min-width: 4em;
 }
 .table .id {
   position: absolute;
@@ -55,18 +62,31 @@
   margin: 0 0 5px 0;
   font-size: .8em;
 }
+.game {
+  display: inline-block;
+  margin: 0;
+  width: 5.5em;
+  margin: 5px;
+  text-align: center;
+  vertical-align: top;
+}
+
 .seats .seat {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
   margin: 5px;
+  overflow: hidden;
+  width: 64px;
+  height: 64px;
+  justify-content: center;
 }
-[data-table-status="started"] img {
+[data-table-status="started"] .seats .seat {
   border-color: white;
 }
-[data-table-status="finished"] img {
+[data-table-status="finished"] .seats .seat {
   border-color: #777;
 }
-[data-table-status="open"] .seats img {
+[data-table-status="open"] .seats .seat {
   border-style: dashed;
 }
 [data-table-status="open"] .touched,
@@ -97,6 +117,7 @@ img.pawn {
   animation-duration: .5s;
   animation-fill-mode: both;
   animation-iteration-count: infinite;
+  pointer-events: none;
 }
 [data-table-status="finished"] img.won {
   visibility: visible;
@@ -133,4 +154,36 @@ img.pawn {
 }
 [data-anonymous="true"] #creates {
   display: none;
+}
+.game button {
+  margin-top: 5px;
+}
+#creates input[type="submit"] {
+  padding: 5px;
+  margin-left: 6em;
+}
+#creates span {
+  display: inline-block;
+  width: 5em;
+  clear: left;
+  color: #3E505C;
+}
+#creates span::after {
+  content: ": "
+}
+#creates label {
+  margin-right: 5px;
+}
+#creates label label {
+  margin-right: .8em;
+}
+#creates > * {
+  display: block;
+  margin-bottom: 2px;
+}
+#creates input[type="text"] {
+  width: 25em;
+}
+.create {
+  break-before: column;
 }

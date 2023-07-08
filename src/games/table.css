@@ -429,25 +429,22 @@ div.player:hover {
   opacity: 1;
 }
 .avatar img {
-  position: absolute;
   margin: auto;
-  top: 0;
-  right: 0;
-  left: 0;
-  bottom: 0;
-  min-height: 100%;
-  min-width: 100%;
+  height: 100%;
 }
 div.player img {
-  max-width: 6em;
   margin: 0;
   float: left;
 }
 div.player .avatar {
+  position: relative;
+  display: inline-flex;
   margin: -1px;
   float: left;
   width: 6em;
   height: 6em;
+  overflow: hidden;
+  justify-content: center;
 }
 div.player div {
   white-space: nowrap;

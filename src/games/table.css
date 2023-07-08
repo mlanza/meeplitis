@@ -108,7 +108,7 @@ body[data-ready="false"] {
   left: calc(50% - 15em - 40px);
   border: solid 2px white;
   min-width: 23em;
-  height: 5em;
+  min-height: 5em;
   display: inline-block;
   text-align: left;
   margin: auto 0;

@@ -618,6 +618,9 @@ export function execute(self, command){
       if (!matched && by !== "teleport"){
         throw new Error("Cannot reach that space directly.");
       }
+      if (wet(board, contents, to) && !contains([b], contents, to)) {
+        throw new Error("Cannot move to water.");
+      }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "moved")));
     }
     case "construct-canal": {

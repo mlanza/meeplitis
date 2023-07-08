@@ -4,6 +4,7 @@ import g from "/lib/game_.js";
 const slots = _.pipe(_.repeat(_, null), _.toArray);
 
 const COL = 64, ROW = 0;
+const CENTER = 'H7';
 
 const w = "w", //water
       l = "l", //land
@@ -22,10 +23,10 @@ export const board = [
   /*3*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,n,n,n,n,n,n,n],
   /*4*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,n,n,n,n,n],
   /*5*/ [w,w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,w,w,w],
-  /*6*/ [n,w,l,l,l,l,l,l,e,l,l,l,l,l,l,w,l,l,l,w,l,l,w],
-  /*7*/ [n,w,l,l,l,l,l,e,e,e,l,l,l,l,l,w,l,l,l,l,l,l,w],
-  /*8*/ [n,w,l,l,l,l,l,l,e,l,l,l,l,l,l,w,l,l,l,l,l,l,w],
-  /*9*/ [n,w,w,l,l,l,l,l,l,l,l,l,l,l,l,w,l,l,l,l,l,w,w],
+  /*6*/ [n,w,l,l,l,l,l,l,e,l,l,l,l,l,l,l,l,l,l,w,l,l,w],
+  /*7*/ [n,w,l,l,l,l,l,e,e,e,l,l,l,l,l,l,l,l,l,l,l,l,w],
+  /*8*/ [n,w,l,l,l,l,l,l,e,l,l,l,l,l,l,l,l,l,l,l,l,l,w],
+  /*9*/ [n,w,w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w],
  /*10*/ [w,w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,w,n],
  /*11*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,n,n,n,n],
  /*12*/ [w,l,l,l,l,l,l,l,l,l,l,l,l,l,w,w,w,n,n,n,n,n,n],
@@ -113,6 +114,10 @@ export const boardSpots = _.map(function([x, y]){
   return [`${letter}${row}`, _.getIn(board, [y, x])];
 }, coords);
 
+export const viableSpots = _.chain(boardSpots, _.filter(function([spot, what]){
+  return spot !== CENTER && _.includes(["l", "e"], what);
+}, _), _.map(_.first, _));
+
 function init(seats){
   return {
     status: null,
@@ -186,7 +191,6 @@ export function below(at){
   return spot([row + 1, column]);
 }
 
-const CENTER = 'H7';
 const around = _.juxt(above, right, below, left);
 const vertically = _.juxt(above, below);
 const horizontally = _.juxt(left, right);

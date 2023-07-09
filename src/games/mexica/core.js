@@ -318,16 +318,10 @@ function consume(spot){
 
 function remit(spot){
   return function(pieces){
-    const idx = indexDetect(_.eq(_, spot), pieces);
-    return idx > -1 ? _.assoc(pieces, idx, null) : pieces;
+    return _.maybe(pieces,
+      _.detectIndex(_.eq(_, spot), _),
+      _.assoc(pieces, _, null)) || pieces;
   }
-}
-
-function indexDetect(pred, xs){
-  const [idx, item] = _.detect(function([_, x]){
-    return pred(x);
-  }, _.mapIndexed(_.array, xs)) || [-1, null];
-  return idx;
 }
 
 function place1(what){

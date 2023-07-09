@@ -645,8 +645,8 @@ export function execute(self, command){
   switch (type) {
     case "start": {
       return _.chain(self,
-        g.fold(_, {type: "started"}),
-        _.count(state.seated) === 2 ? g.fold(_, {type: "scattered-temples", details: scatterTemples()}): _.identity,
+        g.fold(_, {type: "started", seat: null}),
+        _.count(state.seated) === 2 ? g.fold(_, {type: "scattered-temples", details: scatterTemples(), seat: null}): _.identity,
         g.execute(_, {type: "deal-capulli", seat: null}));
     }
     case "deal-capulli": {
@@ -997,7 +997,6 @@ export const accessibleLand = _.partly(function accessibleLand(contents, pilli, 
   }
 });
 
-
 function moves(self, {type = null, seat = null}){
   const types = type ? [type] : ["construct-canal", "construct-bridge", "relocate-bridge", "found-district", "bank", "move", "pass", "commit", "place-pilli"];
   const seats = _.filtera(seat == null ? _.isSome : _.eq(seat, _), g.up(self));
@@ -1115,7 +1114,7 @@ function perspective(self, seen, reality){
 }
 
 function undoable(self, {type}){
-  return !_.includes(["committed", "finished"], type);
+  return !_.includes(["started", "committed", "finished", "dealt-capulli", "scattered-temples"], type);
 }
 
 function status(self){

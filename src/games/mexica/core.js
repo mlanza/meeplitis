@@ -230,14 +230,28 @@ export const distance = _.juxt(
   _.pipe(right, right, below),
   _.pipe(right, right, right));
 
-export function sites(n = 10){
-  return _.chain(inlandSpots, _.shuffle, _.reduce(function({kept, dropped}, spot){
-    const wants = !_.includes(dropped, spot);
-    const _kept = wants ? _.conj(kept, spot) : kept,
-          _dropped = wants ? _.set(_.toArray(_.concat(dropped, distance(spot)))) : _.set(_.toArray(_.conj(dropped, spot))),
-          memo = {kept: _kept, dropped: _dropped};
-  return _.count(kept) >= n ? _.reduced(memo) : memo;
-  }, {kept: [], dropped: []}, _), _.get(_, "kept"));
+function sites(n){
+  return _.chain(inlandSpots,
+    _.shuffle,
+    _.reduce(function({kept, dropped}, spot){
+      const wants = !_.includes(dropped, spot),
+            _kept = wants ? _.conj(kept, spot) : kept,
+            _dropped = _.chain(wants ? _.concat(dropped, distance(spot)) : _.conj(dropped, spot), _.toArray, _.set);
+    return _.chain({kept: _kept, dropped: _dropped}, _.count(kept) >= n ? _.reduced : _.identity);
+    }, {kept: [], dropped: []}, _),
+    _.get(_, "kept"));
+}
+
+function scatterTemples(levels = [1, 1, 1, 1, 2, 2, 2, 3, 3, 4]){
+  const n = _.count(levels);
+  return _.chain(n,
+    sites,
+    _.mapa(function(level, spot){
+      return {level, spot};
+    }, _.shuffle(levels), _),
+    _.groupBy(_.get(_, "level"), _),
+    _.mapVals(_, _.mapa(_.get(_, "spot"), _)),
+    _.assoc({type: "scattered-temples"}, "details", _));
 }
 
 function committed(state){
@@ -610,6 +624,7 @@ export function execute(self, command){
     case "start": {
       return _.chain(self,
         g.fold(_, {type: "started"}),
+        //_.count(state.seated) === 2 ? g.fold(_, scatterTemples()) : _.identity,
         g.execute(_, {type: "deal-capulli", seat: null}));
     }
     case "deal-capulli": {

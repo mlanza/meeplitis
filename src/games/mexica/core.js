@@ -782,7 +782,14 @@ function fold(self, event){
 
   switch (type) {
     case "started":
-      return g.fold(self, event, _.update(_, "canal2", _.assoc(_, 0, ["O6", "O7"], 1, ["O8", "O9"])));
+      return g.fold(self, event,
+        _.pipe(
+          _.update(_, "contents", _.pipe(
+            place(w, "O6"),
+            place(w, "O7"),
+            place(w, "O8"),
+            place(w, "O9"))),
+          _.update(_, "canal2", _.assoc(_, 0, ["O6", "O7"], 1, ["O8", "O9"]))));
 
     case "scattered-temples":
       const temples = details;

@@ -243,8 +243,8 @@ function sites(n){
 }
 
 function scatterTemples(levels = [1, 1, 1, 1, 2, 2, 2, 3, 3, 4]){
-  const n = _.count(levels);
-  return _.chain(n,
+  return _.chain(levels,
+    _.count,
     sites,
     _.mapa(function(level, spot){
       return {level, spot};
@@ -646,7 +646,7 @@ export function execute(self, command){
     case "start": {
       return _.chain(self,
         g.fold(_, {type: "started", seat: null}),
-        _.count(state.seated) === 2 ? g.fold(_, {type: "scattered-temples", details: scatterTemples(), seat: null}): _.identity,
+        _.count(state.seated) === 2 ? g.fold(_, {type: "scattered-temples", details: scatterTemples(), seat: null}) : _.identity,
         g.execute(_, {type: "deal-capulli", seat: null}));
     }
     case "deal-capulli": {

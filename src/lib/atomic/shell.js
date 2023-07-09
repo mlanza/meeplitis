@@ -263,14 +263,6 @@ function dispatchable(Cursor) {
 }
 (function () {
   function dispatch(self, args) {
-    return self.f(...args);
-  }
-  _.doto(_.Router, _.implement(IDispatch, {
-    dispatch
-  }));
-})();
-(function () {
-  function dispatch(self, args) {
     return _.apply(self, args);
   }
   _.doto(Function, _.implement(IDispatch, {

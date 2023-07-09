@@ -250,9 +250,17 @@ function scatterTemples(levels = [1, 1, 1, 1, 2, 2, 2, 3, 3, 4]){
       return {level, spot};
     }, _.shuffle(levels), _),
     _.groupBy(_.get(_, "level"), _),
-    _.mapVals(_, _.mapa(_.get(_, "spot"), _)),
-    _.assoc({type: "scattered-temples"}, "details", _));
+    _.mapVals(_, _.mapa(_.get(_, "spot"), _)));
 }
+
+const extractTemples =
+  _.pipe(
+    _.entries,
+    _.mapcat(function([level, spots]){
+      return _.mapa(function(spot){
+        return {level: parseInt(level), spot};
+      }, spots);
+    }, _));
 
 function committed(state){
   const {status, seated, capulli, period, up} = state;
@@ -322,9 +330,23 @@ function indexDetect(pred, xs){
   return idx;
 }
 
-function place(what, at){
-  return _.update(_, at, _.pipe(_.either(_, []), _.conj(_, what)));
+function place1(what){
+  return function(contents, at){
+    return place3(what, contents, at);
+  }
 }
+
+function place2(what, at){
+  return function(contents){
+    return place3(what, contents, at);
+  }
+}
+
+function place3(what, contents, at){
+  return _.update(contents, at, _.pipe(_.either(_, []), _.conj(_, what)));
+}
+
+const place = _.overload(null, place1, place2, place3);
 
 function displace(what, at){
   return _.update(_, at, _.pipe(_.either(_, []), _.filtera(_.notEq(what, _), _)));
@@ -624,7 +646,7 @@ export function execute(self, command){
     case "start": {
       return _.chain(self,
         g.fold(_, {type: "started"}),
-        //_.count(state.seated) === 2 ? g.fold(_, scatterTemples()) : _.identity,
+        _.count(state.seated) === 2 ? g.fold(_, {type: "scattered-temples", details: scatterTemples()}): _.identity,
         g.execute(_, {type: "deal-capulli", seat: null}));
     }
     case "deal-capulli": {
@@ -768,6 +790,18 @@ function fold(self, event){
     case "started":
       return g.fold(self, event, _.update(_, "canal2", _.assoc(_, 0, ["O6", "O7"], 1, ["O8", "O9"])));
 
+    case "scattered-temples":
+      const temples = details;
+      return g.fold(self, event,
+        _.pipe(
+          _.assoc(_, "nonplayer", {temples}),
+          _.update(_, "contents", function(contents){
+            return _.chain(details,
+              extractTemples,
+              _.map(_.get(_, "spot"), _),
+              _.reduce(place(t), contents, _));
+          })));
+
     case "dealt-capulli":
       return g.fold(self, event,
         _.pipe(
@@ -806,9 +840,7 @@ function fold(self, event){
           _.update(_, "spent", _.inc),
           _.update(_, `canal${size}`, consume(details.at)),
           _.update(_, "contents", function(contents){
-            return _.reduce(function(memo, at){
-              return place(w, at)(memo);
-            }, contents, details.at);
+            return _.reduce(place(w), contents, details.at);
           })));
 
     case "constructed-bridge":

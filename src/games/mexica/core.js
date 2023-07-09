@@ -204,6 +204,42 @@ export const inlandSpots = _.remove(
     _.detect(_.eq(w, _), _)),
   viableSpots);
 
+export const distance = _.juxt(
+  above,
+  _.pipe(above, left),
+  _.pipe(above, right),
+  _.pipe(above, above),
+  _.pipe(above, above, left),
+  _.pipe(above, above, right),
+  _.pipe(above, above, above),
+  below,
+  _.pipe(below, left),
+  _.pipe(below, right),
+  _.pipe(below, below),
+  _.pipe(below, below, left),
+  _.pipe(below, below, right),
+  _.pipe(below, below, below),
+  left,
+  _.pipe(left, left),
+  _.pipe(left, left, above),
+  _.pipe(left, left, below),
+  _.pipe(left, left, left),
+  right,
+  _.pipe(right, right),
+  _.pipe(right, right, above),
+  _.pipe(right, right, below),
+  _.pipe(right, right, right));
+
+export function sites(n = 10){
+  return _.chain(inlandSpots, _.shuffle, _.reduce(function({kept, dropped}, spot){
+    const wants = !_.includes(dropped, spot);
+    const _kept = wants ? _.conj(kept, spot) : kept,
+          _dropped = wants ? _.set(_.toArray(_.concat(dropped, distance(spot)))) : _.set(_.toArray(_.conj(dropped, spot))),
+          memo = {kept: _kept, dropped: _dropped};
+  return _.count(kept) >= n ? _.reduced(memo) : memo;
+  }, {kept: [], dropped: []}, _), _.get(_, "kept"));
+}
+
 function committed(state){
   const {status, seated, capulli, period, up} = state;
   const seats = _.count(seated);

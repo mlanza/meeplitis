@@ -197,6 +197,13 @@ const horizontally = _.juxt(left, right);
 const stop = _.constantly([]);
 const palaceSpots = around(CENTER);
 
+export const inlandSpots = _.remove(
+  _.pipe(
+    around,
+    _.map(_.pipe(coord, _.getIn(board, _)), _),
+    _.detect(_.eq(w, _), _)),
+  viableSpots);
+
 function committed(state){
   const {status, seated, capulli, period, up} = state;
   const seats = _.count(seated);

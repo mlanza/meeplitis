@@ -21,7 +21,7 @@
   bottom: 0;
   right: 0;
 }
-body[data-anonymous="true"] #you {
+body.anon #you {
   display: none;
 }
 a.signin,
@@ -39,10 +39,10 @@ a.signout {
 a.signout {
   display: none;
 }
-body[data-anonymous="false"] a.signin {
+body:not(.anon) a.signin {
   display: none;
 }
-body[data-anonymous="true"] a.signout {
+body.anon a.signout {
   display: none;
 }
 body[data-you="true"] a.signout {

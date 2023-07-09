@@ -34,10 +34,10 @@ button.active,
 button.selected {
   display: initial;
 }
-[data-tense="present"] button {
+body.present button {
   cursor: default;
 }
-[data-tense="present"] button:hover {
+body.present button:hover {
   background-color: orange;
   color: snow;
 }
@@ -53,7 +53,7 @@ button.selected {
   display: inline-flex;
   z-index: 99;
 }
-[data-tense="present"][data-status="playing"] .hand:hover {
+body.present[data-status="playing"] .hand:hover {
   bottom: -8em;
 }
 .hand li {
@@ -67,10 +67,10 @@ button.selected {
   width: 10em;
   height: 16em;
 }
-[data-tense="present"][data-status="playing"] .hand li img {
+body.present[data-status="playing"] .hand li img {
   cursor: pointer;
 }
-[data-tense="present"][data-status="playing"] .hand li:hover {
+body.present[data-status="playing"] .hand li:hover {
   padding-top: 0;
 }
 .trump, .deck {
@@ -101,7 +101,7 @@ body[data-broken="true"] .broken {
   display: block;
   margin: .5em auto 0;
 }
-[data-anonymous="true"] img[data-nav="last-move"] {
+body.anon img[data-nav="last-move"] {
   display: none;
 }
 

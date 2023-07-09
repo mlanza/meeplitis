@@ -304,10 +304,10 @@ div[data-remaining="34"] li:nth-child(n+35),
 div[data-remaining="35"] li:nth-child(n+36) {
   display: none;
 }
-[data-tense="present"] #supplies > div:not([data-remaining='0']) ol,
-[data-tense="present"] .zone.yours .area div.temples:not([data-remaining='0']) ol,
-[data-tense="present"] div[data-remaining] li:not([style*="display: none"]):last-child svg:hover,
-[data-tense="present"] div[data-remaining] li:last-child svg:hover {
+body.present #supplies > div:not([data-remaining='0']) ol,
+body.present .zone.yours .area div.temples:not([data-remaining='0']) ol,
+body.present div[data-remaining] li:not([style*="display: none"]):last-child svg:hover,
+body.present div[data-remaining] li:last-child svg:hover {
     cursor: pointer;
     opacity: 1;
 }
@@ -794,7 +794,7 @@ div[data-spot="U10"] {
 div[data-spot]:hover {
   z-index: 11;
 }
-[data-anonymous="true"] img[data-nav="last-move"] {
+body.anon img[data-nav="last-move"] {
   display: none;
 }
 .zone, #supplies {

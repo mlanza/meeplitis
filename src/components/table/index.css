@@ -148,7 +148,7 @@ img.pawn {
   text-align: center;
   vertical-align: top;
 }
-[data-anonymous="true"] #creates {
+body.anon #creates {
   display: none;
 }
 .game button {

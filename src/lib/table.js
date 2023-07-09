@@ -88,10 +88,10 @@ export function ui($table, $story, $ready, $hist, $online, seated, seat, desc, t
   $.sub($hist, _.see("$hist"));
 
   $.sub($status, dom.attr(el, "data-table-status", _));
-  $.sub($present, _.map(present => present ? "present" : "past"), dom.attr(el, "data-tense", _));
-  $.sub($up, dom.attr(el, "data-up", _));
-  $.sub($ready, dom.attr(el, "data-ready", _));
+  $.sub($present, dom.toggleClass(el, "present", _));
   $.sub($act, dom.toggleClass(el, "act", _));
+  $.sub($up, dom.toggleClass(el, "up", _));
+  $.sub($ready, _.map(_.not), dom.toggleClass(el, "wait", _));
 
   dom.addClass(el, "ui");
 
@@ -140,8 +140,8 @@ export function ui($table, $story, $ready, $hist, $online, seated, seat, desc, t
       dom.removeClass(_, "acknowledged"));
 
     dom.attr(el, "data-event-type", event.type);
-    dom.attr(el, "data-undoable", undoable);
     dom.html(dom.sel1("p", els.event), desc(event));
+    dom.toggleClass(el, "undoable", undoable);
     dom.toggleClass(els.event, "automatic", !player);
 
     if (player) {
@@ -173,7 +173,7 @@ export function ui($table, $story, $ready, $hist, $online, seated, seat, desc, t
   });
 
   $.on(el, "click", "#error", function(e){
-    dom.attr(el, "data-show-error", false);
+    dom.removeClass(el, "error");
   });
 
   $.on(el, "click", "#event", function(e){

@@ -32,7 +32,7 @@ sub {
 .signout {
   display: none;
 }
-body[data-tense="past"],
+body:not(.present),
 body[data-event-type="finished"] {
   background-image: url(/images/backgrounds/pixel_weave.webp);
   transition: background-image .3s ease-in-out;
@@ -44,8 +44,7 @@ body.initialized {
 body {
   opacity: 0;
 }
-body[data-ready=""],
-body[data-ready="false"] {
+body.wait {
   cursor: wait;
 }
 [data-played="0"] [data-seat="0"] .area img,
@@ -127,11 +126,11 @@ body[data-ready="false"] {
 #error {
   visibility: hidden;
 }
-body[data-show-error="true"] #error {
+body.error #error {
   visibility: visible;
 }
-body[data-show-error="true"] #event,
-body[data-show-error="true"] #guidance {
+body.error #event,
+body.error #guidance {
   visibility: hidden;
 }
 #event[data-type="scored"],
@@ -252,7 +251,7 @@ img#up {
   transition: opacity 1s;
   cursor: default;
 }
-[data-up="true"] img#up {
+body.up img#up {
   opacity: 1;
 }
 #replay img {
@@ -263,7 +262,7 @@ img#up {
   margin-right: 7px;
   visibility: hidden;
 }
-[data-undoable="true"] #replay img[data-nav="do-over"] {
+body.undoable #replay img[data-nav="do-over"] {
   visibility: visible;
 }
 #replay span {
@@ -302,11 +301,11 @@ a#logo {
 #game #phase:not(:empty)::before {
   content: ": ";
 }
-[data-tense="past"] #game {
+body:not(.present) #game {
   background-color: #74353b;
 }
-[data-tense="past"] *,
-[data-event-type="finished"] * {
+body:not(.present) *,
+body[data-event-type="finished"] * {
   cursor: not-allowed;
 }
 #game {
@@ -508,7 +507,7 @@ kbd.wide {
     background-image: url(/images/backgrounds/carbon_fibre.webp);
     color: snow;
   }
-  body[data-tense="past"],
+  body:not(.present),
   body[data-event-type="finished"] {
     background-image: url(/images/backgrounds/denim.webp);
   }

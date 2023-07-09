@@ -219,7 +219,7 @@ function fail(error){
   const {message} = error;
   sh.dispatch($wip, null);
   dom.text(dom.sel1("#error p", el), message);
-  dom.attr(el, "data-show-error", true);
+  dom.addClass(el, "error");
 }
 
 const placePilli = {type: "place-pilli"};
@@ -304,7 +304,7 @@ $.sub($both, _.map(_.see("$both")), function([[curr, prior, motion, game], wip, 
   const foundables = g.moves(game, {type: "found-district"});
 
   dom.attr(el, "data-status", status);
-  dom.attr(el, "data-show-error", false);
+  dom.removeClass(el, "error");
 
   if (which === 1) {
     const [curr, prior] = wip;
@@ -499,7 +499,7 @@ const ctx = 'body.ui.act'; //ensure actionable context
 $.on(el, "keydown", ctx, function(e){
   if (e.key === "Escape") { //cancel a command in progress
     sh.dispatch($wip, null);
-    dom.attr(el, "data-show-error", false);
+    dom.removeClass(el, "error");
   }
 });
 

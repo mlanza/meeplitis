@@ -625,7 +625,6 @@ export function execute(self, command){
   const {spent, contents, period, canal1, canal2, capulli, bridges, banked, tokens} = state;
   const {bank, pilli} = seated;
   const {deficit} = spend(spent, bank, cost);
-  const temples = _.map(_.pipe(_.get(_, "temples"), consolidateTemples), state.seated);
   const pillis = _.map(_.get(_, "pilli"), state.seated);
 
   if (deficit) {
@@ -637,34 +636,14 @@ export function execute(self, command){
   }
 
   switch (type) {
-    case "start": {
-      return _.chain(self,
-        g.fold(_, {type: "started", seat: null}),
-        _.count(state.seated) === 2 ? g.fold(_, {type: "scattered-temples", details: scatterTemples(), seat: null}) : _.identity,
-        g.execute(_, {type: "deal-capulli", seat: null}));
-    }
-    case "deal-capulli": {
-      const {dealCapulli} = self.config;
-      return _.chain(self,
-        g.fold(_, {type: "dealt-capulli", details: {capulli: dealCapulli(capullis)}, seat: null}));
-    }
-    case "pass": {
-      if (!matched){
-        throw new Error("Cannot pass once initial actions are spent.");
-      }
-      return _.chain(self, g.fold(_, _.assoc(command, "type", "passed")));
-    }
-    case "place-pilli": {
-      if (!matched) {
-        throw new Error("Cannot place Mexica Pilli there.");
-      }
-      return _.chain(self, g.fold(_, _.assoc(command, "type", "placed-pilli")));
-    }
     //TODO provide UI cue when scoring will happen on commit
     case "commit": {
       if (!matched) {
         throw new Error("Cannot end turn while actions remain.");
       }
+      const temples = _.chain(state.seated,
+        _.map(_.pipe(_.get(_, "temples"), consolidateTemples), _),
+        state.nonplayer ? _.concat(_, [state.nonplayer]) : _.identity);
       return _.chain(self,
         g.fold(_, _.assoc(command, "type", "committed")),
         _.get(state, "scoring-round") && endOfRound
@@ -766,8 +745,31 @@ export function execute(self, command){
       const points = founded(_.toArray(pillis), seat, dist);
       return _.chain(self, g.fold(_, {type: "founded-district", seat, details: {at: details.at, size: _.count(dist), points}}));
     }
+    case "pass": {
+      if (!matched){
+        throw new Error("Cannot pass once initial actions are spent.");
+      }
+      return _.chain(self, g.fold(_, _.assoc(command, "type", "passed")));
+    }
+    case "place-pilli": {
+      if (!matched) {
+        throw new Error("Cannot place Mexica Pilli there.");
+      }
+      return _.chain(self, g.fold(_, _.assoc(command, "type", "placed-pilli")));
+    }
     case "finish": {
       return g.fold(self, _.assoc(command, "type", "finished"));
+    }
+    case "deal-capulli": {
+      const {dealCapulli} = self.config;
+      return _.chain(self,
+        g.fold(_, {type: "dealt-capulli", details: {capulli: dealCapulli(capullis)}, seat: null}));
+    }
+    case "start": {
+      return _.chain(self,
+        g.fold(_, {type: "started", seat: null}),
+        _.count(state.seated) === 2 ? g.fold(_, {type: "scattered-temples", details: scatterTemples(), seat: null}) : _.identity,
+        g.execute(_, {type: "deal-capulli", seat: null}));
     }
   }
 }

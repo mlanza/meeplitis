@@ -297,11 +297,9 @@ function reconcileTemples(seat, level){
 }
 
 $.sub($both, _.map(_.see("$both")), function([[curr, prior, motion, game], wip, which]){
-  const {step, offset, touch} = motion;
   const {state, up} = curr;
   const {seated, tokens, canal1, canal2, bridges, period, contents, status, round, spent} = state;
-  const active = _.includes(up, seat);
-  const play = active && offset === 0;
+  const {step} = motion;
   const moves = g.moves(game, {seat});
   const foundables = g.moves(game, {type: "found-district"});
 
@@ -377,7 +375,7 @@ $.sub($both, _.map(_.see("$both")), function([[curr, prior, motion, game], wip, 
   dom.attr(els.actions, "data-remaining", status == "actions" ? _.max(6 - spent, 0) : 0);
 
   _.doseq(function(level){
-    diff(curr, prior, ["state", "nonplayer", "temples", level], reconcileTemples(3, level));
+    diff(curr, prior, ["state", "nonplayer", "temples", level], reconcileTemples(2, level));
   }, _.range(1, 5));
 
   _.doseq(function(period, seat, level){

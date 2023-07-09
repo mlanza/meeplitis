@@ -173,6 +173,8 @@ function desc({type, details}){
       return "Starts game.";
     case "dealt-capulli":
       return "Deals capulli tiles.";
+    case "scattered-temples":
+      return "Scattered nonplayer temples.";
     case "placed-pilli":
       return `Places Pilli Mexica at ${details.at}.`;
     case "constructed-canal":
@@ -279,6 +281,21 @@ function dropPriorOmissions(el){
   _.each(dom.omit, dom.sel(".gone", el));
 }
 
+function reconcileTemples(seat, level){
+  return function(curr, prior){
+    _.each(function(n){
+      diff(curr, prior, [n], function(curr, prior){
+        if (curr){
+          dom.append(at(curr), temple({size: level, seat}));
+        }
+        if (prior){
+          omit(dom.sel1("[data-piece='temple']", at(prior)));
+        }
+      });
+    }, indices(curr || prior));
+  }
+}
+
 $.sub($both, _.map(_.see("$both")), function([[curr, prior, motion, game], wip, which]){
   const {step, offset, touch} = motion;
   const {state, up} = curr;
@@ -359,20 +376,13 @@ $.sub($both, _.map(_.see("$both")), function([[curr, prior, motion, game], wip, 
   dom.text(dom.sel1("#phase", el), {"placing-pilli": `Choose Starting Spaces`, "actions": `Round ${round}`, "finished": "Finished"}[status]);
   dom.attr(els.actions, "data-remaining", status == "actions" ? _.max(6 - spent, 0) : 0);
 
+  _.doseq(function(level){
+    diff(curr, prior, ["state", "nonplayer", "temples", level], reconcileTemples(3, level));
+  }, _.range(1, 5));
+
   _.doseq(function(period, seat, level){
-    diff(curr, prior, ["state", "seated", seat, "temples", period, level], function(curr, prior){
-      _.each(function(n){
-        diff(curr, prior, [n], function(curr, prior){
-          if (curr){
-            dom.append(at(curr), temple({size: level, seat}));
-          }
-          if (prior){
-            omit(dom.sel1("[data-piece='temple']", at(prior)));
-          }
-        });
-      }, indices(curr || prior));
-    });
-  },  [0, 1], indices(seated), _.range(1, 5));
+    diff(curr, prior, ["state", "seated", seat, "temples", period, level], reconcileTemples(seat, level));
+  }, [0, 1], indices(seated), _.range(1, 5));
 
   _.each(function(pos){
     diff(curr, prior, ["state", "capulli", period, pos], function(curr, prior){
@@ -560,7 +570,8 @@ $.on(el, "click", `${ctx}:not([data-command-type="move"]) #bridge[data-spot]`, f
 });
 
 $.on(el, "click", `${ctx}[data-command-type="place-pilli"][data-command-at~="H6"] div[data-spot="H6"] div.propose, ${ctx}[data-command-type="place-pilli"][data-command-at~="H8"] div[data-spot="H8"] div.propose, ${ctx}[data-command-type="place-pilli"][data-command-at~="I7"] div[data-spot="I7"] div.propose, ${ctx}[data-command-type="place-pilli"][data-command-at~="G7"] div[data-spot="G7"] div.propose`, function(e){
-  const at = closestAttr(this, "data-spot");
+  const type = "place-pilli",
+        at = closestAttr(this, "data-spot");
   sh.dispatch($story, {type, details: {at}});
 });
 

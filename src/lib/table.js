@@ -31,7 +31,7 @@ export function table(tableId){
   return $.pipe($t, _.compact());
 }
 
-export function ui($table, $story, $ready, $hist, $online, seated, seat, desc, template, el){
+export function ui($table, $story, $ready, $hist, $online, log, seated, seat, desc, template, el){
   const $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), _.compact()),
         $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table),
         $status = $.map(_.get(_, "status"), $table),
@@ -78,14 +78,14 @@ export function ui($table, $story, $ready, $hist, $online, seated, seat, desc, t
   dom.attr(el, "data-perspective", seat);
   dom.attr(el, "data-seats", _.count(seated));
 
-  $.sub($table, _.see("$table"));
-  $.sub($status, _.see("$status"));
-  $.sub($touch, _.see("$touch"));
-  $.sub($story, _.see("$story"));
-  $.sub($ready, _.see("$ready"));
-  $.sub($present, _.see("$present"));
-  $.sub($act, _.see("$act"));
-  $.sub($hist, _.see("$hist"));
+  $.sub($table, _.partial(log, "$table"));
+  $.sub($status, _.partial(log, "$status"));
+  $.sub($touch, _.partial(log, "$touch"));
+  $.sub($story, _.partial(log, "$story"));
+  $.sub($ready, _.partial(log, "$ready"));
+  $.sub($present, _.partial(log, "$present"));
+  $.sub($act, _.partial(log, "$act"));
+  $.sub($hist, _.partial(log, "$hist"));
 
   $.sub($status, dom.attr(el, "data-table-status", _));
   $.sub($present, dom.toggleClass(el, "present", _));
@@ -102,7 +102,7 @@ export function ui($table, $story, $ready, $hist, $online, seated, seat, desc, t
     }, seated);
   });
 
-  $.sub($presence, _.map(_.tee(_.see("presence"))), function(presence){
+  $.sub($presence, _.map(_.tee(_.partial(log, "presence"))), function(presence){
     _.eachkv(function(username, presence){
       const zone = dom.sel1(`.zone[data-username="${username}"]`);
       dom.attr(zone, "data-presence", presence ? "online" : "offline");

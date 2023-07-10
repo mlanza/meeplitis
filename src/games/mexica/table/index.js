@@ -223,9 +223,10 @@ function fail(error){
 
 const placePilli = {type: "place-pilli"};
 
-const $table = table(tableId),
+const log    = _.log,
+      $table = table(tableId),
       $ready = $.cell(false),
-      $story = story(session, tableId, seat, seated, await getConfig(tableId), $ready, fail, c.mexica),
+      $story = story(session, tableId, seat, seated, await getConfig(tableId), _.partial(log, "story"), $ready, fail, c.mexica),
       $hist  = hist($story),
       $wip   = wip($story, function(game){
         const {seated} = _.deref(game);
@@ -258,7 +259,7 @@ function diff(curr, prior, path, f){ //TODO promote
 }
 
 //universal ui
-ui($table, $story, $ready, $hist, $online, seated, seat, desc, template, el);
+ui($table, $story, $ready, $hist, $online, _.partial(log, "ui"), seated, seat, desc, template, el);
 
 $.sub($table, _.comp(_.compact(), _.map(describe), _.map(_.join("\n", _))), function(descriptors){
   dom.attr(dom.sel1("#title"), "title", descriptors || "Normal game");
@@ -295,7 +296,7 @@ function reconcileTemples(seat, level){
   }
 }
 
-$.sub($both, _.map(_.see("$both")), function([[curr, prior, motion, game], wip, which]){
+$.sub($both, _.map(_.tee(_.partial(log, "$both"))), function([[curr, prior, motion, game], wip, which]){
   const {state, up} = curr;
   const {seated, tokens, canal1, canal2, bridges, period, contents, status, round, spent} = state;
   const {step} = motion;
@@ -363,7 +364,7 @@ $.sub($both, _.map(_.see("$both")), function([[curr, prior, motion, game], wip, 
   }
 
   _.chain(moves, _.map(_.get(_, "type"), _), _.distinct, _.join(" ", _), dom.attr(el, "data-allow-commands", _));
-  _.chain(moves, _.toArray, _.see("moves")); //debugging only
+  _.chain(moves, _.toArray, _.partial(log, "moves")); //debugging only
 
   dropPriorOmissions(el);
 

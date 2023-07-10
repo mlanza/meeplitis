@@ -62,8 +62,8 @@ function move(_table_id, _seat, _commands, session){
   });
 }
 
-export function Story(session, tableId, seat, seated, config, $ready, fail, make, $state, $story){
-  Object.assign(this, {session, tableId, seat, seated, config, $ready, fail, make, $state, $story});
+export function Story(session, tableId, seat, seated, config, log, $ready, fail, make, $state, $story){
+  Object.assign(this, {session, tableId, seat, seated, config, log, $ready, fail, make, $state, $story});
 }
 
 function stepping(self, cstory, pstory){
@@ -98,9 +98,11 @@ export function wip(self, f = _.noop){ //work in progress
     _.swap($data, _.assoc(_, _.deref($at), command));
   }
 
-  $.sub($at, _.see("$at"));
-  $.sub($head, _.see("$head"));
-  $.sub($snapshot, _.see("$snapshot"));
+  const log = _.partial(self.log, "$wip");
+
+  $.sub($at, _.partial(log, "$at"));
+  $.sub($head, _.partial(log, "$head"));
+  $.sub($snapshot, _.partial(log, "$snapshot"));
   $.sub($snapshot, f);
 
   _.doto($wip, _.specify(sh.IDispatch, {dispatch}));
@@ -141,7 +143,7 @@ export function waypoint(self, up, how){
             _event_id = _.nth(touches, at);
       if (up && _.includes(undoables, _event_id)){
         supabase.rpc('undo', {_table_id, _event_id}).then(function(undo){
-          _.log("undo", undo);
+          self.log("undo", undo);
           _.swap(self.$state, _.update(_, "history", _.pipe(_.take(at -1, _), _.toArray)));
         });
       }
@@ -178,13 +180,13 @@ async function dispatch(self, command){
 
     const {error, data} = await move(self.tableId, self.seat, [command], self.session);
 
-    _.log('moved', {tableId: self.tableId, command, seat: self.seat}, '->', {error, data});
+    self.log('moved', {tableId: self.tableId, command, seat: self.seat}, '->', {error, data});
 
     if (error) {
       self.fail(error);
     }
   } finally {
-    _.reset(self.$ready, true)
+    _.reset(self.$ready, true);
   }
 }
 
@@ -193,12 +195,12 @@ _.doto(Story,
   _.implement($.ISubscribe, {sub}),
   _.implement(_.IDeref, {deref}));
 
-export function story(session, tableId, seat, seated, config, $ready, fail, make){
+export function story(session, tableId, seat, seated, config, log, $ready, fail, make){
   const $state = $.cell({touches: null, history: null, at: null});
 
   _.reset($ready, true);
 
-  return new Story(session, tableId, seat, seated, config, $ready, fail ,make, $state, $.pipe($state, _.filter(function({touches, history, at}){ //TODO cleanup
+  return new Story(session, tableId, seat, seated, config, log, $ready, fail, make, $state, $.pipe($state, _.filter(function({touches, history, at}){ //TODO cleanup
     return touches && history && at != null;
   }), _.thin(_.mapArgs(_.get(_, "at"), _.equiv))));
 }

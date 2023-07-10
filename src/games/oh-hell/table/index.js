@@ -96,13 +96,14 @@ function cardSrc({suit, rank}){
   return `/images/deck/${rank}${suits[suit]}.svg`;
 }
 
-const $table = table(tableId),
+const log    = _.log,
+      $table = table(tableId),
       $ready = $.cell(false),
-      $story = story(session, tableId, seat, seated, await getConfig(tableId), $ready, _.noop, c.ohHell),
+      $story = story(session, tableId, seat, seated, await getConfig(tableId), _.partial(log, "story"), $ready, _.noop, c.ohHell),
       $hist  = hist($story);
 
 //universal ui
-ui($table, $story, $ready, $hist, $online, seated, seat, desc, template, el);
+ui($table, $story, $ready, $hist, $online, _.partial(log, "ui"), seated, seat, desc, template, el);
 
 $.sub($table, _.comp(_.compact(), _.map(describe), _.map(_.join("\n", _))), function(descriptors){
   dom.attr(dom.sel1("#title"), "title", descriptors || "Up and Down");

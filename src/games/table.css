@@ -79,8 +79,9 @@ body.wait {
 .message:hover {
   animation-duration: 60s;
 }
-.message.acknowledged {
+body.ack .message {
   animation: .5s ease 0s normal forwards 1 fadeout;
+  pointer-events: none;
 }
 @keyframes arise {
   0% { transform: translateY(4em)}

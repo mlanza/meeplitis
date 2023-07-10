@@ -218,6 +218,7 @@ function fail(error){
   sh.dispatch($wip, null);
   dom.text(dom.sel1("#error p", el), message);
   dom.addClass(el, "error");
+  dom.removeClass(el, "ack");
 }
 
 const placePilli = {type: "place-pilli"};

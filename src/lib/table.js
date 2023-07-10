@@ -133,11 +133,12 @@ export function ui($table, $story, $ready, $hist, $online, seated, seat, desc, t
     const {event, seen} = curr;
     const player = eventFor(event);
 
+    dom.removeClass(el, "ack");
+
     _.doto(els.event,
       dom.attr(_, "data-type", event.type),
       dom.addClass(_, "bounce"),
-      dom.removeClass(_, "hidden"),
-      dom.removeClass(_, "acknowledged"));
+      dom.removeClass(_, "hidden"));
 
     dom.attr(el, "data-event-type", event.type);
     dom.html(dom.sel1("p", els.event), desc(event));
@@ -172,16 +173,8 @@ export function ui($table, $story, $ready, $hist, $online, seated, seat, desc, t
     replay(dom.attr(e.target, "data-nav"));
   });
 
-  $.on(el, "click", "#error", function(e){
-    dom.removeClass(el, "error");
-  });
-
-  $.on(el, "click", "#event", function(e){
-    const self = this;
-    dom.addClass(self, "acknowledged");
-    setTimeout(function(){
-      dom.addClass(self, "hidden");
-    }, 500);
+  $.on(el, "click", ".message", function(e){
+    dom.addClass(el, "ack");
   });
 }
 

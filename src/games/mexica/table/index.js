@@ -237,6 +237,8 @@ const log    = _.log,
       }),
       $both  = which($.latest([$hist, $wip]));
 
+$.sub($both, _.partial(log, "$both"));
+
 function template(seat){
   return {
     stats: div(span({class: "points"}, "0"), " pts."),
@@ -288,7 +290,7 @@ function reconcileTemples(seat, level){
   }
 }
 
-$.sub($both, _.map(_.tee(_.partial(log, "$both"))), function([[curr, prior, motion, game], wip, which]){
+$.sub($both, function([[curr, prior, motion, game], wip, which]){
   const {state, up} = curr;
   const {seated, tokens, canal1, canal2, bridges, period, contents, status, round, spent} = state;
   const {step} = motion;

@@ -47,21 +47,37 @@ body.init {
 body.wait {
   cursor: wait;
 }
-[data-played="0"] [data-seat="0"] .area img,
-[data-played="1"] [data-seat="1"] .area img,
-[data-played="2"] [data-seat="2"] .area img,
-[data-played="3"] [data-seat="3"] .area img,
-[data-played="4"] [data-seat="4"] .area img,
-[data-played="5"] [data-seat="5"] .area img,
-[data-played="6"] [data-seat="6"] .area img {
-  animation: play .8s;
+.moves {
+  position: fixed;
+  left: 1em;
+  bottom: 1em;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: .7em;
+  z-index: 99;
+  padding: 1px;
 }
-[data-event-type="award"] .area img {
-  transform: translateY(-30em);
-  animation: award .8s !important;
+button {
+  font-size: 1em;
+  min-width: 4em;
+  padding: 5px;
+  border-radius: .5em;
+  margin: 2px;
+  min-width: 2em;
+  text-align: center;
+  transition: background-color .5s, color .5s;
+  display: none;
+}
+body.present button {
+  cursor: default;
+}
+body.present button:hover {
+  cursor: pointer;
 }
 [data-table-status="finished"] #replay .touches::after {
   content: "!";
+}
+body.anon img[data-nav="last-move"] {
+  display: none;
 }
 .message {
   animation: updown 3s ease-out infinite;
@@ -150,7 +166,7 @@ body.error :is(#event, #guidance) {
 #event[data-type="finished"] > * {
   display: inline-block;
 }
-#event img.subject {
+#event .subject {
   border-radius: 5px;
   border: solid 1px dimgray;
   margin-bottom: -25px;
@@ -184,8 +200,9 @@ body.error :is(#event, #guidance) {
   height: 80px;
   width: 80px;
 }
-#event img.subject {
+#event .subject {
   height: 50px;
+  width: 50px;
 }
 .message p {
   display: block;
@@ -214,9 +231,10 @@ body.error :is(#event, #guidance) {
   display: inline-block;
   position: relative;
 }
-.scored li span {
+.scored li span:not(.avatar) {
   display: inline-block;
   width: 50px;
+  height: 20px;
   position: absolute;
   left: 0;
   bottom: 0;
@@ -296,7 +314,7 @@ a#logo {
 #game span {
   line-height: 1.1em;
 }
-#game img, #game .logo {
+#game :is(img, .logo) {
   width: 18px;
   margin-right: 0;
   margin-bottom: -3px;
@@ -518,6 +536,10 @@ kbd.wide {
     background: linear-gradient(-26.5deg, rgb(86, 88, 114) 0%, rgb(49, 53, 91) 100%);
     box-shadow: inset 0 -2px 0 0 rgb(40, 45, 85), inset 0 0 1px 1px rgb(81, 87, 125), 0 2px 2px 0 rgba(3, 4, 9, 0.3);
     color: rgb(127, 132, 151);
+  }
+  .moves {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.1);
   }
 }
 @keyframes play {

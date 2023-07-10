@@ -3,6 +3,7 @@
   --board-top-buffer: 6px;
   --board-left-buffer: .5px;
 }
+/*
 .moves {
   position: fixed;
   left: 1em;
@@ -15,6 +16,7 @@
 .moves button {
   display: none;
 }
+*/
 body.ui.act[data-command-type="move"] .proposed:empty {
   pointer-events: none;
 }

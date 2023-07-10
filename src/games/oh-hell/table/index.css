@@ -1,12 +1,3 @@
-.moves {
-  position: fixed;
-  left: 1em;
-  bottom: 1em;
-  background-color: rgba(255, 255, 255, 0.8);
-  border-radius: .7em;
-  z-index: 99;
-  padding: 1px;
-}
 .leads {
   visibility: hidden;
 }
@@ -19,27 +10,9 @@
 [data-lead="6"] [data-seat="6"] .leads {
   visibility: visible;
 }
-button {
-  font-size: 1.1em;
-  min-width: 4em;
-  padding: 5px;
-  border-radius: .5em;
-  margin: 2px;
-  min-width: 2em;
-  text-align: center;
-  transition: background-color .5s, color .5s;
-  display: none;
-}
 button.active,
 button.selected {
   display: initial;
-}
-body.present button {
-  cursor: default;
-}
-body.present button:hover {
-  background-color: orange;
-  color: snow;
 }
 .hand {
   position: fixed;
@@ -52,6 +25,19 @@ body.present button:hover {
   list-style: none;
   display: inline-flex;
   z-index: 99;
+}
+[data-played="0"] [data-seat="0"] .area img,
+[data-played="1"] [data-seat="1"] .area img,
+[data-played="2"] [data-seat="2"] .area img,
+[data-played="3"] [data-seat="3"] .area img,
+[data-played="4"] [data-seat="4"] .area img,
+[data-played="5"] [data-seat="5"] .area img,
+[data-played="6"] [data-seat="6"] .area img {
+  animation: play .8s;
+}
+body[data-event-type="award"] .area img {
+  transform: translateY(-30em);
+  animation: award .8s !important;
 }
 body.present[data-status="playing"] .hand:hover {
   bottom: -8em;
@@ -90,7 +76,6 @@ body[data-broken="true"] .broken {
   visibility: visible;
 }
 .upkeep {
-  -border: solid 1px purple;
   width: 10em;
   position: absolute;
   right: 0;
@@ -100,14 +85,4 @@ body[data-broken="true"] .broken {
   text-align: center;
   display: block;
   margin: .5em auto 0;
-}
-body.anon img[data-nav="last-move"] {
-  display: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  .moves {
-    color: white;
-    background-color: rgba(255, 255, 255, 0.1);
-  }
 }

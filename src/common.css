@@ -10,5 +10,4 @@
 }
 .avatar img:not(.pawn, .won) {
   height: 100%;
-  min-width: 100%;
 }

@@ -230,5 +230,5 @@ export function victor(player){
 }
 
 export function subject(player){
-  return img({class: "subject", alt: player.username, src: `${player.avatar_url}?s=50`});
+  return span({class: "subject avatar"}, img({alt: player.username, src: `${player.avatar_url}?s=50`}));
 }

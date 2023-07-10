@@ -100,8 +100,6 @@ const {img, ol, li, div, kbd, span} = dom.tags(['img', 'ol', 'li', 'div', 'kbd',
 const params = new URLSearchParams(document.location.search),
       tableId = params.get('id');
 
-dom.addClass(document.body, "initialized"); //TODO temporary
-
 if (!tableId) {
   document.location.href = "../";
 }

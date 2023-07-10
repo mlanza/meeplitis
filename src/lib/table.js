@@ -31,6 +31,14 @@ export function table(tableId){
   return $.pipe($t, _.compact());
 }
 
+export function diff(curr, prior, path, f){
+  const c = _.getIn(curr, path),
+        p = _.getIn(prior, path);
+  if (_.notEq(c, p)) {
+    f(c, p);
+  }
+}
+
 export function ui($table, $story, $ready, $hist, $online, log, seated, seat, desc, template, el){
   const $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), _.compact()),
         $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table),

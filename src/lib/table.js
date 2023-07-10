@@ -149,7 +149,7 @@ export function ui($table, $story, $ready, $hist, $online, seated, seat, desc, t
       dom.text(dom.sel1("p.who", els.event), player.username);
     }
 
-    dom.addClass(el, "initialized");
+    dom.addClass(el, "init");
   });
 
   $.on(el, "keydown", function(e){

@@ -40,7 +40,7 @@ body[data-event-type="finished"] {
 body {
   opacity: 0;
 }
-body.initialized {
+body.init {
   opacity: 1;
   transition: opacity .25s;
 }

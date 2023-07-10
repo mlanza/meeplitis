@@ -37,9 +37,9 @@ export function ui($table, $story, $ready, $hist, $online, log, seated, seat, de
         $status = $.map(_.get(_, "status"), $table),
         $scored = $.map(_.get(_, "scored"), $table),
         $presence = presence($online, _.mapa(_.get(_, "username"), seated)),
-        $present = $.pipe($story, _.map(function({touches, at}){
+        $present = $.map(_.all, $ready, $.pipe($story, _.map(function({touches, at}){
           return _.count(touches) - 1 == at;
-        }), _.dedupe()),
+        }), _.dedupe())),
         $act = $.map(_.all, $present, $up, $ready);
 
   let replays = 0;

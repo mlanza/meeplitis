@@ -73,6 +73,9 @@ body.wait {
   right: .25em;
   top: .25em;
 }
+#error .icon {
+  transform: scaleX(-1);
+}
 .message:hover {
   animation-duration: 60s;
 }

@@ -37,12 +37,12 @@ body[data-event-type="finished"] {
   background-image: url(/images/backgrounds/pixel_weave.webp);
   transition: background-image .3s ease-in-out;
 }
+body {
+  opacity: 0;
+}
 body.initialized {
   opacity: 1;
   transition: opacity .25s;
-}
-body {
-  opacity: 0;
 }
 body.wait {
   cursor: wait;
@@ -123,18 +123,17 @@ body.wait {
   margin-top: 15px;
   margin-bottom: 15px;
 }
-#error {
+#error,
+#event:not([data-type]) {
   visibility: hidden;
 }
 body.error #error {
   visibility: visible;
 }
-body.error #event,
-body.error #guidance {
+body.error :is(#event, #guidance) {
   visibility: hidden;
 }
-#event[data-type="scored"],
-#event[data-type="finished"] {
+#event:is([data-type="scored"], [data-type="finished"]) {
   text-align: center;
   vertical-align: middle;
 }

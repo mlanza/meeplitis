@@ -38,21 +38,18 @@ export function describe(table){
 }
 
 function aged(dt, asof){
+  function diff(dt1, dt2, units){
+    return Math.ceil(Math.abs(dt2 - dt1) / units);
+  }
   function lessThan(units){
     return _.subtract(asof, units) < dt;
   }
   if (lessThan(_.hours(1))) {
-    return [_.detect(function(n){
-      return lessThan(_.minutes(n + 1));
-    }, _.range(60)), "m"];
+    return [diff(dt, asof, 1000 * 60), "m"];
   } else if (lessThan(_.days(1))) {
-    return [_.detect(function(n){
-      return lessThan(_.hours(n + 1));
-    }, _.range(24)), "h"];
+    return [diff(dt, asof, 1000 * 60 * 60), "h"];
   } else {
-    return _.maybe(_.range(50), _.detect(function(n){
-      return lessThan(_.days(n + 1));
-    }, _), _.array, _.conj(_, "d")); //abandoned tables closed after 30 days
+    return [diff(dt, asof, 1000 * 60 * 60 * 24), "d"];
   }
 }
 

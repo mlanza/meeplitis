@@ -363,12 +363,6 @@ export const contains = _.partly(function contains(obstructions, contents, at){
 
 export const lacks = _.partly(_.pipe(contains, _.not));
 
-export const has = _.partly(function has(obstructions, contents, spots){
-  return _.some(function(spot){
-    return contains(obstructions, contents, spot) ? spot : null;
-  }, spots);
-});
-
 export function destinations(contents) {
   return _.filter(
     _.and(
@@ -573,7 +567,7 @@ function score(size, place){
 
 function scoreGrandeur(temples, contents, period, dists, pillis){
   const scored = _.mapa(function(dist){
-    const marker = has([c], contents, dist);
+    const marker = _.detect(contains([c], contents, _), dist);
     const size = _.count(dist);
     const at = marker || _.first(dist);
     const plcs = tieBumps(places(temples, dist));
@@ -697,7 +691,7 @@ export function execute(self, command){
         throw new Error("Cannot place canals on nonadjacent spaces.");
       }
       for(const canalAt of details.at){
-        if (has([c], contents, district(board, contents, canalAt))){
+        if (_.detect(contains([c], contents, _), district(board, contents, canalAt))){
           throw new Error("Cannot place canals in a founded district.");
         }
         if (!isVacant(board, contents, canalAt)) {
@@ -748,7 +742,7 @@ export function execute(self, command){
         throw new Error("Cannot found a district where your Mexica Pilli is not present.");
       }
       const dist = district(board, contents, pilli);
-      if (has([c], contents, dist)){
+      if (_.detect(contains([c], contents, _), dist)){
         throw new Error("Cannot found a founded district.");
       }
       if (!isVacant(board, contents, details.at)) {

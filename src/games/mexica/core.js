@@ -369,6 +369,18 @@ export const has = _.partly(function has(obstructions, contents, spots){
   }, spots);
 });
 
+export function destinations(contents) {
+  return _.filter(
+    _.and(
+      _.or(
+        _.and(
+          contains([w], contents, _),
+          contains([b], contents, _)),
+        lacks([w], contents, _)),
+      lacks([p, t, c], contents, _)),
+         viableSpots);
+}
+
 function isBridgable(board, contents, at){
   const what = _.getIn(board, coord(at)),
         cts  = _.get(contents, at);

@@ -311,7 +311,7 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
       "data-command-size": null,
       "data-command-from": null,
       "data-command-to": null,
-      "data-command-teleport": null,
+      "data-command-destinations": null,
       "data-command-at": null
     };
     switch (type) { //only multi-step commands appear here
@@ -338,9 +338,10 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
         const moves = g.moves(game, {seat, type});
         const to = _.maybe(moves, _.filter(_.comp(_.includes(["foot", "boat"], _), _.getIn(_, ["details", "by"])), _), _.mapa(_.getIn(_, ["details", "to"]), _), _.seq, _.join(" ", _));
         const teleport = _.chain(moves, _.detect(_.comp(_.eq(_, "teleport"), _.getIn(_, ["details", "by"])), _), _.not, _.not);
+        const destinations = teleport ? _.join(" ", c.destinations(contents)) : null;
         attrs["data-command-from"] = details.from;
         attrs["data-command-to"] = to;
-        attrs["data-command-teleport"] = teleport;
+        attrs["data-command-destinations"] = destinations;
         break;
       case "relocate-bridge": {
         const {details} = curr;

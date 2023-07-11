@@ -2,7 +2,44 @@
 @import url(/fonts.css);
 @import url(/you.css);
 @import url(/games/effects.css);
-html, body {
+
+@keyframes wobble {
+  0% { transform: translateX(0%); }
+  15% { transform: translateX(-25%) rotate(-5deg); }
+  30% { transform: translateX(20%) rotate(3deg); }
+  45% { transform: translateX(-15%) rotate(-3deg); }
+  60% { transform: translateX(10%) rotate(2deg); }
+  75% { transform: translateX(-5%) rotate(-1deg); }
+  100% { transform: translateX(0%); }
+}
+@keyframes arise {
+  0% { transform: translateY(4em)}
+  100% { transform: translateY(0)}
+}
+@keyframes play {
+  0% { transform: translateY(-21em); }
+  40% { transform: translateY(0); }
+}
+@keyframes award {
+  0% { transform: translateY(0); }
+  60% { transform: translateY(-21em); }
+}
+@keyframes updown {
+  0% { transform: translateY(0); }
+  25% { transform: translateY(-1em); }
+  100% { transform: translateY(0); }
+}
+@keyframes down {
+  25% { transform: translateY(-1em); }
+  0% { transform: translateY(0); }
+}
+@keyframes fadeout {
+  0% { opacity: 1; }
+  95% { opacity: .8; }
+  100% { opacity: 0; }
+}
+
+:root, body {
   height: 100%;
   margin: 0;
   padding: 0;
@@ -18,6 +55,7 @@ body {
   overflow: auto;
 }
 #table {
+  opacity: 0;
   margin: 0;
   padding: 0;
   padding-top: 2.5em;
@@ -30,6 +68,13 @@ body {
   position: absolute;
   top: 0;
   left: 0;
+}
+#table.init {
+  opacity: 1;
+  transition: opacity .25s;
+}
+#table.wait {
+  cursor: wait;
 }
 sup,
 sub {
@@ -46,7 +91,7 @@ sub {
   font-size: 1em;
   display: inline;
 }
-#game progress {
+#table #game progress {
   margin-right: .5em;
   vertical-align: text-top;
 }
@@ -59,17 +104,7 @@ sub {
   background-image: url(/images/backgrounds/pixel_weave.webp);
   transition: background-image .3s ease-in-out;
 }
-#table {
-  opacity: 0;
-}
-#table.init {
-  opacity: 1;
-  transition: opacity .25s;
-}
-#table.wait {
-  cursor: wait;
-}
-.moves {
+#table .moves {
   position: fixed;
   left: 1em;
   bottom: 1em;
@@ -78,7 +113,7 @@ sub {
   z-index: 99;
   padding: 1px;
 }
-button {
+#table button {
   font-size: 1em;
   min-width: 4em;
   padding: 5px;
@@ -95,7 +130,7 @@ button {
 #table.present button:hover {
   cursor: pointer;
 }
-[data-table-status="finished"] #replay .touches::after {
+#table[data-table-status="finished"] #replay .touches::after {
   content: "!";
 }
 body.anon img[data-nav="last-move"] {
@@ -120,10 +155,6 @@ body.anon img[data-nav="last-move"] {
 #table.ack .message {
   animation: .5s ease 0s normal forwards 1 fadeout;
   pointer-events: none;
-}
-@keyframes arise {
-  0% { transform: translateY(4em)}
-  100% { transform: translateY(0)}
 }
 .hidden {
   display: none;
@@ -237,15 +268,15 @@ body.anon img[data-nav="last-move"] {
 .message.automatic .who {
   visibility: hidden;
 }
-.scored {
+#table .scored {
   padding: 0;
   margin: 0;
   list-style: none;
 }
-.scored {
+#table .scored {
   width: auto;
 }
-.scored li {
+#table .scored li {
   width: 52px;
   height: 4.4em;
   padding: 0;
@@ -253,7 +284,7 @@ body.anon img[data-nav="last-move"] {
   display: inline-block;
   position: relative;
 }
-.scored li span:not(.avatar) {
+#table .scored li span:not(.avatar) {
   display: inline-block;
   width: 50px;
   height: 20px;
@@ -261,18 +292,18 @@ body.anon img[data-nav="last-move"] {
   left: 0;
   bottom: 0;
 }
-[data-event-type="scoring"] #event {
+#table[data-event-type="scoring"] #event {
   height: 7.5em;
   transition: height .5s;
 }
-[data-event-type="finished"] #event {
+#table[data-event-type="finished"] #event {
   height: 14.5em;
   transition: height .5s;
 }
-[data-event-type="finished"] #game {
+#table[data-event-type="finished"] #game {
   background-color: rgba(116, 53, 59, .6);
 }
-#replay {
+#table #replay {
   float: right;
   font-size: .9em;
   position: absolute;
@@ -297,26 +328,26 @@ img#up {
 #table.up img#up {
   opacity: 1;
 }
-#replay img {
+#table #replay img {
   margin: 4px 2px 0;
   cursor: default;
 }
-#replay img[data-nav="do-over"] {
+#table #replay img[data-nav="do-over"] {
   margin-right: 7px;
   visibility: hidden;
 }
 #table.undoable #replay img[data-nav="do-over"] {
   visibility: visible;
 }
-#replay span {
+#table #replay span {
   width: 2em;
   display: inline-block;
   text-align: right;
 }
-#replay span.touches {
+#table #replay span.touches {
   text-align: left;
 }
-#game {
+#table #game {
   position: fixed;
   top: 0;
   background-color: #3E505C;
@@ -333,15 +364,15 @@ img#up {
 a#logo {
   display: none;
 }
-#game span {
+#table #game span {
   line-height: 1.1em;
 }
-#game :is(img, .logo) {
+#table #game :is(img, .logo) {
   width: 18px;
   margin-right: 0;
   margin-bottom: -3px;
 }
-#game #phase:not(:empty)::before {
+#table #game #phase:not(:empty)::before {
   content: ": ";
 }
 #table:not(.present) #game {
@@ -351,17 +382,8 @@ a#logo {
 #table[data-event-type="finished"] * {
   cursor: not-allowed;
 }
-#game {
+#table #game {
   cursor: default;
-}
-@keyframes wobble {
-  0% { transform: translateX(0%); }
-  15% { transform: translateX(-25%) rotate(-5deg); }
-  30% { transform: translateX(20%) rotate(3deg); }
-  45% { transform: translateX(-15%) rotate(-3deg); }
-  60% { transform: translateX(10%) rotate(2deg); }
-  75% { transform: translateX(-5%) rotate(-1deg); }
-  100% { transform: translateX(0%); }
 }
 img[data-action] {
   width: 3em;
@@ -511,12 +533,12 @@ div.player .username * {
   display: inline;
   font-size: 1em;
 }
-#game .logo {
+#table #game .logo {
   max-height: 18px;
   max-width: 18px;
   margin-right: -2px;
 }
-#game .logo > path {
+#table #game .logo > path {
   fill: #FF5733;
 }
 kbd {
@@ -566,26 +588,4 @@ kbd.wide {
     color: white;
     background-color: rgba(255, 255, 255, 0.1);
   }
-}
-@keyframes play {
-  0% { transform: translateY(-21em); }
-  40% { transform: translateY(0); }
-}
-@keyframes award {
-  0% { transform: translateY(0); }
-  60% { transform: translateY(-21em); }
-}
-@keyframes updown {
-  0% { transform: translateY(0); }
-  25% { transform: translateY(-1em); }
-  100% { transform: translateY(0); }
-}
-@keyframes down {
-  25% { transform: translateY(-1em); }
-  0% { transform: translateY(0); }
-}
-@keyframes fadeout {
-  0% { opacity: 1; }
-  95% { opacity: .8; }
-  100% { opacity: 0; }
 }

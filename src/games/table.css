@@ -2,13 +2,34 @@
 @import url(/fonts.css);
 @import url(/you.css);
 @import url(/games/effects.css);
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-image: url(/images/backgrounds/round.webp);
+}
+/*
+eliminates bounce effect on overscroll
+html {
+  overflow: hidden;
+}
+*/
 body {
+  overflow: auto;
+}
+#table {
   margin: 0;
   padding: 0;
   padding-top: 2.5em;
+  height: calc(100% - 2.5em);
+  width: 100%;
   color: #3E505C;
   background-image: url(/images/backgrounds/round.webp);
   transition: background-image .3s ease-in-out;
+  overflow-y: scroll;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 sup,
 sub {
@@ -33,19 +54,19 @@ sub {
 .signout {
   display: none;
 }
-body:not(.present),
-body[data-event-type="finished"] {
+#table:not(.present),
+#table[data-event-type="finished"] {
   background-image: url(/images/backgrounds/pixel_weave.webp);
   transition: background-image .3s ease-in-out;
 }
-body {
+#table {
   opacity: 0;
 }
-body.init {
+#table.init {
   opacity: 1;
   transition: opacity .25s;
 }
-body.wait {
+#table.wait {
   cursor: wait;
 }
 .moves {
@@ -68,10 +89,10 @@ button {
   transition: background-color .5s, color .5s;
   display: none;
 }
-body.present button {
+#table.present button {
   cursor: default;
 }
-body.present button:hover {
+#table.present button:hover {
   cursor: pointer;
 }
 [data-table-status="finished"] #replay .touches::after {
@@ -96,7 +117,7 @@ body.anon img[data-nav="last-move"] {
 .message:hover {
   animation-duration: 60s;
 }
-body.ack .message {
+#table.ack .message {
   animation: .5s ease 0s normal forwards 1 fadeout;
   pointer-events: none;
 }
@@ -148,10 +169,10 @@ body.ack .message {
 #event:not([data-type]) {
   visibility: hidden;
 }
-body.error #error {
+#table.error #error {
   visibility: visible;
 }
-body.error :is(#event, #guidance) {
+#table.error :is(#event, #guidance) {
   visibility: hidden;
 }
 #event:is([data-type="scored"], [data-type="finished"]) {
@@ -273,7 +294,7 @@ img#up {
   transition: opacity 1s;
   cursor: default;
 }
-body.up img#up {
+#table.up img#up {
   opacity: 1;
 }
 #replay img {
@@ -284,7 +305,7 @@ body.up img#up {
   margin-right: 7px;
   visibility: hidden;
 }
-body.undoable #replay img[data-nav="do-over"] {
+#table.undoable #replay img[data-nav="do-over"] {
   visibility: visible;
 }
 #replay span {
@@ -323,11 +344,11 @@ a#logo {
 #game #phase:not(:empty)::before {
   content: ": ";
 }
-body:not(.present) #game {
+#table:not(.present) #game {
   background-color: #74353b;
 }
-body:not(.present) *,
-body[data-event-type="finished"] * {
+#table:not(.present) *,
+#table[data-event-type="finished"] * {
   cursor: not-allowed;
 }
 #game {
@@ -525,12 +546,15 @@ kbd.wide {
   width: 40px;
 }
 @media (prefers-color-scheme: dark) {
-  body {
+  html {
+    background-image: url(/images/backgrounds/carbon_fibre.webp);
+  }
+  #table {
     background-image: url(/images/backgrounds/carbon_fibre.webp);
     color: snow;
   }
-  body:not(.present),
-  body[data-event-type="finished"] {
+  #table:not(.present),
+  #table[data-event-type="finished"] {
     background-image: url(/images/backgrounds/denim.webp);
   }
   kbd {

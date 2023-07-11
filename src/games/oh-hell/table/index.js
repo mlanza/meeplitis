@@ -19,7 +19,7 @@ if (!tableId) {
   document.location.href = "../";
 }
 
-const el = document.body;
+const el = dom.sel1("#table");
 const [roundNum, roundMax] = dom.sel(".round b", el);
 const els = {
   roundNum,
@@ -160,17 +160,17 @@ $.sub($hist, function([curr, prior, {step, offset}, game]){
   }, hand));
 });
 
-$.on(el, "click", 'body.present:not(.wait) .moves button[data-type="bid"]', function(e){
+$.on(el, "click", '#table.present:not(.wait) .moves button[data-type="bid"]', function(e){
   const bid = _.maybe(e.target, dom.attr(_, "data-bid"), _.blot, parseInt);
   sh.dispatch($story, {type: "bid", "details": {bid}});
 });
 
-$.on(el, "click", 'body.present:not(.wait) .moves button[data-type="commit"]', function(e){
+$.on(el, "click", '#table.present:not(.wait) .moves button[data-type="commit"]', function(e){
   const type = dom.attr(e.target, "data-type");
   sh.dispatch($story, {type});
 });
 
-$.on(el, "click", 'body.present:not(.wait) .hand img', function(e){
+$.on(el, "click", '#table.present:not(.wait) .hand img', function(e){
   const suit = dom.attr(this, "data-suit"),
         rank = dom.attr(this, "data-rank");
   sh.dispatch($story, {type: "play", details: {card: {suit, rank}}});

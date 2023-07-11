@@ -101,8 +101,6 @@ export function ui($table, $story, $ready, $hist, $online, log, seated, seat, de
   $.sub($up, dom.toggleClass(el, "up", _));
   $.sub($ready, _.map(_.not), dom.toggleClass(el, "wait", _));
 
-  dom.addClass(el, "ui");
-
   //manage data-action
   $.sub($hist, function([{up, may}]){
     _.eachIndexed(function(seat){

@@ -35,11 +35,11 @@ button.selected {
 [data-played="6"] [data-seat="6"] .area img {
   animation: play .8s;
 }
-body[data-event-type="award"] .area img {
+#table[data-event-type="award"] .area img {
   transform: translateY(-30em);
   animation: award .8s !important;
 }
-body.present[data-status="playing"] .hand:hover {
+#table.present[data-status="playing"] .hand:hover {
   bottom: -8em;
 }
 .hand li {
@@ -53,10 +53,10 @@ body.present[data-status="playing"] .hand:hover {
   width: 10em;
   height: 16em;
 }
-body.present[data-status="playing"] .hand li img {
+#table.present[data-status="playing"] .hand li img {
   cursor: pointer;
 }
-body.present[data-status="playing"] .hand li:hover {
+#table.present[data-status="playing"] .hand li:hover {
   padding-top: 0;
 }
 .trump, .deck {
@@ -72,7 +72,7 @@ body.present[data-status="playing"] .hand li:hover {
   margin-top: -.8em;
   margin-bottom: 1em;
 }
-body[data-broken="true"] .broken {
+#table[data-broken="true"] .broken {
   visibility: visible;
 }
 .upkeep {

@@ -1,15 +1,13 @@
 @import url(/common.css);
 @import url(/fonts.css);
 @import url(/you.css);
-html {
-  background: url(/images/backgrounds/carbon_fibre.webp);
-}
 body {
   margin: 0;
   padding: 0;
   background: url(/images/backgrounds/white_carbon.webp);
   color: #36454F;
   overscroll-behavior: none;
+  height: 100%;
 }
 a#logo {
   position: absolute;

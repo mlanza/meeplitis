@@ -104,7 +104,7 @@ if (!tableId) {
   document.location.href = "../";
 }
 
-const el = document.body;
+const el = dom.sel1("#table");
 const board = dom.sel1("#board", el);
 const actions = dom.sel1("#actions", el);
 const supplies = dom.sel1("#supplies", el);
@@ -489,7 +489,7 @@ function focal(options, what, target){
 
 const moving = _.partial(focal, ["pilli", "bridge"]);
 
-const ctx = 'body.ui.act'; //ensure actionable context
+const ctx = '#table.act'; //ensure actionable context
 
 $.on(el, "keydown", ctx, function(e){
   if (e.key === "Escape") { //cancel a command in progress

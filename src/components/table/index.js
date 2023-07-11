@@ -37,6 +37,21 @@ export function describe(table){
   return _.seq(_.compact(_.cons(table.remark, games[table.game_id](table.config))));
 }
 
+function daylightSavings(dt) {
+  return dt.getTimezoneOffset() < stdTimezoneOffset(dt);
+}
+
+function stdTimezoneOffset(dt){
+  const jan = new Date(dt.getFullYear(), 0, 1),
+        jul = new Date(dt.getFullYear(), 6, 1);
+  return Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
+}
+
+function fromUTCDate(now, utcDt){
+  const offset = stdTimezoneOffset(now) + (daylightSavings(now) ? -60 : 0);
+  return _.add(utcDt, _.minutes(-offset));
+}
+
 function aged(dt, asof){
   function diff(dt1, dt2, units){
     return Math.ceil(Math.abs(dt2 - dt1) / units);
@@ -59,13 +74,13 @@ function avatar(player){
 }
 
 //TODO extract user timezone adjustment
-export function table(item){
+export function table(item, now = new Date()){
   const seat = seated(item.seats);
   const winners = _.maybe(item.seats, _.sort(_.asc(_.get(_, "seat")), _), _.map(_.get(_, "place"), _), _.reducekv(function(memo, seat, place){
     return seat === 1 ? _.conj(memo, seat) : memo;
   }, [], _));
   const link = item.status === "open" ? span : a;
-  const age = _.maybe(item.last_touch_at, _.date, _.add(_, _.hours(-5)), dt => aged(dt, new Date()));
+  const age = _.maybe(item.last_touch_at, _.date, _.partial(fromUTCDate, now), dt => aged(dt, now));
   return div({
       "class": "table",
       "data-table": item.id,

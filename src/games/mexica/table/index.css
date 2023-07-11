@@ -157,7 +157,7 @@
   font-size: 12px;
   float: left;
 }
-div[data-spot] {
+#table div[data-spot] {
   position: absolute;
   border: solid 2px transparent;
   height: 26.55px;
@@ -165,21 +165,21 @@ div[data-spot] {
   z-index: 10;
   overflow: visible;
 }
-div[data-spot] .contents {
+#table div[data-spot] .contents {
   position: relative;
 }
-div[data-spot] .contents > * {
+#table div[data-spot] .contents > * {
   position: absolute;
   top: 0;
   left: 0;
 }
-div[data-spot] :is(.contents, .propose) {
+#table div[data-spot] :is(.contents, .propose) {
   height: var(--square-size);
   width: var(--square-size);
   z-index: 11;
   overflow: visible;
 }
-div[data-spot] > * {
+#table div[data-spot] > * {
   position: absolute;
   top: -4px;
   left: -4px;
@@ -188,7 +188,8 @@ div[data-spot] > * {
   border: solid 2px transparent;
   z-index: 40;
 }
-div.temples, div.tokens {
+#table div.temples,
+#table div.tokens {
   padding: 0;
   margin: 0 2px 0 0;
   float: left;
@@ -217,93 +218,93 @@ div.temples, div.tokens {
 #table .area div.tokens li {
   margin-right: -28px;
 }
-div.tokens {
+#table div.tokens {
   margin-left: .5em;
   margin-bottom: -.5em;
 }
-div[data-remaining="0"] li:nth-child(1) {
+#table div[data-remaining="0"] li:nth-child(1) {
   opacity: .3;
 }
-div[data-remaining] div {
+#table div[data-remaining] div {
   margin-bottom: 2px;
 }
-div[data-remaining] div span {
+#table div[data-remaining] div span {
   display: none;
 }
-div[data-remaining="0"] div span:nth-child(1),
-div[data-remaining="1"] div span:nth-child(2),
-div[data-remaining="2"] div span:nth-child(3),
-div[data-remaining="3"] div span:nth-child(4),
-div[data-remaining="4"] div span:nth-child(5),
-div[data-remaining="5"] div span:nth-child(6),
-div[data-remaining="6"] div span:nth-child(7),
-div[data-remaining="7"] div span:nth-child(8),
-div[data-remaining="8"] div span:nth-child(9),
-div[data-remaining="9"] div span:nth-child(10),
-div[data-remaining="10"] div span:nth-child(11),
-div[data-remaining="11"] div span:nth-child(12),
-div[data-remaining="12"] div span:nth-child(13),
-div[data-remaining="13"] div span:nth-child(14),
-div[data-remaining="14"] div span:nth-child(15),
-div[data-remaining="15"] div span:nth-child(16),
-div[data-remaining="16"] div span:nth-child(17),
-div[data-remaining="17"] div span:nth-child(18),
-div[data-remaining="18"] div span:nth-child(19),
-div[data-remaining="19"] div span:nth-child(20),
-div[data-remaining="20"] div span:nth-child(21),
-div[data-remaining="21"] div span:nth-child(22),
-div[data-remaining="22"] div span:nth-child(23),
-div[data-remaining="23"] div span:nth-child(24),
-div[data-remaining="24"] div span:nth-child(25),
-div[data-remaining="25"] div span:nth-child(26),
-div[data-remaining="26"] div span:nth-child(27),
-div[data-remaining="27"] div span:nth-child(28),
-div[data-remaining="28"] div span:nth-child(29),
-div[data-remaining="29"] div span:nth-child(30),
-div[data-remaining="30"] div span:nth-child(31),
-div[data-remaining="31"] div span:nth-child(32),
-div[data-remaining="32"] div span:nth-child(33),
-div[data-remaining="33"] div span:nth-child(34),
-div[data-remaining="34"] div span:nth-child(35),
-div[data-remaining="35"] div span:nth-child(36) {
+#table div[data-remaining="0"] div span:nth-child(1),
+#table div[data-remaining="1"] div span:nth-child(2),
+#table div[data-remaining="2"] div span:nth-child(3),
+#table div[data-remaining="3"] div span:nth-child(4),
+#table div[data-remaining="4"] div span:nth-child(5),
+#table div[data-remaining="5"] div span:nth-child(6),
+#table div[data-remaining="6"] div span:nth-child(7),
+#table div[data-remaining="7"] div span:nth-child(8),
+#table div[data-remaining="8"] div span:nth-child(9),
+#table div[data-remaining="9"] div span:nth-child(10),
+#table div[data-remaining="10"] div span:nth-child(11),
+#table div[data-remaining="11"] div span:nth-child(12),
+#table div[data-remaining="12"] div span:nth-child(13),
+#table div[data-remaining="13"] div span:nth-child(14),
+#table div[data-remaining="14"] div span:nth-child(15),
+#table div[data-remaining="15"] div span:nth-child(16),
+#table div[data-remaining="16"] div span:nth-child(17),
+#table div[data-remaining="17"] div span:nth-child(18),
+#table div[data-remaining="18"] div span:nth-child(19),
+#table div[data-remaining="19"] div span:nth-child(20),
+#table div[data-remaining="20"] div span:nth-child(21),
+#table div[data-remaining="21"] div span:nth-child(22),
+#table div[data-remaining="22"] div span:nth-child(23),
+#table div[data-remaining="23"] div span:nth-child(24),
+#table div[data-remaining="24"] div span:nth-child(25),
+#table div[data-remaining="25"] div span:nth-child(26),
+#table div[data-remaining="26"] div span:nth-child(27),
+#table div[data-remaining="27"] div span:nth-child(28),
+#table div[data-remaining="28"] div span:nth-child(29),
+#table div[data-remaining="29"] div span:nth-child(30),
+#table div[data-remaining="30"] div span:nth-child(31),
+#table div[data-remaining="31"] div span:nth-child(32),
+#table div[data-remaining="32"] div span:nth-child(33),
+#table div[data-remaining="33"] div span:nth-child(34),
+#table div[data-remaining="34"] div span:nth-child(35),
+#table div[data-remaining="35"] div span:nth-child(36) {
   display: inline;
 }
-div[data-remaining="0"] li:nth-child(n+2),
-div[data-remaining="1"] li:nth-child(n+2),
-div[data-remaining="2"] li:nth-child(n+3),
-div[data-remaining="3"] li:nth-child(n+4),
-div[data-remaining="4"] li:nth-child(n+5),
-div[data-remaining="5"] li:nth-child(n+6),
-div[data-remaining="6"] li:nth-child(n+7),
-div[data-remaining="7"] li:nth-child(n+8),
-div[data-remaining="8"] li:nth-child(n+9),
-div[data-remaining="9"] li:nth-child(n+10),
-div[data-remaining="10"] li:nth-child(n+11),
-div[data-remaining="11"] li:nth-child(n+12),
-div[data-remaining="12"] li:nth-child(n+13),
-div[data-remaining="13"] li:nth-child(n+14),
-div[data-remaining="14"] li:nth-child(n+15),
-div[data-remaining="15"] li:nth-child(n+16),
-div[data-remaining="16"] li:nth-child(n+17),
-div[data-remaining="17"] li:nth-child(n+18),
-div[data-remaining="18"] li:nth-child(n+19),
-div[data-remaining="19"] li:nth-child(n+20),
-div[data-remaining="20"] li:nth-child(n+21),
-div[data-remaining="21"] li:nth-child(n+22),
-div[data-remaining="22"] li:nth-child(n+23),
-div[data-remaining="23"] li:nth-child(n+24),
-div[data-remaining="24"] li:nth-child(n+25),
-div[data-remaining="25"] li:nth-child(n+26),
-div[data-remaining="26"] li:nth-child(n+27),
-div[data-remaining="27"] li:nth-child(n+28),
-div[data-remaining="28"] li:nth-child(n+29),
-div[data-remaining="29"] li:nth-child(n+30),
-div[data-remaining="30"] li:nth-child(n+31),
-div[data-remaining="31"] li:nth-child(n+32),
-div[data-remaining="32"] li:nth-child(n+33),
-div[data-remaining="33"] li:nth-child(n+34),
-div[data-remaining="34"] li:nth-child(n+35),
-div[data-remaining="35"] li:nth-child(n+36) {
+#table div[data-remaining="0"] li:nth-child(n+2),
+#table div[data-remaining="1"] li:nth-child(n+2),
+#table div[data-remaining="2"] li:nth-child(n+3),
+#table div[data-remaining="3"] li:nth-child(n+4),
+#table div[data-remaining="4"] li:nth-child(n+5),
+#table div[data-remaining="5"] li:nth-child(n+6),
+#table div[data-remaining="6"] li:nth-child(n+7),
+#table div[data-remaining="7"] li:nth-child(n+8),
+#table div[data-remaining="8"] li:nth-child(n+9),
+#table div[data-remaining="9"] li:nth-child(n+10),
+#table div[data-remaining="10"] li:nth-child(n+11),
+#table div[data-remaining="11"] li:nth-child(n+12),
+#table div[data-remaining="12"] li:nth-child(n+13),
+#table div[data-remaining="13"] li:nth-child(n+14),
+#table div[data-remaining="14"] li:nth-child(n+15),
+#table div[data-remaining="15"] li:nth-child(n+16),
+#table div[data-remaining="16"] li:nth-child(n+17),
+#table div[data-remaining="17"] li:nth-child(n+18),
+#table div[data-remaining="18"] li:nth-child(n+19),
+#table div[data-remaining="19"] li:nth-child(n+20),
+#table div[data-remaining="20"] li:nth-child(n+21),
+#table div[data-remaining="21"] li:nth-child(n+22),
+#table div[data-remaining="22"] li:nth-child(n+23),
+#table div[data-remaining="23"] li:nth-child(n+24),
+#table div[data-remaining="24"] li:nth-child(n+25),
+#table div[data-remaining="25"] li:nth-child(n+26),
+#table div[data-remaining="26"] li:nth-child(n+27),
+#table div[data-remaining="27"] li:nth-child(n+28),
+#table div[data-remaining="28"] li:nth-child(n+29),
+#table div[data-remaining="29"] li:nth-child(n+30),
+#table div[data-remaining="30"] li:nth-child(n+31),
+#table div[data-remaining="31"] li:nth-child(n+32),
+#table div[data-remaining="32"] li:nth-child(n+33),
+#table div[data-remaining="33"] li:nth-child(n+34),
+#table div[data-remaining="34"] li:nth-child(n+35),
+#table div[data-remaining="35"] li:nth-child(n+36) {
   display: none;
 }
 #table.present #supplies > div:not([data-remaining='0']) ol,
@@ -347,15 +348,15 @@ svg[data-seat="3"][data-piece="pilli"] path {
   fill: #65647C;
 }
 
-div[data-spot] img[data-size="2"] {
+#table div[data-spot] img[data-size="2"] {
   height: 61px;
   z-index: -45;
 }
 
-div[data-spot] img[data-piece="bridge"][data-orientation="vertical"] {
+#table div[data-spot] img[data-piece="bridge"][data-orientation="vertical"] {
   transform: rotate(90deg);
 }
-[data-piece="canal"][data-orientation="horizontal"] {
+#table [data-piece="canal"][data-orientation="horizontal"] {
   transform: rotate(90deg);
   transform-origin: 100% 50%;
 }
@@ -379,31 +380,31 @@ ol#demands li {
   margin-right: 8.5px;
   margin-top: 5px;
 }
-div[data-spot] div.propose {
+#table div[data-spot] div.propose {
   background-repeat: no-repeat;
   background-size: var(--square-size) var(--square-size);
   background-position: 0 0;
   opacity: .6;
   visibility: hidden;
 }
-#demands .foundable {
+#table #demands .foundable {
   animation-name: heartbeat;
   animation-duration: 1s;
   animation-fill-mode: both;
   animation-iteration-count: infinite;
   animation-timing-function: ease-out;
 }
-#demands .foundable:hover {
+#table #demands .foundable:hover {
   animation-iteration-count: 2;
 }
-#actions {
+#table #actions {
   position: absolute;
   top: 580px;
   left: 25px;
   width: 698px;
   text-align: center;
 }
-#actions img {
+#table #actions img {
   opacity: 1;
   transition: opacity .1s ease-in;
   box-shadow: -3px 8px 8px -3px rgba(0, 0, 0, 0.6);
@@ -600,200 +601,200 @@ div[data-spot] div.propose {
 [data-row="15"] {
   top: calc(var(--square-size) * 15 + var(--board-top-buffer));
 }
-div[data-spot^="@"] {
+#table div[data-spot^="@"] {
   left: calc(var(--square-size) * 0 + var(--board-left-buffer));
 }
-div[data-spot^="A"] {
+#table div[data-spot^="A"] {
   left: calc(var(--square-size) * 1 + var(--board-left-buffer));
 }
-div[data-spot^="B"] {
+#table div[data-spot^="B"] {
   left: calc(var(--square-size) * 2 + var(--board-left-buffer));
 }
-div[data-spot^="C"] {
+#table div[data-spot^="C"] {
   left: calc(var(--square-size) * 3 + var(--board-left-buffer));
 }
-div[data-spot^="D"] {
+#table div[data-spot^="D"] {
   left: calc(var(--square-size) * 4 + var(--board-left-buffer));
 }
-div[data-spot^="E"] {
+#table div[data-spot^="E"] {
   left: calc(var(--square-size) * 5 + var(--board-left-buffer));
 }
-div[data-spot^="F"] {
+#table div[data-spot^="F"] {
   left: calc(var(--square-size) * 6 + var(--board-left-buffer));
 }
-div[data-spot^="G"] {
+#table div[data-spot^="G"] {
   left: calc(var(--square-size) * 7 + var(--board-left-buffer));
 }
-div[data-spot^="H"] {
+#table div[data-spot^="H"] {
   left: calc(var(--square-size) * 8 + var(--board-left-buffer));
 }
-div[data-spot^="I"] {
+#table div[data-spot^="I"] {
   left: calc(var(--square-size) * 9 + var(--board-left-buffer));
 }
-div[data-spot^="J"] {
+#table div[data-spot^="J"] {
   left: calc(var(--square-size) * 10 + var(--board-left-buffer));
 }
-div[data-spot^="K"] {
+#table div[data-spot^="K"] {
   left: calc(var(--square-size) * 11 + var(--board-left-buffer));
 }
-div[data-spot^="L"] {
+#table div[data-spot^="L"] {
   left: calc(var(--square-size) * 12 + var(--board-left-buffer));
 }
-div[data-spot^="M"] {
+#table div[data-spot^="M"] {
   left: calc(var(--square-size) * 13 + var(--board-left-buffer));
 }
-div[data-spot^="N"] {
+#table div[data-spot^="N"] {
   left: calc(var(--square-size) * 14 + var(--board-left-buffer));
 }
-div[data-spot^="O"] {
+#table div[data-spot^="O"] {
   left: calc(var(--square-size) * 15 + var(--board-left-buffer));
 }
-div[data-spot^="P"] {
+#table div[data-spot^="P"] {
   left: calc(var(--square-size) * 16 + var(--board-left-buffer));
 }
-div[data-spot^="Q"] {
+#table div[data-spot^="Q"] {
   left: calc(var(--square-size) * 17 + var(--board-left-buffer));
 }
-div[data-spot^="R"] {
+#table div[data-spot^="R"] {
   left: calc(var(--square-size) * 18 + var(--board-left-buffer));
 }
-div[data-spot^="S"] {
+#table div[data-spot^="S"] {
   left: calc(var(--square-size) * 19 + var(--board-left-buffer));
 }
-div[data-spot^="T"] {
+#table div[data-spot^="T"] {
   left: calc(var(--square-size) * 20 + var(--board-left-buffer));
 }
-div[data-spot^="U"] {
+#table div[data-spot^="U"] {
   left: calc(var(--square-size) * 21 + var(--board-left-buffer));
 }
-div[data-spot^="V"] {
+#table div[data-spot^="V"] {
   left: calc(var(--square-size) * 22 + var(--board-left-buffer));
 }
-div[data-spot$="0"] {
+#table div[data-spot$="0"] {
   top: calc(var(--square-size) * 0 + var(--board-top-buffer));
 }
-div[data-spot$="1"] {
+#table div[data-spot$="1"] {
   top: calc(var(--square-size) * 1 + var(--board-top-buffer));
 }
-div[data-spot$="2"] {
+#table div[data-spot$="2"] {
   top: calc(var(--square-size) * 2 + var(--board-top-buffer));
 }
-div[data-spot$="3"] {
+#table div[data-spot$="3"] {
   top: calc(var(--square-size) * 3 + var(--board-top-buffer));
 }
-div[data-spot$="4"] {
+#table div[data-spot$="4"] {
   top: calc(var(--square-size) * 4 + var(--board-top-buffer));
 }
-div[data-spot$="5"] {
+#table div[data-spot$="5"] {
   top: calc(var(--square-size) * 5 + var(--board-top-buffer));
 }
-div[data-spot$="6"] {
+#table div[data-spot$="6"] {
   top: calc(var(--square-size) * 6 + var(--board-top-buffer));
 }
-div[data-spot$="7"] {
+#table div[data-spot$="7"] {
   top: calc(var(--square-size) * 7 + var(--board-top-buffer));
 }
-div[data-spot$="8"] {
+#table div[data-spot$="8"] {
   top: calc(var(--square-size) * 8 + var(--board-top-buffer));
 }
-div[data-spot$="9"] {
+#table div[data-spot$="9"] {
   top: calc(var(--square-size) * 9 + var(--board-top-buffer));
 }
-div[data-spot$="10"] {
+#table div[data-spot$="10"] {
   top: calc(var(--square-size) * 10 + var(--board-top-buffer));
 }
-div[data-spot$="11"] {
+#table div[data-spot$="11"] {
   top: calc(var(--square-size) * 11 + var(--board-top-buffer));
 }
-div[data-spot$="12"] {
+#table div[data-spot$="12"] {
   top: calc(var(--square-size) * 12 + var(--board-top-buffer));
 }
-div[data-spot$="13"] {
+#table div[data-spot$="13"] {
   top: calc(var(--square-size) * 13 + var(--board-top-buffer));
 }
-div[data-spot$="14"] {
+#table div[data-spot$="14"] {
   top: calc(var(--square-size) * 14 + var(--board-top-buffer));
 }
-div[data-spot$="15"] {
+#table div[data-spot$="15"] {
   top: calc(var(--square-size) * 15 + var(--board-top-buffer));
 }
-div[data-terrain="-"],
-div[data-spot^="@"],
-div[data-spot="A0"],
-div[data-spot="B0"],
-div[data-spot="C0"],
-div[data-spot="C1"],
-div[data-spot="D0"],
-div[data-spot="D1"],
-div[data-spot="E0"],
-div[data-spot="E1"],
-div[data-spot="F0"],
-div[data-spot="G0"],
-div[data-spot="H0"],
-div[data-spot="H7"],
-div[data-spot="I0"],
-div[data-spot="J0"],
-div[data-spot="K0"],
-div[data-spot="L0"],
-div[data-spot="M0"],
-div[data-spot="N0"],
-div[data-spot="O0"],
-div[data-spot="P0"],
-div[data-spot="Q0"],
-div[data-spot="R0"],
-div[data-spot="S0"],
-div[data-spot="T0"],
-div[data-spot="U0"],
-div[data-spot$="15"],
-div[data-spot^="V"],
-div[data-spot="A1"],
-div[data-spot="A2"],
-div[data-spot="A5"],
-div[data-spot="A6"],
-div[data-spot="A7"],
-div[data-spot="A8"],
-div[data-spot="A9"],
-div[data-spot="A10"],
-div[data-spot="A14"],
-div[data-spot="B9"],
-div[data-spot="B14"],
-div[data-spot="G14"],
-div[data-spot="H14"],
-div[data-spot="K1"],
-div[data-spot="K14"],
-div[data-spot="L1"],
-div[data-spot="L13"],
-div[data-spot="L14"],
-div[data-spot="M2"],
-div[data-spot="M3"],
-div[data-spot="M13"],
-div[data-spot="N3"],
-div[data-spot="N12"],
-div[data-spot="N13"],
-div[data-spot="O3"],
-div[data-spot="O4"],
-div[data-spot="O12"],
-div[data-spot="P4"],
-div[data-spot="P11"],
-div[data-spot="P12"],
-div[data-spot="Q4"],
-div[data-spot="Q5"],
-div[data-spot="Q11"],
-div[data-spot="R5"],
-div[data-spot="R10"],
-div[data-spot="R11"],
-div[data-spot="S5"],
-div[data-spot="S6"],
-div[data-spot="S10"],
-div[data-spot="T5"],
-div[data-spot="T10"],
-div[data-spot="U5"],
-div[data-spot="U9"],
-div[data-spot="U10"] {
+#table div[data-terrain="-"],
+#table div[data-spot^="@"],
+#table div[data-spot="A0"],
+#table div[data-spot="B0"],
+#table div[data-spot="C0"],
+#table div[data-spot="C1"],
+#table div[data-spot="D0"],
+#table div[data-spot="D1"],
+#table div[data-spot="E0"],
+#table div[data-spot="E1"],
+#table div[data-spot="F0"],
+#table div[data-spot="G0"],
+#table div[data-spot="H0"],
+#table div[data-spot="H7"],
+#table div[data-spot="I0"],
+#table div[data-spot="J0"],
+#table div[data-spot="K0"],
+#table div[data-spot="L0"],
+#table div[data-spot="M0"],
+#table div[data-spot="N0"],
+#table div[data-spot="O0"],
+#table div[data-spot="P0"],
+#table div[data-spot="Q0"],
+#table div[data-spot="R0"],
+#table div[data-spot="S0"],
+#table div[data-spot="T0"],
+#table div[data-spot="U0"],
+#table div[data-spot$="15"],
+#table div[data-spot^="V"],
+#table div[data-spot="A1"],
+#table div[data-spot="A2"],
+#table div[data-spot="A5"],
+#table div[data-spot="A6"],
+#table div[data-spot="A7"],
+#table div[data-spot="A8"],
+#table div[data-spot="A9"],
+#table div[data-spot="A10"],
+#table div[data-spot="A14"],
+#table div[data-spot="B9"],
+#table div[data-spot="B14"],
+#table div[data-spot="G14"],
+#table div[data-spot="H14"],
+#table div[data-spot="K1"],
+#table div[data-spot="K14"],
+#table div[data-spot="L1"],
+#table div[data-spot="L13"],
+#table div[data-spot="L14"],
+#table div[data-spot="M2"],
+#table div[data-spot="M3"],
+#table div[data-spot="M13"],
+#table div[data-spot="N3"],
+#table div[data-spot="N12"],
+#table div[data-spot="N13"],
+#table div[data-spot="O3"],
+#table div[data-spot="O4"],
+#table div[data-spot="O12"],
+#table div[data-spot="P4"],
+#table div[data-spot="P11"],
+#table div[data-spot="P12"],
+#table div[data-spot="Q4"],
+#table div[data-spot="Q5"],
+#table div[data-spot="Q11"],
+#table div[data-spot="R5"],
+#table div[data-spot="R10"],
+#table div[data-spot="R11"],
+#table div[data-spot="S5"],
+#table div[data-spot="S6"],
+#table div[data-spot="S10"],
+#table div[data-spot="T5"],
+#table div[data-spot="T10"],
+#table div[data-spot="U5"],
+#table div[data-spot="U9"],
+#table div[data-spot="U10"] {
   visibility: hidden;
   pointer-events: none;
 }
-div[data-spot]:hover {
+#table div[data-spot]:hover {
   z-index: 11;
 }
 body.anon img[data-nav="last-move"] {
@@ -1584,201 +1585,201 @@ body.anon img[data-nav="last-move"] {
 #table.act[data-command-type='move'][data-command-from='J14'] div[data-spot='J14'] svg[data-piece='pilli'] {
   animation: heartbeat 1s infinite;
 }
-#table.act[data-command-type='relocate-bridge'][data-command-from='B1'] div[data-spot='B1'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='F1'] div[data-spot='F1'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='G1'] div[data-spot='G1'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='H1'] div[data-spot='H1'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='I1'] div[data-spot='I1'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='J1'] div[data-spot='J1'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='B2'] div[data-spot='B2'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='C2'] div[data-spot='C2'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='D2'] div[data-spot='D2'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='E2'] div[data-spot='E2'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='F2'] div[data-spot='F2'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='G2'] div[data-spot='G2'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='H2'] div[data-spot='H2'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='I2'] div[data-spot='I2'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='J2'] div[data-spot='J2'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='K2'] div[data-spot='K2'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='L2'] div[data-spot='L2'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='A3'] div[data-spot='A3'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='B3'] div[data-spot='B3'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='C3'] div[data-spot='C3'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='D3'] div[data-spot='D3'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='E3'] div[data-spot='E3'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='F3'] div[data-spot='F3'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='G3'] div[data-spot='G3'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='H3'] div[data-spot='H3'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='I3'] div[data-spot='I3'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='J3'] div[data-spot='J3'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='K3'] div[data-spot='K3'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='L3'] div[data-spot='L3'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='A4'] div[data-spot='A4'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='B4'] div[data-spot='B4'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='C4'] div[data-spot='C4'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='D4'] div[data-spot='D4'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='E4'] div[data-spot='E4'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='F4'] div[data-spot='F4'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='G4'] div[data-spot='G4'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='H4'] div[data-spot='H4'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='I4'] div[data-spot='I4'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='J4'] div[data-spot='J4'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='K4'] div[data-spot='K4'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='L4'] div[data-spot='L4'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='M4'] div[data-spot='M4'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='N4'] div[data-spot='N4'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='B5'] div[data-spot='B5'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='C5'] div[data-spot='C5'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='D5'] div[data-spot='D5'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='E5'] div[data-spot='E5'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='F5'] div[data-spot='F5'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='G5'] div[data-spot='G5'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='H5'] div[data-spot='H5'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='I5'] div[data-spot='I5'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='J5'] div[data-spot='J5'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='K5'] div[data-spot='K5'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='L5'] div[data-spot='L5'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='M5'] div[data-spot='M5'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='N5'] div[data-spot='N5'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='O5'] div[data-spot='O5'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='P5'] div[data-spot='P5'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='B6'] div[data-spot='B6'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='C6'] div[data-spot='C6'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='D6'] div[data-spot='D6'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='E6'] div[data-spot='E6'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='F6'] div[data-spot='F6'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='G6'] div[data-spot='G6'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='H6'] div[data-spot='H6'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='I6'] div[data-spot='I6'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='J6'] div[data-spot='J6'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='K6'] div[data-spot='K6'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='L6'] div[data-spot='L6'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='M6'] div[data-spot='M6'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='N6'] div[data-spot='N6'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='O6'] div[data-spot='O6'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='P6'] div[data-spot='P6'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='Q6'] div[data-spot='Q6'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='R6'] div[data-spot='R6'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='T6'] div[data-spot='T6'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='U6'] div[data-spot='U6'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='B7'] div[data-spot='B7'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='C7'] div[data-spot='C7'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='D7'] div[data-spot='D7'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='E7'] div[data-spot='E7'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='F7'] div[data-spot='F7'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='G7'] div[data-spot='G7'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='I7'] div[data-spot='I7'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='J7'] div[data-spot='J7'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='K7'] div[data-spot='K7'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='L7'] div[data-spot='L7'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='M7'] div[data-spot='M7'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='N7'] div[data-spot='N7'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='O7'] div[data-spot='O7'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='P7'] div[data-spot='P7'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='Q7'] div[data-spot='Q7'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='R7'] div[data-spot='R7'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='S7'] div[data-spot='S7'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='T7'] div[data-spot='T7'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='U7'] div[data-spot='U7'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='B8'] div[data-spot='B8'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='C8'] div[data-spot='C8'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='D8'] div[data-spot='D8'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='E8'] div[data-spot='E8'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='F8'] div[data-spot='F8'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='G8'] div[data-spot='G8'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='H8'] div[data-spot='H8'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='I8'] div[data-spot='I8'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='J8'] div[data-spot='J8'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='K8'] div[data-spot='K8'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='L8'] div[data-spot='L8'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='M8'] div[data-spot='M8'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='N8'] div[data-spot='N8'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='O8'] div[data-spot='O8'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='P8'] div[data-spot='P8'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='Q8'] div[data-spot='Q8'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='R8'] div[data-spot='R8'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='S8'] div[data-spot='S8'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='T8'] div[data-spot='T8'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='U8'] div[data-spot='U8'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='C9'] div[data-spot='C9'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='D9'] div[data-spot='D9'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='E9'] div[data-spot='E9'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='F9'] div[data-spot='F9'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='G9'] div[data-spot='G9'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='H9'] div[data-spot='H9'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='I9'] div[data-spot='I9'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='J9'] div[data-spot='J9'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='K9'] div[data-spot='K9'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='L9'] div[data-spot='L9'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='M9'] div[data-spot='M9'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='N9'] div[data-spot='N9'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='O9'] div[data-spot='O9'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='P9'] div[data-spot='P9'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='Q9'] div[data-spot='Q9'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='R9'] div[data-spot='R9'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='S9'] div[data-spot='S9'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='T9'] div[data-spot='T9'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='B10'] div[data-spot='B10'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='C10'] div[data-spot='C10'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='D10'] div[data-spot='D10'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='E10'] div[data-spot='E10'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='F10'] div[data-spot='F10'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='G10'] div[data-spot='G10'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='H10'] div[data-spot='H10'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='I10'] div[data-spot='I10'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='J10'] div[data-spot='J10'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='K10'] div[data-spot='K10'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='L10'] div[data-spot='L10'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='M10'] div[data-spot='M10'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='N10'] div[data-spot='N10'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='O10'] div[data-spot='O10'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='P10'] div[data-spot='P10'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='Q10'] div[data-spot='Q10'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='A11'] div[data-spot='A11'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='B11'] div[data-spot='B11'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='C11'] div[data-spot='C11'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='D11'] div[data-spot='D11'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='E11'] div[data-spot='E11'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='F11'] div[data-spot='F11'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='G11'] div[data-spot='G11'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='H11'] div[data-spot='H11'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='I11'] div[data-spot='I11'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='J11'] div[data-spot='J11'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='K11'] div[data-spot='K11'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='L11'] div[data-spot='L11'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='M11'] div[data-spot='M11'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='N11'] div[data-spot='N11'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='O11'] div[data-spot='O11'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='A12'] div[data-spot='A12'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='B12'] div[data-spot='B12'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='C12'] div[data-spot='C12'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='D12'] div[data-spot='D12'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='E12'] div[data-spot='E12'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='F12'] div[data-spot='F12'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='G12'] div[data-spot='G12'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='H12'] div[data-spot='H12'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='I12'] div[data-spot='I12'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='J12'] div[data-spot='J12'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='K12'] div[data-spot='K12'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='L12'] div[data-spot='L12'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='M12'] div[data-spot='M12'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='A13'] div[data-spot='A13'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='B13'] div[data-spot='B13'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='C13'] div[data-spot='C13'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='D13'] div[data-spot='D13'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='E13'] div[data-spot='E13'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='F13'] div[data-spot='F13'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='G13'] div[data-spot='G13'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='H13'] div[data-spot='H13'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='I13'] div[data-spot='I13'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='J13'] div[data-spot='J13'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='K13'] div[data-spot='K13'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='C14'] div[data-spot='C14'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='D14'] div[data-spot='D14'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='E14'] div[data-spot='E14'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='F14'] div[data-spot='F14'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='I14'] div[data-spot='I14'] svg[data-piece='bridge'],
-#table.act[data-command-type='relocate-bridge'][data-command-from='J14'] div[data-spot='J14'] svg[data-piece='bridge'] {
+#table.act[data-command-type='relocate-bridge'][data-command-from='B1'] div[data-spot='B1'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='F1'] div[data-spot='F1'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='G1'] div[data-spot='G1'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='H1'] div[data-spot='H1'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='I1'] div[data-spot='I1'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='J1'] div[data-spot='J1'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='B2'] div[data-spot='B2'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='C2'] div[data-spot='C2'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='D2'] div[data-spot='D2'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='E2'] div[data-spot='E2'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='F2'] div[data-spot='F2'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='G2'] div[data-spot='G2'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='H2'] div[data-spot='H2'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='I2'] div[data-spot='I2'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='J2'] div[data-spot='J2'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='K2'] div[data-spot='K2'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='L2'] div[data-spot='L2'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='A3'] div[data-spot='A3'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='B3'] div[data-spot='B3'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='C3'] div[data-spot='C3'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='D3'] div[data-spot='D3'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='E3'] div[data-spot='E3'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='F3'] div[data-spot='F3'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='G3'] div[data-spot='G3'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='H3'] div[data-spot='H3'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='I3'] div[data-spot='I3'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='J3'] div[data-spot='J3'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='K3'] div[data-spot='K3'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='L3'] div[data-spot='L3'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='A4'] div[data-spot='A4'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='B4'] div[data-spot='B4'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='C4'] div[data-spot='C4'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='D4'] div[data-spot='D4'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='E4'] div[data-spot='E4'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='F4'] div[data-spot='F4'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='G4'] div[data-spot='G4'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='H4'] div[data-spot='H4'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='I4'] div[data-spot='I4'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='J4'] div[data-spot='J4'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='K4'] div[data-spot='K4'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='L4'] div[data-spot='L4'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='M4'] div[data-spot='M4'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='N4'] div[data-spot='N4'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='B5'] div[data-spot='B5'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='C5'] div[data-spot='C5'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='D5'] div[data-spot='D5'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='E5'] div[data-spot='E5'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='F5'] div[data-spot='F5'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='G5'] div[data-spot='G5'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='H5'] div[data-spot='H5'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='I5'] div[data-spot='I5'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='J5'] div[data-spot='J5'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='K5'] div[data-spot='K5'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='L5'] div[data-spot='L5'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='M5'] div[data-spot='M5'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='N5'] div[data-spot='N5'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='O5'] div[data-spot='O5'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='P5'] div[data-spot='P5'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='B6'] div[data-spot='B6'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='C6'] div[data-spot='C6'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='D6'] div[data-spot='D6'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='E6'] div[data-spot='E6'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='F6'] div[data-spot='F6'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='G6'] div[data-spot='G6'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='H6'] div[data-spot='H6'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='I6'] div[data-spot='I6'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='J6'] div[data-spot='J6'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='K6'] div[data-spot='K6'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='L6'] div[data-spot='L6'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='M6'] div[data-spot='M6'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='N6'] div[data-spot='N6'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='O6'] div[data-spot='O6'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='P6'] div[data-spot='P6'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='Q6'] div[data-spot='Q6'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='R6'] div[data-spot='R6'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='T6'] div[data-spot='T6'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='U6'] div[data-spot='U6'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='B7'] div[data-spot='B7'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='C7'] div[data-spot='C7'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='D7'] div[data-spot='D7'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='E7'] div[data-spot='E7'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='F7'] div[data-spot='F7'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='G7'] div[data-spot='G7'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='I7'] div[data-spot='I7'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='J7'] div[data-spot='J7'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='K7'] div[data-spot='K7'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='L7'] div[data-spot='L7'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='M7'] div[data-spot='M7'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='N7'] div[data-spot='N7'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='O7'] div[data-spot='O7'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='P7'] div[data-spot='P7'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='Q7'] div[data-spot='Q7'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='R7'] div[data-spot='R7'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='S7'] div[data-spot='S7'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='T7'] div[data-spot='T7'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='U7'] div[data-spot='U7'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='B8'] div[data-spot='B8'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='C8'] div[data-spot='C8'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='D8'] div[data-spot='D8'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='E8'] div[data-spot='E8'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='F8'] div[data-spot='F8'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='G8'] div[data-spot='G8'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='H8'] div[data-spot='H8'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='I8'] div[data-spot='I8'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='J8'] div[data-spot='J8'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='K8'] div[data-spot='K8'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='L8'] div[data-spot='L8'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='M8'] div[data-spot='M8'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='N8'] div[data-spot='N8'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='O8'] div[data-spot='O8'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='P8'] div[data-spot='P8'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='Q8'] div[data-spot='Q8'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='R8'] div[data-spot='R8'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='S8'] div[data-spot='S8'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='T8'] div[data-spot='T8'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='U8'] div[data-spot='U8'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='C9'] div[data-spot='C9'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='D9'] div[data-spot='D9'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='E9'] div[data-spot='E9'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='F9'] div[data-spot='F9'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='G9'] div[data-spot='G9'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='H9'] div[data-spot='H9'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='I9'] div[data-spot='I9'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='J9'] div[data-spot='J9'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='K9'] div[data-spot='K9'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='L9'] div[data-spot='L9'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='M9'] div[data-spot='M9'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='N9'] div[data-spot='N9'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='O9'] div[data-spot='O9'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='P9'] div[data-spot='P9'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='Q9'] div[data-spot='Q9'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='R9'] div[data-spot='R9'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='S9'] div[data-spot='S9'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='T9'] div[data-spot='T9'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='B10'] div[data-spot='B10'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='C10'] div[data-spot='C10'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='D10'] div[data-spot='D10'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='E10'] div[data-spot='E10'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='F10'] div[data-spot='F10'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='G10'] div[data-spot='G10'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='H10'] div[data-spot='H10'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='I10'] div[data-spot='I10'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='J10'] div[data-spot='J10'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='K10'] div[data-spot='K10'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='L10'] div[data-spot='L10'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='M10'] div[data-spot='M10'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='N10'] div[data-spot='N10'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='O10'] div[data-spot='O10'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='P10'] div[data-spot='P10'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='Q10'] div[data-spot='Q10'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='A11'] div[data-spot='A11'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='B11'] div[data-spot='B11'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='C11'] div[data-spot='C11'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='D11'] div[data-spot='D11'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='E11'] div[data-spot='E11'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='F11'] div[data-spot='F11'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='G11'] div[data-spot='G11'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='H11'] div[data-spot='H11'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='I11'] div[data-spot='I11'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='J11'] div[data-spot='J11'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='K11'] div[data-spot='K11'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='L11'] div[data-spot='L11'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='M11'] div[data-spot='M11'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='N11'] div[data-spot='N11'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='O11'] div[data-spot='O11'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='A12'] div[data-spot='A12'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='B12'] div[data-spot='B12'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='C12'] div[data-spot='C12'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='D12'] div[data-spot='D12'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='E12'] div[data-spot='E12'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='F12'] div[data-spot='F12'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='G12'] div[data-spot='G12'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='H12'] div[data-spot='H12'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='I12'] div[data-spot='I12'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='J12'] div[data-spot='J12'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='K12'] div[data-spot='K12'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='L12'] div[data-spot='L12'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='M12'] div[data-spot='M12'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='A13'] div[data-spot='A13'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='B13'] div[data-spot='B13'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='C13'] div[data-spot='C13'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='D13'] div[data-spot='D13'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='E13'] div[data-spot='E13'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='F13'] div[data-spot='F13'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='G13'] div[data-spot='G13'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='H13'] div[data-spot='H13'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='I13'] div[data-spot='I13'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='J13'] div[data-spot='J13'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='K13'] div[data-spot='K13'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='C14'] div[data-spot='C14'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='D14'] div[data-spot='D14'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='E14'] div[data-spot='E14'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='F14'] div[data-spot='F14'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='I14'] div[data-spot='I14'] img[data-piece='bridge'],
+#table.act[data-command-type='relocate-bridge'][data-command-from='J14'] div[data-spot='J14'] img[data-piece='bridge'] {
   animation: heartbeat 1s infinite;
 }
 #table.act[data-command-type='place-pilli'][data-command-at~='H6'] div[data-spot='H6'] div.propose,

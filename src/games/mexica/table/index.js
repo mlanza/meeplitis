@@ -528,7 +528,7 @@ $.on(el, "click", `#table.act[data-command-type="move"][data-command-from] div[d
   }
 });
 
-$.on(el, "click", `#table.act #pilli[data-spot]`, function(e){
+$.on(el, "click", `#table.act div#pilli[data-spot]`, function(e){
   const type = "move",
         from = closestAttr(this, "data-spot");
   sh.dispatch($wip, {type, details: {from}});
@@ -554,7 +554,7 @@ $.on(el, "click", `#table.act[data-command-type="relocate-bridge"][data-command-
   sh.dispatch($story, {type, details: {from, to}});
 });
 
-$.on(el, "click", `#table.act:not([data-command-type="move"]) #bridge[data-spot]`, function(e){
+$.on(el, "click", `#table.act:not([data-command-type="move"]) div#bridge[data-spot]`, function(e){
   const type = "relocate-bridge",
         from = closestAttr(this, "data-spot");
   sh.dispatch($wip, {type, details: {from}});

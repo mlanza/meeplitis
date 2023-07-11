@@ -27,6 +27,7 @@ sub {
 }
 #game progress {
   margin-right: .5em;
+  vertical-align: text-top;
 }
 .signin,
 .signout {
@@ -276,7 +277,7 @@ body.up img#up {
   opacity: 1;
 }
 #replay img {
-  margin: 2px 2px 0;
+  margin: 4px 2px 0;
   cursor: default;
 }
 #replay img[data-nav="do-over"] {

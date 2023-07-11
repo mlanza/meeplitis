@@ -565,8 +565,8 @@ function score(size, place){
   return f(size);
 }
 
-function scoreGrandeur(temples, contents, period, dists, pillis){
-  const scored = _.mapa(function(dist){
+function scored(period, temples, contents, dists, pillis){
+  return _.mapa(function(dist){
     const marker = _.detect(contains([c], contents, _), dist);
     const size = _.count(dist);
     const at = marker || _.first(dist);
@@ -575,9 +575,16 @@ function scoreGrandeur(temples, contents, period, dists, pillis){
       return score(size, _.nth(plcs, seat));
     }, _.range(_.count(temples))) : null;
     return {at, size, points};
-  }, dists)
-  const palace = bonus(palaceSpots, pillis);
-  return {type: "scored-grandeur", details: {period, palace, districts: scored}}
+  }, dists);
+}
+
+export function scores(self){
+  const {seated, nonplayer, contents, period} = _.deref(self);
+  const pillis = _.map(_.get(_, "pilli"), seated);
+  const temples = _.chain(seated,
+    _.map(_.pipe(_.get(_, "temples"), consolidateTemples), _),
+    nonplayer ? _.concat(_, [nonplayer]) : _.identity);
+  return scored(period, temples, contents, districts(board, contents), pillis);
 }
 
 const hasUnconstructedBridge = _.comp(_.seq, _.filter(_.isNil, _));
@@ -657,14 +664,18 @@ export function execute(self, command){
       if (!matched) {
         throw new Error("Cannot end turn while actions remain.");
       }
-      const temples = _.chain(state.seated,
-        _.map(_.pipe(_.get(_, "temples"), consolidateTemples), _),
-        state.nonplayer ? _.concat(_, [state.nonplayer]) : _.identity);
       return _.chain(self,
         g.fold(_, _.assoc(command, "type", "committed")),
         _.get(state, "scoring-round") && endOfRound
           ? _.pipe(
-              g.fold(_, scoreGrandeur(temples, contents, period, districts(board, contents), pillis)),
+              g.fold(_, {
+                type: "scored-grandeur",
+                details: {
+                  period,
+                  palace: bonus(palaceSpots, pillis),
+                  districts: scores(self)
+                }
+              }),
               period === 0 ? g.fold(_, {type: "concluded-period"}) : g.finish)
           : _.identity);
     }

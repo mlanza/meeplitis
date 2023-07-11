@@ -132,7 +132,7 @@
 #supplies li [data-size="2"] {
   height: 61px;
   width: var(--square-size);
-  transform: rotate(5deg);
+  rotate: 5deg;
 }
 [data-piece] {
   height: var(--square-size);
@@ -143,7 +143,7 @@
 }
 #supplies li [data-piece="bridge"],
 #supplies li [data-size="1"] {
-  transform: rotate(5deg);
+  rotate: 5deg;
 }
 [data-piece="token"] {
   border-radius: 50%;
@@ -357,7 +357,7 @@ svg[data-seat="3"][data-piece="pilli"] path {
   rotate: 90deg;
 }
 #table [data-piece="canal"][data-orientation="horizontal"] {
-  transform: rotate(90deg);
+  rotate: 90deg;
   transform-origin: 100% 50%;
 }
 ol#demands {
@@ -2386,7 +2386,7 @@ body.anon img[data-nav="last-move"] {
 #table.act[data-command-vertical-spots~='I14'] div[data-spot='I14'] div.propose,
 #table.act[data-command-vertical-spots~='J14'] div[data-spot='J14'] div.propose {
   background-image: url(./images/bridge.svg);
-  transform: rotate(90deg);
+  rotate: 90deg;
 }
 #table.act div[data-spot]:hover {
     border-color: white;

@@ -415,27 +415,27 @@ img[data-action="may"] {
   margin: 0;
   margin-left: 1em;
 }
-.zone {
+#table .zone {
   overflow: hidden;
 }
-.zone div span.tip {
+#table .zone div span.tip {
   opacity: 0;
   transition: opacity ease-in .25s;
 }
-.zone:hover div span.tip {
+#table .zone:hover div span.tip {
   opacity: 1;
   transition: opacity ease-in .5s;
 }
-.area {
+#table .area {
   height: 14em;
   width: 10em;
   margin: 2px auto 0;
 }
-.area img {
+#table .area img {
   width: 10em;
   margin: 0 auto;
 }
-.zone {
+#table .zone {
   margin: 0;
   display: block;
   width: auto;
@@ -449,7 +449,7 @@ img[data-action="may"] {
   padding: 9px;
   border-radius: 1.75em;
 }
-.zone:hover {
+#table .zone:hover {
   z-index: 99;
 }
 div.player {
@@ -470,7 +470,7 @@ div.player {
 div.player.scored {
   animation: bump .3s ease-out !important;
 }
-.yours {
+#table .yours {
   background-color: rgba(135, 125, 138, .1);
 }
 [data-presence] {
@@ -584,7 +584,7 @@ kbd.wide {
     box-shadow: inset 0 -2px 0 0 rgb(40, 45, 85), inset 0 0 1px 1px rgb(81, 87, 125), 0 2px 2px 0 rgba(3, 4, 9, 0.3);
     color: rgb(127, 132, 151);
   }
-  .moves {
+  #table .moves {
     color: white;
     background-color: rgba(255, 255, 255, 0.1);
   }

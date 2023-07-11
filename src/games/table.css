@@ -452,7 +452,7 @@ img[data-action="may"] {
 #table .zone:hover {
   z-index: 99;
 }
-div.player {
+#table div.player {
   font-size: .8em;
   border: solid 1px black;
   height: 6.5em;
@@ -467,26 +467,26 @@ div.player {
   position: relative;
   z-index: 99;
 }
-div.player.scored {
+#table div.player.scored {
   animation: bump .3s ease-out !important;
 }
 #table .yours {
   background-color: rgba(135, 125, 138, .1);
 }
-[data-presence] {
+#table .zone[data-presence] {
   transition: box-shadow 0.3s ease-in-out;
 }
-[data-presence="offline"] div.player {
+#table .zone[data-presence="offline"] div.player {
   opacity: .7;
   box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0);
 }
-[data-presence="online"] div.player {
+#table .zone[data-presence="online"] div.player {
   animation: flare 1s ease-out;
 }
-[data-presence="online"].yours div.player {
+#table .zone[data-presence="online"].yours div.player {
   animation: flare 1s ease-out 2;
 }
-div.player:hover {
+#table div.player:hover {
   opacity: 1;
   box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
 }
@@ -494,21 +494,21 @@ div.player:hover {
   position: relative;
   opacity: 1;
 }
-div.player img {
+#table div.player img {
   margin: 0;
 }
-div.player .avatar {
+#table div.player .avatar {
   margin: -1px;
   float: left;
   width: 6em;
   height: 6em;
 }
-div.player div {
+#table div.player div {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-div.player > div {
+#table div.player > div {
   font-size: 1.1em;
   margin: 3px;
   margin-left: 6.5em;
@@ -519,7 +519,7 @@ div.player > div {
 #title {
   cursor: pointer;
 }
-div.player .username {
+#table div.player .username {
   font-size: 1.2em;
   margin-bottom: 2px;
   overflow: hidden;
@@ -527,7 +527,7 @@ div.player .username {
   color: white;
   cursor: pointer;
 }
-div.player .username * {
+#table div.player .username * {
   margin: 0;
   padding: 0;
   display: inline;

@@ -203,7 +203,7 @@ div.temples, div.tokens {
   list-style: none;
   float: left;
 }
-div.player {
+#table div.player {
   max-width: 22em;
   width: 22em;
 }

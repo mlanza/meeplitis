@@ -159,7 +159,7 @@ export function ui($table, $story, $ready, $hist, $online, log, seated, seat, de
     dom.addClass(el, "init");
   });
 
-  $.on(el, "keydown", function(e){
+  $.on(document.body, "keydown", function(e){
     if (e.which === 32) { //space
       e.preventDefault();
       replay("last-move");

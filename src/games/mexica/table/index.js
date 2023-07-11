@@ -489,16 +489,14 @@ function focal(options, what, target){
 
 const moving = _.partial(focal, ["pilli", "bridge"]);
 
-const ctx = '#table.act'; //ensure actionable context
-
-$.on(el, "keydown", ctx, function(e){
+$.on(document.body, "keydown", function(e){
   if (e.key === "Escape") { //cancel a command in progress
     sh.dispatch($wip, null);
     dom.removeClass(el, "error");
   }
 });
 
-$.on(el, "click", `${ctx}[data-foundable]:not([data-command-type]) div[data-spot]`, function(e){
+$.on(el, "click", `#table.act[data-foundable]:not([data-command-type]) div[data-spot]`, function(e){
   const type  = "found-district",
         at    = closestAttr(this, "data-spot"),
         size  = _.maybe(dom.attr(el, "data-foundable"), _.blot, parseInt),
@@ -508,7 +506,7 @@ $.on(el, "click", `${ctx}[data-foundable]:not([data-command-type]) div[data-spot
   }
 });
 
-$.on(el, "mouseover", `${ctx} div[data-spot]`, function(e){ //workaround since layering prevents mouseover on contents
+$.on(el, "mouseover", `#table.act div[data-spot]`, function(e){ //workaround since layering prevents mouseover on contents
   const bridge = dom.sel1(".contents > [data-piece='bridge']", this),
         pilli  = dom.sel1(".contents > [data-piece='pilli']", this),
         you    = _.maybe(pilli, dom.attr(_, "data-seat"), parseInt, _.eq(seat, _)),
@@ -516,7 +514,7 @@ $.on(el, "mouseover", `${ctx} div[data-spot]`, function(e){ //workaround since l
   moving(what, this);
 });
 
-$.on(el, "click", `${ctx}[data-command-type="move"][data-command-from] div[data-spot]`, function(e){
+$.on(el, "click", `#table.act[data-command-type="move"][data-command-from] div[data-spot]`, function(e){
   const type = "move",
         from = closestAttr(this, "data-command-from"),
         to   = closestAttr(this, "data-spot"),
@@ -530,70 +528,70 @@ $.on(el, "click", `${ctx}[data-command-type="move"][data-command-from] div[data-
   }
 });
 
-$.on(el, "click", `${ctx} #pilli[data-spot]`, function(e){
+$.on(el, "click", `#table.act #pilli[data-spot]`, function(e){
   const type = "move",
         from = closestAttr(this, "data-spot");
   sh.dispatch($wip, {type, details: {from}});
 });
 
-$.on(el, "click", `${ctx} .zone.yours .area div.temples:not([data-remaining="0"])`, function(e){
+$.on(el, "click", `#table.act .zone.yours .area div.temples:not([data-remaining="0"])`, function(e){
   const type = "build-temple",
         size = parseInt(closestAttr(this, "data-size"));
   sh.dispatch($wip, {type, details: {size}});
 });
 
-$.on(el, "click", `${ctx}[data-command-type="build-temple"] div[data-spot]`, function(e){
+$.on(el, "click", `#table.act[data-command-type="build-temple"] div[data-spot]`, function(e){
   const type = "build-temple",
         at   = closestAttr(this, "data-spot"),
         level = parseInt(closestAttr(this, "data-command-size"));
   sh.dispatch($story, {type, details: {level, at}});
 });
 
-$.on(el, "click", `${ctx}[data-command-type="relocate-bridge"][data-command-from] div[data-spot]`, function(e){
+$.on(el, "click", `#table.act[data-command-type="relocate-bridge"][data-command-from] div[data-spot]`, function(e){
   const type = "relocate-bridge",
         from = closestAttr(this, "data-command-from"),
         to   = closestAttr(this, "data-spot");
   sh.dispatch($story, {type, details: {from, to}});
 });
 
-$.on(el, "click", `${ctx}:not([data-command-type="move"]) #bridge[data-spot]`, function(e){
+$.on(el, "click", `#table.act:not([data-command-type="move"]) #bridge[data-spot]`, function(e){
   const type = "relocate-bridge",
         from = closestAttr(this, "data-spot");
   sh.dispatch($wip, {type, details: {from}});
 });
 
-$.on(el, "click", `${ctx}[data-command-type="place-pilli"][data-command-at~="H6"] div[data-spot="H6"] div.propose, ${ctx}[data-command-type="place-pilli"][data-command-at~="H8"] div[data-spot="H8"] div.propose, ${ctx}[data-command-type="place-pilli"][data-command-at~="I7"] div[data-spot="I7"] div.propose, ${ctx}[data-command-type="place-pilli"][data-command-at~="G7"] div[data-spot="G7"] div.propose`, function(e){
+$.on(el, "click", `#table.act[data-command-type="place-pilli"][data-command-at~="H6"] div[data-spot="H6"] div.propose, #table.act[data-command-type="place-pilli"][data-command-at~="H8"] div[data-spot="H8"] div.propose, #table.act[data-command-type="place-pilli"][data-command-at~="I7"] div[data-spot="I7"] div.propose, #table.act[data-command-type="place-pilli"][data-command-at~="G7"] div[data-spot="G7"] div.propose`, function(e){
   const type = "place-pilli",
         at = closestAttr(this, "data-spot");
   sh.dispatch($story, {type, details: {at}});
 });
 
-$.on(el, "click", `${ctx} .moves button[data-type="commit"], ${ctx} .moves button[data-type="pass"]`, function(e){
+$.on(el, "click", `#table.act .moves button[data-type="commit"], #table.act .moves button[data-type="pass"]`, function(e){
   const type = dom.attr(this, "data-type");
   sh.dispatch($story, {type});
 });
 
-$.on(el, "click", `${ctx} #supplies div.tokens`, function(e){
+$.on(el, "click", `#table.act #supplies div.tokens`, function(e){
   sh.dispatch($story, {type: "bank"});
 });
 
-$.on(el, "click", `${ctx}[data-command-type="construct-bridge"] div[data-spot]`, function(e){
+$.on(el, "click", `#table.act[data-command-type="construct-bridge"] div[data-spot]`, function(e){
   const type = "construct-bridge",
         at   = closestAttr(this, "data-spot");
   sh.dispatch($story, {type, details: {at}});
 });
 
-$.on(el, "click", `${ctx} #supplies div.bridges`, function(e){
+$.on(el, "click", `#table.act #supplies div.bridges`, function(e){
   sh.dispatch($wip, {type: "construct-bridge"});
 });
 
-$.on(el, "click", `${ctx}[data-command-type="construct-canal"][data-command-size="1"] div[data-spot]`, function(e){
+$.on(el, "click", `#table.act[data-command-type="construct-canal"][data-command-size="1"] div[data-spot]`, function(e){
   const type = "construct-canal",
         at   = closestAttr(this, "data-spot");
   sh.dispatch($story, {type, details: {at: [at]}});
 });
 
-$.on(el, "click", `${ctx}[data-command-type="construct-canal"][data-command-size="2"] div[data-spot]`, function(e){
+$.on(el, "click", `#table.act[data-command-type="construct-canal"][data-command-size="2"] div[data-spot]`, function(e){
   const type = "construct-canal",
         at   = _.distinct(_.compact([closestAttr(this, "data-command-at"), closestAttr(this, "data-spot")])),
         size = parseInt(closestAttr(this, "data-command-size"));
@@ -604,7 +602,7 @@ $.on(el, "click", `${ctx}[data-command-type="construct-canal"][data-command-size
   }
 });
 
-$.on(el, "click", `${ctx} #supplies div.canals`, function(e){
+$.on(el, "click", `#table.act #supplies div.canals`, function(e){
   const type = "construct-canal",
         size = parseInt(closestAttr(this, "data-size"));
   sh.dispatch($wip, {type, details: {size}});

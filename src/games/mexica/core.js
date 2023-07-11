@@ -375,7 +375,7 @@ export function destinations(contents) {
          viableSpots);
 }
 
-function isBridgable(board, contents, at){
+export function isBridgable(board, contents, at){
   const what = _.getIn(board, coord(at)),
         cts  = _.get(contents, at);
   return what === w || _.eq([w], cts) ? orientBridge(board, contents, at) : null;
@@ -611,6 +611,16 @@ function price(command){
     default:
       return 0;
   }
+}
+
+export function bridgePlacements(contents){
+  return _.chain(spots,
+    _.filter(
+      _.and(
+        contains([w], contents, _),
+        lacks([b, p], contents, _)), _),
+    _.groupBy(spot => orientBridge(board, contents, spot), _),
+    _.merge({horizontal: [], vertical: []}, _));
 }
 
 function contiguous(at){

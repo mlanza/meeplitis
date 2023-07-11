@@ -327,12 +327,6 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
         attrs["data-command-at"] = details.at;
         break;
       }
-      case "construct-bridge": {
-        const {horizontal, vertical} = _.chain(c.spots, _.filter(_.partial(c.wet, c.board, contents), _), _.groupBy(spot => c.orientBridge(c.board, contents, spot), _), _.merge({horizontal: [], vertical: []}, _));
-        attrs["data-command-horizontal-spots"] = _.join(" ", horizontal);
-        attrs["data-command-vertical-spots"] = _.join(" ", vertical);
-        break;
-      }
       case "move":
         const {details} = curr;
         const moves = g.moves(game, {seat, type});
@@ -343,9 +337,18 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
         attrs["data-command-to"] = to;
         attrs["data-command-destinations"] = destinations;
         break;
+      case "construct-bridge": {
+        const {horizontal, vertical} = c.bridgePlacements(contents);
+        attrs["data-command-horizontal-spots"] = _.join(" ", horizontal);
+        attrs["data-command-vertical-spots"] = _.join(" ", vertical);
+        break;
+      }
       case "relocate-bridge": {
         const {details} = curr;
+        const {horizontal, vertical} = c.bridgePlacements(contents);
         attrs["data-command-from"] = details.from;
+        attrs["data-command-horizontal-spots"] = _.join(" ", horizontal);
+        attrs["data-command-vertical-spots"] = _.join(" ", vertical);
         break;
       }
       case "build-temple": {

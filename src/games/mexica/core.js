@@ -583,7 +583,7 @@ export function scores(self){
   const pillis = _.map(_.get(_, "pilli"), seated);
   const temples = _.chain(seated,
     _.map(_.pipe(_.get(_, "temples"), consolidateTemples), _),
-    nonplayer ? _.concat(_, [nonplayer]) : _.identity);
+    _.get(nonplayer, "temples") ? _.concat(_, [_.get(nonplayer, "temples")]) : _.identity);
   return scored(period, temples, contents, districts(board, contents), pillis);
 }
 

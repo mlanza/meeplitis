@@ -566,7 +566,7 @@ function score(size, place){
 }
 
 function scored(period, temples, contents, dists, pillis){
-  return _.mapa(function(dist){
+  return _.chain(dists, _.mapa(function(dist){
     const marker = _.detect(contains([c], contents, _), dist);
     const size = _.count(dist);
     const at = marker || _.first(dist);
@@ -575,7 +575,7 @@ function scored(period, temples, contents, dists, pillis){
       return score(size, _.nth(plcs, seat));
     }, _.range(_.count(temples))) : null;
     return {at, size, points};
-  }, dists);
+  }, _), period ? _.identity : _.filtera(_.get(_, "points"), _));
 }
 
 export function scores(self){

@@ -76,7 +76,7 @@
   min-height: auto;
   margin-bottom: .5em;
 }
-#board {
+#table #board {
   background-image: url(./images/mexicab.png);
   background-size: 700px 500px;
   background-repeat: no-repeat;
@@ -442,18 +442,17 @@ ol#demands li {
   font-size: .8em;
   text-shadow: 1px 1px 1px black;
 }
-#board [data-column],
-#board [data-row] {
+#table #board [data-column],
+#table #board [data-row] {
   opacity: 0;
   transition: opacity 0.5s ease-in-out;
   pointer-events: none;
 }
-#board:hover [data-column],
-#board:hover [data-row] {
+#table #board:hover :is([data-column],[data-row]) {
   opacity: 1;
   transition: opacity 0.5s ease-in-out;
 }
-#board [data-piece="emperor"] {
+#table #board [data-piece="emperor"] {
   position: absolute;
   top: 30px;
   right: 25px;
@@ -461,13 +460,13 @@ ol#demands li {
   transform: scaleX(-1);
   transition: opacity .25s ease-out;
 }
-#board [data-piece="emperor"] path {
+#table #board [data-piece="emperor"] path {
   fill: #D4AF37;
 }
-.scoring-round #board .contents img[data-piece="capulli"] {
+#table.scoring-round #board .contents img[data-piece="capulli"] {
   animation: bump .25s ease-in;
 }
-.scoring-round #board [data-piece="emperor"] {
+#table.scoring-round #board [data-piece="emperor"] {
   opacity: 1;
   transition: opacity .25s ease-in;
 }

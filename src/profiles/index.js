@@ -24,7 +24,7 @@ _.chain(profile.avatar_url, _.str(_, "?s=200"), dom.attr(dom.sel1(".banner img")
 
 function getTables(statuses, sort, el, none){
   return supabase
-    .from("touched_tables")
+    .from("tables")
     .select(`
     *,
     seated:seats!inner(

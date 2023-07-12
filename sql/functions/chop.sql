@@ -40,14 +40,8 @@ begin
     where table_id = _table_id
     and seq > _seq
     and undoable = false) then
-    raise '$ cannot undo %#%', _table_id, _event_id;
+      raise '$ cannot undo %#%', _table_id, _event_id;
   end if;
-
-  update tables
-  set last_touch_id = _last_touch_id,
-      status = 'started',
-      finished_at = null
-  where id = _table_id;
 
   with deleted as (
     delete from events
@@ -56,6 +50,13 @@ begin
   select count(*)
   from deleted
   into _count;
+
+  update tables
+  set status = 'started',
+      last_touch_id = _last_touch_id,
+      touched_at = now(),
+      finished_at = null
+  where id = _table_id;
 
   return _count;
 

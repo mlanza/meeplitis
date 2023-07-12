@@ -80,7 +80,7 @@ export function table(item, now = new Date()){
     return seat === 1 ? _.conj(memo, seat) : memo;
   }, [], _));
   const link = item.status === "open" ? span : a;
-  const age = _.maybe(item.last_touch_at, _.date, _.partial(fromUTCDate, now), dt => aged(dt, now));
+  const age = _.maybe(item.touched_at, _.date, _.partial(fromUTCDate, now), dt => aged(dt, now));
   return div({
       "class": "table",
       "data-table": item.id,

@@ -44,15 +44,17 @@ CREATE TABLE tables (
     admins uuid[], -- users capable of editing during/after play
     up smallint[], -- seats required to take action
     seating_change_at timestamp,
-    started_at timestamp, -- used to delay start as in a tournament
-    last_touch_id varchar(5) references events(id), -- last event touching game state
-    finished_at timestamp,
     keypass varchar, -- for restricting access, hashed
     status table_status not null default 'open',
-    shredded_at timestamp, -- replayable history was discarded; happens sometime after finished/abandoned
+    last_touch_id varchar(5) references events(id), -- last event touching game state
     created_by uuid references profiles(id) not null default auth.uid(), -- this person can update before starting
     created_at timestamp not null default now(),
-    updated_at timestamp);
+    updated_at timestamp,
+    started_at timestamp, -- used to delay start as in a tournament
+    touched_at timestamp,
+    finished_at timestamp,
+    shredded_at timestamp -- replayable history was discarded; happens sometime after finished/abandoned
+);
 
 --ALTER TABLE tables ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tables REPLICA IDENTITY FULL;

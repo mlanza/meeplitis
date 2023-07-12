@@ -3,7 +3,8 @@ AS $$
 begin
 
   update tables
-  set last_touch_id = new.id
+  set last_touch_id = new.id,
+      touched_at = now()
   where id = new.table_id;
 
   return new;

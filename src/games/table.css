@@ -139,6 +139,7 @@ body.anon img[data-nav="last-move"] {
 .message {
   animation: updown 3s ease-out infinite;
   position: relative;
+  max-height: 30em;
 }
 .message .icon {
   font-size: 3em;
@@ -244,7 +245,7 @@ body.anon img[data-nav="last-move"] {
   margin-right: 85px;
   opacity: .6;
 }
-#event figure {
+#event > figure {
   position: absolute;
   right: -1px;
   bottom: -1px;

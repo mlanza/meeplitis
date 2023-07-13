@@ -190,7 +190,11 @@ function desc({type, details}){
     case "committed":
       return "I'm done.";
     case "scored-grandeur":
-      return "Emperor awards spiritual grandeur!";
+      const game = _.chain($story, moment);
+      return [
+        "Emperor awards spiritual grandeur!",
+        scores(g.seats(game), details)
+      ];
     case "concluded-period":
       return "The 2nd period begins!";
     case "passed":
@@ -490,41 +494,49 @@ function focal(options, what, target){
   _.maybe(what, dom.attr(target, "id", _));
 }
 
-function scores(seats, scored){
-  const {img, ol, li, div, span, table, thead, tbody, tfoot, tr, th, td, sup, figure} = dom.tags(['img', 'ol', 'li', 'div', 'span', 'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'sup', 'figure']);
-  function ranking(rank){
+function scores(seats, {districts, palace}){
+  const {img, ol, li, div, span, table, thead, tbody, tfoot, tr, th, td, sup, figure} = dom.tags(['small', 'img', 'ol', 'li', 'div', 'span', 'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'sup', 'figure']);
+
+  function ranking(rank, tied){
     const suffix = rank === 1 ? "st" : rank === 2 ? "nd" : "rd";
-    return div({class: "rank"}, rank, sup(suffix));
+    return div({class: "rank"}, rank, sup(suffix, tied ? "*" : ""));
   }
 
-  const n = _.chain(scored, _.getIn(_, [0, "points"]), _.count);
+  const n = _.chain(districts, _.getIn(_, [0, "points"]), _.count);
   const heads = _.map(function(idx){
     const seat = _.nth(seats, idx);
     const {avatar_url} = seat || {avatar_url: "./images/shaman.png"};
     return th({class: seat ? "" : "nonplayer"}, figure({class: "avatar"}, img({src: avatar_url})));
   }, _.range(0, n));
 
+  const bonuses = palace ? _.mapa(function(idx){
+    return _.chain(palace, _.nth(_, idx), span, th);
+  }, _.range(0, n)) : null;
+
   const totals = _.mapa(function(idx){
-    return _.chain(scored, _.map(_.getIn(_, ["points", idx]), _), _.sum, span, th);
+    return _.chain(districts, _.map(_.getIn(_, ["points", idx]), _), _.sum, span, th);
   }, _.range(0, n));
 
   const rows = _.map(function({at, size, points}){
     const ranked = _.chain(points, _.unique, _.sort(_.desc(_.identity), _))
-    return tr(th({class: "at"}, img({src: `./images/c${size}.png`, "data-piece": "capulli", "data-size": size}), span(at)), _.chain(points, _.mapIndexed(function(idx, score){
+    return tr(th({class: "at"}, size > 2 && size < 14 ? img({src: `./images/c${size}.png`, "data-piece": "capulli", "data-size": size}) : div({class: "size"}, size), span(at)), _.chain(points, _.mapIndexed(function(idx, score){
           const rank = _.indexOf(ranked, score) + 1,
                 ties = _.chain(points, _.filter(_.eq(score, _), _), _.count, _.gt(_, 1));
-      return td({"data-score": score}, ranking(rank), span({class: "score"}, score));
+      return td({"data-score": score}, ranking(rank, score > 0 && ties), span({class: "score"}, score));
     },  _), _.toArray));
-  }, scored);
-  return table({class: "scored"},
-    thead(
-      tr(th({class: "corner"}), heads),
-      tr({class: "totals"}, th({class: "corner"}), totals)
-    ),
-    tbody(
-      rows
-    )
-  );
+  }, districts);
+  return [
+    table({class: "scored"},
+      thead(
+        tr(th({class: "corner"}), heads),
+        tr({class: "palace"}, th(div("Palace")), bonuses),
+        tr({class: "districts"}, th(div("Districts")), totals)
+      ),
+      tbody(
+        rows
+      )),
+    div({class: "note"},"Scroll to view district rankings")
+  ];
 }
 
 const moving = _.partial(focal, ["pilli", "bridge"]);

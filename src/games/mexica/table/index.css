@@ -17,6 +17,53 @@
   display: none;
 }
 */
+#table table.scored {
+  border-collapse: collapse;
+  font-size: 1.2em;
+}
+#table table.scored :is(td, th) {
+  width: 3em;
+  height: 3em;
+  position: relative;
+  border: solid 2px white;
+  overflow: hidden;
+}
+#table table.scored .corner {
+  border: transparent;
+}
+#table table thead :is(th, td) {
+  position: sticky;
+  top: 0;
+}
+#table table.scored span.score,
+#table table.scored th span {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  font-family: monospace;
+  color: #DDD;
+  font-weight: normal;
+}
+#table table.scored td[data-score='0'] div.rank {
+  display: none;
+}
+#table table.scored div.rank {
+  width: 100%;
+  text-align: center;
+  font-weight: 500;
+}
+#table table.scored div.rank sup {
+  font-size: .5em;
+}
+#table table.scored th.at img {
+  width: 2.5em;
+  height: 2.5em;
+  margin: 6px;
+}
+#table table.scored tr.totals th {
+  height: 1.2em;
+}
+
 #table.act[data-command-type="move"] .proposed:empty {
   pointer-events: none;
 }

@@ -490,6 +490,43 @@ function focal(options, what, target){
   _.maybe(what, dom.attr(target, "id", _));
 }
 
+function scores(seats, scored){
+  const {img, ol, li, div, span, table, thead, tbody, tfoot, tr, th, td, sup, figure} = dom.tags(['img', 'ol', 'li', 'div', 'span', 'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'sup', 'figure']);
+  function ranking(rank){
+    const suffix = rank === 1 ? "st" : rank === 2 ? "nd" : "rd";
+    return div({class: "rank"}, rank, sup(suffix));
+  }
+
+  const n = _.chain(scored, _.getIn(_, [0, "points"]), _.count);
+  const heads = _.map(function(idx){
+    const seat = _.nth(seats, idx);
+    const {avatar_url} = seat || {avatar_url: "./images/shaman.png"};
+    return th({class: seat ? "" : "nonplayer"}, figure({class: "avatar"}, img({src: avatar_url})));
+  }, _.range(0, n));
+
+  const totals = _.mapa(function(idx){
+    return _.chain(scored, _.map(_.getIn(_, ["points", idx]), _), _.sum, span, th);
+  }, _.range(0, n));
+
+  const rows = _.map(function({at, size, points}){
+    const ranked = _.chain(points, _.unique, _.sort(_.desc(_.identity), _))
+    return tr(th({class: "at"}, img({src: `./images/c${size}.png`, "data-piece": "capulli", "data-size": size}), span(at)), _.chain(points, _.mapIndexed(function(idx, score){
+          const rank = _.indexOf(ranked, score) + 1,
+                ties = _.chain(points, _.filter(_.eq(score, _), _), _.count, _.gt(_, 1));
+      return td({"data-score": score}, ranking(rank), span({class: "score"}, score));
+    },  _), _.toArray));
+  }, scored);
+  return table({class: "scored"},
+    thead(
+      tr(th({class: "corner"}), heads),
+      tr({class: "totals"}, th({class: "corner"}), totals)
+    ),
+    tbody(
+      rows
+    )
+  );
+}
+
 const moving = _.partial(focal, ["pilli", "bridge"]);
 
 $.on(document.body, "keydown", function(e){

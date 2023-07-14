@@ -485,8 +485,8 @@ export function boats(waterways, from, max, seat){
     }, _));
 }
 
-function remaining(spent, bank){
-  return (6 + bank) - spent;
+function remaining(spent, bank, redeemed){
+  return (6 + bank + redeemed) - spent;
 }
 
 function spend(spent, bank, cost){
@@ -1030,12 +1030,12 @@ export const accessibleLand = _.partly(function accessibleLand(contents, pilli, 
 function moves(self, {type = null, seat = null}){
   const types = type ? [type] : ["construct-canal", "construct-bridge", "relocate-bridge", "found-district", "bank", "move", "pass", "commit", "place-pilli"];
   const seats = _.filtera(seat == null ? _.isSome : _.eq(seat, _), g.up(self));
-  const {contents, capulli, canal1, canal2, bridges, period, status, spent, banked, seated} = _.deref(self);
+  const {contents, capulli, canal1, canal2, bridges, period, status, spent, redeemed, banked, seated} = _.deref(self);
 
   return _.flatten(_.braid(function(type, seat){
     const {pilli, bank} = _.nth(seated, seat);
     const from = pilli;
-    const unspent = remaining(spent, bank);
+    const unspent = remaining(spent, bank, redeemed);
     const permit = [{type, seat}];
 
     if (status == "placing-pilli") {

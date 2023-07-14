@@ -96,6 +96,9 @@
   text-align: center;
   line-height: 2.5em;
 }
+#table #board img[data-piece='capulli'] {
+  pointer-events: none;
+}
 #table.act[data-command-type="move"] .proposed:empty {
   pointer-events: none;
 }
@@ -106,10 +109,11 @@
 #table.act[data-allow-commands~='pass']   .moves button[data-type='pass'] {
   display: inherit;
 }
-#guidance, #guidance p {
+#table #guidance,
+#table #guidance p {
   display: none;
 }
-#guidance .esc {
+#table #guidance .esc {
   position: absolute;
   bottom: .5em;
   font-size: .6em;

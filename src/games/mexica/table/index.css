@@ -488,27 +488,27 @@ ol#demands li {
   transition: opacity .1s ease-in;
   box-shadow: -3px 8px 8px -3px rgba(0, 0, 0, 0.6);
 }
-#actions[data-remaining="5"] img:nth-child(6),
-#actions[data-remaining="4"] img:nth-child(6),
-#actions[data-remaining="3"] img:nth-child(6),
-#actions[data-remaining="2"] img:nth-child(6),
-#actions[data-remaining="1"] img:nth-child(6),
-#actions[data-remaining="0"] img:nth-child(6),
-#actions[data-remaining="4"] img:nth-child(5),
-#actions[data-remaining="3"] img:nth-child(5),
-#actions[data-remaining="2"] img:nth-child(5),
-#actions[data-remaining="1"] img:nth-child(5),
-#actions[data-remaining="0"] img:nth-child(5),
-#actions[data-remaining="3"] img:nth-child(4),
-#actions[data-remaining="2"] img:nth-child(4),
-#actions[data-remaining="1"] img:nth-child(4),
-#actions[data-remaining="0"] img:nth-child(4),
-#actions[data-remaining="2"] img:nth-child(3),
-#actions[data-remaining="1"] img:nth-child(3),
-#actions[data-remaining="0"] img:nth-child(3),
-#actions[data-remaining="1"] img:nth-child(2),
-#actions[data-remaining="0"] img:nth-child(2),
-#actions[data-remaining="0"] img:nth-child(1) {
+#table #actions[data-remaining="5"] img:nth-child(6),
+#table #actions[data-remaining="4"] img:nth-child(6),
+#table #actions[data-remaining="3"] img:nth-child(6),
+#table #actions[data-remaining="2"] img:nth-child(6),
+#table #actions[data-remaining="1"] img:nth-child(6),
+#table #actions[data-remaining="0"] img:nth-child(6),
+#table #actions[data-remaining="4"] img:nth-child(5),
+#table #actions[data-remaining="3"] img:nth-child(5),
+#table #actions[data-remaining="2"] img:nth-child(5),
+#table #actions[data-remaining="1"] img:nth-child(5),
+#table #actions[data-remaining="0"] img:nth-child(5),
+#table #actions[data-remaining="3"] img:nth-child(4),
+#table #actions[data-remaining="2"] img:nth-child(4),
+#table #actions[data-remaining="1"] img:nth-child(4),
+#table #actions[data-remaining="0"] img:nth-child(4),
+#table #actions[data-remaining="2"] img:nth-child(3),
+#table #actions[data-remaining="1"] img:nth-child(3),
+#table #actions[data-remaining="0"] img:nth-child(3),
+#table #actions[data-remaining="1"] img:nth-child(2),
+#table #actions[data-remaining="0"] img:nth-child(2),
+#table #actions[data-remaining="0"] img:nth-child(1) {
   opacity: 0;
   transition: opacity .25s ease-out;
 }

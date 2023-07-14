@@ -517,14 +517,15 @@ function scores(seats, {districts, palace}){
     return _.chain(districts, _.map(_.getIn(_, ["points", idx]), _), _.sum, span, th);
   }, _.range(0, n));
 
-  const rows = _.map(function({at, size, points}){
+  const rows = _.chain(districts, _.sort(_.desc(_.get(_, "size")), _), _.map(function({at, size, points}){
     const ranked = _.chain(points, _.unique, _.sort(_.desc(_.identity), _))
     return tr(th({class: "at"}, size > 2 && size < 14 ? img({src: `./images/c${size}.png`, "data-piece": "capulli", "data-size": size}) : div({class: "size"}, size), span(at)), _.chain(points, _.mapIndexed(function(idx, score){
           const rank = _.indexOf(ranked, score) + 1,
                 ties = _.chain(points, _.filter(_.eq(score, _), _), _.count, _.gt(_, 1));
       return td({"data-score": score}, ranking(rank, score > 0 && ties), span({class: "score"}, score));
     },  _), _.toArray));
-  }, districts);
+  }, _));
+
   return [
     table({class: "scored"},
       thead(

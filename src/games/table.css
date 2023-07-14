@@ -178,7 +178,7 @@ body.anon img[data-nav="last-move"] {
   position: fixed;
   vertical-align: middle;
   bottom: 1em;
-  left: calc(50% - 15em - 40px);
+  left: calc(50% - 12.5em);
   border: solid 2px white;
   min-width: 23em;
   min-height: 5em;
@@ -229,7 +229,6 @@ body.anon img[data-nav="last-move"] {
 #event[data-type="finished"] span {
   font-size: 1.2em;
   margin: 0 7px 0 2px;
-  padding-bottom: 5px;
   display: inline-block;
   vertical-align: top;
 }
@@ -291,7 +290,7 @@ body.anon img[data-nav="last-move"] {
   height: 20px;
   position: absolute;
   left: 0;
-  bottom: 0;
+  bottom: 10px;;
 }
 #table[data-event-type="scoring"] #event {
   height: 7.5em;

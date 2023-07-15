@@ -384,8 +384,10 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
     diff(curr, prior, ["state", "seated", seat, "temples", period, level], reconcileTemples(seat, level));
   }, [0, 1], indices(seated), _.range(1, 5));
 
+  const cCapulli = _.getIn(curr, ["state", "capulli", curr?.state?.period]),
+        pCapulli = _.getIn(prior, ["state", "capulli", prior?.state?.period]);
   _.each(function(pos){
-    diff(curr, prior, ["state", "capulli", period, pos], function(curr, prior){
+    diff(cCapulli, pCapulli, [pos], function(curr, prior){
       dom.html(
         dom.sel1(`[data-demand='${pos}']`, el),
         curr && !curr.at ? capulli(curr) : null);

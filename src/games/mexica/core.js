@@ -547,11 +547,15 @@ function half(size){
 
 const quarter = _.comp(half, half);
 
-function founded(pillis, founder, dist){
+function founds(pillis, founder, dist){
   const size = _.count(dist);
   return _.toArray(_.mapkv(function(seat, spot){
     return seat === founder ? half(size) : _.includes(dist, spot) ? quarter(size) : 0;
   }, pillis));
+}
+
+function founded(contents, dist){
+  return _.detect(contains([c], contents, _), dist);
 }
 
 function bonus(spots, pillis){
@@ -712,7 +716,7 @@ export function execute(self, command){
         throw new Error("Cannot place canals on nonadjacent spaces.");
       }
       for(const canalAt of details.at){
-        if (_.detect(contains([c], contents, _), district(board, contents, canalAt))){
+        if (founded(contents, district(board, contents, canalAt))){
           throw new Error("Cannot place canals in a founded district.");
         }
         if (!isVacant(board, contents, canalAt)) {
@@ -763,13 +767,13 @@ export function execute(self, command){
         throw new Error("Cannot found a district where your Mexica Pilli is not present.");
       }
       const dist = district(board, contents, pilli);
-      if (_.detect(contains([c], contents, _), dist)){
+      if (founded(contents, dist)){
         throw new Error("Cannot found a founded district.");
       }
       if (!isVacant(board, contents, details.at)) {
         throw new Error("Cannot place capulli except on empty land spaces.");
       }
-      const points = founded(_.toArray(pillis), seat, dist);
+      const points = founds(_.toArray(pillis), seat, dist);
       return _.chain(self, g.fold(_, {type: "founded-district", seat, details: {at: details.at, size: _.count(dist), points}}));
     }
     case "pass": {
@@ -982,18 +986,21 @@ const may = up;
 
 export function foundable(board, contents, markers, pilli){
   const dist = district(board, contents, pilli);
+  if (founded(contents, dist)){
+    return null;
+  }
   const size = _.count(dist);
-  const [founded, unfounded] = _.sift(function({at}){
+  const [marked, unmarked] = _.sift(function({at}){
     return !!at;
   }, markers);
   const fixed = _.detect(function(at){
     return _.detect(function(c){
       return c.at === at;
-    }, founded);
+    }, marked);
   }, dist);
   const avail = size < 14 && _.detect(function(marker){
     return marker.size === size;
-  }, unfounded);
+  }, unmarked);
   return _.seq(_.map(function(at){
     return {size, at};
   }, avail && !fixed ? _.filter(isVacant(board, contents, _), dist) : null));

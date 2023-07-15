@@ -534,21 +534,22 @@ ol#demands li {
   opacity: 1;
   transition: opacity 0.5s ease-in-out;
 }
-#table #board [data-piece="emperor"] {
+#table #board svg[data-piece="emperor"] {
   position: absolute;
   top: 30px;
   right: 25px;
   opacity: 0;
+  scale: 2.5;
   transform: scaleX(-1);
   transition: opacity .25s ease-out;
 }
-#table #board [data-piece="emperor"] path {
+#table #board svg[data-piece="emperor"] path {
   fill: #D4AF37;
 }
 #table.scoring-round #board .contents img[data-piece="capulli"] {
   animation: bump .25s ease-in;
 }
-#table.scoring-round #board [data-piece="emperor"] {
+#table.scoring-round #board svg[data-piece="emperor"] {
   opacity: 1;
   transition: opacity .25s ease-in;
 }

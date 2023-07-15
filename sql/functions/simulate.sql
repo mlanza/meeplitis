@@ -1,4 +1,4 @@
-create or replace function simulate(_table_id varchar, _event_id varchar, _commands jsonb, _seats int[]) returns jsonb
+create or replace function simulate(_table_id varchar, _event_id varchar, _commands jsonb, _seen jsonb) returns jsonb
 security definer
 set search_path = public
 as $$
@@ -11,8 +11,9 @@ _seat_configs jsonb;
 _payload jsonb;
 _snapshot jsonb;
 _from_event_id varchar;
-_seen varchar;
 begin
+
+raise log '$ simulate! %#%, commands %, seen %', _table_id, _event_id, _commands, _seen;
 
 select config, fn
 from tables
@@ -22,17 +23,28 @@ into _config, _fn;
 select seat_configs(_table_id)
 into _seat_configs;
 
-select id
-from events
-where table_id = _table_id and snapshot is null and seq < (select seq from events where table_id = _table_id and id = _event_id)
-order by seq
-into _from_event_id;
+if _event_id is null then
+  select '[]'::jsonb
+  into _events;
+else
 
-select coalesce(_from_event_id, _event_id)
-into _from_event_id;
+  select id
+  from events
+  where table_id = _table_id
+  and seq > (
+    select seq
+    from events
+    where table_id = _table_id and snapshot is not null and seq < (select seq from events where table_id = _table_id and id = _event_id)
+    order by seq limit 1)
+  limit 1
+  into _from_event_id;
 
-select evented(_table_id, _from_event_id, _event_id)
-into _events;
+  select coalesce(_from_event_id, _event_id)
+  into _from_event_id;
+
+  select evented(_table_id, _from_event_id, _event_id)
+  into _events;
+end if;
 
 select snapshot->'state' --first previous available snapshot
 from events
@@ -47,11 +59,9 @@ where table_id = _table_id and id = (
   limit 1)
 into _snapshot;
 
-select case when array_to_json(_seats)::varchar = array_to_json(array[null])::varchar then 'anon' else array_to_json(_seats)::varchar end into _seen;
+raise log '$ simulate at % for % from event id % to % with snapshot %', _table_id, case when _seen = '[null]'::jsonb then 'anon' else _seen::varchar end, _from_event_id, _event_id, _snapshot;
 
-raise log '$ simulate at % for % from event id % to % with %', _table_id, _seen, _from_event_id, _event_id, _snapshot;
-
-select '{"game": "' || _fn || '", "seats": ' || _seat_configs::varchar || ', "config": ' || _config::varchar || ', "events": ' || _events::varchar || ', "commands": ' || _commands::varchar || ', "seen": ' || array_to_json(_seats) || ', "snapshot": ' || coalesce(_snapshot, 'null')::varchar || '}'
+select '{"game": "' || _fn || '", "seats": ' || _seat_configs::varchar || ', "config": ' || _config::varchar || ', "events": ' || _events::varchar || ', "commands": ' || _commands::varchar || ', "seen": ' || _seen || ', "snapshot": ' || coalesce(_snapshot, 'null')::varchar || '}'
 into _payload;
 
 return (select simulate(_fn, _payload));
@@ -88,7 +98,7 @@ select status, content
 from http_post('https://yourmove.fly.dev/simulate/' || _game, _payload::varchar, 'application/json'::varchar)
 into _status, _result;
 */
-raise log '$ resp/% % % -> %', _game, _req, _status, _result;
+raise log '$ simulate resp/% % % -> %', _game, _req, _status, _result;
 
 if _result is null or _status > 222 then
   raise exception 'Unable to retrieve snapshot for % event %', _table_id, _event_id using hint = 'Check remote server for issues';
@@ -125,12 +135,12 @@ set search_path = public
 as $$
 begin
 
-return (select simulate(_table_id, _event_id, _commands, array[_seat]));
+return (select simulate(_table_id, _event_id, _commands, array_to_json(array[_seat])::jsonb));
 
 end;
 $$ language plpgsql;
 
-create or replace function simulate(_table_id varchar, _event_id varchar, _seats int[]) returns jsonb
+create or replace function simulate(_table_id varchar, _event_id varchar, _seats jsonb) returns jsonb
 security definer
 set search_path = public
 as $$
@@ -146,15 +156,15 @@ security definer
 set search_path = public
 as $$
 declare
-_seats int[];
+_seats jsonb;
 begin
 
-select array_agg(seat)
+select to_jsonb(array_agg(seat))
 from seats
 where table_id = _table_id
 into _seats;
 
-return (select simulate(_table_id, _event_id, '[]'::jsonb, _seats));
+return (select simulate(_table_id, _event_id, _seats));
 
 end;
 $$ language plpgsql;

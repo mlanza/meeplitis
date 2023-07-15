@@ -23,25 +23,31 @@ into _config, _fn;
 select seat_configs(_table_id)
 into _seat_configs;
 
-if _event_id is null then
-  select '[]'::jsonb
-  into _events;
-else
-
-  select id
-  from events
-  where table_id = _table_id
-  and seq > (
-    select seq
+select id from (
+  (select id
     from events
-    where table_id = _table_id and snapshot is not null and seq < (select seq from events where table_id = _table_id and id = _event_id)
-    order by seq limit 1)
-  limit 1
-  into _from_event_id;
+    where table_id = _table_id
+    and seq > (
+      select seq
+      from events
+      where table_id = _table_id and snapshot is not null and seq < (select seq from events where table_id = _table_id and id = _event_id)
+      order by seq limit 1)
+    limit 1)
+  union
+  (select id
+    from events
+    where table_id = _table_id
+    order by seq
+    limit 1)
+) x into _from_event_id;
 
-  select coalesce(_from_event_id, _event_id)
-  into _from_event_id;
+if _from_event_id is null then
+  select evented(_table_id, _event_id, _event_id)
+  into _events;
 
+  --select '[]'::jsonb
+  --into _events;
+else
   select evented(_table_id, _from_event_id, _event_id)
   into _events;
 end if;

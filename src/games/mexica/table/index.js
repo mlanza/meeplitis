@@ -272,7 +272,7 @@ function indices(xs){
 }
 
 function omit(el){
-  dom.addClass(el, "gone");
+  el && dom.addClass(el, "gone");
 }
 
 function dropPriorOmissions(el){
@@ -294,79 +294,81 @@ function reconcileTemples(seat, level){
   }
 }
 
+function workingCommand([curr, prior], seat, {contents}, el){
+  const type = curr?.type;
+  const attrs = {
+    "data-command-type": type,
+    "data-command-spots": null,
+    "data-command-horizontal-spots": null,
+    "data-command-vertical-spots": null,
+    "data-command-size": null,
+    "data-command-from": null,
+    "data-command-to": null,
+    "data-command-destinations": null,
+    "data-command-at": null
+  };
+  switch (type) { //only multi-step commands appear here
+    case "place-pilli": {
+      attrs["data-command-at"] = _.chain(g.moves(game, {type, seat}), _.map(_.getIn(_, ["details", "at"]), _), _.join(" ", _));
+      break;
+    }
+    case "construct-canal": {
+      const {details} = curr;
+      const spots = _.filter(_.partial(c.dry, c.board, contents), c.spots);
+      attrs["data-command-spots"] = _.join(" ", spots);
+      attrs["data-command-size"] = details.size;
+      attrs["data-command-at"] = details.at;
+      break;
+    }
+    case "move":
+      const {details} = curr;
+      const moves = g.moves(game, {seat, type});
+      const to = _.maybe(moves, _.filter(_.comp(_.includes(["foot", "boat"], _), _.getIn(_, ["details", "by"])), _), _.mapa(_.getIn(_, ["details", "to"]), _), _.seq, _.join(" ", _));
+      const teleport = _.chain(moves, _.detect(_.comp(_.eq(_, "teleport"), _.getIn(_, ["details", "by"])), _), _.not, _.not);
+      const destinations = teleport ? _.join(" ", c.destinations(contents)) : null;
+      attrs["data-command-from"] = details.from;
+      attrs["data-command-to"] = to;
+      attrs["data-command-destinations"] = destinations;
+      break;
+    case "construct-bridge": {
+      const {horizontal, vertical} = c.bridgePlacements(contents);
+      attrs["data-command-horizontal-spots"] = _.join(" ", horizontal);
+      attrs["data-command-vertical-spots"] = _.join(" ", vertical);
+      break;
+    }
+    case "relocate-bridge": {
+      const {details} = curr;
+      const {horizontal, vertical} = c.bridgePlacements(contents);
+      attrs["data-command-from"] = details.from;
+      attrs["data-command-horizontal-spots"] = _.join(" ", horizontal);
+      attrs["data-command-vertical-spots"] = _.join(" ", vertical);
+      break;
+    }
+    case "build-temple": {
+      const {details} = curr;
+      attrs["data-command-size"] = details.size;
+      break;
+    }
+  }
+  _.eachkv(retainAttr(el, _, _), attrs);
+}
+
 $.sub($both, function([[curr, prior, motion, game], wip, which]){
   const {state, up} = curr;
   const {seated, tokens, canal1, canal2, bridges, period, contents, status, round, spent} = state;
-  const {step} = motion;
-  const moves = g.moves(game, {seat});
-  const foundables = g.moves(game, {type: "found-district"});
+  const {step, present} = motion;
+  const moves = present ? _.concat(g.moves(game, {seat, type: "commit"}), g.moves(game, {seat, type: "pass"})) : null;
+  const foundables = present ? g.moves(game, {type: "found-district"}) : null;
 
   dom.attr(el, "data-status", status);
   dom.removeClass(el, "error");
 
-  if (which === 1) {
-    const [curr, prior] = wip;
-    const type = curr?.type;
-    const attrs = {
-      "data-command-type": type,
-      "data-command-spots": null,
-      "data-command-horizontal-spots": null,
-      "data-command-vertical-spots": null,
-      "data-command-size": null,
-      "data-command-from": null,
-      "data-command-to": null,
-      "data-command-destinations": null,
-      "data-command-at": null
-    };
-    switch (type) { //only multi-step commands appear here
-      case "place-pilli": {
-        attrs["data-command-at"] = _.chain(g.moves(game, {type, seat}), _.map(_.getIn(_, ["details", "at"]), _), _.join(" ", _));
-        break;
-      }
-      case "construct-canal": {
-        const {details} = curr;
-        const spots = _.filter(_.partial(c.dry, c.board, contents), c.spots);
-        attrs["data-command-spots"] = _.join(" ", spots);
-        attrs["data-command-size"] = details.size;
-        attrs["data-command-at"] = details.at;
-        break;
-      }
-      case "move":
-        const {details} = curr;
-        const moves = g.moves(game, {seat, type});
-        const to = _.maybe(moves, _.filter(_.comp(_.includes(["foot", "boat"], _), _.getIn(_, ["details", "by"])), _), _.mapa(_.getIn(_, ["details", "to"]), _), _.seq, _.join(" ", _));
-        const teleport = _.chain(moves, _.detect(_.comp(_.eq(_, "teleport"), _.getIn(_, ["details", "by"])), _), _.not, _.not);
-        const destinations = teleport ? _.join(" ", c.destinations(contents)) : null;
-        attrs["data-command-from"] = details.from;
-        attrs["data-command-to"] = to;
-        attrs["data-command-destinations"] = destinations;
-        break;
-      case "construct-bridge": {
-        const {horizontal, vertical} = c.bridgePlacements(contents);
-        attrs["data-command-horizontal-spots"] = _.join(" ", horizontal);
-        attrs["data-command-vertical-spots"] = _.join(" ", vertical);
-        break;
-      }
-      case "relocate-bridge": {
-        const {details} = curr;
-        const {horizontal, vertical} = c.bridgePlacements(contents);
-        attrs["data-command-from"] = details.from;
-        attrs["data-command-horizontal-spots"] = _.join(" ", horizontal);
-        attrs["data-command-vertical-spots"] = _.join(" ", vertical);
-        break;
-      }
-      case "build-temple": {
-        const {details} = curr;
-        attrs["data-command-size"] = details.size;
-        break;
-      }
-    }
-    _.eachkv(retainAttr(el, _, _), attrs);
-    return;
+  if (present && which === 1) {
+    return workingCommand(wip, seat, state, el);
   }
 
   _.chain(moves, _.map(_.get(_, "type"), _), _.distinct, _.join(" ", _), dom.attr(el, "data-allow-commands", _));
-  _.chain(moves, _.toArray, _.partial(log, "moves")); //debugging only
+  _.maybe(moves, _.toArray, _.partial(log, "moves")); //debugging only
 
   dropPriorOmissions(el);
 

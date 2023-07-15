@@ -41,16 +41,8 @@ select id from (
     limit 1)
 ) x into _from_event_id;
 
-if _from_event_id is null then
-  select evented(_table_id, _event_id, _event_id)
-  into _events;
-
-  --select '[]'::jsonb
-  --into _events;
-else
-  select evented(_table_id, _from_event_id, _event_id)
-  into _events;
-end if;
+select evented(_table_id, _from_event_id, _event_id)
+into _events;
 
 select snapshot->'state' --first previous available snapshot
 from events

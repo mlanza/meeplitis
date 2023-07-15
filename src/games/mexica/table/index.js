@@ -545,9 +545,17 @@ function scores(seats, {districts, palace}){
 const moving = _.partial(focal, ["pilli", "bridge"]);
 
 $.on(document.body, "keydown", function(e){
-  if (e.key === "Escape") { //cancel a command in progress
-    sh.dispatch($wip, null);
-    dom.removeClass(el, "error");
+  switch(e.key){
+    case "Escape": //cancel a command in progress
+      sh.dispatch($wip, null);
+      dom.removeClass(el, "error");
+      break;
+    case " ":
+      sh.dispatch($story, {type: "pass"});
+      break;
+    case "Enter":
+      sh.dispatch($story, {type: "commit"});
+      break;
   }
 });
 

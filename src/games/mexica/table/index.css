@@ -41,8 +41,7 @@
 }
 #table table.scored thead tr:first-child figure {
   border: solid 2px white;
-  border-radius: 5px;
-  margin: 5px;
+  border-radius: 7px;
 }
 
 #table table.scored .corner {
@@ -1349,6 +1348,7 @@ body.anon img[data-nav="last-move"] {
 #table.act[data-command-type='move'][data-command-from][data-command-to~='L6'] div[data-spot='L6']:hover div.propose,
 #table.act[data-command-type='move'][data-command-from][data-command-to~='M6'] div[data-spot='M6']:hover div.propose,
 #table.act[data-command-type='move'][data-command-from][data-command-to~='N6'] div[data-spot='N6']:hover div.propose,
+#table.act[data-command-type='move'][data-command-from][data-command-to~='O6'] div[data-spot='O6']:hover div.propose,
 #table.act[data-command-type='move'][data-command-from][data-command-to~='P6'] div[data-spot='P6']:hover div.propose,
 #table.act[data-command-type='move'][data-command-from][data-command-to~='Q6'] div[data-spot='Q6']:hover div.propose,
 #table.act[data-command-type='move'][data-command-from][data-command-to~='R6'] div[data-spot='R6']:hover div.propose,
@@ -1367,6 +1367,7 @@ body.anon img[data-nav="last-move"] {
 #table.act[data-command-type='move'][data-command-from][data-command-to~='L7'] div[data-spot='L7']:hover div.propose,
 #table.act[data-command-type='move'][data-command-from][data-command-to~='M7'] div[data-spot='M7']:hover div.propose,
 #table.act[data-command-type='move'][data-command-from][data-command-to~='N7'] div[data-spot='N7']:hover div.propose,
+#table.act[data-command-type='move'][data-command-from][data-command-to~='O7'] div[data-spot='O7']:hover div.propose,
 #table.act[data-command-type='move'][data-command-from][data-command-to~='P7'] div[data-spot='P7']:hover div.propose,
 #table.act[data-command-type='move'][data-command-from][data-command-to~='Q7'] div[data-spot='Q7']:hover div.propose,
 #table.act[data-command-type='move'][data-command-from][data-command-to~='R7'] div[data-spot='R7']:hover div.propose,
@@ -1386,6 +1387,7 @@ body.anon img[data-nav="last-move"] {
 #table.act[data-command-type='move'][data-command-from][data-command-to~='L8'] div[data-spot='L8']:hover div.propose,
 #table.act[data-command-type='move'][data-command-from][data-command-to~='M8'] div[data-spot='M8']:hover div.propose,
 #table.act[data-command-type='move'][data-command-from][data-command-to~='N8'] div[data-spot='N8']:hover div.propose,
+#table.act[data-command-type='move'][data-command-from][data-command-to~='O8'] div[data-spot='O8']:hover div.propose,
 #table.act[data-command-type='move'][data-command-from][data-command-to~='P8'] div[data-spot='P8']:hover div.propose,
 #table.act[data-command-type='move'][data-command-from][data-command-to~='Q8'] div[data-spot='Q8']:hover div.propose,
 #table.act[data-command-type='move'][data-command-from][data-command-to~='R8'] div[data-spot='R8']:hover div.propose,
@@ -1404,6 +1406,7 @@ body.anon img[data-nav="last-move"] {
 #table.act[data-command-type='move'][data-command-from][data-command-to~='L9'] div[data-spot='L9']:hover div.propose,
 #table.act[data-command-type='move'][data-command-from][data-command-to~='M9'] div[data-spot='M9']:hover div.propose,
 #table.act[data-command-type='move'][data-command-from][data-command-to~='N9'] div[data-spot='N9']:hover div.propose,
+#table.act[data-command-type='move'][data-command-from][data-command-to~='O9'] div[data-spot='O9']:hover div.propose,
 #table.act[data-command-type='move'][data-command-from][data-command-to~='P9'] div[data-spot='P9']:hover div.propose,
 #table.act[data-command-type='move'][data-command-from][data-command-to~='Q9'] div[data-spot='Q9']:hover div.propose,
 #table.act[data-command-type='move'][data-command-from][data-command-to~='R9'] div[data-spot='R9']:hover div.propose,

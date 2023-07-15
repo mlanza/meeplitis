@@ -404,6 +404,9 @@ img[data-action="must"] {
   animation-fill-mode: both;
   animation-iteration-count: infinite;
 }
+.player:hover img[data-action="must"] {
+  animation: none;
+}
 img[data-action="may"] {
   opacity: .25;
 }

@@ -223,6 +223,9 @@
 [data-piece="canal"] {
   pointer-events: none;
 }
+#board [data-piece="bridge"] {
+  filter: drop-shadow(0 3px 2px rgb(0 0 0 / 0.4));
+}
 #supplies li [data-piece="bridge"],
 #supplies li [data-size="1"] {
   rotate: 5deg;
@@ -258,7 +261,7 @@
 #table div[data-spot] :is(.contents, .propose) {
   height: var(--square-size);
   width: var(--square-size);
-  z-index: 11;
+  --z-index: 11;
   overflow: visible;
 }
 #table div[data-spot] > * {
@@ -877,7 +880,7 @@ ol#demands li {
   pointer-events: none;
 }
 #table div[data-spot]:hover {
-  z-index: 11;
+  --z-index: 11;
 }
 body.anon img[data-nav="last-move"] {
   display: none;
@@ -2477,6 +2480,7 @@ body.anon img[data-nav="last-move"] {
 #table.act div[data-spot]:hover {
     border-color: white;
     cursor: pointer;
+    z-index: 50;
 }
 #table.act div[data-spot]:hover div.propose {
   visibility: visible;

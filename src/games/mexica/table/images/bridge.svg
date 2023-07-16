@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?><!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
 <svg fill="white" width="800px" height="800px" viewBox="0 0 260 260" id="Flat" xmlns="http://www.w3.org/2000/svg">
-  <rect fill="#663D14" stroke="white" stroke-width="10" x="10" y="45" width="240" height="170" rx="0"/>
+  <rect fill="#996600" stroke="black" stroke-width="10" x="10" y="45" width="240" height="170" rx="0"/>
+  <line x1="50" y1="60" x2="50" y2="200" stroke="black" stroke-width="5" />
+  <line x1="90" y1="60" x2="90" y2="200" stroke="black" stroke-width="5" />
+  <line x1="130" y1="60" x2="130" y2="200" stroke="black" stroke-width="5" />
+  <line x1="170" y1="60" x2="170" y2="200" stroke="black" stroke-width="5" />
+  <line x1="210" y1="60" x2="210" y2="200" stroke="black" stroke-width="5" />
 </svg>

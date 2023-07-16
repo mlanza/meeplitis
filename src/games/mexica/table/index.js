@@ -294,7 +294,7 @@ function reconcileTemples(seat, level){
   }
 }
 
-function workingCommand([curr, prior], seat, {contents}, el){
+function workingCommand([curr, prior], seat, {contents}, game, el){
   const type = curr?.type;
   const attrs = {
     "data-command-type": type,
@@ -364,7 +364,7 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
   dom.removeClass(el, "error");
 
   if (present && which === 1) {
-    return workingCommand(wip, seat, state, el);
+    return workingCommand(wip, seat, state, game, el);
   }
 
   _.chain(moves, _.map(_.get(_, "type"), _), _.distinct, _.join(" ", _), dom.attr(el, "data-allow-commands", _));

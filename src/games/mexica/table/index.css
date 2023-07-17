@@ -131,10 +131,10 @@
 #table[data-command-type='construct-canal'][data-command-size='1'] #guidance p[data-command-type='construct-canal'][data-command-size='1'] {
   display: inherit;
 }
-#table[data-command-type] #guidance {
+#table.act[data-command-type] #guidance {
   display: inherit;
 }
-#table[data-command-type] #event {
+#table.act[data-command-type] #event {
   display: none;
 }
 .players {

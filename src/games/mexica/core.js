@@ -81,7 +81,7 @@ function templesDepleted(temples){
 }
 
 function capulliDepleted(capulli, period){
-  return !_.chain(capulli, _.nth(_, period), _.map(_.get(_, "at"), _), _.remove(_.isSome, _), _.seq);
+  return !_.chain(capulli, _.nth(_, period), _.compact, _.map(_.get(_, "at"), _), _.remove(_.isSome, _), _.seq);
 }
 
 function markScoringRound(state){
@@ -821,6 +821,24 @@ export function execute(self, command){
   }
 }
 
+function removeUnfoundables(keeping){
+  return _.updateIn(_, ["capulli", 1], function(capulli){
+    return _.chain(keeping,
+      _.reduce(function(capulli, size){
+        const idx = _.detectIndex(function(tile){
+          return !tile.at && tile.size === size;
+        }, capulli);
+        return idx === null ? capulli : _.update(capulli, idx, _.assoc(_, "at", "-")); //mark as kept
+      }, capulli, _),
+      _.map(function(tile){
+       return tile.at ? tile : null; //remove unfoundable
+      }, _),
+      _.mapa(function(tile){
+        return _.get(tile, "at") === "-" ? {at: null, size} : tile; //unmark kept
+      }, _));
+  });
+}
+
 function fold(self, event){
   const state = _.deref(self);
   const {period, spent, status} = state;
@@ -891,7 +909,18 @@ function fold(self, event){
           _.update(_, `canal${size}`, consume(details.at)),
           _.update(_, "contents", function(contents){
             return _.reduce(place(w), contents, details.at);
-          })));
+          }),
+          function(state){
+            const {canal1, canal2, contents} = state;
+            const f = canalsDepleted(canal1, canal2) ?
+              _.chain(districts(board, contents),
+                _.remove(dist => founded(contents, dist), _),
+                _.map(_.count, _),
+                removeUnfoundables) :
+              _.identity;
+            return f(state);
+          },
+          markScoringRound));
 
     case "constructed-bridge":
       return g.fold(self, event,
@@ -1006,8 +1035,8 @@ export function foundable(board, contents, markers, pilli){
     return null;
   }
   const size = _.count(dist);
-  const [marked, unmarked] = _.sift(function({at}){
-    return !!at;
+  const [marked, unmarked] = _.sift(function(tile){
+    return !!_.get(tile, "at");
   }, markers);
   const fixed = _.detect(function(at){
     return _.detect(function(c){

@@ -414,6 +414,20 @@ const nodupes = _.pipe(
   _.sort(_.asc(_.hash), _),
   _.dedupe);
 
+export function footways(pilli, board, contents){
+  return _.chain(pilli,
+    around,
+    _.filter(
+      _.and(
+        _.notEq(_, CENTER),
+        _.or(
+          _.and(
+            dry(board, contents, _),
+            accessibleLand(contents, pilli, _)),
+          accessibleBridge(contents, pilli, _)),
+        lacks([p, t, c], contents, _)), _));
+}
+
 export function waterways(board, contents, bridges){
   return _.chain(bridges,
     _.mapcat(function(spot){
@@ -445,44 +459,46 @@ export function waterways(board, contents, bridges){
     _.toArray);
 }
 
-function travel(waterways, canals, min, max){
-  return _.chain(canals,
-    _.filter(_.pipe(_.count, _.eq(_, min - 1)), _),
-    _.mapcat(function(canal){
-      const excludes = _.scan(2, canal);
-      const wws = _.remove(function(waterway){
-        return _.detect(function([x, y]){
-          return _.eq(waterway, [x, y]) || _.eq(waterway, [y, x]);
-        }, excludes);
-      }, waterways);
-      const from = _.last(canal);
-      const nexts = _.chain(wws,
-        _.filter(function(waterway){
-          return _.includes(waterway, from);
-        }, _),
-        cat,
-        _.remove(_.eq(_, from), _),
-        _.map(function(spot){
-          return _.includes(canal, spot) ? canal : _.toArray(_.concat(canal, [spot]));
-        }, _));
-      return min <= max ? travel(wws, nexts, min + 1, max) : nexts;
+function expand(waterways, connection, arrivals){
+  const {from, to, cost, seen, heads, arrived} = connection;
+  if (arrived){
+    throw new Error("Cannot expand on an arrival.");
+  }
+  const _heads = _.chain(waterways,
+    _.filter(function(ww){
+      return _.seq(_.intersection(ww, heads));
     }, _),
-    _.concat(canals, _));
+    _.concatenated,
+    _.unique,
+    _.remove(_.includes(seen, _), _),
+    _.toArray);
+  const _seen = _.unique(_.concat(seen, _heads));
+  return {
+    from,
+    to,
+    cost: cost + 1,
+    seen: _seen,
+    heads: _heads,
+    arrived: _.includes(_seen, to)
+  }
 }
 
-export function boats(waterways, from, max, seat){
-  return _.chain(
-    travel(waterways, [[from]], 2, max),
-    _.filtera(_.pipe(_.count, _.gt(_, 1)), _),
-    //_.see("travel"),
-    _.groupBy(_.last, _),
-    _.mapVals(_, _.pipe(_.sort(_.asc(_.count), _), _.first)),
-    _.vals,
-    _.mapa(function(waterway){
-      const to = _.last(waterway),
-            cost = _.count(waterway) - 1;
-      return {type: "move", details: {by: "boat", from, to, cost}, seat};
-    }, _));
+function expanding(connections, waterways, actions){
+  const [arrivals, nonarrivals] = _.sift(_.get(_, "arrived"), connections);
+  return actions > 0 && _.seq(nonarrivals) ? expanding(_.concat(arrivals, _.map(function(connection){
+    return expand(waterways, connection, arrivals);
+  }, nonarrivals)), waterways, actions - 1) : connections;
+}
+
+export function boats(from, bridges, waterways, actions = 4){
+  return _.chain(bridges,
+    _.remove(_.eq(from, _), _),
+    _.map(function(to){
+      const cost = 0, seen = [from], heads = [from], arrived = false;
+      return {from, to, cost, seen, heads, arrived};
+    }, _),
+    connections => expanding(connections, waterways, actions),
+    _.filter(_.get(_, "arrived"), _));
 }
 
 function remaining(spent, bank, redeemed){
@@ -1089,22 +1105,13 @@ function moves(self, {type = null, seat = null}){
 
         case "move": {
           const foot = unspent > 0 ?
-            _.chain(pilli,
-              around,
-              _.filter(
-                _.and(
-                  _.notEq(_, CENTER),
-                  _.or(
-                    _.and(
-                      dry(board, contents, _),
-                      accessibleLand(contents, pilli, _)),
-                    accessibleBridge(contents, pilli, _)),
-                  lacks([p, t, c], contents, _)), _),
-              _.map(function(to){
-                return {type, details: {by: "foot", from, to}, seat};
-              }, _)) : [];
+            _.map(function(to){
+              return {type, details: {by: "foot", from, to}, seat};
+            }, footways(pilli, board, contents)) : [];
           const water = waterways(board, contents, _.compact(bridges));
-          const boat = contains([b], contents, pilli) ? boats(water, pilli, _.min(unspent, 5), seat) : [];
+          const boat = contains([b], contents, pilli) ? _.map(function({from, to, cost}){
+            return {type: "move", details: {by: "boat", from, to, cost}, seat};
+          }, boats(pilli, _.compact(bridges), water, _.min(unspent, 4))) : [];
           const teleport = unspent > 4 ? [{type: "move", details: {by: "teleport", from, cost: 5}, seat}] : [];
           return _.concat(foot, boat, teleport);
         }

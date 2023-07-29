@@ -197,6 +197,8 @@ function desc({type, details}){
       ];
     case "concluded-period":
       return "The 2nd period begins!";
+    case "removed-unfoundables":
+      return `Removes ${details.removed.length} unfoundable capulli tile(s).`;
     case "passed":
       return "Passed.";
     case "finished":

@@ -742,7 +742,18 @@ export function execute(self, command){
       if (breaksBridge(board, contents, details.at)) {
         throw new Error("Cannot place canals at the foot of a bridge.");
       }
-      return _.chain(self, g.fold(_, {type: "constructed-canal", seat, details: {at: sortSpots(details.at)}}));
+      return _.chain(self,
+        g.fold(_, {type: "constructed-canal", seat, details: {at: sortSpots(details.at)}}),
+        function(self){
+          const state = _.deref(self);
+          const {canal1, canal2, contents, capulli} = state;
+          const removed = canalsDepleted(canal1, canal2) ?
+            _.chain(districts(board, contents),
+              _.remove(dist => founded(contents, dist), _),
+              _.mapa(_.count, _),
+              _.partial(unfoundables, _.second(capulli))) : null;
+          return _.seq(removed) ? g.fold(self, {type: "removed-unfoundables", details: {removed}}) : self;
+        });
     }
     case "build-temple": {
       const present = _.detect(_.eq(details.at, _), district(board, contents, pilli));
@@ -821,21 +832,27 @@ export function execute(self, command){
   }
 }
 
-function removeUnfoundables(keeping){
+function unfoundables(capulli, keeping){
+  return _.chain(keeping,
+    _.reduce(function(capulli, size){
+      const idx = _.detectIndex(function(tile){
+        return !tile.at && tile.size === size;
+      }, capulli);
+      return idx === null ? capulli : _.update(capulli, idx, _.assoc(_, "at", "-")); //mark as kept
+    }, capulli, _),
+    _.map(function(tile){
+     return tile.at ? tile : null; //remove unfoundable
+    }, _),
+    _.reducekv(function(positions, idx, tile){
+      return tile ? positions : _.conj(positions, idx);
+    }, [], _));
+}
+
+function removeCapulli(removed){
   return _.updateIn(_, ["capulli", 1], function(capulli){
-    return _.chain(keeping,
-      _.reduce(function(capulli, size){
-        const idx = _.detectIndex(function(tile){
-          return !tile.at && tile.size === size;
-        }, capulli);
-        return idx === null ? capulli : _.update(capulli, idx, _.assoc(_, "at", "-")); //mark as kept
-      }, capulli, _),
-      _.map(function(tile){
-       return tile.at ? tile : null; //remove unfoundable
-      }, _),
-      _.mapa(function(tile){
-        return _.get(tile, "at") === "-" ? {at: null, size} : tile; //unmark kept
-      }, _));
+    return _.reduce(function(capulli, idx){
+      return _.assoc(capulli, idx, null);
+    }, capulli, removed);
   });
 }
 
@@ -909,17 +926,12 @@ function fold(self, event){
           _.update(_, `canal${size}`, consume(details.at)),
           _.update(_, "contents", function(contents){
             return _.reduce(place(w), contents, details.at);
-          }),
-          function(state){
-            const {canal1, canal2, contents} = state;
-            const f = canalsDepleted(canal1, canal2) ?
-              _.chain(districts(board, contents),
-                _.remove(dist => founded(contents, dist), _),
-                _.map(_.count, _),
-                removeUnfoundables) :
-              _.identity;
-            return f(state);
-          },
+          })));
+
+    case "removed-unfoundables":
+      return g.fold(self, event,
+        _.pipe(
+          removeCapulli(details.removed),
           markScoringRound));
 
     case "constructed-bridge":

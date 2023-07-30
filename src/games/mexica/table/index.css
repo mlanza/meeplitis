@@ -220,7 +220,7 @@
   height: var(--square-size);
   width: var(--square-size);
 }
-[data-piece="canal"] {
+#board [data-piece="canal"] {
   pointer-events: none;
 }
 #board [data-piece="bridge"] {
@@ -528,8 +528,7 @@ ol#demands li {
   font-size: .8em;
   text-shadow: 1px 1px 1px black;
 }
-#table #board [data-column],
-#table #board [data-row] {
+#table #board :is([data-column],[data-row]) {
   opacity: 0;
   transition: opacity 0.5s ease-in-out;
   pointer-events: none;
@@ -881,7 +880,7 @@ ol#demands li {
   pointer-events: none;
 }
 #table div[data-spot]:hover {
-  --z-index: 11;
+  z-index: 11;
 }
 body.anon img[data-nav="last-move"] {
   display: none;
@@ -2479,9 +2478,11 @@ body.anon img[data-nav="last-move"] {
   rotate: 90deg;
 }
 #table.act div[data-spot]:hover {
-    border-color: white;
-    cursor: pointer;
-    z-index: 50;
+  border-color: transparent;
+  z-index: 50;
+}
+#table.act div[data-spot]:is(#pilli,#bridge):hover {
+  cursor: pointer;
 }
 #table.act div[data-spot]:hover div.propose {
   visibility: visible;

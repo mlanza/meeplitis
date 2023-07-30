@@ -78,7 +78,7 @@ function token(){
 }
 
 function capulli({size}){
-  return img({src: `./images/c${size}.png`, "title": `capulli for district size ${size}`, "data-piece": "capulli", "data-size": size});
+  return img({src: `./images/c${size}.png`, "data-piece": "capulli", "data-size": size});
 }
 
 function demand(pos){
@@ -90,7 +90,7 @@ function at(spot){
 }
 
 function spot([spot, terrain]){
-  return div({"title": spot, "data-spot": spot, "data-terrain": terrain},
+  return div({"data-spot": spot, "data-terrain": terrain},
     div({class: "contents"}),
     div({class: "propose"}));
 }
@@ -372,7 +372,6 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
   }
 
   _.chain(moves, _.map(_.get(_, "type"), _), _.distinct, _.join(" ", _), dom.attr(el, "data-allow-commands", _));
-  _.maybe(moves, _.toArray, _.partial(log, "moves")); //debugging only
 
   _.each(dom.removeClass(_, "foundable"), dom.sel(".foundable", demands));
 
@@ -567,7 +566,7 @@ $.on(el, "animationend", "[data-piece]", function(e){
   if (e.animationName === "fade-out"){
     dom.omit(this);
   }
-})
+});
 
 $.on(el, "click", `#table.act[data-foundable]:not([data-command-type]) div[data-spot]`, function(e){
   const type  = "found-district",
@@ -580,10 +579,12 @@ $.on(el, "click", `#table.act[data-foundable]:not([data-command-type]) div[data-
 });
 
 $.on(el, "mouseover", `#table.act div[data-spot]`, function(e){ //workaround since layering prevents mouseover on contents
-  const bridge = dom.sel1(".contents > [data-piece='bridge']", this),
-        pilli  = dom.sel1(".contents > [data-piece='pilli']", this),
-        you    = _.maybe(pilli, dom.attr(_, "data-seat"), parseInt, _.eq(seat, _)),
-        what   = you ? "pilli" : bridge ? "bridge" : null;
+  const what = _.chain([
+      dom.sel1(`.contents > [data-piece='pilli'][data-seat='${seat}']`, this),
+      dom.sel1(".contents > [data-piece='bridge']", this)
+    ],
+    _.compact,
+    _.some(dom.attr(_, "data-piece"), _));
   moving(what, this);
 });
 

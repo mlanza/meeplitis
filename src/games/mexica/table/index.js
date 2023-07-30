@@ -283,10 +283,6 @@ function omit(el){
   el && dom.addClass(el, "gone");
 }
 
-function dropPriorOmissions(el){
-  _.each(dom.omit, dom.sel(".gone", el));
-}
-
 function reconcileTemples(seat, level){
   return function(curr, prior){
     _.each(function(n){
@@ -377,8 +373,6 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
 
   _.chain(moves, _.map(_.get(_, "type"), _), _.distinct, _.join(" ", _), dom.attr(el, "data-allow-commands", _));
   _.maybe(moves, _.toArray, _.partial(log, "moves")); //debugging only
-
-  dropPriorOmissions(el);
 
   _.each(dom.removeClass(_, "foundable"), dom.sel(".foundable", demands));
 
@@ -568,6 +562,12 @@ $.on(document.body, "keydown", function(e){
       break;
   }
 });
+
+$.on(el, "animationend", "[data-piece]", function(e){
+  if (e.animationName === "fade-out"){
+    dom.omit(this);
+  }
+})
 
 $.on(el, "click", `#table.act[data-foundable]:not([data-command-type]) div[data-spot]`, function(e){
   const type  = "found-district",

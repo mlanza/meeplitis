@@ -248,7 +248,6 @@
   border: solid 2px transparent;
   height: 26.55px;
   width: 26.5px;
-  z-index: 10;
   overflow: visible;
 }
 #table div[data-spot] .contents {
@@ -272,7 +271,6 @@
   width: var(--square-size);
   height: var(--square-size);
   border: solid 2px transparent;
-  z-index: 40;
 }
 #table div.temples,
 #table div.tokens {
@@ -756,51 +754,67 @@ ol#demands li {
   left: calc(var(--square-size) * 22 + var(--board-left-buffer));
 }
 #table div[data-spot$="0"] {
+  z-index: 10;
   top: calc(var(--square-size) * 0 + var(--board-top-buffer));
 }
 #table div[data-spot$="1"] {
+  z-index: 11;
   top: calc(var(--square-size) * 1 + var(--board-top-buffer));
 }
 #table div[data-spot$="2"] {
+  z-index: 12;
   top: calc(var(--square-size) * 2 + var(--board-top-buffer));
 }
 #table div[data-spot$="3"] {
+  z-index: 13;
   top: calc(var(--square-size) * 3 + var(--board-top-buffer));
 }
 #table div[data-spot$="4"] {
+  z-index: 14;
   top: calc(var(--square-size) * 4 + var(--board-top-buffer));
 }
 #table div[data-spot$="5"] {
+  z-index: 15;
   top: calc(var(--square-size) * 5 + var(--board-top-buffer));
 }
 #table div[data-spot$="6"] {
+  z-index: 16;
   top: calc(var(--square-size) * 6 + var(--board-top-buffer));
 }
 #table div[data-spot$="7"] {
+  z-index: 17;
   top: calc(var(--square-size) * 7 + var(--board-top-buffer));
 }
 #table div[data-spot$="8"] {
+  z-index: 18;
   top: calc(var(--square-size) * 8 + var(--board-top-buffer));
 }
 #table div[data-spot$="9"] {
+  z-index: 19;
   top: calc(var(--square-size) * 9 + var(--board-top-buffer));
 }
 #table div[data-spot$="10"] {
+  z-index: 20;
   top: calc(var(--square-size) * 10 + var(--board-top-buffer));
 }
 #table div[data-spot$="11"] {
+  z-index: 21;
   top: calc(var(--square-size) * 11 + var(--board-top-buffer));
 }
 #table div[data-spot$="12"] {
+  z-index: 22;
   top: calc(var(--square-size) * 12 + var(--board-top-buffer));
 }
 #table div[data-spot$="13"] {
+  z-index: 23;
   top: calc(var(--square-size) * 13 + var(--board-top-buffer));
 }
 #table div[data-spot$="14"] {
+  z-index: 24;
   top: calc(var(--square-size) * 14 + var(--board-top-buffer));
 }
 #table div[data-spot$="15"] {
+  z-index: 25;
   top: calc(var(--square-size) * 15 + var(--board-top-buffer));
 }
 #table div[data-terrain="-"],
@@ -878,9 +892,6 @@ ol#demands li {
 #table div[data-spot="U10"] {
   visibility: hidden;
   pointer-events: none;
-}
-#table div[data-spot]:hover {
-  z-index: 11;
 }
 body.anon img[data-nav="last-move"] {
   display: none;
@@ -2476,10 +2487,6 @@ body.anon img[data-nav="last-move"] {
 #table.act[data-command-vertical-spots~='J14'] div[data-spot='J14'] div.propose {
   background-image: url(./images/bridge.svg);
   rotate: 90deg;
-}
-#table.act div[data-spot]:hover {
-  border-color: transparent;
-  z-index: 50;
 }
 #table.act div[data-spot]:is(#pilli,#bridge):hover {
   cursor: pointer;

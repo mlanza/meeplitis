@@ -365,8 +365,8 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
   dom.attr(el, "data-status", status);
   dom.removeClass(el, "error");
 
-  if (present && which === 1) {
-    return workingCommand(wip, seat, state, game, el);
+  if (which === 1) {
+    return present ? workingCommand(wip, seat, state, game, el) : null;
   }
 
   _.chain(moves, _.map(_.get(_, "type"), _), _.distinct, _.join(" ", _), dom.attr(el, "data-allow-commands", _));

@@ -26,6 +26,8 @@ declare
   _seat_id varchar;
   _count int;
   _seq bigint;
+  _up smallint[];
+  _simulated jsonb;
 begin
 
   select seat_id
@@ -61,12 +63,24 @@ begin
   from deleted
   into _count;
 
+  if _verify = false then
+    select simulate(_table_id, _last_touch_id)
+    into _simulated;
+
+    select array_agg(value::smallint)::smallint[]
+    from jsonb_array_elements(_simulated->'up')
+    into _up;
+  end if;
+
   update tables
   set status = 'started',
       last_touch_id = _last_touch_id,
+      up = case when _verify = false then _up else up end,
       touched_at = now(),
       finished_at = null
   where id = _table_id;
+
+  raise log '$ chopped % at % to %, up %, verify %', _count, _table_id, _last_touch_id, _up, _verify;
 
   return _count;
 

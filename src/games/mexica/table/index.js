@@ -243,6 +243,12 @@ const log    = _.log,
       }),
       $both  = which($.latest([$hist, $wip]));
 
+$.sub($ready, function(ready){
+  if (!ready){ //upon issuing a move...
+    sh.dispatch($wip, null); //...clear any work in progress
+  }
+});
+
 $.sub($both, _.partial(log, "$both"));
 
 function template(seat){

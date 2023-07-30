@@ -23,9 +23,15 @@ create or replace function chop(_table_id varchar, _event_id varchar, _verify bo
 as $$
 declare
   _last_touch_id varchar;
+  _seat_id varchar;
   _count int;
   _seq bigint;
 begin
+
+  select seat_id
+  from events
+  where table_id = _table_id and id = _event_id
+  into _seat_id;
 
   select id, seq
   from events
@@ -34,6 +40,10 @@ begin
   order by seq desc
   limit 1
   into _last_touch_id, _seq;
+
+  if _seat_id is null then --skip past automatic events
+    return chop(_table_id, _last_touch_id, _verify);
+  end if;
 
   if _verify and exists(select *
     from events

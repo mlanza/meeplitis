@@ -260,7 +260,7 @@ body.anon img[data-nav="last-move"] {
 .message p {
   display: block;
   font-size: 1.2em;
-  max-width: 16em;
+  max-width: 15.9em;
 }
 .message.automatic p {
   max-width: initial;

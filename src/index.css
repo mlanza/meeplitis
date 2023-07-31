@@ -1,6 +1,8 @@
 @import url(/common.css);
 @import url(/fonts.css);
 @import url(/you.css);
+@import url(../../games/effects.css);
+
 body {
   margin: 0;
   padding: 0;
@@ -81,6 +83,22 @@ body.borderless-img .banner figure {
 body.home a#logo {
   display: none;
 }
+p > img {
+  height: 22px;
+  vertical-align: bottom;
+}
+p > img.pawn {
+  border-radius: 50%;
+  background-color: rgba(62, 80, 92, .3);
+}
+p > img.pawn.up {
+  animation-name: wobble;
+  animation-duration: .5s;
+  animation-fill-mode: both;
+  animation-iteration-count: infinite;
+  pointer-events: none;
+}
+
 article,
 section {
   padding: 0;

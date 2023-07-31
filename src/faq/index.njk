@@ -7,46 +7,47 @@ class: borderless-img
 post: |
   ## Is there a cost to use it?
 
-  No, but there are costs run it.  So some modest changes may come about.
+  No, but since there are costs run it, thought is being given to how to offset costs.
 
   ## What must I know about the user interface (ui) for playing a game?
 
-  *Read this while [looking at this example](/games/oh-hell/table/?id=RTyNYRoZY5X).*
+  The ui aims to be minimal.  At the top of [the screen](/games/oh-hell/table/?id=RTyNYRoZY5X) is a header bar.  It has the title of the game being played and potentially the phase of the game.  The pawn icon <img src="../images/pawn.svg" class="pawn"> in the rightmost position of the bar lights up whenever it's your turn.
 
-  The ui is minimalistic.  At the top of the screen is a header bar.  It has the title of the game you're playing, immediately followed by the current phase of the game.  This generally cues you about what you're to do. The pawn icon in the upper right corner lights up when it's your turn.
+  Hovering over the title of the game in the leftmost position of the bar reveals the configuration (some games have options) in a tooltip.  It was configured by the player who opened the table.
 
-  Each player is represented by a placard with their username and few other details about their status in the game.  The placard fades out a bit for any who are offline.
+  Each player seated at the table is represented by a placard with their username and few other details about their status.  The placard is slightly faded when a player is offline.
 
-  A lit up and wobbling pawn appears on the placards of those obligated to move.  A stationary and dim pawn appears on the placards of those who may revise their moves.  It's only possible to revise trival moves like blind bids.  Typical moves cannot be revised once committed.
+  The wobbling pawn <img src="../images/pawn.svg" class="pawn up"> appears on the placard of the player who is obligated to move.  Players making prompt moves is what keeps games moving along.
 
-  Job number one is to make timely moves and pass the pawn to the next player.
+  On your turn, issue moves using the interface.  Almost all actions are driven by clicks—and some actions, multiple clicks.  For example, “move this piece (click) from here to (click) there.”  Some moves are initiated by clicking pieces, some by clicking buttons.  Knowing the rules of the game, you'll have a sense of what you can do and what you might click to do that.
 
-  Each played game is a story told in frames.  As the story progresses, you will be told what just happened.  This is described in floating messages at the bottom of the screen.  You can click these to dismiss them if they get in your way.
+  A game plays out as a story told in frames.  As the story develops, messages at the bottom of the screen describe, in the active voice, what happened in the current frame.  (These messages can be dismissed with a click.)
 
-  These messages are written in active voice.  They tell you what happened, not what you must do.  You must interact with the interface to drive the story whenever it's your turn.
+  The buttons in the upper right allow you to navigate the timeline backward <img src="../images/back.png"> and forward <img src="../images/forward.png">, to jump to the start of the game <img src="../images/inception.png"> or to the last known move <img src="../images/present.png"> which is also known as “the present.”  Hovering over these buttons provides hints for how to navigate the timeline from the keyboard.
 
-  The navigation buttons in the upper right (or, alternately, the left and right arrow keys and shift key on your keyboard) allow you to step forwards and backwards along the timeline.  Immediately before these buttons is a progress bar followed by the current frame number and the total number of frames.  Progress is always in reference to the story thus far and the known timeline.  It is not an indicator of how close a game is until the end.
+  **You can only make moves from the present and only when you're up.**  To draw a clear delineation between present and past, mind the background.  The background in the present moment is distinctly different from the background of past frames in the timeline.
 
-  The ui provides visual cues as you navigate between the present and past.  There is a distinct look to the header bar and screen background when you're in the present moment of the game.  *You are only permitted to make moves from the present.*
+  The timeline bar <progress value="30" max="40"></progress> denotes your position in the known timeline, not how close you are to the end of the game.  If another player makes a move, you may momentarily fall from the present into the past.
 
-  Hovering over the title of the game reveals a tooltip for you to review its configuration.  This is the same configuration which will have been in place when you joined the table.
+  The numbers next to the timeline bar, e.g. <b>30 of 40</b> indicate what frame you are viewing (<b>30</b>) and the total number of frames so far (<b>40</b>).  The total will increase all the way through the conclusion of the game at which time an exclamation will follow final total.  For example, <b>216 of 216!</b> denotes the final frame of a game which concluded after 216 discrete frames.
+
+  You may sometimes wish to take back a move.  When permitted, click do over <img src="../images/do-over.png"> to discard a move you want to revise.
+
+  To conclude your turn and pass control to the next player click the “I'm done” button.
 
   ## What sets it apart from other play-by-web sites?
 
-  One of the biggest grievances I had playing games online is that while learning new games, I'd make a move only to discover—sometimes even after checking the rulebook—I'd misunderstood a rule, or the user interface.  What I had anticipated didn't unfold as expected.
+  **The timeline is easy to navigate.**  In addition to the buttons described above, you can click <img src="../images/last-move.png"> to jump to your last move and step forward and review what happened since then.  And once you learn the keys, it only gets easier.
 
-  This left me in precarious positions and occasionally ruined my hard-wrought plans.  The worst part is these mistakes wouldn't have occurred in the real world.  Someone would've stopped me when I attempted to do something impermissible, then I'd rewind and fix the move.
+  **Do overs are easy.**  Moves which should be easily reversible are easily reversible.  That's not to say all moves are reversible.  In general, what can be easily reversed in the real world can be easily reversed the digital realm.  This aims to keep rules and UI misunderstandings from forcing you to complete bad moves you accidentally started.
 
-  What these games lacked was a rewind.  Undo was implemented at the whim of the developer to varying degree if at all.
+  **The implementation framework necessitates retractibility.**  As such, a given game is not dependent on a developer deciding whether and how to handle it.  It's a prerequisite and it poses almost no cost to the developer.
 
-  The core framework for Your Move was designed around the concept of retractibility, that rewinding a move should be a simple thing and not a costly feat of the developer.  It follows the same principle of reversibility as the real world.  You can rewind as long as it's your turn and you haven't gained new information (drawn a card, rolled dice, etc.), just as we all occasionally do when seated around a table.
+  **The “I'm done” button provides a consistent means for finishing your turn.**  In many situations, it would be obvious when you're done, thus, the extra step adds nothing.  But in some situations, making a move reveals its effects.  By not assuming a player is finished, he may review the consequences and decide whether to commit or rewind.  Awaiting a firm confirmation decreases misteps.
 
-  The `I'm Done` button exists as a means to confirming moves.  In many situations, this extra step adds nothing.  But in some, it allows the move to reveal its effects and the player to assess them and then commit or rewind.  Therefore, while having to make a play and confirm it may seem like a nuisance, you're less likely to be trapped by misteps.
+  **Each supply pile presents its gerth visually.**  That is, in many user interfaces how much of a certain resource remains is conveyed soley by a number.  In the real world, say [Ticket to Ride](https://www.daysofwonder.com/tickettoride/), when you glance across the table at an opponent's train supply, you have an immediate sense of how much distance he has to cover based on the size of his pile.  Many online games abstract away the gerth of the pile.
 
-  Futhermore, since every game is a series of recorded actions taken by players or the game itself, one can navigate the timeline backwards and forwards.  Reviewing the past to see what's been done since your last move is within easy reach.
+  In [Mexica](/games/mexica), supplies are represented by both number and gerth.  Pile size is represented visually, at a glance, same as in the real world.
 
-  It's great feat, however, is how little the back end requires to implement a game.  Each is implemented as a *single, mostly-pure, JavaScript function in a Postgres database.*  This function, which initializes and reduces over game state, is created prior to the user interface.
-
-  Other than this function the server requires little else.  Eventually, creating the user interface will necessitate front-end client logic and assets like images, but you'd have expected that!
-
+  **A game can be practically implemented on the back end with single database function.**  The developer writes the back end (functional core) first then the front end (imperative shell).  The overarching design goal was to simplify how games are implemented.
 ---

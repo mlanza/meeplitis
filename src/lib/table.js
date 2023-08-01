@@ -160,16 +160,16 @@ export function ui($table, $story, $ready, $hist, $online, log, seated, seat, de
   });
 
   $.on(document.body, "keydown", function(e){
-    if (e.which === 32) { //space
+    if (e.key === ",") {
       e.preventDefault();
       replay("last-move");
-    } else if (e.key == "ArrowLeft") {
+    } else if (e.key === "ArrowLeft") {
       e.preventDefault();
       replay(e.shiftKey ? "inception" : "back");
-    } else if (e.key == "ArrowRight") {
+    } else if (e.key === "ArrowRight") {
       e.preventDefault();
       replay(e.shiftKey ? "present": "forward");
-    } else if (e.shiftKey && e.key == "Backspace") {
+    } else if (e.shiftKey && e.key === "Backspace") {
       e.preventDefault();
       replay("do-over");
     }

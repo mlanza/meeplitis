@@ -553,7 +553,7 @@ $.on(document.body, "keydown", function(e){
       sh.dispatch($wip, null);
       dom.removeClass(el, "error");
       break;
-    case " ":
+    case ".":
       sh.dispatch($story, {type: "pass"});
       break;
     case "Enter":

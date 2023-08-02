@@ -41,6 +41,7 @@ export function diff(curr, prior, path, f){
 
 export function ui($table, $story, $ready, $hist, $online, log, seated, seat, desc, template, el){
   const $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), _.compact()),
+        $started = $.map(_.pipe(_.get(_, "status"), _.eq(_, "started")), $table), //games can be abandoned
         $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table),
         $status = $.map(_.get(_, "status"), $table),
         $scored = $.map(_.get(_, "scored"), $table),
@@ -48,7 +49,7 @@ export function ui($table, $story, $ready, $hist, $online, log, seated, seat, de
         $present = $.map(_.all, $ready, $.pipe($story, _.map(function({touches, at}){
           return _.count(touches) - 1 == at;
         }), _.dedupe())),
-        $act = $.map(_.all, $present, $up, $ready);
+        $act = $.map(_.all, $present, $up, $ready, $started);
 
   let replays = 0;
 

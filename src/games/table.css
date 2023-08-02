@@ -73,8 +73,9 @@ body {
   opacity: 1;
   transition: opacity .25s;
 }
-#table[data-table-status='abandoned'] {
-  opacity: .7;
+#table[data-table-status='abandoned'],
+#table[data-table-status='locked'] {
+  opacity: .8;
 }
 #table.wait {
   cursor: wait;
@@ -303,7 +304,8 @@ body.anon img[data-nav="last-move"] {
   height: 14.5em;
   transition: height .5s;
 }
-#table[data-event-type="finished"] #game,
+#table[data-table-status="finished"] #game,
+#table[data-table-status="locked"] #game,
 #table[data-table-status="abandoned"] #game {
   background-color: rgba(116, 53, 59, .6);
 }

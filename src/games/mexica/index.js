@@ -43,7 +43,7 @@ const {data: [game]} = await supabase
 
 function getTables(game_id, statuses, sort, el, none){
   return supabase
-    .from('tables_with_placement')
+    .from('tables')
     .select(`
       *,
       status,
@@ -51,6 +51,7 @@ function getTables(game_id, statuses, sort, el, none){
         id,
         seat,
         joined_at,
+        place,
         player:player_id(
           id,
           username,

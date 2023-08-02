@@ -76,7 +76,7 @@ function avatar(player){
 //TODO extract user timezone adjustment
 export function table(item, now = new Date()){
   const seat = seated(item.seats);
-  const placement = item.placement || [];
+  const placement = item.seats.map(s => s.place);
   const link = item.status === "open" ? span : a;
   const age = _.maybe(item.touched_at, _.date, _.partial(fromUTCDate, now), dt => aged(dt, now));
   return div({

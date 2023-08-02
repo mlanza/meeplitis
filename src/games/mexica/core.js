@@ -196,6 +196,7 @@ const vertically = _.juxt(above, below);
 const horizontally = _.juxt(left, right);
 const stop = _.constantly([]);
 const palaceSpots = around(CENTER);
+const startCanalSpots = ["O6", "O7", "O8", "O9"];
 
 export const inlandSpots = _.remove(
   _.pipe(
@@ -232,6 +233,7 @@ export const distance = _.juxt(
 
 function sites(n){
   return _.chain(inlandSpots,
+    _.remove(_.includes(_.set(_.concat(startCanalSpots, palaceSpots)), _), _),
     _.shuffle,
     _.reduce(function({kept, dropped}, spot){
       const wants = !_.includes(dropped, spot),

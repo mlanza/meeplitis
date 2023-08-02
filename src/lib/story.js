@@ -34,17 +34,31 @@ export function getSeat(tableId, session){
   }), json) : Promise.resolve(null);
 }
 
-function getPerspective(tableId, session, eventId, seat){
+function getPerspective(tableId, session, eventId, seat, seatId){
   const qs = _.chain([
     `table_id=${tableId}`,
     eventId != null ? `event_id=${eventId}` : null,
     seat != null ? `seat=${seat}` : null
   ], _.compact, _.join("&", _));
-  return _.fmap(fetch(`https://perspective.workers.yourmove.cc?${qs}`, session ? {
+  const perspective = _.fmap(fetch(`https://perspective.workers.yourmove.cc?${qs}`, session ? {
     headers: {
       accessToken: session.accessToken
     }
   } : {}), json);
+  const last_move = getLastMove(tableId, eventId, seatId);
+  return Promise.all([perspective, last_move]).then(function([perspective, last_move]){
+    return Object.assign({}, perspective, last_move);
+  });
+}
+
+function getLastMove(tableId, eventId, seatId){
+  return supabase.rpc('last_move', {
+    _table_id: tableId,
+    _event_id: eventId,
+    _seat_id: seatId
+  }).then(function({error, data, status}){
+    return {last_move: data};
+  });
 }
 
 function move(_table_id, _seat, _commands, session){
@@ -151,10 +165,8 @@ export function waypoint(self, up, how){
       return null;
 
     case "last-move":
-      const {events} = _.nth(history, at);
-      return self.seat == null ? null : _.chain(events, _.take(at + 1, _), _.reverse, _.rest, _.detect(function({seat}){
-        return seat === self.seat;
-      }, _), _.get(_, "id"));
+      const {last_move} = _.nth(history, at);
+      return last_move;
 
     case "back":
       return _.nth(touches, _.clamp(at - 1, 0, _.count(touches) - 1));
@@ -233,7 +245,8 @@ export function inPast(self, touch){
 }
 
 export function nav(self, _at){
-  const {tableId, session, seat, $state} = self;
+  const {tableId, session, seat, seated, $state} = self;
+  const seatId = _.nth(seated, seat)?.seat_id;
   const {at, history, touches} = _.deref($state);
   const pos = _.isNumber(_at) ? _at : _.indexOf(touches, _at);
 
@@ -252,7 +265,7 @@ export function nav(self, _at){
     })), _.filter(function([offset, pos, touch, frame]){
       return touch && !frame;
     }, _), _.mapa(function([offset, pos, touch]){
-      return _.fmap(getPerspective(tableId, session, touch, seat), _.array(pos, _));
+      return _.fmap(getPerspective(tableId, session, touch, seat, seatId), _.array(pos, _));
     }, _), Promise.all.bind(Promise), _.fmap(_, function(results){
       _.swap($state, _.pipe(_.reduce(function(state, [pos, frame]){
         return _.update(state, "history", _.pipe(expand(pos), _.assoc(_, pos, frame)));

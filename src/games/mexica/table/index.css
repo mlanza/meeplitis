@@ -900,6 +900,39 @@ body.anon img[data-nav="last-move"] {
 #table #supplies {
   border-radius: 1.6em;
 }
+#table.act[data-command-type='build-temple'][data-command-size='1'] .zone.yours .area .temples[data-size='1']:not([data-remaining='0']) ol {
+  animation: heartbeat 1s infinite;
+}
+#table.act[data-command-type='build-temple'][data-command-size='2'] .zone.yours .area .temples[data-size='2']:not([data-remaining='0']) ol {
+  animation: heartbeat 1s infinite;
+}
+#table.act[data-command-type='build-temple'][data-command-size='3'] .zone.yours .area .temples[data-size='3']:not([data-remaining='0']) ol {
+  animation: heartbeat 1s infinite;
+}
+#table.act[data-command-type='build-temple'][data-command-size='4'] .zone.yours .area .temples[data-size='4']:not([data-remaining='0']) ol {
+  animation: heartbeat 1s infinite;
+}
+
+#table.act[data-command-type='place-pilli'][data-command-at~='H6'] div[data-spot='H6'] div.propose,
+#table.act[data-command-type='place-pilli'][data-command-at~='H8'] div[data-spot='H8'] div.propose,
+#table.act[data-command-type='place-pilli'][data-command-at~='I7'] div[data-spot='I7'] div.propose,
+#table.act[data-command-type='place-pilli'][data-command-at~='G7'] div[data-spot='G7'] div.propose {
+  background-image: url(./images/pilli.svg);
+  cursor: pointer;
+}
+#table.act[data-command-type="construct-canal"] div[data-spot][data-terrain="l"] div.propose {
+  background-image: url(./images/spot.svg);
+}
+#table.act[data-command-type='construct-canal'][data-command-size='1'] .canals[data-size='1'] ol {
+  animation: ping 2s infinite;
+}
+#table.act[data-command-type='construct-canal'][data-command-size='2'] .canals[data-size='2'] ol {
+  animation: ping 2s infinite;
+}
+#table.act[data-command-type='construct-bridge'] .bridges ol {
+  animation: ping 2s infinite;
+}
+/* generated start */
 #table.act:not([data-command-type])[data-found-at~='B1'] div[data-spot='B1']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='F1'] div[data-spot='F1']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='G1'] div[data-spot='G1']:hover div.propose,
@@ -971,6 +1004,7 @@ body.anon img[data-nav="last-move"] {
 #table.act:not([data-command-type])[data-found-at~='L6'] div[data-spot='L6']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='M6'] div[data-spot='M6']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='N6'] div[data-spot='N6']:hover div.propose,
+#table.act:not([data-command-type])[data-found-at~='O6'] div[data-spot='O6']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='P6'] div[data-spot='P6']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='Q6'] div[data-spot='Q6']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='R6'] div[data-spot='R6']:hover div.propose,
@@ -982,12 +1016,13 @@ body.anon img[data-nav="last-move"] {
 #table.act:not([data-command-type])[data-found-at~='E7'] div[data-spot='E7']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='F7'] div[data-spot='F7']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='G7'] div[data-spot='G7']:hover div.propose,
-#table.act:not([data-command-type])[data-found-at~='H7'] div[data-spot='H7']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='I7'] div[data-spot='I7']:hover div.propose,
+#table.act:not([data-command-type])[data-found-at~='J7'] div[data-spot='J7']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='K7'] div[data-spot='K7']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='L7'] div[data-spot='L7']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='M7'] div[data-spot='M7']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='N7'] div[data-spot='N7']:hover div.propose,
+#table.act:not([data-command-type])[data-found-at~='O7'] div[data-spot='O7']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='P7'] div[data-spot='P7']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='Q7'] div[data-spot='Q7']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='R7'] div[data-spot='R7']:hover div.propose,
@@ -1002,10 +1037,12 @@ body.anon img[data-nav="last-move"] {
 #table.act:not([data-command-type])[data-found-at~='G8'] div[data-spot='G8']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='H8'] div[data-spot='H8']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='I8'] div[data-spot='I8']:hover div.propose,
+#table.act:not([data-command-type])[data-found-at~='J8'] div[data-spot='J8']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='K8'] div[data-spot='K8']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='L8'] div[data-spot='L8']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='M8'] div[data-spot='M8']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='N8'] div[data-spot='N8']:hover div.propose,
+#table.act:not([data-command-type])[data-found-at~='O8'] div[data-spot='O8']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='P8'] div[data-spot='P8']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='Q8'] div[data-spot='Q8']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='R8'] div[data-spot='R8']:hover div.propose,
@@ -1024,6 +1061,7 @@ body.anon img[data-nav="last-move"] {
 #table.act:not([data-command-type])[data-found-at~='L9'] div[data-spot='L9']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='M9'] div[data-spot='M9']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='N9'] div[data-spot='N9']:hover div.propose,
+#table.act:not([data-command-type])[data-found-at~='O9'] div[data-spot='O9']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='P9'] div[data-spot='P9']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='Q9'] div[data-spot='Q9']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='R9'] div[data-spot='R9']:hover div.propose,
@@ -1092,18 +1130,7 @@ body.anon img[data-nav="last-move"] {
 #table.act:not([data-command-type])[data-found-at~='J14'] div[data-spot='J14']:hover div.propose {
   background-image: url(./images/capulli.png);
 }
-#table.act[data-command-type='build-temple'][data-command-size='1'] .zone.yours .area .temples[data-size='1']:not([data-remaining='0']) ol {
-  animation: heartbeat 1s infinite;
-}
-#table.act[data-command-type='build-temple'][data-command-size='2'] .zone.yours .area .temples[data-size='2']:not([data-remaining='0']) ol {
-  animation: heartbeat 1s infinite;
-}
-#table.act[data-command-type='build-temple'][data-command-size='3'] .zone.yours .area .temples[data-size='3']:not([data-remaining='0']) ol {
-  animation: heartbeat 1s infinite;
-}
-#table.act[data-command-type='build-temple'][data-command-size='4'] .zone.yours .area .temples[data-size='4']:not([data-remaining='0']) ol {
-  animation: heartbeat 1s infinite;
-}
+
 #table.act[data-command-type='move'][data-command-from][data-command-destinations~='B1'] div[data-spot='B1']:hover div.propose,
 #table.act[data-command-type='move'][data-command-from][data-command-destinations~='F1'] div[data-spot='F1']:hover div.propose,
 #table.act[data-command-type='move'][data-command-from][data-command-destinations~='G1'] div[data-spot='G1']:hover div.propose,
@@ -1302,6 +1329,7 @@ body.anon img[data-nav="last-move"] {
   background-image: url(./images/pilli.svg);
   animation: flare 1s infinite;
 }
+
 #table.act[data-command-type='move'][data-command-from][data-command-to~='B1'] div[data-spot='B1']:hover div.propose,
 #table.act[data-command-type='move'][data-command-from][data-command-to~='F1'] div[data-spot='F1']:hover div.propose,
 #table.act[data-command-type='move'][data-command-from][data-command-to~='G1'] div[data-spot='G1']:hover div.propose,
@@ -1385,7 +1413,6 @@ body.anon img[data-nav="last-move"] {
 #table.act[data-command-type='move'][data-command-from][data-command-to~='E7'] div[data-spot='E7']:hover div.propose,
 #table.act[data-command-type='move'][data-command-from][data-command-to~='F7'] div[data-spot='F7']:hover div.propose,
 #table.act[data-command-type='move'][data-command-from][data-command-to~='G7'] div[data-spot='G7']:hover div.propose,
-#table.act[data-command-type='move'][data-command-from][data-command-to~='H7'] div[data-spot='H7']:hover div.propose,
 #table.act[data-command-type='move'][data-command-from][data-command-to~='I7'] div[data-spot='I7']:hover div.propose,
 #table.act[data-command-type='move'][data-command-from][data-command-to~='J7'] div[data-spot='J7']:hover div.propose,
 #table.act[data-command-type='move'][data-command-from][data-command-to~='K7'] div[data-spot='K7']:hover div.propose,
@@ -1501,6 +1528,7 @@ body.anon img[data-nav="last-move"] {
   background-image: url(./images/pilli.svg);
   animation: none;
 }
+
 #table.act[data-command-type='move'][data-command-from='B1'] div[data-spot='B1'] svg[data-piece='pilli'],
 #table.act[data-command-type='move'][data-command-from='F1'] div[data-spot='F1'] svg[data-piece='pilli'],
 #table.act[data-command-type='move'][data-command-from='G1'] div[data-spot='G1'] svg[data-piece='pilli'],
@@ -1572,6 +1600,7 @@ body.anon img[data-nav="last-move"] {
 #table.act[data-command-type='move'][data-command-from='L6'] div[data-spot='L6'] svg[data-piece='pilli'],
 #table.act[data-command-type='move'][data-command-from='M6'] div[data-spot='M6'] svg[data-piece='pilli'],
 #table.act[data-command-type='move'][data-command-from='N6'] div[data-spot='N6'] svg[data-piece='pilli'],
+#table.act[data-command-type='move'][data-command-from='O6'] div[data-spot='O6'] svg[data-piece='pilli'],
 #table.act[data-command-type='move'][data-command-from='P6'] div[data-spot='P6'] svg[data-piece='pilli'],
 #table.act[data-command-type='move'][data-command-from='Q6'] div[data-spot='Q6'] svg[data-piece='pilli'],
 #table.act[data-command-type='move'][data-command-from='R6'] div[data-spot='R6'] svg[data-piece='pilli'],
@@ -1583,13 +1612,13 @@ body.anon img[data-nav="last-move"] {
 #table.act[data-command-type='move'][data-command-from='E7'] div[data-spot='E7'] svg[data-piece='pilli'],
 #table.act[data-command-type='move'][data-command-from='F7'] div[data-spot='F7'] svg[data-piece='pilli'],
 #table.act[data-command-type='move'][data-command-from='G7'] div[data-spot='G7'] svg[data-piece='pilli'],
-#table.act[data-command-type='move'][data-command-from='H7'] div[data-spot='H7'] svg[data-piece='pilli'],
 #table.act[data-command-type='move'][data-command-from='I7'] div[data-spot='I7'] svg[data-piece='pilli'],
 #table.act[data-command-type='move'][data-command-from='J7'] div[data-spot='J7'] svg[data-piece='pilli'],
 #table.act[data-command-type='move'][data-command-from='K7'] div[data-spot='K7'] svg[data-piece='pilli'],
 #table.act[data-command-type='move'][data-command-from='L7'] div[data-spot='L7'] svg[data-piece='pilli'],
 #table.act[data-command-type='move'][data-command-from='M7'] div[data-spot='M7'] svg[data-piece='pilli'],
 #table.act[data-command-type='move'][data-command-from='N7'] div[data-spot='N7'] svg[data-piece='pilli'],
+#table.act[data-command-type='move'][data-command-from='O7'] div[data-spot='O7'] svg[data-piece='pilli'],
 #table.act[data-command-type='move'][data-command-from='P7'] div[data-spot='P7'] svg[data-piece='pilli'],
 #table.act[data-command-type='move'][data-command-from='Q7'] div[data-spot='Q7'] svg[data-piece='pilli'],
 #table.act[data-command-type='move'][data-command-from='R7'] div[data-spot='R7'] svg[data-piece='pilli'],
@@ -1609,6 +1638,7 @@ body.anon img[data-nav="last-move"] {
 #table.act[data-command-type='move'][data-command-from='L8'] div[data-spot='L8'] svg[data-piece='pilli'],
 #table.act[data-command-type='move'][data-command-from='M8'] div[data-spot='M8'] svg[data-piece='pilli'],
 #table.act[data-command-type='move'][data-command-from='N8'] div[data-spot='N8'] svg[data-piece='pilli'],
+#table.act[data-command-type='move'][data-command-from='O8'] div[data-spot='O8'] svg[data-piece='pilli'],
 #table.act[data-command-type='move'][data-command-from='P8'] div[data-spot='P8'] svg[data-piece='pilli'],
 #table.act[data-command-type='move'][data-command-from='Q8'] div[data-spot='Q8'] svg[data-piece='pilli'],
 #table.act[data-command-type='move'][data-command-from='R8'] div[data-spot='R8'] svg[data-piece='pilli'],
@@ -1627,6 +1657,7 @@ body.anon img[data-nav="last-move"] {
 #table.act[data-command-type='move'][data-command-from='L9'] div[data-spot='L9'] svg[data-piece='pilli'],
 #table.act[data-command-type='move'][data-command-from='M9'] div[data-spot='M9'] svg[data-piece='pilli'],
 #table.act[data-command-type='move'][data-command-from='N9'] div[data-spot='N9'] svg[data-piece='pilli'],
+#table.act[data-command-type='move'][data-command-from='O9'] div[data-spot='O9'] svg[data-piece='pilli'],
 #table.act[data-command-type='move'][data-command-from='P9'] div[data-spot='P9'] svg[data-piece='pilli'],
 #table.act[data-command-type='move'][data-command-from='Q9'] div[data-spot='Q9'] svg[data-piece='pilli'],
 #table.act[data-command-type='move'][data-command-from='R9'] div[data-spot='R9'] svg[data-piece='pilli'],
@@ -1695,6 +1726,7 @@ body.anon img[data-nav="last-move"] {
 #table.act[data-command-type='move'][data-command-from='J14'] div[data-spot='J14'] svg[data-piece='pilli'] {
   animation: heartbeat 1s infinite;
 }
+
 #table.act[data-command-type='relocate-bridge'][data-command-from='B1'] div[data-spot='B1'] img[data-piece='bridge'],
 #table.act[data-command-type='relocate-bridge'][data-command-from='F1'] div[data-spot='F1'] img[data-piece='bridge'],
 #table.act[data-command-type='relocate-bridge'][data-command-from='G1'] div[data-spot='G1'] img[data-piece='bridge'],
@@ -1892,22 +1924,7 @@ body.anon img[data-nav="last-move"] {
 #table.act[data-command-type='relocate-bridge'][data-command-from='J14'] div[data-spot='J14'] img[data-piece='bridge'] {
   animation: heartbeat 1s infinite;
 }
-#table.act[data-command-type='place-pilli'][data-command-at~='H6'] div[data-spot='H6'] div.propose,
-#table.act[data-command-type='place-pilli'][data-command-at~='H8'] div[data-spot='H8'] div.propose,
-#table.act[data-command-type='place-pilli'][data-command-at~='I7'] div[data-spot='I7'] div.propose,
-#table.act[data-command-type='place-pilli'][data-command-at~='G7'] div[data-spot='G7'] div.propose {
-  background-image: url(./images/pilli.svg);
-  cursor: pointer;
-}
-#table.act[data-command-type="construct-canal"] div[data-spot][data-terrain="l"] div.propose {
-  background-image: url(./images/spot.svg);
-}
-#table.act[data-command-type='construct-canal'][data-command-size='1'] .canals[data-size='1'] ol {
-  animation: ping 2s infinite;
-}
-#table.act[data-command-type='construct-canal'][data-command-size='2'] .canals[data-size='2'] ol {
-  animation: ping 2s infinite;
-}
+
 #table.act[data-command-type='construct-canal'][data-command-at~='B1'] div[data-spot='B1'] div.propose,
 #table.act[data-command-type='construct-canal'][data-command-at~='F1'] div[data-spot='F1'] div.propose,
 #table.act[data-command-type='construct-canal'][data-command-at~='G1'] div[data-spot='G1'] div.propose,
@@ -1979,6 +1996,7 @@ body.anon img[data-nav="last-move"] {
 #table.act[data-command-type='construct-canal'][data-command-at~='L6'] div[data-spot='L6'] div.propose,
 #table.act[data-command-type='construct-canal'][data-command-at~='M6'] div[data-spot='M6'] div.propose,
 #table.act[data-command-type='construct-canal'][data-command-at~='N6'] div[data-spot='N6'] div.propose,
+#table.act[data-command-type='construct-canal'][data-command-at~='O6'] div[data-spot='O6'] div.propose,
 #table.act[data-command-type='construct-canal'][data-command-at~='P6'] div[data-spot='P6'] div.propose,
 #table.act[data-command-type='construct-canal'][data-command-at~='Q6'] div[data-spot='Q6'] div.propose,
 #table.act[data-command-type='construct-canal'][data-command-at~='R6'] div[data-spot='R6'] div.propose,
@@ -1990,13 +2008,13 @@ body.anon img[data-nav="last-move"] {
 #table.act[data-command-type='construct-canal'][data-command-at~='E7'] div[data-spot='E7'] div.propose,
 #table.act[data-command-type='construct-canal'][data-command-at~='F7'] div[data-spot='F7'] div.propose,
 #table.act[data-command-type='construct-canal'][data-command-at~='G7'] div[data-spot='G7'] div.propose,
-#table.act[data-command-type='construct-canal'][data-command-at~='H7'] div[data-spot='H7'] div.propose,
 #table.act[data-command-type='construct-canal'][data-command-at~='I7'] div[data-spot='I7'] div.propose,
 #table.act[data-command-type='construct-canal'][data-command-at~='J7'] div[data-spot='J7'] div.propose,
 #table.act[data-command-type='construct-canal'][data-command-at~='K7'] div[data-spot='K7'] div.propose,
 #table.act[data-command-type='construct-canal'][data-command-at~='L7'] div[data-spot='L7'] div.propose,
 #table.act[data-command-type='construct-canal'][data-command-at~='M7'] div[data-spot='M7'] div.propose,
 #table.act[data-command-type='construct-canal'][data-command-at~='N7'] div[data-spot='N7'] div.propose,
+#table.act[data-command-type='construct-canal'][data-command-at~='O7'] div[data-spot='O7'] div.propose,
 #table.act[data-command-type='construct-canal'][data-command-at~='P7'] div[data-spot='P7'] div.propose,
 #table.act[data-command-type='construct-canal'][data-command-at~='Q7'] div[data-spot='Q7'] div.propose,
 #table.act[data-command-type='construct-canal'][data-command-at~='R7'] div[data-spot='R7'] div.propose,
@@ -2016,6 +2034,7 @@ body.anon img[data-nav="last-move"] {
 #table.act[data-command-type='construct-canal'][data-command-at~='L8'] div[data-spot='L8'] div.propose,
 #table.act[data-command-type='construct-canal'][data-command-at~='M8'] div[data-spot='M8'] div.propose,
 #table.act[data-command-type='construct-canal'][data-command-at~='N8'] div[data-spot='N8'] div.propose,
+#table.act[data-command-type='construct-canal'][data-command-at~='O8'] div[data-spot='O8'] div.propose,
 #table.act[data-command-type='construct-canal'][data-command-at~='P8'] div[data-spot='P8'] div.propose,
 #table.act[data-command-type='construct-canal'][data-command-at~='Q8'] div[data-spot='Q8'] div.propose,
 #table.act[data-command-type='construct-canal'][data-command-at~='R8'] div[data-spot='R8'] div.propose,
@@ -2034,6 +2053,7 @@ body.anon img[data-nav="last-move"] {
 #table.act[data-command-type='construct-canal'][data-command-at~='L9'] div[data-spot='L9'] div.propose,
 #table.act[data-command-type='construct-canal'][data-command-at~='M9'] div[data-spot='M9'] div.propose,
 #table.act[data-command-type='construct-canal'][data-command-at~='N9'] div[data-spot='N9'] div.propose,
+#table.act[data-command-type='construct-canal'][data-command-at~='O9'] div[data-spot='O9'] div.propose,
 #table.act[data-command-type='construct-canal'][data-command-at~='P9'] div[data-spot='P9'] div.propose,
 #table.act[data-command-type='construct-canal'][data-command-at~='Q9'] div[data-spot='Q9'] div.propose,
 #table.act[data-command-type='construct-canal'][data-command-at~='R9'] div[data-spot='R9'] div.propose,
@@ -2103,9 +2123,7 @@ body.anon img[data-nav="last-move"] {
   visibility: visible;
   background-image: url(./images/spot.svg);
 }
-#table.act[data-command-type='construct-bridge'] .bridges ol {
-  animation: ping 2s infinite;
-}
+
 #table.act[data-command-horizontal-spots~='B1'] div[data-spot='B1'] div.propose,
 #table.act[data-command-horizontal-spots~='F1'] div[data-spot='F1'] div.propose,
 #table.act[data-command-horizontal-spots~='G1'] div[data-spot='G1'] div.propose,
@@ -2189,7 +2207,6 @@ body.anon img[data-nav="last-move"] {
 #table.act[data-command-horizontal-spots~='E7'] div[data-spot='E7'] div.propose,
 #table.act[data-command-horizontal-spots~='F7'] div[data-spot='F7'] div.propose,
 #table.act[data-command-horizontal-spots~='G7'] div[data-spot='G7'] div.propose,
-#table.act[data-command-horizontal-spots~='H7'] div[data-spot='H7'] div.propose,
 #table.act[data-command-horizontal-spots~='I7'] div[data-spot='I7'] div.propose,
 #table.act[data-command-horizontal-spots~='J7'] div[data-spot='J7'] div.propose,
 #table.act[data-command-horizontal-spots~='K7'] div[data-spot='K7'] div.propose,
@@ -2304,6 +2321,7 @@ body.anon img[data-nav="last-move"] {
 #table.act[data-command-horizontal-spots~='J14'] div[data-spot='J14'] div.propose {
   background-image: url(./images/bridge.svg);
 }
+
 #table.act[data-command-vertical-spots~='B1'] div[data-spot='B1'] div.propose,
 #table.act[data-command-vertical-spots~='F1'] div[data-spot='F1'] div.propose,
 #table.act[data-command-vertical-spots~='G1'] div[data-spot='G1'] div.propose,
@@ -2375,6 +2393,7 @@ body.anon img[data-nav="last-move"] {
 #table.act[data-command-vertical-spots~='L6'] div[data-spot='L6'] div.propose,
 #table.act[data-command-vertical-spots~='M6'] div[data-spot='M6'] div.propose,
 #table.act[data-command-vertical-spots~='N6'] div[data-spot='N6'] div.propose,
+#table.act[data-command-vertical-spots~='O6'] div[data-spot='O6'] div.propose,
 #table.act[data-command-vertical-spots~='P6'] div[data-spot='P6'] div.propose,
 #table.act[data-command-vertical-spots~='Q6'] div[data-spot='Q6'] div.propose,
 #table.act[data-command-vertical-spots~='R6'] div[data-spot='R6'] div.propose,
@@ -2386,13 +2405,13 @@ body.anon img[data-nav="last-move"] {
 #table.act[data-command-vertical-spots~='E7'] div[data-spot='E7'] div.propose,
 #table.act[data-command-vertical-spots~='F7'] div[data-spot='F7'] div.propose,
 #table.act[data-command-vertical-spots~='G7'] div[data-spot='G7'] div.propose,
-#table.act[data-command-vertical-spots~='H7'] div[data-spot='H7'] div.propose,
 #table.act[data-command-vertical-spots~='I7'] div[data-spot='I7'] div.propose,
 #table.act[data-command-vertical-spots~='J7'] div[data-spot='J7'] div.propose,
 #table.act[data-command-vertical-spots~='K7'] div[data-spot='K7'] div.propose,
 #table.act[data-command-vertical-spots~='L7'] div[data-spot='L7'] div.propose,
 #table.act[data-command-vertical-spots~='M7'] div[data-spot='M7'] div.propose,
 #table.act[data-command-vertical-spots~='N7'] div[data-spot='N7'] div.propose,
+#table.act[data-command-vertical-spots~='O7'] div[data-spot='O7'] div.propose,
 #table.act[data-command-vertical-spots~='P7'] div[data-spot='P7'] div.propose,
 #table.act[data-command-vertical-spots~='Q7'] div[data-spot='Q7'] div.propose,
 #table.act[data-command-vertical-spots~='R7'] div[data-spot='R7'] div.propose,
@@ -2412,6 +2431,7 @@ body.anon img[data-nav="last-move"] {
 #table.act[data-command-vertical-spots~='L8'] div[data-spot='L8'] div.propose,
 #table.act[data-command-vertical-spots~='M8'] div[data-spot='M8'] div.propose,
 #table.act[data-command-vertical-spots~='N8'] div[data-spot='N8'] div.propose,
+#table.act[data-command-vertical-spots~='O8'] div[data-spot='O8'] div.propose,
 #table.act[data-command-vertical-spots~='P8'] div[data-spot='P8'] div.propose,
 #table.act[data-command-vertical-spots~='Q8'] div[data-spot='Q8'] div.propose,
 #table.act[data-command-vertical-spots~='R8'] div[data-spot='R8'] div.propose,
@@ -2430,6 +2450,7 @@ body.anon img[data-nav="last-move"] {
 #table.act[data-command-vertical-spots~='L9'] div[data-spot='L9'] div.propose,
 #table.act[data-command-vertical-spots~='M9'] div[data-spot='M9'] div.propose,
 #table.act[data-command-vertical-spots~='N9'] div[data-spot='N9'] div.propose,
+#table.act[data-command-vertical-spots~='O9'] div[data-spot='O9'] div.propose,
 #table.act[data-command-vertical-spots~='P9'] div[data-spot='P9'] div.propose,
 #table.act[data-command-vertical-spots~='Q9'] div[data-spot='Q9'] div.propose,
 #table.act[data-command-vertical-spots~='R9'] div[data-spot='R9'] div.propose,
@@ -2499,6 +2520,7 @@ body.anon img[data-nav="last-move"] {
   background-image: url(./images/bridge.svg);
   rotate: 90deg;
 }
+/* generated end */
 #table.act[data-status='actions'] div[data-spot]:is(#pilli,#bridge):hover {
   cursor: pointer;
 }

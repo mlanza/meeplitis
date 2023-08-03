@@ -391,10 +391,10 @@
 #table div[data-remaining="35"] li:nth-child(n+36) {
   display: none;
 }
-#table.present #supplies > div:not([data-remaining='0']) ol,
-#table.present .zone.yours .area div.temples:not([data-remaining='0']) ol,
-#table.present div[data-remaining] li:not([style*="display: none"]):last-child svg:hover,
-#table.present div[data-remaining] li:last-child svg:hover {
+#table.present[data-status='actions'] #supplies > div:not([data-remaining='0']) ol,
+#table.present[data-status='actions'] .zone.yours .area div.temples:not([data-remaining='0']) ol,
+#table.present[data-status='actions'] div[data-remaining] li:not([style*="display: none"]):last-child svg:hover,
+#table.present[data-status='actions'] div[data-remaining] li:last-child svg:hover {
     cursor: pointer;
     opacity: 1;
 }
@@ -1887,6 +1887,7 @@ body.anon img[data-nav="last-move"] {
 #table.act[data-command-type='place-pilli'][data-command-at~='I7'] div[data-spot='I7'] div.propose,
 #table.act[data-command-type='place-pilli'][data-command-at~='G7'] div[data-spot='G7'] div.propose {
   background-image: url(./images/pilli.svg);
+  cursor: pointer;
 }
 #table.act[data-command-type="construct-canal"] div[data-spot][data-terrain="l"] div.propose {
   background-image: url(./images/spot.svg);
@@ -2488,7 +2489,7 @@ body.anon img[data-nav="last-move"] {
   background-image: url(./images/bridge.svg);
   rotate: 90deg;
 }
-#table.act div[data-spot]:is(#pilli,#bridge):hover {
+#table.act[data-status='actions'] div[data-spot]:is(#pilli,#bridge):hover {
   cursor: pointer;
 }
 #table.act div[data-spot]:hover div.propose {

@@ -602,39 +602,39 @@ $.on(el, "click", `#table.act[data-command-type="move"][data-command-from] div[d
   }
 });
 
-$.on(el, "click", `#table.act div#pilli[data-spot]`, function(e){
+$.on(el, "click", `#table.act[data-status='actions'] div#pilli[data-spot]`, function(e){
   const type = "move",
         from = closestAttr(this, "data-spot");
   sh.dispatch($wip, {type, details: {from}});
 });
 
-$.on(el, "click", `#table.act .zone.yours .area div.temples:not([data-remaining="0"])`, function(e){
+$.on(el, "click", `#table.act[data-status='actions'] .zone.yours .area div.temples:not([data-remaining="0"])`, function(e){
   const type = "build-temple",
         size = parseInt(closestAttr(this, "data-size"));
   sh.dispatch($wip, {type, details: {size}});
 });
 
-$.on(el, "click", `#table.act[data-command-type="build-temple"] div[data-spot]`, function(e){
+$.on(el, "click", `#table.act[data-status='actions'][data-command-type="build-temple"] div[data-spot]`, function(e){
   const type = "build-temple",
         at   = closestAttr(this, "data-spot"),
         level = parseInt(closestAttr(this, "data-command-size"));
   sh.dispatch($story, {type, details: {level, at}});
 });
 
-$.on(el, "click", `#table.act[data-command-type="relocate-bridge"][data-command-from] div[data-spot]`, function(e){
+$.on(el, "click", `#table.act[data-status='actions'][data-command-type="relocate-bridge"][data-command-from] div[data-spot]`, function(e){
   const type = "relocate-bridge",
         from = closestAttr(this, "data-command-from"),
         to   = closestAttr(this, "data-spot");
   sh.dispatch($story, {type, details: {from, to}});
 });
 
-$.on(el, "click", `#table.act:not([data-command-type="move"]) div#bridge[data-spot]`, function(e){
+$.on(el, "click", `#table.act[data-status='actions']:not([data-command-type="move"]) div#bridge[data-spot]`, function(e){
   const type = "relocate-bridge",
         from = closestAttr(this, "data-spot");
   sh.dispatch($wip, {type, details: {from}});
 });
 
-$.on(el, "click", `#table.act[data-command-type="place-pilli"][data-command-at~="H6"] div[data-spot="H6"] div.propose, #table.act[data-command-type="place-pilli"][data-command-at~="H8"] div[data-spot="H8"] div.propose, #table.act[data-command-type="place-pilli"][data-command-at~="I7"] div[data-spot="I7"] div.propose, #table.act[data-command-type="place-pilli"][data-command-at~="G7"] div[data-spot="G7"] div.propose`, function(e){
+$.on(el, "click", `#table.act[data-status='placing-pilli'][data-command-type="place-pilli"][data-command-at~="H6"] div[data-spot="H6"] div.propose, #table.act[data-command-type="place-pilli"][data-command-at~="H8"] div[data-spot="H8"] div.propose, #table.act[data-command-type="place-pilli"][data-command-at~="I7"] div[data-spot="I7"] div.propose, #table.act[data-command-type="place-pilli"][data-command-at~="G7"] div[data-spot="G7"] div.propose`, function(e){
   const type = "place-pilli",
         at = closestAttr(this, "data-spot");
   sh.dispatch($story, {type, details: {at}});
@@ -645,27 +645,27 @@ $.on(el, "click", `#table.act .moves button[data-type="commit"], #table.act .mov
   sh.dispatch($story, {type});
 });
 
-$.on(el, "click", `#table.act #supplies div.tokens`, function(e){
+$.on(el, "click", `#table.act[data-status='actions'] #supplies div.tokens`, function(e){
   sh.dispatch($story, {type: "bank"});
 });
 
-$.on(el, "click", `#table.act[data-command-type="construct-bridge"] div[data-spot]`, function(e){
+$.on(el, "click", `#table.act[data-status='actions'][data-command-type="construct-bridge"] div[data-spot]`, function(e){
   const type = "construct-bridge",
         at   = closestAttr(this, "data-spot");
   sh.dispatch($story, {type, details: {at}});
 });
 
-$.on(el, "click", `#table.act #supplies div.bridges`, function(e){
+$.on(el, "click", `#table.act[data-status='actions'] #supplies div.bridges`, function(e){
   sh.dispatch($wip, {type: "construct-bridge"});
 });
 
-$.on(el, "click", `#table.act[data-command-type="construct-canal"][data-command-size="1"] div[data-spot]`, function(e){
+$.on(el, "click", `#table.act[data-status='actions'][data-command-type="construct-canal"][data-command-size="1"] div[data-spot]`, function(e){
   const type = "construct-canal",
         at   = closestAttr(this, "data-spot");
   sh.dispatch($story, {type, details: {at: [at]}});
 });
 
-$.on(el, "click", `#table.act[data-command-type="construct-canal"][data-command-size="2"] div[data-spot]`, function(e){
+$.on(el, "click", `#table.act[data-status='actions'][data-command-type="construct-canal"][data-command-size="2"] div[data-spot]`, function(e){
   const type = "construct-canal",
         at   = _.distinct(_.compact([closestAttr(this, "data-command-at"), closestAttr(this, "data-spot")])),
         size = parseInt(closestAttr(this, "data-command-size"));
@@ -676,7 +676,7 @@ $.on(el, "click", `#table.act[data-command-type="construct-canal"][data-command-
   }
 });
 
-$.on(el, "click", `#table.act #supplies div.canals`, function(e){
+$.on(el, "click", `#table.act[data-status='actions'] #supplies div.canals`, function(e){
   const type = "construct-canal",
         size = parseInt(closestAttr(this, "data-size"));
   sh.dispatch($wip, {type, details: {size}});

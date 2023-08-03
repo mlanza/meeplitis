@@ -47,11 +47,16 @@ begin
     return chop(_table_id, _last_touch_id, _verify);
   end if;
 
-  if _verify and exists(select *
-    from events
-    where table_id = _table_id
-    and seq > _seq
-    and undoable = false) then
+  if _verify and (
+    exists(select 1
+      from events
+      where table_id = _table_id
+      and seq > _seq
+      and undoable = false) or
+    exists(select 1
+      from tables
+      where id = _table_id
+      and status <> 'started')) then
       raise '$ cannot undo %#%', _table_id, _event_id;
   end if;
 

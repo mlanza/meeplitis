@@ -10,6 +10,7 @@ function template(subject, body){
     <style type="text/css">
       @import url(https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&family=Racing+Sans+One&family=Viga&family=Anonymous+Pro&display=swap);
       h1 {
+        font-style: italic;
         font-family: "Racing Sans One", "Arial Black", Impact;
       }
       p {

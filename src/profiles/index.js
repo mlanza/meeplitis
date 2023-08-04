@@ -66,7 +66,7 @@ function getTables(statuses, ops, el, none){
 function refreshTables(){
   getTables(
     ["open", "started"],
-    _.sort(_.asc(_.get(_, "status")), _.desc(_.get(_, "touched_at")), _.desc(_.get(_, "started_at")), _.desc(_.get(_, "created_at")), _),
+    _.sort(_.desc(_.get(_, "status")), _.desc(_.get(_, "touched_at")), _.desc(_.get(_, "started_at")), _.desc(_.get(_, "created_at")), _),
     dom.sel1(".unfinished-tables > p"),
     "None open or started");
   getTables(

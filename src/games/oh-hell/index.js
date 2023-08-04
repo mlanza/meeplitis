@@ -44,7 +44,7 @@ const {data: [game]} = await supabase
     thumbnail_url`)
   .eq('id', game_id);
 
-function getTables(game_id, statuses, sort, el, none){
+function getTables(game_id, statuses, ops, el, none){
   return supabase
     .from('tables')
     .select(`
@@ -75,7 +75,7 @@ function getTables(game_id, statuses, sort, el, none){
       return data;
     })
     .then(_.see("tables"))
-    .then(_.sort(sort, _))
+    .then(ops)
     .then(_.map(table, _))
     .then(_.seq)
     .then(_.either(_, none))
@@ -83,8 +83,16 @@ function getTables(game_id, statuses, sort, el, none){
 }
 
 async function refreshTables(){
-  getTables(game_id, ["open", "started"], _.asc(_.get(_, "status")), dom.sel1(".unfinished-tables > p"), "None open or started");
-  getTables(game_id, ["finished"], _.asc(_.get(_, "status")), dom.sel1(".finished-tables > p"), "None finished");
+  getTables(game_id,
+    ["open", "started"],
+    _.sort(_.asc(_.get(_, "status")), _.desc(_.get(_, "touched_at")), _.desc(_.get(_, "started_at")), _.desc(_.get(_, "created_at")), _),
+    dom.sel1(".unfinished-tables > p"),
+    "None open or started");
+  getTables(game_id,
+    ["finished"],
+    _.sort(_.desc(_.get(_, "finished_at")), _),
+    dom.sel1(".finished-tables > p"),
+    "None finished");
 
 }
 

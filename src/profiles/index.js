@@ -22,7 +22,7 @@ _.chain(profile.headline || "Mysteriously quiet", dom.text(dom.sel1(".banner .he
 _.chain(profile.description || "Has not shared any details.", dom.html(dom.sel1(".about > p"), _));
 _.chain(profile.avatar_url, _.str(_, "?s=200"), dom.attr(dom.sel1(".banner img"), "src", _));
 
-function getTables(statuses, sort, el, none){
+function getTables(statuses, ops, el, none){
   return supabase
     .from("tables")
     .select(`
@@ -56,7 +56,7 @@ function getTables(statuses, sort, el, none){
       return data;
     })
     .then(_.see("tables"))
-    .then(_.sort(sort, _))
+    .then(ops)
     .then(_.map(table, _))
     .then(_.seq)
     .then(_.either(_, none))
@@ -64,8 +64,16 @@ function getTables(statuses, sort, el, none){
   }
 
 function refreshTables(){
-  getTables(["open", "started"], _.desc(_.get(_, "status")), dom.sel1(".unfinished-tables > p"), "None open or started");
-  getTables(["finished"], _.desc(_.get(_, "status")), dom.sel1(".finished-tables > p"), "None finished");
+  getTables(
+    ["open", "started"],
+    _.sort(_.asc(_.get(_, "status")), _.desc(_.get(_, "touched_at")), _.desc(_.get(_, "started_at")), _.desc(_.get(_, "created_at")), _),
+    dom.sel1(".unfinished-tables > p"),
+    "None open or started");
+  getTables(
+    ["finished"],
+    _.sort(_.desc(_.get(_, "finished_at")), _),
+    dom.sel1(".finished-tables > p"),
+    "None finished");
 }
 
 refreshTables();

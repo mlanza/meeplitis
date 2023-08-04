@@ -70,7 +70,7 @@ end if;
 
 return query
 insert into events (table_id, type, details, undoable, seat_id)
-select s.table_id, e.type, e.details, e.undoable, s.id as seat_id
+select _table_id, e.type, e.details, e.undoable, s.id as seat_id
 from addable_events(_simulated->'added') e
 left join seats s on s.table_id = _table_id and s.seat = e.seat
 returning events.id, events.table_id, events.type, events.seat_id;

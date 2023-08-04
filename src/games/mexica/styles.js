@@ -42,16 +42,6 @@ style(c.viableSpots, spot => `#table.act[data-command-vertical-spots~='${spot}']
   background-image: url(./images/bridge.svg);
   rotate: 90deg;
 `);
-
-
-
-
-
-
-
-
-
-
-
-
-
+style(c.viableSpots, spot => `#table.act:not([data-command-type]):is([data-pilli-at='${spot}'],[data-bridges-at~='${spot}']) div[data-spot='${spot}']:hover div.propose`, `
+  cursor: pointer;
+`);

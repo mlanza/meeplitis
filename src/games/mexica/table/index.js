@@ -413,6 +413,9 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
   retainAttr(el, "data-foundable", foundable);
   _.chain(foundables, _.map(_.getIn(_, ["details", "at"]), _), _.seq, _.join(" ", _), _.blot, retainAttr(el, "data-found-at", _));
 
+  _.chain(bridges, _.compact, _.join(" ", _), dom.attr(el, "data-bridges-at", _));
+  _.chain(state, _.getIn(_, ["seated", seat, "pilli"]), dom.attr(el, "data-pilli-at", _));
+
   diff(curr, prior, ["state", "canal2"], function(curr, prior){
     _.each(function(n){
       diff(curr, prior, [n], function(curr, prior){
@@ -578,16 +581,6 @@ $.on(el, "click", `#table.act[data-foundable]:not([data-command-type]) div[data-
   }
 });
 
-$.on(el, "mouseover", `#table.act div[data-spot]`, function(e){ //workaround since layering prevents mouseover on contents
-  const what = _.chain([
-      dom.sel1(`.contents > [data-piece='pilli'][data-seat='${seat}']`, this),
-      dom.sel1(".contents > [data-piece='bridge']", this)
-    ],
-    _.compact,
-    _.some(dom.attr(_, "data-piece"), _));
-  moving(what, this);
-});
-
 $.on(el, "click", `#table.act[data-command-type="move"][data-command-from] div[data-spot]`, function(e){
   const type = "move",
         from = closestAttr(this, "data-command-from"),
@@ -600,12 +593,6 @@ $.on(el, "click", `#table.act[data-command-type="move"][data-command-from] div[d
   if (move) {
     sh.dispatch($story, move);
   }
-});
-
-$.on(el, "click", `#table.act[data-status='actions'] div#pilli[data-spot]`, function(e){
-  const type = "move",
-        from = closestAttr(this, "data-spot");
-  sh.dispatch($wip, {type, details: {from}});
 });
 
 $.on(el, "click", `#table.act[data-status='actions'] .zone.yours .area div.temples:not([data-remaining="0"])`, function(e){
@@ -626,12 +613,6 @@ $.on(el, "click", `#table.act[data-status='actions'][data-command-type="relocate
         from = closestAttr(this, "data-command-from"),
         to   = closestAttr(this, "data-spot");
   sh.dispatch($story, {type, details: {from, to}});
-});
-
-$.on(el, "click", `#table.act[data-status='actions']:not([data-command-type="move"]) div#bridge[data-spot]`, function(e){
-  const type = "relocate-bridge",
-        from = closestAttr(this, "data-spot");
-  sh.dispatch($wip, {type, details: {from}});
 });
 
 $.on(el, "click", `#table.act[data-status='placing-pilli'][data-command-type="place-pilli"][data-command-at~="H6"] div[data-spot="H6"] div.propose, #table.act[data-command-type="place-pilli"][data-command-at~="H8"] div[data-spot="H8"] div.propose, #table.act[data-command-type="place-pilli"][data-command-at~="I7"] div[data-spot="I7"] div.propose, #table.act[data-command-type="place-pilli"][data-command-at~="G7"] div[data-spot="G7"] div.propose`, function(e){
@@ -680,6 +661,32 @@ $.on(el, "click", `#table.act[data-status='actions'] #supplies div.canals`, func
   const type = "construct-canal",
         size = parseInt(closestAttr(this, "data-size"));
   sh.dispatch($wip, {type, details: {size}});
+});
+
+$.on(el, "click", `#table.act[data-status='actions']:not([data-command-type="move"]) div[data-spot]`, function(e){
+  const piece = _.chain([
+      dom.sel1(`.contents > [data-piece='pilli'][data-seat='${seat}']`, this),
+      dom.sel1(".contents > [data-piece='bridge']", this)
+    ],
+    _.compact,
+    _.first);
+
+  const what = _.maybe(piece, dom.attr(_, "data-piece"));
+  switch(what){
+    case "pilli": {
+      const type = "move",
+            from = closestAttr(this, "data-spot");
+      sh.dispatch($wip, {type, details: {from}});
+      break;
+    }
+
+    case "bridge": {
+      const type = "relocate-bridge",
+            from = closestAttr(this, "data-spot");
+      sh.dispatch($wip, {type, details: {from}});
+      break;
+    }
+  }
 });
 
 Object.assign(window, {$, g, _, sh, c, moment, session, $story, $wip, $table, $online, supabase});

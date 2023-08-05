@@ -673,7 +673,7 @@ export function execute(self, command){
   const pillis = _.map(_.get(_, "pilli"), state.seated);
 
   if (deficit) {
-    throw new Error("Cannot perform action.  Insufficient action points.");
+    throw new Error("Not enough action points to do that.");
   }
 
   if (automatic && seat != null) {

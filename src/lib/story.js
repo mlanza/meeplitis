@@ -41,15 +41,6 @@ function digest(result){
   return {error, data};
 }
 
-function raise(result){
-  const {error} = result;
-  if (error){
-    debugger
-    throw error;
-  }
-  return result;
-}
-
 function getPerspective(tableId, session, eventId, seat, seatId){
   const qs = _.chain([
     `table_id=${tableId}`,
@@ -60,10 +51,10 @@ function getPerspective(tableId, session, eventId, seat, seatId){
     headers: {
       accessToken: session.accessToken
     }
-  } : {}), json, digest, raise);
+  } : {}), json, digest);
   const last_move = getLastMove(tableId, eventId, seatId);
   return Promise.all([perspective, last_move]).then(function([{data, error}, last_move]){
-    return Object.assign({}, data, last_move);
+    return Object.assign({}, error || data, last_move);
   });
 }
 
@@ -72,7 +63,7 @@ function getLastMove(_table_id, _event_id, _seat_id){
     _table_id,
     _event_id,
     _seat_id
-  }).then(raise).then(function({data}){
+  }).then(function({data}){
     return {last_move: data};
   });
 }
@@ -84,7 +75,7 @@ function move(_table_id, _seat, _commands, session){
     headers: {
       accessToken: session.accessToken
     }
-  }).then(json).then(digest).then(raise);
+  }).then(json).then(digest);
 }
 
 export function Story(session, tableId, seat, seated, config, log, $ready, fail, make, $state, $story){

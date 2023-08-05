@@ -27,9 +27,7 @@ function getTables(statuses, ops, el, none){
     .from("tables")
     .select(`
     *,
-    seated:seats!inner(
-      *
-    ),
+    seated:seats!inner(*),
     seats!inner (
       id,
       seat,
@@ -63,10 +61,15 @@ function getTables(statuses, ops, el, none){
     .then(dom.html(el, _));
   }
 
+function yourTurn(table){
+  const seated = _.first(table.seated)?.seat;
+  return _.includes(table.up, seated);
+}
+
 function refreshTables(){
   getTables(
     ["open", "started"],
-    _.sort(_.desc(_.get(_, "status")), _.desc(_.get(_, "touched_at")), _.desc(_.get(_, "started_at")), _.desc(_.get(_, "created_at")), _),
+    _.sort(_.desc(_.get(_, "status")), _.desc(yourTurn), _.asc(_.get(_, "touched_at")), _.asc(_.get(_, "started_at")), _.asc(_.get(_, "created_at")), _),
     dom.sel1(".unfinished-tables > p"),
     "None open or started");
   getTables(

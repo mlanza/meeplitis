@@ -932,6 +932,10 @@ body.anon img[data-nav="last-move"] {
 #table.act[data-command-type='construct-bridge'] .bridges ol {
   animation: ping 2s infinite;
 }
+#table.act[data-command-type='build-temple'] div[data-spot]:not(:has(div.contents *[data-piece])):hover {
+  cursor: pointer;
+}
+
 /* generated start */
 #table.act:not([data-command-type]):is([data-pilli-at='B1'],[data-bridges-at~='B1']) div[data-spot='B1']:hover div.propose,
 #table.act:not([data-command-type]):is([data-pilli-at='F1'],[data-bridges-at~='F1']) div[data-spot='F1']:hover div.propose,

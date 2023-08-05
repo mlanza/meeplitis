@@ -1,4 +1,4 @@
-create or replace function move(_table_id varchar, _commands jsonb)
+  create or replace function move(_table_id varchar, _commands jsonb)
 returns table(id varchar, table_id varchar, type varchar, seat_id varchar)
 security definer
 set search_path = public
@@ -69,8 +69,8 @@ if _recipients > 0 then
 end if;
 
 return query
-insert into events (table_id, type, details, undoable, seat_id)
-select _table_id, e.type, e.details, e.undoable, s.id as seat_id
+insert into events (table_id, type, details, undoable, seat_id, snapshot)
+select _table_id, e.type, e.details, e.undoable, s.id as seat_id, e.snapshot
 from addable_events(_simulated->'added') e
 left join seats s on s.table_id = _table_id and s.seat = e.seat
 returning events.id, events.table_id, events.type, events.seat_id;

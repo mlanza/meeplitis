@@ -257,7 +257,7 @@ export function inPast(self, touch){
 
 export function nav(self, _at){
   const {tableId, session, seat, seated, $state} = self;
-  const seatId = _.nth(seated, seat)?.seat_id;
+  const seatId = _.nth(seated, seat)?.seat_id ?? null;
   const {at, history, touches} = _.deref($state);
   const pos = _.isNumber(_at) ? _at : _.indexOf(touches, _at);
 

@@ -179,14 +179,21 @@ export function simulate(make){
   }
 }
 
+function andSnapshot(events, snapshot){
+  const last = _.last(events),
+        committed = _.detect(function({type}){
+          return type === "committed";
+        }, events) && _.every(function({undoable}){
+          return undoable === false;
+        }, events);
+  return _.mapa(function(event){
+    return Object.assign({}, event, {snapshot: committed && event === last ? snapshot() : null});
+  }, events);
+}
+
 export function effects([curr, prior, seen, commands]){
   if (_.seq(commands)) {
-    const _added = events(curr),
-          last = _.last(_added);
-    const added = _.mapa(function(event){
-      const snapshot = event.type === "committed" && event === last ? _.deref(curr) : null;
-      return Object.assign({}, event, {snapshot});
-    }, _added);
+    const added = andSnapshot(events(curr), _.partial(_.deref, curr));
     return {
       added,
       up: up(curr),

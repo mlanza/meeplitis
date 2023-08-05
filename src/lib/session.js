@@ -1,6 +1,7 @@
 import supabase from "./supabase.js";
 import * as o from "./online.js";
 import dom from "/lib/atomic_/dom.js";
+import $ from "/lib/atomic_/reactives.js";
 import "/lib/cmd.js";
 
 const img = dom.tag("img");
@@ -28,5 +29,14 @@ export const $online = o.online(session?.username);
 
 dom.toggleClass(document.body, "anon", !user);
 session && dom.html(you, img({src: `${session?.avatar_url}?s=50`}));
+
+if (user) {
+  $.on(document.body, "keydown", function(e){
+    if (e.shiftKey && e.key === "Escape") {
+      e.preventDefault();
+      window.location = "/signout";
+    }
+  });
+}
 
 Object.assign(window, {$online, session});

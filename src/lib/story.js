@@ -34,6 +34,13 @@ export function getSeat(tableId, session){
   }), json) : Promise.resolve(null);
 }
 
+function digest(result){
+  const code  = result?.code,
+        error = code == null ? null : result,
+        data  = code == null ? result : null;
+  return {error, data};
+}
+
 function getPerspective(tableId, session, eventId, seat, seatId){
   const qs = _.chain([
     `table_id=${tableId}`,
@@ -44,10 +51,13 @@ function getPerspective(tableId, session, eventId, seat, seatId){
     headers: {
       accessToken: session.accessToken
     }
-  } : {}), json);
+  } : {}), json, digest);
   const last_move = getLastMove(tableId, eventId, seatId);
-  return Promise.all([perspective, last_move]).then(function([perspective, last_move]){
-    return Object.assign({}, perspective, last_move);
+  return Promise.all([perspective, last_move]).then(function([{data, error}, last_move]){
+    if (error) {
+      throw error;
+    }
+    return Object.assign({}, data, last_move);
   });
 }
 
@@ -68,12 +78,7 @@ function move(_table_id, _seat, _commands, session){
     headers: {
       accessToken: session.accessToken
     }
-  }).then(json).then(function(result){
-    const code  = result?.code,
-          error = code == null ? null : result,
-          data  = code == null ? result : null;
-    return {error, data};
-  });
+  }).then(json).then(digest);
 }
 
 export function Story(session, tableId, seat, seated, config, log, $ready, fail, make, $state, $story){

@@ -180,11 +180,21 @@ export function simulate(make){
 }
 
 export function effects([curr, prior, seen, commands]){
-  return _.seq(commands) ? {
-    added: events(curr),
-    up: up(curr),
-    notify: notify(curr, prior)
-  } : perspective(curr, seen);
+  if (_.seq(commands)) {
+    const _added = events(curr),
+          last = _.last(_added);
+    const added = _.mapa(function(event){
+      const snapshot = event.type === "committed" && event === last ? _.deref(curr) : null;
+      return Object.assign({}, event, {snapshot});
+    }, _added);
+    return {
+      added,
+      up: up(curr),
+      notify: notify(curr, prior)
+    }
+  } else {
+    return perspective(curr, seen);
+  }
 }
 
 function _events(self){

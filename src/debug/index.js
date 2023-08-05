@@ -3,26 +3,11 @@ import $ from "/lib/atomic_/reactives.js";
 import g from "/lib/game_.js";
 import supabase from "/lib/supabase.js";
 
-function timing(f){
-  return async function(...args){
-    const start = _.date();
-    const results = await f(...args);
-    const stop = _.date();
-    const ms = _.elapsed(_.period(start, stop)).valueOf();
-    return [ms, results];
-  }
-}
-
 const params = new URLSearchParams(document.location.search),
       tableId = params.get('id'),
       eventId = document.location.hash.substr(1),
-      options = params.get('options')?.split(',') || [],
-      cut = _.maybe(params.get('cut'), parseInt),
-      server = params.get("server") || "browser", //local, remote, browser
-      monitor = !_.includes(options, "nomonitor"),
-      cache = !_.includes(options, "nocache");
+      options = params.get('options')?.split(',') || [];
 
-//=> exec(commands) // on a blank game
 const [tables, seated, evented] = await Promise.all([
   supabase.from("tables").select('*,game_id(slug)').eq("id", tableId),
   supabase.rpc('seated', {_table_id: tableId}),
@@ -30,62 +15,59 @@ const [tables, seated, evented] = await Promise.all([
 ]);
 
 const table = tables.data[0],
-      events = evented.data || [],
       seats = _.toArray(_.repeat(_.count(seated.data) || 4, {})),
       seen = _.toArray(_.range(0, _.count(seats))),
-      commands = [],
       slug = table.game_id.slug,
       config = table.config,
-      source = server == "local" ? "http://0.0.0.0:8090" : "https://yourmove.fly.dev",
-      url = `${source}/simulate/${slug}`,
       {make} = await import(`/games/${slug}/core.js`),
       simulate = g.simulate(make),
       effects = _.comp(g.effects, simulate);
 
-function remote({seats, config = {}, loaded = [], events = [], commands = [], seen, snapshot = null}){
-  return fetch(url, {
-    method: "POST",
-    mode: "cors",
-    credentials: "omit",
-    headers: {
-      'Accept': 'application/json',
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({seats, loaded, events, commands, config, seen, snapshot})
-  }).then(function(resp){
-    return resp.json();
-  });
-}
+const thru = eventId ? _.detectIndex(function({id}){
+  return id === eventId;
+}, evented.data) : null;
 
-const sim = timing(server == "browser" ? simulate : remote);
+const events = thru == null ? evented.data : _.chain(evented.data, _.take(thru, _), _.toArray),
+      later  = thru == null ? [] : _.chain(evented.data, _.drop(thru, _), _.toArray);
 
-const loaded = cut == null ? events : _.chain(events, _.take(cut, _), _.toArray),
-      added  = cut == null ? [] : _.chain(events, _.drop(cut, _), _.toArray),
-      loadedUnseen = monitor ? [] : loaded,
-      loadedSeen = monitor ? loaded : [];
+const [curr, prior] = simulate({seats, config, seen}),
+      $game = $.cell(curr);
 
-function augment(f, ...added){
-  return function(args){
-    return args.length == 1 ? f([...args, null, ...added]) : f([...args, ...added]);
+$.sub($.hist($game), _.map(g.effects), _.log);
+
+function sim({events = [], commands = [], seat = null} = {}){
+  const snapshot = _.chain($game, _.deref, _.deref);
+  if (_.seq(commands)){
+    if (seat == null) {
+      throw Error("Must specify seat with commands.");
+    }
+    return effects({seats, config, events, commands, seen: [seat], snapshot});
+  } else {
+    return effects({seats, config, events, commands, seen, snapshot});
   }
 }
 
-const [curr, prior] = simulate({
-        seats,
-        config,
-        seen
-      }),
-      $game = $.cell(curr),
-      exec = g.batch($game, g.execute, _);
+function run({events = [], commands = [], seat = null} = {}){
+  if (_.seq(events)){
+    g.batch($game, g.fold, events);
+    _.log("played", {events});
+  }
+  if (_.seq(commands)) {
+    const result = sim({commands, seat});
+    _.log("issued", {commands, seat, result});
+    const added = result?.added || [];
+    g.batch($game, g.fold, added);
+    _.log("added", {added});
+  }
+}
 
-$.sub($.hist($game), _.map(augment(g.effects, seen)), _.log);
+function flush(){
+  _.swap($game, _.compact);
+  _.log("flushed");
+}
 
-g.batch($game, g.fold, loadedSeen);
+run({events});
+flush();
 
-const snapshot = _.chain($game, _.deref, _.deref);
-
-_.log(...await sim({seats, config, added, commands, seen, snapshot}));
-
-_.swap($game, _.compact);
-
-Object.assign(window, {$game, effects, g, exec, commands, supabase});
+//example: run({commands: [{type: "pass"},{type: "commit"}], seat: 1});
+Object.assign(window, {$game, effects, g, sim, run, later, flush, supabase});

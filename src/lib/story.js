@@ -41,6 +41,15 @@ function digest(result){
   return {error, data};
 }
 
+function raise(result){
+  const {error} = result;
+  if (error){
+    debugger
+    throw error;
+  }
+  return result;
+}
+
 function getPerspective(tableId, session, eventId, seat, seatId){
   const qs = _.chain([
     `table_id=${tableId}`,
@@ -51,22 +60,19 @@ function getPerspective(tableId, session, eventId, seat, seatId){
     headers: {
       accessToken: session.accessToken
     }
-  } : {}), json, digest);
+  } : {}), json, digest, raise);
   const last_move = getLastMove(tableId, eventId, seatId);
   return Promise.all([perspective, last_move]).then(function([{data, error}, last_move]){
-    if (error) {
-      throw error;
-    }
     return Object.assign({}, data, last_move);
   });
 }
 
-function getLastMove(tableId, eventId, seatId){
+function getLastMove(_table_id, _event_id, _seat_id){
   return supabase.rpc('last_move', {
-    _table_id: tableId,
-    _event_id: eventId,
-    _seat_id: seatId
-  }).then(function({error, data, status}){
+    _table_id,
+    _event_id,
+    _seat_id
+  }).then(raise).then(function({data}){
     return {last_move: data};
   });
 }
@@ -78,7 +84,7 @@ function move(_table_id, _seat, _commands, session){
     headers: {
       accessToken: session.accessToken
     }
-  }).then(json).then(digest);
+  }).then(json).then(digest).then(raise);
 }
 
 export function Story(session, tableId, seat, seated, config, log, $ready, fail, make, $state, $story){

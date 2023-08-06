@@ -10,6 +10,7 @@ _config jsonb;
 _seat_configs jsonb;
 _payload jsonb;
 _snapshot jsonb;
+_snapshot_event_id varchar;
 _from_event_id varchar;
 begin
 
@@ -31,7 +32,7 @@ select id from (
       select seq
       from events
       where table_id = _table_id and snapshot is not null and seq < (select seq from events where table_id = _table_id and id = _event_id)
-      order by seq limit 1)
+      order by seq desc limit 1)
     limit 1)
   union
   (select id
@@ -44,7 +45,7 @@ select id from (
 select evented(_table_id, _from_event_id, _event_id)
 into _events;
 
-select snapshot->'state' --first previous available snapshot
+select id, snapshot->'state' --first previous available snapshot
 from events
 where table_id = _table_id and id = (
   select id
@@ -55,9 +56,9 @@ where table_id = _table_id and id = (
     where table_id = _table_id and id = _from_event_id)
   order by seq desc
   limit 1)
-into _snapshot;
+into _snapshot_event_id, _snapshot;
 
-raise log '$ simulate at % for % from event id % to % with snapshot %', _table_id, case when _seen = '[null]'::jsonb then 'anon' else _seen::varchar end, _from_event_id, _event_id, _snapshot;
+raise log '$ simulate at % for % from event id % to % with snapshot at % -> %', _table_id, case when _seen = '[null]'::jsonb then 'anon' else _seen::varchar end, _from_event_id, _event_id, _snapshot_event_id, _snapshot;
 
 select '{"game": "' || _fn || '", "seats": ' || _seat_configs::varchar || ', "config": ' || _config::varchar || ', "events": ' || _events::varchar || ', "commands": ' || _commands::varchar || ', "seen": ' || _seen || ', "snapshot": ' || coalesce(_snapshot, 'null')::varchar || '}'
 into _payload;

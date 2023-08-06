@@ -6,12 +6,11 @@ stylesheets:
 - /games/game.css
 - ./index.css
 ---
-<div class="byline">
-
-  <span>Published By:</span> {% if publisher_url %}<a href='{{ publisher_url }}'>{{ publisher }}</a> {% else %}{{ publisher }}{% endif %},
-  <span>Designed By:</span> {{ designers }},
-  <span>Implemented By:</span> {{ developers }}
+{% if publisher %}
+<div class="publisher">
+  <label>Publisher:</label> {% if publisher_url %}<a href='{{ publisher_url }}'>{{ publisher }}</a> {% else %}{{ publisher }}{% endif %}
 </div>
+{% endif %}
 <section class="about">
   <h2>Playing</h2>
   {{ about | md | safe }}
@@ -19,6 +18,10 @@ stylesheets:
 <section class="implementation">
   <h2>Implementation notes</h2>
 {{ implementation | md | safe }}
+</section>
+<section class="credits">
+  <h2>Credits</h2>
+{{ credits | md | safe }}
 </section>
 <section class="create">
   <h2>Open a table</h2>

@@ -106,15 +106,16 @@ section {
   margin: 0 2em 1em 0;
   break-inside: avoid;
 }
-.byline {
+label {
   color: #3E505C;
+  opacity: .6;
+}
+.publisher {
   position: absolute;
   top: 5.5em;
-  left: 4.5em;
+  left: 6em;
   scale: .8;
-}
-.byline span {
-  opacity: .6;
+  width: 30em;
 }
 main {
   min-height: calc(100vh - 10.5em);

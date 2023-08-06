@@ -1058,7 +1058,7 @@ export function foundable(board, contents, markers, pilli){
     }, marked);
   }, dist);
   const avail = size < 14 && _.detect(function(marker){
-    return marker.size === size;
+    return _.get(marker, "size") === size;
   }, unmarked);
   return _.seq(_.map(function(at){
     return {size, at};

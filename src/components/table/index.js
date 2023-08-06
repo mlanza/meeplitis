@@ -76,7 +76,6 @@ function avatar(player){
 //TODO extract user timezone adjustment
 export function table(item, now = new Date()){
   const seat = seated(item.seats);
-  const placement = item.seats.map(s => s.place);
   const link = item.status === "open" ? span : a;
   const age = _.maybe(item.touched_at, _.date, _.partial(fromUTCDate, now), dt => aged(dt, now));
   return div({
@@ -94,7 +93,7 @@ export function table(item, now = new Date()){
         seat || !session ? null : button({value: "join"}, "Join"),
         seat && item.status === "open" ? button({value: "leave"}, "Leave") : null),
       div({class: "seats"}, _.map(function(seat){
-        const won = _.nth(placement, seat.seat) === 1;
+        const won = seat.place === 1;
         return span({"class": "seat avatar", "data-username": seat?.player?.username || "", "data-seat": seat.seat},
           img({class: "pawn", src: "/images/pawn.svg"}),
           won ? img({class: "won", title: "Winner", alt: "Winner", src: "/images/star.svg"}) : null,

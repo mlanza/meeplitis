@@ -193,7 +193,7 @@ function andSnapshot(events, snapshot){
 
 export function effects([curr, prior, seen, commands]){
   if (_.seq(commands)) {
-    const added = andSnapshot(events(curr), _.partial(_.deref, curr));
+    const added = andSnapshot(events(curr), _.partial(reality, curr));
     return {
       added,
       up: up(curr),

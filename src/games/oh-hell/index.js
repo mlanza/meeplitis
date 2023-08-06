@@ -84,16 +84,20 @@ function getTables(game_id, statuses, ops, el, none){
 
 async function refreshTables(){
   getTables(game_id,
-    ["open", "started"],
-    _.sort(_.desc(_.get(_, "status")), _.desc(_.get(_, "touched_at")), _.desc(_.get(_, "started_at")), _.desc(_.get(_, "created_at")), _),
-    dom.sel1(".unfinished-tables > p"),
-    "None open or started");
+    ["open"],
+    _.sort(_.desc(_.get(_, "created_at")), _),
+    dom.sel1(".open-tables > p"),
+    "None open");
+  getTables(game_id,
+    ["started"],
+    _.sort(_.desc(_.get(_, "touched_at")), _.desc(_.get(_, "started_at")), _.desc(_.get(_, "created_at")), _),
+    dom.sel1(".started-tables > p"),
+    "None started");
   getTables(game_id,
     ["finished"],
     _.sort(_.desc(_.get(_, "finished_at")), _),
     dom.sel1(".finished-tables > p"),
     "None finished");
-
 }
 
 async function open({config, seats, remark}){

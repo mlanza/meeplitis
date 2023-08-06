@@ -68,10 +68,15 @@ function yourTurn(table){
 
 function refreshTables(){
   getTables(
-    ["open", "started"],
-    _.sort(_.desc(_.get(_, "status")), _.desc(yourTurn), _.asc(_.get(_, "touched_at")), _.asc(_.get(_, "started_at")), _.asc(_.get(_, "created_at")), _),
-    dom.sel1(".unfinished-tables > p"),
-    "None open or started");
+    ["open"],
+    _.sort(_.desc(_.get(_, "created_at")), _),
+    dom.sel1(".open-tables > p"),
+    "None open");
+  getTables(
+    ["started"],
+    _.sort(_.desc(yourTurn), _.asc(_.get(_, "touched_at")), _.asc(_.get(_, "started_at")), _.asc(_.get(_, "created_at")), _),
+    dom.sel1(".started-tables > p"),
+    "None started");
   getTables(
     ["finished"],
     _.sort(_.desc(_.get(_, "finished_at")), _),

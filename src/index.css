@@ -106,7 +106,7 @@ section {
   margin: 0 2em 1em 0;
   break-inside: avoid;
 }
-label {
+section.credits label {
   color: #3E505C;
   opacity: .6;
 }

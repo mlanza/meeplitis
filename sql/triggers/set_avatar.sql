@@ -5,7 +5,7 @@ declare
   _status int;
 begin
 
-  select concat('http://www.gravatar.com/avatar/', md5((select email from auth.users where id = new.id))) as avatar_url
+  select concat('https://www.gravatar.com/avatar/', md5((select email from auth.users where id = new.id))) as avatar_url
   into _avatar_url;
 
   select status

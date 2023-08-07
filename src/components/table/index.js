@@ -59,7 +59,9 @@ function aged(dt, asof){
   function lessThan(units){
     return _.subtract(asof, units) < dt;
   }
-  if (lessThan(_.hours(1))) {
+  if (lessThan(_.minutes(1))) {
+    return [diff(dt, asof, 1000), "s"];
+  } else if (lessThan(_.hours(1))) {
     return [diff(dt, asof, 1000 * 60), "m"];
   } else if (lessThan(_.days(1))) {
     return [diff(dt, asof, 1000 * 60 * 60), "h"];

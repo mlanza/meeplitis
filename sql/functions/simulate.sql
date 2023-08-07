@@ -24,8 +24,9 @@ into _config, _fn;
 select seat_configs(_table_id)
 into _seat_configs;
 
-select id from (
-  (select id
+select id, seq
+from (
+  (select id, seq
     from events
     where table_id = _table_id
     and seq > (
@@ -35,12 +36,14 @@ select id from (
       order by seq desc limit 1)
     limit 1)
   union
-  (select id
+  (select id, seq
     from events
     where table_id = _table_id
     order by seq
     limit 1)
-) x into _from_event_id;
+) x
+order by seq desc limit 1
+into _from_event_id;
 
 select evented(_table_id, _from_event_id, _event_id)
 into _events;

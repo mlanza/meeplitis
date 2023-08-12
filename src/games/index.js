@@ -21,6 +21,7 @@ function game(item){
 const {data: games, error} =
   await supabase
     .from("games_with_activity")
-    .select("*");
+    .select("*")
+    .order('title');
 
 _.chain(games, _.see("games"), _.map(game, _), dom.html(dom.sel1(".open > p"), _));

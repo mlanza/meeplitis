@@ -137,6 +137,10 @@
 #table.act[data-command-type] #event {
   display: none;
 }
+#table #event[data-type='scored-grandeur'] {
+  overflow-y: hidden;
+  height: 30em;
+}
 .players {
   width: 20em;
   height: auto;

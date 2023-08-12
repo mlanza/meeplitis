@@ -89,7 +89,7 @@
 [data-table-status="finished"] .touched {
   visibility: hidden;
 }
-.touched {
+.touched, .finished {
   opacity: .5;
 }
 img.won,

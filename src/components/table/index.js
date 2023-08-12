@@ -18,10 +18,99 @@ function mexica(config){
   return [];
 }
 
+export const slugs = {
+  "mexica": "SopC",
+  "oh-hell": "8Mj1"
+}
+
 const games = {
   "8Mj1": ohhell,
   "SopC": mexica
 };
+
+export const selection = `
+*,
+status,
+seats (
+  id,
+  seat,
+  joined_at,
+  place,
+  player:player_id(
+    id,
+    username,
+    avatar_url
+  )
+),
+game:game_id (
+  id,
+  title,
+  seats,
+  slug,
+  thumbnail_url
+)`;
+
+export function promised(request){
+  return new Promise(function(resolve, reject){
+    request.then(function({data, error}){
+      if (error) {
+        reject(error);
+      } else if (data) {
+        resolve(data);
+      }
+    });
+  });
+}
+
+export function mount(el, none, request){
+  _.fmap(promised(request),
+    _.see("mounting"),
+    _.map(table, _),
+    _.seq,
+    _.either(_, none),
+    dom.html(el, _));
+}
+
+export function refreshingTables(game_id){
+  return function refreshTables(){
+    mount(dom.sel1(".open-tables > p"), "None open",
+      supabase
+        .from('tables')
+        .select(selection)
+        .eq('game_id', game_id)
+        .eq('status', 'open')
+        .order('created_at', {ascending: false}));
+    mount(dom.sel1(".started-tables > p"), "None started",
+      supabase
+        .from('tables')
+        .select(selection)
+        .eq('game_id', game_id)
+        .eq('status', 'started')
+        .order('touched_at', {ascending: false})
+        .order('started_at', {ascending: false})
+        .order('created_at', {ascending: false}));
+    mount(dom.sel1(".finished-tables > p"), "None finished",
+      supabase
+        .from('tables')
+        .select(selection)
+        .limit(5)
+        .eq('game_id', game_id)
+        .eq('status', 'finished')
+        .order('finished_at', {ascending: false}));
+  }
+}
+
+export async function getGame(game_id){
+  const {data: [game]} = await supabase
+    .from('games')
+    .select(`
+      id,
+      title,
+      seats,
+      thumbnail_url`)
+    .eq('id', game_id);
+  return game;
+}
 
 export function seated(seats){
   return _.detect(function(seat){
@@ -80,7 +169,8 @@ export function table(item, now = new Date()){
   const seat = seated(item.seats);
   const open = item.status === "open";
   const link = open ? span : a;
-  const age = _.maybe(item.touched_at, _.date, _.partial(fromUTCDate, now), dt => aged(dt, now));
+  const stamp = item.finished_at ? "finished" : item.touched_at ? "touched" : null;
+  const age = _.maybe(item.finished_at || item.touched_at, _.date, _.partial(fromUTCDate, now), dt => aged(dt, now));
   return div({
       "class": "table",
       "data-table": item.id,
@@ -90,7 +180,7 @@ export function table(item, now = new Date()){
     },
       span({class: "id"},
         link({href: `/games/${item.game.slug}/table/?id=${item.id}`}, item.game.title, " - ", item.id), " ",
-        span({class: "touched"}, _.maybe(age, _.join("", _), _.str("touched ", _, " ago")))),
+        span({class: stamp}, _.maybe(age, _.join("", _), _.str(stamp || "", " ", _, " ago")))),
       div({class: "game"},
         a({href: `/games/${item.game.slug}`}, img({src: item.game.thumbnail_url, alt: item.game.title})),
         !seat && open && session ? button({value: "join"}, "Join") : null,

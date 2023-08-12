@@ -3,7 +3,7 @@ import dom from "/lib/atomic_/dom.js";
 import $ from "/lib/atomic_/reactives.js";
 import supabase from "/lib/supabase.js";
 import {session} from "/lib/session.js";
-import {table, seated, ready, onUpdate} from "/components/table/index.js";
+import {table, refreshingTables, getGame, slugs, seated, ready, onUpdate} from "/components/table/index.js";
 
 const {div, span, img, a, p, button, submit, form, label, input} = dom.tags(['div', 'span', 'img', 'a', 'p', 'button', 'submit', 'form', 'label', 'input']),
       radio = dom.tag('input', {type: "radio"});
@@ -33,72 +33,9 @@ function creates(open, game){
   return el;
 }
 
-const game_id = '8Mj1';
-
-const {data: [game]} = await supabase
-  .from('games')
-  .select(`
-    id,
-    title,
-    seats,
-    thumbnail_url`)
-  .eq('id', game_id);
-
-function getTables(game_id, statuses, ops, el, none){
-  return supabase
-    .from('tables')
-    .select(`
-      *,
-      status,
-      seats (
-        id,
-        seat,
-        place,
-        joined_at,
-        player:player_id(
-          id,
-          username,
-          avatar_url
-        )
-      ),
-      game:game_id (
-        id,
-        title,
-        seats,
-        slug,
-        thumbnail_url
-      )`)
-    .eq('game_id', game_id)
-    .in('status', statuses)
-    .order('created_at', {ascending: false})
-    .then(function({data, error}){
-      return data;
-    })
-    .then(_.see("tables"))
-    .then(ops)
-    .then(_.map(table, _))
-    .then(_.seq)
-    .then(_.either(_, none))
-    .then(dom.html(el, _));
-}
-
-async function refreshTables(){
-  getTables(game_id,
-    ["open"],
-    _.sort(_.desc(_.get(_, "created_at")), _),
-    dom.sel1(".open-tables > p"),
-    "None open");
-  getTables(game_id,
-    ["started"],
-    _.sort(_.desc(_.get(_, "touched_at")), _.desc(_.get(_, "started_at")), _.desc(_.get(_, "created_at")), _),
-    dom.sel1(".started-tables > p"),
-    "None started");
-  getTables(game_id,
-    ["finished"],
-    _.sort(_.desc(_.get(_, "finished_at")), _),
-    dom.sel1(".finished-tables > p"),
-    "None finished");
-}
+const game_id = slugs["oh-hell"];
+const game = await getGame(game_id);
+const refreshTables = refreshingTables(game_id);
 
 async function open({config, seats, remark}){
   const {data, error} = await supabase.rpc('open_table', {

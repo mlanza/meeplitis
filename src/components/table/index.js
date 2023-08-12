@@ -18,11 +18,6 @@ function mexica(config){
   return [];
 }
 
-export const slugs = {
-  "mexica": "SopC",
-  "oh-hell": "8Mj1"
-}
-
 const games = {
   "8Mj1": ohhell,
   "SopC": mexica
@@ -71,8 +66,17 @@ export function mount(el, none, request){
     dom.html(el, _));
 }
 
-export function refreshingTables(game_id){
-  return function refreshTables(){
+export function managing(game_id){
+  async function open({config, seats, remark}){
+    const {data, error} = await supabase.rpc('open_table', {
+      _game_id: game_id,
+      _config: config,
+      _remark: remark,
+      _seats: seats
+    });
+    refreshTables();
+  }
+  function refreshTables(){
     mount(dom.sel1(".open-tables > p"), "None open",
       supabase
         .from('tables')
@@ -98,6 +102,7 @@ export function refreshingTables(game_id){
         .eq('status', 'finished')
         .order('finished_at', {ascending: false}));
   }
+  return {open, refreshTables};
 }
 
 export async function getGame(game_id){
@@ -203,6 +208,6 @@ export function onUpdate(callback){
     const {data, error} = await supabase.rpc(action, {
       _table_id: id
     });
-    callback();
+    callback(data);
   });
 }

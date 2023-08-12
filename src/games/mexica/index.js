@@ -3,8 +3,10 @@ import dom from "/lib/atomic_/dom.js";
 import $ from "/lib/atomic_/reactives.js";
 import supabase from "/lib/supabase.js";
 import {session} from "/lib/session.js";
-import {table, refreshingTables, getGame, slugs, seated, ready, onUpdate} from "/components/table/index.js";
+import {table, managing, getGame, seated, ready, onUpdate} from "/components/table/index.js";
 
+const game = await getGame("SopC");
+const {open, refreshTables} = managing(game.id);
 const {div, span, img, a, p, button, submit, form, label, input} = dom.tags(['div', 'span', 'img', 'a', 'p', 'button', 'submit', 'form', 'label', 'input']),
       radio = dom.tag('input', {type: "radio"});
 
@@ -28,21 +30,6 @@ function creates(open, game){
     open({seats, config, remark});
   });
   return el;
-}
-
-const game_id = slugs["mexica"];
-const game = await getGame(game_id);
-const refreshTables = refreshingTables(game_id);
-
-async function open({config, seats, remark}){
-  const {data, error} = await supabase.rpc('open_table', {
-    _game_id: game_id,
-    _config: config,
-    _remark: remark,
-    _seats: seats
-  });
-
-  refreshTables();
 }
 
 session && _.chain(game, _.see("game"), _.partial(creates, open), dom.html(dom.sel1(".create > p"), _));

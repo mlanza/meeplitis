@@ -11,6 +11,10 @@ body {
   overscroll-behavior: none;
   height: 100%;
 }
+img.spinner {
+  height: 2.5em;
+  margin: .5em;
+}
 a#logo {
   position: absolute;
   right: 1em;

@@ -119,8 +119,9 @@ CREATE TABLE jobs (
 
 CREATE INDEX idx_jobs_status ON jobs (status, seq);
 
-INSERT INTO games (id, title, slug, seats)
-    VALUES ('8Mj1', 'Oh Hell', 'oh-hell', array[2, 3, 4, 5, 6, 7]);
+INSERT INTO games (id, title, slug, fn, seats)
+    VALUES ('8Mj1', 'Oh Hell', 'oh-hell', 'ohhell', array[2, 3, 4, 5, 6, 7]),
+    VALUES ('SopC', 'Mexica', 'mexica', 'mexica', array[2, 3, 4]);
 
 DO $$
 DECLARE

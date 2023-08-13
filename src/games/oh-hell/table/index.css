@@ -1,20 +1,19 @@
-.leads {
+#table .leads {
   visibility: hidden;
 }
-[data-lead="0"] [data-seat="0"] .leads,
-[data-lead="1"] [data-seat="1"] .leads,
-[data-lead="2"] [data-seat="2"] .leads,
-[data-lead="3"] [data-seat="3"] .leads,
-[data-lead="4"] [data-seat="4"] .leads,
-[data-lead="5"] [data-seat="5"] .leads,
-[data-lead="6"] [data-seat="6"] .leads {
+#table[data-lead="0"] [data-seat="0"] .leads,
+#table[data-lead="1"] [data-seat="1"] .leads,
+#table[data-lead="2"] [data-seat="2"] .leads,
+#table[data-lead="3"] [data-seat="3"] .leads,
+#table[data-lead="4"] [data-seat="4"] .leads,
+#table[data-lead="5"] [data-seat="5"] .leads,
+#table[data-lead="6"] [data-seat="6"] .leads {
   visibility: visible;
 }
-button.active,
-button.selected {
+#table :is(button.active, button.selected) {
   display: initial;
 }
-.hand {
+#table .hand {
   position: fixed;
   right: 1em;
   bottom: -11em;
@@ -26,13 +25,13 @@ button.selected {
   display: inline-flex;
   z-index: 99;
 }
-[data-played="0"] [data-seat="0"] .area img,
-[data-played="1"] [data-seat="1"] .area img,
-[data-played="2"] [data-seat="2"] .area img,
-[data-played="3"] [data-seat="3"] .area img,
-[data-played="4"] [data-seat="4"] .area img,
-[data-played="5"] [data-seat="5"] .area img,
-[data-played="6"] [data-seat="6"] .area img {
+#table[data-played="0"] [data-seat="0"] .area img,
+#table[data-played="1"] [data-seat="1"] .area img,
+#table[data-played="2"] [data-seat="2"] .area img,
+#table[data-played="3"] [data-seat="3"] .area img,
+#table[data-played="4"] [data-seat="4"] .area img,
+#table[data-played="5"] [data-seat="5"] .area img,
+#table[data-played="6"] [data-seat="6"] .area img {
   animation: play .8s;
 }
 #table[data-event-type="award"] .area img {
@@ -42,14 +41,14 @@ button.selected {
 #table.present[data-status="playing"] .hand:hover {
   bottom: -8em;
 }
-.hand li {
+#table .hand li {
   transition: padding-top .25s;
   margin-right: -8.5em;
   height: 18em;
   padding-top: 2em;
 }
-.hand li,
-.hand li img {
+#table .hand li,
+#table .hand li img {
   width: 10em;
   height: 16em;
 }
@@ -59,15 +58,16 @@ button.selected {
 #table.present[data-status="playing"] .hand li:hover {
   padding-top: 0;
 }
-.trump, .deck {
+#table .trump,
+#table.deck {
   min-height: 14em;
 }
-.deck img,
-.trump img {
+#table .deck img,
+#table .trump img {
   width: 9em;
   margin: 5px;
 }
-.broken {
+#table .broken {
   visibility: hidden;
   margin-top: -.8em;
   margin-bottom: 1em;
@@ -75,13 +75,13 @@ button.selected {
 #table[data-broken="true"] .broken {
   visibility: visible;
 }
-.upkeep {
+#table .upkeep {
   width: 10em;
   position: absolute;
   right: 0;
   text-align: center;
 }
-.cards {
+#table .cards {
   text-align: center;
   display: block;
   margin: .5em auto 0;

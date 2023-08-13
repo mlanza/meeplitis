@@ -244,13 +244,10 @@ function execute(self, command){
 }
 
 function compel1(self){ //compel play of final card in hand
-  const seat = _.chain(self, up, _.first);
-  const state = _.deref(self);
-  const seated = state.seated[state.up] || {hand: null};
-  const {played, hand} = seated;
-  const options = seat == null ? [] : g.moves(self, {seat});
-  const compelled = !played && _.count(hand) === 1 && _.count(options) === 1;
-  return compelled ? compel3(self, _.first(options), seat) : self;
+  const seat = _.chain(self, up, _.first),
+        type = "play",
+        cards = g.moves(self, {seat, type});
+  return _.count(cards) === 1 ? compel3(self, _.first(cards), seat) : self;
 }
 
 function compel3(self, command, seat){

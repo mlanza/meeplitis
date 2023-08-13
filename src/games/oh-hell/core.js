@@ -153,7 +153,8 @@ function undoable(self, {type}){
 function execute(self, command){
   const state = _.deref(self);
   const {type, details, seat} = command;
-  const valid = _.detect(_.eq(_, _.chain(command, _.compact, _.dissoc(_, "id"))), g.moves(self, {type, seat}));
+  const moves = g.moves(self, {type, seat});
+  const valid = _.detect(_.eq(_, _.chain(command, _.compact, _.dissoc(_, "id"))), moves);
   const automatic = _.includes(["start", "award", "score", "finish", "deal"], type);
 
   if (!automatic && !valid){
@@ -246,9 +247,9 @@ function compel1(self){ //compel play of final card in hand
   const seat = _.chain(self, up, _.first);
   const state = _.deref(self);
   const seated = state.seated[state.up] || {hand: null};
-  const {hand} = seated;
+  const {played, hand} = seated;
   const options = seat == null ? [] : g.moves(self, {seat});
-  const compelled = _.count(hand) === 1 && _.count(options) === 1;
+  const compelled = !played && _.count(hand) === 1 && _.count(options) === 1;
   return compelled ? compel3(self, _.first(options), seat) : self;
 }
 

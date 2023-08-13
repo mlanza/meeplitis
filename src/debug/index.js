@@ -23,12 +23,12 @@ const table = tables.data[0],
       simulate = g.simulate(make),
       effects = _.comp(g.effects, simulate);
 
-const thru = eventId ? _.detectIndex(function({id}){
+const thru = eventId ? _.maybe(evented.data, _.detectIndex(function({id}){
   return id === eventId;
-}, evented.data) : null;
+}, _), _.inc) : null;
 
 const events = thru == null ? evented.data : _.chain(evented.data, _.take(thru, _), _.toArray),
-      later  = thru == null ? [] : _.chain(evented.data, _.drop(thru, _), _.toArray);
+      held = thru == null ? [] : _.chain(evented.data, _.drop(thru, _), _.toArray);
 
 const [curr, prior] = simulate({seats, config, seen}),
       $game = $.cell(curr);
@@ -50,14 +50,12 @@ function sim({events = [], commands = [], seat = null} = {}){
 function run({events = [], commands = [], seat = null} = {}){
   if (_.seq(events)){
     g.batch($game, g.fold, events);
-    _.log("played", {events});
+    _.log("digested", {events});
   }
   if (_.seq(commands)) {
     const result = sim({commands, seat});
     _.log("issued", {commands, seat, result});
-    const added = result?.added || [];
-    g.batch($game, g.fold, added);
-    _.log("added", {added});
+    run({events: result.added});
   }
 }
 
@@ -67,7 +65,6 @@ function flush(){
 }
 
 run({events});
-flush();
 
 //example: run({commands: [{type: "pass"},{type: "commit"}], seat: 1});
-Object.assign(window, {$game, effects, g, sim, run, later, flush, supabase});
+Object.assign(window, {$game, effects, g, sim, run, held, flush, supabase});

@@ -102,19 +102,19 @@ function up(self){
 }
 
 function may(self){
-  return _.unique(_.map(function({seat}){
-    return seat;
-  }, g.moves(self, g.seated(self))));
+  const {status} = _.deref(self);
+  return status === "bidding" ? g.everyone(self) : g.up(self);
 }
 
-function bids(state){
+function bids(state, idx){
   const size = state.deals[state.round] || 0;
   const bids = _.cons(null, _.range(0, size + 1));
-  return _.chain(state.seated, _.mapIndexed(function(idx, seat){
-    return _.chain(bids, _.mapa(function(bid){
+  const seat = _.nth(state.seated, idx);
+  return _.chain(bids,
+    _.mapa(function(bid){
       return {type: "bid", details: {bid}, seat: idx};
-    }, _), _.remove(_.pipe(_.getIn(_, ["details", "bid"]), _.eq(_, seat.bid)), _));
-  }, _), _.flatten, _.compact)
+    }, _),
+    _.remove(_.pipe(_.getIn(_, ["details", "bid"]), _.eq(_, seat.bid)), _));
 }
 
 function playable(state, seat){
@@ -129,19 +129,21 @@ function playable(state, seat){
   }, cards);
 }
 
-function moves(self){
+function moves(self, {type = null, seat = null}){
+  const types = type ? [type] : ["bid", "play", "commit"];
+  const seats = _.filtera(seat == null ? _.isSome : _.eq(seat, _), _.unique(_.concat(g.up(self), g.may(self))));
   const state = _.deref(self);
-  if (state.up != null) {
-    switch(state.status){
-      case "bidding":
-        return bids(state);
-
-      case "playing":
-        return state.trick ? [] : playable(state, state.up);
-
+  return _.flatten(_.braid(function(type, seat){
+    const seated = _.nth(state.seated, seat);
+    switch(type){
+      case "bid":
+        return state.status === "bidding" ? bids(state, seat) : [];
+      case "play":
+        return state.up === seat && state.status === "playing" && !state.trick ? playable(state, state.up) : [];
+      case "commit":
+        return state.up === seat && (state.status === "confirming" || (state.status !== "bidding" && seated.played)) ? [{type: "commit", seat}] : [];
     }
-  }
-  return [];
+  }, types, seats));
 }
 
 function undoable(self, {type}){
@@ -151,7 +153,7 @@ function undoable(self, {type}){
 function execute(self, command){
   const state = _.deref(self);
   const {type, details, seat} = command;
-  const valid = _.detect(_.eq(_, _.chain(command, _.compact, _.dissoc(_, "id"))), g.moves(self, [seat]));
+  const valid = _.detect(_.eq(_, _.chain(command, _.compact, _.dissoc(_, "id"))), g.moves(self, {type, seat}));
   const automatic = _.includes(["start", "award", "score", "finish", "deal"], type);
 
   if (!automatic && !valid){
@@ -161,10 +163,6 @@ function execute(self, command){
   if (automatic && seat != null) {
     throw new Error(`Cannot invoke automatic command ${type}`);
   }
-
-  /*TODO if (!_.seq(g.events(self)) && type != "start") {
-    throw new Error(`Cannot ${type} unless the game is first started.`);
-  }*/
 
   switch (type) {
     case "start": {
@@ -249,7 +247,7 @@ function compel1(self){ //compel play of final card in hand
   const state = _.deref(self);
   const seated = state.seated[state.up] || {hand: null};
   const {hand} = seated;
-  const options = seat == null ? [] : g.moves(self, [seat]);
+  const options = seat == null ? [] : g.moves(self, {seat});
   const compelled = _.count(hand) === 1 && _.count(options) === 1;
   return compelled ? compel3(self, _.first(options), seat) : self;
 }
@@ -412,7 +410,7 @@ const obscureCards = _.mapa(_.constantly({}), _);
 
 function obscure(seen){
   return function(event){
-    const {type} = event;
+    const {type} = event || {type: null};
     switch (type) {
       case "bid":
         return _.includes(seen, event.seat) ? event : _.updateIn(event, ["details", "bid"], function(bid){

@@ -1,5 +1,6 @@
 layout: layouts/main.njk
 language: en
+subject_url: /images/meeple.png
 site:
   title: Your Move
   description: Play-by-web board games

@@ -6,7 +6,7 @@ import {session} from "/lib/session.js";
 import {table, managing, getGame, seated, ready, onUpdate} from "/components/table/index.js";
 
 const game = await getGame("SopC");
-const {open, refreshTables} = managing(game.id);
+const {open, refreshTables} = managing('game_id', game.id);
 const {div, span, img, a, p, button, submit, form, label, input} = dom.tags(['div', 'span', 'img', 'a', 'p', 'button', 'submit', 'form', 'label', 'input']),
       radio = dom.tag('input', {type: "radio"});
 

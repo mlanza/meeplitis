@@ -8,6 +8,9 @@ h2 {
 .about p:first-child {
   margin-top: 0;
 }
+section.started-tables {
+  break-before: column;
+}
 #creates input[type="submit"] {
   padding: 5px;
   margin-left: 6em;

@@ -25,7 +25,7 @@ const games = {
 
 export const selection = `
 *,
-status,
+seated:seats!inner(*),
 seats (
   id,
   seat,
@@ -57,8 +57,9 @@ export function promised(request){
   });
 }
 
-export function mount(el, none, request){
+export function mount(el, none, request, op = _.identity){
   _.fmap(promised(request),
+    op,
     _.see("mounting"),
     _.map(table, _),
     _.seq,
@@ -66,10 +67,10 @@ export function mount(el, none, request){
     dom.html(el, _));
 }
 
-export function managing(game_id){
+export function managing(key, id, op = _.identity){
   async function open({config, seats, remark}){
     const {data, error} = await supabase.rpc('open_table', {
-      _game_id: game_id,
+      _game_id: id,
       _config: config,
       _remark: remark,
       _seats: seats
@@ -81,24 +82,24 @@ export function managing(game_id){
       supabase
         .from('tables')
         .select(selection)
-        .eq('game_id', game_id)
+        .eq(key, id)
         .eq('status', 'open')
         .order('created_at', {ascending: false}));
     mount(dom.sel1(".started-tables > p"), "None started",
       supabase
         .from('tables')
         .select(selection)
-        .eq('game_id', game_id)
+        .eq(key, id)
         .eq('status', 'started')
         .order('touched_at', {ascending: false})
         .order('started_at', {ascending: false})
-        .order('created_at', {ascending: false}));
+        .order('created_at', {ascending: false}), op);
     mount(dom.sel1(".finished-tables > p"), "None finished",
       supabase
         .from('tables')
         .select(selection)
         .limit(5)
-        .eq('game_id', game_id)
+        .eq(key, id)
         .eq('status', 'finished')
         .order('finished_at', {ascending: false}));
   }
@@ -106,15 +107,25 @@ export function managing(game_id){
 }
 
 export async function getGame(game_id){
-  const {data: [game]} = await supabase
-    .from('games')
-    .select(`
-      id,
-      title,
-      seats,
-      thumbnail_url`)
-    .eq('id', game_id);
+  const {data: [game]} =
+    await supabase
+      .from('games')
+      .select(`
+        id,
+        title,
+        seats,
+        thumbnail_url`)
+      .eq('id', game_id);
   return game;
+}
+
+export async function getProfile(username){
+  const {data: [profile]} =
+    await supabase
+      .from("profiles")
+      .select("id,username,headline,description,avatar_url")
+      .eq("username", username);
+  return profile;
 }
 
 export function seated(seats){

@@ -45,8 +45,7 @@ function started({title, table_id, table_url, icon_url}){
   return template(`${title} started - ${table_id}`, `
   <body>
     <h1>Your Move</h1>
-    <p>Your game of <strong>${title}</strong> has begun at table <a href="${table_url}">${table_id}</a>.</p>
-    <p>You will be notified when it's your turn.</p>
+    <p><strong>${title}</strong> has begun at table <a href="${table_url}">${table_id}</a>.  You will be notified when it's your turn.</p>
     <img src="${icon_url}">
   </body>
 `);

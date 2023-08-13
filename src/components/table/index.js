@@ -213,12 +213,18 @@ export function table(item, now = new Date()){
 
 export function onUpdate(callback){
   $.on(document.body, "click", "button", async function(e){
+    dom.prop(this, "disabled", true);
+    dom.addClass(document.body, "blocked");
     const action = `${this.value}_table`,
           table = _.closest(this, "[data-table]"),
-          id = dom.attr(table, "data-table");
-    const {data, error} = await supabase.rpc(action, {
-      _table_id: id
-    });
-    callback(data);
+          _table_id = dom.attr(table, "data-table");
+    try {
+      const {data, error} = await supabase.rpc(action, {
+        _table_id
+      });
+      callback(data);
+    } finally {
+      dom.removeClass(document.body, "blocked");
+    }
   });
 }

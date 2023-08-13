@@ -183,3 +183,6 @@ body.anon #creates {
 .create {
   break-before: column;
 }
+.blocked {
+  cursor: wait !important;
+}

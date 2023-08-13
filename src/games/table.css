@@ -389,7 +389,7 @@ a#logo {
 #table[data-event-type="finished"] * {
   cursor: not-allowed;
 }
-#table #game {
+#table #game, #table #game * {
   cursor: default;
 }
 img[data-action] {
@@ -550,9 +550,6 @@ img[data-action="may"] {
 }
 #table #game .logo > path {
   fill: #FF5733;
-}
-a.user[href] #up {
-  cursor: pointer;
 }
 kbd {
   align-items: center;

@@ -141,9 +141,13 @@ body.anon img[data-nav="last-move"] {
   display: none;
 }
 .message {
-  animation: updown 3s ease-out infinite;
   position: relative;
   max-height: 30em;
+  min-height: 5em;
+  min-width: 23em;
+  height: 5em;
+  transition: min-height .25s, height .25s, width .25s;
+  animation: updown 3s ease-out infinite;
 }
 .message .icon {
   font-size: 3em;
@@ -184,9 +188,6 @@ body.anon img[data-nav="last-move"] {
   bottom: 1em;
   left: calc(50% - 12.5em);
   border: solid 2px white;
-  min-width: 23em;
-  min-height: 5em;
-  height: 5em;
   display: inline-block;
   text-align: left;
   margin: auto 0;
@@ -196,7 +197,6 @@ body.anon img[data-nav="last-move"] {
   background: rgba(62, 80, 92, .95);
   box-shadow: -3px 5px 5px -3px rgba(0, 0, 0, 0.6);
   border-radius: 1.1em;
-  transition: max-height .25s, height .25s, width .25s;
 }
 .message p {
   margin-top: 15px;
@@ -299,11 +299,11 @@ body.anon img[data-nav="last-move"] {
 }
 #table[data-event-type="scoring"] #event {
   height: 7.5em;
-  transition: height .5s;
+  transition: height .5s, min-height .5s;
 }
 #table[data-event-type="finished"] #event {
   height: 14.5em;
-  transition: height .5s;
+  transition: height .5s, min-height .5s;
 }
 #table[data-table-status="finished"] #game,
 #table[data-table-status="locked"] #game,

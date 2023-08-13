@@ -140,6 +140,7 @@
 #table #event[data-type='scored-grandeur'] {
   overflow-y: hidden;
   height: 30em;
+  transition: height .5s, min-height .5s;
 }
 .players {
   width: 20em;

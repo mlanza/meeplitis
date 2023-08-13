@@ -35,6 +35,9 @@ if (user) {
     if (e.shiftKey && e.key === "Escape") {
       e.preventDefault();
       window.location = "/signout";
+    } else if (e.shiftKey && e.key === " " && session?.username) {
+      e.preventDefault();
+      window.location = `/profiles/?username=${session?.username}`;
     }
   });
 }

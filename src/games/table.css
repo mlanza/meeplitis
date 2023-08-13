@@ -551,6 +551,9 @@ img[data-action="may"] {
 #table #game .logo > path {
   fill: #FF5733;
 }
+a.user[href] #up {
+  cursor: pointer;
+}
 kbd {
   align-items: center;
   font-family: Montserrat;

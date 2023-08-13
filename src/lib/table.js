@@ -3,9 +3,12 @@ import dom from "/lib/atomic_/dom.js";
 import $ from "/lib/atomic_/reactives.js";
 import supabase from "/lib/supabase.js";
 import {presence} from "/lib/online.js";
+import {session} from "/lib/session.js";
 import {story, nav, hist, waypoint, refresh, atPresent, inPast} from "/lib/story.js";
 
 const {div, h1, a, span, img, ol, ul, li} = dom.tags(['div', 'h1', 'a', 'span', 'img', 'ol', 'ul', 'li']);
+
+_.maybe(session?.username, _.str("/profiles/?username=", _), dom.attr(dom.sel1("a.user"), "href", _));
 
 export function table(tableId){
   const $t = $.cell(null);

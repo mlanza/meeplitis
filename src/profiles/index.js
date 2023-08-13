@@ -10,7 +10,7 @@ const params = new URLSearchParams(document.location.search),
       you = session?.username === username;
 
 const profile = await getProfile(username);
-const {refreshTables} = managing('seated.player_id', profile.id, _.sort(_.desc(yourTurn), _));
+const {refreshTables} = managing('seated.player_id', profile.id, _.sort(_.desc(yourTurn), _.asc(_.get(_, "touched_at")), _));
 
 _.chain(you, dom.attr(document.body, "data-you", _));
 _.chain(profile.username, _.str(_, " | ", "Your Move"), dom.text(dom.sel1("head title"), _));

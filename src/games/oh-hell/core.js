@@ -129,22 +129,25 @@ function playable(state, seat){
   }, cards);
 }
 
-function moves(self, {type = null, seat = null}){
-  const types = type ? [type] : ["bid", "play", "commit"];
-  const seats = _.filtera(seat == null ? _.isSome : _.eq(seat, _), _.unique(_.concat(g.up(self), g.may(self))));
-  const state = _.deref(self);
-  return _.flatten(_.braid(function(type, seat){
-    const seated = _.nth(state.seated, seat);
-    switch(type){
-      case "bid":
-        return state.status === "bidding" ? bids(state, seat) : [];
-      case "play":
-        return state.up === seat && state.status === "playing" ? playable(state, state.up) : [];
-      case "commit":
-        return state.up === seat && state.status === "playing" && (state.awarded || seated.played) ? [{type: "commit", seat}] : [];
-    }
-  }, types, seats));
+
+function moves1(self){
+  return ["bid", "play", "commit"];
 }
+
+function moves3(self, type, seat){
+  const state = _.deref(self);
+  const seated = _.nth(state.seated, seat);
+  switch(type){
+    case "bid":
+      return state.status === "bidding" ? bids(state, seat) : [];
+    case "play":
+      return state.up === seat && state.status === "playing" ? playable(state, state.up) : [];
+    case "commit":
+      return state.up === seat && state.status === "playing" && (state.awarded || seated.played) ? [{type: "commit", seat}] : [];
+  }
+}
+
+const moves = _.overload(null, moves1, moves1, moves3);
 
 function undoable(self, {type}){
   return !_.includes(["started", "dealt", "bid", "committed", "finished"], type);

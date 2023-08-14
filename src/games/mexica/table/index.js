@@ -361,7 +361,7 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
   const {state, up} = curr;
   const {seated, tokens, canal1, canal2, bridges, period, contents, status, round, spent} = state;
   const {step, present} = motion;
-  const moves = present ? _.concat(g.moves(game, {type: "commit", seat}), g.moves(game, {type: "pass", seat})) : null;
+  const moves = present ? g.moves(game, {type: ["pass", "commit"], seat}) : null;
   const foundables = present ? g.moves(game, {type: "found-district", seat}) : null;
 
   dom.attr(el, "data-status", status);

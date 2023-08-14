@@ -120,11 +120,11 @@ export function added(curr, prior){
   return prior ? _.chain(events(curr), _.last(_.count(events(curr)) - _.count(events(prior)), _), _.toArray) : [];
 }
 
-function moves1(self){
-  return IGame.moves(self, {type: null, seat: null});
+export function moves(self, options = {}){
+  const types = typeof options.type === 'string' ? [options.type] : options.type || IGame.moves(self),
+        seats = typeof options.seat === 'number' ? [options.seat] : options.seat || everyone(self);
+  return _.flatten(_.braid(_.partial(IGame.moves, self), types, seats));
 }
-
-export const moves = _.overload(null, moves1, IGame.moves);
 
 export function notify(curr, prior){
   return _.difference(_.chain(curr, up), _.maybe(prior, up) || []);

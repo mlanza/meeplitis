@@ -1093,87 +1093,94 @@ export const accessibleLand = _.partly(function accessibleLand(contents, pilli, 
   }
 });
 
-function moves(self, {type = null, seat = null}){
-  const types = type ? [type] : ["construct-canal", "construct-bridge", "relocate-bridge", "found-district", "bank", "move", "pass", "commit", "place-pilli"];
-  const seats = _.filtera(seat == null ? _.isSome : _.eq(seat, _), g.up(self));
+function moves1(self){
+  return ["construct-canal", "construct-bridge", "relocate-bridge", "found-district", "bank", "move", "pass", "commit", "place-pilli"];
+}
+
+function moves3(self, type, seat){
+  const up = g.up(self);
+
+  if (!_.includes(up, seat)) {
+    return [];
+  }
+
   const {contents, capulli, canal1, canal2, bridges, period, status, spent, redeemed, banked, seated} = _.deref(self);
+  const {pilli, bank} = _.nth(seated, seat);
+  const from = pilli;
+  const unspent = remaining(spent, bank, redeemed);
+  const permit = [{type, seat}];
 
-  return _.flatten(_.braid(function(type, seat){
-    const {pilli, bank} = _.nth(seated, seat);
-    const from = pilli;
-    const unspent = remaining(spent, bank, redeemed);
-    const permit = [{type, seat}];
-
-    if (status == "placing-pilli") {
-      switch(type){
-        case "place-pilli": {
-          const taken = _.chain(seated, _.map(_.get(_, "pilli"), _), _.compact);
-          return pilli ? [] : _.chain(palaceSpots, _.remove(_.includes(taken, _), _), _.map(function(at){
-            return {type, details: {at}, seat}; //TODO compel 4th player to last position
-          }, _));
-        }
-
-        case "commit": {
-          return pilli ? [{type, seat}] : [];
-        }
-
-        default: {
-          return [];
-        }
+  if (status == "placing-pilli") {
+    switch(type){
+      case "place-pilli": {
+        const taken = _.chain(seated, _.map(_.get(_, "pilli"), _), _.compact);
+        return pilli ? [] : _.chain(palaceSpots, _.remove(_.includes(taken, _), _), _.map(function(at){
+          return {type, details: {at}, seat}; //TODO compel 4th player to last position
+        }, _));
       }
-    } else {
-      switch(type){
-        case "construct-canal": {
-          return canalsDepleted(canal1, canal2) ? [] : permit;
-        }
 
-        case "found-district": {
-          const markers = _.nth(capulli, period);
-          return _.map(function(details){
-            return {type, seat, details};
-          }, foundable(board, contents, markers, pilli));
-        }
+      case "commit": {
+        return pilli ? [{type, seat}] : [];
+      }
 
-        case "construct-bridge": {
-          return bridgesDepleted(bridges) ? [] : permit;
-        }
-
-        case "relocate-bridge": {
-          return bridgesDepleted(bridges) ? permit : [];
-        }
-
-        case "bank": {
-          return banked < 2 && spent < 6 ? permit : [];
-        }
-
-        case "move": {
-          const foot = unspent > 0 ?
-            _.map(function(to){
-              return {type, details: {by: "foot", from, to}, seat};
-            }, footways(pilli, board, contents)) : [];
-          const water = waterways(board, contents, _.compact(bridges));
-          const boat = contains([b], contents, pilli) ? _.map(function({from, to, cost}){
-            return {type: "move", details: {by: "boat", from, to, cost}, seat};
-          }, boats(pilli, _.compact(bridges), water, _.min(unspent, 4))) : [];
-          const teleport = unspent > 4 ? [{type: "move", details: {by: "teleport", from, cost: 5}, seat}] : [];
-          return _.concat(foot, boat, teleport);
-        }
-
-        case "pass": {
-          return spent < 6 ? permit : [];
-        }
-
-        case "commit": {
-          return spent > 5 ? permit : [];
-        }
-
-        default: {
-          return [];
-        }
+      default: {
+        return [];
       }
     }
-  }, types, seats));
+  } else {
+    switch(type){
+      case "construct-canal": {
+        return canalsDepleted(canal1, canal2) ? [] : permit;
+      }
+
+      case "found-district": {
+        const markers = _.nth(capulli, period);
+        return _.map(function(details){
+          return {type, seat, details};
+        }, foundable(board, contents, markers, pilli));
+      }
+
+      case "construct-bridge": {
+        return bridgesDepleted(bridges) ? [] : permit;
+      }
+
+      case "relocate-bridge": {
+        return bridgesDepleted(bridges) ? permit : [];
+      }
+
+      case "bank": {
+        return banked < 2 && spent < 6 ? permit : [];
+      }
+
+      case "move": {
+        const foot = unspent > 0 ?
+          _.map(function(to){
+            return {type, details: {by: "foot", from, to}, seat};
+          }, footways(pilli, board, contents)) : [];
+        const water = waterways(board, contents, _.compact(bridges));
+        const boat = contains([b], contents, pilli) ? _.map(function({from, to, cost}){
+          return {type: "move", details: {by: "boat", from, to, cost}, seat};
+        }, boats(pilli, _.compact(bridges), water, _.min(unspent, 4))) : [];
+        const teleport = unspent > 4 ? [{type: "move", details: {by: "teleport", from, cost: 5}, seat}] : [];
+        return _.concat(foot, boat, teleport);
+      }
+
+      case "pass": {
+        return spent < 6 ? permit : [];
+      }
+
+      case "commit": {
+        return spent > 5 ? permit : [];
+      }
+
+      default: {
+        return [];
+      }
+    }
+  }
 }
+
+const moves = _.overload(null, moves1, moves1, moves3);
 
 function metrics(self){
   const {seated} = _.deref(self);

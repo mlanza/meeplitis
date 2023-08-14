@@ -247,7 +247,7 @@ function compel1(self){ //compel play of final card in hand
   const seat = _.chain(self, up, _.first),
         type = "play",
         state = _.deref(self),
-        cards = g.moves(self, {seat, type});
+        cards = g.moves(self, {type, seat});
   const {hand} = state.seated[state.up] || {hand: null};
   return _.count(hand) === 1 && _.count(cards) === 1 ? compel3(self, _.first(cards), seat) : self;
 }

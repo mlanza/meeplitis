@@ -326,7 +326,7 @@ function workingCommand([curr, prior], seat, {contents}, game, el){
     }
     case "move":
       const {details} = curr;
-      const moves = g.moves(game, {seat, type});
+      const moves = g.moves(game, {type, seat});
       const to = _.maybe(moves, _.filter(_.comp(_.includes(["foot", "boat"], _), _.getIn(_, ["details", "by"])), _), _.mapa(_.getIn(_, ["details", "to"]), _), _.seq, _.join(" ", _));
       const teleport = _.chain(moves, _.detect(_.comp(_.eq(_, "teleport"), _.getIn(_, ["details", "by"])), _), _.not, _.not);
       const destinations = teleport ? _.join(" ", c.destinations(contents)) : null;
@@ -361,8 +361,8 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
   const {state, up} = curr;
   const {seated, tokens, canal1, canal2, bridges, period, contents, status, round, spent} = state;
   const {step, present} = motion;
-  const moves = present ? _.concat(g.moves(game, {seat, type: "commit"}), g.moves(game, {seat, type: "pass"})) : null;
-  const foundables = present ? g.moves(game, {type: "found-district"}) : null;
+  const moves = present ? _.concat(g.moves(game, {type: "commit", seat}), g.moves(game, {type: "pass", seat})) : null;
+  const foundables = present ? g.moves(game, {type: "found-district", seat}) : null;
 
   dom.attr(el, "data-status", status);
   dom.removeClass(el, "error");
@@ -586,7 +586,7 @@ $.on(el, "click", `#table.act[data-command-type="move"][data-command-from] div[d
         from = closestAttr(this, "data-command-from"),
         to   = closestAttr(this, "data-spot"),
         game = moment($story),
-        moves = g.moves(game, {type}),
+        moves = g.moves(game, {type, seat}),
         move = _.maybe(moves, _.detect(function({details}){
           return (details.from === from && details.to === to) || details.by === "teleport"
         }, _), _.update(_, "details", _.merge(_, {from, to}))); //merge completes teleport

@@ -123,7 +123,7 @@ function playable(state, seat){
   const trump = state.trump;
   const hand = seated.hand;
   const follows = lead ? _.pipe(_.get(_, "suit"), _.eq(_, lead.suit)) : _.identity;
-  const cards = lead ? (_.seq(_.filter(follows, hand)) || hand) : state.broken || tight(hand) ? hand : _.filter(_.pipe(_.get(_, "suit"), _.notEq(_, trump.suit)), hand);
+  const cards = lead ? (_.seq(_.filter(follows, hand)) || hand) : state.broke || tight(hand) ? hand : _.filter(_.pipe(_.get(_, "suit"), _.notEq(_, trump.suit)), hand);
   return seated.played ? [] : _.map(function(card){
     return {type: "play", seat, details: {card}};
   }, cards);
@@ -139,9 +139,9 @@ function moves(self, {type = null, seat = null}){
       case "bid":
         return state.status === "bidding" ? bids(state, seat) : [];
       case "play":
-        return state.up === seat && state.status === "playing" && !state.trick ? playable(state, state.up) : [];
+        return state.up === seat && state.status === "playing" ? playable(state, state.up) : [];
       case "commit":
-        return state.up === seat && (state.status === "confirming" || (state.status !== "bidding" && seated.played)) ? [{type: "commit", seat}] : [];
+        return state.up === seat && state.status === "playing" && (state.awarded || seated.played) ? [{type: "commit", seat}] : [];
     }
   }, types, seats));
 }
@@ -194,7 +194,7 @@ function execute(self, command){
     }
 
     case "play": {
-      const breaks = details.card.suit == state.trump.suit && !state.broken;
+      const breaks = details.card.suit == state.trump.suit && !state.broke;
       return _.chain(self, g.fold(_, _.assoc(command, "type", "played")),
         breaks ? g.fold(_, {type: "broke"}) : _.identity,
         function(self){
@@ -315,7 +315,8 @@ function fold(self, event){
           _.assoc(_, "status", "bidding"),
           _.assoc(_, "lead", lead),
           _.assoc(_, "up", lead),
-          _.assoc(_, "broken", false),
+          _.assoc(_, "awarded", null),
+          _.assoc(_, "broke", false),
           _.assoc(_, "trump", details.trump),
           _.assoc(_, "deck", details.deck),
           _.assoc(_, "round", details.round),
@@ -348,11 +349,11 @@ function fold(self, event){
     case "awarded": {
       return g.fold(self, event,
         _.pipe(
-          _.assoc(_, "status", "confirming"),
           _.update(_, "seated", _.mapa(function(seat){
             return _.assoc(seat, "played", null);
           }, _)),
           _.updateIn(_, ["seated", details.winner, "tricks"], _.conj(_, details.trick)),
+          _.assoc(_, "awarded", details.trick),
           _.assoc(_, "lead", details.winner)));
     }
 
@@ -362,6 +363,7 @@ function fold(self, event){
       const up = empty ? null : (played ? _.second(ordered(_.count(state.seated), state.up)) : state.lead);
       return g.fold(self, event,
         _.pipe(
+          _.assoc(_, "awarded", null),
           _.assoc(_, "status", "playing"),
           _.assoc(_, "up", up)));
     }

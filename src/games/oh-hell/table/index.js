@@ -7,7 +7,7 @@ import * as c from "../core.js";
 import * as g from "/lib/game.js";
 import {session, $online} from "/lib/session.js";
 import {table, ui, scored, outcome, subject} from "/lib/table.js";
-import {getSeated, getSeat, getConfig, story, hist} from "/lib/story.js";
+import {getSeated, getSeat, getConfig, story, hist, moment} from "/lib/story.js";
 import {describe} from "/components/table/index.js";
 
 const {img, li, div, span} = dom.tags(['img', 'li', 'div', 'span']);
@@ -110,7 +110,7 @@ $.sub($table, _.comp(_.compact(), _.map(describe), _.map(_.join("\n", _))), func
 });
 
 $.sub($hist, function([curr, prior, {step, offset}, game]){
-  const {seen, event, metrics, state, state: {trump, round, status, seated, deck, lead, broken, deals}} = curr;
+  const {seen, event, metrics, state, state: {trump, round, status, seated, deck, lead, broke, deals}} = curr;
   const {hand, bid} = _.nth(seated, seat) || {hand: null, bid: -1};
   const moves = g.moves(game);
   const cnt = _.count(seated);
@@ -135,7 +135,7 @@ $.sub($hist, function([curr, prior, {step, offset}, game]){
   }
 
   dom.attr(el, "data-lead", lead);
-  dom.attr(el, "data-played", event.type == "play" ? event.seat : "");
+  dom.attr(el, "data-played", event.type == "played" ? event.seat : "");
 
   _.eachIndexed(function(idx, {bid, tricks, hand, played, scored}){
     const plyd = _.nth(awarded, idx) || played;
@@ -148,9 +148,9 @@ $.sub($hist, function([curr, prior, {step, offset}, game]){
     }));
   }, seated);
 
-  dom.text(dom.sel1("#phase", el), {"bidding": "Bidding", "playing": `Playing ${leadSuit}`, "confirming": "Playing", "finished": "Finished"}[status]);
+  dom.text(dom.sel1("#phase", el), {"bidding": "Bidding", "playing": `Playing ${leadSuit}`, "finished": "Finished"}[status]);
   dom.attr(el, "data-status", status);
-  dom.attr(el, "data-broken", broken);
+  dom.attr(el, "data-broke", broke);
   dom.text(els.cards, _.count(deck) || 52);
   dom.attr(els.trump, "src", _.maybe(trump, cardSrc) || "");
   dom.text(els.roundNum, round + 1);
@@ -176,4 +176,4 @@ $.on(el, "click", '#table.present:not(.wait) .hand img', function(e){
   sh.dispatch($story, {type: "play", details: {card: {suit, rank}}});
 });
 
-Object.assign(window, {$, _, sh, session, $story, $table, $online, supabase});
+Object.assign(window, {$, _, sh, session, moment, $story, $table, $online, supabase});

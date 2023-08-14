@@ -67,12 +67,12 @@
   width: 9em;
   margin: 5px;
 }
-#table .broken {
+#table .broke {
   visibility: hidden;
   margin-top: -.8em;
   margin-bottom: 1em;
 }
-#table[data-broken="true"] .broken {
+#table[data-broke="true"] .broke {
   visibility: visible;
 }
 #table .upkeep {

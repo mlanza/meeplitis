@@ -78,15 +78,13 @@ function desc(event){
   }
 }
 
-function phase(status, leadSuit){
+function phase(status){
   const overall = _.first(status);
   if (overall === "finished") {
     return "Finished";
   } else {
-    const [round, rounds] = _.second(status)
-    const descs = {"bidding": "Bidding", "playing": `Playing ${leadSuit}`, "wait": null};
-    const phase = _.nth(status, 2);
-    const desc = descs[phase];
+    const [[round, rounds], leadSuit, phase] = _.chain(status, _.rest, _.toArray)
+    const desc = _.get({"bidding": "Bidding", "playing": `Playing ${leadSuit || ''}`, "wait": null}, phase);
     const progress = round > 0 ? `Round ${round} of ${rounds}` : null;
     return _.chain([progress, desc], _.compact, _.join(" : ", _));
   }
@@ -125,7 +123,6 @@ $.sub($hist, function([curr, prior, {step, offset}, game]){
   const {hand, bid} = _.nth(seated, seat) || {hand: null, bid: -1};
   const moves = g.moves(game);
   const cnt = _.count(seated);
-  const leadSuit = _.maybe(seated, _.nth(_, lead), _.getIn(_, ["played", "suit"])) || "";
   const awarded = event.type == "awarded" ? _.toArray(_.take(cnt, _.drop(cnt - event.details.lead, _.cycle(event.details.trick)))) : null;
 
   _.each(_.doto(_,
@@ -159,7 +156,7 @@ $.sub($hist, function([curr, prior, {step, offset}, game]){
     }));
   }, seated);
 
-  dom.text(dom.sel1("#phase", el), phase(g.status(game), leadSuit));
+  dom.text(dom.sel1("#phase", el), phase(g.status(game)));
   dom.attr(el, "data-status", status);
   dom.attr(el, "data-broke", broke);
   dom.text(els.cards, _.count(deck) || 52);

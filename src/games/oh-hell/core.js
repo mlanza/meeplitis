@@ -459,9 +459,10 @@ function perspective(self, seen, reality){
 }
 
 function status(self){
-  const {status, deals, round} = _.deref(self);
+  const {status, deals, round, seated, lead} = _.deref(self);
   if (round != null) {
-    return status === "finished" ? [status] : _.chain(["started", [round + 1, _.count(deals)], status], _.compact, _.toArray);
+    const leadSuit = _.maybe(seated, _.nth(_, lead), _.getIn(_, ["played", "suit"]));
+    return status === "finished" ? [status] : ["started", [round + 1, _.count(deals)], leadSuit, status];
   } else {
     return ["pending"];
   }

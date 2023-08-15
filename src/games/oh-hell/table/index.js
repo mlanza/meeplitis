@@ -71,7 +71,7 @@ function desc(event){
       return outcome(seated, event.details);
 
     case "awarded":
-      return ["Awards trick to ", subject(_.nth(seated, event.details.winner)), "."];
+      return ["Awards trick to ", _.chain(event.details.winner, _.nth(seated, _), _.get(_, "username")), "."];
 
     default:
       return event.type;

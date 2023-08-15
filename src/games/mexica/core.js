@@ -268,9 +268,10 @@ function committed(state){
   const {status, seated, capulli, period, up} = state;
   const seats = _.count(seated);
   const endRound = seats - 1 === up;
+  const over = state["scoring-round"] && period === 1;
   const absent = !!_.seq(_.remove(_.get(_, "pilli"), seated));
   return _.chain(state,
-    _.update(_, "round", endRound ? _.inc : _.identity),
+    _.update(_, "round", endRound && !over ? _.inc : _.identity),
     _.update(_, "up", function(up){
       return _.chain(seats, _.range, _.cycle, _.dropWhile(_.notEq(_, up), _), _.second);
     }),

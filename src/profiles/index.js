@@ -3,7 +3,7 @@ import dom from "/lib/atomic_/dom.js";
 import $ from "/lib/atomic_/reactives.js";
 import supabase from "/lib/supabase.js";
 import {session} from "/lib/session.js";
-import {table, managing, getProfile, seated, onUpdate} from "/components/table/index.js";
+import {managing, getProfile, onUpdate} from "/components/table/index.js";
 
 const params = new URLSearchParams(document.location.search),
       username = params.get('username'),

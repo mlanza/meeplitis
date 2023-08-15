@@ -3,7 +3,7 @@ import dom from "/lib/atomic_/dom.js";
 import $ from "/lib/atomic_/reactives.js";
 import supabase from "/lib/supabase.js";
 import {session} from "/lib/session.js";
-import {table, managing, getGame, seated, ready, onUpdate} from "/components/table/index.js";
+import {managing, getGame, onUpdate} from "/components/table/index.js";
 
 const game = await getGame("8Mj1");
 const {open, refreshTables} = managing('game_id', game.id);

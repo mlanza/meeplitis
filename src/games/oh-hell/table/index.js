@@ -20,10 +20,7 @@ if (!tableId) {
 }
 
 const el = dom.sel1("#table");
-const [roundNum, roundMax] = dom.sel(".round b", el);
 const els = {
-  roundNum,
-  roundMax,
   moves: dom.sel1(".moves", el),
   trump: dom.sel1(".trump img", el),
   cards: dom.sel1(".cards b", el),
@@ -78,6 +75,20 @@ function desc(event){
 
     default:
       return event.type;
+  }
+}
+
+function phase(status, leadSuit){
+  const overall = _.first(status);
+  if (overall === "finished") {
+    return "Finished";
+  } else {
+    const [round, rounds] = _.second(status)
+    const descs = {"bidding": "Bidding", "playing": `Playing ${leadSuit}`, "wait": null};
+    const phase = _.nth(status, 2);
+    const desc = descs[phase];
+    const progress = round > 0 ? `Round ${round} of ${rounds}` : null;
+    return _.chain([progress, desc], _.compact, _.join(" : ", _));
   }
 }
 
@@ -148,13 +159,11 @@ $.sub($hist, function([curr, prior, {step, offset}, game]){
     }));
   }, seated);
 
-  dom.text(dom.sel1("#phase", el), {"bidding": "Bidding", "playing": `Playing ${leadSuit}`, "finished": "Finished"}[status]);
+  dom.text(dom.sel1("#phase", el), phase(g.status(game), leadSuit));
   dom.attr(el, "data-status", status);
   dom.attr(el, "data-broke", broke);
   dom.text(els.cards, _.count(deck) || 52);
   dom.attr(els.trump, "src", _.maybe(trump, cardSrc) || "");
-  dom.text(els.roundNum, round + 1);
-  dom.text(els.roundMax, _.count(deals));
   dom.html(els.hand, _.map(function(card){
     return li(img({src: cardSrc(card), "data-suit": card.suit, "data-rank": card.rank}));
   }, hand));

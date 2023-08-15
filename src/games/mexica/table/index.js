@@ -298,6 +298,22 @@ function reconcileTemples(seat, level){
   }
 }
 
+function phase(status){
+  const overall = _.first(status);
+  if (overall === "finished") {
+    return "Finished";
+  } else {
+    const [period, round, phase] = _.chain(status, _.rest, _.toArray)
+    switch(phase) {
+      case "placing-pilli":
+        return `Choose Starting Spaces`;
+      case "actions":
+        return `Period ${period} : Round ${round}`;
+    }
+    return "";
+  }
+}
+
 function workingCommand([curr, prior], seat, {contents}, game, el){
   const type = curr?.type;
   const attrs = {
@@ -376,7 +392,7 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
   _.each(dom.removeClass(_, "foundable"), dom.sel(".foundable", demands));
 
   dom.toggleClass(el, "scoring-round", _.get(state, "scoring-round"));
-  dom.text(dom.sel1("#phase", el), {"placing-pilli": `Choose Starting Spaces`, "actions": `Round ${round}`, "finished": "Finished"}[status]);
+  dom.text(dom.sel1("#phase", el), phase(g.status(game)));
   dom.attr(els.actions, "data-remaining", status == "actions" ? _.max(6 - spent, 0) : 0);
 
   _.doseq(function(level){

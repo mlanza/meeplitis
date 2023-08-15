@@ -1212,9 +1212,9 @@ function undoable(self, {type}){
 }
 
 function status(self){
-  const {canal2, status} = _.deref(self);
+  const {canal2, status, round, period} = _.deref(self);
   if (_.chain(canal2, _.first, _.isSome)) {
-    return status === "finished" ? [status] : _.chain(["started", status], _.compact, _.toArray);
+    return status === "finished" ? [status] : ["started", period + 1, round, status];
   } else {
     return ["pending"];
   }

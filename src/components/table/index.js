@@ -98,7 +98,7 @@ export function managing(key, id, op = _.identity){
       supabase
         .from('tables')
         .select(selection)
-        .limit(5)
+        .limit(10)
         .eq(key, id)
         .eq('status', 'finished')
         .order('finished_at', {ascending: false}));

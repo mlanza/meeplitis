@@ -2,6 +2,12 @@ addEventListener("fetch", event => {
   event.respondWith(handleRequest(event.request))
 });
 
+function joined(names){
+  const copy = [...names].map(name => `<em>${name}</em>`);
+  const last = copy.pop();
+  return `${copy.join(', ')} and ${last}`;
+}
+
 function template(subject, body){
   const message = `<!DOCTYPE html>
   <html>
@@ -12,6 +18,18 @@ function template(subject, body){
       h1 {
         font-style: italic;
         font-family: "Racing Sans One", "Arial Black", Impact;
+      }
+      table {
+        margin: .5em 0;
+        font-family: monospace;
+        border-collapse: collapse;
+      }
+      th {
+        font-weight: 500;
+        text-decoration: underline;
+      }
+      th, td {
+        padding: .25em 1em;
       }
       p {
         font-size: 1.2em;
@@ -31,32 +49,44 @@ function template(subject, body){
   return {subject, message};
 }
 
-function up({title, table_id, table_url, icon_url}){
+function up({title, table_id, table_url, icon_url, recipients}){
+  const seated = joined(recipients.map(r => r.name));
   return template(`${title} awaits your move - ${table_id}`, `
   <body>
     <h1>Your Move</h1>
-    <p>It's your move in <strong>${title}</strong> at table <a href="${table_url}">${table_id}</a>.</p>
+    <p>It's your move in <strong>${title}</strong> involving ${seated} at table <a href="${table_url}">${table_id}</a>.</p>
     <img src="${icon_url}">
   </body>
 `);
 }
 
-function started({title, table_id, table_url, icon_url}){
+function started({title, table_id, table_url, icon_url, recipients}){
+  const seated = joined(recipients.map(r => r.name));
   return template(`${title} started - ${table_id}`, `
   <body>
     <h1>Your Move</h1>
-    <p><strong>${title}</strong> has begun at table <a href="${table_url}">${table_id}</a>.  You will be notified when it's your turn.</p>
+    <p><strong>${title}</strong> has begun at table <a href="${table_url}">${table_id}</a> involving ${seated}.  You will be notified when it's your turn.</p>
     <img src="${icon_url}">
   </body>
 `);
 }
 
-function finished({title, table_id, table_url, icon_url}){
+function finished({title, table_id, table_url, icon_url, recipients, outcome}){
+  const seated = joined(recipients.map(r => r.name));
+  const ranked = outcome.sort(function(a, b){
+    return a.place - b.place;
+  }).map(function({place, username, brief}){
+    return `<tr><td>${place}</td><td>${username}</td><td>${brief}</td></tr>`;
+  }).join('')
   return template(`${title} finished - ${table_id}`, `
   <body>
     <h1>Your Move</h1>
-    <p>Your game of <strong>${title}</strong> finished at table <a href="${table_url}">${table_id}</a>.</p>
+    <p>The game of <strong>${title}</strong> involving ${seated} finished at table <a href="${table_url}">${table_id}</a>.</p>
     <img src="${icon_url}">
+    <table>
+      <thead><tr><th>Rank</th><th>Player</th><th>Score</th></tr></thead>
+      <tbody>${ranked}</tbody>
+    </table>
   </body>
 `);
 }

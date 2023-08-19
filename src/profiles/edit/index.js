@@ -36,7 +36,7 @@ _.maybe(profile, _.get(_, "username"), dom.value(username, _));
 _.maybe(profile, _.get(_, "headline"), dom.value(headline, _));
 _.maybe(profile, _.get(_, "description"), dom.value(description, _));
 
-if (!profile) {
+if (!profile.username) {
   dom.prop(username, "disabled", "");
   username.focus();
 }

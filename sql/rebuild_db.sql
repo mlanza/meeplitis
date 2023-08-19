@@ -21,6 +21,17 @@ CREATE TYPE table_status AS ENUM ('open', 'vacant', 'full', 'started', 'locked',
 
 CREATE TYPE seating_mode AS ENUM ('random', 'joined', 'picked');
 
+CREATE TABLE profiles (
+    id uuid not null references auth.users on delete cascade,
+    username text null,
+    avatar_url text null,
+    headline character varying null,
+    website text null,
+    description text null,
+    updated_at timestamp with time zone null,
+    unique (username),
+    constraint username_length check ((char_length(username) >= 3)));
+
 CREATE TABLE games (
     id varchar(4) not null default generate_uid(4) primary key,
     title text not null,

@@ -28,7 +28,7 @@ export const session = data.session;
 export const $online = o.online(session?.username);
 
 dom.toggleClass(document.body, "anon", !user);
-session && dom.html(you, img({src: `${session?.avatar_url}?s=50`}));
+session && dom.html(you, img({src: session?.avatar_url}));
 
 if (user) {
   $.on(document.body, "keydown", function(e){

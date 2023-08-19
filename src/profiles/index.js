@@ -17,7 +17,7 @@ _.chain(profile.username, _.str(_, " | ", "Your Move"), dom.text(dom.sel1("head 
 _.chain(profile.username, dom.text(dom.sel1(".banner h1"), _));
 _.chain(profile.headline || "Mysteriously quiet", dom.text(dom.sel1(".banner .headline"), _));
 _.chain(profile.description || "Has not shared any details.", dom.html(dom.sel1(".about > p"), _));
-_.chain(profile.avatar_url, _.str(_, "?s=600"), dom.attr(dom.sel1(".banner img"), "src", _));
+_.chain(profile.avatar_url, dom.attr(dom.sel1(".banner img"), "src", _));
 
 function yourTurn(table){
   const seated = _.first(table.seated)?.seat;

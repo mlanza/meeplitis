@@ -6,7 +6,7 @@ import supabase from "/lib/supabase.js";
 import * as c from "../core.js";
 import * as g from "/lib/game.js";
 import {session, $online} from "/lib/session.js";
-import {table, diff, ui, scored, outcome, subject} from "/lib/table.js";
+import {table, diff, ui, outcome, subject} from "/lib/table.js";
 import {getSeated, getSeat, getConfig, story, nav, waypoint, hist, moment, wip} from "/lib/story.js";
 import {describe} from "/components/table/index.js";
 

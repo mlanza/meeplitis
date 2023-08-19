@@ -169,18 +169,31 @@ body.anon img[data-nav="last-move"] {
   display: none;
   visibility: hidden;
 }
-.victor img {
+.victor img,
+.victors img {
   border-radius: 1em;
-  border: solid 2px white;
   margin: 5px auto;
   clear: both;
   display: block;
   animation: arise .6s forwards;
+}
+.victor img {
+  border: solid 2px white;
   height: 150px;
+}
+.victors img {
+  height: 200px;
 }
 .victor {
   font-size: 1.3em;
   margin: -100px 0 .5em;
+}
+.victors {
+  font-size: 1.3em;
+  margin: -150px 0 .5em;
+}
+.victors + .scored [data-place='1'] {
+  scale: 1.1;
 }
 .message {
   position: fixed;

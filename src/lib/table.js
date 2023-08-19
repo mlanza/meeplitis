@@ -201,8 +201,8 @@ export function zone(seat, username, avatar_url, {stats, resources}){
     div({class: "area"}, resources));
 }
 
-function score(player, points){
-  return li(
+function score(player, points, place){
+  return li({"data-place": place},
     subject(player),
     span(points));
 }
@@ -214,18 +214,27 @@ export function scored(seated, {scoring}){
 }
 
 export function outcome(seated, {places, metrics}){
-  const first = _.count(_.filter(_.eq(_, 1), places)) === 1 ? _.indexOf(places, 1) : null;
-  const winner = _.maybe(first, _.nth(seated, _));
-  const ranked = _.chain(places, _.mapkv(function(k, v){
-    return [k, v];
-  }, _), _.toArray, _.sort(_.asc(_.second), _), _.mapa(_.first, _));
-  return [victor(winner), ol({class: "scored"}, _.mapa(function(seat){
-    const {points} = _.nth(metrics, seat);
-    return score(seated[seat], points);
-  }, ranked))];
+  const standings = _.chain(seated, _.mapIndexed(function(idx, seat){
+    const place = _.nth(places, idx),
+          {points} = _.nth(metrics, idx);
+    return Object.assign({}, seat, {place, points});
+  }, _), _.sort(_.asc(_.get(_, "place")), _));
+  const winners = _.filtera(_.pipe(_.get(_, "place"), _.eq(_, 1)), standings);
+  const highlight = _.count(winners) === 1 ? victor : victors;
+  return [highlight(winners),
+      ol({class: "scored"}, _.mapa(function(seat){
+        const {points, place} = seat;
+        return score(seat, points, place);
+      }, standings))];
 }
 
-export function victor(player){
+function victors(players) {
+  return div({class: "victors"},
+    img({src: "/images/trophy.png"}),
+    `The victory is shared!`);
+}
+
+function victor([player]){
   return div({class: "victor"},
     img({alt: player.username, src: `${player.avatar_url}?s=300`}),
     `${player.username} wins!`);

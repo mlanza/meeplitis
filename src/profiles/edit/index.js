@@ -31,7 +31,7 @@ _.chain(profile, _.get(_, "username"), function(username){
   username || dom.attr(form, "data-mode", "initial");
 });
 _.chain(profile, _.get(_, "headline"), _.either(_, "Mysteriously quiet"), dom.text(dom.sel1(".banner .headline"), _));
-_.chain(profile, _.get(_, "avatar_url"), _.str(_, "?s=200"), dom.attr(dom.sel1(".banner img"), "src", _));
+_.chain(profile, _.get(_, "avatar_url"), _.str(_, "?s=300"), dom.attr(dom.sel1(".banner img"), "src", _));
 _.maybe(profile, _.get(_, "username"), dom.value(username, _));
 _.maybe(profile, _.get(_, "headline"), dom.value(headline, _));
 _.maybe(profile, _.get(_, "description"), dom.value(description, _));

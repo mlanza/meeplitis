@@ -156,7 +156,7 @@ export function ui($table, $story, $ready, $hist, $online, log, seated, seat, de
     dom.toggleClass(els.event, "automatic", !player);
 
     if (player) {
-      dom.attr(dom.sel1("img.who", els.event), "src", _.maybe(player.avatar_url, _.str(_, "?s=80")));
+      dom.attr(dom.sel1("img.who", els.event), "src", _.maybe(player.avatar_url, _.str(_, "?s=300")));
       dom.text(dom.sel1("p.who", els.event), player.username);
     }
 
@@ -190,7 +190,7 @@ export function ui($table, $story, $ready, $hist, $online, log, seated, seat, de
 
 export function player(username, avatar_url, ...contents){
   return div({class: "player"},
-    div({class: "avatar"}, img({src: `${avatar_url}?s=104`})),
+    div({class: "avatar"}, img({src: `${avatar_url}?s=300`})),
     div(a({class: "username", "href": `/profiles/?username=${username}`}, h1(username)), contents),
     img({"data-action": "", src: "/images/pawn.svg"}));
 }
@@ -227,10 +227,10 @@ export function outcome(seated, {places, metrics}){
 
 export function victor(player){
   return div({class: "victor"},
-    img({alt: player.username, src: `${player.avatar_url}?s=150`}),
+    img({alt: player.username, src: `${player.avatar_url}?s=300`}),
     `${player.username} wins!`);
 }
 
 export function subject(player){
-  return span({class: "subject avatar"}, img({alt: player.username, src: `${player.avatar_url}?s=50`}));
+  return span({class: "subject avatar"}, img({alt: player.username, src: `${player.avatar_url}?s=300`}));
 }

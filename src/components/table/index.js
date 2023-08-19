@@ -176,7 +176,7 @@ function aged(dt, asof){
 }
 
 function avatar(player){
-  const src = _.str(player?.avatar_url, "?s=80");
+  const src = _.str(player?.avatar_url, "?s=300");
   return player ? a({href: `/profiles/?username=${player.username}`}, img({src, title: player.username})) : img({src: "/images/chair.jpg", title: "Vacant Seat"});
 }
 

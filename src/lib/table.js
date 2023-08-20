@@ -190,7 +190,7 @@ export function ui($table, $story, $ready, $hist, $online, log, seated, seat, de
 
 export function player(username, avatar_url, ...contents){
   return div({class: "player"},
-    div({class: "avatar"}, img({src: avatar_url)),
+    div({class: "avatar"}, img({src: avatar_url})),
     div(a({class: "username", "href": `/profiles/?username=${username}`}, h1(username)), contents),
     img({"data-action": "", src: "/images/pawn.svg"}));
 }

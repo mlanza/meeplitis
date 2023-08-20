@@ -11,6 +11,43 @@ h2 {
 section.started-tables {
   break-before: column;
 }
+section.profiles {
+  display: none;
+}
+body.show-profiles section {
+  display: none;
+}
+body.show-profiles section.profiles {
+  display: inherit;
+}
+body.show-profiles section {
+  width: 70em;
+}
+section.profiles figure {
+  display: inline-block;
+  height: 8em;
+  width: 8em;
+  border: solid 2px #3E505C;
+  border-radius: 1em;
+  box-shadow: -3px 5px 5px -3px rgba(0, 0, 0, 0.6);
+  margin: 1em;
+}
+section.profiles figcaption {
+  margin-top: -2em;
+  text-align: center;
+  color: white;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+  font-size: .8em;
+}
+section.profiles ul {
+  list-style: none;
+}
+section.profiles li {
+  padding: 0;
+  margin: 0;
+  display: inline-block;
+}
+
 #creates input[type="submit"] {
   padding: 5px;
   margin-left: 6em;

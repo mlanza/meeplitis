@@ -5,24 +5,44 @@ import supabase from "/lib/supabase.js";
 import {session} from "/lib/session.js";
 import {managing, getProfile, onUpdate} from "/components/table/index.js";
 
+const {figure, img, figcaption, li, a} = dom.tags(["figure", "figcaption", "img", "li", "a"]);
+
 const params = new URLSearchParams(document.location.search),
       username = params.get('username'),
       you = session?.username === username;
 
-const profile = await getProfile(username);
-const {refreshTables} = managing('seated.player_id', profile.id, _.sort(_.desc(yourTurn), _.asc(_.get(_, "touched_at")), _));
+dom.toggleClass(document.body, "show-profiles", !username);
+dom.toggleClass(document.body, "borderless-img", !username);
 
-_.chain(you, dom.attr(document.body, "data-you", _));
-_.chain(profile.username, _.str(_, " | ", "Your Move"), dom.text(dom.sel1("head title"), _));
-_.chain(profile.username, dom.text(dom.sel1(".banner h1"), _));
-_.chain(profile.headline || "Mysteriously quiet", dom.text(dom.sel1(".banner .headline"), _));
-_.chain(profile.description || "Has not shared any details.", dom.html(dom.sel1(".about > p"), _));
-_.chain(profile.avatar_url, dom.attr(dom.sel1(".banner img"), "src", _));
-
-function yourTurn(table){
-  const seated = _.first(table.seated)?.seat;
-  return _.includes(table.up, seated);
+function avatar(profile){
+  return figure({class: "avatar"}, img({src: profile.avatar_url}), figcaption(profile.username));
 }
 
-refreshTables();
-onUpdate(refreshTables);
+if (username) {
+  const profile = await getProfile(username);
+  const {refreshTables} = managing('seated.player_id', profile.id, _.sort(_.desc(yourTurn), _.asc(_.get(_, "touched_at")), _));
+
+  _.chain(you, dom.attr(document.body, "data-you", _));
+  _.chain(profile.username, _.str(_, " | ", "Your Move"), dom.text(dom.sel1("head title"), _));
+  _.chain(profile.username, dom.text(dom.sel1(".banner h1"), _));
+  _.chain(profile.headline || "Mysteriously quiet", dom.text(dom.sel1(".banner .headline"), _));
+  _.chain(profile.description || "Has not shared any details.", dom.html(dom.sel1(".about > p"), _));
+  _.chain(profile.avatar_url, dom.attr(dom.sel1(".banner img"), "src", _));
+
+  function yourTurn(table){
+    const seated = _.first(table.seated)?.seat;
+    return _.includes(table.up, seated);
+  }
+
+  refreshTables();
+  onUpdate(refreshTables);
+} else {
+  const el = dom.sel1("section.profiles ul");
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*');
+  for(const profile of data){
+    dom.append(el, li(a({href: `/profiles/?username=${profile.username}`}, avatar(profile))));
+  }
+}
+

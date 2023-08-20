@@ -47,6 +47,11 @@ section.profiles li {
   margin: 0;
   display: inline-block;
 }
+section.profiles div {
+  margin: 0 auto;
+  text-align: center;
+  width: 10em;
+}
 
 #creates input[type="submit"] {
   padding: 5px;

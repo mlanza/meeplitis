@@ -9,6 +9,7 @@ const {figure, img, figcaption, li, a} = dom.tags(["figure", "figcaption", "img"
 
 const params = new URLSearchParams(document.location.search),
       username = params.get('username'),
+      view = params.get('v') || "profiles",
       you = session?.username === username;
 
 dom.toggleClass(document.body, "show-profiles", !username);
@@ -39,7 +40,7 @@ if (username) {
 } else {
   const el = dom.sel1("section.profiles ul");
   const profiles = await supabase
-    .from('profiles')
+    .from(view)
     .select('username,avatar_url')
     .order('username', {ascending: true})
     .then(({data}) => data)

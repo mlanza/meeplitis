@@ -38,10 +38,15 @@ if (username) {
   onUpdate(refreshTables);
 } else {
   const el = dom.sel1("section.profiles ul");
-  const { data, error } = await supabase
+  const profiles = await supabase
     .from('profiles')
-    .select('*');
-  for(const profile of data){
+    .select('username,avatar_url')
+    .order('username', {ascending: true})
+    .then(({data}) => data)
+    .then(_.sort(_.asc(function(profile){
+      return profile.username.toLowerCase();
+    }), _));
+  for(const profile of profiles){
     dom.append(el, li(a({href: `/profiles/?username=${profile.username}`}, avatar(profile))));
   }
 }

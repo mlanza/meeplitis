@@ -30,7 +30,7 @@ CREATE TABLE profiles (
     description text null,
     updated_at timestamp with time zone null,
     unique (username),
-    constraint username_length check ((char_length(username) >= 3)));
+    constraint ck_username check (username ~ '^[a-zA-Z][a-zA-Z0-9\-_]{2,19}$');
 
 CREATE TABLE games (
     id varchar(4) not null default generate_uid(4) primary key,

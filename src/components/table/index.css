@@ -76,11 +76,8 @@
   width: 64px;
   height: 64px;
 }
-[data-table-status="started"] .seats .seat {
-  border-color: white;
-}
-[data-table-status="finished"] .seats .seat {
-  border-color: #777;
+.table[data-table-status="finished"] :is(div.game img, .seats .seat) {
+  border-color: rgba(255, 255, 255, 0.5);
 }
 [data-table-status="open"] .seats .seat {
   border-style: dashed;

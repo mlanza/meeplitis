@@ -32,6 +32,6 @@ function creates(open, game){
   return el;
 }
 
-session && _.chain(game, _.see("game"), _.partial(creates, open), dom.html(dom.sel1(".create > p"), _));
+session?.username && _.chain(game, _.see("game"), _.partial(creates, open), dom.html(dom.sel1(".create > p"), _));
 refreshTables();
 onUpdate(refreshTables);

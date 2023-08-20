@@ -199,8 +199,8 @@ export function table(item, now = new Date()){
         span({class: stamp}, _.maybe(age, _.join("", _), _.str(stamp || "", " ", _, " ago")))),
       div({class: "game"},
         a({href: `/games/${item.game.slug}`}, img({src: item.game.thumbnail_url, alt: item.game.title})),
-        !seat && open && session ? button({value: "join"}, "Join") : null,
-         seat && open && session ? button({value: "leave"}, "Leave") : null),
+        !seat && open && session?.username ? button({value: "join"}, "Join") : null,
+         seat && open && session?.username ? button({value: "leave"}, "Leave") : null),
       div({class: "seats"}, _.map(function(seat){
         const won = seat.place === 1;
         return span({"class": "seat avatar", "data-username": seat?.player?.username || "", "data-seat": seat.seat},

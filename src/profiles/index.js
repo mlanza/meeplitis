@@ -42,6 +42,7 @@ if (username) {
   const profiles = await supabase
     .from(view)
     .select('username,avatar_url')
+    .neq('username', null)
     .order('username', {ascending: true})
     .then(({data}) => data)
     .then(_.sort(_.asc(function(profile){

@@ -272,7 +272,8 @@ function scoring(self){
   const scoring = _.chain(state, _.get(_, "seated"), _.mapa(function(seat){
     const tricks = _.count(seat.tricks),
           bid = seat.bid,
-          points = tricks === bid ? 10 + tricks : 0;
+          bonus = tricks === bid ? 10 : 0,
+          points = tricks + bonus;
     return {bid, tricks, points};
   }, _));
   return g.execute(self, {type: "score", details: {scoring}});

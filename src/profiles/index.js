@@ -9,7 +9,6 @@ const {figure, img, figcaption, li, a} = dom.tags(["figure", "figcaption", "img"
 
 const params = new URLSearchParams(document.location.search),
       username = params.get('username'),
-      view = params.get('v') || "profiles",
       you = session?.username === username;
 
 dom.toggleClass(document.body, "show-profiles", !username);
@@ -17,6 +16,17 @@ dom.toggleClass(document.body, "borderless-img", !username);
 
 function avatar(profile){
   return figure({class: "avatar"}, img({src: profile.avatar_url}), figcaption(profile.username));
+}
+
+function entitle(view){
+  switch(view) {
+    case "active_players":
+      return "Active";
+    case "waiting_players":
+      return "Waiting";
+    default:
+      return "Everyone";
+  }
 }
 
 if (username) {
@@ -38,7 +48,13 @@ if (username) {
   refreshTables();
   onUpdate(refreshTables);
 } else {
-  const el = dom.sel1("section.profiles ul");
+  const view = params.get('v') || "profiles",
+        title = entitle(view);
+
+  const ul = dom.sel1("section.profiles ul"),
+        h1 = dom.sel1("section.profiles h1"),
+        p  = dom.sel1("section.profiles p");
+
   const profiles = await supabase
     .from(view)
     .select('username,avatar_url')
@@ -48,8 +64,12 @@ if (username) {
     .then(_.sort(_.asc(function(profile){
       return profile.username.toLowerCase();
     }), _));
+  dom.html(h1, title);
   for(const profile of profiles){
-    dom.append(el, li(a({href: `/profiles/?username=${profile.username}`}, avatar(profile))));
+    dom.append(ul, li(a({href: `/profiles/?username=${profile.username}`}, avatar(profile))));
+  }
+  if (!_.seq(profiles)) {
+    dom.text(p, "No results.");
   }
 }
 

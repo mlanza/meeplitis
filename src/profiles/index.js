@@ -11,9 +11,6 @@ const params = new URLSearchParams(document.location.search),
       username = params.get('username'),
       you = session?.username === username;
 
-dom.toggleClass(document.body, "show-profiles", !username);
-dom.toggleClass(document.body, "borderless-img", !username);
-
 function avatar(profile){
   return figure({class: "avatar"}, img({src: profile.avatar_url}), figcaption(profile.username));
 }
@@ -30,6 +27,9 @@ function entitle(view){
 }
 
 if (username) {
+  dom.attr(document.body, "data-view", "profile");
+  dom.removeClass(document.body, "borderless-img");
+
   const profile = await getProfile(username);
   const {refreshTables} = managing('seated.player_id', profile.id, _.sort(_.desc(yourTurn), _.asc(_.get(_, "touched_at")), _));
 
@@ -47,7 +47,10 @@ if (username) {
 
   refreshTables();
   onUpdate(refreshTables);
+
 } else {
+  dom.attr(document.body, "data-view", "profiles");
+
   const view = params.get('v') || "profiles",
         title = entitle(view);
 
@@ -65,6 +68,7 @@ if (username) {
       return profile.username.toLowerCase();
     }), _));
   dom.html(h1, title);
+  dom.html(ul, null);
   for(const profile of profiles){
     dom.append(ul, li(a({href: `/profiles/?username=${profile.username}`}, avatar(profile))));
   }

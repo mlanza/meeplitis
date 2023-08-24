@@ -8,20 +8,18 @@ h2 {
 .about p:first-child {
   margin-top: 0;
 }
-section.started-tables {
-  break-before: column;
-}
-section.profiles {
+body[data-view] :is(main, section) {
   display: none;
 }
-body.show-profiles section {
-  display: none;
-}
-body.show-profiles section.profiles {
+body[data-view="profile"] :is(main, section.started-tables, section.open-tables, section.started-tables, section.finished-tables),
+body[data-view="profiles"] :is(main, section.profiles) {
   display: inherit;
 }
-body.show-profiles section {
+body[data-view="profiles"] section {
   width: 70em;
+}
+section.started-tables {
+  break-before: column;
 }
 section.profiles figure {
   display: inline-block;
@@ -41,6 +39,8 @@ section.profiles figcaption {
 }
 section.profiles ul {
   list-style: none;
+  padding: 0;
+  margin: 0;
 }
 section.profiles li {
   padding: 0;
@@ -52,7 +52,6 @@ section.profiles div {
   text-align: center;
   width: 20em;
 }
-
 #creates input[type="submit"] {
   padding: 5px;
   margin-left: 6em;

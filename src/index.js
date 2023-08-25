@@ -9,5 +9,5 @@ if (session && !session?.username) {
 
 _.fmap(games(),
   _.see("games"),
-  _.map(render, _),
-  dom.html(dom.sel1(".games > p"), _));
+  _.map(_.pipe(render, dom.tag('li')), _),
+  dom.html(dom.sel1(".games > ul"), _));

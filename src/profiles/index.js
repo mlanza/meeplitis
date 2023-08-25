@@ -8,6 +8,7 @@ import {managing, getProfile, onUpdate} from "/components/table/index.js";
 const {figure, img, figcaption, li, a} = dom.tags(["figure", "figcaption", "img", "li", "a"]);
 
 const params = new URLSearchParams(document.location.search),
+      column = params.get('c') || "all_tables",
       username = params.get('username'),
       you = session?.username === username;
 
@@ -18,11 +19,11 @@ function avatar(profile){
 function entitle(column){
   switch(column) {
     case "open_tables":
-      return "At Open Tables";
+      return "seated at open tables";
     case "started_tables":
-      return "At Started Tables";
+      return "seated at started tables";
     default:
-      return "All";
+      return "one might face";
   }
 }
 
@@ -49,14 +50,12 @@ if (username) {
   onUpdate(refreshTables);
 
 } else {
-  dom.attr(document.body, "data-view", "profiles");
-
-  const column = params.get('c') || "all_tables",
-        title = entitle(column);
-
   const ul = dom.sel1("section.profiles ul"),
-        h1 = dom.sel1("section.profiles h1"),
+        h  = dom.sel1(".headline"),
         p  = dom.sel1("section.profiles p");
+
+  dom.attr(document.body, "data-view", "profiles");
+  _.chain(column, entitle, dom.append(h, " ", _));
 
   const profiles = await supabase
     .from('profiles_with_activity')
@@ -68,7 +67,6 @@ if (username) {
     .then(_.sort(_.asc(function(profile){
       return profile.username.toLowerCase();
     }), _));
-  dom.html(h1, title);
   dom.html(ul, null);
   for(const profile of profiles){
     dom.append(ul, li(a({href: `/profiles/?username=${profile.username}`}, avatar(profile))));

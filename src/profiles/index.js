@@ -17,10 +17,12 @@ function avatar(profile){
 
 function entitle(view){
   switch(view) {
-    case "active_players":
-      return "Active";
-    case "waiting_players":
-      return "Waiting";
+    case "open_players":
+      return "At Open Tables";
+    case "started_players":
+      return "At Started Tables";
+    case "finished_players":
+      return "At Finished Tables";
     default:
       return "Everyone";
   }

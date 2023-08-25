@@ -15,14 +15,12 @@ function avatar(profile){
   return figure({class: "avatar"}, img({src: profile.avatar_url}), figcaption(profile.username));
 }
 
-function entitle(view){
-  switch(view) {
-    case "open_players":
+function entitle(column){
+  switch(column) {
+    case "open_tables":
       return "At Open Tables";
-    case "started_players":
+    case "started_tables":
       return "At Started Tables";
-    case "finished_players":
-      return "At Finished Tables";
     default:
       return "All";
   }
@@ -53,17 +51,18 @@ if (username) {
 } else {
   dom.attr(document.body, "data-view", "profiles");
 
-  const view = params.get('v') || "profiles",
-        title = entitle(view);
+  const column = params.get('c') || "all_tables",
+        title = entitle(column);
 
   const ul = dom.sel1("section.profiles ul"),
         h1 = dom.sel1("section.profiles h1"),
         p  = dom.sel1("section.profiles p");
 
   const profiles = await supabase
-    .from(view)
+    .from('profiles_with_activity')
     .select('username,avatar_url')
     .neq('username', null)
+    .gt(column, 0)
     .order('username', {ascending: true})
     .then(({data}) => data)
     .then(_.sort(_.asc(function(profile){

@@ -24,7 +24,7 @@ function entitle(view){
     case "finished_players":
       return "At Finished Tables";
     default:
-      return "Everyone";
+      return "All";
   }
 }
 

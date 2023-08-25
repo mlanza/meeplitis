@@ -138,6 +138,18 @@ main h1, main h2, main h3, main h4 {
   margin-bottom: 0;
   padding-bottom: 0;
 }
+main h1 {
+  font-size: 1.8em;
+}
+main h2 {
+  font-size: 1.6em;
+}
+main h3 {
+  font-size: 1.4em;
+}
+main h4 {
+  font-size: 1.2em;
+}
 span.controls {
   margin-left: 5px;
   visibility: hidden;

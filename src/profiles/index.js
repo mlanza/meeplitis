@@ -4,27 +4,11 @@ import $ from "/lib/atomic_/reactives.js";
 import supabase from "/lib/supabase.js";
 import {session} from "/lib/session.js";
 import {managing, getProfile, onUpdate} from "/components/table/index.js";
-
-const {figure, img, figcaption, li, a} = dom.tags(["figure", "figcaption", "img", "li", "a"]);
+import {profiles, render} from "/lib/profiles.js";
 
 const params = new URLSearchParams(document.location.search),
       username = params.get('username'),
       you = session?.username === username;
-
-function avatar(profile){
-  return figure({class: "avatar"}, img({src: profile.avatar_url}), figcaption(profile.username));
-}
-
-function entitle(column){
-  switch(column) {
-    case "open_tables":
-      return "At Open Tables";
-    case "started_tables":
-      return "At Started Tables";
-    default:
-      return "All";
-  }
-}
 
 if (username) {
   dom.attr(document.body, "data-view", "profile");
@@ -51,30 +35,9 @@ if (username) {
 } else {
   dom.attr(document.body, "data-view", "profiles");
 
-  const column = params.get('c') || "all_tables",
-        title = entitle(column);
-
-  const ul = dom.sel1("section.profiles ul"),
-        h1 = dom.sel1("section.profiles h1"),
-        p  = dom.sel1("section.profiles p");
-
-  const profiles = await supabase
-    .from('profiles_with_activity')
-    .select('username,avatar_url')
-    .neq('username', null)
-    .gt(column, 0)
-    .order('username', {ascending: true})
-    .then(({data}) => data)
-    .then(_.sort(_.asc(function(profile){
-      return profile.username.toLowerCase();
-    }), _));
-  dom.html(h1, title);
-  dom.html(ul, null);
-  for(const profile of profiles){
-    dom.append(ul, li(a({href: `/profiles/?username=${profile.username}`}, avatar(profile))));
-  }
-  if (!_.seq(profiles)) {
-    dom.text(p, "No results.");
-  }
+  _.fmap(profiles(),
+    _.see("profiles"),
+    _.map(_.pipe(render, dom.tag('li')), _),
+    dom.html(dom.sel1(".profiles ul"), _));
 }
 

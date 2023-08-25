@@ -1,6 +1,22 @@
-.activity {
+@keyframes lesser-ping {
+  0% {
+    transform: scale(1);
+  }
+  15% {
+    transform: scale(1.05);
+  }
+  50% {
+    transform: scale(1);
+  }
+}
+.activity h2 + * {
   display: inline-block;
   margin: 1em;
+  animation: lesser-ping 1s ease-in .5s infinite;
+}
+.activity[data-open='0'] h2 + *,
+h2 + *:hover {
+  animation-play-state: paused;
 }
 .activity h2 {
   margin: 0;

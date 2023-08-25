@@ -1,0 +1,35 @@
+.activity {
+  display: inline-block;
+  margin: 1em;
+}
+.activity h2 {
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  font-size: 1em;
+}
+.activity .stats {
+  text-align: center;
+  scale: .9;
+}
+.activity .stats div.slash {
+  font-size: 2em;
+}
+.activity .stats div.count {
+  font-size: 1em;
+  max-width: 3em;
+  text-align: center;
+}
+.activity .stats div.count span {
+  font-weight: bold;
+}
+.activity .stats div.count,
+.activity .stats div.slash {
+  display: inline-block;
+}
+.activity img {
+  border: solid 3px dimgray;
+  border-radius: 1em;
+  height: 9em;
+  box-shadow: -3px 5px 5px -3px rgba(0, 0, 0, 0.6);
+}

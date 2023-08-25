@@ -6,7 +6,7 @@ const {img, a, h2, div, span, figure} = dom.tags(['img', 'a', 'h2', 'div', 'span
 
 export function render(item){
   return a({href: `/profiles/?username=${item.username}`},
-    div({class: "profile"},
+    div({class: "profile activity"},
     h2(item.username),
     figure({class: "avatar"},
       img({src: item.avatar_url})),

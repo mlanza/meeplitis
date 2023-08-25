@@ -1,4 +1,10 @@
-@import url(/games/effects.css);
+@import url(/activity.css);
+.profile img {
+  border: none;
+  border-radius: 0;
+  height: auto;
+  box-shadow: none;
+}
 body.meeple h1 {
   width: 10em;
 }
@@ -77,39 +83,3 @@ section.profiles div {
 #creates input[type="text"] {
   width: 25em;
 }
-.profile {
-  display: inline-block;
-  margin: 1em;
-}
-.profile h2 {
-  margin: 0;
-  padding: 0;
-  text-align: center;
-  font-size: 1em;
-}
-.profile .stats {
-  text-align: center;
-  scale: .9;
-}
-.profile .stats div.slash {
-  font-size: 2em;
-}
-.profile .stats div.count {
-  font-size: 1em;
-  max-width: 3em;
-  text-align: center;
-}
-.profile .stats div.count span {
-  font-weight: bold;
-}
-.profile .stats div.count,
-.profile .stats div.slash {
-  display: inline-block;
-}
-.profile img {
-  --border: solid 3px dimgray;
-  --border-radius: 1em;
-  --height: 9em;
-  --box-shadow: -3px 5px 5px -3px rgba(0, 0, 0, 0.6);
-}
-

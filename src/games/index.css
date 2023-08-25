@@ -31,3 +31,14 @@
   height: 9em;
   box-shadow: -3px 5px 5px -3px rgba(0, 0, 0, 0.6);
 }
+section.games ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+section.games li {
+  padding: 0;
+  margin: 0;
+  display: inline-block;
+}
+

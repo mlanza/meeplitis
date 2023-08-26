@@ -22,7 +22,10 @@ body[data-view="profiles"] :is(main, section.profiles) {
   display: inherit;
 }
 body[data-view="profiles"] section {
-  width: 70em;
+  width: 100%;
+}
+main {
+  columns: unset;
 }
 section.started-tables {
   break-before: column;

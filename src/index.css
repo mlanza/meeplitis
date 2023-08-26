@@ -181,7 +181,7 @@ footer {
   font-size: .8em;
   display: block;
   white-space: nowrap;
-  width: 30em;
+  width: 27em;
   position: fixed;
   bottom: 0;
   left: calc((100vw / 2) - 15em);
@@ -196,7 +196,7 @@ footer li {
   display: inline;
 }
 footer li + li::before {
-  content: " | "
+  content: " ♦️ "
 }
 footer a {
   color: white

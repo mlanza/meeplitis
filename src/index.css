@@ -130,6 +130,9 @@ main {
   column-gap: 2em;
   margin-bottom: -2em;
 }
+.home main {
+  columns: 1;
+}
 .centered main {
   columns: 1;
   padding: 1em;

@@ -30,6 +30,11 @@
   min-height: 4em;
   min-width: 4em;
 }
+.table .seat a img { /* firefox */
+  position: absolute;
+  top: 0;
+  left: 0;
+}
 .table .id {
   position: absolute;
   left: 112px;

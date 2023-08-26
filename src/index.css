@@ -128,7 +128,6 @@ main {
   columns: 2;
   column-width: 35em;
   column-gap: 2em;
-  column-fill: auto;
   margin-bottom: -2em;
 }
 .centered main {

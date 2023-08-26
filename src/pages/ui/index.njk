@@ -2,46 +2,45 @@
 title: Understanding the table UI
 headline: The what and why behind the interface
 subject_url: /images/meeple.png
-layout: layouts/page.njk
+layout: layouts/article.njk
 class: borderless-img
-post: |
-  The table ui (user interface)—[the screen on which a game is played](/games/oh-hell/table/?id=RTyNYRoZY5X)—is intentionally minimal.  At the top is a header bar.  It has the title of the game being played and potentially the phase/stage of the game.  The pawn icon <img src="../../images/pawn.svg" class="pawn"> in the rightmost position of the bar is lit (bright rather than dim) when it's your turn.
-
-  Hovering over the title of the game in the leftmost position of the bar reveals the configuration (as some games have options) in a tooltip.  These options are set by the player who opens the table.
-
-  Each player seated at the table is represented by a placard with their username, avatar and few other details about their status.  The placards of offline players are slightly faded.
-
-  A wobbling pawn <img src="../../images/pawn.svg" class="pawn up"> appears on the placard of the player obligated to move.
-
-  Actions are primarily driven by clicks—some actions, multiple clicks.  For example, “move this piece (click) from here to (click) there.”  Some moves are initiated by clicking pieces on the board or in a player tableau, and some by clicking buttons.  Knowing the rules of the game, you'll have a sense of what you can do and what you might click to do that.
-
-  A game plays out as a story told in frames.  As the story develops, messages at the bottom of the screen describe, in the active voice, what happened in the current frame.  (These messages can be dismissed with a click.)
-
-  The buttons in the upper right allow you to navigate the timeline backward <img src="../../images/back.png"> and forward <img src="../../images/forward.png">, to jump to the start of the game <img src="../../images/inception.png"> or to the last known move <img src="../../images/present.png"> which is also known as “the present.”  Hovering over these buttons reveals hints (tooltips) for how to navigate the timeline from the keyboard.
-
-  **When it's your turn to move, to do anything you must be in the present frame.**  The background pattern will change whenever you move between the past and present.  Note the difference.  The distinction is meant to be obvious because it's important.
-
-  The timeline bar <progress value="30" max="40"></progress> denotes your position in the known timeline, not how close you are to the end of the game.  As moves are made the timeline grows the present is replaced by newer frames.
-
-  The numbers next to the timeline bar, e.g. <b>30 of 40</b> indicate the frame you're viewing (<b>30</b>) and the total number of frames so far (<b>40</b>).  The total will increase all the way through the conclusion of the game at which time an exclamation will follow the total.  For example, <b>216 of 216!</b> denotes the final frame of a game which concluded after 216 discrete frames.
-
-  You may sometimes wish to take back a move.  When permitted, click do over <img src="../../images/do-over.png"> to discard a move you want to revise.
-
-  To conclude your turn and pass control to the next player click the “I'm done” button.  This button won't be visible until you've executed your turn.
-
-  ## How Your Move differs from other play-by-web sites
-
-  **The timeline is easy to navigate.**  In addition to the buttons described above, click <img src="../../images/last-move.png"> to jump to your last move and step forward to see what's happened since then.  And once you learn the keys, it only gets easier.
-
-  **Do overs are easy.**  Moves which should be easily reversible are easily reversible.  That's not to say all moves are reversible.  In general, what can be easily reversed in the real world can be easily reversed the digital realm.  This aims to keep rules and UI misunderstandings from forcing you to complete bad moves you accidentally started.
-
-  **The implementation framework necessitates retractibility.**  As such, a given game is not dependent on a developer deciding whether and how to handle it.  It's a prerequisite and it poses almost no cost to the developer.
-
-  **The “I'm done” button provides a consistent means of finishing your turn.**  In many situations, it would be obvious when you're done, thus, having to click a button seems superfluous.  But in some situations, making a move reveals its effects.  By not assuming a player is finished, he may review the consequences and decide whether to commit or rewind.  Having a regular and firm confirmation reduces misteps.
-
-  **Each supply pile presents its gerth visually.**  That is, in many user interfaces how much of a certain resource remains is conveyed soley by a number.  In the real world, say [Ticket to Ride](https://www.daysofwonder.com/tickettoride/), when you glance across the table at an opponent's train supply, you have an immediate sense of how much distance he has to cover based on the size of his pile.  Many online games abstract away the gerth of the pile.
-
-  In [Mexica](/games/mexica), supplies are represented by both number and gerth.  Pile size is represented visually, at a glance, same as in the real world.
-
-  **A game can be practically implemented on the back end with a single database function.**  The developer writes the back end (functional core) first then the front end (imperative shell).  An overarching goal of the site was to simplify how games are implemented.
 ---
+The table ui (user interface)—[the screen on which a game is played](/games/oh-hell/table/?id=RTyNYRoZY5X)—is intentionally minimal.  At the top is a header bar.  It has the title of the game being played and potentially the phase/stage of the game.  The pawn icon <img src="../../images/pawn.svg" class="pawn"> in the rightmost position of the bar is lit (bright rather than dim) when it's your turn.
+
+Hovering over the title of the game in the leftmost position of the bar reveals the configuration (as some games have options) in a tooltip.  These options are set by the player who opens the table.
+
+Each player seated at the table is represented by a placard with their username, avatar and few other details about their status.  The placards of offline players are slightly faded.
+
+A wobbling pawn <img src="../../images/pawn.svg" class="pawn up"> appears on the placard of the player obligated to move.
+
+Actions are primarily driven by clicks—some actions, multiple clicks.  For example, “move this piece (click) from here to (click) there.”  Some moves are initiated by clicking pieces on the board or in a player tableau, and some by clicking buttons.  Knowing the rules of the game, you'll have a sense of what you can do and what you might click to do that.
+
+A game plays out as a story told in frames.  As the story develops, messages at the bottom of the screen describe, in the active voice, what happened in the current frame.  (These messages can be dismissed with a click.)
+
+The buttons in the upper right allow you to navigate the timeline backward <img src="../../images/back.png"> and forward <img src="../../images/forward.png">, to jump to the start of the game <img src="../../images/inception.png"> or to the last known move <img src="../../images/present.png"> which is also known as “the present.”  Hovering over these buttons reveals hints (tooltips) for how to navigate the timeline from the keyboard.
+
+**When it's your turn to move, to do anything you must be in the present frame.**  The background pattern will change whenever you move between the past and present.  Note the difference.  The distinction is meant to be obvious because it's important.
+
+The timeline bar <progress value="30" max="40"></progress> denotes your position in the known timeline, not how close you are to the end of the game.  As moves are made the timeline grows the present is replaced by newer frames.
+
+The numbers next to the timeline bar, e.g. <b>30 of 40</b> indicate the frame you're viewing (<b>30</b>) and the total number of frames so far (<b>40</b>).  The total will increase all the way through the conclusion of the game at which time an exclamation will follow the total.  For example, <b>216 of 216!</b> denotes the final frame of a game which concluded after 216 discrete frames.
+
+You may sometimes wish to take back a move.  When permitted, click do over <img src="../../images/do-over.png"> to discard a move you want to revise.
+
+To conclude your turn and pass control to the next player click the “I'm done” button.  This button won't be visible until you've executed your turn.
+
+## How Your Move differs from other play-by-web sites
+
+**The timeline is easy to navigate.**  In addition to the buttons described above, click <img src="../../images/last-move.png"> to jump to your last move and step forward to see what's happened since then.  And once you learn the keys, it only gets easier.
+
+**Do overs are easy.**  Moves which should be easily reversible are easily reversible.  That's not to say all moves are reversible.  In general, what can be easily reversed in the real world can be easily reversed the digital realm.  This aims to keep rules and UI misunderstandings from forcing you to complete bad moves you accidentally started.
+
+**The implementation framework necessitates retractibility.**  As such, a given game is not dependent on a developer deciding whether and how to handle it.  It's a prerequisite and it poses almost no cost to the developer.
+
+**The “I'm done” button provides a consistent means of finishing your turn.**  In many situations, it would be obvious when you're done, thus, having to click a button seems superfluous.  But in some situations, making a move reveals its effects.  By not assuming a player is finished, he may review the consequences and decide whether to commit or rewind.  Having a regular and firm confirmation reduces misteps.
+
+**Each supply pile presents its gerth visually.**  That is, in many user interfaces how much of a certain resource remains is conveyed soley by a number.  In the real world, say [Ticket to Ride](https://www.daysofwonder.com/tickettoride/), when you glance across the table at an opponent's train supply, you have an immediate sense of how much distance he has to cover based on the size of his pile.  Many online games abstract away the gerth of the pile.
+
+In [Mexica](/games/mexica), supplies are represented by both number and gerth.  Pile size is represented visually, at a glance, same as in the real world.
+
+**A game can be practically implemented on the back end with a single database function.**  The developer writes the back end (functional core) first then the front end (imperative shell).  An overarching goal of the site was to simplify how games are implemented.

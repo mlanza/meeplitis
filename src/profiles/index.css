@@ -24,7 +24,7 @@ body[data-view="profiles"] :is(main, section.profiles) {
 body[data-view="profiles"] section {
   width: 100%;
 }
-main {
+body[data-view="profiles"] main {
   columns: unset;
 }
 section.started-tables {

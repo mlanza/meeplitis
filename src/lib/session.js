@@ -6,38 +6,35 @@ import "/lib/cmd.js";
 
 const img = dom.tag("img");
 const you = dom.sel1("#you");
-const data = {session: null, user: null};
 
-function Session(userId, username, avatar_url, accessToken){
-  Object.assign(this, {userId, username, avatar_url, accessToken});
+function Session(user, username, avatar_url, accessToken){
+  Object.assign(this, {user, username, avatar_url, accessToken});
+}
+
+async function registered(sess){
+  const {data: {user}} = await supabase.auth.getUser();
+  const {data: [profile], error} = await supabase.from("profiles").select("username,avatar_url").eq("id", user.id);
+  const {username, avatar_url} = profile ?? {username: null, avatar_url: null};
+  return new Session(user, username, avatar_url, sess?.access_token);
 }
 
 const {data: {session: sess}} = await supabase.auth.getSession();
-
-if (sess){
-  let {data: {user}} = await supabase.auth.getUser();
-  data.user = user;
-  const {data: [profile], error} = await supabase.from("profiles").select("username,avatar_url").eq("id", user.id);
-  const {username, avatar_url} = profile ?? {username: null, avatar_url: null};
-  dom.attr(you, "href", username ? `/profiles/?username=${username}` : '/profiles/edit');
-  data.session = new Session(user.id, username, avatar_url, sess?.access_token);
-}
-
-const user = data.user;
-export const session = data.session;
+export const session = sess ? await registered(sess) : null;
 export const $online = o.online(session?.username);
+export default session;
 
-dom.toggleClass(document.body, "anon", !user);
-session && dom.html(you, img({src: session?.avatar_url}));
+dom.toggleClass(document.body, "anon", !session);
 
-if (user) {
+if (session) {
+  dom.html(you, img({src: session.avatar_url}))
+  dom.attr(you, "href", username ? `/profiles/?username=${username}` : '/profiles/edit');
   $.on(document.body, "keydown", function(e){
     if (e.shiftKey && e.key === "Escape") {
       e.preventDefault();
       window.location = "/signout";
-    } else if (e.shiftKey && e.key === " " && session?.username) {
+    } else if (e.shiftKey && e.key === " " && session.username) {
       e.preventDefault();
-      window.location = `/profiles/?username=${session?.username}`;
+      window.location = `/profiles/?username=${session.username}`;
     }
   });
 }

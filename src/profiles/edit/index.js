@@ -2,7 +2,7 @@ import _ from "/lib/atomic_/core.js";
 import dom from "/lib/atomic_/dom.js";
 import $ from "/lib/atomic_/reactives.js";
 import supabase from "/lib/supabase.js";
-import {session} from "/lib/session.js";
+import session from "/lib/session.js";
 
 const username = dom.sel1("#username"),
       headline = dom.sel1("#headline"),
@@ -13,14 +13,14 @@ const username = dom.sel1("#username"),
 
 form.addEventListener("submit", process);
 
-if (!session?.userId) {
+if (!session?.user) {
   location.href = "/signin";
 }
 
 const { data: [profile], error } = await supabase
   .from('profiles')
   .select('*')
-  .eq('id', session?.userId);
+  .eq('id', session?.user.id);
 
 const {data: {user}} = await supabase.auth.getUser();
 
@@ -48,7 +48,7 @@ async function process(e) {
       const { data, error } = await supabase
         .from('profiles')
         .upsert({
-          id: session.userId,
+          id: session.user.id,
           username: dom.value(username),
           headline: dom.value(headline) || null,
           description: dom.value(description) || null

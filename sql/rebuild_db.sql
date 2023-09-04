@@ -32,6 +32,25 @@ CREATE TABLE profiles (
     unique (username),
     constraint ck_username check (username ~ '^[a-zA-Z][a-zA-Z0-9\-_]{2,19}$');
 
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Profiles are viewable by everyone."
+  ON profiles FOR SELECT USING (true);
+
+CREATE POLICY "Users can insert their own profile."
+  ON profiles FOR INSERT USING (auth.uid() = id);
+
+CREATE POLICY "Users can update their own profile."
+  ON profiles FOR UPDATE USING (auth.uid() = id);
+
+CREATE TABLE admins (
+    user_id uuid not null references auth.users on delete cascade);
+
+ALTER TABLE admins ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Admins are viewable by everyone."
+  ON admins FOR SELECT USING (true);
+
 CREATE TABLE games (
     id varchar(4) not null default generate_uid(4) primary key,
     title text not null,
@@ -65,12 +84,14 @@ CREATE TABLE tables (
     shredded_at timestamp -- replayable history was discarded; happens sometime after finished/abandoned
 );
 
---ALTER TABLE tables ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tables ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "tables are viewable by everyone."
+    ON tables FOR SELECT USING (true);
+
 ALTER TABLE tables REPLICA IDENTITY FULL;
 
 CREATE INDEX idx_tables_game_status ON tables (game_id, status);
-
---CREATE POLICY "tables are viewable by everyone."  ON tables FOR ALL USING (true);
 
 CREATE TABLE seats (
     table_id varchar(11) references tables(id) not null,
@@ -109,6 +130,9 @@ CREATE TABLE events(
 
 ALTER TABLE events ENABLE ROW LEVEL SECURITY;
 
+CREATE POLICY "Events are viewable by admins" ON "public"."events"
+    USING ((EXISTS ( SELECT 1 FROM admins a WHERE (a.user_id = auth.uid()))));
+
 ALTER TABLE tables
 ADD CONSTRAINT fk_last_touch
 FOREIGN KEY (id, last_touch_id)
@@ -125,6 +149,8 @@ CREATE TABLE jobs (
     created_at timestamp not null default now(),
     executed_at timestamp,
     tries smallint default 0);
+
+ALTER TABLE jobs ENABLE ROW LEVEL SECURITY;
 
 CREATE INDEX idx_jobs_status ON jobs (status, seq);
 

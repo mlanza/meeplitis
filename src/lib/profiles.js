@@ -16,12 +16,11 @@ export function render(item){
       div({class: "count"}, span(item.started_tables), " Started"))));
 }
 
-export function profiles(column = "all_tables") {
+export function profiles() {
   return supabase
     .from('profiles_with_activity')
     .select('username,avatar_url,open_tables,started_tables')
     .neq('username', null)
-    .gt(column, 0)
     .order('username', {ascending: true})
     .then(({data}) => data)
     .then(_.sort(_.asc(function(profile){

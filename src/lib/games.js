@@ -15,11 +15,10 @@ export function render(item){
         div({class: "count"}, span(item.started_tables), " Started"))));
 }
 
-export function games(column = "all_tables"){
+export function games(){
   return supabase
     .from("games_with_activity")
     .select("*")
-    .gt(column, 0)
     .order('title')
     .then(({data}) => data);
 }

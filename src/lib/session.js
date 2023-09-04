@@ -26,8 +26,11 @@ export default session;
 dom.toggleClass(document.body, "anon", !session);
 
 if (session) {
+  if (!session.username) {
+    dom.addClass(dom.sel1("#unidentified-user"), "reveal");
+  }
   dom.html(you, img({src: session.avatar_url}))
-  dom.attr(you, "href", username ? `/profiles/?username=${username}` : '/profiles/edit');
+  dom.attr(you, "href", session.username ? `/profiles/?username=${session.username}` : '/profiles/edit');
   $.on(document.body, "keydown", function(e){
     if (e.shiftKey && e.key === "Escape") {
       e.preventDefault();

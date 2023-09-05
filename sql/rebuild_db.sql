@@ -80,8 +80,7 @@ CREATE TABLE tables (
     updated_at timestamp,
     started_at timestamp,
     touched_at timestamp,
-    finished_at timestamp,
-    shredded_at timestamp -- replayable history was discarded; happens sometime after finished/abandoned
+    finished_at timestamp
 );
 
 ALTER TABLE tables ENABLE ROW LEVEL SECURITY;

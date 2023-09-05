@@ -25,7 +25,7 @@ begin
   into _allow;
 
   if not _allow then
-    raise '$ only % can undo % at table %', _up, _event_id, _table_id;
+    raise '$ only % can undo % at table %, user % tried', _up, _event_id, _table_id, auth.uid();
   end if;
 
   select chop from chop(_table_id, _event_id, true) into _count;

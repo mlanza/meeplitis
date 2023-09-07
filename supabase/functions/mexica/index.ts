@@ -1,8 +1,8 @@
 // @ts-nocheck
 import {serve} from "https://deno.land/std@0.131.0/http/server.ts";
-import {comp} from "https://yourmove.cc/lib/atomic/core.js";
-import * as g from "https://yourmove.cc/lib/game.js";
-import mexica from "https://yourmove.cc/games/mexica/core.js";
+import {comp} from "https://f5f77202.yourmove.pages.dev/lib/atomic/core.js";
+import * as g from "https://f5f77202.yourmove.pages.dev/lib/game.js";
+import mexica from "https://f5f77202.yourmove.pages.dev/games/mexica/core.js";
 const simulate = comp(g.effects, g.simulate(mexica));
 
 console.log("Let's play Mexica!");

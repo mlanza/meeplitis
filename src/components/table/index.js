@@ -122,8 +122,8 @@ export async function getGame(game_id){
 export async function getProfile(username){
   const {data: [profile]} =
     await supabase
-      .from("profiles")
-      .select("id,username,headline,description,avatar_url")
+      .from("profiles_with_activity")
+      .select("id,username,headline,description,avatar_url,last_sign_in_at")
       .eq("username", username);
   return profile;
 }

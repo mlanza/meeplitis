@@ -18,6 +18,7 @@ if (username) {
   const {refreshTables} = managing('seated.player_id', profile.id, _.sort(_.desc(yourTurn), _.asc(_.get(_, "touched_at")), _));
 
   _.chain(you, dom.attr(document.body, "data-you", _));
+  _.maybe(profile.last_sign_in_at, _.date, _.invokes(_, "toLocaleString", "en-US"), dom.text(dom.sel1("#last-sign-in"), _));
   _.chain(profile.username, _.str(_, " | ", "Your Move"), dom.text(dom.sel1("head title"), _));
   _.chain(profile.username, dom.text(dom.sel1(".banner h1"), _));
   _.chain(profile.headline || "Mysteriously quiet", dom.text(dom.sel1(".banner .headline"), _));

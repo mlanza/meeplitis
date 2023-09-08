@@ -17,7 +17,7 @@ h2 {
 body[data-view] :is(main, section) {
   display: none;
 }
-body[data-view="profile"] :is(main, section.started-tables, section.open-tables, section.started-tables, section.finished-tables),
+body[data-view="profile"] :is(main, section.about, section.stats, section.started-tables, section.open-tables, section.started-tables, section.finished-tables),
 body[data-view="profiles"] :is(main, section.profiles) {
   display: inherit;
 }
@@ -26,6 +26,11 @@ body[data-view="profiles"] section {
 }
 body[data-view="profiles"] main {
   columns: unset;
+}
+section label {
+  color: #3E505C;
+  font-weight: 300;
+  margin-right: 1em;
 }
 section.started-tables {
   break-before: column;

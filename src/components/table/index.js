@@ -123,7 +123,7 @@ export async function getProfile(username){
   const {data: [profile]} =
     await supabase
       .from("profiles_with_activity")
-      .select("id,username,headline,description,avatar_url,last_sign_in_at")
+      .select("id,username,headline,description,avatar_url,last_sign_in_at,last_moved_at")
       .eq("username", username);
   return profile;
 }

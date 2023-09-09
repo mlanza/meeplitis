@@ -3,6 +3,7 @@ import dom from "/lib/atomic_/dom.js";
 import $ from "/lib/atomic_/reactives.js";
 import supabase from "/lib/supabase.js";
 import {session} from "/lib/session.js";
+import {fmttime} from "/lib/dates.js";
 import {managing, getProfile, onUpdate} from "/components/table/index.js";
 import {profiles, render} from "/lib/profiles.js";
 
@@ -18,7 +19,8 @@ if (username) {
   const {refreshTables} = managing('seated.player_id', profile.id, _.sort(_.desc(yourTurn), _.asc(_.get(_, "touched_at")), _));
 
   _.chain(you, dom.attr(document.body, "data-you", _));
-  _.maybe(profile.last_sign_in_at, _.date, _.invokes(_, "toLocaleString", "en-US"), dom.text(dom.sel1("#last-sign-in"), _));
+  _.maybe(profile.last_sign_in_at, fmttime, dom.text(dom.sel1("#last-sign-in"), _));
+  _.maybe(profile.last_moved_at, fmttime, dom.text(dom.sel1("#last-moved"), _));
   _.chain(profile.username, _.str(_, " | ", "Your Move"), dom.text(dom.sel1("head title"), _));
   _.chain(profile.username, dom.text(dom.sel1(".banner h1"), _));
   _.chain(profile.headline || "Mysteriously quiet", dom.text(dom.sel1(".banner .headline"), _));

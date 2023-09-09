@@ -60,6 +60,11 @@ update tables
 set up = _up
 where tables.id = _table_id;
 
+update profiles p
+set last_moved_at = now()
+from seats s
+where p.id = s.player_id and s.table_id = _table_id and s.seat = _seat;
+
 select jsonb_array_length((_simulated->'notify')::jsonb)
 into _recipients;
 

@@ -28,7 +28,7 @@ CREATE TABLE profiles (
     headline character varying null,
     website text null,
     description text null,
-    updated_at timestamp with time zone null,
+    last_moved_at timestamp null,
     unique (username),
     constraint ck_username check (username ~ '^[a-zA-Z][a-zA-Z0-9\-_]{2,19}$');
 

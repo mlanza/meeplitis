@@ -91,6 +91,9 @@
 [data-table-status="finished"] .touched {
   visibility: hidden;
 }
+.table[data-table-status="finished"] .seat.avatar[data-place='1'] {
+  border-color: #ffd82c;
+}
 .touched, .finished {
   opacity: .5;
 }

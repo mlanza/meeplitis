@@ -203,7 +203,7 @@ export function table(item, now = new Date()){
          seat && open && session?.username ? button({value: "leave"}, "Leave") : null),
       div({class: "seats"}, _.map(function(seat){
         const won = seat.place === 1;
-        return span({"class": "seat avatar", "data-username": seat?.player?.username || "", "data-seat": seat.seat},
+        return span({"class": "seat avatar", "data-username": seat?.player?.username || "", "data-seat": seat.seat, "data-place": seat.place},
           img({class: "pawn", src: "/images/pawn.svg"}),
           won ? img({class: "won", title: "Winner", alt: "Winner", src: "/images/star.svg"}) : null,
           avatar(seat.player));

@@ -5,7 +5,7 @@ addEventListener("fetch", event => {
 function joined(names){
   const copy = [...names].map(name => `<em>${name}</em>`);
   const last = copy.pop();
-  return `${copy.join(', ')} and ${last}`;
+  return copy.length > 0 ? `${copy.join(', ')} and ${last}` : last;
 }
 
 function template(subject, body){

@@ -1,4 +1,4 @@
-create function immutable_usernames() returns trigger
+create or replace function immutable_usernames() returns trigger
   language plpgsql as
 $$
 begin
@@ -9,6 +9,6 @@ begin
 end;
 $$;
 
-create trigger immutable_usernames
+create or replace trigger immutable_usernames
    before update on profiles for each row
    execute procedure immutable_usernames();

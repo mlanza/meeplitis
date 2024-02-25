@@ -65,6 +65,11 @@ body.borderless-img .banner figure {
   margin-left: 125px;
   min-height: 1em;
 }
+.banner h1 sup {
+  font-size: .5em;
+  font-family: Montserrat;
+  font-weight: normal;
+}
 .banner .headline {
   padding: 0;
   margin: 0;

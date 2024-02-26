@@ -202,8 +202,9 @@ export function zone(seat, username, avatar_url, {stats, resources}){
 }
 
 function score(player){
-  const {points, place} = player;
-  return li({"data-place": place},
+  const {points, place, brief} = player;
+  const title = brief;
+  return li({"data-place": place, title},
     subject(player),
     span(points));
 }
@@ -214,10 +215,11 @@ export function scored(seated, {scoring}){
   }, scoring));
 }
 
-export function outcome(seated, {places, metrics}){
+export function outcome(seated, {places, metrics, briefs}){
   const standings = _.chain(seated, _.mapIndexed(function(idx, seat){
-    const place = _.nth(places, idx);
-    return Object.assign({place}, _.nth(metrics, idx), seat);
+    const place = _.nth(places, idx),
+          brief = _.nth(briefs, idx);
+    return Object.assign({place, brief}, _.nth(metrics, idx), seat);
   }, _), _.sort(_.asc(_.get(_, "place")), _));
   const winners = _.filtera(_.pipe(_.get(_, "place"), _.eq(_, 1)), standings);
   const highlight = _.count(winners) === 1 ? victor : victors;

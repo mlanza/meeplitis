@@ -405,6 +405,14 @@ a#logo {
 #table #game, #table #game * {
   cursor: default;
 }
+#table[data-event-type="finished"] #event,
+#table[data-event-type="finished"] #event * {
+  cursor: inherit;
+}
+#table[data-event-type="finished"] #event ol.scored li {
+  cursor: pointer;
+}
+
 img[data-action] {
   width: 3em;
   position: absolute;

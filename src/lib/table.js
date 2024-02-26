@@ -201,7 +201,8 @@ export function zone(seat, username, avatar_url, {stats, resources}){
     div({class: "area"}, resources));
 }
 
-function score(player, points, place){
+function score(player){
+  const {points, place} = player;
   return li({"data-place": place},
     subject(player),
     span(points));
@@ -215,17 +216,13 @@ export function scored(seated, {scoring}){
 
 export function outcome(seated, {places, metrics}){
   const standings = _.chain(seated, _.mapIndexed(function(idx, seat){
-    const place = _.nth(places, idx),
-          {points} = _.nth(metrics, idx);
-    return Object.assign({}, seat, {place, points});
+    const place = _.nth(places, idx);
+    return Object.assign({place}, _.nth(metrics, idx), seat);
   }, _), _.sort(_.asc(_.get(_, "place")), _));
   const winners = _.filtera(_.pipe(_.get(_, "place"), _.eq(_, 1)), standings);
   const highlight = _.count(winners) === 1 ? victor : victors;
   return [highlight(winners),
-      ol({class: "scored"}, _.mapa(function(seat){
-        const {points, place} = seat;
-        return score(seat, points, place);
-      }, standings))];
+      ol({class: "scored"}, _.mapa(score, standings))];
 }
 
 function victors(players) {
@@ -240,6 +237,6 @@ function victor([player]){
     `${player.username} wins!`);
 }
 
-export function subject(player){
-  return span({class: "subject avatar"}, img({alt: player.username, src: player.avatar_url}));
+export function subject({username, avatar_url}){
+  return span({class: "subject avatar"}, img({alt: username, src: avatar_url}));
 }

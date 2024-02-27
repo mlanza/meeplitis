@@ -114,9 +114,10 @@ function manageCreation(game, f){
   session?.username && _.chain(game, _.see("game"), g, dom.html(dom.sel1(".create > p"), _));
 }
 
-export async function spawnTables(game_id, creates){
-  const game = await getGame(game_id);
-  const {open, refreshTables} = managing('game_id', game_id);
+export async function spawnTables(creates){
+  const id = dom.attr(dom.sel1("#identity"), "data-id");
+  const game = await getGame(id);
+  const {open, refreshTables} = managing('game_id', id);
   manageCreation(game, _.partial(creates, open));
   refreshTables();
   onUpdate(refreshTables);

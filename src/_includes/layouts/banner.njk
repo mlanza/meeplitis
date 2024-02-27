@@ -7,7 +7,7 @@ stylesheets:
   <figure class="avatar">
     <img id="subject" src="{{ subject_url }}">
   </figure>
-  <h1 data-title="{{title}}">{{ title }}{% if release %}<sup>{{release}}</sup>{% endif %}</h1><span class="controls"><a href="/profiles/edit">Edit</a></span>
+  <h1 id="identity" data-title="{{title}}" {% if identity %} data-id="{{identity}}" {% endif %}>{{ title }}{% if release %}<sup>{{release}}</sup>{% endif %}</h1><span class="controls"><a href="/profiles/edit">Edit</a></span>
   <div class="headline">{{ headline }}</div>
 </header>
 <main>

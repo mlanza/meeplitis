@@ -8,7 +8,7 @@ import {spawnTables} from "/components/table/index.js";
 const {div, span, img, a, p, button, submit, form, label, input} = dom.tags(['div', 'span', 'img', 'a', 'p', 'button', 'submit', 'form', 'label', 'input']),
       radio = dom.tag('input', {type: "radio"});
 
-function creates(open, game){
+spawnTables(function(open, game){
   const el = form({id: "creates"},
     label(span("Players"), _.map(function(value){
       return label(value, radio({name: "players", value}, value === 2 ? {checked: "checked"} : null));
@@ -28,6 +28,4 @@ function creates(open, game){
     open({seats, config, remark});
   });
   return el;
-}
-
-spawnTables("SopC", creates);
+});

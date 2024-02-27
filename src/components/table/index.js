@@ -114,6 +114,7 @@ export async function getGame(game_id){
         id,
         title,
         seats,
+        status,
         thumbnail_url`)
       .eq('id', game_id);
   return game;

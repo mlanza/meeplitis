@@ -19,6 +19,8 @@ CREATE TYPE table_status AS ENUM ('open', 'vacant', 'full', 'started', 'locked',
 -- finished - the game has concluded
 -- abandoned - the game was not concluded before time ran out
 
+CREATE TYPE game_status AS ENUM ('up', 'down', 'capacity');
+
 CREATE TYPE seating_mode AS ENUM ('random', 'joined', 'picked');
 
 CREATE TABLE profiles (
@@ -54,6 +56,7 @@ CREATE POLICY "Admins are viewable by everyone."
 CREATE TABLE games (
     id varchar(4) not null default generate_uid(4) primary key,
     title text not null,
+    status game_status not null default 'up',
     slug varchar(30) not null,
     fn varchar(30) not null, -- name of versioned function
     seats int2[] not null,

@@ -106,6 +106,13 @@ export function managing(key, id, op = _.identity){
   return {open, refreshTables};
 }
 
+export function manageCreation(game, f){
+  const g = game.status == "up" ? f : function(game){
+    return div("Cannot create new tables.  ", game.status == "capacity" ? "Too many open games." : "Down for maintenance.");
+  }
+  session?.username && _.chain(game, _.see("game"), g, dom.html(dom.sel1(".create > p"), _));
+}
+
 export async function getGame(game_id){
   const {data: [game]} =
     await supabase

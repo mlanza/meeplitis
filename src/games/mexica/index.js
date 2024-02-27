@@ -3,7 +3,7 @@ import dom from "/lib/atomic_/dom.js";
 import $ from "/lib/atomic_/reactives.js";
 import supabase from "/lib/supabase.js";
 import {session} from "/lib/session.js";
-import {managing, getGame, onUpdate} from "/components/table/index.js";
+import {managing, getGame, manageCreation, onUpdate} from "/components/table/index.js";
 
 const game = await getGame("SopC");
 const {open, refreshTables} = managing('game_id', game.id);
@@ -32,6 +32,6 @@ function creates(open, game){
   return el;
 }
 
-session?.username && _.chain(game, _.see("game"), _.partial(creates, open), dom.html(dom.sel1(".create > p"), _));
+manageCreation(game, _.partial(creates, open));
 refreshTables();
 onUpdate(refreshTables);

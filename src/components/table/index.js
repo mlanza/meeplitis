@@ -41,6 +41,7 @@ game:game_id (
   id,
   title,
   seats,
+  status,
   slug,
   thumbnail_url
 )`;
@@ -108,7 +109,7 @@ export function managing(key, id, op = _.identity){
 
 export function manageCreation(game, f){
   const g = game.status == "up" ? f : function(game){
-    return div("Cannot create new tables.  ", game.status == "capacity" ? "Too many open games." : "Down for maintenance.");
+    return div("Cannot create new tables.  ", game.status == "capacity" ? "No more may be opened at this time." : "Down for maintenance.");
   }
   session?.username && _.chain(game, _.see("game"), g, dom.html(dom.sel1(".create > p"), _));
 }
@@ -192,6 +193,7 @@ function avatar(player){
 export function table(item, now = new Date()){
   const seat = seated(item.seats);
   const open = item.status === "open";
+  const {game} = item;
   const link = open ? span : a;
   const stamp = item.finished_at ? "finished" : item.touched_at ? "touched" : null;
   const age = _.maybe(item.finished_at || item.touched_at, _.date, _.partial(fromUTCDate, now), dt => aged(dt, now));
@@ -203,11 +205,11 @@ export function table(item, now = new Date()){
       "data-up": `${ _.join(" ", item.up) }`
     },
       span({class: "id"},
-        link({href: `/games/${item.game.slug}/table/?id=${item.id}`}, item.game.title, " - ", item.id), " ",
+        link({href: `/games/${game.slug}/table/?id=${item.id}`}, game.title, " - ", item.id), " ",
         span({class: stamp}, _.maybe(age, _.join("", _), _.str(stamp || "", " ", _, " ago")))),
       div({class: "game"},
-        a({href: `/games/${item.game.slug}`}, img({src: item.game.thumbnail_url, alt: item.game.title})),
-        !seat && open && session?.username ? button({value: "join"}, "Join") : null,
+        a({href: `/games/${game.slug}`}, img({src: game.thumbnail_url, alt: game.title})),
+        !seat && open && session?.username ? button({value: "join"}, game.status == "down" ? {disabled: "disabled"} : {}, "Join") : null,
          seat && open && session?.username ? button({value: "leave"}, "Leave") : null),
       div({class: "seats"}, _.map(function(seat){
         const won = seat.place === 1;

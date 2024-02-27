@@ -107,11 +107,19 @@ export function managing(key, id, op = _.identity){
   return {open, refreshTables};
 }
 
-export function manageCreation(game, f){
+function manageCreation(game, f){
   const g = game.status == "up" ? f : function(game){
     return div("Cannot create new tables.  ", game.status == "capacity" ? "No more may be opened at this time." : "Down for maintenance.");
   }
   session?.username && _.chain(game, _.see("game"), g, dom.html(dom.sel1(".create > p"), _));
+}
+
+export async function spawnTables(game_id, creates){
+  const game = await getGame(game_id);
+  const {open, refreshTables} = managing('game_id', game_id);
+  manageCreation(game, _.partial(creates, open));
+  refreshTables();
+  onUpdate(refreshTables);
 }
 
 export async function getGame(game_id){

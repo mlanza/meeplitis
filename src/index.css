@@ -129,6 +129,7 @@ section.credits label {
 }
 main {
   min-height: calc(100vh - 10.5em);
+  max-width: 78em;
   padding: 1em 1em 3em 9em;
   columns: 2;
   column-width: 35em;

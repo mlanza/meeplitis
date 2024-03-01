@@ -149,6 +149,7 @@ create table jobs (
     seq bigserial not null primary key,
     type job_type not null,
     details jsonb,
+    response jsonb,
     status job_status not null default 'pending',
     created_at timestamp not null default now(),
     executed_at timestamp,

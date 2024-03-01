@@ -195,7 +195,7 @@ function aged(dt, asof){
   }
 }
 
-const rankings = (function(){
+export const rankings = (function(){
   const {table, tbody, thead, tr, td, th} = tags;
   return function rankings({seated, seats}){
     const ranks = _.sort(_.asc(_.get(_, "place")), _.map(_.merge, seated, seats));

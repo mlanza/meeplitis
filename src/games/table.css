@@ -80,6 +80,53 @@ body {
 #table.wait {
   cursor: wait;
 }
+
+#table[data-event-type="finished"] #event[data-type='finished'] {
+  max-height: 15em;
+  transition: max-height .3s ease-in-out;
+
+}
+#table[data-event-type="finished"] table.rankings {
+  opacity: 0;
+  transition: opacity .2s ease-in-out 0s;
+}
+#table[data-event-type="finished"] #event[data-type='finished']:hover {
+  height: auto;
+  max-height: 20em;
+  transition: max-height .3s ease-in-out;
+}
+#table[data-event-type="finished"] #event[data-type='finished']:hover table.rankings {
+  opacity: 1;
+  transition: opacity .3s ease-in-out .2s;
+}
+#table[data-event-type="finished"] #event[data-type='finished'] table.rankings a {
+  color: white;
+}
+
+table.rankings {
+  font-size: .9em;
+}
+table.rankings th {
+  font-weight: 500;
+}
+table.rankings :is(td,th) {
+  padding: 1px 5px;
+}
+table.rankings .place {
+  min-width: 1em;
+  text-align: center;
+}
+table.rankings .player {
+  text-align: right;
+}
+table.rankings .brief {
+  min-width: 10em;
+  text-align: left;
+}
+table.rankings {
+  margin-top: .5em;
+  font-size: .8em;
+}
 sup,
 sub {
   vertical-align: baseline;
@@ -145,7 +192,6 @@ body.anon img[data-nav="last-move"] {
   max-height: 30em;
   min-height: 5em;
   min-width: 23em;
-  height: 5em;
   transition: min-height .25s, height .25s, width .25s;
   animation: updown 3s ease-out infinite;
 }
@@ -311,11 +357,11 @@ body.anon img[data-nav="last-move"] {
   bottom: 10px;;
 }
 #table[data-event-type="scoring"] #event {
-  height: 7.5em;
+  min-height: 7.5em;
   transition: height .5s, min-height .5s;
 }
 #table[data-event-type="finished"] #event {
-  height: 14.5em;
+  min-height: 14.5em;
   transition: height .5s, min-height .5s;
 }
 #table[data-table-status="finished"] #game,

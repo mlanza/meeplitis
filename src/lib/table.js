@@ -5,6 +5,7 @@ import supabase from "/lib/supabase.js";
 import {presence} from "/lib/online.js";
 import {session} from "/lib/session.js";
 import {story, nav, hist, waypoint, refresh, atPresent, inPast} from "/lib/story.js";
+import {rankings} from "/components/table/index.js";
 
 const {div, h1, a, span, img, ol, ul, li} = dom.tags(['div', 'h1', 'a', 'span', 'img', 'ol', 'ul', 'li']);
 
@@ -216,6 +217,9 @@ export function scored(seated, {scoring}){
 }
 
 export function outcome(seated, {places, metrics, briefs}){
+  const seats = _.mapa(function(place, metric, brief, player){
+    return {place, metric, brief, player};
+  }, places, metrics, briefs, seated);
   const standings = _.chain(seated, _.mapIndexed(function(idx, seat){
     const place = _.nth(places, idx),
           brief = _.nth(briefs, idx);
@@ -224,7 +228,8 @@ export function outcome(seated, {places, metrics, briefs}){
   const winners = _.filtera(_.pipe(_.get(_, "place"), _.eq(_, 1)), standings);
   const highlight = _.count(winners) === 1 ? victor : victors;
   return [highlight(winners),
-      ol({class: "scored"}, _.mapa(score, standings))];
+      ol({class: "scored"}, _.mapa(score, standings)),
+      rankings({seated, seats})];
 }
 
 function victors(players) {

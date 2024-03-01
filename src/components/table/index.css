@@ -16,15 +16,11 @@
   opacity: 1;
   transition: opacity .5s ease-in-out;
 }
-
 table.rankings {
   font-size: .9em;
 }
 table.rankings th {
   font-weight: 500;
-}
-table.rankings :is(th.player, th.brief) {
-  --visibility: hidden;
 }
 table.rankings :is(td,th) {
   padding: 1px 5px;

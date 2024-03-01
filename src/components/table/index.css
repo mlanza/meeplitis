@@ -1,5 +1,46 @@
 @import url(../../games/effects.css);
 @import url(/common.css);
+.table[data-table-status="finished"] {
+  max-height: 5em;
+  transition: max-height .3s ease-in-out;
+  margin-bottom: 2em;
+}
+.table[data-table-status="finished"] table.rankings {
+  opacity: 0;
+  transition: opacity .3s ease-in-out;
+}
+.table[data-table-status="finished"]:hover {
+  max-height: 20em;
+}
+.table[data-table-status="finished"]:hover table.rankings {
+  opacity: 1;
+  transition: opacity .5s ease-in-out;
+}
+
+table.rankings {
+  font-size: .9em;
+}
+table.rankings th {
+  font-weight: 500;
+}
+table.rankings :is(th.player, th.brief) {
+  --visibility: hidden;
+}
+table.rankings :is(td,th) {
+  padding: 1px 5px;
+}
+table.rankings .place {
+  min-width: 1em;
+  text-align: center;
+}
+table.rankings .player {
+  min-width: 9em;
+  text-align: right;
+}
+table.rankings .brief {
+  min-width: 10em;
+  text-align: left;
+}
 .table {
   position: relative;
   border: solid 1px black;

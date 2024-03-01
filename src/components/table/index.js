@@ -4,7 +4,8 @@ import $ from "/lib/atomic_/reactives.js";
 import supabase from "/lib/supabase.js";
 import {session} from "/lib/session.js";
 
-const {div, span, img, a, p, button} = dom.tags(['div', 'span', 'img', 'a', 'p', 'button']);
+const tags = dom.tags(['div', 'span', 'img', 'a', 'p', 'button', 'table', 'tbody', 'thead', 'tr', 'th', 'td']);
+const {div, span, img, a, p, button} = tags;
 
 function ohhell(config){
   const descriptors = [];
@@ -25,7 +26,8 @@ const games = {
 
 export const selection = `
 *,
-seated:seats!inner(*),
+seat:seats!inner(*),
+seated:seats(*),
 seats (
   id,
   seat,
@@ -193,6 +195,20 @@ function aged(dt, asof){
   }
 }
 
+const rankings = (function(){
+  const {table, tbody, thead, tr, td, th} = tags;
+  return function rankings({seated, seats}){
+    const ranks = _.sort(_.asc(_.get(_, "place")), _.map(_.merge, seated, seats));
+    const rows = _.map(function({place, player, brief}){
+      return tr(td({class: "player"}, a({href: `/profiles/?username=${player.username}`}, player.username)), td({class: "place"}, place), td({class: "brief"}, brief));
+    }, ranks);
+    return table({class: "rankings"},
+      thead(tr(th({class: "player"}, "player"), th({class: "place"}, "#"), th({class: "brief"}, "score"))),
+      tbody(rows)
+    )
+  }
+})();
+
 function avatar(player){
   const src = player?.avatar_url;
   return player ? a({href: `/profiles/?username=${player.username}`}, img({src, title: player.username})) : img({src: "/images/chair.jpg", title: "Vacant Seat"});
@@ -206,6 +222,7 @@ export function table(item, now = new Date()){
   const link = open ? span : a;
   const thinned = item.thinned_at ? img({class: "thinned", src: "/images/broom.png", title: "move history purged"}) : null;
   const stamp = item.finished_at ? "finished" : item.touched_at ? "touched" : null;
+  const ranked = stamp == 'finished' ? rankings(item) : null;
   const age = _.maybe(item.finished_at || item.touched_at, _.date, _.partial(fromUTCDate, now), dt => aged(dt, now));
   return div({
       "class": "table",
@@ -228,7 +245,7 @@ export function table(item, now = new Date()){
           won ? img({class: "won", title: "Winner", alt: "Winner", src: "/images/star.svg"}) : null,
           avatar(seat.player));
       }, _.sort(_.asc(_.get(_, "seat")), item.seats)),
-      _.map(p, describe(item))));
+      _.map(p, describe(item))), ranked);
 }
 
 export function onUpdate(callback){

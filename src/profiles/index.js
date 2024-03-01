@@ -16,7 +16,7 @@ if (username) {
   dom.removeClass(document.body, "borderless-img");
 
   const profile = await getProfile(username);
-  const {refreshTables} = managing('seated.player_id', profile.id, _.sort(_.desc(yourTurn), _.asc(_.get(_, "touched_at")), _));
+  const {refreshTables} = managing('seat.player_id', profile.id, _.sort(_.desc(yourTurn), _.asc(_.get(_, "touched_at")), _));
 
   _.chain(you, dom.attr(document.body, "data-you", _));
   _.maybe(profile.last_sign_in_at, fmttime, dom.text(dom.sel1("#last-sign-in"), _));

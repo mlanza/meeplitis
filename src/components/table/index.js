@@ -215,7 +215,7 @@ export function table(item, now = new Date()){
       "data-up": `${ _.join(" ", item.up) }`
     },
       span({class: "id"},
-        link({href: `/games/${game.slug}/table/?id=${item.id}`}, game.title, " - ", item.id), " ",
+        link(thinned ? null : {href: `/games/${game.slug}/table/?id=${item.id}`}, game.title, " - ", item.id), " ",
         span({class: stamp}, _.maybe(age, _.join("", _), _.str(stamp || "", " ", _, " ago"))), " ", thinned),
       div({class: "game"},
         a({href: `/games/${game.slug}`}, img({src: game.thumbnail_url, alt: game.title})),

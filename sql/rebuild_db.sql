@@ -75,6 +75,7 @@ CREATE TABLE tables (
     seating seating_mode default 'random',
     config jsonb, -- configure this play
     up smallint[], -- seats required to take action
+    keep boolean not null default false,
     seating_change_at timestamp,
     status table_status not null default 'open',
     last_touch_id varchar(5) references events(id), -- last event touching game state
@@ -83,7 +84,8 @@ CREATE TABLE tables (
     updated_at timestamp,
     started_at timestamp,
     touched_at timestamp,
-    finished_at timestamp
+    finished_at timestamp,
+    thinned_at timestamp
 );
 
 ALTER TABLE tables ENABLE ROW LEVEL SECURITY;

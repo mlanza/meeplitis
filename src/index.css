@@ -142,6 +142,7 @@ main {
 .centered main {
   columns: 1;
   padding: 1em;
+  max-width: none;
 }
 main h1, main h2, main h3, main h4 {
   margin-bottom: 0;

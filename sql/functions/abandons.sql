@@ -25,6 +25,8 @@ begin
   end loop;
   close _stale_tables_cursor;
 
+  raise log '$ abandoned % tables', _count;
+
   return _count;
 
 end;

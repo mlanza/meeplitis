@@ -29,6 +29,8 @@ begin
   end loop;
   close _plump_tables_cursor;
 
+  raise log '$ thinned % tables', _count;
+
   return _count;
 
 end;

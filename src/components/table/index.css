@@ -22,6 +22,10 @@
 .table img {
   height: 5em;
 }
+.table img.thinned {
+  height: 12px;
+  cursor: pointer;
+}
 .table :is(.seat, .game img) {
   border-radius: 1em;
   border: solid 3px white;

@@ -204,6 +204,7 @@ export function table(item, now = new Date()){
   const open = item.status === "open";
   const {game} = item;
   const link = open ? span : a;
+  const thinned = item.thinned_at ? img({class: "thinned", src: "/images/broom.png", title: "move history purged"}) : null;
   const stamp = item.finished_at ? "finished" : item.touched_at ? "touched" : null;
   const age = _.maybe(item.finished_at || item.touched_at, _.date, _.partial(fromUTCDate, now), dt => aged(dt, now));
   return div({
@@ -215,7 +216,7 @@ export function table(item, now = new Date()){
     },
       span({class: "id"},
         link({href: `/games/${game.slug}/table/?id=${item.id}`}, game.title, " - ", item.id), " ",
-        span({class: stamp}, _.maybe(age, _.join("", _), _.str(stamp || "", " ", _, " ago")))),
+        span({class: stamp}, _.maybe(age, _.join("", _), _.str(stamp || "", " ", _, " ago"))), " ", thinned),
       div({class: "game"},
         a({href: `/games/${game.slug}`}, img({src: game.thumbnail_url, alt: game.title})),
         !seat && open && session?.username ? button({value: "join"}, game.status == "down" ? {disabled: "disabled"} : {}, "Join") : null,

@@ -11,6 +11,7 @@ begin
   with deletions as (
     delete from jobs
     where created_at < now() - interval '30 days'
+    and status = 'succeeded'
     returning *
   )
 

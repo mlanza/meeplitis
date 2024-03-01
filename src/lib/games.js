@@ -22,3 +22,12 @@ export function games(){
     .order('title')
     .then(({data}) => data);
 }
+
+export function open_games(){
+  return supabase
+    .from("games_with_activity")
+    .select("*")
+    .gt("open_tables", 0)
+    .order('title')
+    .then(({data}) => data);
+}

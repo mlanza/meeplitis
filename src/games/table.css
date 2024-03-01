@@ -89,10 +89,11 @@ body {
 #table[data-event-type="finished"] table.rankings {
   opacity: 0;
   transition: opacity .2s ease-in-out 0s;
+  margin: 0 auto;
 }
 #table[data-event-type="finished"] #event[data-type='finished']:hover {
   height: auto;
-  max-height: 20em;
+  max-height: 40em;
   transition: max-height .3s ease-in-out;
 }
 #table[data-event-type="finished"] #event[data-type='finished']:hover table.rankings {
@@ -120,7 +121,7 @@ table.rankings .player {
   text-align: right;
 }
 table.rankings .brief {
-  min-width: 10em;
+  min-width: 4em;
   text-align: left;
 }
 table.rankings {
@@ -189,7 +190,6 @@ body.anon img[data-nav="last-move"] {
 }
 .message {
   position: relative;
-  max-height: 30em;
   min-height: 5em;
   min-width: 23em;
   transition: min-height .25s, height .25s, width .25s;

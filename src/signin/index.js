@@ -29,6 +29,7 @@ if (user) {
   redirects(5000)();
 } else {
   document.getElementById("signin-section").style.display = "block";
+  document.querySelector("[autofocus]")?.focus();
 }
 
 const signInForm = document.querySelector('#signin');

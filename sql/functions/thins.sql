@@ -7,7 +7,7 @@ as $$
 declare
   _count int := 0;
   _plump_table_record record;
-  _plump_tables_cursor cursor for select id, touched_at from tables_since_touched where plump;
+  _plump_tables_cursor cursor for select id, touched_at from tables_since_touched where plump and not keep;
 begin
 
   open _plump_tables_cursor;

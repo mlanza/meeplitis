@@ -69,9 +69,6 @@ table.rankings .brief {
 .table img {
   height: 5em;
 }
-.table p {
-  margin-left: 1em;
-}
 .table p img {
   height: 16px;
   margin-right: 5px;
@@ -130,6 +127,9 @@ table.rankings .brief {
   width: 25em;
   margin: 0 0 5px;
   font-size: .8em;
+  padding-left: 2em;
+  text-indent: -1.6em;
+  line-height: 1.3em;
 }
 .game {
   display: inline-block;

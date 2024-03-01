@@ -4,8 +4,8 @@ import $ from "/lib/atomic_/reactives.js";
 import supabase from "/lib/supabase.js";
 import {session} from "/lib/session.js";
 
-const tags = dom.tags(['div', 'span', 'img', 'a', 'p', 'button', 'table', 'tbody', 'thead', 'tr', 'th', 'td']);
-const {div, span, img, a, p, button} = tags;
+const tags = dom.tags(['div', 'span', 'img', 'a', 'p', 'button', 'article', 'table', 'tbody', 'thead', 'tr', 'th', 'td']);
+const {div, span, img, a, p, button, article} = tags;
 
 function ohhell(config){
   const descriptors = [];
@@ -159,7 +159,7 @@ export function ready(item, seat) {
 }
 
 export function describe(table){
-  return _.seq(_.compact(_.cons(table.remark, games[table.game_id](table.config))));
+  return games[table.game_id](table.config);
 }
 
 function daylightSavings(dt) {
@@ -218,12 +218,17 @@ function avatar(player){
 export function table(item, now = new Date()){
   const seat = seated(item.seats);
   const open = item.status === "open";
-  const {game} = item;
+  const {game, remark} = item;
   const link = open ? span : a;
-  const thinned = item.thinned_at ? img({class: "thinned", src: "/images/broom.png", title: "move history purged"}) : null;
   const stamp = item.finished_at ? "finished" : item.touched_at ? "touched" : null;
   const ranked = stamp == 'finished' ? rankings(item) : null;
   const age = _.maybe(item.finished_at || item.touched_at, _.date, _.partial(fromUTCDate, now), dt => aged(dt, now));
+  const remarks = remark ? p(img({src: "/images/remarks.png"}), remark) : null;
+  const remarked = remarks ? img({class: "flag", src: "/images/remarks.png", title: "see remarks"}) : null;
+  const desc = _.join(", ", describe(item)) || null;
+  const options = desc ? p(img({src: "/images/gear.png"}), desc) : null;
+  const optioned = options ? img({class: "flag", src: "/images/gear.png", title: "see options"}) : null;
+  const thinned = item.thinned_at ? img({class: "flag", src: "/images/broom.png", title: "move history purged"}) : null;
   return div({
       "class": "table",
       "data-table": item.id,
@@ -233,19 +238,27 @@ export function table(item, now = new Date()){
     },
       span({class: "id"},
         link(thinned ? null : {href: `/games/${game.slug}/table/?id=${item.id}`}, game.title, " - ", item.id), " ",
-        span({class: stamp}, _.maybe(age, _.join("", _), _.str(stamp || "", " ", _, " ago"))), " ", thinned),
+        span({class: stamp}, _.maybe(age, _.join("", _), _.str(stamp || "", " ", _, " ago"))), " ",
+          optioned,
+          remarked,
+          thinned),
       div({class: "game"},
         a({href: `/games/${game.slug}`}, img({src: game.thumbnail_url, alt: game.title})),
         !seat && open && session?.username ? button({value: "join"}, game.status == "down" ? {disabled: "disabled"} : {}, "Join") : null,
          seat && open && session?.username ? button({value: "leave"}, "Leave") : null),
-      div({class: "seats"}, _.map(function(seat){
-        const won = seat.place === 1;
-        return span({"class": "seat avatar", "data-username": seat?.player?.username || "", "data-seat": seat.seat, "data-place": seat.place},
-          img({class: "pawn", src: "/images/pawn.svg"}),
-          won ? img({class: "won", title: "Winner", alt: "Winner", src: "/images/star.svg"}) : null,
-          avatar(seat.player));
-      }, _.sort(_.asc(_.get(_, "seat")), item.seats)),
-      _.map(p, describe(item))), ranked);
+      article(
+        div({class: "seats"}, _.map(function(seat){
+          const won = seat.place === 1;
+          return span({"class": "seat avatar", "data-username": seat?.player?.username || "", "data-seat": seat.seat, "data-place": seat.place},
+            img({class: "pawn", src: "/images/pawn.svg"}),
+            won ? img({class: "won", title: "Winner", alt: "Winner", src: "/images/star.svg"}) : null,
+            avatar(seat.player));
+        }, _.sort(_.asc(_.get(_, "seat")), item.seats)),
+        options,
+        remarks,
+
+        )),
+      ranked);
 }
 
 export function onUpdate(callback){

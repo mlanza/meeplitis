@@ -1,20 +1,30 @@
 @import url(../../games/effects.css);
 @import url(/common.css);
+input[name="remark"] {
+  background-image: url(/images/remarks.png);
+  background-position:  calc(100% - 5px) 4px;
+  background-repeat: no-repeat;
+  padding: 4px;
+}
+
 .table[data-table-status="finished"] {
   max-height: 5em;
   transition: max-height .3s ease-in-out;
   margin-bottom: 2em;
 }
-.table[data-table-status="finished"] table.rankings {
+.table[data-table-status="finished"] :is(table.rankings,p) {
   opacity: 0;
   transition: opacity .3s ease-in-out;
 }
 .table[data-table-status="finished"]:hover {
   max-height: 20em;
 }
-.table[data-table-status="finished"]:hover table.rankings {
+.table[data-table-status="finished"]:hover :is(table.rankings,p) {
   opacity: 1;
   transition: opacity .5s ease-in-out;
+}
+.table:not([data-table-status="finished"]) img.flag {
+  display: none;
 }
 table.rankings {
   font-size: .9em;
@@ -59,7 +69,14 @@ table.rankings .brief {
 .table img {
   height: 5em;
 }
-.table img.thinned {
+.table p {
+  margin-left: 1em;
+}
+.table p img {
+  height: 16px;
+  margin-right: 5px;
+}
+.table img.flag {
   height: 12px;
   cursor: pointer;
 }
@@ -103,10 +120,15 @@ table.rankings .brief {
   width: 25em;
   margin: 10px 0 0 5px;
 }
+.table article {
+  display: inline-block;
+  width: 25em;
+  margin: 0;
+}
 .table p {
   display: inline-block;
   width: 25em;
-  margin: 0 0 5px 0;
+  margin: 0 0 5px;
   font-size: .8em;
 }
 .game {

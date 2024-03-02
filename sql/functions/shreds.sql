@@ -1,4 +1,4 @@
-create or replace function shred()
+create or replace function shreds()
   returns int
   security definer
   set search_path = public

@@ -7,7 +7,7 @@ as $$
 declare
   _count int := 0;
   _record record;
-  _cursor cursor for select id, touched_at from tables_since_touched where plump and not keep;
+  _cursor cursor for select id, touched_at from tables_since_touched where status = 'finished' and shredded_at is null and stale and not keep;
 begin
 
   open _cursor;

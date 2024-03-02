@@ -69,8 +69,12 @@ select jsonb_array_length((_simulated->'notify')::jsonb)
 into _recipients;
 
 if _recipients > 0 then
-  insert into notifications(type, table_id)
-  values ('up', _table_id, _simulated->'notify');
+  select array(
+    select cast(value AS smallint)
+    from jsonb_array_elements_text(_simulated->'notify'))
+  into _up;
+
+  insert into notifications(type, table_id, seats) values ('up', _table_id, _up);
 end if;
 
 return query

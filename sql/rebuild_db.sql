@@ -85,7 +85,7 @@ create table tables (
     started_at timestamp,
     touched_at timestamp,
     finished_at timestamp,
-    thinned_at timestamp
+    shredded_at timestamp
 );
 
 alter table tables enable row level security;

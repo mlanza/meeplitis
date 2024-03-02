@@ -228,7 +228,7 @@ export function table(item, now = new Date()){
   const desc = _.join(", ", describe(item)) || null;
   const options = desc ? p(img({src: "/images/gear.png"}), desc) : null;
   const optioned = options ? img({class: "flag", src: "/images/gear.png", title: "see options"}) : null;
-  const thinned = item.thinned_at ? img({class: "flag", src: "/images/broom.png", title: "move history purged"}) : null;
+  const shredded = item.shredded_at ? img({class: "flag", src: "/images/broom.png", title: "shredded move history"}) : null;
   return div({
       "class": "table",
       "data-table": item.id,
@@ -237,11 +237,11 @@ export function table(item, now = new Date()){
       "data-up": `${ _.join(" ", item.up) }`
     },
       span({class: "id"},
-        link(thinned ? null : {href: `/games/${game.slug}/table/?id=${item.id}`}, game.title, " - ", item.id), " ",
+        link(shredded ? null : {href: `/games/${game.slug}/table/?id=${item.id}`}, game.title, " - ", item.id), " ",
         span({class: stamp}, _.maybe(age, _.join("", _), _.str(stamp || "", " ", _, " ago"))), " ",
           optioned,
           remarked,
-          thinned),
+          shredded),
       div({class: "game"},
         a({href: `/games/${game.slug}`}, img({src: game.thumbnail_url, alt: game.title})),
         !seat && open && session?.username ? button({value: "join"}, game.status == "down" ? {disabled: "disabled"} : {}, "Join") : null,

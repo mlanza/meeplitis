@@ -1,4 +1,6 @@
 create or replace function start_game() returns trigger
+security definer
+set search_path = public
 AS $$
 declare
   _seated jsonb;
@@ -21,10 +23,24 @@ begin
     set seat = public.seat(new.id, seats.player_id)
     where seats.table_id = new.id;
 
-    _seated := (select seated(new.id));
-    _simulated := (select simulate(new.id, '[{"type": "start"}]', null));
-    _up := (select array_agg(value::smallint)::smallint[] from jsonb_array_elements(_simulated->'up'));
-    _slug := (select slug from games where id = new.game_id);
+    raise log '$ starting';
+
+    select seated(new.id)
+    into _seated;
+
+    select simulate(new.id, null::varchar, '[{"type": "start"}]', '[null]'::jsonb)
+    into _simulated;
+
+    select array_agg(value::smallint)::smallint[]
+    from jsonb_array_elements(_simulated->'up')
+    into _up;
+
+    select slug
+    from games
+    where id = new.game_id
+    into _slug;
+
+    raise log '$ starting % up, %', _up, _simulated;
 
     insert into events (table_id, type, details, seat_id)
     select new.id as table_id, type, details, (_seated->(e.seat)->'seat') as seat_id
@@ -35,11 +51,11 @@ begin
         up = _up
     where id = new.id;
 
-    insert into jobs(type, details)
-    values ('started:notice', ('{"table_id": "' || new.id || '"}')::jsonb);
+    insert into notifications(type, table_id)
+    values('started', new.id);
 
-    insert into jobs(type, details)
-    values ('up:notice', ('{"table_id": "' || new.id || '", "seats": ' || (_simulated->'notify')::jsonb || '}')::jsonb);
+    insert into notifications(type, table_id, seats)
+    values('up', new.id, _up);
 
     raise log '$ game `%` started at table `%`', _slug, new.id;
 

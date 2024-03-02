@@ -98,7 +98,7 @@ alter table tables replica identity full;
 create index idx_tables_game_status on tables (game_id, status);
 
 create table seats (
-    table_id varchar(11) references tables(id) not null,
+    table_id varchar(11) references tables(id) on delete cascade,
     id varchar(3) not null default generate_uid(4),
     config jsonb, -- player specific configuration
     player_id uuid references profiles(id),
@@ -119,7 +119,7 @@ create policy "Seats are viewable by everyone."
   on seats for select using (true);
 
 create table events(
-    table_id varchar(11) references tables(id) not null,
+    table_id varchar(11) references tables(id) on delete cascade,
     id varchar(5) not null default generate_uid(5),
     seq bigserial not null, -- guarantees order
     seat_id varchar(3),
@@ -142,22 +142,22 @@ add constraint fk_last_touch
 foreign key (id, last_touch_id)
 references events(table_id, id);
 
-create type job_status as enum ('pending', 'succeeded', 'failed', 'deferred');
-create type job_type as enum ('started:notice', 'up:notice', 'finished:notice');
+create type notification_type as enum ('started', 'up', 'finished');
 
-create table jobs (
+create table notifications (
     seq bigserial not null primary key,
-    type job_type not null,
-    details jsonb,
+    table_id varchar(11) references tables(id) on delete cascade,
+    type notification_type not null,
+    seats smallint[],
     response jsonb,
-    status job_status not null default 'pending',
+    completed boolean not null default false,
     created_at timestamp not null default now(),
     executed_at timestamp,
     tries smallint default 0);
 
-alter table jobs enable row level security;
+alter table notifications enable row level security;
 
-create index idx_jobs_status on jobs (status, seq);
+create index idx_notifications_status on notifications (done, seq);
 
 insert into games (id, title, slug, fn, seats)
     values ('8Mj1', 'Oh Hell', 'oh-hell', 'ohhell', array[2, 3, 4, 5, 6, 7]),

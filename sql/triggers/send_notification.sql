@@ -2,7 +2,7 @@ create or replace function send_notification() returns trigger
 AS $$
 begin
 
-  raise log '$ job added `%`', new.seq;
+  raise log '$ notification added `%`', new.seq;
 
   perform notify(new.seq);
 
@@ -11,8 +11,8 @@ begin
 end;
 $$ language plpgsql;
 
-drop trigger if exists on_notification_job_added on jobs;
+drop trigger if exists on_notification_added on notification;
 
-create trigger on_notification_job_added
-after insert on jobs for each row when (new.type in ('up:notice', 'started:notice', 'finished:notice'))
+create trigger on_notification_added
+after insert on notifications for each row
 execute function send_notification();

@@ -93,11 +93,11 @@ function finished({title, table_id, table_url, icon_url, recipients, outcome}){
 
 function composes(type){
   switch(type){
-    case "up:notice":
+    case "up":
       return up;
-    case "started:notice":
+    case "started":
       return started;
-    case "finished:notice":
+    case "finished":
       return finished;
     default:
       throw new Error(`Unknown message type ${type}`);

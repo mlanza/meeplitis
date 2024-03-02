@@ -13,8 +13,8 @@ begin
     set finished_at = now()
     where id = new.id;
 
-    insert into jobs(type, details)
-    values ('finished:notice', ('{"table_id": "' || new.id || '"}')::jsonb);
+    insert into notifications(type, table_id)
+    values('finished', new.id);
   end if;
 
   return new;

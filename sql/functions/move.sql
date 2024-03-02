@@ -1,4 +1,4 @@
-  create or replace function move(_table_id varchar, _commands jsonb)
+create or replace function move(_table_id varchar, _commands jsonb)
 returns table(id varchar, table_id varchar, type varchar, seat_id varchar)
 security definer
 set search_path = public
@@ -69,8 +69,8 @@ select jsonb_array_length((_simulated->'notify')::jsonb)
 into _recipients;
 
 if _recipients > 0 then
-  insert into jobs(type, details)
-  values ('up:notice', ('{"table_id": "' || _table_id || '", "seats": ' || (_simulated->'notify')::jsonb || '}')::jsonb);
+  insert into notifications(type, table_id)
+  values ('up', _table_id, _simulated->'notify');
 end if;
 
 return query

@@ -6,7 +6,7 @@ language plpgsql
 as $$
 declare
   _status int = 401; -- no recipients
-  _job_status job_status;
+  _completed boolean;
   _details jsonb;
   _type varchar;
   _title varchar;
@@ -20,14 +20,14 @@ begin
 
   raise log '$ notifying';
 
-  select type, title, slug, table_id, recipients, outcome, status, details
+  select type, title, slug, table_id, recipients, outcome, completed, details
   from notices
   where seq = _seq
-  into _type, _title, _slug, _table_id, _recipients, _outcome, _job_status, _details;
+  into _type, _title, _slug, _table_id, _recipients, _outcome, _completed, _details;
 
   raise log '$ notifying % % -> %', _type, _seq, _details;
 
-  if _retry or _job_status in ('pending'::job_status, 'failed'::job_status) then
+  if _retry or not _completed then
 
     raise log '$ notify type %, title %, slug %, table_id %, outcome %, recipients %', _type, _title, _slug, _table_id, _outcome, _recipients;
 
@@ -45,8 +45,8 @@ begin
 
     raise log '$ notified % -> %', _status, _response;
 
-    update jobs
-    set status = (case _status when 200 then 'succeeded' else 'failed' end)::job_status,
+    update notifications
+    set completed = (_status = 200),
         response = _response,
         executed_at = now(),
         tries = tries + 1

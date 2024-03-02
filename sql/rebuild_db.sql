@@ -157,7 +157,7 @@ create table notifications (
 
 alter table notifications enable row level security;
 
-create index idx_notifications_status on notifications (done, seq);
+create index idx_notifications_status on notifications (completed, seq);
 
 insert into games (id, title, slug, fn, seats)
     values ('8Mj1', 'Oh Hell', 'oh-hell', 'ohhell', array[2, 3, 4, 5, 6, 7]),

@@ -157,10 +157,6 @@ export const make = mexica;
 
 export default mexica;
 
-export function describe(config){
-  return [];
-}
-
 const cat = _.mapcat(_.identity, _);
 
 function coord(at){

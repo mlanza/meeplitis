@@ -196,7 +196,7 @@ function avatar(player){
 
 //TODO extract user timezone adjustment
 export async function table(item, now = new Date()){
-  const {describe} = await import(`/games/${item.game.slug}/core.js`);
+  const {describe} = await import(`/games/${item.game.slug}/ancillary.js`);
   const seat = seated(item.seats);
   const open = item.status === "open";
   const {game, remark, config} = item;

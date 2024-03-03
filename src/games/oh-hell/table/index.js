@@ -4,6 +4,7 @@ import $ from "/lib/atomic_/reactives.js";
 import sh from "/lib/atomic_/shell.js";
 import supabase from "/lib/supabase.js";
 import * as c from "../core.js";
+import {describe} from "../ancillary.js";
 import * as g from "/lib/game.js";
 import {session, $online} from "/lib/session.js";
 import {table, ui, scored, outcome, subject} from "/lib/table.js";
@@ -111,7 +112,7 @@ const log    = _.log,
       $hist  = hist($story);
 
 //universal ui
-ui($table, $story, $ready, $hist, $online, c.describe, _.partial(log, "ui"), seated, seat, desc, template, el);
+ui($table, $story, $ready, $hist, $online, describe, _.partial(log, "ui"), seated, seat, desc, template, el);
 
 $.sub($hist, function([curr, prior, {step, offset}, game]){
   const {seen, event, metrics, state, state: {trump, round, status, seated, deck, lead, broke, deals}} = curr;

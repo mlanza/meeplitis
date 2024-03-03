@@ -261,15 +261,23 @@ body.anon img[data-nav="last-move"] {
   margin-top: 15px;
   margin-bottom: 15px;
 }
+#remarks,
+#options,
 #error,
-#event:not([data-type]) {
+#event:not([data-type]),
+#table[data-message-type] #event {
   visibility: hidden;
 }
+#table[data-message-type='options'] #options,
+#table[data-message-type='remarks'] #remarks,
 #table.error #error {
   visibility: visible;
 }
-#table.error :is(#event, #guidance) {
+#table.error :is(#event, #guidance, #remarks, #options) {
   visibility: hidden;
+}
+div.icon img {
+  width: 1em;
 }
 #event:is([data-type="scored"], [data-type="finished"]) {
   text-align: center;
@@ -370,26 +378,50 @@ body.anon img[data-nav="last-move"] {
   background-color: rgba(116, 53, 59, .6);
 }
 #table #replay {
-  float: right;
   font-size: .9em;
-  position: absolute;
-  right: 2em;
-  top: 3px;
+}
+#table #options {
+  float: right;
 }
 #title {
   color: white;
 }
-img#up {
-  position: absolute;
-  right: 0;
+#nav {
+  display: block;
   float: right;
-  top: 4px;
+  margin: 0 -5px -1em 0;
+}
+#nav > *, #controls > * {
+  float: right;
+  margin-left: 7px;
+  cursor: pointer !important;
+}
+#controls {
+  position: fixed;
+  bottom: .5em;
+  right: .5em;
+  width: 3em;
+  z-index: 999;
+}
+#controls .none {
+  opacity: .5;
+  transition: opacity .5s;
+}
+#controls  .none:hover {
+  opacity: 1;
+  transition: opacity .5s;
+}
+img#remarks-button.none {
+  display: none;
+}
+
+img#up {
   width: 25px !important;
   padding: 0;
-  margin: -2px -5px .5em 0;
   opacity: .2;
   transition: opacity 1s;
   cursor: default;
+  margin-top: -2px;
 }
 #table.up img#up {
   opacity: 1;
@@ -418,7 +450,6 @@ img#up {
   top: 0;
   background-color: #3E505C;
   color: snow;
-  font-weight: 1.2em;
   width: calc(100% - 10px);
   padding: 5px;
   text-align: left;
@@ -434,9 +465,15 @@ a#logo {
   line-height: 1.1em;
 }
 #table #game :is(img, .logo) {
-  width: 18px;
+  width: 16px;
   margin-right: 0;
   margin-bottom: -3px;
+}
+#remarks {
+  padding-top: 4px;
+}
+#options {
+  padding-top: 3px;
 }
 #table #game #phase:not(:empty)::before {
   content: ": ";

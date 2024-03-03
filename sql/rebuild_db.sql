@@ -19,7 +19,7 @@ create type table_status as enum ('open', 'vacant', 'full', 'started', 'locked',
 -- finished - the game has concluded
 -- abandoned - the game was not concluded before time ran out
 
-create type game_status as enum ('up', 'down', 'capacity');
+create type game_status as enum ('unlisted', 'up', 'down', 'capacity');
 
 create type seating_mode as enum ('random', 'joined', 'picked');
 
@@ -56,7 +56,7 @@ create policy "Admins are viewable by everyone."
 create table games (
     id varchar(4) not null default generate_uid(4) primary key,
     title text not null,
-    status game_status not null default 'up',
+    status game_status not null default 'unlisted',
     slug varchar(30) not null,
     fn varchar(30) not null, -- name of versioned function
     seats int2[] not null,

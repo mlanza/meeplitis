@@ -6,6 +6,7 @@ import {presence} from "/lib/online.js";
 import {session} from "/lib/session.js";
 import {story, nav, hist, waypoint, refresh, atPresent, inPast} from "/lib/story.js";
 import {rankings} from "/components/table/index.js";
+import {describe} from "/lib/games.js";
 
 const {div, h1, a, span, img, ol, ul, li} = dom.tags(['div', 'h1', 'a', 'span', 'img', 'ol', 'ul', 'li']);
 
@@ -49,6 +50,8 @@ export function ui($table, $story, $ready, $hist, $online, log, seated, seat, de
         $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table),
         $status = $.map(_.get(_, "status"), $table),
         $scored = $.map(_.get(_, "scored"), $table),
+        $remarks = $.map(_.get(_, "remark"), $table),
+        $described = $.map(describe, $table),
         $presence = presence($online, _.mapa(_.get(_, "username"), seated)),
         $present = $.map(_.all, $ready, $.pipe($story, _.map(function({touches, at}){
           return _.count(touches) - 1 == at;
@@ -58,6 +61,8 @@ export function ui($table, $story, $ready, $hist, $online, log, seated, seat, de
   let replays = 0;
 
   const els = {
+    remarks: dom.sel1("#remarks-button", el),
+    options: dom.sel1("#options-button", el),
     progress: dom.sel1("progress", el),
     touch: dom.sel1("#replay .touch", el),
     touches: dom.sel1("#replay .touches", el),
@@ -106,6 +111,16 @@ export function ui($table, $story, $ready, $hist, $online, log, seated, seat, de
   $.sub($up, dom.toggleClass(el, "up", _));
   $.sub($ready, _.map(_.not), dom.toggleClass(el, "wait", _));
 
+  $.sub($remarks, function(remarks){
+    dom.toggleClass(els.remarks, "none", !remarks);
+    dom.text(dom.sel1("#remarks p", el), remarks);
+  });
+
+  $.sub($described, function(described){
+    dom.toggleClass(els.options, "none", !_.seq(described));
+    dom.text(dom.sel1("#options p", el), _.join(", ", described) || "Normal game");
+  });
+
   //manage data-action
   $.sub($hist, function([{up, may}]){
     _.eachIndexed(function(seat){
@@ -145,6 +160,7 @@ export function ui($table, $story, $ready, $hist, $online, log, seated, seat, de
     const player = eventFor(event);
 
     dom.removeClass(el, "ack");
+    dom.removeAttr(el, "data-message-type");
 
     _.doto(els.event,
       dom.attr(_, "data-type", event.type),
@@ -162,6 +178,16 @@ export function ui($table, $story, $ready, $hist, $online, log, seated, seat, de
     }
 
     dom.addClass(el, "init");
+  });
+
+  $.on(els.options, "click", function(e){
+    dom.removeClass(el, "ack");
+    dom.attr(el, "data-message-type", "options");
+  });
+
+  $.on(els.remarks, "click", function(e){
+    dom.removeClass(el, "ack");
+    dom.attr(el, "data-message-type", "remarks");
   });
 
   $.on(document.body, "keydown", function(e){

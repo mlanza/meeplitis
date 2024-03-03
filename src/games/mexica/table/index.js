@@ -8,7 +8,6 @@ import * as g from "/lib/game.js";
 import {session, $online} from "/lib/session.js";
 import {table, diff, ui, outcome, subject} from "/lib/table.js";
 import {getSeated, getSeat, getConfig, story, nav, waypoint, hist, moment, wip} from "/lib/story.js";
-import {describe} from "/components/table/index.js";
 
 function closestAttr(el, attr){
   return _.maybe(el, _.closest(_, `[${attr}]`), dom.attr(_, attr));
@@ -266,10 +265,6 @@ function template(seat){
 
 //universal ui
 ui($table, $story, $ready, $hist, $online, _.partial(log, "ui"), seated, seat, desc, template, el);
-
-$.sub($table, _.comp(_.compact(), _.map(describe), _.map(_.join("\n", _))), function(descriptors){
-  dom.attr(dom.sel1("#title"), "title", descriptors || "Normal game");
-});
 
 function remaining(slots){
   return _.count(_.filter(_.isNil, slots));

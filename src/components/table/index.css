@@ -6,7 +6,6 @@ input[name="remark"] {
   background-repeat: no-repeat;
   padding: 4px;
 }
-
 .table[data-table-status="finished"] {
   max-height: 5em;
   transition: max-height .3s ease-in-out;

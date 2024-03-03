@@ -3,26 +3,10 @@ import dom from "/lib/atomic_/dom.js";
 import $ from "/lib/atomic_/reactives.js";
 import supabase from "/lib/supabase.js";
 import {session} from "/lib/session.js";
+import {describe} from "/lib/games.js";
 
 const tags = dom.tags(['div', 'span', 'img', 'a', 'p', 'button', 'article', 'table', 'tbody', 'thead', 'tr', 'th', 'td']);
 const {div, span, img, a, p, button, article} = tags;
-
-function ohhell(config){
-  const descriptors = [];
-  if (config.start === 7 && config.end === 1) {
-    descriptors.push("Down and Up Variant");
-  }
-  return descriptors;
-}
-
-function mexica(config){
-  return [];
-}
-
-const games = {
-  "8Mj1": ohhell,
-  "SopC": mexica
-};
 
 export const selection = `
 *,
@@ -156,10 +140,6 @@ export function seated(seats){
 
 export function ready(item, seat) {
   return _.includes(item.up, seat?.seat);
-}
-
-export function describe(table){
-  return games[table.game_id](table.config);
 }
 
 function daylightSavings(dt) {

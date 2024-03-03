@@ -8,7 +8,6 @@ import * as g from "/lib/game.js";
 import {session, $online} from "/lib/session.js";
 import {table, ui, scored, outcome, subject} from "/lib/table.js";
 import {getSeated, getSeat, getConfig, story, hist, moment} from "/lib/story.js";
-import {describe} from "/components/table/index.js";
 
 const {img, li, div, span} = dom.tags(['img', 'li', 'div', 'span']);
 
@@ -113,10 +112,6 @@ const log    = _.log,
 
 //universal ui
 ui($table, $story, $ready, $hist, $online, _.partial(log, "ui"), seated, seat, desc, template, el);
-
-$.sub($table, _.comp(_.compact(), _.map(describe), _.map(_.join("\n", _))), function(descriptors){
-  dom.attr(dom.sel1("#title"), "title", descriptors || "Up and Down");
-});
 
 $.sub($hist, function([curr, prior, {step, offset}, game]){
   const {seen, event, metrics, state, state: {trump, round, status, seated, deck, lead, broke, deals}} = curr;

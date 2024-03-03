@@ -3,7 +3,6 @@ import dom from "/lib/atomic_/dom.js";
 import $ from "/lib/atomic_/reactives.js";
 import supabase from "/lib/supabase.js";
 import {session} from "/lib/session.js";
-import {describe} from "/lib/games.js";
 
 const tags = dom.tags(['div', 'span', 'img', 'a', 'p', 'button', 'article', 'table', 'tbody', 'thead', 'tr', 'th', 'td']);
 const {div, span, img, a, p, button, article} = tags;
@@ -48,7 +47,8 @@ export function mount(el, none, request, op = _.identity){
   _.fmap(promised(request),
     op,
     _.see("mounting"),
-    _.map(table, _),
+    _.mapa(table, _),
+    Promise.all.bind(Promise),
     _.seq,
     _.either(_, none),
     dom.html(el, _));
@@ -195,17 +195,18 @@ function avatar(player){
 }
 
 //TODO extract user timezone adjustment
-export function table(item, now = new Date()){
+export async function table(item, now = new Date()){
+  const {describe} = await import(`/games/${item.game.slug}/core.js`);
   const seat = seated(item.seats);
   const open = item.status === "open";
-  const {game, remark} = item;
+  const {game, remark, config} = item;
   const link = open ? span : a;
   const stamp = item.finished_at ? "finished" : item.touched_at ? "touched" : null;
   const ranked = stamp == 'finished' ? rankings(item) : null;
   const age = _.maybe(item.finished_at || item.touched_at, _.date, _.partial(fromUTCDate, now), dt => aged(dt, now));
   const remarks = remark ? p(img({src: "/images/remarks.png"}), remark) : null;
   const remarked = remarks ? img({class: "flag", src: "/images/remarks.png", title: "see remarks"}) : null;
-  const desc = _.join(", ", describe(item)) || null;
+  const desc = _.join(", ", describe(config)) || null;
   const options = desc ? p(img({src: "/images/gear.png"}), desc) : null;
   const optioned = options ? img({class: "flag", src: "/images/gear.png", title: "see options"}) : null;
   const shredded = item.shredded_at ? img({class: "flag", src: "/images/broom.png", title: "shredded move history"}) : null;

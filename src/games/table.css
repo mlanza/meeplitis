@@ -398,8 +398,8 @@ div.icon img {
 }
 #controls {
   position: fixed;
-  bottom: .5em;
-  right: .5em;
+  bottom: 1em;
+  right: 1em;
   width: 3em;
   z-index: 999;
 }

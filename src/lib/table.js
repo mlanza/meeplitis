@@ -6,7 +6,6 @@ import {presence} from "/lib/online.js";
 import {session} from "/lib/session.js";
 import {story, nav, hist, waypoint, refresh, atPresent, inPast} from "/lib/story.js";
 import {rankings} from "/components/table/index.js";
-import {describe} from "/lib/games.js";
 
 const {div, h1, a, span, img, ol, ul, li} = dom.tags(['div', 'h1', 'a', 'span', 'img', 'ol', 'ul', 'li']);
 
@@ -44,14 +43,14 @@ export function diff(curr, prior, path, f){
   }
 }
 
-export function ui($table, $story, $ready, $hist, $online, log, seated, seat, desc, template, el){
+export function ui($table, $story, $ready, $hist, $online, describe, log, seated, seat, desc, template, el){
   const $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), _.compact()),
         $started = $.map(_.pipe(_.get(_, "status"), _.eq(_, "started")), $table), //games can be abandoned
         $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table),
         $status = $.map(_.get(_, "status"), $table),
         $scored = $.map(_.get(_, "scored"), $table),
         $remarks = $.map(_.get(_, "remark"), $table),
-        $described = $.map(describe, $table),
+        $described = $.map(_.pipe(_.get(_, "config"), describe), $table),
         $presence = presence($online, _.mapa(_.get(_, "username"), seated)),
         $present = $.map(_.all, $ready, $.pipe($story, _.map(function({touches, at}){
           return _.count(touches) - 1 == at;

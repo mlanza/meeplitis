@@ -111,7 +111,7 @@ const log    = _.log,
       $hist  = hist($story);
 
 //universal ui
-ui($table, $story, $ready, $hist, $online, _.partial(log, "ui"), seated, seat, desc, template, el);
+ui($table, $story, $ready, $hist, $online, c.describe, _.partial(log, "ui"), seated, seat, desc, template, el);
 
 $.sub($hist, function([curr, prior, {step, offset}, game]){
   const {seen, event, metrics, state, state: {trump, round, status, seated, deck, lead, broke, deals}} = curr;

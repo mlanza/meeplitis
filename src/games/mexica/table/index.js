@@ -264,7 +264,7 @@ function template(seat){
 }
 
 //universal ui
-ui($table, $story, $ready, $hist, $online, _.partial(log, "ui"), seated, seat, desc, template, el);
+ui($table, $story, $ready, $hist, $online, c.describe, _.partial(log, "ui"), seated, seat, desc, template, el);
 
 function remaining(slots){
   return _.count(_.filter(_.isNil, slots));

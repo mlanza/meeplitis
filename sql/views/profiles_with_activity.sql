@@ -1,20 +1,17 @@
 create or replace view profiles_with_activity as
-select p.*,
+select pp.*,
   u.last_sign_in_at,
-  (select count(*)
-    from profiles p2
-    join seats s on s.player_id = p2.id
-    join tables t on t.id = s.table_id
-    where p2.id = p.id) as all_tables,
-  (select count(*)
-    from profiles p2
-    join seats s on s.player_id = p2.id
-    join tables t on t.id = s.table_id and t.status = 'open'
-    where p2.id = p.id) as open_tables,
-  (select count(*)
-    from profiles p2
-    join seats s on s.player_id = p2.id
-    join tables t on t.id = s.table_id and t.status = 'started'
-    where p2.id = p.id) as started_tables
-from profiles p
-join auth.users u on u.id = p.id;
+  x.all_tables,
+  x.open_tables,
+  x.started_tables
+from profiles pp join (
+  select
+    p.id,
+    count(distinct s.table_id) as all_tables,
+    count(distinct case when t.status = 'open' then s.table_id end) as open_tables,
+    count(distinct case when t.status = 'started' then s.table_id end) as started_tables
+  from profiles p
+  left join seats s on s.player_id = p.id
+  left join tables t on s.table_id = t.id
+  group by p.id) x on x.id = pp.id
+join auth.users u on u.id = pp.id;

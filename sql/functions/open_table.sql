@@ -6,9 +6,22 @@ as $$
 declare
 _fn varchar;
 _id varchar;
+_capacity smallint;
+_going smallint;
 begin
 
-_fn = (select fn from games where id = _game_id);
+select capacity,
+  (select count(*) from tables t join seats s on s.table_id = t.id and s.player_id = _player_id and t.status in ('open', 'started')) as going
+from profiles where id = _player_id
+into _capacity, _going;
+
+if (_capacity is not null and _capacity >= _going) then
+  raise 'You''re at capacity and cannot open additional tables at this time.';
+end if;
+
+select fn from games
+where id = _game_id
+into _fn;
 
 insert into tables (game_id, config, remark, created_by, fn)
 values (_game_id, _config, _remark, _player_id, _fn)

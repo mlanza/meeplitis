@@ -5,9 +5,23 @@ language plpgsql
 as $$
 declare
 _seat_id varchar;
+_capacity smallint;
+_going smallint;
 begin
 
-_seat_id = (select id from seats where table_id = _table_id and player_id is null order by seat limit 1);
+select capacity,
+  (select count(*) from tables t join seats s on s.table_id = t.id and s.player_id = _player_id and t.status in ('open', 'started')) as going
+from profiles where id = _player_id
+into _capacity, _going;
+
+if (_capacity is not null and _capacity >= _going) then
+  raise 'You''re at capacity and cannot join additional tables at this time.';
+end if;
+
+select id
+from seats
+where table_id = _table_id and player_id is null order by seat limit 1
+into _seat_id;
 
 if _seat_id is not null then
   update seats

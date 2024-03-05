@@ -6,6 +6,8 @@ import {session} from "/lib/session.js";
 
 const tags = dom.tags(['div', 'span', 'img', 'a', 'p', 'button', 'article', 'table', 'tbody', 'thead', 'tr', 'th', 'td']);
 const {div, span, img, a, p, button, article} = tags;
+const profile = session?.username ? await getProfile(session?.username) : null;
+const capacity = profile ? profile.capacity != null && (profile.open_tables + profile.started_tables) >= profile.capacity : null;
 
 export const selection = `
 *,
@@ -62,6 +64,11 @@ export function managing(key, id, op = _.identity){
       _remark: remark,
       _seats: seats
     });
+    if (error) {
+      const {message} = error;
+      alert(message);
+      return;
+    }
     refreshTables();
   }
   function refreshTables(){
@@ -94,7 +101,9 @@ export function managing(key, id, op = _.identity){
 }
 
 function manageCreation(game, f){
-  const g = game.status == "up" ? f : function(game){
+  const g = game.status == "up" ? function(game){
+    return capacity ? div("Cannot create new tables.  You are already at capacity.") : f(game);
+  } : function(game){
     return div("Cannot create new tables.  ", game.status == "capacity" ? "No more may be opened at this time." : "Down for maintenance.");
   }
   session?.username && _.chain(game, _.see("game"), g, dom.html(dom.sel1(".create > p"), _));
@@ -127,7 +136,7 @@ export async function getProfile(username){
   const {data: [profile]} =
     await supabase
       .from("profiles_with_activity")
-      .select("id,username,headline,description,avatar_url,last_sign_in_at,last_moved_at")
+      .select("id,username,headline,description,avatar_url,last_sign_in_at,last_moved_at,capacity,all_tables,open_tables,started_tables")
       .eq("username", username);
   return profile;
 }

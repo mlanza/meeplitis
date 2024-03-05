@@ -15,7 +15,7 @@ select capacity,
 from profiles where id = _player_id
 into _capacity, _going;
 
-if (_capacity is not null and _capacity >= _going) then
+if (_capacity is not null and _going >= _capacity) then
   raise 'You''re at capacity and cannot open additional tables at this time.';
 end if;
 

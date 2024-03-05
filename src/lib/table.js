@@ -227,8 +227,7 @@ export function zone(seat, username, avatar_url, {stats, resources}){
     div({class: "area"}, resources));
 }
 
-function score(player){
-  const {points, place, brief} = player;
+function score(player, {points, place, brief}){
   const title = brief;
   return li({"data-place": place, title},
     subject(player),
@@ -236,8 +235,8 @@ function score(player){
 }
 
 export function scored(seated, {scoring}){
-  return ul({class: "scored"}, _.mapIndexed(function(idx, {points}){
-    return score(seated[idx], points);
+  return ul({class: "scored"}, _.mapIndexed(function(idx, metrics){
+    return score(seated[idx], metrics);
   }, scoring));
 }
 

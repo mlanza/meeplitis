@@ -109,7 +109,7 @@ function restrictOpen(game, f){
   session?.username && _.chain(game, _.see("game"), g, dom.html(dom.sel1(".create > p"), _));
 }
 
-export async function spawnTables(creates){
+export async function manageTables(creates){
   const id = dom.attr(dom.sel1("#identity"), "data-id");
   const game = await getGame(id);
   const {open, refreshTables} = managing('game_id', id);

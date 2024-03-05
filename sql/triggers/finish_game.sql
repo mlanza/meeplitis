@@ -36,6 +36,7 @@ begin
 
   update tables
   set finished_at = now(),
+      keep = exists (select 1 from seats s join profiles p on p.id = s.player_id where s.table_id = tables.id and p.retain_history),
       status = 'finished'::table_status
   where id = new.table_id;
 

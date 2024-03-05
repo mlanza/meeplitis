@@ -262,8 +262,14 @@ export function onUpdate(callback){
       const {data, error} = await supabase.rpc(action, {
         _table_id
       });
-      callback(data);
+      if (error) {
+        const {message} = error;
+        alert(message);
+      } else {
+        callback(data);
+      }
     } finally {
+      dom.prop(this, "disabled", false);
       dom.removeClass(document.body, "blocked");
     }
   });

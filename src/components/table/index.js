@@ -100,11 +100,11 @@ export function managing(key, id, op = _.identity){
   return {open, refreshTables};
 }
 
-function manageCreation(game, f){
+function restrictOpen(game, f){
   const g = game.status == "up" ? function(game){
-    return capacity ? div("Cannot create new tables.  You are already at capacity.") : f(game);
+    return capacity ? div("Cannot open new tables.  You are already at capacity.") : f(game);
   } : function(game){
-    return div("Cannot create new tables.  ", game.status == "capacity" ? "No more may be opened at this time." : "Down for maintenance.");
+    return div("Cannot open new tables.  ", game.status == "capacity" ? "No more may be opened at this time." : "Down for maintenance.");
   }
   session?.username && _.chain(game, _.see("game"), g, dom.html(dom.sel1(".create > p"), _));
 }
@@ -113,7 +113,7 @@ export async function spawnTables(creates){
   const id = dom.attr(dom.sel1("#identity"), "data-id");
   const game = await getGame(id);
   const {open, refreshTables} = managing('game_id', id);
-  manageCreation(game, _.partial(creates, open));
+  restrictOpen(game, _.partial(creates, open));
   refreshTables();
   onUpdate(refreshTables);
 }

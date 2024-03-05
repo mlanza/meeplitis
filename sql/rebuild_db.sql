@@ -31,6 +31,7 @@ create table profiles (
     website text null,
     description text null,
     last_moved_at timestamp null,
+    retain_history boolean not null default false,
     capacity smallint null, -- how many open/started tables can this user be present at?
     unique (username),
     constraint ck_username check (username ~ '^[a-zA-Z][a-zA-Z0-9\-_]{2,19}$');

@@ -252,7 +252,7 @@ export function outcome(seated, {places, metrics, briefs}){
   const winners = _.filtera(_.pipe(_.get(_, "place"), _.eq(_, 1)), standings);
   const highlight = _.count(winners) === 1 ? victor : victors;
   return [highlight(winners),
-      ol({class: "scored"}, _.mapa(score, standings)),
+      ol({class: "scored"}, _.mapa(score, standings, standings)),
       rankings({seated, seats})];
 }
 

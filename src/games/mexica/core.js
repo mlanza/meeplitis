@@ -752,7 +752,7 @@ export function execute(self, command){
           const {canal1, canal2, contents, capulli} = state;
           const removed = canalsDepleted(canal1, canal2) ?
             _.chain(districts(board, contents),
-              _.remove(dist => founded(contents, dist), _),
+              _.remove(dist => founded(contents, dist) || jammed(contents, dist), _),
               _.mapa(_.count, _),
               _.partial(unfoundables, _.second(capulli))) : null;
           return _.seq(removed) ? g.fold(self, {type: "removed-unfoundables", details: {removed}}) : self;
@@ -835,20 +835,20 @@ export function execute(self, command){
   }
 }
 
+function jammed(contents, dist){ //district has no room to build temples
+  return _.chain(dist, _.map(_.get(contents, _), _), _.filtera(_.isNil, _), _.count) < 2;
+}
+
 function unfoundables(capulli, keeping){
-  return _.chain(keeping,
-    _.reduce(function(capulli, size){
-      const idx = _.detectIndex(function(tile){
-        return !tile.at && tile.size === size;
-      }, capulli);
-      return idx === null ? capulli : _.update(capulli, idx, _.assoc(_, "at", "-")); //mark as kept
-    }, capulli, _),
-    _.map(function(tile){
-     return tile.at ? tile : null; //remove unfoundable
-    }, _),
-    _.reducekv(function(positions, idx, tile){
-      return tile ? positions : _.conj(positions, idx);
-    }, [], _));
+  const foundables = _.chain(capulli, _.remove(_.get(_, "at"), _), _.mapa(_.get(_, "size"), _));
+  return _.chain(foundables,
+    _.reduce(function(unfounded, size){
+      const x = _.indexOf(unfounded, size);
+      return x > -1 ? _.assoc(unfounded, x, null) : unfounded;
+    }, _, keeping),
+    _.compact,
+    _.sort,
+    _.toArray);
 }
 
 function removeCapulli(removed){

@@ -485,7 +485,8 @@ a#logo {
 #table[data-event-type="finished"] * {
   cursor: not-allowed;
 }
-#table #game, #table #game * {
+#table #game,
+#table #game * {
   cursor: default;
 }
 #table[data-event-type="finished"] #event,
@@ -495,7 +496,6 @@ a#logo {
 #table[data-event-type="finished"] #event ol.scored li {
   cursor: pointer;
 }
-
 img[data-action] {
   width: 3em;
   position: absolute;
@@ -630,7 +630,13 @@ img[data-action="may"] {
   width: 10em;
   transition: width .5s;
 }
-#title {
+#table #game #title h1,
+#table #game a.home svg.logo {
+  pointer-events: none;
+}
+#table #game a.home,
+#table #game #title,
+#table #replay img {
   cursor: pointer;
 }
 #table div.player .username {

@@ -836,7 +836,9 @@ export function execute(self, command){
 }
 
 function jammed(contents, dist){ //district has no room to build temples
-  return _.chain(dist, _.map(_.get(contents, _), _), _.filtera(_.isNil, _), _.count) < 2;
+  return _.chain(dist,
+    _.map(_.get(contents, _), _),
+    _.remove(_.includes(_, t), _), _.count) < 2; //fewer than 2 non-temple spots
 }
 
 function unfoundables(capulli, keeping){

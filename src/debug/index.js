@@ -17,12 +17,11 @@ try {
     throw Error(error.message);
   }
 
-  const {table, seated, evented} = data;
+  const {table, seated, evented} = data,
+        {slug, config} = table,
+        {make} = await import(`/games/${slug}/core.js`);
   const seats = _.toArray(_.repeat(_.count(seated) || 4, {})),
         seen = _.toArray(_.range(0, _.count(seats))),
-        slug = table.slug,
-        config = table.config,
-        {make} = await import(`/games/${slug}/core.js`),
         simulate = g.simulate(make),
         effects = _.comp(g.effects, simulate);
 

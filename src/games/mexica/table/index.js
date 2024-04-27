@@ -193,7 +193,7 @@ function desc({type, details}){
       const game = _.chain($story, moment);
       return [
         "Emperor awards spiritual grandeur!",
-        scores(g.seats(game), details)
+        scores(g.seats(game), details, _.deref(game))
       ];
     case "concluded-period":
       return "The 2nd period begins!";
@@ -514,7 +514,7 @@ function focal(options, what, target){
   _.maybe(what, dom.attr(target, "id", _));
 }
 
-function scores(seats, {districts, palace}){
+function scores(seats, {districts, palace}, {board, contents}){
   const {img, ol, li, div, span, table, thead, tbody, tfoot, tr, th, td, sup, figure} = dom.tags(['small', 'img', 'ol', 'li', 'div', 'span', 'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'sup', 'figure']);
 
   function ranking(rank, tied){
@@ -538,12 +538,14 @@ function scores(seats, {districts, palace}){
   }, _.range(0, n));
 
   const rows = _.chain(districts, _.sort(_.desc(_.get(_, "size")), _), _.map(function({at, size, points}){
-    const ranked = _.chain(points, _.unique, _.sort(_.desc(_.identity), _))
-    return tr(th({class: "at"}, size > 2 && size < 14 ? img({src: `./images/c${size}.png`, "data-piece": "capulli", "data-size": size}) : div({class: "size"}, size), span(at)), _.chain(points, _.mapIndexed(function(idx, score){
+    const ranked = _.chain(points, _.unique, _.sort(_.desc(_.identity), _));
+    const founded = c.founded(contents, c.district(board, contents, at));
+    const scored = _.detect(_.gt(_, 0), points);
+    return founded || scored ? tr(th({class: "at"}, founded ? img({src: `./images/c${size}.png`, "data-piece": "capulli", "data-size": size}) : div({class: "size"}, size), span(at)), _.chain(points, _.mapIndexed(function(idx, score){
           const rank = _.indexOf(ranked, score) + 1,
                 ties = _.chain(points, _.filter(_.eq(score, _), _), _.count, _.gt(_, 1));
       return td({"data-score": score}, ranking(rank, score > 0 && ties), span({class: "score"}, score));
-    },  _), _.toArray));
+    },  _), _.toArray)) : null;
   }, _));
 
   return [

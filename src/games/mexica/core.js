@@ -399,7 +399,7 @@ function gather(coll, f, g, i){
   return _.nth(spots, idx + 1) ? gather(spots, f, g, idx + 1) : sortSpots(spots);
 }
 
-function district(board, contents, spot){
+export function district(board, contents, spot){
   return gather([spot], dry(board, contents, _), _.constantly(true));
 }
 
@@ -573,7 +573,7 @@ function founds(pillis, founder, dist){
   }, pillis));
 }
 
-function founded(contents, dist){
+export function founded(contents, dist){
   return _.detect(contains([c], contents, _), dist);
 }
 

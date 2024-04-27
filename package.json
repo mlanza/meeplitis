@@ -3,7 +3,5 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "lume --dev --serve",
-    "simulate": "rollup ./sim/bundle/ohhell.js -o ./sim/src/ohhell.js --format es && rollup ./sim/bundle/mexica.js -o ./sim/src/mexica.js --format es && lume --config _config.sim.js"
   }
 }

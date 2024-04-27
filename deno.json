@@ -1,11 +1,10 @@
 {
   "importMap": "import_map.json",
   "tasks": {
+    "lume": "echo \"import 'lume/cli.ts'\" | deno run -A -",
     "build": "deno task lume",
     "serve": "deno task lume -s",
-    "ohhell": "deno bundle ./sim/bundle/ohhell.js ./sim/src/ohhell.js",
-    "mexica": "deno bundle ./sim/bundle/mexica.js ./sim/src/mexica.js",
-    "lume": "echo \"import 'lume/cli.ts'\" | deno run -A -"
+    "simulate": "rollup ./sim/bundle/ohhell.js -o ./sim/src/ohhell.js --format es && rollup ./sim/bundle/mexica.js -o ./sim/src/mexica.js --format es && lume --config _config.sim.js"
   },
   "compilerOptions": {
     "types": [

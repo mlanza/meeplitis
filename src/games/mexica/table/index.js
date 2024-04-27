@@ -541,7 +541,7 @@ function scores(seats, {districts, palace}, {board, contents}){
     const ranked = _.chain(points, _.unique, _.sort(_.desc(_.identity), _));
     const founded = c.founded(contents, c.district(board, contents, at));
     const scored = _.detect(_.gt(_, 0), points);
-    return founded || scored ? tr(th({class: "at"}, founded ? img({src: `./images/c${size}.png`, "data-piece": "capulli", "data-size": size}) : div({class: "size"}, size), span(at)), _.chain(points, _.mapIndexed(function(idx, score){
+    return founded || scored ? tr(th({class: "at"}, founded ? img({src: `./images/c${size}.png`, "data-piece": "capulli", "data-size": size}) : [img({src: `./images/capulli.png`, "data-piece": "capulli", "data-size": size}), div({class: "size"}, size)], span(at)), _.chain(points, _.mapIndexed(function(idx, score){
           const rank = _.indexOf(ranked, score) + 1,
                 ties = _.chain(points, _.filter(_.eq(score, _), _), _.count, _.gt(_, 1));
       return td({"data-score": score}, ranking(rank, score > 0 && ties), span({class: "score"}, score));

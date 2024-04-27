@@ -142,11 +142,27 @@
   height: 30em;
   transition: height .5s, min-height .5s;
 }
+#table #event[data-type='scored-grandeur'] th.at img[src='./images/capulli.png'] {
+  opacity: .33;
+}
+
 #table #event[data-type='scored-grandeur'] th.at span {
   text-shadow: -1px 1px 2px #000,
     1px 1px 2px #000,
     1px -1px 0 #000,
     -1px -1px 0 #000;
+}
+#table #event[data-type='scored-grandeur'] div.size {
+  position: absolute;
+  left: .95em;
+  border: solid 1px transparent;
+  width: 1.2em;
+  text-align: center;
+  text-shadow: -1px 1px 2px #000,
+    1px 1px 2px #000,
+    1px -1px 0 #000,
+    -1px -1px 0 #000;
+
 }
 .players {
   width: 20em;

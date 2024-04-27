@@ -1,4 +1,4 @@
-import {comp} from "../../src/lib/atomic/core.js";
-import * as g from "../../src/lib/game.js";
 import ohHell from "../../src/games/oh-hell/core.js";
-export const simulate = comp(g.effects, g.simulate(ohHell));
+import _ from "../../src/lib/atomic_/core.js";
+import g from "../../src/lib/game_.js";
+export const simulate = _.comp(g.effects, g.simulate(ohHell));

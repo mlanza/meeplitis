@@ -6,5 +6,10 @@
     "ohhell": "deno bundle ./sim/bundle/ohhell.js ./sim/src/ohhell.js",
     "mexica": "deno bundle ./sim/bundle/mexica.js ./sim/src/mexica.js",
     "lume": "echo \"import 'lume/cli.ts'\" | deno run -A -"
+  },
+  "compilerOptions": {
+    "types": [
+      "lume/types.ts"
+    ]
   }
 }

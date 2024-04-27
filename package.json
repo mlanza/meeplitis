@@ -1,12 +1,9 @@
 {
   "name": "yourmove",
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
     "dev": "lume --dev --serve",
-    "build": "node build",
-    "mexica": "npm run build -- mexica",
-    "ohhell": "npm run build -- ohhell",
-    "obsolete:bundle-rollup": "rollup ./src/db/ohhell.js -o dist/ohhell.bundle.js --format umd --name '$OhHell$'",
-    "obsolete:bundle": "webpack build --config ./webpack.config.js"
+    "simulate": "rollup ./sim/bundle/ohhell.js -o ./sim/src/ohhell.js --format es && rollup ./sim/bundle/mexica.js -o ./sim/src/mexica.js --format es && lume --config _config.sim.js"
   }
 }

@@ -54,15 +54,15 @@ const sub$4 = _.overload(null, null, ISubscribe.sub, sub3, subN);
 
 var p = /*#__PURE__*/Object.freeze({
   __proto__: null,
-  on: on,
   chan: chan,
-  trigger: trigger,
+  closed: closed$3,
+  complete: complete$3,
+  err: err$3,
+  on: on,
   once: once,
   pub: pub$3,
-  err: err$3,
-  complete: complete$3,
-  closed: closed$3,
-  sub: sub$4
+  sub: sub$4,
+  trigger: trigger
 });
 
 function hist$2(limit) {
@@ -483,7 +483,6 @@ function sub$2(self, observer) {
   pub$3(observer, self.state); //to prime subscriber state
   return sub$4(self.observer, observer); //return unsubscribe fn
 }
-
 function deref$1(self) {
   return self.state;
 }
@@ -563,7 +562,6 @@ function pub$1(self, message) {
     return self.pub(message); //unusual for a command but required by transducers
   }
 }
-
 function err$1(self, error) {
   if (!self.terminated) {
     self.terminated = {
@@ -630,7 +628,6 @@ function err(self, error) {
     _.vswap(self.observers, _.empty); //release references
   }
 }
-
 function complete(self) {
   if (!self.terminated) {
     self.terminated = {
@@ -640,7 +637,6 @@ function complete(self) {
     _.vswap(self.observers, _.empty); //release references
   }
 }
-
 function closed(self) {
   return self.terminated;
 }
@@ -737,7 +733,6 @@ function render3(el, obs, f) {
     }); //TODO rename
   });
 }
-
 function render2(state, f) {
   var _state, _f, _render;
   return _render = render3, _state = state, _f = f, function render3(_argPlaceholder3) {
@@ -754,7 +749,6 @@ function renderDiff3(el, obs, f) {
     }); //TODO rename
   });
 }
-
 function renderDiff2(state, f) {
   var _state2, _f2, _renderDiff;
   return _renderDiff = renderDiff3, _state2 = state, _f2 = f, function renderDiff3(_argPlaceholder4) {

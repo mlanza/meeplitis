@@ -1,23 +1,27 @@
 import lume from "lume/mod.ts";
-import terser from "lume/plugins/terser.ts";
+import "https://cdn.jsdelivr.net/npm/terser/dist/bundle.min.js";
 
-function simulation(page){
-  page.dest.ext = ".js"
-  const named = page.src.path.replace("/","");
-  const contents = page.content.split("\n").filter(function(line){
-    return !line.startsWith("//") && !line.startsWith("export");
-  }).join("\n").replace("export{simulate1 as simulate};", "");
+const minify = globalThis.Terser.minify;
 
-  page.content = `create or replace function ${named}(_payload jsonb)
-returns jsonb as $$
-  const simulate1 = (function(){
-    ${contents}
-    return simulate1;
-  })();
-return simulate1(_payload);
-
+async function simulation(pages){
+  const opts = {
+    module: true,
+    compress: true,
+    mangle: false
+  }
+  for (const page of pages) {
+    let content = page.content.replace("<!DOCTYPE html>","");
+    let output = (await minify(content, opts)).code.replace("export{simulate};","");
+    page.data.filename = page.src.path + page.src.ext;
+    page.data.url = page.data.filename;
+    const named = page.data.url.replace("/","").replace(".js","");
+    page.content =
+`create or replace function ${named}(_payload jsonb) returns jsonb as
+$$
+${output}
+return simulate(_payload);
 $$ language plv8 immutable;`;
-
+  }
   return true;
 }
 
@@ -25,11 +29,6 @@ export default lume({
   src: "./sim/src",
   dest: "./sim/dist",
   prettyUrls: false
-}).
-  use(terser({
-    options: {
-      module: false
-    }
-  }))
+})
   .loadPages([".js"])
   .process([".js"], simulation);

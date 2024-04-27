@@ -74,7 +74,6 @@ function mounts(self) {
       });
     }, ["mounting", "mounted"]); //ensure hooks trigger even if already mounted
   }
-
   return self;
 }
 
@@ -305,7 +304,6 @@ function hide(self) {
 function show(self) {
   mut.omit(nestedAttrs(self, "style"), hides); //TODO mut unconj
 }
-
 function embeddables(self) {
   function embed(parent, add) {
     if (isMountable(self)) {
@@ -433,7 +431,6 @@ function sel1(self, selector) {
 function children$1(self) {
   return _.seq(self.children || _.filter(isElement, self.childNodes)); //IE has no children on document fragment
 }
-
 const descendants$1 = _.downward(_.children);
 function nextSibling$1(self) {
   return self.nextElementSibling;

@@ -29,9 +29,9 @@ const handle$6 = _.overload(null, null, handle2, IMiddleware.handle);
 var p = /*#__PURE__*/Object.freeze({
   __proto__: null,
   dispatch: dispatch$1,
+  handle: handle$6,
   raise: raise,
-  release: release,
-  handle: handle$6
+  release: release
 });
 
 function Bus(middlewares) {

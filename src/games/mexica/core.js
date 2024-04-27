@@ -1,5 +1,5 @@
-import _ from "/lib/atomic_/core.js";
-import g from "/lib/game_.js";
+import _ from "../../lib/atomic_/core.js";
+import g from "../../lib/game_.js";
 
 const slots = _.pipe(_.repeat(_, null), _.toArray);
 
@@ -840,15 +840,15 @@ function jammed(contents, dist){ //district has no room to build temples
 }
 
 function unfoundables(capulli, keeping){
-  const foundables = _.chain(capulli, _.remove(_.get(_, "at"), _), _.mapa(_.get(_, "size"), _));
-  return _.chain(foundables,
-    _.reduce(function(unfounded, size){
-      const x = _.indexOf(unfounded, size);
-      return x > -1 ? _.assoc(unfounded, x, null) : unfounded;
+  return _.chain(capulli,
+    _.reduce(function(capulli, size){
+      const which = _.detectIndex(_.eq({at: null, size}, _), capulli);
+      return which == null ? capulli : _.update(capulli, which, _.assoc(_, "feasible", true));
     }, _, keeping),
-    _.compact,
-    _.sort,
-    _.toArray);
+    _.mapIndexed(function(idx, c){
+      return c.at == null && !c.feasible ? idx : null;
+    }, _),
+    _.filtera(_.isSome, _));
 }
 
 function removeCapulli(removed){

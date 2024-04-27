@@ -20,7 +20,7 @@ async function handleRequest(request) {
       supabaseKey: SUPABASE_KEY,
       options: {
         schema: 'public',
-        headers: { 'x-my-custom-header': 'yourmove' },
+        headers: { 'x-my-custom-header': 'meeplitis' },
         autoRefreshToken: true,
         persistSession: true,
         detectSessionInUrl: true,

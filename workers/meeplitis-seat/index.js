@@ -26,7 +26,7 @@ async function handleRequest(request) {
           const url = new URL(request.url);
           const _table_id = url.searchParams.get("table_id");
 
-          const {sub} = await fetch("https://yourmove-verify.mlanza.workers.dev", {
+          const {sub} = await fetch("https://meeplitis-verify.mlanza.workers.dev", {
               headers: {
                   accessToken
               }

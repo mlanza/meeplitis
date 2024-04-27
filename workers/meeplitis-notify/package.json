@@ -1,8 +1,8 @@
 {
   "private": true,
-  "name": "yourmove-move",
+  "name": "meeplitis-notify",
   "version": "1.0.0",
-  "description": "Posts a move for a seat at a table",
+  "description": "Sends a notification to a player",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

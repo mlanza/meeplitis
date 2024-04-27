@@ -1,8 +1,8 @@
 {
   "private": true,
-  "name": "yourmove-touches",
+  "name": "meeplitis-seated",
   "version": "1.0.0",
-  "description": "Gets a complete set of touches for a table",
+  "description": "A template for kick starting a Cloudflare Workers project",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

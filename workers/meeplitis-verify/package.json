@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "yourmove-verify",
+  "name": "meeplitis-verify",
   "version": "1.0.0",
   "description": "Verifies the access token for a user",
   "main": "index.js",

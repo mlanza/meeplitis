@@ -1,8 +1,6 @@
-name = "yourmove-perspective"
-type = "modules"
+name = "meeplitis-touches"
 main = "index.js"
 compatibility_date = "2022-10-08"
-usage_model = 'bundled'
 workers_dev = true
 
 [vars]

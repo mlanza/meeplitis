@@ -40,45 +40,49 @@ async function handleRequest(request) {
       const accessToken = request.headers.get('accessToken');
       const url = new URL(request.url);
       const _table_id = url.searchParams.get("table_id"),
+            _event_id = url.searchParams.get("event_id"),
             _seat = url.searchParams.get('seat'),
             _commands = [];
+      let seat = null;
 
       console.log("url", request.url, "table", _table_id, "event_id", _event_id, "accessToken", accessToken);
 
-      const {sub, email} = await fetch("https://yourmove-verify.mlanza.workers.dev", {
-        headers: {
-            accessToken
+      if (accessToken) {
+        const {sub, email} = await fetch("https://meeplitis-verify.mlanza.workers.dev", {
+          headers: {
+              accessToken
+          }
+        }).then(function(resp){
+          return resp.json();
+        });
+
+        console.log("sub", sub, "email", email);
+
+        const _player_id = sub;
+
+        let seat = await fetch(`${SUPABASE_URL}/rest/v1/rpc/seat`, {
+          method: "POST",
+          body: JSON.stringify({_player_id, _table_id}),
+          headers: {
+            "content-type": "application/json; charset=UTF-8",
+            "accept": 'application/json',
+            "apiKey": APIKEY,
+            "authorization": `Bearer ${APIKEY}`
+          }
+        }).then(function(resp){
+          return resp.json();
+        });
+
+        console.log("seat", _seat);
+
+        if (seat != _seat) {
+          throw new Error("You are not permitted to see the game from this seat");
         }
-      }).then(function(resp){
-        return resp.json();
-      });
-
-      console.log("sub", sub, "email", email);
-
-      const _player_id = sub;
-
-      const seat = await fetch(`${SUPABASE_URL}/rest/v1/rpc/seat`, {
-        method: "POST",
-        body: JSON.stringify({_player_id, _table_id}),
-        headers: {
-          "content-type": "application/json; charset=UTF-8",
-          "accept": 'application/json',
-          "apiKey": APIKEY,
-          "authorization": `Bearer ${APIKEY}`
-        }
-      }).then(function(resp){
-        return resp.json();
-      });
-
-      if (seat != _seat) {
-        throw new Error("You are not permitted to issue a move from this seat");
       }
 
-      console.log("seat", _seat);
-
-      const resp = await fetch(`${SUPABASE_URL}/rest/v1/rpc/move`, {
+      const resp = await fetch(`${SUPABASE_URL}/rest/v1/rpc/simulate`, {
         method: "POST",
-        body: JSON.stringify({_table_id, _seat, _commands}),
+        body: JSON.stringify(_event_id ? {_table_id, _event_id, _commands, _seat} : {_table_id, _commands, _seat}),
         headers: {
           "content-type": "application/json; charset=UTF-8",
           "accept": 'application/json',
@@ -88,10 +92,13 @@ async function handleRequest(request) {
       }).then(function(resp){
         return resp.json();
       });
+
+      const cc = seat == null ? "public" : "private";
 
       return new Response(JSON.stringify(resp), {
         status: 200,
         headers: {
+          "cache-control": `${cc}, max-age=2500000, immutable`, //about a month
           "Content-type": "application/json; charset=UTF-8",
           'access-control-allow-headers': 'accessToken,Apikey,Accept,Content-Type,Authorization',
           "Access-Control-Allow-Origin": '*',
@@ -99,6 +106,5 @@ async function handleRequest(request) {
           'Access-Control-Max-Age': '86400'
         }
       });
-
   }
 }

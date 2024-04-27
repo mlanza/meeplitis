@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "yourmove-seat",
+  "name": "meeplitis-seat",
   "version": "1.0.0",
   "description": "Gets the seat occupied by the access token holder at a table",
   "main": "index.js",

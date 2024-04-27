@@ -1,8 +1,8 @@
 {
   "private": true,
-  "name": "yourmove-notify",
+  "name": "meeplitis-touches",
   "version": "1.0.0",
-  "description": "Sends a notification to a player",
+  "description": "Gets a complete set of touches for a table",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

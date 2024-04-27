@@ -111,8 +111,8 @@ async function handleRequest(request) {
       return {to: [recipient]};
   });
   const compose = composes(type);
-  const table_url = `https://yourmove.cc/games/${slug}/table/?id=${table_id}`,
-        icon_url  = `https://yourmove.cc/images/games/${slug}.png`,
+  const table_url = `https://meeplitis.com/games/${slug}/table/?id=${table_id}`,
+        icon_url  = `https://meeplitis.com/images/games/${slug}.png`,
         {subject, message} = compose(Object.assign({table_url, icon_url}, details));
   const resp = await fetch(new Request("https://api.mailchannels.net/tx/v1/send", {
           "method": "POST",
@@ -121,7 +121,7 @@ async function handleRequest(request) {
           },
           "body": JSON.stringify({
             "from": {
-              "email": "donotreply@yourmove.cc",
+              "email": "donotreply@meeplitis.com",
               "name": "Meeplitis",
             },
             subject,

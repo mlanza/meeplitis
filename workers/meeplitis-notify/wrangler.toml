@@ -1,8 +1,6 @@
-name = "yourmove-touches"
-type = "modules"
+name = "meeplitis-notify"
 main = "index.js"
-compatibility_date = "2022-10-08"
-usage_model = 'bundled'
+compatibility_date = "2022-12-04"
 workers_dev = true
 
 [vars]

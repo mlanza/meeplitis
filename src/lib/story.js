@@ -9,7 +9,7 @@ function json(resp){
 }
 
 function getTouches(tableId){
-  return _.fmap(fetch(`https://touches.workers.yourmove.cc?table_id=${tableId}`), json);
+  return _.fmap(fetch(`https://touches.workers.meeplitis.com?table_id=${tableId}`), json);
 }
 
 export function getConfig(tableId){
@@ -23,11 +23,11 @@ export function getConfig(tableId){
 }
 
 export function getSeated(tableId){
-  return _.fmap(fetch(`https://seated.workers.yourmove.cc?table_id=${tableId}`), json);
+  return _.fmap(fetch(`https://seated.workers.meeplitis.com?table_id=${tableId}`), json);
 }
 
 export function getSeat(tableId, session){
-  return session ? _.fmap(fetch(`https://seat.workers.yourmove.cc?table_id=${tableId}`, {
+  return session ? _.fmap(fetch(`https://seat.workers.meeplitis.com?table_id=${tableId}`, {
     headers: {
       accessToken: session.accessToken
     }
@@ -47,7 +47,7 @@ function getPerspective(tableId, session, eventId, seat, seatId){
     eventId != null ? `event_id=${eventId}` : null,
     seat != null ? `seat=${seat}` : null
   ], _.compact, _.join("&", _));
-  const perspective = _.fmap(fetch(`https://perspective.workers.yourmove.cc?${qs}`, session ? {
+  const perspective = _.fmap(fetch(`https://perspective.workers.meeplitis.com?${qs}`, session ? {
     headers: {
       accessToken: session.accessToken
     }
@@ -69,7 +69,7 @@ function getLastMove(_table_id, _event_id, _seat_id){
 }
 
 function move(_table_id, _seat, _commands, session){
-  return fetch("https://move.workers.yourmove.cc", {
+  return fetch("https://move.workers.meeplitis.com", {
     method: "POST",
     body: JSON.stringify({_table_id, _seat, _commands}),
     headers: {

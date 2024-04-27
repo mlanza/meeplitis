@@ -4,7 +4,7 @@ function toJSON(resp){
   return resp.json();
 }
 
-const {supabaseUrl, supabaseKey, options} = await fetch("https://config.workers.yourmove.cc", {
+const {supabaseUrl, supabaseKey, options} = await fetch("https://config.workers.meeplitis.com", {
   mode: "cors",
   headers: {
     "accept": "application/json",

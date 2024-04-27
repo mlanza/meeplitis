@@ -1,5 +1,5 @@
-# Your Move
+# Meeplitis
 Turn-based gaming site
 
 ## Status
-Early Development
+Beta

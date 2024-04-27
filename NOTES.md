@@ -7,5 +7,5 @@ flyctl open
 ```
 
 ```sh
-time curl -i --location --request POST 'https://yourmove.fly.dev/simulate/mexica' --header 'Content-Type: application/json' --data '@payload/sim.json'
+time curl -i --location --request POST 'https://meeplitis.fly.dev/simulate/mexica' --header 'Content-Type: application/json' --data '@payload/sim.json'
 ```

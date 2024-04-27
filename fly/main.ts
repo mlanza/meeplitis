@@ -62,12 +62,12 @@ app(
   options("/simulate/:game", function(){
     return [200, headers, ""];
   }),
-  get("/", () => "<h1>Your Move Compute lives!</h1>"),
+  get("/", () => "<h1>Meeplitis Compute lives!</h1>"),
   get("/info", () => [
     200,
     contentType("json"),
-    JSON.stringify({ app: "yourmove", appname: "Your Move Compute", version: "1.2.0" })
+    JSON.stringify({ app: "meeplitis", appname: "Meeplitis Compute", version: "1.2.0" })
   ])
 );
 
-log("Your Move Compute lives!");
+log("Meeplitis Compute lives!");

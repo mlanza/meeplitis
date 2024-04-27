@@ -4,7 +4,7 @@ import relative_urls from "lume/plugins/relative_urls.ts";
 import nunjucks from "lume/plugins/nunjucks.ts";
 
 export default lume({
-  location: new URL("https://yourmove.cc"),
+  location: new URL("https://meeplitis.com"),
   prettyUrls: true,
   src: "./src",
   dest: "./public",

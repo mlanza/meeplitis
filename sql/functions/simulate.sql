@@ -97,7 +97,7 @@ into _result;
 SET statement_timeout = 10000;
 
 select status, content
-from http_post('https://yourmove.fly.dev/simulate/' || _game, _payload::varchar, 'application/json'::varchar)
+from http_post('https://meeplitis.fly.dev/simulate/' || _game, _payload::varchar, 'application/json'::varchar)
 into _status, _result;
 */
 raise log '$ simulate resp/% % % -> %', _game, _req, _status, _result;

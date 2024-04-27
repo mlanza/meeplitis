@@ -12,7 +12,7 @@ function template(subject, body){
   const message = `<!DOCTYPE html>
   <html>
   <head>
-    <title>Your Move</title>
+    <title>Meeplitis</title>
     <style type="text/css">
       @import url(https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&family=Racing+Sans+One&family=Viga&family=Anonymous+Pro&display=swap);
       h1 {
@@ -53,7 +53,7 @@ function up({title, table_id, table_url, icon_url, recipients}){
   const seated = joined(recipients.map(r => r.name));
   return template(`${title} awaits your move - ${table_id}`, `
   <body>
-    <h1>Your Move</h1>
+    <h1>Meeplitis</h1>
     <p>It's your move in <strong>${title}</strong> involving ${seated} at table <a href="${table_url}">${table_id}</a>.</p>
     <img src="${icon_url}">
   </body>
@@ -64,7 +64,7 @@ function started({title, table_id, table_url, icon_url, recipients}){
   const seated = joined(recipients.map(r => r.name));
   return template(`${title} started - ${table_id}`, `
   <body>
-    <h1>Your Move</h1>
+    <h1>Meeplitis</h1>
     <p><strong>${title}</strong> has begun at table <a href="${table_url}">${table_id}</a> involving ${seated}.  You will be notified when it's your turn.</p>
     <img src="${icon_url}">
   </body>
@@ -80,7 +80,7 @@ function finished({title, table_id, table_url, icon_url, recipients, outcome}){
   }).join('')
   return template(`${title} finished - ${table_id}`, `
   <body>
-    <h1>Your Move</h1>
+    <h1>Meeplitis</h1>
     <p>The game of <strong>${title}</strong> involving ${seated} finished at table <a href="${table_url}">${table_id}</a>.</p>
     <img src="${icon_url}">
     <table>
@@ -122,7 +122,7 @@ async function handleRequest(request) {
           "body": JSON.stringify({
             "from": {
               "email": "donotreply@yourmove.cc",
-              "name": "Your Move",
+              "name": "Meeplitis",
             },
             subject,
             personalizations,

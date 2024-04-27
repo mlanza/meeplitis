@@ -1,1 +1,1 @@
-docker build -t yourmove ./fly
+docker build -t meeplitis ./fly

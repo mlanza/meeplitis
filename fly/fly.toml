@@ -1,10 +1,10 @@
-# fly.toml app configuration file generated for yourmove on 2023-04-29T08:50:44-04:00
+# fly.toml app configuration file generated for meeplitis on 2023-04-29T08:50:44-04:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = "yourmove"
-app_name = "Your Move Compute"
+app = "meeplitis"
+app_name = "Meeplitis Compute"
 primary_region = "atl"
 
 [env]

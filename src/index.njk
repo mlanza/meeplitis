@@ -1,5 +1,5 @@
 ---
-title: Your Move
+title: Meeplitis
 headline: Play games by web
 subject_url: /images/meeple.png
 layout: layouts/page.njk
@@ -11,7 +11,7 @@ modules:
 - ./index.js
 ---
 <article>
-Your Move is you playing <a href="./games">board and card games</a> by web.  You join tables to play and you're notified by email whenever it's <i>your move</i>.  Players with a mind to can complete a game in real time, but there's no strict time requirement.
+{{ site.title }} is you playing <a href="./games">board and card games</a> by web.  You join tables to play and you're notified by email whenever it's <i>your move</i>.  Players with a mind to can complete a game in real time, but there's no strict time requirement.
 
 Abandoned games are purged from the system.  These are started games which see no activity for 30 days.  Likewise, although the record of a finished game is kept, its playback history is purged after 30 days.
 
@@ -19,7 +19,7 @@ Understand, also, for <a href="./sustainability">practical reasons</a>, the serv
 
 Have fun!
 
-<a href="mailto:capnemo@yourmove.cc">capnemo</a>
+<a href="mailto:{{ author.email }}">{{ author.name }}</a>
 </article>
 <section id="unidentified-user" style="visibility: hidden;">
   <p>You must <a href="/profiles/edit">complete your profile</a> to be able to open or join games.</p>

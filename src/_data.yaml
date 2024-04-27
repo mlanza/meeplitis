@@ -2,9 +2,9 @@ layout: layouts/main.njk
 language: en
 subject_url: /images/meeple.png
 site:
-  title: Your Move
+  title: Meeplitis
   description: Play-by-web board games
 author:
-  name: Mario
-  email: mario@doesideas.com
-  url: https://doesideas.com/
+  name: Captain Nemo
+  email: capnemo@meeplitis.com
+  url: https://meeplitis.com/

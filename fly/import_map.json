@@ -1,10 +1,10 @@
 {
   "imports": {
     "dinatra": "https://denopkg.com/syumai/dinatra/mod.ts",
-    "game": "https://yourmove.cc/lib/game.js",
-    "atomic/core": "https://yourmove.cc/lib/atomic/core.js",
-    "game_": "https://yourmove.cc/lib/game_.js",
-    "atomic_/core": "https://yourmove.cc/lib/atomic_/core.js",
-    "mexica": "https://yourmove.cc/games/mexica/core.js"
+    "game": "https://meeplitis.com/lib/game.js",
+    "atomic/core": "https://meeplitis.com/lib/atomic/core.js",
+    "game_": "https://meeplitis.com/lib/game_.js",
+    "atomic_/core": "https://meeplitis.com/lib/atomic_/core.js",
+    "mexica": "https://meeplitis.com/games/mexica/core.js"
   }
 }

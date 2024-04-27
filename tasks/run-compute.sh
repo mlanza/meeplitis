@@ -1,1 +1,1 @@
-docker run -p 8080:8080 yourmove
+docker run -p 8080:8080 meeplitis

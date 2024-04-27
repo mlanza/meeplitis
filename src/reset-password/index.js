@@ -4,7 +4,7 @@ async function resetPassword(e){
   e.preventDefault();
   const email = this[0].value;
   const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: 'https://yourmove.cc/update-password',
+    redirectTo: 'https://meeplitis.com/update-password',
   });
   if (error) {
     throw error;

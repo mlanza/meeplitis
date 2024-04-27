@@ -21,7 +21,7 @@ if (username) {
   _.chain(you, dom.attr(document.body, "data-you", _));
   _.maybe(profile.last_sign_in_at, fmttime, dom.text(dom.sel1("#last-sign-in"), _));
   _.maybe(profile.last_moved_at, fmttime, dom.text(dom.sel1("#last-moved"), _));
-  _.chain(profile.username, _.str(_, " | ", "Your Move"), dom.text(dom.sel1("head title"), _));
+  _.chain(profile.username, _.str(_, " | ", "Meeplitis"), dom.text(dom.sel1("head title"), _));
   _.chain(profile.username, dom.text(dom.sel1(".banner h1"), _));
   _.chain(profile.headline || "Mysteriously quiet", dom.text(dom.sel1(".banner .headline"), _));
   _.chain(profile.description || "Has not shared any details.", dom.html(dom.sel1(".about > p"), _));

@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "yourmove-config",
+  "name": "meeplitis-config",
   "version": "1.0.0",
   "description": "Gets the public settings for a Supabase client connection",
   "main": "index.js",

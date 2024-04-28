@@ -12,10 +12,10 @@ async function handleRequest(request) {
       return Promise.resolve(new Response("", {
         status: 200,
         headers: {
-          "access-control-allow-origin": '*',
-          'access-control-allow-headers': 'accessToken,Apikey,Accept,Content-Type,Authorization',
-          'access-control-allow-methods': 'GET,POST,PATCH,OPTIONS',
-          'access-control-max-age': '86400'
+          "access-control-allow-origin": "*",
+          "access-control-allow-headers": "accessToken,Apikey,Accept,Content-Type,Authorization",
+          "access-control-allow-methods": "GET,POST,PATCH,OPTIONS",
+          "access-control-max-age": "86400"
         }
       }));
       break;
@@ -32,7 +32,7 @@ async function handleRequest(request) {
         body: JSON.stringify({_table_id}),
         headers: {
           "content-type": "application/json; charset=UTF-8",
-          "accept": 'application/json',
+          "accept": "application/json",
           "apiKey": APIKEY,
           "authorization": `Bearer ${APIKEY}`
         }
@@ -45,10 +45,10 @@ async function handleRequest(request) {
         headers: {
           "cache-control": "public, max-age=2500000, immutable", //about a month
           "Content-type": "application/json; charset=UTF-8",
-          'access-control-allow-headers': 'accessToken,Apikey,Accept,Content-Type,Authorization',
-          "Access-Control-Allow-Origin": '*',
-          'Access-Control-Allow-Methods': 'GET,POST,PATCH,OPTIONS',
-          'Access-Control-Max-Age': '86400'
+          "access-control-allow-headers": "accessToken,Apikey,Accept,Content-Type,Authorization",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET,POST,PATCH,OPTIONS",
+          "Access-Control-Max-Age": "86400"
         }
       });
 

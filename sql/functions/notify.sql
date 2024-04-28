@@ -30,7 +30,7 @@ begin
     raise log '$ notify % -> %', _seq, _payload;
 
     select status, content
-    from http_post('https://notify.workers.yourmove.cc', _payload, 'application/json')
+    from http_post('https://notify.workers.meeplitis.com', _payload, 'application/json')
     into _status, _content;
 
     select ('{"status": ' || _status::varchar || ', "content": ' || _content || '}')::jsonb

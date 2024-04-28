@@ -5,10 +5,11 @@ stylesheets:
 ---
 <header class="banner">
   <figure class="avatar">
-    <img id="subject" src="{{ subject_url }}">
+    {% if subject_url %}<img id="subject" src="{{ subject_url }}">{% else %}<img id="subject" src="/images/meeple.png">
+{% endif %}
   </figure>
-  <h1 id="identity" data-title="{{title}}" {% if identity %} data-id="{{identity}}" {% endif %}>{{ title }}{% if release %}<sup>{{release}}</sup>{% endif %}</h1><span class="controls"><a href="/profiles/edit">Edit</a></span>
-  <div class="headline">{{ headline }}</div>
+  <h1 id="identity" data-title="{{title}}" {% if identity %} data-id="{{identity}}" {% endif %}>{% if title %}{{ title }}{% else %}{{ site.title }}{% endif %}{% if release %}<sup>{{release}}</sup>{% endif %}</h1><span class="controls"><a href="/profiles/edit">Edit</a></span>
+  {% if headline %}<div class="headline">{{ headline }}</div>{% else %}<div class="headline">{{ site.description }}</div>{% endif %}
 </header>
 <main>
 {{ content | safe }}
@@ -18,6 +19,6 @@ stylesheets:
     <li><a href="/games">Games</a></li>
     <li><a href="/profiles/?">Profiles</a></li>
     <li><a href="/about">About</a></li>
-    <li><a href="/">{{ site.title }}</a> © 2022-2024</li>
+    <li><a href="/">{{ site.title }}</a> {{ site.copyright }}</li>
   </ul>
 </footer>

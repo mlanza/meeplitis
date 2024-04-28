@@ -1,9 +1,9 @@
 layout: layouts/main.njk
 language: en
-subject_url: /images/meeple.png
 site:
   title: Meeplitis
   description: Play-by-web board games
+  copyright: © 2022-2024
 author:
   name: Captain Nemo
   email: capnemo@meeplitis.com

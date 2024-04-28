@@ -2,7 +2,7 @@ layout: layouts/main.njk
 language: en
 site:
   title: Meeplitis
-  description: Play-by-web board games
+  description: Play board games by web
   copyright: © 2022-2024
 author:
   name: Captain Nemo

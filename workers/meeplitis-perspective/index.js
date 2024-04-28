@@ -48,7 +48,7 @@ async function handleRequest(request) {
       console.log("url", request.url, "table", _table_id, "event_id", _event_id, "accessToken", accessToken);
 
       if (accessToken) {
-        const {sub, email} = await fetch("https://meeplitis-verify.mlanza.workers.dev", {
+        const {sub, email} = await fetch("https://verify.workers.meeplitis.com", {
           headers: {
               accessToken
           }

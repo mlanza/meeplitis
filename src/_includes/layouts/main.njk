@@ -2,7 +2,7 @@
 <html lang="{{ language }}">
   <head>
     <meta charset="utf-8">
-    <title>{{ title }} | {{ site.title }}</title>
+    <title>{% if title %}{{ title }}{% else %}{{ site.description }}{% endif %} | {{ site.title }}</title>
     <meta name="description" content="{{ site.description }}">
     <link rel="icon" type="image/x-icon" href="/images/meeple.svg">
   {% for href in stylesheets %}

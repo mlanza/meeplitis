@@ -1,5 +1,5 @@
 # Meeplitis
-Turn-based gaming site
+Play board games by web
 
 ## Status
-Beta
+BETA

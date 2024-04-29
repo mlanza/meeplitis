@@ -163,8 +163,12 @@ export function ui($table, $story, $ready, $hist, $online, describe, log, seated
 
     _.doto(els.event,
       dom.attr(_, "data-type", event.type),
-      dom.addClass(_, "bounce"),
+      dom.addClass(_, "posted"),
       dom.removeClass(_, "hidden"));
+
+    setTimeout(function(){
+      dom.removeClass(els.event, "posted");
+    }, 300);
 
     dom.attr(el, "data-event-type", event.type);
     dom.html(dom.sel1("p", els.event), desc(event));

@@ -325,6 +325,9 @@ div.icon img {
   height: 80px;
   width: 80px;
 }
+#event.posted p {
+  animation: bump .25s ease-in;
+}
 #event .subject {
   height: 50px;
   width: 50px;

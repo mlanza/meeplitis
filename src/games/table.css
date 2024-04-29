@@ -80,11 +80,9 @@ body {
 #table.wait {
   cursor: wait;
 }
-
 #table[data-event-type="finished"] #event[data-type='finished'] {
   max-height: 15em;
   transition: max-height .3s ease-in-out;
-
 }
 #table[data-event-type="finished"] table.rankings {
   opacity: 0;
@@ -325,9 +323,6 @@ div.icon img {
   height: 80px;
   width: 80px;
 }
-#event.posted p {
-  animation: bump .25s ease-in;
-}
 #event .subject {
   height: 50px;
   width: 50px;
@@ -374,6 +369,9 @@ div.icon img {
 #table[data-event-type="finished"] #event {
   min-height: 14.5em;
   transition: height .5s, min-height .5s;
+}
+#event.posted p {
+  animation: bump .25s ease-in;
 }
 #table[data-table-status="finished"] #game,
 #table[data-table-status="locked"] #game,

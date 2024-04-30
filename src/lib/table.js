@@ -153,6 +153,9 @@ export function ui($table, $story, $ready, $hist, $online, describe, log, seated
     dom.text(els.touches, _.count(touches));
   });
 
+  const $depressed = $.map(_.pipe(_.join(" ", _), _.lowerCase), dom.depressed(document.body));
+  $.sub($depressed, dom.attr(el, "data-depressed", _));
+
   //configure event
   $.sub($hist, function([curr, prior, {undoable}]){
     const {event, seen} = curr;

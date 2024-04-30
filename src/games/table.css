@@ -373,6 +373,7 @@ div.icon img {
 #event.posted p {
   animation: bump .25s ease-in;
 }
+#table[data-depressed*='meta'] #event.posted p, /* hold down command to suppress bump */
 #event.posted p.who {
   animation: none;
 }

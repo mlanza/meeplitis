@@ -373,6 +373,9 @@ div.icon img {
 #event.posted p {
   animation: bump .25s ease-in;
 }
+#event.posted p.who {
+  animation: none;
+}
 #table[data-table-status="finished"] #game,
 #table[data-table-status="locked"] #game,
 #table[data-table-status="abandoned"] #game {

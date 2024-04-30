@@ -1,4 +1,4 @@
-import supabase from "/lib/supabase.js";
+import supabase from "/libs/supabase.js";
 
 const form = document.getElementById('signin'),
       password = form[0],

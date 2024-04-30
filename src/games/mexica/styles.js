@@ -1,5 +1,5 @@
 import * as c from "./core.js";
-import _ from "../../lib/atomic_/core.js";
+import _ from "../../libs/atomic_/core.js";
 
 function styled(styles){
   return _.pipe(

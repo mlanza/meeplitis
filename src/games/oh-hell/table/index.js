@@ -1,14 +1,14 @@
-import _ from "/lib/atomic_/core.js";
-import dom from "/lib/atomic_/dom.js";
-import $ from "/lib/atomic_/reactives.js";
-import sh from "/lib/atomic_/shell.js";
-import supabase from "/lib/supabase.js";
+import _ from "/libs/atomic_/core.js";
+import dom from "/libs/atomic_/dom.js";
+import $ from "/libs/atomic_/reactives.js";
+import sh from "/libs/atomic_/shell.js";
+import supabase from "/libs/supabase.js";
 import * as c from "../core.js";
 import {describe} from "../ancillary.js";
-import * as g from "/lib/game.js";
-import {session, $online} from "/lib/session.js";
-import {table, ui, scored, outcome, subject} from "/lib/table.js";
-import {getSeated, getSeat, getConfig, story, hist, moment} from "/lib/story.js";
+import * as g from "/libs/game.js";
+import {session, $online} from "/libs/session.js";
+import {table, ui, scored, outcome, subject} from "/libs/table.js";
+import {getSeated, getSeat, getConfig, story, hist, moment} from "/libs/story.js";
 
 const {img, li, div, span} = dom.tags(['img', 'li', 'div', 'span']);
 

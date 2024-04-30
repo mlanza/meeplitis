@@ -1,8 +1,8 @@
 import supabase from "./supabase.js";
 import * as o from "./online.js";
-import dom from "/lib/atomic_/dom.js";
-import $ from "/lib/atomic_/reactives.js";
-import "/lib/cmd.js";
+import dom from "/libs/atomic_/dom.js";
+import $ from "/libs/atomic_/reactives.js";
+import "/libs/cmd.js";
 
 const img = dom.tag("img");
 const you = dom.sel1("#you");

@@ -1,8 +1,8 @@
-import _ from "/lib/atomic_/core.js";
-import $ from "/lib/atomic_/reactives.js";
-import g from "/lib/game_.js";
-import supabase from "/lib/supabase.js";
-import session from "/lib/session.js";
+import _ from "/libs/atomic_/core.js";
+import $ from "/libs/atomic_/reactives.js";
+import g from "/libs/game_.js";
+import supabase from "/libs/supabase.js";
+import session from "/libs/session.js";
 
 const params = new URLSearchParams(document.location.search),
       tableId = params.get('id'),

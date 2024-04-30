@@ -1,14 +1,14 @@
-import _ from "/lib/atomic_/core.js";
-import dom from "/lib/atomic_/dom.js";
-import $ from "/lib/atomic_/reactives.js";
-import sh from "/lib/atomic_/shell.js";
-import supabase from "/lib/supabase.js";
+import _ from "/libs/atomic_/core.js";
+import dom from "/libs/atomic_/dom.js";
+import $ from "/libs/atomic_/reactives.js";
+import sh from "/libs/atomic_/shell.js";
+import supabase from "/libs/supabase.js";
 import * as c from "../core.js";
 import {describe} from "../ancillary.js";
-import * as g from "/lib/game.js";
-import {session, $online} from "/lib/session.js";
-import {table, diff, ui, outcome, subject} from "/lib/table.js";
-import {getSeated, getSeat, getConfig, story, nav, waypoint, hist, moment, wip} from "/lib/story.js";
+import * as g from "/libs/game.js";
+import {session, $online} from "/libs/session.js";
+import {table, diff, ui, outcome, subject} from "/libs/table.js";
+import {getSeated, getSeat, getConfig, story, nav, waypoint, hist, moment, wip} from "/libs/story.js";
 
 function closestAttr(el, attr){
   return _.maybe(el, _.closest(_, `[${attr}]`), dom.attr(_, attr));

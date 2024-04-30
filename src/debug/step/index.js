@@ -1,6 +1,6 @@
-import _ from "/lib/atomic_/core.js";
-import g from "/lib/game_.js";
-import supabase from "/lib/supabase.js";
+import _ from "/libs/atomic_/core.js";
+import g from "/libs/game_.js";
+import supabase from "/libs/supabase.js";
 
 const params = new URLSearchParams(document.location.search),
       game = params.get('game'),

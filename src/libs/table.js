@@ -1,10 +1,10 @@
-import _ from "/lib/atomic_/core.js";
-import dom from "/lib/atomic_/dom.js";
-import $ from "/lib/atomic_/reactives.js";
-import supabase from "/lib/supabase.js";
-import {presence} from "/lib/online.js";
-import {session} from "/lib/session.js";
-import {story, nav, hist, waypoint, refresh, atPresent, inPast} from "/lib/story.js";
+import _ from "/libs/atomic_/core.js";
+import dom from "/libs/atomic_/dom.js";
+import $ from "/libs/atomic_/reactives.js";
+import supabase from "/libs/supabase.js";
+import {presence} from "/libs/online.js";
+import {session} from "/libs/session.js";
+import {story, nav, hist, waypoint, refresh, atPresent, inPast} from "/libs/story.js";
 import {rankings} from "/components/table/index.js";
 
 const {div, h1, a, span, img, ol, ul, li} = dom.tags(['div', 'h1', 'a', 'span', 'img', 'ol', 'ul', 'li']);

@@ -1,11 +1,11 @@
-import _ from "/lib/atomic_/core.js";
-import dom from "/lib/atomic_/dom.js";
-import $ from "/lib/atomic_/reactives.js";
-import supabase from "/lib/supabase.js";
-import {session} from "/lib/session.js";
-import {fmttime} from "/lib/dates.js";
+import _ from "/libs/atomic_/core.js";
+import dom from "/libs/atomic_/dom.js";
+import $ from "/libs/atomic_/reactives.js";
+import supabase from "/libs/supabase.js";
+import {session} from "/libs/session.js";
+import {fmttime} from "/libs/dates.js";
 import {managing, getProfile, onUpdate} from "/components/table/index.js";
-import {profiles, render} from "/lib/profiles.js";
+import {profiles, render} from "/libs/profiles.js";
 
 const params = new URLSearchParams(document.location.search),
       username = params.get('username'),

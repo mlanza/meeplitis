@@ -1,6 +1,6 @@
-import _ from "./src/lib/atomic_/core.js";
-import g from "./src/lib/game_.js";
-import supabase from "./src/lib/supabase.js";
+import _ from "./src/libs/atomic_/core.js";
+import g from "./src/libs/game_.js";
+import supabase from "./src/libs/supabase.js";
 
 const tableId = Deno.args[0],
       limit   = Deno.args[1] || 10000;

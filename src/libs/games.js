@@ -1,6 +1,6 @@
-import _ from "/lib/atomic_/core.js";
-import dom from "/lib/atomic_/dom.js";
-import supabase from "/lib/supabase.js";
+import _ from "/libs/atomic_/core.js";
+import dom from "/libs/atomic_/dom.js";
+import supabase from "/libs/supabase.js";
 
 const {img, a, h2, div, span} = dom.tags(['img', 'a', 'h2', 'div', 'span']);
 

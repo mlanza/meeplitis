@@ -1,4 +1,4 @@
-import supabase from "/lib/supabase.js";
+import supabase from "/libs/supabase.js";
 
 async function resetPassword(e){
   e.preventDefault();

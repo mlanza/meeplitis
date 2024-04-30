@@ -1,7 +1,7 @@
-import _ from "/lib/atomic_/core.js";
-import dom from "/lib/atomic_/dom.js";
-import {open_games, render} from "/lib/games.js";
-import "/lib/session.js";
+import _ from "/libs/atomic_/core.js";
+import dom from "/libs/atomic_/dom.js";
+import {open_games, render} from "/libs/games.js";
+import "/libs/session.js";
 
 _.fmap(open_games(),
   _.see("games"),

@@ -1,6 +1,6 @@
-import _ from "/lib/atomic_/core.js";
-import dom from "/lib/atomic_/dom.js";
-import {games, render} from "/lib/games.js";
+import _ from "/libs/atomic_/core.js";
+import dom from "/libs/atomic_/dom.js";
+import {games, render} from "/libs/games.js";
 
 _.fmap(games(),
   _.see("games"),

@@ -1,7 +1,7 @@
 // @ts-nocheck
 import {serve} from "https://deno.land/std@0.131.0/http/server.ts";
-import {comp} from "https://meeplitis.pages.dev/lib/atomic/core.js";
-import * as g from "https://meeplitis.pages.dev/lib/game.js";
+import {comp} from "https://meeplitis.pages.dev/libs/atomic/core.js";
+import * as g from "https://meeplitis.pages.dev/libs/game.js";
 import mexica from "https://meeplitis.pages.dev/games/mexica/core.js";
 const simulate = comp(g.effects, g.simulate(mexica));
 

@@ -16,7 +16,7 @@
     <a class="signout" href="/signout">Sign Out</a>
       {{ content | safe }}
   </body>
-  <script type="module" src="/lib/session.js"></script><!-- register user presence! -->
+  <script type="module" src="/libs/session.js"></script><!-- register user presence! -->
   {% for src in modules %}
     <script type="module" src="{{ src }}"></script>
   {% endfor %}

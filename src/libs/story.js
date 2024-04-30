@@ -1,8 +1,8 @@
-import _ from "/lib/atomic_/core.js";
-import $ from "/lib/atomic_/reactives.js";
-import sh from "/lib/atomic_/shell.js";
-import supabase from "/lib/supabase.js";
-import {session} from "/lib/session.js";
+import _ from "/libs/atomic_/core.js";
+import $ from "/libs/atomic_/reactives.js";
+import sh from "/libs/atomic_/shell.js";
+import supabase from "/libs/supabase.js";
+import {session} from "/libs/session.js";
 
 function json(resp){
   return resp.json();

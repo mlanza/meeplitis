@@ -1,8 +1,8 @@
-import _ from "/lib/atomic_/core.js";
-import dom from "/lib/atomic_/dom.js";
-import $ from "/lib/atomic_/reactives.js";
-import supabase from "/lib/supabase.js";
-import session from "/lib/session.js";
+import _ from "/libs/atomic_/core.js";
+import dom from "/libs/atomic_/dom.js";
+import $ from "/libs/atomic_/reactives.js";
+import supabase from "/libs/supabase.js";
+import session from "/libs/session.js";
 
 const username = dom.sel1("#username"),
       headline = dom.sel1("#headline"),

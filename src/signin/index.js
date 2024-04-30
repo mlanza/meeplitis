@@ -1,5 +1,5 @@
-import supabase from "/lib/supabase.js";
-import {session, $online} from "/lib/session.js";
+import supabase from "/libs/supabase.js";
+import {session, $online} from "/libs/session.js";
 
 const params = new URLSearchParams(document.location.search),
       dest   = params.get('dest') ? decodeURIComponent(params.get('dest')) : null;

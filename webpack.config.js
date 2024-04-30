@@ -6,10 +6,10 @@ module.exports = {
   },
   resolve: {
     alias: {
-      "/lib/atomic_/core.js": "/src/lib/atomic_/core.js",
-      "/lib/atomic_/reactives.js": "/src/lib/atomic_/reactives.js",
-      "/lib/game.js": "/src/lib/game.js",
-      "/lib/game_.js": "/src/lib/game_.js"
+      "/libs/atomic_/core.js": "/src/libs/atomic_/core.js",
+      "/libs/atomic_/reactives.js": "/src/libs/atomic_/reactives.js",
+      "/libs/game.js": "/src/libs/game.js",
+      "/libs/game_.js": "/src/libs/game_.js"
     }
   },
   output: {

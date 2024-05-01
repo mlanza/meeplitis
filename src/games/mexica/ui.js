@@ -3,7 +3,7 @@ import dom from "/libs/atomic_/dom.js";
 import $ from "/libs/atomic_/reactives.js";
 import supabase from "/libs/supabase.js";
 import {session} from "/libs/session.js";
-import {manageTables} from "/components/table/index.js";
+import {manageTables} from "/components/table/ui.js";
 
 const {div, span, img, a, p, button, submit, form, label, input} = dom.tags(['div', 'span', 'img', 'a', 'p', 'button', 'submit', 'form', 'label', 'input']),
       radio = dom.tag('input', {type: "radio"});

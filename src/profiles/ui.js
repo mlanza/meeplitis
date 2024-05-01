@@ -4,7 +4,7 @@ import $ from "/libs/atomic_/reactives.js";
 import supabase from "/libs/supabase.js";
 import {session} from "/libs/session.js";
 import {fmttime} from "/libs/dates.js";
-import {managing, getProfile, onUpdate} from "/components/table/index.js";
+import {managing, getProfile, onUpdate} from "/components/table/ui.js";
 import {profiles, render} from "/libs/profiles.js";
 
 const params = new URLSearchParams(document.location.search),

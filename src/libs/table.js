@@ -5,7 +5,7 @@ import supabase from "/libs/supabase.js";
 import {presence} from "/libs/online.js";
 import {session} from "/libs/session.js";
 import {story, nav, hist, waypoint, refresh, atPresent, inPast} from "/libs/story.js";
-import {rankings} from "/components/table/index.js";
+import {rankings} from "/components/table/ui.js";
 
 const {div, h1, a, span, img, ol, ul, li} = dom.tags(['div', 'h1', 'a', 'span', 'img', 'ol', 'ul', 'li']);
 

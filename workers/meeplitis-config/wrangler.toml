@@ -1,8 +1,0 @@
-name = "meeplitis-config"
-main = "index.js"
-compatibility_date = "2022-10-08"
-workers_dev = true
-
-[vars]
-SUPABASE_URL = "https://miwfiwpgvfhggfnqtfso.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTYzODUwMzIzMywiZXhwIjoxOTU0MDc5MjMzfQ.i1l7NNGYF7mChifi8X-Cn_tis-us1Zq1ntyVW-Amdf8"

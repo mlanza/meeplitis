@@ -12,6 +12,6 @@ from profiles pp join (
     count(distinct case when t.status = 'started' then s.table_id end) as started_tables
   from profiles p
   left join seats s on s.player_id = p.id
-  left join tables t on s.table_id = t.id
+  left join tables t on s.table_id = t.id and not t.dummy
   group by p.id) x on x.id = pp.id
 join auth.users u on u.id = pp.id;

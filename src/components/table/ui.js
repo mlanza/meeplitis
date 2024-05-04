@@ -10,8 +10,9 @@ const profile = session?.username ? await getProfile(session?.username) : null;
 const capacity = profile ? profile.capacity != null && (profile.open_tables + profile.started_tables) >= profile.capacity : null;
 
 const params = new URLSearchParams(document.location.search),
+      profiles = location.href.includes("/profiles/"),
       listed = params.get('listed'),
-      dummy  = listed == "all" ? [true, false] : listed == "dummy" ? [true] : [false];
+      dummy  = profiles || listed == "all" ? [true, false] : listed == "dummy" ? [true] : [false];
 
 export const selection = `
 *,

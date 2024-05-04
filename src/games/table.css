@@ -39,7 +39,7 @@
   100% { opacity: 0; }
 }
 
-:root, body {
+:root, #table {
   height: 100%;
   margin: 0;
   padding: 0;
@@ -693,10 +693,7 @@ kbd.wide {
   width: 40px;
 }
 @media (prefers-color-scheme: dark) {
-  html {
-    background-image: url(/images/backgrounds/carbon_fibre.webp);
-  }
-  #table {
+  #table, :root {
     background-image: url(/images/backgrounds/carbon_fibre.webp);
     color: snow;
   }

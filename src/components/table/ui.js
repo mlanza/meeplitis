@@ -66,6 +66,7 @@ export function managing(key, id, op = _.identity){
       _game_id: id,
       _config: config,
       _remark: remark,
+      _dummy:  listed == "dummy",
       _seats: seats
     });
     if (error) {

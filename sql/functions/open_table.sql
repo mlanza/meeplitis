@@ -1,4 +1,4 @@
-create or replace function open_table(_game_id varchar, _config jsonb, _remark varchar, _seats int, _player_id uuid default auth.uid())
+create or replace function open_table(_game_id varchar, _config jsonb, _remark varchar, _seats int, _dummy boolean, _player_id uuid default auth.uid())
 returns varchar
 security definer
 language plpgsql
@@ -24,8 +24,8 @@ select fn, release from games
 where id = _game_id
 into _fn, _release;
 
-insert into tables (game_id, config, remark, created_by, fn, release)
-values (_game_id, _config, _remark, _player_id, _fn, _release)
+insert into tables (game_id, config, remark, created_by, fn, release, dummy)
+values (_game_id, _config, _remark, _player_id, _fn, _release, _dummy)
 returning id into _id;
 
 insert into seats (table_id, player_id, seat, joined_at)

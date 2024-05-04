@@ -21,7 +21,7 @@ end if;
 
 raise log '$ moment for % at table `%` was granted', _user_id, _table_id;
 
-select json_build_object('slug', g.slug, 'id', t.id, 'game_id', t.game_id, 'config', t.config)
+select json_build_object('slug', g.slug, 'id', t.id, 'game_id', t.game_id, 'release', t.release, 'config', t.config)
 into _table
 from tables t
 join games g on g.id = t.game_id

@@ -18,8 +18,8 @@ try {
   }
 
   const {table, seated, evented} = data,
-        {slug, config} = table,
-        {make} = await import(`/games/${slug}/core.js`);
+        {slug, release, config} = table,
+        {make} = await import(`/games/${slug}/table/${release}/core.js`);
   const seats = _.toArray(_.repeat(_.count(seated) || 4, {})),
         seen = _.toArray(_.range(0, _.count(seats))),
         simulate = g.simulate(make),

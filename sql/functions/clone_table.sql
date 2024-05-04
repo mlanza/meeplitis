@@ -11,8 +11,8 @@ begin
 select now()
 into _now;
 
-insert into tables(game_id, release, config, status, clone_id, created_by)
-select game_id, coalesce(_release, release), coalesce(_config, config), status, _table_id, _cloned_by from tables where id = _table_id
+insert into tables(game_id, release, config, status, clone_id, dummy, created_by)
+select game_id, coalesce(_release, release), coalesce(_config, config), status, _table_id, true, _cloned_by from tables where id = _table_id
 returning id into _id;
 
 insert into seats(table_id, id, config, player_id, seat, joined_at, created_at)

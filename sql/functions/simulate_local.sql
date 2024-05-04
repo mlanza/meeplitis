@@ -6,11 +6,7 @@ declare
 _result jsonb;
 begin
 
-select case _fn
-      when 'ohhell' then ohhell(_payload)
-      when 'mexica' then mexica(_payload)
-      else null end
-into _result;
+EXECUTE 'select * from ' || _fn || '(' || '''' || _payload::varchar || '''' || ')' into _result;
 
 return _result;
 end;

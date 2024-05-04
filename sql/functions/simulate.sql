@@ -78,33 +78,18 @@ set search_path = public,extensions
 as $$
 declare
 _result jsonb;
-_status int = 0;
 _req varchar;
 begin
 
 select generate_uid(5)
 into _req;
 
-raise log '$ req/% % -> %', _game, _req, _payload;
+raise log '$ simulate %:% in -> %', _game, _req, _payload;
 
-select case _game
-      when 'ohhell' then ohhell(_payload)
-      when 'mexica' then mexica(_payload)
-      else null end
+select simulate_local(_game, _payload)
 into _result;
-/*
 
-SET statement_timeout = 10000;
-
-select status, content
-from http_post('https://meeplitis.fly.dev/simulate/' || _game, _payload::varchar, 'application/json'::varchar)
-into _status, _result;
-*/
-raise log '$ simulate resp/% % % -> %', _game, _req, _status, _result;
-
-if _result is null or _status > 222 then
-  raise exception 'Unable to retrieve snapshot for % event %', _table_id, _event_id using hint = 'Check remote server for issues';
-end if;
+raise log '$ simulate %:% out -> %', _game, _req, _result;
 
 return _result;
 

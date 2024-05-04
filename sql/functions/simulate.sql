@@ -4,6 +4,7 @@ set search_path = public
 as $$
 declare
 _fn text;
+_slug text;
 _result jsonb;
 _events jsonb;
 _config jsonb;
@@ -16,10 +17,11 @@ begin
 
 raise log '$ simulate! %#%, commands %, seen %', _table_id, _event_id, _commands, _seen;
 
-select config, fn
-from tables
-where id = _table_id
-into _config, _fn;
+select t.config, g.slug, g.slug || '_' || t.release
+from tables t
+join games g on g.id = t.game_id
+where t.id = _table_id
+into _config, _slug, _fn;
 
 select seat_configs(_table_id)
 into _seat_configs;
@@ -63,7 +65,7 @@ into _snapshot_event_id, _snapshot;
 
 raise log '$ simulate at % for % from event id % to % with snapshot at % -> %', _table_id, case when _seen = '[null]'::jsonb then 'anon' else _seen::varchar end, _from_event_id, _event_id, _snapshot_event_id, _snapshot;
 
-select '{"game": "' || _fn || '", "seats": ' || _seat_configs::varchar || ', "config": ' || _config::varchar || ', "events": ' || _events::varchar || ', "commands": ' || _commands::varchar || ', "seen": ' || _seen || ', "snapshot": ' || coalesce(_snapshot, 'null')::varchar || '}'
+select '{"game": "' || _slug || '", "fn": "' || _fn || '", "seats": ' || _seat_configs::varchar || ', "config": ' || _config::varchar || ', "events": ' || _events::varchar || ', "commands": ' || _commands::varchar || ', "seen": ' || _seen || ', "snapshot": ' || coalesce(_snapshot, 'null')::varchar || '}'
 into _payload;
 
 return (select simulate(_fn, _payload));

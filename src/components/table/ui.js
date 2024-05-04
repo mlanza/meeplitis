@@ -12,6 +12,7 @@ const capacity = profile ? profile.capacity != null && (profile.open_tables + pr
 const params = new URLSearchParams(document.location.search),
       profiles = location.href.includes("/profiles/"),
       listed = params.get('listed'),
+      release = params.get('release') || null,
       dummy  = profiles || listed == "all" ? [true, false] : listed == "dummy" ? [true] : [false];
 
 export const selection = `
@@ -65,6 +66,7 @@ export function managing(key, id, op = _.identity){
   async function open({config, seats, remark}){
     const {data, error} = await supabase.rpc('open_table', {
       _game_id: id,
+      _release: release,
       _config: config,
       _remark: remark,
       _dummy:  listed == "dummy",

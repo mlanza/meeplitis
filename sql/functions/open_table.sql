@@ -1,11 +1,10 @@
-create or replace function open_table(_game_id varchar, _config jsonb, _remark varchar, _seats int, _dummy boolean, _player_id uuid default auth.uid())
+create or replace function open_table(_game_id varchar, _release varchar, _config jsonb, _remark varchar, _seats int, _dummy boolean, _player_id uuid default auth.uid())
 returns varchar
 security definer
 language plpgsql
 as $$
 declare
 _fn varchar;
-_release varchar;
 _id varchar;
 _capacity smallint;
 _going smallint;
@@ -20,7 +19,7 @@ if (_capacity is not null and _going >= _capacity) then
   raise 'You''re at capacity and cannot open additional tables at this time.';
 end if;
 
-select fn, release from games
+select fn, coalesce(_release, release) from games
 where id = _game_id
 into _fn, _release;
 

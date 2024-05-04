@@ -9,6 +9,10 @@ const {div, span, img, a, p, button, article} = tags;
 const profile = session?.username ? await getProfile(session?.username) : null;
 const capacity = profile ? profile.capacity != null && (profile.open_tables + profile.started_tables) >= profile.capacity : null;
 
+const params = new URLSearchParams(document.location.search),
+      listed = params.get('listed'),
+      dummy  = listed == "all" ? [true, false] : listed == "dummy" ? [true] : [false];
+
 export const selection = `
 *,
 seat:seats!inner(*),
@@ -77,6 +81,7 @@ export function managing(key, id, op = _.identity){
         .from('tables')
         .select(selection)
         .eq(key, id)
+        .in('dummy', dummy)
         .eq('status', 'open')
         .order('created_at', {ascending: false}));
     mount(dom.sel1(".started-tables > p"), "None started",
@@ -85,6 +90,7 @@ export function managing(key, id, op = _.identity){
         .select(selection)
         .eq(key, id)
         .eq('status', 'started')
+        .in('dummy', dummy)
         .order('touched_at', {ascending: false})
         .order('started_at', {ascending: false})
         .order('created_at', {ascending: false}), op);
@@ -94,6 +100,7 @@ export function managing(key, id, op = _.identity){
         .select(selection)
         .limit(10)
         .eq(key, id)
+        .in('dummy', dummy)
         .eq('status', 'finished')
         .order('finished_at', {ascending: false}));
   }
@@ -238,8 +245,9 @@ export async function table(item, now = new Date()){
   const options = desc ? p(img({src: "/images/gear.png"}), desc) : null;
   const optioned = options ? img({class: "flag", src: "/images/gear.png", title: "see options"}) : null;
   const shredded = item.shredded_at ? img({class: "flag", src: "/images/broom.png", title: "shredded move history"}) : null;
+  const dummy = item.dummy ? "dummy" : "";
   return div({
-      "class": "table",
+      "class": `table ${dummy}`.trim(),
       "data-table": item.id,
       "data-table-status": item.status,
       "data-seated": seat?.seat,

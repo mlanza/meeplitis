@@ -6,6 +6,13 @@ input[name="remark"] {
   background-repeat: no-repeat;
   padding: 4px;
 }
+.table {
+  transition: border-color .3s ease-in;
+  border: solid 1px transparent;
+}
+.table.dummy {
+  border-color: yellowgreen;
+}
 .table img[title='shredded move history'] {
   display: none;
 }

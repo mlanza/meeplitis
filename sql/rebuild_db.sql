@@ -59,6 +59,7 @@ create table games (
   id varchar(4) not null default generate_uid(4) primary key,
   title text not null,
   release varchar(3) not null default generate_uid(3),
+  dummy boolean not null default false, -- not real games, for testing
   status game_status not null default 'unlisted',
   slug varchar(30) not null,
   fn varchar(30) not null, -- name of versioned function

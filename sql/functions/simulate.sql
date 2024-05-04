@@ -17,7 +17,7 @@ begin
 
 raise log '$ simulate! %#%, commands %, seen %', _table_id, _event_id, _commands, _seen;
 
-select t.config, g.slug, g.slug || '_' || t.release
+select t.config, g.slug, replace(g.slug,'-','') || '_' || t.release
 from tables t
 join games g on g.id = t.game_id
 where t.id = _table_id

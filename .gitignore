@@ -5,6 +5,7 @@ dist
 .env
 sim/dist
 sim/src
+sim/bundle
 fly/src
 secrets.md
 deno.lock

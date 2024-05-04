@@ -26,7 +26,7 @@ $$ language plv8 immutable;`;
 }
 
 export default lume({
-  src: "./sim/src",
+  src: "./sim/bundle",
   dest: "./sim/dist",
   prettyUrls: false
 })

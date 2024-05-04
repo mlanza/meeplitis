@@ -3,13 +3,15 @@ select pp.*,
   u.last_sign_in_at,
   x.all_tables,
   x.open_tables,
-  x.started_tables
+  x.started_tables,
+  x.finished_tables
 from profiles pp join (
   select
     p.id,
     count(distinct s.table_id) as all_tables,
     count(distinct case when t.status = 'open' then s.table_id end) as open_tables,
-    count(distinct case when t.status = 'started' then s.table_id end) as started_tables
+    count(distinct case when t.status = 'started' then s.table_id end) as started_tables,
+    count(distinct case when t.status = 'finished' then s.table_id end) as finished_tables
   from profiles p
   left join seats s on s.player_id = p.id
   left join tables t on s.table_id = t.id and not t.dummy

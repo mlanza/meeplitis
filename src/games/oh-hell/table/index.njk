@@ -1,25 +1,10 @@
 ---
-title: Oh Hell
-path: /games/oh-hell/
-layout: layouts/table.njk
+title: Mexica
+layout: layouts/main.njk
+stylesheets:
+- /games/table.css
+modules:
+- ./redirect.js
 ---
-<div class="upkeep">
-  <div class="trump"><img src="/images/deck/BackDark.svg"></div>
-  <div class="broke">Broken</div>
-  <div class="cards"><b>-</b> card deck</div>
-  <div class="deck"><img src="/images/deck/BackDark.svg"></div>
-</div>
-<ul class="hand">
-</ul>
-<div class="moves">
-  <button data-type="bid" data-bid="">Bid ?</button>
-  <button data-type="bid" data-bid="0">Bid 0</button>
-  <button data-type="bid" data-bid="1">Bid 1</button>
-  <button data-type="bid" data-bid="2">Bid 2</button>
-  <button data-type="bid" data-bid="3">Bid 3</button>
-  <button data-type="bid" data-bid="4">Bid 4</button>
-  <button data-type="bid" data-bid="5">Bid 5</button>
-  <button data-type="bid" data-bid="6">Bid 6</button>
-  <button data-type="bid" data-bid="7">Bid 7</button>
-  <button data-type="commit">I'm done</button>
+<div id="table">
 </div>

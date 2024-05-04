@@ -118,7 +118,26 @@ export async function manageTables(creates){
   onUpdate(refreshTables);
 }
 
-export async function getGame(game_id){
+async function getRelease(tableId){
+  const {data: [table]} = await supabase.
+    from("tables").
+    select('release').
+    eq("id", tableId);
+
+  return table?.release;
+}
+
+export async function chooseRelease(){
+  const params = new URLSearchParams(document.location.search),
+        tableId = params.get('id');
+
+  if (tableId) {
+    const release = await getRelease(tableId);
+    location.href = location.href.replace("/table/", `/table/${release}/`);
+  }
+}
+
+export async function getGame(gameId){
   const {data: [game]} =
     await supabase
       .from('games')
@@ -128,7 +147,7 @@ export async function getGame(game_id){
         seats,
         status,
         thumbnail_url`)
-      .eq('id', game_id);
+      .eq('id', gameId);
   return game;
 }
 
@@ -205,7 +224,7 @@ function avatar(player){
 
 //TODO extract user timezone adjustment
 export async function table(item, now = new Date()){
-  const {describe} = await import(`/games/${item.game.slug}/ancillary.js`);
+  const {describe} = await import(`/games/${item.game.slug}/table/${item.release}/ancillary.js`);
   const seat = seated(item.seats);
   const open = item.status === "open";
   const {game, remark, config} = item;

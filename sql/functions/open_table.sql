@@ -5,6 +5,7 @@ language plpgsql
 as $$
 declare
 _fn varchar;
+_release varchar;
 _id varchar;
 _capacity smallint;
 _going smallint;
@@ -19,12 +20,12 @@ if (_capacity is not null and _going >= _capacity) then
   raise 'You''re at capacity and cannot open additional tables at this time.';
 end if;
 
-select fn from games
+select fn, release from games
 where id = _game_id
-into _fn;
+into _fn, _release;
 
-insert into tables (game_id, config, remark, created_by, fn)
-values (_game_id, _config, _remark, _player_id, _fn)
+insert into tables (game_id, config, remark, created_by, fn, release)
+values (_game_id, _config, _remark, _player_id, _fn, _release)
 returning id into _id;
 
 insert into seats (table_id, player_id, seat, joined_at)

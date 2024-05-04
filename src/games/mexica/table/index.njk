@@ -1,34 +1,10 @@
 ---
 title: Mexica
-path: /games/mexica/
-layout: layouts/table.njk
+layout: layouts/main.njk
+stylesheets:
+- /games/table.css
+modules:
+- ./redirect.js
 ---
-<div id="guidance" class="message">
-  <p data-command-type="place-pilli">Place Mexica Pilli on which space the emperor's palace?</p>
-  <p data-command-type="move">Move Mexica Pilli where?</p>
-  <p data-command-type="construct-canal" data-command-size="2" data-which="first">Construct 1st square of double canal on which space?</p>
-  <p data-command-type="construct-canal" data-command-size="2" data-which="second">Construct 2nd square of double canal on which space?</p>
-  <p data-command-type="construct-canal" data-command-size="1">Construct single canal on which space?</p>
-  <p data-command-type="construct-bridge">Construct bridge across which waterway?</p>
-  <p data-command-type="relocate-bridge">Relocate bridge to which waterway?</p>
-  <p data-command-type="build-temple">Build temple in which space?</p>
-  <div class="icon">🧭</div>
-  <div class="esc">Press ESC to cancel</div>
-</div>
-<div id="board">
-  <ol id="demands"></ol>
-</div>
-<div id="actions" data-remaining="0">
-  <img src="./images/token.png" data-piece="token">
-  <img src="./images/token.png" data-piece="token">
-  <img src="./images/token.png" data-piece="token">
-  <img src="./images/token.png" data-piece="token">
-  <img src="./images/token.png" data-piece="token">
-  <img src="./images/token.png" data-piece="token">
-</div>
-<div id="supplies">
-</div>
-<div class="moves">
-  <button data-type="pass">Pass</button>
-  <button data-type="commit">I'm done</button>
+<div id="table">
 </div>

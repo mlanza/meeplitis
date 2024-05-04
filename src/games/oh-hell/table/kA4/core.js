@@ -1,5 +1,5 @@
-import _ from "../../libs/atomic_/core.js";
-import g from "../../libs/game_.js";
+import _ from "../../../../libs/atomic_/core.js";
+import g from "../../../../libs/game_.js";
 
 const ranks = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "K", "Q", "A"];
 const suits = ["♥️", "♠️", "♦️", "♣️"];

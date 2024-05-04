@@ -1,5 +1,5 @@
-import _ from "../../libs/atomic_/core.js";
-import g from "../../libs/game_.js";
+import _ from "../../../../libs/atomic_/core.js";
+import g from "../../../../libs/game_.js";
 
 const slots = _.pipe(_.repeat(_, null), _.toArray);
 

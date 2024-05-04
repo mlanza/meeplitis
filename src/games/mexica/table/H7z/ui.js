@@ -3,8 +3,8 @@ import dom from "/libs/atomic_/dom.js";
 import $ from "/libs/atomic_/reactives.js";
 import sh from "/libs/atomic_/shell.js";
 import supabase from "/libs/supabase.js";
-import * as c from "../core.js";
-import {describe} from "../ancillary.js";
+import * as c from "./core.js";
+import {describe} from "./ancillary.js";
 import * as g from "/libs/game.js";
 import {session, $online} from "/libs/session.js";
 import {table, diff, ui, outcome, subject} from "/libs/table.js";
@@ -30,7 +30,7 @@ function which($latest){ //which entry index changed?
 }
 
 async function svg(what){
-  return await fetch(`../table/images/${what}.svg`).then(function(resp){
+  return await fetch(import.meta.resolve(`./images/${what}.svg`)).then(function(resp){
     return resp.text();
   });
 }

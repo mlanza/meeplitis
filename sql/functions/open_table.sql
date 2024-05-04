@@ -4,7 +4,6 @@ security definer
 language plpgsql
 as $$
 declare
-_fn varchar;
 _id varchar;
 _capacity smallint;
 _going smallint;
@@ -19,12 +18,12 @@ if (_capacity is not null and _going >= _capacity) then
   raise 'You''re at capacity and cannot open additional tables at this time.';
 end if;
 
-select fn, coalesce(_release, release) from games
+select coalesce(_release, release) from games
 where id = _game_id
-into _fn, _release;
+into _release;
 
-insert into tables (game_id, config, remark, created_by, fn, release, dummy)
-values (_game_id, _config, _remark, _player_id, _fn, _release, _dummy)
+insert into tables (game_id, config, remark, created_by, release, dummy)
+values (_game_id, _config, _remark, _player_id, _release, _dummy)
 returning id into _id;
 
 insert into seats (table_id, player_id, seat, joined_at)

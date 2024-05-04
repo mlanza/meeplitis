@@ -59,10 +59,8 @@ create table games (
   id varchar(4) not null default generate_uid(4) primary key,
   title text not null,
   release varchar(3) not null default generate_uid(3),
-  dummy boolean not null default false, -- not real games, for testing
   status game_status not null default 'unlisted',
   slug varchar(30) not null,
-  fn varchar(30) not null, -- name of versioned function
   seats int2[] not null,
   thumbnail_url varchar,
   created_at timestamp not null default now());
@@ -76,13 +74,14 @@ create table tables (
   id varchar(11) default generate_uid(11) not null primary key,
   game_id varchar(4) references games(id) not null,
   release varchar(3) not null,
-  fn varchar(30) not null, -- name of versioned function
   seating seating_mode default 'random',
   config jsonb, -- configure this play
   up smallint[], -- seats required to take action
   keep boolean not null default false,
   seating_change_at timestamp,
   status table_status not null default 'open',
+  dummy boolean not null default false, -- not real games, for testing
+  clone_id varchar(11),
   last_touch_id varchar(5) references events(id), -- last event touching game state
   created_by uuid references profiles(id) not null default auth.uid(), -- this person can update before starting
   created_at timestamp not null default now(),
@@ -164,9 +163,9 @@ alter table notifications enable row level security;
 
 create index idx_notifications_status on notifications (completed, seq);
 
-insert into games (id, title, slug, fn, release, seats)
-  values ('8Mj1', 'Oh Hell', 'oh-hell', 'ohhell', 'kA4', array[2, 3, 4, 5, 6, 7]),
-  values ('SopC', 'Mexica', 'mexica', 'mexica', 'H7z', array[2, 3, 4]);
+insert into games (id, title, slug, release, seats)
+  values ('8Mj1', 'Oh Hell', 'oh-hell', 'kA4', array[2, 3, 4, 5, 6, 7]),
+  values ('SopC', 'Mexica', 'mexica', 'H7z', array[2, 3, 4]);
 
 do $$
 declare

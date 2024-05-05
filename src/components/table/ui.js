@@ -10,10 +10,9 @@ const profile = session?.username ? await getProfile(session?.username) : null;
 const capacity = profile ? profile.capacity != null && (profile.open_tables + profile.started_tables) >= profile.capacity : null;
 
 const params = new URLSearchParams(document.location.search),
-      profiles = location.href.includes("/profiles/"),
       listed = params.get('listed'),
       release = params.get('release') || null,
-      dummy  = profiles || listed == "all" ? [true, false] : listed == "dummy" ? [true] : [false];
+      dummy = listed == "all" ? [true, false] : listed == "dummy" ? [true] : [false];
 
 export const selection = `
 *,
@@ -118,6 +117,20 @@ function restrictOpen(game, f){
     return div("Cannot open new tables.  ", game.status == "capacity" ? "No more may be opened at this time." : "Down for maintenance.");
   }
   session?.username && _.chain(game, _.see("game"), g, dom.html(dom.sel1(".create > p"), _));
+}
+
+export function dummyToggle(){
+  const params = new URLSearchParams(document.location.search);
+  $.on(document, "keydown", function(e){
+    if (e.ctrlKey && e.key == "d") {
+      if (params.get("listed") == "dummy") {
+        params.delete("listed");
+      } else {
+        params.set("listed", "dummy");
+      }
+      location.href = `${location.origin}${location.pathname}?${params.toString()}` ;
+    }
+  });
 }
 
 export async function manageTables(creates){
@@ -245,13 +258,13 @@ export async function table(item, now = new Date()){
   const age = _.maybe(item.finished_at || item.touched_at, _.date, _.partial(fromUTCDate, now), dt => aged(dt, now));
   const remarks = remark ? p(img({src: "/images/remarks.png"}), remark) : null;
   const remarked = remarks ? img({class: "flag", src: "/images/remarks.png", title: "see remarks"}) : null;
+  const dummy = item.dummy ? img({class: "flag", title: "dummy table - for testing, eventually disposed", src: "/images/trash.png"}) : null;
   const desc = _.join(", ", describe(config)) || null;
   const options = desc ? p(img({src: "/images/gear.png"}), desc) : null;
   const optioned = options ? img({class: "flag", src: "/images/gear.png", title: "see options"}) : null;
   const shredded = item.shredded_at ? img({class: "flag", src: "/images/broom.png", title: "shredded move history"}) : null;
-  const dummy = item.dummy ? "dummy" : "";
   return div({
-      "class": `table ${dummy}`.trim(),
+      "class": `table ${item.dummy ? ' dummy' : ''}`,
       "data-table": item.id,
       "data-table-status": item.status,
       "data-seated": seat?.seat,
@@ -260,6 +273,7 @@ export async function table(item, now = new Date()){
       span({class: "id"},
         link(shredded ? null : {href: `/games/${game.slug}/table/?id=${item.id}`}, game.title, " - ", item.id), " ",
         span({class: stamp}, _.maybe(age, _.join("", _), _.str(stamp || "", " ", _, " ago"))), " ",
+          dummy,
           optioned,
           remarked,
           shredded),

@@ -7,11 +7,10 @@ input[name="remark"] {
   padding: 4px;
 }
 .table {
-  transition: border-color .3s ease-in;
-  border: solid 1px transparent;
+  transition: background-image .3s ease-in;
 }
 .table.dummy {
-  border-color: yellowgreen;
+  background: url(/images/backgrounds/denim.webp);
 }
 .table img[title='shredded move history'] {
   display: none;
@@ -34,6 +33,9 @@ input[name="remark"] {
 }
 .table:not([data-table-status="finished"]) img.flag {
   display: none;
+}
+.table img[src="/images/trash.png"] {
+  display: initial !important;
 }
 table.rankings {
   font-size: .9em;

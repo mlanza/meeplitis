@@ -409,6 +409,7 @@ div.icon img {
   opacity: 1;
   transition: opacity .5s;
 }
+img#options-button.none,
 img#remarks-button.none {
   display: none;
 }
@@ -486,6 +487,9 @@ a#logo {
   display: inline-flex;
   padding: 0;
   margin: 0;
+}
+#info li:has(p:empty) {
+  display: none;
 }
 .bar {
   padding: 5px;

@@ -123,7 +123,7 @@ export function ui($table, $story, $ready, $hist, $online, describe, log, seated
 
   $.sub($described, function(described){
     dom.toggleClass(els.options, "none", !_.seq(described));
-    dom.text(dom.sel1("#options p", el), _.join(", ", described) || "Normal game");
+    dom.text(dom.sel1("#options p", el), _.join(", ", described));
   });
 
   //manage data-action

@@ -15,6 +15,11 @@ dom.text(ttl, `${title} #${id}`);
 
 const {div, h1, a, span, img, ol, ul, li} = dom.tags(['div', 'h1', 'a', 'span', 'img', 'ol', 'ul', 'li']);
 
+function swapAttr(el, key, f){
+  const value = dom.attr(el, key);
+  dom.attr(el, key, f(value));
+}
+
 _.maybe(session?.username, _.str("/profiles/?username=", _), dom.attr(dom.sel1("a.user"), "href", _));
 
 export function table(tableId){
@@ -62,6 +67,8 @@ export function ui($table, $story, $ready, $hist, $online, describe, log, seated
           return _.count(touches) - 1 == at;
         }), _.dedupe())),
         $act = $.map(_.all, $present, $up, $ready, $started);
+
+  params.get("listed") && swapAttr(dom.sel1("#title", el), "href", href => `${href}?listed=${params.get("listed")}`);
 
   let replays = 0;
 

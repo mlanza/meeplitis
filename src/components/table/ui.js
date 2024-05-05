@@ -264,6 +264,7 @@ export async function table(item, now = new Date()){
   const options = desc ? p(img({src: "/images/gear.png"}), desc) : null;
   const optioned = options ? img({class: "flag", src: "/images/gear.png", title: "see options"}) : null;
   const shredded = item.shredded_at ? img({class: "flag", src: "/images/broom.png", title: "shredded move history"}) : null;
+  const qs = listed ? `&listed=${listed}` : "";
   return div({
       "class": `table ${item.dummy ? ' dummy' : ''}`,
       "data-table": item.id,
@@ -272,7 +273,7 @@ export async function table(item, now = new Date()){
       "data-up": `${ _.join(" ", item.up) }`
     },
       span({class: "id"},
-        link(shredded ? null : {href: `/games/${game.slug}/table/?id=${item.id}`}, game.title, " - ", item.id), " ",
+        link(shredded ? null : {href: `/games/${game.slug}/table/?id=${item.id}${qs}`}, game.title, " - ", item.id), " ",
         span({class: stamp}, _.maybe(age, _.join("", _), _.str(stamp || "", " ", _, " ago"))), " ",
           dummy,
           optioned,

@@ -119,16 +119,20 @@ function restrictOpen(game, f){
   session?.username && _.chain(game, _.see("game"), g, dom.html(dom.sel1(".create > p"), _));
 }
 
-export function dummyToggle(){
+function queryToggle(key, value){
   const params = new URLSearchParams(document.location.search);
+  if (params.get(key) == value) {
+    params.delete(keu);
+  } else {
+    params.set(key, value);
+  }
+  location.href = `${location.origin}${location.pathname}?${params.toString()}${location.hash}`;
+}
+
+export function dummyToggle(){
   $.on(document, "keydown", function(e){
     if (e.ctrlKey && e.key == "d") {
-      if (params.get("listed") == "dummy") {
-        params.delete("listed");
-      } else {
-        params.set("listed", "dummy");
-      }
-      location.href = `${location.origin}${location.pathname}?${params.toString()}${location.hash}` ;
+      queryToggle("listed", "dummy");
     }
   });
 }

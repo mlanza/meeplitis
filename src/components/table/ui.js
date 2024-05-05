@@ -263,7 +263,7 @@ export async function table(item, now = new Date()){
   const age = _.maybe(item.finished_at || item.touched_at, _.date, _.partial(fromUTCDate, now), dt => aged(dt, now));
   const remarks = remark ? p(img({src: "/images/remarks.png"}), remark) : null;
   const remarked = remarks ? img({class: "flag", src: "/images/remarks.png", title: "see remarks"}) : null;
-  const dummy = item.dummy ? img({class: "flag", title: "dummy table - for testing, eventually disposed", src: "/images/trash.png"}) : null;
+  const dummy = item.dummy ? img({class: "flag", title: "dummy table", src: "/images/trash.png"}) : null;
   const desc = _.join(", ", describe(config)) || null;
   const options = desc ? p(img({src: "/images/gear.png"}), desc) : null;
   const optioned = options ? img({class: "flag", src: "/images/gear.png", title: "see options"}) : null;

@@ -7,6 +7,12 @@ import {session} from "/libs/session.js";
 import {story, nav, hist, waypoint, refresh, atPresent, inPast} from "/libs/story.js";
 import {rankings} from "/components/table/ui.js";
 
+const params = new URLSearchParams(location.search);
+const id = params.get("id");
+const ttl = dom.sel1("head title");
+const title = _.chain(ttl, dom.text, _.split(_, "|"), _.first, _.trim);
+dom.text(ttl, `${title} #${id}`);
+
 const {div, h1, a, span, img, ol, ul, li} = dom.tags(['div', 'h1', 'a', 'span', 'img', 'ol', 'ul', 'li']);
 
 _.maybe(session?.username, _.str("/profiles/?username=", _), dom.attr(dom.sel1("a.user"), "href", _));

@@ -140,6 +140,7 @@ export async function manageTables(creates){
   restrictOpen(game, _.partial(creates, open));
   refreshTables();
   onUpdate(refreshTables);
+  dummyToggle();
 }
 
 async function getRelease(tableId){

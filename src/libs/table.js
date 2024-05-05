@@ -162,7 +162,6 @@ export function ui($table, $story, $ready, $hist, $online, describe, log, seated
     const player = eventFor(event);
 
     dom.removeClass(el, "ack");
-    dom.removeAttr(el, "data-message-type");
 
     _.doto(els.event,
       dom.attr(_, "data-type", event.type),
@@ -187,13 +186,11 @@ export function ui($table, $story, $ready, $hist, $online, describe, log, seated
   });
 
   $.on(els.options, "click", function(e){
-    dom.removeClass(el, "ack");
-    dom.attr(el, "data-message-type", "options");
+    dom.sel1("#options", el).scrollIntoView();
   });
 
   $.on(els.remarks, "click", function(e){
-    dom.removeClass(el, "ack");
-    dom.attr(el, "data-message-type", "remarks");
+    dom.sel1("#remarks", el).scrollIntoView();
   });
 
   $.on(document.body, "keydown", function(e){

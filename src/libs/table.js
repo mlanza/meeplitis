@@ -5,7 +5,7 @@ import supabase from "/libs/supabase.js";
 import {presence} from "/libs/online.js";
 import {session} from "/libs/session.js";
 import {story, nav, hist, waypoint, refresh, atPresent, inPast} from "/libs/story.js";
-import {rankings} from "/components/table/ui.js";
+import {rankings, dummyToggle} from "/components/table/ui.js";
 
 const params = new URLSearchParams(location.search);
 const id = params.get("id");
@@ -19,6 +19,8 @@ function swapAttr(el, key, f){
   const value = dom.attr(el, key);
   dom.attr(el, key, f(value));
 }
+
+dummyToggle();
 
 _.maybe(session?.username, _.str("/profiles/?username=", _), dom.attr(dom.sel1("a.user"), "href", _));
 

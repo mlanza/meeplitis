@@ -128,7 +128,7 @@ export function dummyToggle(){
       } else {
         params.set("listed", "dummy");
       }
-      location.href = `${location.origin}${location.pathname}?${params.toString()}` ;
+      location.href = `${location.origin}${location.pathname}?${params.toString()}${location.hash}` ;
     }
   });
 }

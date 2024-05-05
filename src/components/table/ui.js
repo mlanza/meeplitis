@@ -122,7 +122,7 @@ function restrictOpen(game, f){
 function queryToggle(key, value){
   const params = new URLSearchParams(document.location.search);
   if (params.get(key) == value) {
-    params.delete(keu);
+    params.delete(key);
   } else {
     params.set(key, value);
   }

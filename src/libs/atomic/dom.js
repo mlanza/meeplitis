@@ -1123,7 +1123,11 @@ function attr2(self, key) {
   }
 }
 function attr3(self, key, value) {
-  self.setAttribute(key, _.str(value));
+  if (_.isFunction(value)) {
+    self.setAttribute(key, value(self.getAttribute(key)));
+  } else {
+    self.setAttribute(key, _.str(value));
+  }
 }
 function attrN(self, ...kvps) {
   const stop = kvps.length - 1;

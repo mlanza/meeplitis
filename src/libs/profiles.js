@@ -4,15 +4,25 @@ import supabase from "/libs/supabase.js";
 
 const {img, a, h2, div, span, figure} = dom.tags(['img', 'a', 'h2', 'div', 'span', 'figure', 'figcaption']);
 
-const params = new URLSearchParams(document.location.search),
-      listed = params.get('listed');
-
-export function playerLink(username){
-  return `/profiles/?username=${username}${listed ? "&listed=" + listed : ""}`;
+function keeping(keys){
+  return function(url, override = {}){
+    const params = new URLSearchParams(document.location.search);
+    for (let key of params.keys()) {
+      if (!keys.includes(key)) {
+        params.delete(key);
+      }
+    }
+    for (let [key, value] of Object.entries(override)) {
+      params.set(key, value);
+    }
+    return `${url}?${params}`;
+  }
 }
 
+export const relink = keeping("listed");
+
 export function render(item){
-  return a({href: playerLink(item.username)},
+  return a({href: relink("/profiles/", {username: item.username})},
     div({class: "profile activity", "data-open": item.open_tables, "data-started": item.started_tables},
     h2(item.username),
     figure({class: "avatar"},

@@ -2,7 +2,7 @@ import _ from "/libs/atomic_/core.js";
 import dom from "/libs/atomic_/dom.js";
 import $ from "/libs/atomic_/reactives.js";
 import supabase from "/libs/supabase.js";
-import {playerLink} from "/libs/profiles.js";
+import {relink} from "/libs/profiles.js";
 import {session} from "/libs/session.js";
 
 const tags = dom.tags(['div', 'span', 'img', 'a', 'p', 'button', 'article', 'table', 'tbody', 'thead', 'tr', 'th', 'td']);
@@ -238,7 +238,7 @@ export const rankings = (function(){
   return function rankings({seated, seats}){
     const ranks = _.sort(_.asc(_.get(_, "place")), _.map(_.merge, seated, seats));
     const rows = _.map(function({place, player, brief}){
-      return tr(td({class: "player"}, a({href: playerLink(player.username)}, player.username)), td({class: "place"}, place), td({class: "brief"}, brief));
+      return tr(td({class: "player"}, a({href: relink("/profiles", {username: player.username})}, player.username)), td({class: "place"}, place), td({class: "brief"}, brief));
     }, ranks);
     return table({class: "rankings"},
       thead(tr(th({class: "player"}, "player"), th({class: "place"}, "#"), th({class: "brief"}, "score"))),
@@ -249,7 +249,7 @@ export const rankings = (function(){
 
 function avatar(player){
   const src = player?.avatar_url;
-  return player ? a({href: playerLink(player.username)}, img({src, title: player.username})) : img({src: "/images/chair.jpg", title: "Vacant Seat"});
+  return player ? a({href: relink("/profiles/", {username: player.username})}, img({src, title: player.username})) : img({src: "/images/chair.jpg", title: "Vacant Seat"});
 }
 
 //TODO extract user timezone adjustment
@@ -278,14 +278,14 @@ export async function table(item, now = new Date()){
       "data-up": `${ _.join(" ", item.up) }`
     },
       span({class: "id"},
-        link(shredded ? null : {href: `/games/${game.slug}/table/?id=${item.id}${qs}`}, game.title, " - ", item.id), " ",
+        link(shredded ? null : {href: relink(`/games/${game.slug}/table/`, {id: item.id})}, game.title, " - ", item.id), " ",
         span({class: stamp}, _.maybe(age, _.join("", _), _.str(stamp || "", " ", _, " ago"))), " ",
           dummy,
           optioned,
           remarked,
           shredded),
       div({class: "game"},
-        a({href: `/games/${game.slug}/${qs.replace("&","?")}`}, img({src: game.thumbnail_url, alt: game.title})),
+        a({href: relink(`/games/${game.slug}/`)}, img({src: game.thumbnail_url, alt: game.title})),
         !seat && open && session?.username ? button({value: "join"}, game.status == "down" ? {disabled: "disabled"} : {}, "Join") : null,
          seat && open && session?.username ? button({value: "leave"}, "Leave") : null),
       article(

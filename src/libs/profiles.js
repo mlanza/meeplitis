@@ -4,8 +4,15 @@ import supabase from "/libs/supabase.js";
 
 const {img, a, h2, div, span, figure} = dom.tags(['img', 'a', 'h2', 'div', 'span', 'figure', 'figcaption']);
 
+const params = new URLSearchParams(document.location.search),
+      listed = params.get('listed');
+
+export function playerLink(username){
+  return `/profiles/?username=${username}${listed ? "&listed=" + listed : ""}`;
+}
+
 export function render(item){
-  return a({href: `/profiles/?username=${item.username}`},
+  return a({href: playerLink(item.username)},
     div({class: "profile activity", "data-open": item.open_tables, "data-started": item.started_tables},
     h2(item.username),
     figure({class: "avatar"},

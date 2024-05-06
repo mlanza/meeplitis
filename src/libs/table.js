@@ -4,6 +4,7 @@ import $ from "/libs/atomic_/reactives.js";
 import supabase from "/libs/supabase.js";
 import {presence} from "/libs/online.js";
 import {session} from "/libs/session.js";
+import {playerLink} from "/libs/profiles.js";
 import {story, nav, hist, waypoint, refresh, atPresent, inPast} from "/libs/story.js";
 import {rankings, dummyToggle} from "/components/table/ui.js";
 
@@ -17,7 +18,7 @@ const {div, h1, a, span, img, ol, ul, li} = dom.tags(['div', 'h1', 'a', 'span', 
 
 dummyToggle();
 
-_.maybe(session?.username, _.str("/profiles/?username=", _), dom.attr(dom.sel1("a.user"), "href", _));
+_.maybe(session?.username, playerLink, dom.attr(dom.sel1("a.user"), "href", _));
 
 export function table(tableId){
   const $t = $.cell(null);
@@ -231,7 +232,7 @@ export function ui($table, $story, $ready, $hist, $online, describe, log, seated
 export function player(username, avatar_url, ...contents){
   return div({class: "player"},
     div({class: "avatar"}, img({src: avatar_url})),
-    div(a({class: "username", "href": `/profiles/?username=${username}`}, h1(username)), contents),
+    div(a({class: "username", "href": playerLink(username)}, h1(username)), contents),
     img({"data-action": "", src: "/images/pawn.svg"}));
 }
 

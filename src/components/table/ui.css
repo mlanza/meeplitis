@@ -9,9 +9,6 @@ input[name="remark"] {
 .table {
   transition: background-image .3s ease-in;
 }
-.table.dummy {
-  background: url(/images/backgrounds/denim.webp);
-}
 .table img[title='shredded move history'] {
   display: none;
 }

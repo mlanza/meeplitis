@@ -34,6 +34,27 @@ export function getSeats(tableId, session){
   }), json) : Promise.resolve(null);
 }
 
+function selectSeat(seats){
+  const params = new URLSearchParams(location.search);
+  const seat = _.count(seats) > 1 ? _.maybe(params.get("seat"), parseInt) : _.first(seats);
+  const rejected = seat != null && !_.includes(seats, seat);
+  params.delete("seat");
+  const redirect = rejected ? `${location.origin}${location.pathname}?${params.toString()}${location.hash}` : null;
+  return {seat, redirect};
+}
+
+export async function getSeating(tableId, session){
+  const [seated, seats] = await Promise.all([
+    getSeated(tableId),
+    getSeats(tableId, session)
+  ]);
+  const {seat, redirect} = selectSeat(seats);
+  if (redirect) {
+    location.href = redirect;
+  }
+  return {seated, seats, seat};
+}
+
 function digest(result){
   const code  = result?.code,
         error = code == null ? null : result,

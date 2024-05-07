@@ -194,13 +194,13 @@ img.pawn {
 [data-table-status="finished"] img.won {
   visibility: visible;
 }
-[data-up~="0"][data-seated="0"] .game img,
-[data-up~="1"][data-seated="1"] .game img,
-[data-up~="2"][data-seated="2"] .game img,
-[data-up~="3"][data-seated="3"] .game img,
-[data-up~="4"][data-seated="4"] .game img,
-[data-up~="5"][data-seated="5"] .game img,
-[data-up~="6"][data-seated="6"] .game img {
+[data-up~="0"][data-seated~="0"] .game img,
+[data-up~="1"][data-seated~="1"] .game img,
+[data-up~="2"][data-seated~="2"] .game img,
+[data-up~="3"][data-seated~="3"] .game img,
+[data-up~="4"][data-seated~="4"] .game img,
+[data-up~="5"][data-seated~="5"] .game img,
+[data-up~="6"][data-seated~="6"] .game img {
   animation: flare .5s infinite;
 }
 [data-up~="0"] [data-seat="0"] img.pawn,

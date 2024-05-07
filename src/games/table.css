@@ -628,6 +628,26 @@ img[data-action="may"] {
   opacity: 1;
   box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
 }
+#table:not(.multi-seated) #event span.seat,
+#table:not(.multi-seated) div.player a.seat {
+  display: none;
+}
+#table.multi-seated #event .seat,
+#table.multi-seated div.player .seat {
+  font-weight: bold;
+  font-size: 1.2em;
+  position: absolute;
+  bottom: 5px;
+  right: 7px;
+  width: 1em;
+  text-align: right;
+  color: white;
+  text-decoration: none;
+  text-shadow: -1px 1px 2px #000,
+  1px 1px 2px #000,
+  1px -1px 0 #000,
+  -1px -1px 0 #000
+}
 .avatar {
   position: relative;
   opacity: 1;

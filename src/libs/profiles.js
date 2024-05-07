@@ -4,9 +4,9 @@ import supabase from "/libs/supabase.js";
 
 const {img, a, h2, div, span, figure} = dom.tags(['img', 'a', 'h2', 'div', 'span', 'figure', 'figcaption']);
 
-function keeping(keys){
+export function keeping(...keys){
   return function(url, override = {}){
-    const params = new URLSearchParams(document.location.search);
+    const params = new URLSearchParams(location.search);
     for (let key of params.keys()) {
       if (!keys.includes(key)) {
         params.delete(key);

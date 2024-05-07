@@ -191,7 +191,7 @@ export async function getProfile(username){
 }
 
 export function seated(seats){
-  return _.detect(function(seat){
+  return _.filtera(function(seat){
     return session && seat.player && seat.player.username === session.username;
   }, seats);
 }
@@ -255,7 +255,7 @@ function avatar(player){
 //TODO extract user timezone adjustment
 export async function table(item, now = new Date()){
   const {describe} = await import(`/games/${item.game.slug}/table/${item.release}/ancillary.js`);
-  const seat = seated(item.seats);
+  const seats = seated(item.seats);
   const open = item.status === "open";
   const {game, remark, dummy, config} = item;
   const link = open ? span : a;
@@ -274,7 +274,7 @@ export async function table(item, now = new Date()){
       "class": `table ${item.dummy ? ' dummy' : ''}`,
       "data-table": item.id,
       "data-table-status": item.status,
-      "data-seated": seat?.seat,
+      "data-seated": _.join(" ", _.map(_.get(_, "seat"), seats)),
       "data-up": `${ _.join(" ", item.up) }`
     },
       span({class: "id"},
@@ -286,8 +286,8 @@ export async function table(item, now = new Date()){
           shredded),
       div({class: "game"},
         a({href: relink(`/games/${game.slug}/`)}, img({src: game.thumbnail_url, alt: game.title})),
-        (!seat || dummy) && open && session?.username ? button({value: "join"}, game.status == "down" ? {disabled: "disabled"} : {}, "Join") : null,
-         seat && open && session?.username ? button({value: "leave"}, "Leave") : null),
+        (!_.seq(seats) || dummy) && open && session?.username ? button({value: "join"}, game.status == "down" ? {disabled: "disabled"} : {}, "Join") : null,
+          _.seq(seats) && open && session?.username ? button({value: "leave"}, "Leave") : null),
       article(
         div({class: "seats"}, _.map(function(seat){
           const won = seat.place === 1;

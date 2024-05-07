@@ -4,10 +4,11 @@ import $ from "/libs/atomic_/reactives.js";
 import supabase from "/libs/supabase.js";
 import {presence} from "/libs/online.js";
 import {session} from "/libs/session.js";
-import {relink} from "/libs/profiles.js";
+import {keeping, relink} from "/libs/profiles.js";
 import {story, nav, hist, waypoint, refresh, atPresent, inPast} from "/libs/story.js";
 import {rankings, dummyToggle} from "/components/table/ui.js";
 
+const changeSeat = keeping("id", "listed");
 const params = new URLSearchParams(location.search);
 const id = params.get("id");
 const ttl = dom.sel1("head title");
@@ -52,7 +53,7 @@ export function diff(curr, prior, path, f){
   }
 }
 
-export function ui($table, $story, $ready, $hist, $online, describe, log, seated, seat, desc, template, el){
+export function ui($table, $story, $ready, $hist, $online, describe, log, seated, seat, seats, desc, template, el){
   const $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), _.compact()),
         $started = $.map(_.pipe(_.get(_, "status"), _.eq(_, "started")), $table), //games can be abandoned
         $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table),
@@ -65,6 +66,9 @@ export function ui($table, $story, $ready, $hist, $online, describe, log, seated
           return _.count(touches) - 1 == at;
         }), _.dedupe())),
         $act = $.map(_.all, $present, $up, $ready, $started);
+
+  const multiSeated = _.count(seats) > 1;
+  dom.toggleClass(el, "multi-seated", multiSeated);
 
   params.get("listed") && dom.attr(dom.sel1("#title", el), "href", href => `${href}?listed=${params.get("listed")}`);
 
@@ -185,6 +189,7 @@ export function ui($table, $story, $ready, $hist, $online, describe, log, seated
 
     dom.attr(el, "data-event-type", event.type);
     dom.html(dom.sel1("p", els.event), desc(event));
+    dom.text(dom.sel1("span.seat", els.event), event.seat);
     dom.toggleClass(el, "undoable", undoable);
     dom.toggleClass(els.event, "automatic", !player);
 
@@ -229,16 +234,16 @@ export function ui($table, $story, $ready, $hist, $online, describe, log, seated
   });
 }
 
-export function player(username, avatar_url, ...contents){
+export function player(username, avatar_url, seat, ...contents){
   return div({class: "player"},
-    div({class: "avatar"}, img({src: avatar_url})),
+    div({class: "avatar"}, img({src: avatar_url}), a({class: "seat", href: changeSeat("./", {seat})}, seat)),
     div(a({class: "username", "href": relink("/profiles/", {username})}, h1(username)), contents),
     img({"data-action": "", src: "/images/pawn.svg"}));
 }
 
 export function zone(seat, username, avatar_url, {stats, resources}){
   return div({class: "zone", "data-seat": seat, "data-username": username, "data-presence": ""},
-    player(username, avatar_url, stats),
+    player(username, avatar_url, seat, stats),
     div({class: "area"}, resources));
 }
 

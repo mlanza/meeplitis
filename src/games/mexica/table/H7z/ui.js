@@ -8,7 +8,7 @@ import {describe} from "./ancillary.js";
 import * as g from "/libs/game.js";
 import {session, $online} from "/libs/session.js";
 import {table, diff, ui, outcome, subject} from "/libs/table.js";
-import {getSeated, getSeat, getConfig, story, nav, waypoint, hist, moment, wip} from "/libs/story.js";
+import {getSeated, getSeats, getConfig, story, nav, waypoint, hist, moment, wip} from "/libs/story.js";
 
 function closestAttr(el, attr){
   return _.maybe(el, _.closest(_, `[${attr}]`), dom.attr(_, attr));
@@ -110,10 +110,11 @@ const actions = dom.sel1("#actions", el);
 const supplies = dom.sel1("#supplies", el);
 const demands = dom.sel1("#demands", el);
 
-const [seated, seat] = await Promise.all([
+const [seated, seats] = await Promise.all([
   getSeated(tableId),
-  getSeat(tableId, session)
+  getSeats(tableId, session)
 ]);
+const seat = _.first(seats);
 
 function resources(title, resource, _attrs, supply){
   const attrs = Object.assign({orientation: "vertical", size: 1}, _attrs);

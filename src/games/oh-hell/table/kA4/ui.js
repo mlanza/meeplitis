@@ -8,7 +8,7 @@ import {describe} from "./ancillary.js";
 import * as g from "/libs/game.js";
 import {session, $online} from "/libs/session.js";
 import {table, ui, scored, outcome, subject} from "/libs/table.js";
-import {getSeated, getSeat, getConfig, story, hist, moment} from "/libs/story.js";
+import {getSeated, getSeats, getConfig, story, hist, moment} from "/libs/story.js";
 
 const {img, li, div, span} = dom.tags(['img', 'li', 'div', 'span']);
 
@@ -39,10 +39,11 @@ function template(){
   };
 }
 
-const [seated, seat] = await Promise.all([
+const [seated, seats] = await Promise.all([
   getSeated(tableId),
-  getSeat(tableId, session)
+  getSeats(tableId, session)
 ]);
+const seat = _.first(seats);
 
 function desc(event){
   switch(event.type) {

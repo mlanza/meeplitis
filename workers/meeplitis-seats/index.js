@@ -38,7 +38,7 @@ async function handleRequest(request) {
 
           console.log("url", request.url, "table", _table_id, "player_id", _player_id, "accessToken", accessToken);
 
-          const seat = await fetch(`${SUPABASE_URL}/rest/v1/rpc/seat`, {
+          const seats = await fetch(`${SUPABASE_URL}/rest/v1/rpc/seats`, {
               method: "POST",
               body: JSON.stringify({_table_id, _player_id}),
               headers: {
@@ -51,7 +51,7 @@ async function handleRequest(request) {
               return resp.json();
           });
 
-          return new Response(JSON.stringify(seat), {
+          return new Response(JSON.stringify(seats), {
               status: 200,
               headers: {
                   "cache-control": "no-cache, no-store, must-revalidate",

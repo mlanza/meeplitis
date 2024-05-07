@@ -26,8 +26,8 @@ export function getSeated(tableId){
   return _.fmap(fetch(`https://seated.workers.meeplitis.com?table_id=${tableId}`), json);
 }
 
-export function getSeat(tableId, session){
-  return session ? _.fmap(fetch(`https://seat.workers.meeplitis.com?table_id=${tableId}`, {
+export function getSeats(tableId, session){
+  return session ? _.fmap(fetch(`https://seats.workers.meeplitis.com?table_id=${tableId}`, {
     headers: {
       accessToken: session.accessToken
     }

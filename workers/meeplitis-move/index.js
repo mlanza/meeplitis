@@ -60,7 +60,7 @@ async function handleRequest(request) {
 
 			const _player_id = sub;
 
-			const seat = await fetch(`${SUPABASE_URL}/rest/v1/rpc/seat`, {
+			const seats = await fetch(`${SUPABASE_URL}/rest/v1/rpc/seats`, {
 				method: "POST",
 				body: JSON.stringify({
 					_player_id,
@@ -76,11 +76,11 @@ async function handleRequest(request) {
 				return resp.json();
 			});
 
-			if (seat != _seat) {
+			if (!seats.includes(_seat)) {
 				throw new Error("You are not permitted to issue a move from this seat");
 			}
 
-			console.log("seat", _seat);
+			console.log("seat", _seat, "of", seats);
 
 			const resp = await fetch(`${SUPABASE_URL}/rest/v1/rpc/move`, {
 				method: "POST",

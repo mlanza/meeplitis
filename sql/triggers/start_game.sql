@@ -19,9 +19,17 @@ begin
     where seats.table_id = new.id
     and os.id = seats.id;
 
+    with repositioned as (
+      select
+          id,
+          row_number() over () - 1 AS position
+      FROM seats
+      WHERE table_id = new.id
+      order by seat )
     update seats
-    set seat = public.seat(new.id, seats.player_id)
-    where seats.table_id = new.id;
+    set seat = r.position
+    from repositioned r
+    where seats.id = r.id;
 
     raise log '$ starting';
 

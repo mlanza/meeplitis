@@ -257,14 +257,14 @@ export async function table(item, now = new Date()){
   const {describe} = await import(`/games/${item.game.slug}/table/${item.release}/ancillary.js`);
   const seat = seated(item.seats);
   const open = item.status === "open";
-  const {game, remark, config} = item;
+  const {game, remark, dummy, config} = item;
   const link = open ? span : a;
   const stamp = item.finished_at ? "finished" : item.touched_at ? "touched" : null;
   const ranked = stamp == 'finished' ? rankings(item) : null;
   const age = _.maybe(item.finished_at || item.touched_at, _.date, _.partial(fromUTCDate, now), dt => aged(dt, now));
   const remarks = remark ? p(img({src: "/images/remarks.png"}), remark) : null;
   const remarked = remarks ? img({class: "flag", src: "/images/remarks.png", title: "see remarks"}) : null;
-  const dummy = item.dummy ? img({class: "flag", title: "dummy table", src: "/images/trash.png"}) : null;
+  const dummyTable = item.dummy ? img({class: "flag", title: "dummy table", src: "/images/trash.png"}) : null;
   const desc = _.join(", ", describe(config)) || null;
   const options = desc ? p(img({src: "/images/gear.png"}), desc) : null;
   const optioned = options ? img({class: "flag", src: "/images/gear.png", title: "see options"}) : null;
@@ -280,13 +280,13 @@ export async function table(item, now = new Date()){
       span({class: "id"},
         link(shredded ? null : {href: relink(`/games/${game.slug}/table/`, {id: item.id})}, game.title, " - ", item.id), " ",
         span({class: stamp}, _.maybe(age, _.join("", _), _.str(stamp || "", " ", _, " ago"))), " ",
-          dummy,
+          dummyTable,
           optioned,
           remarked,
           shredded),
       div({class: "game"},
         a({href: relink(`/games/${game.slug}/`)}, img({src: game.thumbnail_url, alt: game.title})),
-        !seat && open && session?.username ? button({value: "join"}, game.status == "down" ? {disabled: "disabled"} : {}, "Join") : null,
+        (!seat || dummy) && open && session?.username ? button({value: "join"}, game.status == "down" ? {disabled: "disabled"} : {}, "Join") : null,
          seat && open && session?.username ? button({value: "leave"}, "Leave") : null),
       article(
         div({class: "seats"}, _.map(function(seat){

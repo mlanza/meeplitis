@@ -40,9 +40,8 @@
         const url = new URL(request.url);
         const _table_id = url.searchParams.get("table_id"),
               _event_id = url.searchParams.get("event_id"),
-              _seat = url.searchParams.get('seat'),
+              _seat = url.searchParams.get('seat') == null ? null : parseInt(url.searchParams.get('seat')),
               _commands = [];
-        let seat = null;
         console.log("url", request.url, "table", _table_id, "event_id", _event_id, "accessToken", accessToken);
         if (accessToken) {
           const {sub, email} = await fetch("https://verify.workers.meeplitis.com", {
@@ -54,7 +53,7 @@
           });
           console.log("sub", sub, "email", email);
           const _player_id = sub;
-          let seat2 = await fetch(`${SUPABASE_URL}/rest/v1/rpc/seat`, {
+          const seats = await fetch(`${SUPABASE_URL}/rest/v1/rpc/seats`, {
             method: "POST",
             body: JSON.stringify({ _player_id, _table_id }),
             headers: {
@@ -67,7 +66,7 @@
             return resp.json();
           });
           console.log("seat", _seat);
-          if (seat2 != _seat) {
+          if (_seat != null && !seats.includes(_seat)) {
             throw new Error("You are not permitted to see the game from this seat");
           }
         }
@@ -83,7 +82,7 @@
         }).then(function(resp) {
           return resp.json();
         });
-        const cc = seat == null ? "public" : "private";
+        const cc = _seat == null ? "public" : "private";
         return new Response(JSON.stringify(resp), {
           status: 200,
           headers: {

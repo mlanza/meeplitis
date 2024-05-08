@@ -414,6 +414,7 @@ img#remarks-button.none {
   display: none;
 }
 
+img#lock,
 img#up {
   width: 25px !important;
   padding: 0;
@@ -421,6 +422,14 @@ img#up {
   transition: opacity 1s;
   cursor: default;
   margin-top: -2px;
+}
+#table[data-table-status="locked"] img#up,
+img#lock {
+  display: none;
+  opacity: 1;
+}
+#table[data-table-status="locked"] img#lock {
+  display: initial;
 }
 #table.up img#up {
   opacity: 1;

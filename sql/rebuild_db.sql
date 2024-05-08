@@ -113,8 +113,7 @@ create table seats (
   created_at timestamp default now(),
   updated_at timestamp,
   primary key (table_id, id),
-  unique (table_id, seat), -- seats are ordered beginning with 0 once game starts
-  unique (table_id, player_id)); -- player can only occupy one seat
+  unique (table_id, seat)); -- seats are ordered beginning with 0 once game starts
 
 alter table seats enable row level security;
 

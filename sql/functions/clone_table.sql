@@ -1,4 +1,4 @@
-create or replace function clone_table(_table_id varchar, _release varchar, _config jsonb, _cloned_by uuid, _players uuid[])
+create or replace function clone_table(_table_id varchar, _release varchar, _config jsonb, _players uuid[], _cloned_by uuid = auth.uid())
 returns varchar
 security definer
 language plpgsql
@@ -16,7 +16,7 @@ select game_id, coalesce(_release, release), coalesce(_config, config), status, 
 returning id into _id;
 
 insert into seats(table_id, id, config, player_id, seat, joined_at, created_at)
-select _id, id, config, coalesce(_players[seat + 1], player_id), seat, _now, _now
+select _id, id, config, coalesce(_players[(row_number() OVER (order by seat))], player_id), seat, _now, _now
 from seats where table_id = _table_id order by seat;
 
 insert into events(table_id, id, seat_id, type, details, undoable, created_at)

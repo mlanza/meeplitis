@@ -7,7 +7,7 @@ as $$
 declare
   _count int := 0;
   _record record;
-  _cursor cursor for select id, touched_at from tables_since_touched where status = 'abandoned' and stale;
+  _cursor cursor for select id, touched_at from tables_since_touched where status = 'started' and stale and not dummy;
 begin
 
   open _cursor;

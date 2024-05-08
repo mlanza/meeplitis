@@ -1,5 +1,4 @@
 -- TODO define indexes
--- TODO define proc for committing move
 
 alter table tables drop constraint fk_last_touch;
 drop table events;
@@ -15,7 +14,7 @@ create type table_status as enum ('open', 'vacant', 'full', 'started', 'locked',
 -- vacant - all players vacated before the game started
 -- full - the full complement of players are seated, the game will start momentarily
 -- started - the game is ready for moves (occurs once `start` event is added)
--- locked - rare admin action perhaps to resolve a concern
+-- locked - admin action perhaps to resolve a concern
 -- finished - the game has concluded
 -- abandoned - the game was not concluded before time ran out
 

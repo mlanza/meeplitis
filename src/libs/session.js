@@ -27,7 +27,8 @@ dom.toggleClass(document.body, "anon", !session);
 
 if (session) {
   if (!session.username) {
-    dom.addClass(dom.sel1("#unidentified-user"), "reveal");
+    const el = dom.sel1("#unidentified-user");
+    el && dom.addClass(el, "reveal");
   }
   dom.html(you, img({src: session.avatar_url}))
   dom.attr(you, "href", session.username ? `/profiles/?username=${session.username}` : '/profiles/edit');

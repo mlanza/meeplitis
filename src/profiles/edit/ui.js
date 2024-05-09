@@ -26,7 +26,7 @@ const {data: {user}} = await supabase.auth.getUser();
 
 _.maybe(user, _.get(_, "email"), dom.value(email, _));
 _.maybe(profile, _.get(_, "username"), _.str(_, " | ", "Meeplitis"), dom.text(dom.sel1("head title"), _));
-_.maybe(profile, _.get(_, "username"), dom.text(dom.sel1(".banner h1"), _));
+_.chain(profile, _.get(_, "username"), _.either(_, "<username>"), dom.text(dom.sel1(".banner h1"), _));
 _.chain(profile, _.get(_, "username"), function(username){
   username || dom.attr(form, "data-mode", "initial");
 });

@@ -112,14 +112,12 @@ export function ui($table, $story, $ready, $error, $hist, $online, describe, log
   dom.attr(el, "data-perspective", seat);
   dom.attr(el, "data-seats", _.count(seated));
 
-  $.sub($error, function(error){
-    if (error) {
-      log("$error", error);
-      const {message} = error;
-      dom.text(dom.sel1("#error p", el), message);
-      dom.addClass(el, "error");
-      dom.removeClass(el, "ack");
-    }
+  $.sub($error, _.filter(_.isSome), function(error){
+    log("$error", error);
+    const {message} = error;
+    dom.text(dom.sel1("#error p", el), message);
+    dom.addClass(el, "error");
+    dom.removeClass(el, "ack");
   });
   $.sub($table, _.partial(log, "$table"));
   $.sub($status, _.partial(log, "$status"));

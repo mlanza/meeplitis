@@ -233,7 +233,7 @@ const log    = _.log,
       }),
       $both  = which($.latest([$hist, $wip]));
 
-$.sub($error, function(error){
+$.sub($error, _.filter(_.isSome), function(error){
   sh.dispatch($wip, null);
 });
 

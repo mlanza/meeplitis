@@ -102,10 +102,17 @@ function cardSrc({suit, rank}){
   return `/images/deck/${rank}${suits[suit]}.svg`;
 }
 
+function fail(error){
+  const {message} = error;
+  dom.text(dom.sel1("#error p", el), message);
+  dom.addClass(el, "error");
+  dom.removeClass(el, "ack");
+}
+
 const log    = _.log,
       $table = table(tableId),
       $ready = $.cell(false),
-      $story = story(session, tableId, seat, seated, await getConfig(tableId), _.partial(log, "story"), $ready, _.noop, c.ohHell),
+      $story = story(session, tableId, seat, seated, await getConfig(tableId), _.partial(log, "story"), $ready, fail, c.ohHell),
       $hist  = hist($story);
 
 //universal ui

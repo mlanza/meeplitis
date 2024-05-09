@@ -83,6 +83,7 @@ export function ui($table, $story, $ready, $hist, $online, describe, log, seated
     touches: dom.sel1("#replay .touches", el),
     game: dom.sel1("#game", el),
     players: dom.sel1(".players", el),
+    error: dom.sel1("#error", el),
     event: dom.sel1("#event", el)
   }
 
@@ -178,6 +179,7 @@ export function ui($table, $story, $ready, $hist, $online, describe, log, seated
     const player = eventFor(event);
 
     dom.removeClass(el, "ack");
+    dom.removeClass(el, "failure");
 
     _.doto(els.event,
       dom.attr(_, "data-type", event.type),

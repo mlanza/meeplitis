@@ -68,7 +68,8 @@ try {
 
     run({events});
 
-    //example: run({commands: [{type: "pass"},{type: "commit"}], seat: 1});
+    _.log("example:");
+    _.log(`run({commands: [{type: "pass"},{type: "commit"}], seat: 1})`);
     Object.assign(window, {$game, $online, session, effects, g, sim, run, held, flush, supabase});
   }
 } catch (ex) {

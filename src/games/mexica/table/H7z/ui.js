@@ -216,20 +216,13 @@ function desc({type, details}){
   }
 }
 
-function fail(error){
-  const {message} = error;
-  sh.dispatch($wip, null);
-  dom.text(dom.sel1("#error p", el), message);
-  dom.addClass(el, "error");
-  dom.removeClass(el, "ack");
-}
-
 const placePilli = {type: "place-pilli"};
 
 const log    = _.log,
       $table = table(tableId),
       $ready = $.cell(false),
-      $story = story(session, tableId, seat, seated, await getConfig(tableId), _.partial(log, "story"), $ready, fail, c.mexica),
+      $error = $.cell(null),
+      $story = story(session, tableId, seat, seated, await getConfig(tableId), _.partial(log, "story"), $ready, $error, c.mexica),
       $hist  = hist($story),
       $wip   = wip($story, function(game){
         const {seated} = _.deref(game);
@@ -239,6 +232,11 @@ const log    = _.log,
         }
       }),
       $both  = which($.latest([$hist, $wip]));
+
+$.sub($error, function(error){
+  debugger;
+  sh.dispatch($wip, null);
+});
 
 $.sub($ready, function(ready){
   if (!ready){ //upon issuing a move...
@@ -262,7 +260,7 @@ function template(seat){
 }
 
 //universal ui
-ui($table, $story, $ready, $hist, $online, describe, _.partial(log, "ui"), seated, seat, seats, desc, template, el);
+ui($table, $story, $ready, $error, $hist, $online, describe, _.partial(log, "ui"), seated, seat, seats, desc, template, el);
 
 function remaining(slots){
   return _.count(_.filter(_.isNil, slots));

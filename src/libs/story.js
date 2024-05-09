@@ -99,8 +99,8 @@ function move(_table_id, _seat, _commands, session){
   }).then(json).then(digest);
 }
 
-export function Story(session, tableId, seat, seated, config, log, $ready, fail, make, $state, $story){
-  Object.assign(this, {session, tableId, seat, seated, config, log, $ready, fail, make, $state, $story});
+export function Story(session, tableId, seat, seated, config, log, $ready, $error, make, $state, $story){
+  Object.assign(this, {session, tableId, seat, seated, config, log, $ready, $error, make, $state, $story});
 }
 
 function stepping(self, cstory, pstory){
@@ -219,7 +219,7 @@ async function dispatch(self, command){
     self.log('moved', {tableId: self.tableId, command, seat: self.seat}, '->', {error, data});
 
     if (error) {
-      self.fail(error);
+      $.pub(self.$error, error);
     }
   } finally {
     _.reset(self.$ready, true);
@@ -231,12 +231,12 @@ _.doto(Story,
   _.implement($.ISubscribe, {sub}),
   _.implement(_.IDeref, {deref}));
 
-export function story(session, tableId, seat, seated, config, log, $ready, fail, make){
+export function story(session, tableId, seat, seated, config, log, $ready, $error, make){
   const $state = $.cell({touches: null, history: null, at: null});
 
   _.reset($ready, true);
 
-  return new Story(session, tableId, seat, seated, config, log, $ready, fail, make, $state, $.pipe($state, _.filter(function({touches, history, at}){ //TODO cleanup
+  return new Story(session, tableId, seat, seated, config, log, $ready, $error, make, $state, $.pipe($state, _.filter(function({touches, history, at}){ //TODO cleanup
     return touches && history && at != null;
   }), _.thin(_.mapArgs(_.get(_, "at"), _.equiv))));
 }

@@ -53,7 +53,7 @@ export function diff(curr, prior, path, f){
   }
 }
 
-export function ui($table, $story, $ready, $hist, $online, describe, log, seated, seat, seats, desc, template, el){
+export function ui($table, $story, $ready, $error, $hist, $online, describe, log, seated, seat, seats, desc, template, el){
   const $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), _.compact()),
         $started = $.map(_.pipe(_.get(_, "status"), _.eq(_, "started")), $table), //games can be abandoned
         $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table),
@@ -112,6 +112,15 @@ export function ui($table, $story, $ready, $hist, $online, describe, log, seated
   dom.attr(el, "data-perspective", seat);
   dom.attr(el, "data-seats", _.count(seated));
 
+  $.sub($error, function(error){
+    if (error) {
+      log("$error", error);
+      const {message} = error;
+      dom.text(dom.sel1("#error p", el), message);
+      dom.addClass(el, "error");
+      dom.removeClass(el, "ack");
+    }
+  });
   $.sub($table, _.partial(log, "$table"));
   $.sub($status, _.partial(log, "$status"));
   $.sub($touch, _.partial(log, "$touch"));

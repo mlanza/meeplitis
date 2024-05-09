@@ -102,21 +102,15 @@ function cardSrc({suit, rank}){
   return `/images/deck/${rank}${suits[suit]}.svg`;
 }
 
-function fail(error){
-  const {message} = error;
-  dom.text(dom.sel1("#error p", el), message);
-  dom.addClass(el, "error");
-  dom.removeClass(el, "ack");
-}
-
 const log    = _.log,
       $table = table(tableId),
       $ready = $.cell(false),
-      $story = story(session, tableId, seat, seated, await getConfig(tableId), _.partial(log, "story"), $ready, fail, c.ohHell),
+      $error = $.cell(null),
+      $story = story(session, tableId, seat, seated, await getConfig(tableId), _.partial(log, "story"), $ready, $error, c.ohHell),
       $hist  = hist($story);
 
 //universal ui
-ui($table, $story, $ready, $hist, $online, describe, _.partial(log, "ui"), seated, seat, seats, desc, template, el);
+ui($table, $story, $ready, $error, $hist, $online, describe, _.partial(log, "ui"), seated, seat, seats, desc, template, el);
 
 $.sub($hist, function([curr, prior, {step, offset}, game]){
   const {seen, event, metrics, state, state: {trump, round, status, seated, deck, lead, broke, deals}} = curr;

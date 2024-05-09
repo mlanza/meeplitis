@@ -4,13 +4,15 @@ begin
 
   if (new.status = 'started'::table_status and old.status <> 'started'::table_status) then
     update tables
-    set started_at = now()
+    set started_at = now(),
+        touched_at = now()
     where id = new.id;
   end if;
 
   if (new.status = 'finished'::table_status and old.status <> 'finished'::table_status) then
     update tables
-    set finished_at = now()
+    set finished_at = now(),
+        touched_at = now()
     where id = new.id;
 
     insert into notifications(type, table_id)

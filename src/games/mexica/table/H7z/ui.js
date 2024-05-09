@@ -233,14 +233,12 @@ const log    = _.log,
       }),
       $both  = which($.latest([$hist, $wip]));
 
-$.sub($error, _.filter(_.isSome), function(error){
-  sh.dispatch($wip, null);
+$.sub($error, _.filter(_.isSome), function(error){ //when an error occurs...
+  sh.dispatch($wip, null); //...clear any work in progress
 });
 
-$.sub($ready, function(ready){
-  if (!ready){ //upon issuing a move...
-    sh.dispatch($wip, null); //...clear any work in progress
-  }
+$.sub($ready, _.filter(_.not), function(){ //upon issuin a move...
+  sh.dispatch($wip, null); //...clear any work in progress
 });
 
 $.sub($both, _.partial(log, "$both"));

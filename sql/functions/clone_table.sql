@@ -11,8 +11,23 @@ begin
 select now()
 into _now;
 
-insert into tables(game_id, release, config, status, up, seating, clone_id, dummy, created_by)
-select game_id, coalesce(_release, release), coalesce(_config, config), status, up, seating, _table_id, true, _cloned_by from tables where id = _table_id
+insert into tables(game_id, release, config, last_touch_id, joined_at, started_at, finished_at, touched_at, status, up, seating, clone_id, dummy, created_by)
+select
+  game_id,
+  coalesce(_release, release),
+  coalesce(_config, config),
+  last_touch_id,
+  case when joined_at is null then null else _now end,
+  case when started_at is null then null else _now end,
+  case when finished_at is null then null else _now end,
+  case when touched_at is null then null else _now end,
+  status,
+  up,
+  seating,
+  _table_id,
+  true,
+  _cloned_by
+from tables where id = _table_id
 returning id into _id;
 
 insert into seats(table_id, id, config, player_id, seat, joined_at, created_at)

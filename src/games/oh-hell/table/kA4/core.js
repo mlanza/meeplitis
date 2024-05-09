@@ -161,6 +161,9 @@ function execute(self, command){
   const automatic = _.includes(["start", "award", "score", "finish", "deal"], type);
 
   if (!automatic && !valid){
+    if (type == "play" && _.getIn(command, ["details", "card", "suit"]) == _.getIn(state, ["trump", "suit"])) {
+      throw new Error(`Trump has not yet been broken!`);
+    }
     throw new Error(`Invalid ${type}`);
   }
 

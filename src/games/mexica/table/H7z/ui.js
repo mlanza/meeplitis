@@ -234,7 +234,6 @@ const log    = _.log,
       $both  = which($.latest([$hist, $wip]));
 
 $.sub($error, function(error){
-  debugger;
   sh.dispatch($wip, null);
 });
 

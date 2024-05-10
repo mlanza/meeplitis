@@ -5,7 +5,7 @@ import supabase from "/libs/supabase.js";
 const {img, a, h2, div, span, figure} = dom.tags(['img', 'a', 'h2', 'div', 'span', 'figure', 'figcaption']);
 
 export function keeping(...keys){
-  return function(url, override = {}){
+  return function(url, override = {}, hash){
     const params = new URLSearchParams(location.search);
     for (let key of params.keys()) {
       if (!keys.includes(key)) {
@@ -13,9 +13,13 @@ export function keeping(...keys){
       }
     }
     for (let [key, value] of Object.entries(override)) {
-      params.set(key, value);
+      if (value == null) {
+        params.delete(key);
+      } else {
+        params.set(key, value);
+      }
     }
-    return `${url}?${params}`;
+    return `${url}?${params}${hash ? '#' + hash : ''}`;
   }
 }
 

@@ -1,15 +1,29 @@
 import _ from "/libs/atomic_/core.js";
 import $ from "/libs/atomic_/reactives.js";
+import dom from "/libs/atomic_/dom.js";
 import g from "/libs/game_.js";
 import supabase from "/libs/supabase.js";
+import {keeping} from "/libs/profiles.js";
 import {session, $online} from "/libs/session.js";
 
 const params = new URLSearchParams(document.location.search),
       tableId = params.get('id'),
+      chopped = _.maybe(params.get("chopped"), parseInt) || 0,
+      ctx = _.maybe(params.get("ctx"), parseInt) || 3,
       userId = session?.user?.id,
       eventId = document.location.hash.substr(1),
       options = params.get('options')?.split(',') || [];
 
+const els = {
+  before: dom.sel1("#before span"),
+  after: dom.sel1("#after span"),
+  events: dom.sel1("#events"),
+  held: dom.sel1("#held"),
+  chop: dom.sel1("#chop"),
+  chopped: dom.sel1("#chopped"),
+  permalink: dom.sel1("#permalink"),
+  head: dom.sel1("#head")
+}
 
 try {
   const {data, error, status} = await supabase.rpc('inspect', {_table_id: tableId, _user_id: userId});
@@ -20,17 +34,56 @@ try {
     const {table, seated, evented} = data,
           {slug, release, config} = table,
           {make} = await import(`/games/${slug}/table/${release}/core.js`);
+
     const seats = _.toArray(_.repeat(_.count(seated) || 4, {})),
           seen = _.toArray(_.range(0, _.count(seats))),
+          num = _.count(evented),
+          thruId = chopped ? _.chain(evented, _.take(_.count(evented) - chopped, _), _.last, _.get(_, "id")) : eventId || _.chain(evented, _.last, _.get(_, "id")),
           simulate = g.simulate(make),
           effects = _.comp(g.effects, simulate);
 
-    const thru = eventId ? _.maybe(evented, _.detectIndex(function({id}){
-      return id === eventId;
+    const relink = keeping("id", "seat", "chopped", "listed"),
+          link = relink("./", {chopped: chopped + 1}),
+          headlink = relink("./", {chopped: null}),
+          permalink = relink("./", {chopped: null}, thruId);
+
+    dom.attr(els.permalink, "href", permalink);
+    dom.text(els.permalink, '#' + thruId);
+    dom.attr(els.head, "href", headlink);
+    dom.attr(els.chop, "href", link);
+    dom.text(els.chopped, chopped);
+
+    const thru = thruId ? _.maybe(evented, _.detectIndex(function({id}){
+      return id === thruId;
     }, _), _.inc) : null;
 
     const events = thru == null ? evented : _.chain(evented, _.take(thru, _), _.toArray),
           held = thru == null ? [] : _.chain(evented, _.drop(thru, _), _.toArray);
+
+    const before = _.count(events),
+          after = _.count(held);
+
+    function numbered(n){
+      return n ? ` ${n}` : null;
+    }
+
+    function formatEvent(e){
+      return li({id: e.id}, pre(JSON.stringify(e)));
+    }
+
+    const li = dom.tag('li'), pre = dom.tag('pre');
+    dom.append(els.events, _.map(formatEvent, events));
+    dom.append(els.held, _.map(formatEvent, held));
+    dom.text(els.before, numbered(before));
+    dom.text(els.after, numbered(after));
+    dom.attr(_.parent(els.before), "num", before);
+    dom.attr(_.parent(els.after), "num", after);
+
+    const head = document.getElementById(thruId);
+    setTimeout(function(){
+      dom.addClass(head, "head");
+      head.scrollIntoView({behavior: "smooth", block: "center"});
+    }, 300);
 
     const [curr, prior] = simulate({seats, config, seen}),
           $game = $.cell(curr);

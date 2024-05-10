@@ -1,0 +1,59 @@
+body {
+  background-image: url(/images/backgrounds/greypx.webp);
+  padding-top: 3em;
+}
+a#logo,
+a#you {
+  position: fixed !important;
+}
+#permalink {
+  color: white;
+  position: fixed;
+  bottom: 1em;
+  right: 1em;
+  width: 4.5em;
+}
+#chop, #chopped, #head {
+  color: white;
+  position: fixed;
+  bottom: 1em;
+  right: 6em;
+}
+#chop {
+  right: 8em;
+}
+#chopped {
+  right: 6em;
+}
+#head {
+  right: 11.5em;
+}
+#before,
+#after {
+  margin-left: 1.5em;
+  width: 3em;
+  text-align: right;
+}
+.head {
+  border: solid 1px white;
+}
+pre {
+  padding: 1em;
+  white-space: normal;
+}
+pre, ul, #before, #after {
+  color: white;
+  font-size: small;
+}
+li {
+  width: calc(100vw - 15em);
+}
+#events {
+  list-style-type: "☑️ ";
+}
+#held {
+  list-style-type: "▫️ ";
+}
+[num='0'] {
+  display: none;
+}

@@ -186,7 +186,7 @@ export function ui($table, $story, $ready, $error, $hist, $online, describe, log
     const player = eventFor(event);
 
     dom.removeClass(el, "ack");
-    dom.removeClass(el, "failure");
+    dom.removeClass(el, "error");
 
     _.doto(els.event,
       dom.attr(_, "data-type", event.type),

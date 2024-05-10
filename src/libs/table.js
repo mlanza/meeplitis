@@ -134,6 +134,12 @@ export function ui($table, $story, $ready, $error, $hist, $online, describe, log
   $.sub($up, dom.toggleClass(el, "up", _));
   $.sub($ready, _.map(_.not), dom.toggleClass(el, "wait", _));
 
+  $.on(document, "keydown", function(e){
+    if (e.ctrlKey && e.key == "s") {
+      location.href = `${location.origin}/shell/${location.search}${location.hash}`;
+    }
+  });
+
   $.sub($remarks, function(remarks){
     dom.toggleClass(els.remarks, "none", !remarks);
     dom.text(dom.sel1("#remarks p", el), remarks);

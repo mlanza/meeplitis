@@ -13,6 +13,10 @@
 #table :is(button.active, button.selected) {
   display: initial;
 }
+#table:is([data-seats='5'],[data-seats='6'],[data-seats='7']) #event[data-type='scored'] {
+  width: 30em;
+  left: calc(50% - 15em);
+}
 #table .hand {
   position: fixed;
   right: 1em;

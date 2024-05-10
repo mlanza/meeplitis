@@ -12,7 +12,7 @@ const params = new URLSearchParams(document.location.search),
 
 
 try {
-  const {data, error, status} = await supabase.rpc('moment', {_table_id: tableId, _user_id: userId});
+  const {data, error, status} = await supabase.rpc('inspect', {_table_id: tableId, _user_id: userId});
 
   if (error) {
     console.error(error.message);

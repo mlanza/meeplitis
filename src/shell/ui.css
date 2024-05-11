@@ -38,12 +38,19 @@ pre {
   padding: 1em;
   white-space: normal;
 }
-pre, ul, #before, #after {
+pre, ul {
   color: white;
   font-size: small;
 }
 li {
   width: calc(100vw - 15em);
+}
+li .state {
+  opacity: .8;
+  display: none;
+}
+li:hover .state {
+  display: block;
 }
 #events {
   list-style-type: "☑️ ";

@@ -128,8 +128,10 @@ try {
       return i < idx ? "past" : i == idx ? "present" : "future";
     }
 
-    function formatEvent(e, klass = ""){
-      return li({id: e.id, class: klass}, pre(JSON.stringify(e)));
+    function formatEvent({event, state}, klass = ""){
+      return li({id: event.id, class: klass},
+        pre(JSON.stringify(event)),
+        pre({class: "state"}, JSON.stringify(state)));
     }
 
     $.sub($hist, function([curr, prior]){
@@ -140,8 +142,8 @@ try {
         const increase = cf > pf ? cf - pf : 0;
         const decrease = cf < pf ? pf - cf : 0;
         if (increase) {
-          const added = _.mapa(_.get(_, "event"), _.drop(pf, curr.frames));
-          dom.append(dom.sel1("#events"), _.mapa(formatEvent, added));
+          dom.append(dom.sel1("#events"),
+            _.mapa(formatEvent, _.drop(pf, curr.frames)));
         }
         if (decrease) {
           const subtracted = _.mapa(_.getIn(_, ["event", "id"]), _.drop(cf, prior.frames));
@@ -162,10 +164,10 @@ try {
           location.hash = `#${curr.at}`;
         }
       } else {
-        const events = _.mapIndexed(function(i, {event}){
-          return formatEvent(event, when(i, idx));
+        const els = _.mapIndexed(function(i, frame){
+          return formatEvent(frame, when(i, idx));
         }, frames);
-        dom.append(dom.sel1("#events"), events);
+        dom.append(dom.sel1("#events"), els);
       }
       const id = frames[idx].event.id;
       const head = document.getElementById(id);

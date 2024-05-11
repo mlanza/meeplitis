@@ -34,9 +34,6 @@ a#you {
   width: 3em;
   text-align: right;
 }
-.head {
-  border: solid 1px white;
-}
 pre {
   padding: 1em;
   white-space: normal;
@@ -51,7 +48,11 @@ li {
 #events {
   list-style-type: "☑️ ";
 }
-#held {
+#events li.present {
+  list-style-type: "🕙 ";
+  border: solid 1px white;
+}
+#events li.future {
   list-style-type: "▫️ ";
 }
 [num='0'] {

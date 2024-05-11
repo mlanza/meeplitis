@@ -8,22 +8,8 @@ import {session, $online} from "/libs/session.js";
 
 const params = new URLSearchParams(document.location.search),
       tableId = params.get('id'),
-      chopped = _.maybe(params.get("chopped"), parseInt) || 0,
-      ctx = _.maybe(params.get("ctx"), parseInt) || 3,
       userId = session?.user?.id,
-      eventId = document.location.hash.substr(1),
       options = params.get('options')?.split(',') || [];
-
-const els = {
-  before: dom.sel1("#before span"),
-  after: dom.sel1("#after span"),
-  events: dom.sel1("#events"),
-  held: dom.sel1("#held"),
-  chop: dom.sel1("#chop"),
-  chopped: dom.sel1("#chopped"),
-  permalink: dom.sel1("#permalink"),
-  head: dom.sel1("#head")
-}
 
 try {
   const {data, error, status} = await supabase.rpc('inspect', {_table_id: tableId, _user_id: userId});
@@ -37,94 +23,168 @@ try {
 
     const seats = _.toArray(_.repeat(_.count(seated) || 4, {})),
           seen = _.toArray(_.range(0, _.count(seats))),
-          num = _.count(evented),
-          thruId = chopped ? _.chain(evented, _.take(_.count(evented) - chopped, _), _.last, _.get(_, "id")) : eventId || _.chain(evented, _.last, _.get(_, "id")),
           simulate = g.simulate(make),
           effects = _.comp(g.effects, simulate);
 
-    const relink = keeping("id", "seat", "chopped", "listed"),
-          link = relink("./", {chopped: chopped + 1}),
-          headlink = relink("./", {chopped: null}),
-          permalink = relink("./", {chopped: null}, thruId);
-
-    dom.attr(els.permalink, "href", permalink);
-    dom.text(els.permalink, '#' + thruId);
-    dom.attr(els.head, "href", headlink);
-    dom.attr(els.chop, "href", link);
-    dom.text(els.chopped, chopped);
-
-    const thru = thruId ? _.maybe(evented, _.detectIndex(function({id}){
-      return id === thruId;
-    }, _), _.inc) : null;
-
-    const events = thru == null ? evented : _.chain(evented, _.take(thru, _), _.toArray),
-          held = thru == null ? [] : _.chain(evented, _.drop(thru, _), _.toArray);
-
-    const before = _.count(events),
-          after = _.count(held);
-
-    function numbered(n){
-      return n ? ` ${n}` : null;
+    function init({seats, config, seen, evented, hash}){
+      const at = hash ? hash.replace("#", "") : _.last(evented)?.id;
+      const [seed] = simulate({seats, config, seen});
+      const frames = _.fold(function(memo, event){
+        const {game, loaded} = _.last(memo) || {game: seed, loaded: []};
+        const snapshot = _.deref(game);
+        const result = _.chain({seats, config, events: [event], loaded, commands: [], seen, snapshot}, simulate);
+        const [curr] = result;
+        const effs = g.effects(result);
+        return _.conj(memo, {game: curr, loaded: _.conj(loaded, event), ...effs});
+      },[], evented);
+      const idx = at ? _.detectIndex(function({event}){
+        return event.id == at;
+      }, frames) : _.count(frames) - 1;
+      return {seed, frames, idx, at};
     }
 
-    function formatEvent(e){
-      return li({id: e.id}, pre(JSON.stringify(e)));
+    function issue(cmd = {type: null}){
+      return function(memo){
+        const {type} = cmd;
+        const {seed, frames, idx, at} = memo;
+        const max = _.count(frames) - 1;
+        switch(type) {
+          case "reset": {
+            return idx == max ? memo : {seed, frames, idx: max, at};
+          }
+
+          case "undo": {
+            const _idx = _.max(0, idx - 1);
+            const at = frames[_idx]?.event?.id;
+            return idx == 0 ? memo : {seed, frames, idx: _idx, at};
+          }
+
+          case "redo": {
+            const _idx = _.min(idx + 1, _.count(frames) - 1);
+            const at = frames[_idx]?.event?.id;
+            return idx == 0 ? memo : {seed, frames, idx: _idx, at};
+          }
+
+          case "flush": {
+            return flush(memo);
+          }
+
+          case "at": {
+            const {id} = cmd;
+            const idx = _.detectIndex(function(frame){
+              return frame?.event?.id == id;
+            }, frames);
+            return {seed, frames, idx, at};
+          }
+
+          case "run": {
+            const {seed, frames, idx} = flush(memo);
+            const frame = _.last(frames);
+            const {seat, commands} = cmd;
+            if (seat == null) {
+              throw Error("Must specify seat with commands.");
+            }
+            const {added} = effects({seats, config, loaded: frame.loaded, events: [], commands, seen: [seat], snapshot: frame.state});
+            const addframes = _.toArray(_.drop(1, _.fold(function(memo, event){
+              const {game, loaded} = _.last(memo);
+              const snapshot = _.deref(game);
+              const result = _.chain({seats, config, events: [event], loaded, commands: [], seen, snapshot}, simulate);
+              const [curr] = result;
+              const effs = g.effects(result);
+              return _.conj(memo, {game: curr, loaded: _.conj(loaded, event), ...effs});
+            },[{game: frame.game, loaded: frame.loaded}], tempIds(added))));
+            const _frames = _.toArray(_.concat(frames, addframes));
+            const at = _.chain(_frames, _.last, _.getIn(_, ["event", "id"]));
+            return {seed, frames: _frames, idx: _.count(_frames) - 1, at};
+          }
+        }
+      }
+    }
+
+    function flush({seed, frames, idx, at}){
+      return {seed, frames: _.toArray(_.take(idx + 1, frames)), idx, at};
+    }
+
+    function tempIds(added){
+      return _.mapa(function(event){
+        const id = _.uident(3) + '!';
+        return {id, ...event};
+      }, added);
     }
 
     const li = dom.tag('li'), pre = dom.tag('pre');
-    dom.append(els.events, _.map(formatEvent, events));
-    dom.append(els.held, _.map(formatEvent, held));
-    dom.text(els.before, numbered(before));
-    dom.text(els.after, numbered(after));
-    dom.attr(_.parent(els.before), "num", before);
-    dom.attr(_.parent(els.after), "num", after);
+    const $state = $.cell(init({seats, config, seen, evented, hash: location.hash}));
+    const at = _.chain($state, _.deref, _.get(_, "frames"), _.last, _.getIn(_, ["event", "id"]));
+    const $hist = $.hist($state);
 
-    const head = document.getElementById(thruId);
-    setTimeout(function(){
-      dom.addClass(head, "head");
-      head.scrollIntoView({behavior: "smooth", block: "center"});
-    }, 300);
+    if (at) {
+      location.hash = `#${at}`;
+    }
 
-    const [curr, prior] = simulate({seats, config, seen}),
-          $game = $.cell(curr);
+    function exec(cmd){
+      _.swap($state, issue(cmd));
+    }
 
-    $.sub($.hist($game), _.map(g.effects), _.log);
+    function when(i, idx){
+      return i < idx ? "past" : i == idx ? "present" : "future";
+    }
 
-    function sim({events = [], commands = [], seat = null} = {}){
-      const snapshot = _.chain($game, _.deref, _.deref);
-      if (_.seq(commands)){
-        if (seat == null) {
-          throw Error("Must specify seat with commands.");
+    function formatEvent(e, klass = ""){
+      return li({id: e.id, class: klass}, pre(JSON.stringify(e)));
+    }
+
+    $.sub($hist, function([curr, prior]){
+      const {frames, idx} = curr;
+      if (prior) {
+        const cf = _.count(curr.frames);
+        const pf = _.count(prior.frames);
+        const increase = cf > pf ? cf - pf : 0;
+        const decrease = cf < pf ? pf - cf : 0;
+        if (increase) {
+          const added = _.mapa(_.get(_, "event"), _.drop(pf, curr.frames));
+          dom.append(dom.sel1("#events"), _.mapa(formatEvent, added));
         }
-        return effects({seats, config, events, commands, seen: [seat], snapshot});
+        if (decrease) {
+          const subtracted = _.mapa(_.getIn(_, ["event", "id"]), _.drop(cf, prior.frames));
+          _.each(function(id){
+            const el = document.getElementById(id);
+            el.remove();
+          }, subtracted);
+        }
+        _.eachIndexed(function(i, {event}){
+        _.maybe(document.getElementById(event.id),
+          _.does(
+          dom.removeClass(_, "past"),
+          dom.removeClass(_, "present"),
+          dom.removeClass(_, "future"),
+          dom.addClass(_, when(i, idx))));
+        }, curr.frames);
+        if (curr.at) {
+          location.hash = `#${curr.at}`;
+        }
       } else {
-        return effects({seats, config, events, commands, seen, snapshot});
+        const events = _.mapIndexed(function(i, {event}){
+          return formatEvent(event, when(i, idx));
+        }, frames);
+        dom.append(dom.sel1("#events"), events);
       }
-    }
+      const id = frames[idx].event.id;
+      const head = document.getElementById(id);
+      head.scrollIntoView({behavior: "smooth", block: "center"});
+    });
 
-    function run({events = [], commands = [], seat = null} = {}){
-      if (_.seq(events)){
-        g.batch($game, g.fold, events);
-        _.log("digested", {events});
-      }
-      if (_.seq(commands)) {
-        const result = sim({commands, seat});
-        _.log("issued", {commands, seat, result});
-        run({events: result.added});
-      }
-    }
-
-    function flush(){
-      _.swap($game, _.compact);
-      _.log("flushed");
-    }
-
-    run({events});
+    const $hash = dom.hash(document);
+    $.sub($hash, function(hash){
+      const id = _.replace(hash, "#", "");
+      _.swap($state, issue({type: "at", id}));
+    });
 
     _.log("example:");
-    _.log(`run({commands: [{type: "pass"},{type: "commit"}], seat: 1})`);
-    Object.assign(window, {$game, $online, session, effects, g, sim, run, held, flush, supabase});
+    _.log(`  exec({type: "run", commands: [{type: "pass"},{type: "commit"}], seat: 1})`);
+    _.log(`  exec({type: "flush"})`);
+
+    Object.assign(window, {$state, exec, issue, $online, session, simulate, effects, g, supabase});
   }
 } catch (ex) {
-  Object.assign(window, {$online, session, supabase});
+  Object.assign(window, {ex, $online, session, supabase});
 }

@@ -1,4 +1,4 @@
-create or replace function inspect(_table_id varchar, _user_id uuid)
+create or replace function shell(_table_id varchar, _user_id uuid)
 returns jsonb
 security definer
 set search_path = public

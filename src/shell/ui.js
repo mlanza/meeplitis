@@ -3,16 +3,15 @@ import $ from "/libs/atomic_/reactives.js";
 import dom from "/libs/atomic_/dom.js";
 import g from "/libs/game_.js";
 import supabase from "/libs/supabase.js";
-import {keeping} from "/libs/profiles.js";
 import {session, $online} from "/libs/session.js";
 
 const params = new URLSearchParams(document.location.search),
-      tableId = params.get('id'),
-      userId = session?.user?.id,
+      _table_id = params.get('id'),
+      _user_id = session?.user?.id,
       options = params.get('options')?.split(',') || [];
 
 try {
-  const {data, error, status} = await supabase.rpc('inspect', {_table_id: tableId, _user_id: userId});
+  const {data, error, status} = await supabase.rpc('shell', {_table_id, _user_id});
 
   if (error) {
     console.error(error.message);

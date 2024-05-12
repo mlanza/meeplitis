@@ -1,25 +1,20 @@
-create or replace function shell(_table_id varchar, _user_id uuid)
+create or replace function shell(_table_id varchar)
 returns jsonb
 security definer
 set search_path = public
 language plpgsql
 as $$
 declare
-_admins int;
 _table jsonb;
 _seated jsonb;
 _evented jsonb;
 begin
 
-select count(*)
-into _admins
-from admins where user_id = _user_id;
-
-if _admins = 0 then
-  raise exception '$ moment for % at table `%` was denied', _user_id, _table_id;
+if auth.uid() != '5e6b12f5-f24c-4fd3-8812-f537778dc5c2' then
+  raise exception '$ No authority to access table `%`', _table_id;
 end if;
 
-raise log '$ moment for % at table `%` was granted', _user_id, _table_id;
+raise log '$ Shell access was used at table `%` by %', _table_id, auth.uid();
 
 select json_build_object('slug', g.slug, 'id', t.id, 'game_id', t.game_id, 'release', t.release, 'config', t.config)
 into _table

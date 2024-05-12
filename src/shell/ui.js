@@ -3,18 +3,16 @@ import $ from "/libs/atomic_/reactives.js";
 import dom from "/libs/atomic_/dom.js";
 import g from "/libs/game_.js";
 import supabase from "/libs/supabase.js";
-import {session, $online} from "/libs/session.js";
 
 const params = new URLSearchParams(document.location.search),
       _table_id = params.get('id'),
-      _user_id = session?.user?.id,
       options = params.get('options')?.split(',') || [];
 
 try {
-  const {data, error, status} = await supabase.rpc('shell', {_table_id, _user_id});
+  const {data, error, status} = await supabase.rpc('shell', {_table_id});
 
   if (error) {
-    console.error(error.message);
+    alert(error.message);
   } else {
     const {table, seated, evented} = data,
           {slug, release, config} = table,
@@ -237,8 +235,8 @@ try {
     _.log(`  exec({type: "run", commands: [{type: "pass"},{type: "commit"}], seat: 1})`);
     _.log(`  exec({type: "flush"})`);
 
-    Object.assign(window, {$state, exec, issue, $online, session, simulate, effects, g, supabase});
+    Object.assign(window, {$state, exec, issue, simulate, effects, g, supabase});
   }
 } catch (ex) {
-  Object.assign(window, {ex, $online, session, supabase});
+  Object.assign(window, {ex, supabase});
 }

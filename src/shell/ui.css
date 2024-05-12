@@ -6,34 +6,6 @@ a#logo,
 a#you {
   position: fixed !important;
 }
-#permalink {
-  color: white;
-  position: fixed;
-  bottom: 1em;
-  right: 1em;
-  width: 4.5em;
-}
-#chop, #chopped, #head {
-  color: white;
-  position: fixed;
-  bottom: 1em;
-  right: 6em;
-}
-#chop {
-  right: 8em;
-}
-#chopped {
-  right: 6em;
-}
-#head {
-  right: 11.5em;
-}
-#before,
-#after {
-  margin-left: 1.5em;
-  width: 3em;
-  text-align: right;
-}
 pre {
   padding: 1em;
   white-space: normal;
@@ -44,13 +16,7 @@ pre, ul {
 }
 li {
   width: calc(100vw - 15em);
-}
-li .state {
-  opacity: .8;
-  display: none;
-}
-li:hover .state {
-  display: block;
+  padding: 5px;
 }
 #events {
   list-style-type: "☑️ ";
@@ -62,6 +28,16 @@ li:hover .state {
 #events li.future {
   list-style-type: "▫️ ";
 }
-[num='0'] {
-  display: none;
+summary > pre {
+  margin-top: -15px;
+  margin-left: 10px;
+  padding: 0;
+}
+details > pre {
+  margin-left: 15px;
+}
+.state {
+  margin-left: 10px;
+  padding: 0;
+  color: antiquewhite;
 }

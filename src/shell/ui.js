@@ -111,7 +111,7 @@ try {
       }, added);
     }
 
-    const li = dom.tag('li'), pre = dom.tag('pre');
+    const li = dom.tag('li'), pre = dom.tag('pre'), details = dom.tag("details"), summary = dom.tag("summary");
     const $state = $.cell(init({seats, config, seen, evented, hash: location.hash}));
     const at = _.chain($state, _.deref, _.get(_, "frames"), _.last, _.getIn(_, ["event", "id"]));
     const $hist = $.hist($state);
@@ -130,8 +130,8 @@ try {
 
     function formatEvent({event, state}, klass = ""){
       return li({id: event.id, class: klass},
-        pre(JSON.stringify(event)),
-        pre({class: "state"}, JSON.stringify(state)));
+        details(summary(pre(JSON.stringify(event))),
+          pre({class: "state"}, JSON.stringify(state))));
     }
 
     $.sub($hist, function([curr, prior]){

@@ -23,8 +23,11 @@ li {
 #events {
   list-style-image: url(/images/checked.png);
 }
+#events li {
+  border: solid 1px transparent;
+}
 #events li.present {
-  border: solid 1px white;
+  border-color: white;
 }
 #events li.future {
   list-style-image: url(/images/unchecked.png);

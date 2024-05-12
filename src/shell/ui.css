@@ -1,6 +1,6 @@
 body {
   background-image: url(/images/backgrounds/greypx.webp);
-  padding-top: 3em;
+  padding: 3em 0 6em;
 }
 a#logo,
 a#you {
@@ -8,25 +8,50 @@ a#you {
 }
 pre {
   padding: 1em;
-  white-space: normal;
 }
 pre, ul {
   color: white;
   font-size: small;
+}
+summary pre {
+  white-space: normal;
 }
 li {
   width: calc(100vw - 15em);
   padding: 5px;
 }
 #events {
-  list-style-type: "☑️ ";
+  list-style-image: url(/images/checked.png);
 }
 #events li.present {
-  list-style-type: "🕙 ";
   border: solid 1px white;
 }
 #events li.future {
-  list-style-type: "▫️ ";
+  list-style-image: url(/images/unchecked.png);
+}
+#commands {
+  position: fixed;
+  bottom: 1em;
+  left: 1em;
+  width: calc(100vw - 2em);
+}
+#commands #seat {
+  position: absolute;
+  right: 42em;
+  bottom: 1em;
+  width: 2.5em;
+  min-height: 3em;
+  vertical-align: top;
+  resize: none;
+}
+#commands #move {
+  position: absolute;
+  width: 40em;
+  min-height: 3em;
+  right: 1em;
+  bottom: 1em;
+  max-height: 15em;
+  resize: vertical;
 }
 summary > pre {
   margin-top: -15px;
@@ -35,6 +60,11 @@ summary > pre {
 }
 details > pre {
   margin-left: 15px;
+}
+.facts {
+  margin-left: 10px;
+  padding: 0;
+  color: greenyellow;
 }
 .state {
   margin-left: 10px;

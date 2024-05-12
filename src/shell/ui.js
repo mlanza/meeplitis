@@ -39,31 +39,32 @@ try {
       const idx = at ? _.detectIndex(function({event}){
         return event.id == at;
       }, frames) : _.count(frames) - 1;
-      return {seed, frames, idx, at};
+      const init = {seed, frames, idx, at};
+      return {...init, init};
     }
 
     function issue(cmd = {type: null}){
       return function(memo){
         const {type} = cmd;
-        const {seed, frames, idx, at} = memo;
+        const {seed, frames, idx, at, init} = memo;
         const max = _.count(frames) - 1;
         switch(type) {
           case "reset": {
-            return idx == max ? memo : {seed, frames, idx: max, at};
+            return {...init, init};
           }
 
           case "undo": {
             const min = 0;
             const _idx = _.max(0, idx - 1);
             const at = frames[_idx]?.event?.id;
-            return idx <= min ? memo : {seed, frames, idx: _idx, at};
+            return idx <= min ? memo : {seed, frames, idx: _idx, at, init};
           }
 
           case "redo": {
             const max = _.count(frames) - 1;
             const _idx = _.min(idx + 1, max);
             const at = frames[_idx]?.event?.id;
-            return idx >= max ? memo : {seed, frames, idx: _idx, at};
+            return idx >= max ? memo : {seed, frames, idx: _idx, at, init};
           }
 
           case "flush": {
@@ -75,7 +76,7 @@ try {
             const idx = _.detectIndex(function(frame){
               return frame?.event?.id == id;
             }, frames);
-            return {seed, frames, idx, at};
+            return {seed, frames, idx, at, init};
           }
 
           case "run": {
@@ -96,14 +97,14 @@ try {
             },[{game: frame.game, loaded: frame.loaded}], tempIds(added))));
             const _frames = _.toArray(_.concat(frames, addframes));
             const at = _.chain(_frames, _.last, _.getIn(_, ["event", "id"]));
-            return {seed, frames: _frames, idx: _.count(_frames) - 1, at};
+            return {seed, frames: _frames, idx: _.count(_frames) - 1, at, init};
           }
         }
       }
     }
 
-    function flush({seed, frames, idx, at}){
-      return {seed, frames: _.toArray(_.take(idx + 1, frames)), idx, at};
+    function flush({seed, frames, idx, at, init}){
+      return {seed, frames: _.toArray(_.take(idx + 1, frames)), idx, at, init};
     }
 
     function tempIds(added){
@@ -130,10 +131,11 @@ try {
       return i < idx ? "past" : i == idx ? "present" : "future";
     }
 
-    function formatEvent({event, state}, klass = ""){
+    function formatEvent({event, state, may, up}, klass = ""){
       return li({id: event.id, class: klass},
         details(summary(pre(JSON.stringify(event))),
-          pre({class: "state"}, JSON.stringify(state))));
+          pre({class: "facts"}, JSON.stringify({up, may})),
+          pre({class: "state"}, JSON.stringify(state, null, 2))));
     }
 
     $.sub($hist, function([curr, prior]){
@@ -182,6 +184,13 @@ try {
       _.swap($state, issue({type: "at", id}));
     });
 
+    function command(){
+      const text = dom.value(dom.sel1("#move"));
+      const command = JSON.parse(text);
+      const seat = _.maybe(dom.value(dom.sel1("#seat")), _.blot, parseInt);
+      return {type: "run", commands: [command], seat};
+    }
+
     $.on(document, "click", "li[id] summary pre", function(e){
       if (e.metaKey) {
         e.preventDefault();
@@ -194,12 +203,17 @@ try {
     $.on(document, "keydown", function(e){
       if (e.metaKey) {
         switch(e.key) {
-          case "u":
+          case "r":
+            e.preventDefault();
+            exec({type: "reset"});
+            break;
+
+          case "ArrowLeft":
             e.preventDefault();
             exec({type: "undo"});
             break;
 
-          case "r":
+          case "ArrowRight":
             e.preventDefault();
             exec({type: "redo"});
             break;
@@ -207,6 +221,11 @@ try {
           case "f":
             e.preventDefault();
             exec({type: "flush"});
+            break;
+
+          case "m":
+            e.preventDefault();
+            exec(command());
             break;
 
         }

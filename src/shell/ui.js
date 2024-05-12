@@ -53,15 +53,17 @@ try {
           }
 
           case "undo": {
+            const min = 0;
             const _idx = _.max(0, idx - 1);
             const at = frames[_idx]?.event?.id;
-            return idx == 0 ? memo : {seed, frames, idx: _idx, at};
+            return idx <= min ? memo : {seed, frames, idx: _idx, at};
           }
 
           case "redo": {
-            const _idx = _.min(idx + 1, _.count(frames) - 1);
+            const max = _.count(frames) - 1;
+            const _idx = _.min(idx + 1, max);
             const at = frames[_idx]?.event?.id;
-            return idx == 0 ? memo : {seed, frames, idx: _idx, at};
+            return idx >= max ? memo : {seed, frames, idx: _idx, at};
           }
 
           case "flush": {
@@ -179,6 +181,38 @@ try {
       const id = _.replace(hash, "#", "");
       _.swap($state, issue({type: "at", id}));
     });
+
+    $.on(document, "click", "li[id] summary pre", function(e){
+      if (e.metaKey) {
+        e.preventDefault();
+        const el = _.closest(this, "li[id]");
+        const id = dom.attr(el, "id");
+        exec({type: "at", id});
+      }
+    })
+
+    $.on(document, "keydown", function(e){
+      if (e.metaKey) {
+        switch(e.key) {
+          case "u":
+            e.preventDefault();
+            exec({type: "undo"});
+            break;
+
+          case "r":
+            e.preventDefault();
+            exec({type: "redo"});
+            break;
+
+          case "f":
+            e.preventDefault();
+            exec({type: "flush"});
+            break;
+
+        }
+      }
+    });
+
 
     _.log("example:");
     _.log(`  exec({type: "run", commands: [{type: "pass"},{type: "commit"}], seat: 1})`);

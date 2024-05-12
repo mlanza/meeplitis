@@ -132,7 +132,8 @@ function queryToggle(key, value){
 
 export function dummyToggle(){
   $.on(document, "keydown", function(e){
-    if (e.ctrlKey && e.key == "d") {
+    if (e.metaKey && e.key == "d") {
+      e.preventDefault();
       queryToggle("listed", "dummy");
     }
   });

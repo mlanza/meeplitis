@@ -135,7 +135,8 @@ export function ui($table, $story, $ready, $error, $hist, $online, describe, log
   $.sub($ready, _.map(_.not), dom.toggleClass(el, "wait", _));
 
   $.on(document, "keydown", function(e){
-    if (e.ctrlKey && e.key == "s") {
+    if (e.metaKey && e.key == "s") {
+      e.preventDefault();
       location.href = `${location.origin}/shell/${location.search}${location.hash}`;
     }
   });

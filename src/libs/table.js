@@ -4,7 +4,8 @@ import $ from "/libs/atomic_/reactives.js";
 import supabase from "/libs/supabase.js";
 import {presence} from "/libs/online.js";
 import {session} from "/libs/session.js";
-import {keeping, relink} from "/libs/profiles.js";
+import {keeping} from "/libs/links.js";
+import {relink} from "/libs/profiles.js";
 import {story, nav, hist, waypoint, refresh, atPresent, inPast} from "/libs/story.js";
 import {rankings, dummyToggle} from "/components/table/ui.js";
 

@@ -1,27 +1,9 @@
 import _ from "/libs/atomic_/core.js";
 import dom from "/libs/atomic_/dom.js";
+import {keeping} from "/libs/links.js";
 import supabase from "/libs/supabase.js";
 
 const {img, a, h2, div, span, figure} = dom.tags(['img', 'a', 'h2', 'div', 'span', 'figure', 'figcaption']);
-
-export function keeping(...keys){
-  return function(url, override = {}, hash){
-    const params = new URLSearchParams(location.search);
-    for (let key of params.keys()) {
-      if (!keys.includes(key)) {
-        params.delete(key);
-      }
-    }
-    for (let [key, value] of Object.entries(override)) {
-      if (value == null) {
-        params.delete(key);
-      } else {
-        params.set(key, value);
-      }
-    }
-    return `${url}?${params}${hash ? '#' + hash : ''}`;
-  }
-}
 
 export const relink = keeping("listed");
 

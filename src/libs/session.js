@@ -2,6 +2,7 @@ import supabase from "./supabase.js";
 import * as o from "./online.js";
 import dom from "/libs/atomic_/dom.js";
 import $ from "/libs/atomic_/reactives.js";
+import {toggleHost} from "/libs/links.js";
 import "/libs/cmd.js";
 
 const img = dom.tag("img");
@@ -24,6 +25,13 @@ export const $online = o.online(session?.username);
 export default session;
 
 dom.toggleClass(document.body, "anon", !session);
+
+$.on(document, "keydown", function(e){
+  if (e.metaKey && e.key == "l") {
+    e.preventDefault();
+    location.href = toggleHost("https://meeplitis.com");
+  }
+});
 
 if (session) {
   if (!session.username) {

@@ -114,7 +114,8 @@ try {
 
     const li = dom.tag('li'), pre = dom.tag('pre'), details = dom.tag("details"), summary = dom.tag("summary");
     const $state = $.cell(init({seats, config, seen, evented, hash: location.hash}));
-    const at = _.chain($state, _.deref, _.get(_, "frames"), _.last, _.getIn(_, ["event", "id"]));
+    const state = _.deref($state);
+    const at = _.get(state, "at") ||_.chain(state, _.get(_, "frames"), _.last, _.getIn(_, ["event", "id"]));
     const $hist = $.hist($state);
 
     if (at) {
@@ -192,11 +193,23 @@ try {
     $.on(document, "click", "li[id] summary pre", function(e){
       if (e.metaKey) {
         e.preventDefault();
-        const el = _.closest(this, "li[id]");
-        const id = dom.attr(el, "id");
+        const el = _.closest(this, "li[id]"),
+              id = dom.attr(el, "id");
         exec({type: "at", id});
       }
     })
+
+    $.on(dom.sel1("#commands"), "keydown", "textarea", function(e){
+      if (e.key == "Enter") {
+        e.preventDefault();
+        try {
+          exec(command());
+        } catch (ex){
+          _.log("error", ex);
+          alert(ex?.message || "There was an error.");
+        }
+      }
+    });
 
     $.on(document, "keydown", function(e){
       if (e.metaKey) {
@@ -207,11 +220,13 @@ try {
             break;
 
           case "ArrowLeft":
+          case "ArrowUp":
             e.preventDefault();
             exec({type: "undo"});
             break;
 
           case "ArrowRight":
+          case "ArrowDown":
             e.preventDefault();
             exec({type: "redo"});
             break;
@@ -219,11 +234,6 @@ try {
           case "f":
             e.preventDefault();
             exec({type: "flush"});
-            break;
-
-          case "m":
-            e.preventDefault();
-            exec(command());
             break;
 
         }

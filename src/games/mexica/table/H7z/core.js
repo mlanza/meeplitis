@@ -1152,7 +1152,7 @@ function moves3(self, type, seat){
       }
 
       case "bank": {
-        return banked < 2 && spent < 6 ? permit : [];
+        return banked < 2 ? permit : [];
       }
 
       case "move": {

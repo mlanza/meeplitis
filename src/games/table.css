@@ -143,6 +143,7 @@ sub {
 }
 #table #game progress {
   margin-right: .5em;
+  margin-top: 1px;
   vertical-align: text-top;
 }
 .signin,

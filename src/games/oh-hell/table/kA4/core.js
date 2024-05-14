@@ -159,12 +159,13 @@ function execute(self, command){
   const moves = g.moves(self, {type, seat});
   const valid = _.detect(_.eq(_, _.chain(command, _.compact, _.dissoc(_, "id"))), moves);
   const automatic = _.includes(["start", "award", "score", "finish", "deal"], type);
+  const trumped = type == "play" && _.getIn(command, ["details", "card", "suit"]) == _.getIn(state, ["trump", "suit"]);
 
   if (!automatic && !valid){
-    if (type == "play" && _.getIn(command, ["details", "card", "suit"]) == _.getIn(state, ["trump", "suit"])) {
+    if (trumped && !state.broke) {
       throw new Error(`Trump has not yet been broken!`);
     }
-    throw new Error(`Invalid ${type}`);
+    throw new Error(`Invalid ${type}.`);
   }
 
   if (automatic && seat != null) {

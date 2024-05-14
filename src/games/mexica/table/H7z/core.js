@@ -754,7 +754,7 @@ export function execute(self, command){
             _.chain(districts(board, contents),
               _.remove(dist => founded(contents, dist) || jammed(contents, dist), _),
               _.mapa(_.count, _),
-              _.partial(unfoundables, _.second(capulli))) : null;
+              _.partial(unfoundables, _.chain(capulli, _.concatenated, _.toArray))) : null;
           return _.seq(removed) ? g.fold(self, {type: "removed-unfoundables", details: {removed}}) : self;
         });
     }
@@ -854,9 +854,10 @@ function unfoundables(capulli, keeping){
 }
 
 function removeCapulli(removed){
-  return _.updateIn(_, ["capulli", 1], function(capulli){
+  return _.update(_, "capulli", function(capulli){
     return _.reduce(function(capulli, idx){
-      return _.assoc(capulli, idx, null);
+      const [period, i] = idx < 8 ? [0, idx] : [1, idx - 8];
+      return _.assocIn(capulli, [period, i], null);
     }, capulli, removed);
   });
 }

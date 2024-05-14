@@ -254,7 +254,7 @@ export function ui($table, $story, $ready, $error, $hist, $online, describe, log
 
 export function player(username, avatar_url, seat, ...contents){
   return div({class: "player"},
-    div({class: "avatar"}, img({src: avatar_url}), a({class: "seat", href: changeSeat("./", {seat})}, seat)),
+    div({class: "avatar"}, img({src: avatar_url}), a({class: "seat", href: changeSeat("./", {seat}, null)}, seat)),
     div(a({class: "username", "href": relink("/profiles/", {username})}, h1(username)), contents),
     img({"data-action": "", src: "/images/pawn.svg"}));
 }

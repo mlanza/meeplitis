@@ -1234,11 +1234,21 @@ function tags2(engine, keys) {
   return tags3(engine, _.identity, keys);
 }
 function tags3(engine, f, keys) {
+  var _ref3, _ref4, _ref5, _keys, _param2, _$concat, _ref6, _$scan, _ref7, _param3, _param4, _$fold, _ref8;
   const tag = _.factory(engine);
-  return _.fold(function (memo, key) {
-    memo[key] = f(tag(key));
+  return _ref3 = (_ref4 = (_ref5 = (_keys = keys, (_ref6 = _, _$concat = _ref6.concat, _param2 = [null], function concat(_argPlaceholder7) {
+    return _$concat.call(_ref6, _argPlaceholder7, _param2);
+  })(_keys)), (_ref7 = _, _$scan = _ref7.scan, function scan(_argPlaceholder8) {
+    return _$scan.call(_ref7, 2, _argPlaceholder8);
+  })(_ref5)), _.toArray(_ref4)), (_ref8 = _, _$fold = _ref8.fold, _param3 = function (memo, keys) {
+    const [key, nextKey] = _.toArray(keys);
+    if (_.isString(key)) {
+      memo[key] = f(_.isArray(nextKey) ? _.isString(_.first(nextKey)) ? tag(...nextKey) : tag(key, ...nextKey) : tag(key));
+    }
     return memo;
-  }, {}, keys);
+  }, _param4 = {}, function fold(_argPlaceholder9) {
+    return _$fold.call(_ref8, _param3, _param4, _argPlaceholder9);
+  })(_ref3);
 }
 function svg(doc = document, tags = ["svg", "g", "symbol", "defs", "clipPath", "metadata", "path", "line", "circle", "rect", "ellipse", "polygon", "polyline", "image", "text", "tspan"]) {
   function use(link, ...contents) {

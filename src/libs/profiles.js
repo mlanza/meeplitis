@@ -3,7 +3,7 @@ import dom from "/libs/atomic_/dom.js";
 import {keeping} from "/libs/links.js";
 import supabase from "/libs/supabase.js";
 
-const {img, a, h2, div, span, figure} = dom.tags(['img', 'a', 'h2', 'div', 'span', 'figure', 'figcaption']);
+const {img, a, h2, div, span, figure} = dom.tags(['img', 'a', 'h2', 'div', 'span', 'figure']);
 
 export const relink = keeping("listed");
 

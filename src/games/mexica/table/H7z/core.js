@@ -997,7 +997,8 @@ function fold(self, event){
       return g.fold(self, event,
         _.pipe(
           _.updateIn(_, ["capulli", period], function(capulli){
-            const idx = _.first(_.keepIndexed(function(idx, {at, size}){
+            const idx = _.first(_.keepIndexed(function(idx, marker){
+              const {at, size} = marker || {at: null, size: null};
               return at == null && size === details.size ? idx : null;
             }, capulli));
             return _.update(capulli, idx, _.assoc(_, "at", details.at));

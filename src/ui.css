@@ -16,14 +16,14 @@ img.spinner {
   height: 2.5em;
   margin: .5em;
 }
-a#logo {
+#logo {
   position: absolute;
   right: 1em;
   top: 10px;
   color: white;
   font-size: 1.1em;
 }
-a#logo img {
+#logo img {
   height: 1em;
   margin: -2px 3px 0;
 }
@@ -90,7 +90,7 @@ body.borderless-img .banner figure {
   border: none;
   box-shadow: none;
 }
-body.home a#logo {
+body.home #logo {
   display: none;
 }
 p > img {

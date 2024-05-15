@@ -8,7 +8,7 @@ stylesheets:
     {% if subject_url %}<img id="subject" src="{{ subject_url }}">{% else %}<img id="subject" src="/images/meeple.png">
 {% endif %}
   </figure>
-  <h1 id="identity" data-title="{% if title %}{{ title }}{% else %}{{ site.title }}{% endif %}" {% if identity %} data-id="{{identity}}" {% endif %}>{% if title %}{{ title }}{% else %}{{ site.title }}{% endif %}{% if release %}<sup>{{release}}</sup>{% endif %}</h1><span class="controls"><a href="/profiles/edit">Edit</a></span>
+  <h1 id="identity" {% if identity %} data-id="{{identity}}" {% endif %}>{% if title %}{{ title }}{% else %}{{ site.title }}{% endif %}{% if release %}<sup>{{release}}</sup>{% endif %}</h1><span class="controls"><a href="/profiles/edit">Edit</a></span>
   {% if headline %}<div class="headline">{{ headline }}</div>{% else %}<div class="headline">{{ site.description }}</div>{% endif %}
 </header>
 <main>

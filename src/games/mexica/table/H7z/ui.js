@@ -514,11 +514,13 @@ function scores(seats, {districts, palace}, {board, contents}){
     return div({class: "rank"}, rank, sup(suffix, tied ? "*" : ""));
   }
 
-  const n = _.chain(districts, _.getIn(_, [0, "points"]), _.count);
+  const n = _.max(3, _.count(seats)); // 3 is min., with nonplayer
   const heads = _.map(function(idx){
     const seat = _.nth(seats, idx);
     const {avatar_url} = seat || {avatar_url: "./images/shaman.png"};
-    return th({class: seat ? "" : "nonplayer"}, figure({class: "avatar"}, img({src: avatar_url})));
+    return th(seat ? null : {class: "nonplayer"},
+      figure({class: "avatar"},
+        img({src: avatar_url})));
   }, _.range(0, n));
 
   const bonuses = palace ? _.mapa(function(idx){

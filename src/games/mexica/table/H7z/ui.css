@@ -164,6 +164,9 @@
     -1px -1px 0 #000;
 
 }
+th.nonplayer .seat {
+  display: none;
+}
 .players {
   width: 20em;
   height: auto;

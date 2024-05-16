@@ -110,7 +110,7 @@ const actions = dom.sel1("#actions", el);
 const supplies = dom.sel1("#supplies", el);
 const demands = dom.sel1("#demands", el);
 
-const {seated, seats, seat} = await getSeating(tableId, session);
+const {seated, seats, seat} = await getSeating(tableId, session?.accessToken);
 
 function resources(title, resource, _attrs, supply){
   const attrs = Object.assign({orientation: "vertical", size: 1}, _attrs);
@@ -222,7 +222,7 @@ const log    = _.log,
       $table = table(tableId),
       $ready = $.cell(false),
       $error = $.cell(null),
-      $story = story(session, tableId, seat, seated, await getConfig(tableId), _.partial(log, "story"), $ready, $error, c.mexica),
+      $story = story(session?.accessToken, tableId, seat, seated, await getConfig(tableId), _.partial(log, "story"), $ready, $error, c.mexica),
       $hist  = hist($story),
       $wip   = wip($story, function(game){
         const {seated} = _.deref(game);

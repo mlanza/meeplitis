@@ -2,7 +2,6 @@ import _ from "/libs/atomic_/core.js";
 import $ from "/libs/atomic_/reactives.js";
 import sh from "/libs/atomic_/shell.js";
 import supabase from "/libs/supabase.js";
-import {session} from "/libs/session.js";
 
 function json(resp){
   return resp.json();
@@ -26,10 +25,10 @@ export function getSeated(tableId){
   return _.fmap(fetch(`https://seated.workers.meeplitis.com?table_id=${tableId}`), json);
 }
 
-export function getSeats(tableId, session){
-  return session ? _.fmap(fetch(`https://seats.workers.meeplitis.com?table_id=${tableId}`, {
+export function getSeats(tableId, accessToken){
+  return accessToken ? _.fmap(fetch(`https://seats.workers.meeplitis.com?table_id=${tableId}`, {
     headers: {
-      accessToken: session.accessToken
+      accessToken
     }
   }), json) : Promise.resolve(null);
 }
@@ -43,10 +42,10 @@ function selectSeat(seats){
   return {seat, redirect};
 }
 
-export async function getSeating(tableId, session){
+export async function getSeating(tableId, accessToken){
   const [seated, seats] = await Promise.all([
     getSeated(tableId),
-    getSeats(tableId, session)
+    getSeats(tableId, accessToken)
   ]);
   const {seat, redirect} = selectSeat(seats);
   if (redirect) {
@@ -62,15 +61,15 @@ function digest(result){
   return {error, data};
 }
 
-function getPerspective(tableId, session, eventId, seat, seatId){
+function getPerspective(tableId, accessToken, eventId, seat, seatId){
   const qs = _.chain([
     `table_id=${tableId}`,
     eventId != null ? `event_id=${eventId}` : null,
     seat != null ? `seat=${seat}` : null
   ], _.compact, _.join("&", _));
-  const perspective = _.fmap(fetch(`https://perspective.workers.meeplitis.com?${qs}`, session ? {
+  const perspective = _.fmap(fetch(`https://perspective.workers.meeplitis.com?${qs}`, accessToken ? {
     headers: {
-      accessToken: session.accessToken
+      accessToken
     }
   } : {}), json, digest);
   const last_move = getLastMove(tableId, eventId, seatId);
@@ -89,18 +88,18 @@ function getLastMove(_table_id, _event_id, _seat_id){
   });
 }
 
-function move(_table_id, _seat, _commands, session){
+function move(_table_id, _seat, _commands, accessToken){
   return fetch("https://move.workers.meeplitis.com", {
     method: "POST",
     body: JSON.stringify({_table_id, _seat, _commands}),
     headers: {
-      accessToken: session.accessToken
+      accessToken
     }
   }).then(json).then(digest);
 }
 
-export function Story(session, tableId, seat, seated, config, log, $ready, $error, make, $state, $story){
-  Object.assign(this, {session, tableId, seat, seated, config, log, $ready, $error, make, $state, $story});
+export function Story(accessToken, tableId, seat, seated, config, log, $ready, $error, make, $state, $story){
+  Object.assign(this, {accessToken, tableId, seat, seated, config, log, $ready, $error, make, $state, $story});
 }
 
 function stepping(self, cstory, pstory){
@@ -214,7 +213,7 @@ async function dispatch(self, command){
       throw new Error("Spectators are not permitted to issue moves");
     }
 
-    const {error, data} = await move(self.tableId, self.seat, [command], self.session);
+    const {error, data} = await move(self.tableId, self.seat, [command], self.accessToken);
 
     self.log('moved', {tableId: self.tableId, command, seat: self.seat}, '->', {error, data});
 
@@ -231,12 +230,12 @@ _.doto(Story,
   _.implement($.ISubscribe, {sub}),
   _.implement(_.IDeref, {deref}));
 
-export function story(session, tableId, seat, seated, config, log, $ready, $error, make){
+export function story(accessToken, tableId, seat, seated, config, log, $ready, $error, make){
   const $state = $.cell({touches: null, history: null, at: null});
 
   _.reset($ready, true);
 
-  return new Story(session, tableId, seat, seated, config, log, $ready, $error, make, $state, $.pipe($state, _.filter(function({touches, history, at}){ //TODO cleanup
+  return new Story(accessToken, tableId, seat, seated, config, log, $ready, $error, make, $state, $.pipe($state, _.filter(function({touches, history, at}){ //TODO cleanup
     return touches && history && at != null;
   }), _.thin(_.mapArgs(_.get(_, "at"), _.equiv))));
 }
@@ -268,7 +267,7 @@ export function inPast(self, touch){
 }
 
 export function nav(self, _at){
-  const {tableId, session, seat, seated, $state} = self;
+  const {tableId, accessToken, seat, seated, $state} = self;
   const seatId = _.nth(seated, seat)?.seat_id ?? null;
   const {at, history, touches} = _.deref($state);
   const pos = _.isNumber(_at) ? _at : _.indexOf(touches, _at);
@@ -288,7 +287,7 @@ export function nav(self, _at){
     })), _.filter(function([offset, pos, touch, frame]){
       return touch && !frame;
     }, _), _.mapa(function([offset, pos, touch]){
-      return _.fmap(getPerspective(tableId, session, touch, seat, seatId), _.array(pos, _));
+      return _.fmap(getPerspective(tableId, accessToken, touch, seat, seatId), _.array(pos, _));
     }, _), Promise.all.bind(Promise), _.fmap(_, function(results){
       _.swap($state, _.pipe(_.reduce(function(state, [pos, frame]){
         return _.update(state, "history", _.pipe(expand(pos), _.assoc(_, pos, frame)));

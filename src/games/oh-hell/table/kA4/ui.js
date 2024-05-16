@@ -39,7 +39,7 @@ function template(){
   };
 }
 
-const {seated, seats, seat} = await getSeating(tableId, session);
+const {seated, seats, seat} = await getSeating(tableId, session?.accessToken);
 
 function desc(event){
   switch(event.type) {
@@ -106,7 +106,7 @@ const log    = _.log,
       $table = table(tableId),
       $ready = $.cell(false),
       $error = $.cell(null),
-      $story = story(session, tableId, seat, seated, await getConfig(tableId), _.partial(log, "story"), $ready, $error, c.ohHell),
+      $story = story(session?.accessToken, tableId, seat, seated, await getConfig(tableId), _.partial(log, "story"), $ready, $error, c.ohHell),
       $hist  = hist($story);
 
 //universal ui

@@ -2,13 +2,11 @@ import _ from "/libs/atomic_/core.js";
 import dom from "/libs/atomic_/dom.js";
 import $ from "/libs/atomic_/reactives.js";
 import sh from "/libs/atomic_/shell.js";
-import supabase from "/libs/supabase.js";
 import * as c from "./core.js";
-import {describe} from "./ancillary.js";
 import * as g from "/libs/game.js";
-import {session, $online} from "/libs/session.js";
-import {snapshot, moment} from "/libs/story.js";
-import {el, seated, seats, seat, ui, scored, outcome, diff} from "/libs/table.js";
+import {moment} from "/libs/story.js";
+import {describe} from "./ancillary.js";
+import {el, seated, seats, seat, ui, scored, outcome, diff, which} from "/libs/table.js";
 
 const {img, ol, li, div, kbd, span} = dom.tags(['img', 'ol', 'li', 'div', 'kbd', 'span']);
 
@@ -19,17 +17,6 @@ function closestAttr(el, attr){
 const retainAttr = _.partly(function retainAttr(el, key, value){
   value == null ? dom.removeAttr(el, key) : dom.attr(el, key, value);
 });
-
-function which($latest){ //which entry index changed?
-  return $.share($.pipe($.hist($latest),
-    _.filter(_.isArray),
-    _.filter(function([curr, prior]){
-      return _.isArray(curr);
-    }),
-    _.map(function([curr, prior]){
-      return _.conj(curr, _.detectIndex(_.not, _.map(_.isIdentical, curr, prior)));
-    })));
-}
 
 async function svg(what){
   return await fetch(import.meta.resolve(`./images/${what}.svg`)).then(function(resp){

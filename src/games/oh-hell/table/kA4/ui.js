@@ -2,11 +2,9 @@ import _ from "/libs/atomic_/core.js";
 import dom from "/libs/atomic_/dom.js";
 import $ from "/libs/atomic_/reactives.js";
 import sh from "/libs/atomic_/shell.js";
-import supabase from "/libs/supabase.js";
 import * as c from "./core.js";
-import {describe} from "./ancillary.js";
 import * as g from "/libs/game.js";
-import {session, $online} from "/libs/session.js";
+import {describe} from "./ancillary.js";
 import {el, seated, seats, seat, ui, scored, outcome, diff} from "/libs/table.js";
 
 const {img, li, div, span} = dom.tags(['img', 'li', 'div', 'span']);

@@ -7,12 +7,7 @@ import * as c from "./core.js";
 import {describe} from "./ancillary.js";
 import * as g from "/libs/game.js";
 import {session, $online} from "/libs/session.js";
-import {story, hist, moment} from "/libs/story.js";
-import {el, tableId, config, seated, seats, seat, $table, $error, $ready, ui, scored, outcome, subject} from "/libs/table.js";
-
-const log    = _.log,
-      $story = story(session?.accessToken, tableId, seat, seated, config, _.partial(log, "story"), $ready, $error, c.ohHell),
-      $hist  = hist($story);
+import {el, seated, seats, seat, ui, scored, outcome, diff} from "/libs/table.js";
 
 const {img, li, div, span} = dom.tags(['img', 'li', 'div', 'span']);
 
@@ -96,8 +91,8 @@ function cardSrc({suit, rank}){
   return `/images/deck/${rank}${suits[suit]}.svg`;
 }
 
-//universal ui
-ui($table, $story, $ready, $error, $hist, $online, describe, _.partial(log, "ui"), seated, seat, seats, desc, template, el);
+const {$story, $hist} =
+  ui(c.make, describe, desc, template);
 
 $.sub($hist, function([curr, prior, {step, offset}, game]){
   const {seen, event, metrics, state, state: {trump, round, status, seated, deck, lead, broke, deals}} = curr;
@@ -162,5 +157,3 @@ $.on(el, "click", '#table.present:not(.wait) .hand img', function(e){
         rank = dom.attr(this, "data-rank");
   sh.dispatch($story, {type: "play", details: {card: {suit, rank}}});
 });
-
-Object.assign(window, {$, _, sh, session, moment, $story, $table, $online, supabase});

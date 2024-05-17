@@ -183,7 +183,7 @@ _.doto(Story,
   _.implement($.ISubscribe, {sub}),
   _.implement(_.IDeref, {deref}));
 
-export function story(accessToken, tableId, seat, seated, config, log, $ready, $error, make){
+export function story(make, accessToken, tableId, seat, seated, config, $ready, $error, {log = _.log} = {}){
   const $state = $.cell({touches: null, history: null, at: null});
 
   _.reset($ready, true);

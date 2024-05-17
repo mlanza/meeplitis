@@ -7,8 +7,8 @@ import * as c from "./core.js";
 import {describe} from "./ancillary.js";
 import * as g from "/libs/game.js";
 import {session, $online} from "/libs/session.js";
-import {story, hist, snapshot, moment, wip} from "/libs/story.js";
-import {el, tableId, config, seated, seats, seat, $table, $error, $ready, ui, scored, outcome, diff} from "/libs/table.js";
+import {snapshot, moment} from "/libs/story.js";
+import {el, seated, seats, seat, ui, scored, outcome, diff} from "/libs/table.js";
 
 const {img, ol, li, div, kbd, span} = dom.tags(['img', 'ol', 'li', 'div', 'kbd', 'span']);
 
@@ -152,6 +152,21 @@ dom.append(els.board, _.map(function(number){
 dom.append(els.demands,
   _.map(demand, _.range(8)));
 
+const placePilli = {type: "place-pilli"};
+
+function template(seat){
+  return {
+    stats: div(span({class: "points"}, "0"), " pts."),
+    resources: [
+      supply.temples({size: 1, seat}, 6),
+      supply.temples({size: 2, seat}, 5),
+      supply.temples({size: 3, seat}, 4),
+      supply.temples({size: 4, seat}, 3),
+      supply.tokens()
+    ]
+  };
+}
+
 function desc({type, details}){
   switch(type) {
     case "started":
@@ -206,14 +221,10 @@ function desc({type, details}){
   }
 }
 
-const placePilli = {type: "place-pilli"};
+const {$ready, $error, $story, $hist, $snapshot, $wip} =
+  ui(c.make, describe, desc, template);
 
-const log    = _.log,
-      $story = story(session?.accessToken, tableId, seat, seated, config, _.partial(log, "story"), $ready, $error, c.mexica),
-      $hist  = hist($story),
-      $snapshot = snapshot($story),
-      $wip   = wip($story),
-      $both  = which($.latest([$hist, $wip]));
+const $both = which($.latest([$hist, $wip]));
 
 $.sub($snapshot, function(game){
   const {seated} = _.deref(game);
@@ -223,7 +234,7 @@ $.sub($snapshot, function(game){
   }
 });
 
-$.sub($snapshot, _.partial(log, "$snapshot"));
+$.sub($snapshot, _.partial(_.log, "$snapshot"));
 
 $.sub($error, _.filter(_.isSome), function(error){ //when an error occurs...
   sh.dispatch($wip, null); //...clear any work in progress
@@ -233,23 +244,7 @@ $.sub($ready, _.filter(_.not), function(){ //upon issuin a move...
   sh.dispatch($wip, null); //...clear any work in progress
 });
 
-$.sub($both, _.partial(log, "$both"));
-
-function template(seat){
-  return {
-    stats: div(span({class: "points"}, "0"), " pts."),
-    resources: [
-      supply.temples({size: 1, seat}, 6),
-      supply.temples({size: 2, seat}, 5),
-      supply.temples({size: 3, seat}, 4),
-      supply.temples({size: 4, seat}, 3),
-      supply.tokens()
-    ]
-  };
-}
-
-//universal ui
-ui($table, $story, $ready, $error, $hist, $online, describe, _.partial(log, "ui"), seated, seat, seats, desc, template, el);
+$.sub($both, _.partial(_.log, "$both"));
 
 function remaining(slots){
   return _.count(_.filter(_.isNil, slots));
@@ -688,5 +683,3 @@ $.on(el, "click", `#table.act[data-status='actions']:not([data-command-type="mov
     }
   }
 });
-
-Object.assign(window, {$, g, _, sh, c, moment, session, $story, $wip, $table, $online, supabase});

@@ -3,16 +3,16 @@ import dom from "/libs/atomic_/dom.js";
 import $ from "/libs/atomic_/reactives.js";
 import supabase from "/libs/supabase.js";
 import {presence} from "/libs/online.js";
-import {session} from "/libs/session.js";
+import {$online, session} from "/libs/session.js";
 import {keeping} from "/libs/links.js";
 import {relink} from "/libs/profiles.js";
-import {story, nav, hist, waypoint, refresh, atPresent, inPast} from "/libs/story.js";
+import {story, nav, hist, snapshot, wip, waypoint, refresh, atPresent, inPast} from "/libs/story.js";
 import {rankings} from "/components/table/ui.js";
 import "/libs/dummy.js";
 
+export const el = dom.sel1("#table");
 const params = new URLSearchParams(location.search);
 export const tableId = params.get('id');
-export const el = dom.sel1("#table");
 
 const accessToken = session?.accessToken;
 
@@ -32,10 +32,6 @@ if (redirect) {
   location.href = redirect;
 }
 
-export const $table = table(tableId),
-             $ready = $.cell(false),
-             $error = $.cell(null);
-
 const changeSeat = keeping("id", "listed");
 const ttl = dom.sel1("head title");
 const title = _.chain(ttl, dom.text, _.split(_, "|"), _.first, _.trim);
@@ -45,7 +41,7 @@ const {div, h1, a, span, img, ol, ul, li} = dom.tags(['div', 'h1', 'a', 'span', 
 
 _.maybe(session?.username, username => relink("/profiles/", {username}), dom.attr(dom.sel1("a.user"), "href", _));
 
-export function table(tableId){
+function table(tableId){
   const $t = $.cell(null);
 
   supabase
@@ -77,7 +73,16 @@ export function diff(curr, prior, path, f){
   }
 }
 
-export function ui($table, $story, $ready, $error, $hist, $online, describe, log, seated, seat, seats, desc, template, el){
+export function ui(make, describe, desc, template, {log = _.log} = {}){
+  const $table = table(tableId),
+        $ready = $.cell(false),
+        $error = $.cell(null);
+
+  const $story = story(make, session?.accessToken, tableId, seat, seated, config, $ready, $error, {log: _.partial(log, "story")}),
+        $hist  = hist($story),
+        $snapshot = snapshot($story),
+        $wip   = wip($story);
+
   const $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), _.compact()),
         $started = $.map(_.pipe(_.get(_, "status"), _.eq(_, "started")), $table), //games can be abandoned
         $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table),
@@ -273,6 +278,8 @@ export function ui($table, $story, $ready, $error, $hist, $online, describe, log
   $.on(el, "click", ".message", function(e){
     dom.addClass(el, "ack");
   });
+
+  return {$table, $ready, $error, $story, $hist, $snapshot, $wip};
 }
 
 export function player(username, avatar_url, seat, ...contents){

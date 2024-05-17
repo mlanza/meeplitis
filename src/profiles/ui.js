@@ -4,8 +4,9 @@ import $ from "/libs/atomic_/reactives.js";
 import supabase from "/libs/supabase.js";
 import {session} from "/libs/session.js";
 import {fmttime} from "/libs/dates.js";
-import {managing, getProfile, onUpdate, dummyToggle} from "/components/table/ui.js";
+import {managing, getProfile, onUpdate} from "/components/table/ui.js";
 import {profiles, render} from "/libs/profiles.js";
+import "/libs/dummy.js";
 
 const params = new URLSearchParams(document.location.search),
       username = params.get('username'),
@@ -34,7 +35,6 @@ if (username) {
 
   refreshTables();
   onUpdate(refreshTables);
-  dummyToggle();
 
 } else {
   dom.attr(document.body, "data-view", "profiles");
@@ -44,4 +44,3 @@ if (username) {
     _.map(_.pipe(render, dom.tag('li')), _),
     dom.html(dom.sel1(".profiles ul"), _));
 }
-

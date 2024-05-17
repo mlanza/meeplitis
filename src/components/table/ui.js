@@ -4,6 +4,7 @@ import $ from "/libs/atomic_/reactives.js";
 import supabase from "/libs/supabase.js";
 import {relink} from "/libs/profiles.js";
 import {session} from "/libs/session.js";
+import "/libs/dummy.js";
 
 const tags = dom.tags(['div', 'span', 'img', 'a', 'p', 'button', 'article', 'table', 'tbody', 'thead', 'tr', 'th', 'td']);
 const {div, span, img, a, p, button, article} = tags;
@@ -120,24 +121,6 @@ function restrictOpen(game, f){
   session?.username && _.chain(game, _.see("game"), g, dom.html(dom.sel1(".create > p"), _));
 }
 
-function queryToggle(key, value){
-  const params = new URLSearchParams(document.location.search);
-  if (params.get(key) == value) {
-    params.delete(key);
-  } else {
-    params.set(key, value);
-  }
-  location.href = `${location.origin}${location.pathname}?${params.toString()}${location.hash}`;
-}
-
-export function dummyToggle(){
-  $.on(document, "keydown", function(e){
-    if (e.metaKey && e.key == "d") {
-      e.preventDefault();
-      queryToggle("listed", "dummy");
-    }
-  });
-}
 
 export async function manageTables(creates){
   const id = dom.attr(dom.sel1("#identity"), "data-id");
@@ -146,7 +129,6 @@ export async function manageTables(creates){
   restrictOpen(game, _.partial(creates, open));
   refreshTables();
   onUpdate(refreshTables);
-  dummyToggle();
 }
 
 async function getRelease(tableId){

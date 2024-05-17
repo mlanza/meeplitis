@@ -7,18 +7,41 @@ import {session} from "/libs/session.js";
 import {keeping} from "/libs/links.js";
 import {relink} from "/libs/profiles.js";
 import {story, nav, hist, waypoint, refresh, atPresent, inPast} from "/libs/story.js";
-import {rankings, dummyToggle} from "/components/table/ui.js";
+import {rankings} from "/components/table/ui.js";
+import "/libs/dummy.js";
+
+const params = new URLSearchParams(location.search);
+export const tableId = params.get('id');
+export const el = dom.sel1("#table");
+
+const accessToken = session?.accessToken;
+
+export const [config, seated, seats] = await Promise.all([
+  getConfig(tableId),
+  getSeated(tableId),
+  getSeats(tableId, accessToken)
+]);
+
+export const seat = _.count(seats) > 1 ? _.maybe(params.get("seat"), parseInt) : _.first(seats);
+
+const rejected = seat != null && !_.includes(seats, seat);
+params.delete("seat");
+const redirect = !tableId ? "../" : rejected ? `${location.origin}${location.pathname}?${params.toString()}${location.hash}` : null;
+
+if (redirect) {
+  location.href = redirect;
+}
+
+export const $table = table(tableId),
+             $ready = $.cell(false),
+             $error = $.cell(null);
 
 const changeSeat = keeping("id", "listed");
-const params = new URLSearchParams(location.search);
-const id = params.get("id");
 const ttl = dom.sel1("head title");
 const title = _.chain(ttl, dom.text, _.split(_, "|"), _.first, _.trim);
-dom.text(ttl, `${title} #${id}`);
+dom.text(ttl, `${title} #${tableId}`);
 
 const {div, h1, a, span, img, ol, ul, li} = dom.tags(['div', 'h1', 'a', 'span', 'img', 'ol', 'ul', 'li']);
-
-dummyToggle();
 
 _.maybe(session?.username, username => relink("/profiles/", {username}), dom.attr(dom.sel1("a.user"), "href", _));
 
@@ -309,3 +332,26 @@ function victor([player]){
 export function subject({username, avatar_url}){
   return span({class: "subject avatar"}, img({alt: username, src: avatar_url}));
 }
+
+function getSeated(tableId){
+  return tableId ? _.fmap(fetch(`https://seated.workers.meeplitis.com?table_id=${tableId}`), resp => resp.json()) : Promise.resolve([]);
+}
+
+function getSeats(tableId, accessToken){
+  return tableId && accessToken ? _.fmap(fetch(`https://seats.workers.meeplitis.com?table_id=${tableId}`, {
+    headers: {
+      accessToken
+    }
+  }), resp => resp.json()) : Promise.resolve([]);
+}
+
+function getConfig(tableId){
+  return tableId ? supabase
+    .from('tables')
+    .select('config')
+    .eq('id', tableId)
+    .then(function({data}){
+      return data[0].config;
+    }) : Promise.resolve({});
+}
+

@@ -3,57 +3,6 @@ import $ from "/libs/atomic_/reactives.js";
 import sh from "/libs/atomic_/shell.js";
 import supabase from "/libs/supabase.js";
 
-function json(resp){
-  return resp.json();
-}
-
-function getTouches(tableId){
-  return _.fmap(fetch(`https://touches.workers.meeplitis.com?table_id=${tableId}`), json);
-}
-
-export function getConfig(tableId){
-  return supabase
-    .from('tables')
-    .select('config')
-    .eq('id', tableId)
-    .then(function({data}){
-      return data[0].config;
-    });
-}
-
-export function getSeated(tableId){
-  return _.fmap(fetch(`https://seated.workers.meeplitis.com?table_id=${tableId}`), json);
-}
-
-export function getSeats(tableId, accessToken){
-  return accessToken ? _.fmap(fetch(`https://seats.workers.meeplitis.com?table_id=${tableId}`, {
-    headers: {
-      accessToken
-    }
-  }), json) : Promise.resolve(null);
-}
-
-function selectSeat(seats){
-  const params = new URLSearchParams(location.search);
-  const seat = _.count(seats) > 1 ? _.maybe(params.get("seat"), parseInt) : _.first(seats);
-  const rejected = seat != null && !_.includes(seats, seat);
-  params.delete("seat");
-  const redirect = rejected ? `${location.origin}${location.pathname}?${params.toString()}${location.hash}` : null;
-  return {seat, redirect};
-}
-
-export async function getSeating(tableId, accessToken){
-  const [seated, seats] = await Promise.all([
-    getSeated(tableId),
-    getSeats(tableId, accessToken)
-  ]);
-  const {seat, redirect} = selectSeat(seats);
-  if (redirect) {
-    location.href = redirect;
-  }
-  return {seated, seats, seat};
-}
-
 function digest(result){
   const code  = result?.code,
         error = code == null ? null : result,
@@ -61,17 +10,20 @@ function digest(result){
   return {error, data};
 }
 
+function getTouches(tableId){
+  return _.fmap(fetch(`https://touches.workers.meeplitis.com?table_id=${tableId}`), resp => resp.json());
+}
+
 function getPerspective(tableId, accessToken, eventId, seat, seatId){
-  const qs = _.chain([
-    `table_id=${tableId}`,
-    eventId != null ? `event_id=${eventId}` : null,
-    seat != null ? `seat=${seat}` : null
-  ], _.compact, _.join("&", _));
-  const perspective = _.fmap(fetch(`https://perspective.workers.meeplitis.com?${qs}`, accessToken ? {
+  const params = new URLSearchParams();
+  params.set("table_id", tableId);
+  eventId != null && params.set("event_id", eventId);
+  seat != null && params.set("seat", seat);
+  const perspective = _.fmap(fetch(`https://perspective.workers.meeplitis.com?${params}`, accessToken ? {
     headers: {
       accessToken
     }
-  } : {}), json, digest);
+  } : {}), resp => resp.json(), digest);
   const last_move = getLastMove(tableId, eventId, seatId);
   return Promise.all([perspective, last_move]).then(function([{data, error}, last_move]){
     return Object.assign({}, error || data, last_move);
@@ -95,7 +47,7 @@ function move(_table_id, _seat, _commands, accessToken){
     headers: {
       accessToken
     }
-  }).then(json).then(digest);
+  }).then(resp => resp.json()).then(digest);
 }
 
 export function Story(accessToken, tableId, seat, seated, config, log, $ready, $error, make, $state, $story){

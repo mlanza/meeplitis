@@ -7,19 +7,15 @@ import * as c from "./core.js";
 import {describe} from "./ancillary.js";
 import * as g from "/libs/game.js";
 import {session, $online} from "/libs/session.js";
-import {table, ui, scored, outcome, subject} from "/libs/table.js";
-import {getSeating, getConfig, story, hist, moment} from "/libs/story.js";
+import {story, hist, moment} from "/libs/story.js";
+import {el, tableId, config, seated, seats, seat, $table, $error, $ready, ui, scored, outcome, subject} from "/libs/table.js";
+
+const log    = _.log,
+      $story = story(session?.accessToken, tableId, seat, seated, config, _.partial(log, "story"), $ready, $error, c.ohHell),
+      $hist  = hist($story);
 
 const {img, li, div, span} = dom.tags(['img', 'li', 'div', 'span']);
 
-const params = new URLSearchParams(document.location.search),
-      tableId = params.get('id');
-
-if (!tableId) {
-  document.location.href = "../";
-}
-
-const el = dom.sel1("#table");
 const els = {
   moves: dom.sel1(".moves", el),
   trump: dom.sel1(".trump img", el),
@@ -38,8 +34,6 @@ function template(){
     resources: null
   };
 }
-
-const {seated, seats, seat} = await getSeating(tableId, session?.accessToken);
 
 function desc(event){
   switch(event.type) {
@@ -101,13 +95,6 @@ function cardSrc({suit, rank}){
   const suits = {"♥️": "H", "♦️": "D", "♣️": "C", "♠️": "S"};
   return `/images/deck/${rank}${suits[suit]}.svg`;
 }
-
-const log    = _.log,
-      $table = table(tableId),
-      $ready = $.cell(false),
-      $error = $.cell(null),
-      $story = story(session?.accessToken, tableId, seat, seated, await getConfig(tableId), _.partial(log, "story"), $ready, $error, c.ohHell),
-      $hist  = hist($story);
 
 //universal ui
 ui($table, $story, $ready, $error, $hist, $online, describe, _.partial(log, "ui"), seated, seat, seats, desc, template, el);

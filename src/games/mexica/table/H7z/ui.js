@@ -7,8 +7,10 @@ import * as c from "./core.js";
 import {describe} from "./ancillary.js";
 import * as g from "/libs/game.js";
 import {session, $online} from "/libs/session.js";
-import {table, diff, ui, outcome, subject} from "/libs/table.js";
-import {getSeating, getConfig, story, nav, waypoint, hist, moment, wip} from "/libs/story.js";
+import {story, hist, moment, wip} from "/libs/story.js";
+import {el, tableId, config, seated, seats, seat, $table, $error, $ready, ui, scored, outcome, diff} from "/libs/table.js";
+
+const {img, ol, li, div, kbd, span} = dom.tags(['img', 'ol', 'li', 'div', 'kbd', 'span']);
 
 function closestAttr(el, attr){
   return _.maybe(el, _.closest(_, `[${attr}]`), dom.attr(_, attr));
@@ -95,22 +97,10 @@ function spot([spot, terrain]){
     div({class: "propose"}));
 }
 
-const {img, ol, li, div, kbd, span} = dom.tags(['img', 'ol', 'li', 'div', 'kbd', 'span']);
-
-const params = new URLSearchParams(document.location.search),
-      tableId = params.get('id');
-
-if (!tableId) {
-  document.location.href = "../";
-}
-
-const el = dom.sel1("#table");
 const board = dom.sel1("#board", el);
 const actions = dom.sel1("#actions", el);
 const supplies = dom.sel1("#supplies", el);
 const demands = dom.sel1("#demands", el);
-
-const {seated, seats, seat} = await getSeating(tableId, session?.accessToken);
 
 function resources(title, resource, _attrs, supply){
   const attrs = Object.assign({orientation: "vertical", size: 1}, _attrs);
@@ -219,10 +209,7 @@ function desc({type, details}){
 const placePilli = {type: "place-pilli"};
 
 const log    = _.log,
-      $table = table(tableId),
-      $ready = $.cell(false),
-      $error = $.cell(null),
-      $story = story(session?.accessToken, tableId, seat, seated, await getConfig(tableId), _.partial(log, "story"), $ready, $error, c.mexica),
+      $story = story(session?.accessToken, tableId, seat, seated, config, _.partial(log, "story"), $ready, $error, c.mexica),
       $hist  = hist($story),
       $wip   = wip($story, function(game){
         const {seated} = _.deref(game);

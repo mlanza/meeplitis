@@ -69,15 +69,18 @@ function stepping(self, cstory, pstory){
   return [curr, prior, {step, at, head, present, offset, touch, undoable}, game];
 }
 
-export function wip(self, f = _.noop){ //work in progress
+export function snapshot(self){
+  return $.pipe(self, _.filter(_.isSome), _.map(function({at, history}){
+    return moment(self, _.get(history, at));
+  }));
+}
+
+export function wip(self){ //work in progress
   const $data  = $.cell({}),
         $head  = $.pipe(self, _.map(_.comp(_.last, _.get(_, "touches"))), _.filter(_.isSome)),
         $at    = $.pipe(self, _.map(function({at, touches}){
           return _.get(touches, at);
         }), _.filter(_.isSome)),
-        $snapshot = $.pipe(self, _.filter(_.isSome), _.map(function({at, history}){
-          return moment(self, _.get(history, at));
-        })),
         $ctx   = $.map(function(data, head, at){
           return head == at ? _.get(data, at, {}) : null;
         }, $data, $head, $at),
@@ -91,8 +94,6 @@ export function wip(self, f = _.noop){ //work in progress
 
   $.sub($at, _.partial(log, "$at"));
   $.sub($head, _.partial(log, "$head"));
-  $.sub($snapshot, _.partial(log, "$snapshot"));
-  $.sub($snapshot, f);
 
   _.doto($wip, _.specify(sh.IDispatch, {dispatch}));
 

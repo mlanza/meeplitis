@@ -7,7 +7,7 @@ import * as c from "./core.js";
 import {describe} from "./ancillary.js";
 import * as g from "/libs/game.js";
 import {session, $online} from "/libs/session.js";
-import {story, hist, moment, wip} from "/libs/story.js";
+import {story, hist, snapshot, moment, wip} from "/libs/story.js";
 import {el, tableId, config, seated, seats, seat, $table, $error, $ready, ui, scored, outcome, diff} from "/libs/table.js";
 
 const {img, ol, li, div, kbd, span} = dom.tags(['img', 'ol', 'li', 'div', 'kbd', 'span']);
@@ -211,14 +211,19 @@ const placePilli = {type: "place-pilli"};
 const log    = _.log,
       $story = story(session?.accessToken, tableId, seat, seated, config, _.partial(log, "story"), $ready, $error, c.mexica),
       $hist  = hist($story),
-      $wip   = wip($story, function(game){
-        const {seated} = _.deref(game);
-        const pilli = _.chain(seated, _.nth(_, seat), _.get(_, "pilli"));
-        if (_.isSome(seat) && _.isNil(pilli) && _.includes(g.up(game), seat)) {
-          sh.dispatch($wip, placePilli);
-        }
-      }),
+      $snapshot = snapshot($story),
+      $wip   = wip($story),
       $both  = which($.latest([$hist, $wip]));
+
+$.sub($snapshot, function(game){
+  const {seated} = _.deref(game);
+  const pilli = _.chain(seated, _.nth(_, seat), _.get(_, "pilli"));
+  if (_.isSome(seat) && _.isNil(pilli) && _.includes(g.up(game), seat)) {
+    sh.dispatch($wip, placePilli);
+  }
+});
+
+$.sub($snapshot, _.partial(log, "$snapshot"));
 
 $.sub($error, _.filter(_.isSome), function(error){ //when an error occurs...
   sh.dispatch($wip, null); //...clear any work in progress

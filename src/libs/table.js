@@ -6,7 +6,7 @@ import {presence} from "/libs/online.js";
 import {$online, session} from "/libs/session.js";
 import {keeping} from "/libs/links.js";
 import {relink} from "/libs/profiles.js";
-import {story, nav, hist, snapshot, wip, waypoint, refresh, atPresent, inPast} from "/libs/story.js";
+import {story, nav, hist, snapshot, wip, waypoint, refresh, replay, toPresent, atPresent, inPast} from "/libs/story.js";
 import {rankings} from "/components/table/ui.js";
 import "/libs/dummy.js";
 
@@ -76,16 +76,16 @@ export function diff(curr, prior, path, f){
 export function ui(make, describe, desc, template, {log = _.log} = {}){
   const $table = table(tableId),
         $ready = $.cell(false),
-        $error = $.cell(null);
+        $error = $.cell(null),
+        $up    = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table);
 
-  const $story = story(make, session?.accessToken, tableId, seat, seated, config, $ready, $error, {log: _.partial(log, "story")}),
+  const $story = story(make, session?.accessToken, tableId, seat, seated, config, $up, $ready, $error, {log: _.partial(log, "story")}),
         $hist  = hist($story),
         $snapshot = snapshot($story),
         $wip   = wip($story);
 
   const $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), _.compact()),
         $started = $.map(_.pipe(_.get(_, "status"), _.eq(_, "started")), $table), //games can be abandoned
-        $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table),
         $status = $.map(_.get(_, "status"), $table),
         $scored = $.map(_.get(_, "scored"), $table),
         $remarks = $.map(_.get(_, "remark"), $table),
@@ -102,8 +102,6 @@ export function ui(make, describe, desc, template, {log = _.log} = {}){
 
   params.get("listed") && dom.attr(dom.sel1("#title", el), "href", href => `${href}?listed=${params.get("listed")}`);
 
-  let replays = 0;
-
   const els = {
     remarks: dom.sel1("#remarks-button", el),
     options: dom.sel1("#options-button", el),
@@ -114,18 +112,6 @@ export function ui(make, describe, desc, template, {log = _.log} = {}){
     players: dom.sel1(".players", el),
     error: dom.sel1("#error", el),
     event: dom.sel1("#event", el)
-  }
-
-  function replay(how){
-    replays++;
-    location.hash = waypoint($story, _.deref($up), how) || location.hash;
-  }
-
-  function toPresent(was){
-    if ((was == null || was === replays) && !atPresent($story)) { //did the user navigate since timer started?
-      replay("forward");
-      setTimeout(_.partial(toPresent, replays), 3000);
-    }
   }
 
   function eventFor(event){
@@ -195,7 +181,7 @@ export function ui(make, describe, desc, template, {log = _.log} = {}){
   });
 
   $.sub($touch, function(touch){
-    refresh($story, inPast($story, touch) ? _.partial(replay, "present") : atPresent($story) ? toPresent : _.noop);
+    refresh($story, inPast($story, touch) ? _.partial(replay, $story, "present") : atPresent($story) ? _.partial(toPresent, $story) : _.noop);
   });
 
   const init = _.once(function(startTouch){
@@ -258,21 +244,21 @@ export function ui(make, describe, desc, template, {log = _.log} = {}){
   $.on(document.body, "keydown", function(e){
     if (e.key === ",") {
       e.preventDefault();
-      replay("last-move");
+      replay($story, "last-move");
     } else if (e.key === "ArrowLeft") {
       e.preventDefault();
-      replay(e.shiftKey ? "inception" : "back");
+      replay($story, e.shiftKey ? "inception" : "back");
     } else if (e.key === "ArrowRight") {
       e.preventDefault();
-      replay(e.shiftKey ? "present": "forward");
+      replay($story, e.shiftKey ? "present": "forward");
     } else if (e.shiftKey && e.key === "Backspace") {
       e.preventDefault();
-      replay("do-over");
+      replay($story, "do-over");
     }
   });
 
   $.on(el, "click", "#replay [data-nav]", function(e){
-    replay(dom.attr(e.target, "data-nav"));
+    replay($story, dom.attr(e.target, "data-nav"));
   });
 
   $.on(el, "click", ".message", function(e){

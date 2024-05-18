@@ -50,8 +50,8 @@ function move(_table_id, _seat, _commands, accessToken){
   }).then(resp => resp.json()).then(digest);
 }
 
-export function Story(accessToken, tableId, seat, seated, config, log, $ready, $error, make, $state, $story){
-  Object.assign(this, {accessToken, tableId, seat, seated, config, log, $ready, $error, make, $state, $story});
+export function Story(accessToken, tableId, seat, seated, config, log, $up, $ready, $error, make, $state, $story){
+  Object.assign(this, {accessToken, tableId, seat, seated, config, log, $up, $ready, $error, make, $state, $story});
 }
 
 function stepping(self, cstory, pstory){
@@ -183,12 +183,12 @@ _.doto(Story,
   _.implement($.ISubscribe, {sub}),
   _.implement(_.IDeref, {deref}));
 
-export function story(make, accessToken, tableId, seat, seated, config, $ready, $error, {log = _.log} = {}){
+export function story(make, accessToken, tableId, seat, seated, config, $up, $ready, $error, {log = _.log} = {}){
   const $state = $.cell({touches: null, history: null, at: null});
 
   _.reset($ready, true);
 
-  return new Story(accessToken, tableId, seat, seated, config, log, $ready, $error, make, $state, $.pipe($state, _.filter(function({touches, history, at}){ //TODO cleanup
+  return new Story(accessToken, tableId, seat, seated, config, log, $up, $ready, $error, make, $state, $.pipe($state, _.filter(function({touches, history, at}){ //TODO cleanup
     return touches && history && at != null;
   }), _.thin(_.mapArgs(_.get(_, "at"), _.equiv))));
 }
@@ -204,6 +204,20 @@ export function refresh(self, ...fs){
   return _.fmap(getTouches(self.tableId), function(touches){
     return _.merge(_, touches);
   }, _.swap(self.$state, _), ...fs);
+}
+
+let replays = 0;
+
+export function replay(self, how){
+  replays++;
+  location.hash = waypoint(self, _.deref(self.$up), how) || location.hash;
+}
+
+export function toPresent(self, was){
+  if ((was == null || was === replays) && !atPresent(self)) { //did the user navigate since timer started?
+    replay(self, "forward");
+    setTimeout(_.partial(toPresent, self, replays), 3000);
+  }
 }
 
 export function atPresent(self){

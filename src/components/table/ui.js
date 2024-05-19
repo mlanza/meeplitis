@@ -8,8 +8,6 @@ import "/libs/dummy.js";
 
 const tags = dom.tags(['div', 'span', 'img', 'a', 'p', 'button', 'article', 'table', 'tbody', 'thead', 'tr', 'th', 'td']);
 const {div, span, img, a, p, button, article} = tags;
-const profile = session?.username ? await getProfile(session?.username) : null;
-const capacity = profile ? profile.capacity != null && (profile.open_tables + profile.started_tables) >= profile.capacity : null;
 
 const params = new URLSearchParams(document.location.search),
       listed = params.get('listed'),
@@ -112,21 +110,36 @@ export function managing(key, id, op = _.identity){
   return {open, refreshTables};
 }
 
-function restrictOpen(game, f){
-  const g = game.status == "up" ? function(game){
-    return capacity ? div("Cannot open new tables.  You are already at capacity.") : f(game);
-  } : function(game){
-    return div("Cannot open new tables.  ", game.status == "capacity" ? "No more may be opened at this time." : "Down for maintenance.");
-  }
-  session?.username && _.chain(game, _.see("game"), g, dom.html(dom.sel1(".create > p"), _));
+function unlisted(game, capacity, f){
+  return f(game);
 }
 
+function up(game, capacity, f){
+  return capacity ? div("Cannot open new tables.  You are already at capacity.") : f(game);
+}
+
+function down(game, capacity, f){
+  return div("Cannot open new tables.  This game is down for maintenance.");
+}
+
+function capacity(game, capacity, f){
+  return div("Cannot open new tables.  No more may be opened at this time.");
+}
+
+const statuses = {unlisted, up, down, capacity};
+
+function restrictOpen(game, capacity, f){
+  const g = _.plug(_.get(statuses, game.status), _, capacity, f);
+  session?.username && _.chain(game, _.see("game"), g, dom.html(dom.sel1(".create > p"), _));
+}
 
 export async function manageTables(creates){
   const id = dom.attr(dom.sel1("#identity"), "data-id");
   const game = await getGame(id);
+  const profile = session?.username ? await getProfile(session?.username) : null;
+  const capacity = profile ? profile.capacity != null && (profile.open_tables + profile.started_tables) >= profile.capacity : null;
   const {open, refreshTables} = managing('game_id', id);
-  restrictOpen(game, _.partial(creates, open));
+  restrictOpen(game, capacity, _.partial(creates, open));
   refreshTables();
   onUpdate(refreshTables);
 }

@@ -1,15 +1,15 @@
-addEventListener("fetch", event => {
-  event.respondWith(handleRequest(event.request))
-});
-
-function joined(names){
-  const copy = [...names].map(name => `<em>${name}</em>`);
-  const last = copy.pop();
-  return copy.length > 0 ? `${copy.join(', ')} and ${last}` : last;
-}
-
-function template(subject, body){
-  const message = `<!DOCTYPE html>
+(() => {
+  // workers/meeplitis-notify/index.js
+  addEventListener("fetch", (event) => {
+    event.respondWith(handleRequest(event.request));
+  });
+  function joined(names) {
+    const copy = [...names].map((name) => `<em>${name}</em>`);
+    const last = copy.pop();
+    return copy.length > 0 ? `${copy.join(", ")} and ${last}` : last;
+  }
+  function template(subject, body) {
+    const message = `<!DOCTYPE html>
   <html>
   <head>
     <title>Meeplitis</title>
@@ -46,39 +46,36 @@ function template(subject, body){
   </head>
   ${body}
 </html>`;
-  return {subject, message};
-}
-
-function up({title, table_id, table_url, icon_url, recipients}){
-  const seated = joined(recipients.map(r => r.name));
-  return template(`${title} awaits your move - ${table_id}`, `
+    return { subject, message };
+  }
+  function up({ title, table_id, table_url, icon_url, recipients }) {
+    const seated = joined(recipients.map((r) => r.name));
+    return template(`${title} awaits your move - ${table_id}`, `
   <body>
     <h1>Meeplitis</h1>
     <p>It's your move in <strong>${title}</strong> involving ${seated} at table <a href="${table_url}">${table_id}</a>.</p>
     <img src="${icon_url}">
   </body>
 `);
-}
-
-function started({title, table_id, table_url, icon_url, recipients}){
-  const seated = joined(recipients.map(r => r.name));
-  return template(`${title} started - ${table_id}`, `
+  }
+  function started({ title, table_id, table_url, icon_url, recipients }) {
+    const seated = joined(recipients.map((r) => r.name));
+    return template(`${title} started - ${table_id}`, `
   <body>
     <h1>Meeplitis</h1>
     <p><strong>${title}</strong> has begun at table <a href="${table_url}">${table_id}</a> involving ${seated}.  You will be notified when it's your turn.</p>
     <img src="${icon_url}">
   </body>
 `);
-}
-
-function finished({title, table_id, table_url, icon_url, recipients, outcome}){
-  const seated = joined(recipients.map(r => r.name));
-  const ranked = outcome.sort(function(a, b){
-    return a.place - b.place;
-  }).map(function({place, username, brief}){
-    return `<tr><td>${place}</td><td>${username}</td><td>${brief}</td></tr>`;
-  }).join('')
-  return template(`${title} finished - ${table_id}`, `
+  }
+  function finished({ title, table_id, table_url, icon_url, recipients, outcome }) {
+    const seated = joined(recipients.map((r) => r.name));
+    const ranked = outcome.sort(function(a, b) {
+      return a.place - b.place;
+    }).map(function({ place, username, brief }) {
+      return `<tr><td>${place}</td><td>${username}</td><td>${brief}</td></tr>`;
+    }).join("");
+    return template(`${title} finished - ${table_id}`, `
   <body>
     <h1>Meeplitis</h1>
     <p>The game of <strong>${title}</strong> involving ${seated} finished at table <a href="${table_url}">${table_id}</a>.</p>
@@ -89,52 +86,53 @@ function finished({title, table_id, table_url, icon_url, recipients, outcome}){
     </table>
   </body>
 `);
-}
-
-function composes(type){
-  switch(type){
-    case "up":
-      return up;
-    case "started":
-      return started;
-    case "finished":
-      return finished;
-    default:
-      throw new Error(`Unknown message type ${type}`);
   }
-}
-
-async function handleRequest(request) {
-  const details = await request.json();
-  const {type, table_id, title, slug, recipients} = details;
-  const personalizations = recipients.map(function(recipient){
-      return {to: [recipient]};
-  });
-  const compose = composes(type);
-  const table_url = `https://meeplitis.com/games/${slug}/table/?id=${table_id}`,
-        icon_url  = `https://meeplitis.com/images/games/${slug}.png`,
-        {subject, message} = compose(Object.assign({table_url, icon_url}, details));
-  const resp = await fetch(new Request("https://api.mailchannels.net/tx/v1/send", {
-          "method": "POST",
-          "headers": {
-            "content-type": "application/json",
-          },
-          "body": JSON.stringify({
-            "from": {
-              "email": "donotreply@meeplitis.com",
-              "name": "Meeplitis",
-            },
-            subject,
-            personalizations,
-            "content": [{
-              "type": "text/html",
-              "value": message,
-            }],
-          }),
-        })),
-        text = await resp.text();
-
-  return new Response(JSON.stringify({status: resp.status, statusText: resp.statusText, text, num: recipients.length}), {
-    headers: { "content-type": "application/json" },
-  });
-}
+  function composes(type) {
+    switch (type) {
+      case "up":
+        return up;
+      case "started":
+        return started;
+      case "finished":
+        return finished;
+      default:
+        throw new Error(`Unknown message type ${type}`);
+    }
+  }
+  async function handleRequest(request) {
+    const details = await request.json();
+    const { type, table_id, title, slug, recipients } = details;
+    const personalizations = recipients.map(function(recipient) {
+      return {
+        to: [recipient],
+        dkim_domain: "meeplitis.com",
+        dkim_selector: "mailchannels",
+        dkim_private_key: DKIM_PRIVATE_KEY
+      };
+    });
+    const compose = composes(type);
+    const table_url = `https://meeplitis.com/games/${slug}/table/?id=${table_id}`, icon_url = `https://meeplitis.com/images/games/${slug}.png`, { subject, message } = compose(Object.assign({ table_url, icon_url }, details));
+    const resp = await fetch(new Request("https://api.mailchannels.net/tx/v1/send", {
+      "method": "POST",
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": JSON.stringify({
+        "from": {
+          "email": "noreply@meeplitis.com",
+          "name": "Meeplitis"
+        },
+        subject,
+        personalizations,
+        "content": [{
+          "type": "text/html",
+          "value": message
+        }]
+      })
+    })), text = await resp.text();
+    return new Response(JSON.stringify({ status: resp.status, statusText: resp.statusText, text, num: recipients.length }), {
+      headers: { "content-type": "application/json" }
+    });
+  }
+})();
+//# sourceMappingURL=index.js.map

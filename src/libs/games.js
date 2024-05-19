@@ -19,6 +19,7 @@ export function games(){
   return supabase
     .from("games_with_activity")
     .select("*")
+    .neq("status", "unlisted")
     .order('title')
     .then(({data}) => data);
 }

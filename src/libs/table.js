@@ -133,6 +133,7 @@ export function ui(make, describe, desc, template, {log = _.log} = {}){
     dom.text(dom.sel1("#error p", el), message);
     dom.addClass(el, "error");
     dom.removeClass(el, "ack");
+    addLog(message, {tableId});
   });
   $.sub($table, _.partial(log, "$table"));
   $.sub($status, _.partial(log, "$status"));
@@ -336,6 +337,12 @@ function getSeats(tableId, accessToken){
       accessToken
     }
   }), resp => resp.json()) : Promise.resolve([]);
+}
+
+export function addLog(message, details = null){
+  return supabase
+    .from('logs')
+    .insert({ message, details });
 }
 
 function getConfig(tableId){

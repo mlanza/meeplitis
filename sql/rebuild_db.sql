@@ -22,6 +22,20 @@ create type game_status as enum ('unlisted', 'up', 'down', 'capacity');
 
 create type seating_mode as enum ('random', 'joined', 'picked');
 
+create table logs(
+  seq bigserial not null,
+  message text not null,
+  details jsonb,
+  created_by uuid references auth.users on delete cascade not null default auth.uid(),
+  created_at timestamp not null default now(),
+  primary key (seq)
+);
+
+alter table logs enable row level security;
+
+create policy "Users can insert their own log entries."
+  on logs for insert with check (created_by = auth.uid());
+
 create table profiles (
     id uuid not null references auth.users on delete cascade,
     username text null,

@@ -150,9 +150,6 @@ create table events(
 
 alter table events enable row level security;
 
-create policy "Events are viewable by admins" on "public"."events"
-  using ((exists ( select 1 from admins a where (a.user_id = auth.uid()))));
-
 alter table tables
 add constraint fk_last_touch
 foreign key (id, last_touch_id)

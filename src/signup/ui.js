@@ -31,5 +31,3 @@ function setToken(response) {
     location.href = "/signin";
   }
 }
-
-Object.assign(window, {supabase});

@@ -3,6 +3,9 @@ import $ from "/libs/atomic_/reactives.js";
 import dom from "/libs/atomic_/dom.js";
 import g from "/libs/game_.js";
 import supabase from "/libs/supabase.js";
+import {reg} from "/libs/cmd.js";
+
+reg({supabase, g});
 
 const params = new URLSearchParams(document.location.search),
       _table_id = params.get('id'),
@@ -240,13 +243,11 @@ try {
       }
     });
 
-
     _.log("example:");
     _.log(`  exec({type: "run", commands: [{type: "pass"},{type: "commit"}], seat: 1})`);
     _.log(`  exec({type: "flush"})`);
 
-    Object.assign(window, {$state, exec, issue, simulate, effects, g, supabase});
+    reg({$state, exec, issue, simulate, effects});
   }
 } catch (ex) {
-  Object.assign(window, {ex, supabase});
 }

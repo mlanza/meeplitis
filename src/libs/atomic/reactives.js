@@ -174,7 +174,7 @@ function observer(pub, err, complete) {
   return new Observer(pub || _.noop, err || _.noop, complete || _.noop, null);
 }
 
-var _time, _tick, _time2, _when, _hist;
+var _time, _when, _hist;
 function pipeN(source, ...xforms) {
   return pipe2(source, _.comp(...xforms));
 }
@@ -321,24 +321,42 @@ function fixed$1(value) {
 function time() {
   return _.date().getTime();
 }
-function tick2(interval, f) {
+function tick3(interval, frame = 0, f = time) {
   return observable(function (observer) {
-    const iv = setInterval(function () {
-      pub$3(observer, f());
-    }, interval);
+    const seed = performance.now();
+    const target = seed + frame * interval;
+    const self = {
+      seed,
+      target,
+      frame,
+      stopped: false
+    };
+    function callback() {
+      self.offage = performance.now() - self.target;
+      if (self.offage >= 0) {
+        pub$3(observer, f(self));
+        self.frame += 1;
+        self.target = self.seed + self.frame * interval;
+      }
+      const delay = Math.abs(Math.round(Math.min(0, self.offage), 0));
+      self.stopped || setTimeout(callback, delay);
+    }
+    setTimeout(callback, 0);
     return function () {
-      clearInterval(iv);
+      self.stopped = true;
+      complete$3(observer);
     };
   });
 }
-const tick$1 = _.overload(null, (_tick = tick2, _time = time, function tick2(_argPlaceholder4) {
-  return _tick(_argPlaceholder4, _time);
-}), tick2);
+function tick2(interval, f = time) {
+  return tick3(interval, 0, f);
+}
+const tick$1 = _.overload(null, tick2, tick2, tick3);
 function when2(interval, f) {
   return seed(f, tick$1(interval, f));
 }
-const when$1 = _.overload(null, (_when = when2, _time2 = time, function when2(_argPlaceholder5) {
-  return _when(_argPlaceholder5, _time2);
+const when$1 = _.overload(null, (_when = when2, _time = time, function when2(_argPlaceholder4) {
+  return _when(_argPlaceholder4, _time);
 }), when2);
 function map2(f, source) {
   return pipe(source, _.map(f), _.dedupe());
@@ -372,8 +390,8 @@ function resolve(source) {
 function hist2(size, source) {
   return pipe(source, hist$2(size));
 }
-const hist$1 = _.overload(null, (_hist = hist2, function hist2(_argPlaceholder6) {
-  return _hist(2, _argPlaceholder6);
+const hist$1 = _.overload(null, (_hist = hist2, function hist2(_argPlaceholder5) {
+  return _hist(2, _argPlaceholder5);
 }), hist2);
 function fromCollection(coll) {
   return observable(function (observer) {
@@ -389,10 +407,10 @@ function fromCollection(coll) {
 function fromPromise$1(promise) {
   return observable(function (observer) {
     var _observer2, _pub2, _observer3, _err;
-    promise.then((_pub2 = pub$3, _observer2 = observer, function pub(_argPlaceholder7) {
-      return _pub2(_observer2, _argPlaceholder7);
-    }), (_err = err$3, _observer3 = observer, function err(_argPlaceholder8) {
-      return _err(_observer3, _argPlaceholder8);
+    promise.then((_pub2 = pub$3, _observer2 = observer, function pub(_argPlaceholder6) {
+      return _pub2(_observer2, _argPlaceholder6);
+    }), (_err = err$3, _observer3 = observer, function err(_argPlaceholder7) {
+      return _err(_observer3, _argPlaceholder7);
     })).then(function () {
       complete$3(observer);
     });
@@ -401,8 +419,8 @@ function fromPromise$1(promise) {
 function fromSource(source) {
   var _source, _sub;
   //can be used to cover a source making it readonly
-  return observable((_sub = sub$4, _source = source, function sub(_argPlaceholder9) {
-    return _sub(_source, _argPlaceholder9);
+  return observable((_sub = sub$4, _source = source, function sub(_argPlaceholder8) {
+    return _sub(_source, _argPlaceholder8);
   }));
 }
 function toObservable(self) {

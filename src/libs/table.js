@@ -8,6 +8,7 @@ import {keeping} from "/libs/links.js";
 import {relink} from "/libs/profiles.js";
 import {story, nav, hist, snapshot, wip, waypoint, refresh, replay, toPresent, atPresent, inPast} from "/libs/story.js";
 import {rankings} from "/components/table/ui.js";
+import {reg} from "/libs/cmd.js";
 import "/libs/dummy.js";
 
 export const el = dom.sel1("#table");
@@ -83,6 +84,8 @@ export function ui(make, describe, desc, template, {log = _.log} = {}){
         $hist  = hist($story),
         $snapshot = snapshot($story),
         $wip   = wip($story);
+
+  reg({$table, $ready, $error, $up, $story, $hist, $snapshot, $wip});
 
   const $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), _.compact()),
         $started = $.map(_.pipe(_.get(_, "status"), _.eq(_, "started")), $table), //games can be abandoned

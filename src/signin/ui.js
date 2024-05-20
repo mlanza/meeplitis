@@ -58,5 +58,3 @@ function signOutSubmitted(event){
 function setToken(response) {
   location.href = dest;
 }
-
-Object.assign(window, {supabase});

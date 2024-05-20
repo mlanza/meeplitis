@@ -5,6 +5,7 @@ import {session} from "/libs/session.js";
 import {fmttime} from "/libs/dates.js";
 import {managing, getProfile, onUpdate} from "/components/table/ui.js";
 import {profiles, render} from "/libs/profiles.js";
+import {reg} from "/libs/cmd.js";
 import "/libs/dummy.js";
 
 const params = new URLSearchParams(document.location.search),
@@ -39,7 +40,7 @@ if (username) {
   dom.attr(document.body, "data-view", "profiles");
 
   _.fmap(profiles(),
-    _.see("profiles"),
+    _.tee(_.plug(reg, "profiles", _)),
     _.map(_.pipe(render, dom.tag('li')), _),
     dom.html(dom.sel1(".profiles ul"), _));
 }

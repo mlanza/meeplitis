@@ -532,21 +532,6 @@ function scores(seats, {districts, palace}, {board, contents}){
 
 const moving = _.partial(focal, ["pilli", "bridge"]);
 
-$.on(document.body, "keydown", function(e){
-  switch(e.key){
-    case "Escape": //cancel a command in progress
-      clear($wip);
-      dom.removeClass(el, "error");
-      break;
-    case ".":
-      sh.dispatch($story, {type: "pass"});
-      break;
-    case "Enter":
-      sh.dispatch($story, {type: "commit"});
-      break;
-  }
-});
-
 $.on(el, "animationend", "[data-piece]", function(e){
   if (e.animationName === "fade-out"){
     dom.omit(this);

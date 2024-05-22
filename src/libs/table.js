@@ -240,18 +240,46 @@ export function ui(make, describe, desc, template){
   });
 
   $.on(document.body, "keydown", function(e){
-    if (e.key === ",") {
-      e.preventDefault();
-      replay($story, "last-move");
-    } else if (e.key === "ArrowLeft") {
-      e.preventDefault();
-      replay($story, e.shiftKey ? "inception" : "back");
-    } else if (e.key === "ArrowRight") {
-      e.preventDefault();
-      replay($story, e.shiftKey ? "present": "forward");
-    } else if (e.shiftKey && e.key === "Backspace") {
-      e.preventDefault();
-      replay($story, "do-over");
+    switch(e.key){
+      case ",":
+        e.preventDefault();
+        replay($story, "last-move");
+        break;
+
+      case "ArrowUp":
+      case "ArrowLeft":
+        e.preventDefault();
+        replay($story, e.shiftKey ? "inception" : "back");
+        break;
+
+      case "ArrowDown":
+      case "ArrowRight":
+        e.preventDefault();
+        replay($story, e.shiftKey ? "present": "forward");
+        break;
+
+      case "Backspace":
+        if (e.shiftKey) {
+          e.preventDefault();
+          replay($story, "do-over");
+        }
+        break;
+
+      case "Escape": //cancel work in progress and/or clear error
+        e.preventDefault();
+        clear($wip);
+        _.reset($error, null);
+        break;
+
+      case ".": //not always an option
+        e.preventDefault();
+        sh.dispatch($story, {type: "pass"});
+        break;
+
+      case "Enter":
+        e.preventDefault();
+        sh.dispatch($story, {type: "commit"});
+        break;
     }
   });
 

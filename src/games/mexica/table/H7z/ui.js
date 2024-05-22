@@ -6,7 +6,7 @@ import * as c from "./core.js";
 import * as g from "/libs/game.js";
 import {moment} from "/libs/story.js";
 import {describe} from "./ancillary.js";
-import {el, seated, seats, seat, ui, scored, outcome, diff, which} from "/libs/table.js";
+import {el, seated, seats, seat, ui, scored, outcome, diff, which, save, clear} from "/libs/table.js";
 import {reg} from "/libs/cmd.js";
 
 const {img, ol, li, div, kbd, span} = dom.tags(['img', 'ol', 'li', 'div', 'kbd', 'span']);
@@ -218,16 +218,16 @@ $.sub($snapshot, function(game){
   const {seated} = _.deref(game);
   const pilli = _.chain(seated, _.nth(_, seat), _.get(_, "pilli"));
   if (_.isSome(seat) && _.isNil(pilli) && _.includes(g.up(game), seat)) {
-    sh.dispatch($wip, placePilli);
+    save($wip, placePilli);
   }
 });
 
 $.sub($error, _.filter(_.isSome), function(error){ //when an error occurs...
-  sh.dispatch($wip, null); //...clear any work in progress
+  clear($wip);
 });
 
 $.sub($ready, _.filter(_.not), function(){ //upon issuing a move...
-  sh.dispatch($wip, null); //...clear any work in progress
+  clear($wip);
 });
 
 reg({$both});
@@ -534,7 +534,7 @@ const moving = _.partial(focal, ["pilli", "bridge"]);
 $.on(document.body, "keydown", function(e){
   switch(e.key){
     case "Escape": //cancel a command in progress
-      sh.dispatch($wip, null);
+      clear($wip);
       dom.removeClass(el, "error");
       break;
     case ".":
@@ -579,7 +579,7 @@ $.on(el, "click", `#table.act[data-command-type="move"][data-command-from] div[d
 $.on(el, "click", `#table.act[data-status='actions'] .zone.yours .area div.temples:not([data-remaining="0"])`, function(e){
   const type = "build-temple",
         size = parseInt(closestAttr(this, "data-size"));
-  sh.dispatch($wip, {type, details: {size}});
+  save($wip, {type, details: {size}});
 });
 
 $.on(el, "click", `#table.act[data-status='actions'][data-command-type="build-temple"] div[data-spot]`, function(e){
@@ -618,7 +618,7 @@ $.on(el, "click", `#table.act[data-status='actions'][data-command-type="construc
 });
 
 $.on(el, "click", `#table.act[data-status='actions'] #supplies div.bridges`, function(e){
-  sh.dispatch($wip, {type: "construct-bridge"});
+  save($wip, {type: "construct-bridge"});
 });
 
 $.on(el, "click", `#table.act[data-status='actions'][data-command-type="construct-canal"][data-command-size="1"] div[data-spot]`, function(e){
@@ -634,14 +634,14 @@ $.on(el, "click", `#table.act[data-status='actions'][data-command-type="construc
   if(_.count(at) == 2) {
     sh.dispatch($story, {type, details: {at}});
   } else {
-    sh.dispatch($wip, {type, details: {size: 2, at}});
+    save($wip, {type, details: {size: 2, at}});
   }
 });
 
 $.on(el, "click", `#table.act[data-status='actions'] #supplies div.canals`, function(e){
   const type = "construct-canal",
         size = parseInt(closestAttr(this, "data-size"));
-  sh.dispatch($wip, {type, details: {size}});
+  save($wip, {type, details: {size}});
 });
 
 $.on(el, "click", `#table.act[data-status='actions']:not([data-command-type="move"]) div[data-spot]`, function(e){
@@ -657,14 +657,14 @@ $.on(el, "click", `#table.act[data-status='actions']:not([data-command-type="mov
     case "pilli": {
       const type = "move",
             from = closestAttr(this, "data-spot");
-      sh.dispatch($wip, {type, details: {from}});
+      save($wip, {type, details: {from}});
       break;
     }
 
     case "bridge": {
       const type = "relocate-bridge",
             from = closestAttr(this, "data-spot");
-      sh.dispatch($wip, {type, details: {from}});
+      save($wip, {type, details: {from}});
       break;
     }
   }

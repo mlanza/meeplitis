@@ -81,18 +81,21 @@ function WorkInProgress($data, $head, $at, $ctx, $wip){
 }
 
 (function(){
-  function dispatch(self, command){
-    _.swap(self.$data, _.assoc(_, _.deref(self.$at), command));
-  }
-
   function sub(self, ...args){
     return $.sub(self.$wip, ...args);
   }
 
   _.doto(WorkInProgress,
-    _.implement($.ISubscribe, {sub}),
-    _.implement(sh.IDispatch, {dispatch}));
+    _.implement($.ISubscribe, {sub}));
 })();
+
+export function save(self){
+  _.swap(self.$data, _.assoc(_, _.deref(self.$at), command));
+}
+
+export function clear(self){
+  _.reset(self.$data, {});
+}
 
 export function wip(self){
   const $data  = $.cell({}),

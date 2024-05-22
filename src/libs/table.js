@@ -7,6 +7,7 @@ import {$online, session} from "/libs/session.js";
 import {keeping} from "/libs/links.js";
 import {relink} from "/libs/profiles.js";
 import {story, nav, hist, snapshot, wip, waypoint, refresh, replay, toPresent, atPresent, inPast} from "/libs/story.js";
+export {save, clear} from "/libs/story.js";
 import {rankings} from "/components/table/ui.js";
 import {reg} from "/libs/cmd.js";
 import "/libs/dummy.js";

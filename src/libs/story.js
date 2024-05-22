@@ -76,7 +76,25 @@ export function snapshot(self){
   }));
 }
 
-export function wip(self){ //work in progress
+function WorkInProgress($data, $head, $at, $ctx, $wip){
+  Object.assign(this, {$data, $head, $at, $ctx, $wip});
+}
+
+(function(){
+  function dispatch(self, command){
+    _.swap(self.$data, _.assoc(_, _.deref(self.$at), command));
+  }
+
+  function sub(self, ...args){
+    return $.sub(self.$wip, ...args);
+  }
+
+  _.doto(WorkInProgress,
+    _.implement($.ISubscribe, {sub}),
+    _.implement(sh.IDispatch, {dispatch}));
+})();
+
+export function wip(self){
   const $data  = $.cell({}),
         $head  = $.pipe(self, _.map(_.comp(_.last, _.get(_, "touches"))), _.filter(_.isSome)),
         $at    = $.pipe(self, _.map(function({at, touches}){
@@ -87,15 +105,7 @@ export function wip(self){ //work in progress
         }, $data, $head, $at),
         $wip   = $.hist($ctx);
 
-  reg({$data, $head, $at, $ctx, $wip});
-
-  function dispatch(self, command){
-    _.swap($data, _.assoc(_, _.deref($at), command));
-  }
-
-  _.doto($wip, _.specify(sh.IDispatch, {dispatch}));
-
-  return $wip;
+  return new WorkInProgress($data, $head, $at, $ctx, $wip);
 }
 
 function moment2(self, {state, event}){

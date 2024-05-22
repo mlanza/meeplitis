@@ -3,6 +3,7 @@ import $ from "/libs/atomic_/reactives.js";
 import sh from "/libs/atomic_/shell.js";
 import supabase from "/libs/supabase.js";
 import {reg} from "/libs/cmd.js";
+export {wip} from "/libs/wip.js";
 
 function digest(result){
   const code  = result?.code,
@@ -76,40 +77,6 @@ export function snapshot(self){
   }));
 }
 
-function WorkInProgress($data, $head, $at, $ctx, $wip){
-  Object.assign(this, {$data, $head, $at, $ctx, $wip});
-}
-
-(function(){
-  function sub(self, ...args){
-    return $.sub(self.$wip, ...args);
-  }
-
-  _.doto(WorkInProgress,
-    _.implement($.ISubscribe, {sub}));
-})();
-
-export function save(self){
-  _.swap(self.$data, _.assoc(_, _.deref(self.$at), command));
-}
-
-export function clear(self){
-  _.reset(self.$data, {});
-}
-
-export function wip(self){
-  const $data  = $.cell({}),
-        $head  = $.pipe(self, _.map(_.comp(_.last, _.get(_, "touches"))), _.filter(_.isSome)),
-        $at    = $.pipe(self, _.map(function({at, touches}){
-          return _.get(touches, at);
-        }), _.filter(_.isSome)),
-        $ctx   = $.map(function(data, head, at){
-          return head == at ? _.get(data, at, {}) : null;
-        }, $data, $head, $at),
-        $wip   = $.hist($ctx);
-
-  return new WorkInProgress($data, $head, $at, $ctx, $wip);
-}
 
 function moment2(self, {state, event}){
   return self.make(self.seated, self.config, [event], state);

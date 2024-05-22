@@ -9,11 +9,29 @@ function sub(self, ...args){
   return $.sub(self.$wip, ...args);
 }
 
+function deref(self){
+  const at = _.deref(self.$at);
+  return _.chain(self.$data, _.deref, _.get(_, at)) || null;
+}
+
+function reset(self, value){
+  const at = _.deref(self.$at);
+  return _.swap(self.$data, _.assoc(_, at, value));
+}
+
+function swap(self, f){
+  const at = _.deref(self.$at);
+  return _.swap(self.$data, _.update(_, at, f));
+}
+
 _.doto(WorkInProgress,
+  _.implement(_.IResettable, {reset}),
+  _.implement(_.ISwappable, {swap}),
+  _.implement(_.IDeref, {deref}),
   _.implement($.ISubscribe, {sub}));
 
 export function save(self, command){
-  _.swap(self.$data, _.assoc(_, _.deref(self.$at), command));
+  _.reset(self, command);
 }
 
 export function clear(self){

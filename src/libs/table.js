@@ -7,7 +7,7 @@ import {$online, session} from "/libs/session.js";
 import {keeping} from "/libs/links.js";
 import {relink} from "/libs/profiles.js";
 import {story, nav, hist, snapshot, waypoint, refresh, replay, toPresent, atPresent, inPast} from "/libs/story.js";
-import {wip, save, clear} from "/libs/wip.js";
+import {wip, clear} from "/libs/wip.js";
 import {rankings} from "/components/table/ui.js";
 import {reg} from "/libs/cmd.js";
 import "/libs/dummy.js";
@@ -139,6 +139,14 @@ export function ui(make, describe, desc, template){
     dom.addClass(el, "error");
     dom.removeClass(el, "ack");
     addLog(message, {tableId});
+  });
+
+  $.sub($error, _.filter(_.isSome), function(error){ //when an error occurs...
+    clear($wip);
+  });
+
+  $.sub($ready, _.filter(_.not), function(){ //upon issuing a move...
+    clear($wip);
   });
 
   $.sub($status, dom.attr(el, "data-table-status", _));

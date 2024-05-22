@@ -6,7 +6,7 @@ import * as c from "./core.js";
 import * as g from "/libs/game.js";
 import {moment} from "/libs/story.js";
 import {describe} from "./ancillary.js";
-import {save, clear} from "/libs/wip.js";
+import {save} from "/libs/wip.js";
 import {el, seated, seats, seat, ui, scored, outcome, diff, which} from "/libs/table.js";
 import {reg} from "/libs/cmd.js";
 
@@ -221,14 +221,6 @@ $.sub($snapshot, function(game){
   if (_.isSome(seat) && _.isNil(pilli) && _.includes(g.up(game), seat)) {
     save($wip, placePilli);
   }
-});
-
-$.sub($error, _.filter(_.isSome), function(error){ //when an error occurs...
-  clear($wip);
-});
-
-$.sub($ready, _.filter(_.not), function(){ //upon issuing a move...
-  clear($wip);
 });
 
 reg({$both});

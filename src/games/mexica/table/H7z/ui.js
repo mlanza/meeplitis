@@ -7,6 +7,7 @@ import * as g from "/libs/game.js";
 import {moment} from "/libs/story.js";
 import {describe} from "./ancillary.js";
 import {el, seated, seats, seat, ui, scored, outcome, diff, which} from "/libs/table.js";
+import {reg} from "/libs/cmd.js";
 
 const {img, ol, li, div, kbd, span} = dom.tags(['img', 'ol', 'li', 'div', 'kbd', 'span']);
 
@@ -221,8 +222,6 @@ $.sub($snapshot, function(game){
   }
 });
 
-$.sub($snapshot, _.partial(_.log, "$snapshot"));
-
 $.sub($error, _.filter(_.isSome), function(error){ //when an error occurs...
   sh.dispatch($wip, null); //...clear any work in progress
 });
@@ -231,7 +230,7 @@ $.sub($ready, _.filter(_.not), function(){ //upon issuing a move...
   sh.dispatch($wip, null); //...clear any work in progress
 });
 
-$.sub($both, _.partial(_.log, "$both"));
+reg({$both});
 
 function remaining(slots){
   return _.count(_.filter(_.isNil, slots));

@@ -74,13 +74,13 @@ export function diff(curr, prior, path, f){
   }
 }
 
-export function ui(make, describe, desc, template, {log = _.log} = {}){
+export function ui(make, describe, desc, template){
   const $table = table(tableId),
         $ready = $.cell(false),
         $error = $.cell(null),
         $up    = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table);
 
-  const $story = story(make, session?.accessToken, tableId, seat, seated, config, $up, $ready, $error, {log: _.partial(log, "story")}),
+  const $story = story(make, session?.accessToken, tableId, seat, seated, config, $up, $ready, $error),
         $hist  = hist($story),
         $snapshot = snapshot($story),
         $wip   = wip($story);
@@ -98,6 +98,8 @@ export function ui(make, describe, desc, template, {log = _.log} = {}){
           return _.count(touches) - 1 == at;
         }), _.dedupe())),
         $act = $.map(_.all, $present, $up, $ready, $started);
+
+  reg({$touch, $started, $status, $scored, $remarks, $described, $presence, $present, $act});
 
   const multiSeated = _.count(_.unique(_.map(_.get(_, "player_id"), seated))) != _.count(seated);
   dom.toggleClass(el, "multi-seated", multiSeated);
@@ -131,21 +133,12 @@ export function ui(make, describe, desc, template, {log = _.log} = {}){
   dom.attr(el, "data-seats", _.count(seated));
 
   $.sub($error, _.filter(_.isSome), function(error){
-    log("$error", error);
     const {message} = error;
     dom.text(dom.sel1("#error p", el), message);
     dom.addClass(el, "error");
     dom.removeClass(el, "ack");
     addLog(message, {tableId});
   });
-  $.sub($table, _.partial(log, "$table"));
-  $.sub($status, _.partial(log, "$status"));
-  $.sub($touch, _.partial(log, "$touch"));
-  $.sub($story, _.partial(log, "$story"));
-  $.sub($ready, _.partial(log, "$ready"));
-  $.sub($present, _.partial(log, "$present"));
-  $.sub($act, _.partial(log, "$act"));
-  $.sub($hist, _.partial(log, "$hist"));
 
   $.sub($status, dom.attr(el, "data-table-status", _));
   $.sub($present, dom.toggleClass(el, "present", _));
@@ -177,7 +170,7 @@ export function ui(make, describe, desc, template, {log = _.log} = {}){
     }, seated);
   });
 
-  $.sub($presence, _.map(_.tee(_.partial(log, "presence"))), function(presence){
+  $.sub($presence, function(presence){
     _.eachkv(function(username, presence){
       const zone = dom.sel1(`.zone[data-username="${username}"]`);
       dom.attr(zone, "data-presence", presence ? "online" : "offline");

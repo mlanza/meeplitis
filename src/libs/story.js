@@ -2,6 +2,7 @@ import _ from "/libs/atomic_/core.js";
 import $ from "/libs/atomic_/reactives.js";
 import sh from "/libs/atomic_/shell.js";
 import supabase from "/libs/supabase.js";
+import {reg} from "/libs/cmd.js";
 
 function digest(result){
   const code  = result?.code,
@@ -50,8 +51,8 @@ function move(_table_id, _seat, _commands, accessToken){
   }).then(resp => resp.json()).then(digest);
 }
 
-export function Story(accessToken, tableId, seat, seated, config, log, $up, $ready, $error, make, $state, $story){
-  Object.assign(this, {accessToken, tableId, seat, seated, config, log, $up, $ready, $error, make, $state, $story});
+export function Story(accessToken, tableId, seat, seated, config, $up, $ready, $error, make, $state, $story){
+  Object.assign(this, {accessToken, tableId, seat, seated, config, $up, $ready, $error, make, $state, $story});
 }
 
 function stepping(self, cstory, pstory){
@@ -86,14 +87,11 @@ export function wip(self){ //work in progress
         }, $data, $head, $at),
         $wip   = $.hist($ctx);
 
+  reg({$data, $head, $at, $ctx, $wip});
+
   function dispatch(self, command){
     _.swap($data, _.assoc(_, _.deref($at), command));
   }
-
-  const log = _.partial(self.log, "$wip");
-
-  $.sub($at, _.partial(log, "$at"));
-  $.sub($head, _.partial(log, "$head"));
 
   _.doto($wip, _.specify(sh.IDispatch, {dispatch}));
 
@@ -133,7 +131,6 @@ export function waypoint(self, up, how){
             _event_id = _.nth(touches, at);
       if (up && _.includes(undoables, _event_id)){
         supabase.rpc('undo', {_table_id, _event_id}).then(function(undo){
-          self.log("undo", undo);
           _.swap(self.$state, _.update(_, "history", _.pipe(_.take(at -1, _), _.toArray)));
         });
       }
@@ -168,7 +165,7 @@ async function dispatch(self, command){
 
     const {error, data} = await move(self.tableId, self.seat, [command], self.accessToken);
 
-    self.log('moved', {tableId: self.tableId, command, seat: self.seat}, '->', {error, data});
+    _.log('moved', {tableId: self.tableId, command, seat: self.seat}, '->', {error, data});
 
     if (error) {
       $.pub(self.$error, error);
@@ -183,12 +180,12 @@ _.doto(Story,
   _.implement($.ISubscribe, {sub}),
   _.implement(_.IDeref, {deref}));
 
-export function story(make, accessToken, tableId, seat, seated, config, $up, $ready, $error, {log = _.log} = {}){
+export function story(make, accessToken, tableId, seat, seated, config, $up, $ready, $error){
   const $state = $.cell({touches: null, history: null, at: null});
 
   _.reset($ready, true);
 
-  return new Story(accessToken, tableId, seat, seated, config, log, $up, $ready, $error, make, $state, $.pipe($state, _.filter(function({touches, history, at}){ //TODO cleanup
+  return new Story(accessToken, tableId, seat, seated, config, $up, $ready, $error, make, $state, $.pipe($state, _.filter(function({touches, history, at}){ //TODO cleanup
     return touches && history && at != null;
   }), _.thin(_.mapArgs(_.get(_, "at"), _.equiv))));
 }

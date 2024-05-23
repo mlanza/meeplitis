@@ -79,9 +79,10 @@ export function ui(make, describe, desc, template){
   const $table = table(tableId),
         $ready = $.cell(false),
         $error = $.cell(null),
-        $up    = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table);
+        $up    = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table),
+        $hash  = dom.hash(window);
 
-  const $story = story(make, session?.accessToken, tableId, seat, seated, config, $up, $ready, $error),
+  const $story = story(make, session?.accessToken, tableId, seat, seated, config, $hash, $up, $ready, $error),
         $hist  = hist($story),
         $snapshot = snapshot($story),
         $wip   = wip($story);
@@ -181,14 +182,6 @@ export function ui(make, describe, desc, template){
   $.sub($touch, function(touch){
     refresh($story, inPast($story, touch) ? _.partial(replay, $story, "present") : atPresent($story) ? _.partial(toPresent, $story) : _.noop);
   });
-
-  const init = _.once(function(startTouch){
-    $.sub(dom.hash(window), _.map(_.replace(_, "#", "")), function(touch){
-      nav($story, touch || startTouch);
-    });
-  });
-
-  $.sub($story.$state, _.comp(_.map(_.get(_, "touches")), _.compact(), _.map(_.last)), init);
 
   $.sub($story, function({touches, at}){
     dom.value(els.progress, at + 1);

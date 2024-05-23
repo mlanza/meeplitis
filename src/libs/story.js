@@ -52,8 +52,8 @@ function move(_table_id, _seat, _commands, accessToken){
   }).then(resp => resp.json()).then(digest);
 }
 
-export function Story(accessToken, tableId, seat, seated, config, $up, $ready, $error, make, $state, $story){
-  Object.assign(this, {accessToken, tableId, seat, seated, config, $up, $ready, $error, make, $state, $story});
+export function Story(accessToken, tableId, seat, seated, config, $hash, $up, $ready, $error, make, $state, $story){
+  Object.assign(this, {accessToken, tableId, seat, seated, config, $hash, $up, $ready, $error, make, $state, $story});
 }
 
 function stepping(self, cstory, pstory){
@@ -160,14 +160,24 @@ _.doto(Story,
   _.implement($.ISubscribe, {sub}),
   _.implement(_.IDeref, {deref}));
 
-export function story(make, accessToken, tableId, seat, seated, config, $up, $ready, $error){
+export function story(make, accessToken, tableId, seat, seated, config, $hash, $up, $ready, $error){
   const $state = $.cell({touches: null, history: null, at: null});
 
   _.reset($ready, true);
 
-  return new Story(accessToken, tableId, seat, seated, config, $up, $ready, $error, make, $state, $.pipe($state, _.filter(function({touches, history, at}){ //TODO cleanup
+  const self = new Story(accessToken, tableId, seat, seated, config, $hash, $up, $ready, $error, make, $state, $.pipe($state, _.filter(function({touches, history, at}){ //TODO cleanup
     return touches && history && at != null;
   }), _.thin(_.mapArgs(_.get(_, "at"), _.equiv))));
+
+  const init = _.once(function(startTouch){
+    $.sub($hash, _.map(_.replace(_, "#", "")), function(touch){
+      nav(self, touch || startTouch);
+    });
+  });
+
+  $.sub($state, _.comp(_.map(_.get(_, "touches")), _.compact(), _.map(_.last)), init);
+
+  return self;
 }
 
 function expand(idx){

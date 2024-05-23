@@ -1,7 +1,6 @@
 import _ from "/libs/atomic_/core.js";
 import dom from "/libs/atomic_/dom.js";
-import $ from "/libs/atomic_/reactives.js";
-import sh from "/libs/atomic_/shell.js";
+import $ from "/libs/atomic_/shell.js";
 import * as c from "./core.js";
 import * as g from "/libs/game.js";
 import {describe} from "./ancillary.js";
@@ -142,16 +141,16 @@ $.sub($hist, function([curr, prior, {step, offset}, game]){
 
 $.on(el, "click", '#table.present:not(.wait) .moves button[data-type="bid"]', function(e){
   const bid = _.maybe(e.target, dom.attr(_, "data-bid"), _.blot, parseInt);
-  sh.dispatch($story, {type: "bid", "details": {bid}});
+  $.dispatch($story, {type: "bid", "details": {bid}});
 });
 
 $.on(el, "click", '#table.present:not(.wait) .moves button[data-type="commit"]', function(e){
   const type = dom.attr(e.target, "data-type");
-  sh.dispatch($story, {type});
+  $.dispatch($story, {type});
 });
 
 $.on(el, "click", '#table.present:not(.wait) .hand img', function(e){
   const suit = dom.attr(this, "data-suit"),
         rank = dom.attr(this, "data-rank");
-  sh.dispatch($story, {type: "play", details: {card: {suit, rank}}});
+  $.dispatch($story, {type: "play", details: {card: {suit, rank}}});
 });

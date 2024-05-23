@@ -1,6 +1,6 @@
 import _ from "/libs/atomic_/core.js";
 import dom from "/libs/atomic_/dom.js";
-import $ from "/libs/atomic_/reactives.js";
+import $ from "/libs/atomic_/shell.js";
 import supabase from "/libs/supabase.js";
 import {presence} from "/libs/online.js";
 import {$online, session} from "/libs/session.js";
@@ -261,12 +261,12 @@ export function ui(make, describe, desc, template){
 
       case ".": //not always an option
         e.preventDefault();
-        sh.dispatch($story, {type: "pass"});
+        $.dispatch($story, {type: "pass"});
         break;
 
       case "Enter":
         e.preventDefault();
-        sh.dispatch($story, {type: "commit"});
+        $.dispatch($story, {type: "commit"});
         break;
 
       case "s":

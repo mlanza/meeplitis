@@ -1,5 +1,5 @@
 import _ from "/libs/atomic_/core.js";
-import $ from "/libs/atomic_/reactives.js";
+import $ from "/libs/atomic_/shell.js";
 import dom from "/libs/atomic_/dom.js";
 import g from "/libs/game_.js";
 import supabase from "/libs/supabase.js";

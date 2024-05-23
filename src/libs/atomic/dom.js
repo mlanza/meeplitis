@@ -1,8 +1,7 @@
 import * as _ from './core.js';
 import { protocol, first as first$2, overload } from './core.js';
-import * as $ from './reactives.js';
-import * as mut from './transients.js';
-export { after, append, before, empty, omit, prepend } from './transients.js';
+import * as $ from './shell.js';
+export { after, append, before, empty, omit, prepend } from './shell.js';
 
 const IContent = _.protocol({
   contents: null
@@ -208,11 +207,11 @@ var behave$c = _.does(_.keying("Attrs"), _.ICoercible.addMethod((_ref$2 = _, _$a
   contains: contains$3
 }), _.implement(_.ILookup, {
   lookup: lookup$4
-}), _.implement(mut.ITransientMap, {
+}), _.implement($.IMap, {
   dissoc: dissoc$3
-}), _.implement(mut.ITransientEmptyableCollection, {
+}), _.implement($.IEmptyableCollection, {
   empty: empty$1
-}), _.implement(mut.ITransientAssociative, {
+}), _.implement($.IAssociative, {
   assoc: assoc$3
 }));
 
@@ -299,10 +298,10 @@ const hidden = _.comp((_ref$1 = _, _$includes = _ref$1.includes, _hides = hides,
 }));
 const toggle = _.partial(_.toggles, show, hide, hidden);
 function hide(self) {
-  mut.conj(nestedAttrs(self, "style"), hides);
+  $.conj(nestedAttrs(self, "style"), hides);
 }
 function show(self) {
-  mut.omit(nestedAttrs(self, "style"), hides); //TODO mut unconj
+  $.omit(nestedAttrs(self, "style"), hides); //TODO $.unconj
 }
 function embeddables(self) {
   function embed(parent, add) {
@@ -637,9 +636,9 @@ var ielement = _.does(ihierarchy, icontents, ievented, iselectable, _.keying("El
   html
 }), _.implement(IEmbeddable, {
   embeddables
-}), _.implement(mut.ITransientEmptyableCollection, {
+}), _.implement($.IEmptyableCollection, {
   empty
-}), _.implement(mut.ITransientInsertable, {
+}), _.implement($.IInsertable, {
   before,
   after
 }), _.implement(_.IInclusive, {
@@ -648,26 +647,26 @@ var ielement = _.does(ihierarchy, icontents, ievented, iselectable, _.keying("El
   show,
   hide,
   toggle
-}), _.implement(mut.ITransientOmissible, {
+}), _.implement($.IOmissible, {
   omit: omit$3
 }), _.implement(_.ICloneable, {
   clone
-}), _.implement(mut.ITransientAppendable, {
+}), _.implement($.IAppendable, {
   append
-}), _.implement(mut.ITransientPrependable, {
+}), _.implement($.IPrependable, {
   prepend
-}), _.implement(mut.ITransientCollection, {
+}), _.implement($.ICollection, {
   conj: conj$4
 }), _.implement(_.ILookup, {
   lookup: lookup$3
 }), _.implement(_.IMap, {
   keys: keys$1,
   vals: vals$1
-}), _.implement(mut.ITransientMap, {
+}), _.implement($.IMap, {
   dissoc: dissoc$2
 }), _.implement(_.IAssociative, {
   contains: contains$2
-}), _.implement(mut.ITransientAssociative, {
+}), _.implement($.IAssociative, {
   assoc: assoc$2
 }));
 
@@ -700,7 +699,7 @@ function replaceWith(self, other) {
 }
 function wrap(self, other) {
   replaceWith(self, other);
-  mut.append(other, self);
+  $.append(other, self);
 }
 function isVisible(el) {
   return !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
@@ -860,9 +859,9 @@ const text = _.comp((_ref2 = _, _$either = _ref2.either, function either(_argPla
     return _$either.call(_ref2, _argPlaceholder2, "");
   }), access(text$2)),
   value = access(value$2);
-var behave$5 = _.does(_.keying("HTMLSelectElement"), _.implement(mut.ITransientCollection, {
+var behave$5 = _.does(_.keying("HTMLSelectElement"), _.implement($.ICollection, {
   conj: conj$3
-}), _.implement(mut.ITransientAppendable, {
+}), _.implement($.IAppendable, {
   append: conj$3
 }), _.implement(IValue, {
   value
@@ -935,13 +934,13 @@ var behave$3 = _.does(_.keying("NestedAttrs"), _.implement(_.IDeref, {
   contains: contains$1
 }), _.implement(_.ILookup, {
   lookup: lookup$1
-}), _.implement(mut.ITransientMap, {
+}), _.implement($.IMap, {
   dissoc: dissoc$1
-}), _.implement(mut.ITransientAssociative, {
+}), _.implement($.IAssociative, {
   assoc: assoc$1
-}), _.implement(mut.ITransientOmissible, {
+}), _.implement($.IOmissible, {
   omit: omit$2
-}), _.implement(mut.ITransientCollection, {
+}), _.implement($.ICollection, {
   conj: conj$2
 }));
 
@@ -989,13 +988,13 @@ var behave$2 = _.does(_.keying("Props"), _.implement(_.IMap, {
   contains
 }), _.implement(_.ILookup, {
   lookup
-}), _.implement(mut.ITransientAssociative, {
+}), _.implement($.IAssociative, {
   assoc
-}), _.implement(mut.ITransientMap, {
+}), _.implement($.IMap, {
   dissoc
-}), _.implement(mut.ITransientOmissible, {
+}), _.implement($.IOmissible, {
   omit: omit$1
-}), _.implement(mut.ITransientCollection, {
+}), _.implement($.ICollection, {
   conj: conj$1
 }));
 
@@ -1048,9 +1047,9 @@ var behave$1 = _.does(_.keying("SpaceSep"), _.implement(_.ISequential), _.implem
   includes
 }), _.implement(_.ICounted, {
   count
-}), _.implement(mut.ITransientOmissible, {
+}), _.implement($.IOmissible, {
   omit
-}), _.implement(mut.ITransientCollection, {
+}), _.implement($.ICollection, {
   conj
 }));
 
@@ -1301,7 +1300,7 @@ const toFragment = _.ICoercible.toFragment;
   function embeddables(self, doc) {
     function embed(el) {
       _.each(function (entry) {
-        mut.assoc(el, _.key(entry), _.val(entry)); //attributes
+        $.assoc(el, _.key(entry), _.val(entry)); //attributes
       }, self);
     }
     return [embed];
@@ -1330,7 +1329,7 @@ function stylesheet2(href, document) {
       rel: "stylesheet",
       href
     });
-    mut.append(document.body, stylesheet);
+    $.append(document.body, stylesheet);
   }
 }
 function stylesheet1(href) {

@@ -7,7 +7,7 @@ module.exports = {
   resolve: {
     alias: {
       "/libs/atomic_/core.js": "/src/libs/atomic_/core.js",
-      "/libs/atomic_/reactives.js": "/src/libs/atomic_/reactives.js",
+      "/libs/atomic_/shell.js": "/src/libs/atomic_/shell.js",
       "/libs/game.js": "/src/libs/game.js",
       "/libs/game_.js": "/src/libs/game_.js"
     }

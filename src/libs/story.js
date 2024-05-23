@@ -1,6 +1,5 @@
 import _ from "/libs/atomic_/core.js";
-import $ from "/libs/atomic_/reactives.js";
-import sh from "/libs/atomic_/shell.js";
+import $ from "/libs/atomic_/shell.js";
 import supabase from "/libs/supabase.js";
 import {reg} from "/libs/cmd.js";
 export {wip} from "/libs/wip.js";
@@ -156,7 +155,7 @@ async function dispatch(self, command){
 }
 
 _.doto(Story,
-  _.implement(sh.IDispatch, {dispatch}),
+  _.implement($.IDispatch, {dispatch}),
   _.implement($.ISubscribe, {sub}),
   _.implement(_.IDeref, {deref}));
 

@@ -1,7 +1,6 @@
 import _ from "/libs/atomic_/core.js";
 import dom from "/libs/atomic_/dom.js";
-import $ from "/libs/atomic_/reactives.js";
-import sh from "/libs/atomic_/shell.js";
+import $ from "/libs/atomic_/shell.js";
 import * as c from "./core.js";
 import * as g from "/libs/game.js";
 import {moment} from "/libs/story.js";
@@ -536,7 +535,7 @@ $.on(el, "click", `#table.act[data-foundable]:not([data-command-type]) div[data-
         size  = _.maybe(dom.attr(el, "data-foundable"), _.blot, parseInt),
         spots = _.chain(dom.attr(el, "data-found-at"), _.split(_, " "));
   if (size && _.includes(spots, at)) {
-    sh.dispatch($story, {type, details: {size, at}});
+    $.dispatch($story, {type, details: {size, at}});
   }
 });
 
@@ -550,7 +549,7 @@ $.on(el, "click", `#table.act[data-command-type="move"][data-command-from] div[d
           return (details.from === from && details.to === to) || details.by === "teleport"
         }, _), _.update(_, "details", _.merge(_, {from, to}))); //merge completes teleport
   if (move) {
-    sh.dispatch($story, move);
+    $.dispatch($story, move);
   }
 });
 
@@ -564,35 +563,35 @@ $.on(el, "click", `#table.act[data-status='actions'][data-command-type="build-te
   const type = "build-temple",
         at   = closestAttr(this, "data-spot"),
         level = parseInt(closestAttr(this, "data-command-size"));
-  sh.dispatch($story, {type, details: {level, at}});
+  $.dispatch($story, {type, details: {level, at}});
 });
 
 $.on(el, "click", `#table.act[data-status='actions'][data-command-type="relocate-bridge"][data-command-from] div[data-spot]`, function(e){
   const type = "relocate-bridge",
         from = closestAttr(this, "data-command-from"),
         to   = closestAttr(this, "data-spot");
-  sh.dispatch($story, {type, details: {from, to}});
+  $.dispatch($story, {type, details: {from, to}});
 });
 
 $.on(el, "click", `#table.act[data-status='placing-pilli'][data-command-type="place-pilli"][data-command-at~="H6"] div[data-spot="H6"] div.propose, #table.act[data-command-type="place-pilli"][data-command-at~="H8"] div[data-spot="H8"] div.propose, #table.act[data-command-type="place-pilli"][data-command-at~="I7"] div[data-spot="I7"] div.propose, #table.act[data-command-type="place-pilli"][data-command-at~="G7"] div[data-spot="G7"] div.propose`, function(e){
   const type = "place-pilli",
         at = closestAttr(this, "data-spot");
-  sh.dispatch($story, {type, details: {at}});
+  $.dispatch($story, {type, details: {at}});
 });
 
 $.on(el, "click", `#table.act .moves button[data-type="commit"], #table.act .moves button[data-type="pass"]`, function(e){
   const type = dom.attr(this, "data-type");
-  sh.dispatch($story, {type});
+  $.dispatch($story, {type});
 });
 
 $.on(el, "click", `#table.act[data-status='actions'] #supplies div.tokens`, function(e){
-  sh.dispatch($story, {type: "bank"});
+  $.dispatch($story, {type: "bank"});
 });
 
 $.on(el, "click", `#table.act[data-status='actions'][data-command-type="construct-bridge"] div[data-spot]`, function(e){
   const type = "construct-bridge",
         at   = closestAttr(this, "data-spot");
-  sh.dispatch($story, {type, details: {at}});
+  $.dispatch($story, {type, details: {at}});
 });
 
 $.on(el, "click", `#table.act[data-status='actions'] #supplies div.bridges`, function(e){
@@ -602,7 +601,7 @@ $.on(el, "click", `#table.act[data-status='actions'] #supplies div.bridges`, fun
 $.on(el, "click", `#table.act[data-status='actions'][data-command-type="construct-canal"][data-command-size="1"] div[data-spot]`, function(e){
   const type = "construct-canal",
         at   = closestAttr(this, "data-spot");
-  sh.dispatch($story, {type, details: {at: [at]}});
+  $.dispatch($story, {type, details: {at: [at]}});
 });
 
 $.on(el, "click", `#table.act[data-status='actions'][data-command-type="construct-canal"][data-command-size="2"] div[data-spot]`, function(e){
@@ -610,7 +609,7 @@ $.on(el, "click", `#table.act[data-status='actions'][data-command-type="construc
         at   = _.distinct(_.compact([closestAttr(this, "data-command-at"), closestAttr(this, "data-spot")])),
         size = parseInt(closestAttr(this, "data-command-size"));
   if(_.count(at) == 2) {
-    sh.dispatch($story, {type, details: {at}});
+    $.dispatch($story, {type, details: {at}});
   } else {
     save($wip, {type, details: {size: 2, at}});
   }

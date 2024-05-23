@@ -1,5 +1,5 @@
 import _ from "./atomic_/core.js";
-import $ from "./atomic_/reactives.js";
+import $ from "./atomic_/shell.js";
 
 export const registry = {};
 const params = new URLSearchParams(location.search);
@@ -40,7 +40,7 @@ reg({_, $});
 
 function cmd(target = globalThis){
   Object.assign(target, registry);
-  _.log("Commands loaded", registry);
+  log("Commands loaded", registry);
 }
 
 Object.assign(globalThis, {reg, cmd});

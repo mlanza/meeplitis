@@ -1,6 +1,6 @@
 import supabase from "./supabase.js";
 import _ from "./atomic_/core.js";
-import $ from "./atomic_/reactives.js";
+import $ from "./atomic_/shell.js";
 
 export function online(username){
   const $online = $.cell(null);

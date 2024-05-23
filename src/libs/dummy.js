@@ -1,4 +1,4 @@
-import $ from "/libs/atomic_/reactives.js";
+import $ from "/libs/atomic_/shell.js";
 
 function queryToggle(key, value){
   const params = new URLSearchParams(document.location.search);

@@ -1,5 +1,5 @@
 import _ from "/libs/atomic_/core.js";
-import $ from "/libs/atomic_/reactives.js";
+import $ from "/libs/atomic_/shell.js";
 
 function WorkInProgress($data, $head, $at, $ctx, $wip){
   Object.assign(this, {$data, $head, $at, $ctx, $wip});

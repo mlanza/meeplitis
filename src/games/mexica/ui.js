@@ -1,6 +1,6 @@
 import _ from "/libs/atomic_/core.js";
 import dom from "/libs/atomic_/dom.js";
-import $ from "/libs/atomic_/reactives.js";
+import $ from "/libs/atomic_/shell.js";
 import {session} from "/libs/session.js";
 import {manageTables} from "/components/table/ui.js";
 

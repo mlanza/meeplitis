@@ -48,7 +48,7 @@ if (session) {
   }
   dom.html(you, img({src: session.avatar_url}))
   dom.attr(you, "href", session.username ? `/profiles/?username=${session.username}` : '/profiles/edit');
-  $.on(document.body, "keydown", function(e){
+  $.on(document, "keydown", function(e){
     if (e.shiftKey && e.key === "Escape") {
       e.preventDefault();
       window.location = "/signout";

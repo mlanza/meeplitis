@@ -239,7 +239,7 @@ export function ui(make, describe, desc, template){
     dom.sel1("#remarks", el).scrollIntoView();
   });
 
-  $.on(document.body, "keydown", function(e){
+  $.on(document, "keydown", function(e){
     switch(e.key){
       case "ArrowUp":
       case "ArrowLeft":

@@ -1,5 +1,4 @@
 import _ from "./atomic_/core.js";
-import $ from "./atomic_/reactives.js";
 
 export const IGame = _.protocol({
   perspective: null,

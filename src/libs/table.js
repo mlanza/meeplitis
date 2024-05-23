@@ -154,14 +154,6 @@ export function ui(make, describe, desc, template){
   $.sub($act, dom.toggleClass(el, "act", _));
   $.sub($up, dom.toggleClass(el, "up", _));
   $.sub($ready, _.map(_.not), dom.toggleClass(el, "wait", _));
-
-  $.on(document, "keydown", function(e){
-    if (e.metaKey && e.key == "s") {
-      e.preventDefault();
-      location.href = `${location.origin}/shell/${location.search}${location.hash}`;
-    }
-  });
-
   $.sub($remarks, function(remarks){
     dom.toggleClass(els.remarks, "none", !remarks);
     dom.text(dom.sel1("#remarks p", el), remarks);
@@ -249,11 +241,6 @@ export function ui(make, describe, desc, template){
 
   $.on(document.body, "keydown", function(e){
     switch(e.key){
-      case ",":
-        e.preventDefault();
-        replay($story, "last-move");
-        break;
-
       case "ArrowUp":
       case "ArrowLeft":
         e.preventDefault();
@@ -287,6 +274,18 @@ export function ui(make, describe, desc, template){
       case "Enter":
         e.preventDefault();
         sh.dispatch($story, {type: "commit"});
+        break;
+
+      case "s":
+        if (e.metaKey) {
+          e.preventDefault();
+          location.href = `${location.origin}/shell/${location.search}${location.hash}`;
+        }
+        break;
+
+      case ",":
+        e.preventDefault();
+        replay($story, "last-move");
         break;
     }
   });

@@ -110,7 +110,7 @@ export function waypoint(self, up, how){
             _event_id = _.nth(touches, at);
       if (up && _.includes(undoables, _event_id)){
         supabase.rpc('undo', {_table_id, _event_id}).then(function(undo){
-          _.swap(self.$state, _.update(_, "history", _.pipe(_.take(at -1, _), _.toArray)));
+          $.swap(self.$state, _.update(_, "history", _.pipe(_.take(at -1, _), _.toArray)));
         });
       }
       return null;
@@ -136,7 +136,7 @@ export function waypoint(self, up, how){
 
 async function dispatch(self, command){
   try {
-    _.reset(self.$ready, false); //protect users from accidentally reissuing commands; one at a time
+    $.reset(self.$ready, false); //protect users from accidentally reissuing commands; one at a time
 
     if (self.seat == null) {
       throw new Error("Spectators are not permitted to issue moves");
@@ -150,7 +150,7 @@ async function dispatch(self, command){
       $.pub(self.$error, error);
     }
   } finally {
-    _.reset(self.$ready, true);
+    $.reset(self.$ready, true);
   }
 }
 
@@ -162,7 +162,7 @@ _.doto(Story,
 export function story(make, accessToken, tableId, seat, seated, config, $hash, $up, $ready, $error){
   const $state = $.cell({touches: null, history: null, at: null});
 
-  _.reset($ready, true);
+  $.reset($ready, true);
 
   const self = new Story(accessToken, tableId, seat, seated, config, $hash, $up, $ready, $error, make, $state, $.pipe($state, _.filter(function({touches, history, at}){ //TODO cleanup
     return touches && history && at != null;
@@ -189,7 +189,7 @@ function expand(idx){
 export function refresh(self, ...fs){
   return _.fmap(getTouches(self.tableId), function(touches){
     return _.merge(_, touches);
-  }, _.swap(self.$state, _), ...fs);
+  }, $.swap(self.$state, _), ...fs);
 }
 
 let replays = 0;
@@ -235,14 +235,14 @@ export function nav(self, _at){
   if (pos !== at) {
     _.chain([0, 1, -1], _.mapa(loaded, _), _.tee(_.pipe(_.first, function([offset, pos, touch, frame]){
       if (frame) {
-        _.swap($state, _.assoc(_, "at", pos));
+        $.swap($state, _.assoc(_, "at", pos));
       }
     })), _.filter(function([offset, pos, touch, frame]){
       return touch && !frame;
     }, _), _.mapa(function([offset, pos, touch]){
       return _.fmap(getPerspective(tableId, accessToken, touch, seat, seatId), _.array(pos, _));
     }, _), Promise.all.bind(Promise), _.fmap(_, function(results){
-      _.swap($state, _.pipe(_.reduce(function(state, [pos, frame]){
+      $.swap($state, _.pipe(_.reduce(function(state, [pos, frame]){
         return _.update(state, "history", _.pipe(expand(pos), _.assoc(_, pos, frame)));
       }, _, results), _.assoc(_, "at", pos)));
     }));

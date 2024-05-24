@@ -16,26 +16,26 @@ function deref(self){
 
 function reset(self, value){
   const at = _.deref(self.$at);
-  return _.swap(self.$data, _.assoc(_, at, value));
+  return $.swap(self.$data, _.assoc(_, at, value));
 }
 
 function swap(self, f){
   const at = _.deref(self.$at);
-  return _.swap(self.$data, _.update(_, at, f));
+  return $.swap(self.$data, _.update(_, at, f));
 }
 
 _.doto(WorkInProgress,
-  _.implement(_.IResettable, {reset}),
-  _.implement(_.ISwappable, {swap}),
   _.implement(_.IDeref, {deref}),
+  _.implement($.IResettable, {reset}),
+  _.implement($.ISwappable, {swap}),
   _.implement($.ISubscribe, {sub}));
 
 export function save(self, command){
-  _.reset(self, command);
+  $.reset(self, command);
 }
 
 export function clear(self){
-  _.reset(self.$data, {});
+  $.reset(self.$data, {});
 }
 
 export function wip($story){

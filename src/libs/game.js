@@ -1,4 +1,5 @@
 import _ from "./atomic_/core.js";
+import $ from "./atomic_/shell.js";
 
 export const IGame = _.protocol({
   perspective: null,
@@ -153,7 +154,7 @@ function singular(xs){
 //triggers on discrete updates, like reduce but with side effects for each item
 export function batch($state, f, xs){
   _.each(function(x){
-    _.swap($state, function(state){
+    $.swap($state, function(state){
       return f(state, x);
     });
   }, xs);

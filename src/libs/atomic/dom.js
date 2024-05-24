@@ -238,7 +238,7 @@ function send3(self, message, address) {
   self[address](message);
 }
 const send = _.overload(null, null, send2, send3);
-var behave$a = _.does(_.specify(_.ISend, {
+var behave$a = _.does(_.specify($.ISend, {
   send
 }));
 

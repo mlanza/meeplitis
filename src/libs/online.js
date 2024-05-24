@@ -22,15 +22,15 @@ export function online(username){
     .on('presence', {event: 'leave'}, left);
 
   function changed(){
-    _.reset($online, channel.presenceState());
+    $.reset($online, channel.presenceState());
   }
 
   function joined({key, newPresences}){
-    _.swap($online, _.assoc(_, key, newPresences));
+    $.swap($online, _.assoc(_, key, newPresences));
   }
 
   function left({key, leftPresences}){
-    _.swap($online, _.dissoc(_, key));
+    $.swap($online, _.dissoc(_, key));
   }
 
   return $online;

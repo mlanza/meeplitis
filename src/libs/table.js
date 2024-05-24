@@ -51,7 +51,7 @@ function table(tableId){
     .select('*')
     .eq('id', tableId)
     .then(_.getIn(_, ["data", 0]))
-    .then(_.reset($t, _));
+    .then($.reset($t, _));
 
   const channel = supabase.channel('db-messages').
     on('postgres_changes', {
@@ -60,7 +60,7 @@ function table(tableId){
       table: 'tables',
       filter: `id=eq.${tableId}`,
     }, function(payload){
-      _.reset($t, payload.new);
+      $.reset($t, payload.new);
     }).
     subscribe();
 
@@ -256,7 +256,7 @@ export function ui(make, describe, desc, template){
       case "Escape": //cancel work in progress and/or clear error
         e.preventDefault();
         clear($wip);
-        _.reset($error, null);
+        $.reset($error, null);
         break;
 
       case ".": //not always an option

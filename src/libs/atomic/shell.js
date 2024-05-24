@@ -168,6 +168,56 @@ const IReversible = _.protocol({
 
 const reverse = IReversible.reverse;
 
+const ISwappable = _.protocol({
+  swap: null
+});
+
+function swap3(self, f, a) {
+  return ISwappable.swap(self, function (state) {
+    return f(state, a);
+  });
+}
+function swap4(self, f, a, b) {
+  return ISwappable.swap(self, function (state) {
+    return f(state, a, b);
+  });
+}
+function swapN(self, f, a, b, cs) {
+  return ISwappable.swap(self, function (state) {
+    return f.apply(null, [state, a, b, ...cs]);
+  });
+}
+const swap$2 = _.overload(null, null, ISwappable.swap, swap3, swap4, swapN);
+
+const IResettable = _.protocol({
+  reset: null,
+  resettable: null
+});
+
+const reset$1 = IResettable.reset;
+const resettable = IResettable.resettable;
+
+const ISend = _.protocol({
+  send: null
+});
+
+const send = ISend.send;
+
+const IQueryable = _.protocol({
+  query: null
+});
+
+const query = IQueryable.query;
+
+function log$1(...args) {
+  ILogger.log(_.config.logger, ...args);
+}
+const ILogger = _.protocol({
+  log: log$1
+});
+
+const log = ILogger.log;
+
 var p = /*#__PURE__*/Object.freeze({
   __proto__: null,
   after: after,
@@ -184,16 +234,22 @@ var p = /*#__PURE__*/Object.freeze({
   empty: empty,
   err: err$3,
   handle: handle$6,
+  log: log,
   omit: omit,
   on: on,
   once: once,
   persistent: persistent,
   prepend: prepend,
   pub: pub$3,
+  query: query,
   raise: raise,
   release: release,
+  reset: reset$1,
+  resettable: resettable,
   reverse: reverse,
+  send: send,
   sub: sub$4,
+  swap: swap$2,
   transient: transient,
   trigger: trigger,
   unconj: unconj
@@ -648,9 +704,9 @@ var behave$b = _.does(reducible, mergable, _.keying("Cell"), _.implement(_.IDisp
   dispose
 }), _.implement(_.IDeref, {
   deref: deref$1
-}), _.implement(_.IResettable, {
+}), _.implement(IResettable, {
   reset: pub$2
-}), _.implement(_.ISwappable, {
+}), _.implement(ISwappable, {
   swap: swap$1
 }), _.implement(ISubscribe, {
   sub: sub$2
@@ -677,12 +733,12 @@ function deref(self) {
   return _.getIn(_.deref(self.source), self.path);
 }
 function reset(self, value) {
-  _.swap(self.source, function (state) {
+  swap$2(self.source, function (state) {
     return _.assocIn(state, self.path, value);
   });
 }
 function swap(self, f) {
-  _.swap(self.source, function (state) {
+  swap$2(self.source, function (state) {
     return _.updateIn(state, self.path, f);
   });
 }
@@ -697,9 +753,9 @@ _.implement(_.IPath, {
   path
 }), _.implement(_.IDeref, {
   deref
-}), _.implement(_.IResettable, {
+}), _.implement(IResettable, {
   reset
-}), _.implement(_.ISwappable, {
+}), _.implement(ISwappable, {
   swap
 }), _.implement(ISubscribe, {
   sub: sub$1
@@ -1017,11 +1073,28 @@ var behave = _.does(_.keying("TeeMiddleware"), _.implement(IMiddleware, {
 behave(TeeMiddleware);
 
 var _fromPromise;
+function called4(fn, message, context, logger) {
+  return function () {
+    const meta = Object.assign({}, context, {
+      fn,
+      arguments
+    });
+    log(logger, message, meta);
+    return meta.results = fn.apply(this, arguments);
+  };
+}
+function called3(fn, message, context) {
+  return called4(fn, message, context, config.logger);
+}
+function called2(fn, message) {
+  return called3(fn, message, {});
+}
+const called = _.overload(null, null, called2, called3, called4);
 function collect(cell) {
   return function (value) {
     var _value, _$conj, _ref;
     //return observer
-    _.swap(cell, (_ref = _, _$conj = _ref.conj, _value = value, function conj(_argPlaceholder) {
+    swap$2(cell, (_ref = _, _$conj = _ref.conj, _value = value, function conj(_argPlaceholder) {
       return _$conj.call(_ref, _argPlaceholder, _value);
     }));
   };
@@ -1159,5 +1232,52 @@ function dispatchable(Cursor) {
   }));
 })();
 _.ICoercible.addMethod([Set, Array], Array.from);
+(function () {
+  function log(self, ...args) {
+    self.log(...args);
+  }
+  _.doto(console,
+  //TODO move to dom?
+  _.specify(ILogger, {
+    log
+  }));
+  _.doto(_.Nil, _.implement(ILogger, {
+    log: _.noop
+  }));
+})();
+function severityLogger(logger, severity) {
+  const f = logger[severity].bind(logger);
+  function log(self, ...args) {
+    f(...args);
+  }
+  return _.doto({
+    logger,
+    severity
+  }, _.specify(ILogger, {
+    log
+  }));
+}
+function metaLogger(logger, ...meta) {
+  function log$1(self, ...args) {
+    log(logger, ...[...mapa(execute, meta), ...args]);
+  }
+  return _.doto({
+    logger,
+    meta
+  }, _.specify(ILogger, {
+    log: log$1
+  }));
+}
+function labelLogger(logger, ...labels) {
+  function log$1(self, ...args) {
+    log(logger, ...[...labels, ...args]);
+  }
+  return _.doto({
+    logger,
+    labels
+  }, _.specify(ILogger, {
+    log: log$1
+  }));
+}
 
-export { Bus, Cell, Command, Cursor, DrainEventsMiddleware, Event, EventMiddleware, HandlerMiddleware, IAppendable, IAssociative, ICollection, IDispatch, IEmptyableCollection, IEventProvider, IEvented, IInsertable, IMap, IMiddleware, IOmissible, IPersistent, IPrependable, IPublish, IReversible, ISet, ISubscribe, ITransient, LockingMiddleware, Observable, Observer, Subject, TeeMiddleware, after, alter, append, assoc$1 as assoc, before, bus, cell, chan, closed$3 as closed, collect, command, complete$3 as complete, computed, conj$1 as conj, connect, constructs, cursor, defs, disj, dispatch$1 as dispatch, dispatchable, dissoc, drainEventsMiddleware, effect, empty, err$3 as err, event, eventMiddleware, fixed, fromEvent, fromPromise, handle$6 as handle, handlerMiddleware, hist, interact, isolate, latest, lockingMiddleware, map, observable, observer, omit, on, once, persistent, pipe, prepend, pub$3 as pub, raise, release, render, renderDiff, reverse, seed, share, shared, sharing, splay, sub$4 as sub, subject, teeMiddleware, then, tick, toObservable, toggles, transient, trigger, unconj, when };
+export { Bus, Cell, Command, Cursor, DrainEventsMiddleware, Event, EventMiddleware, HandlerMiddleware, IAppendable, IAssociative, ICollection, IDispatch, IEmptyableCollection, IEventProvider, IEvented, IInsertable, ILogger, IMap, IMiddleware, IOmissible, IPersistent, IPrependable, IPublish, IQueryable, IResettable, IReversible, ISend, ISet, ISubscribe, ISwappable, ITransient, LockingMiddleware, Observable, Observer, Subject, TeeMiddleware, after, alter, append, assoc$1 as assoc, before, bus, called, cell, chan, closed$3 as closed, collect, command, complete$3 as complete, computed, conj$1 as conj, connect, constructs, cursor, defs, disj, dispatch$1 as dispatch, dispatchable, dissoc, drainEventsMiddleware, effect, empty, err$3 as err, event, eventMiddleware, fixed, fromEvent, fromPromise, handle$6 as handle, handlerMiddleware, hist, interact, isolate, labelLogger, latest, lockingMiddleware, log, map, metaLogger, observable, observer, omit, on, once, persistent, pipe, prepend, pub$3 as pub, query, raise, release, render, renderDiff, reset$1 as reset, resettable, reverse, seed, send, severityLogger, share, shared, sharing, splay, sub$4 as sub, subject, swap$2 as swap, teeMiddleware, then, tick, toObservable, toggles, transient, trigger, unconj, when };

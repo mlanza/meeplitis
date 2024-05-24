@@ -126,7 +126,7 @@ try {
     }
 
     function exec(cmd){
-      _.swap($state, issue(cmd));
+      $.swap($state, issue(cmd));
     }
 
     function when(i, idx){
@@ -183,7 +183,7 @@ try {
     const $hash = dom.hash(document);
     $.sub($hash, function(hash){
       const id = _.replace(hash, "#", "");
-      _.swap($state, issue({type: "at", id}));
+      $.swap($state, issue({type: "at", id}));
     });
 
     function command(){

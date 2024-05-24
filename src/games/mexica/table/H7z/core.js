@@ -450,7 +450,7 @@ export function waterways(board, contents, bridges){
     }, _),
     _.filter(_.seq, _),
     nodupes,
-    //_.see("pools"),
+    //$.see("pools"),
     _.mapcat(function(pool){
       return _.mapcat(function(x){
         return _.filtera(_.pipe(_.count, _.dec), _.mapa(function(y){

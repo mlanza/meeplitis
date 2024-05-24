@@ -53,7 +53,7 @@ export function promised(request){
 export function mount(el, none, request, op = _.identity){
   _.fmap(promised(request),
     op,
-    _.see("mounting"),
+    $.see("mounting"),
     _.mapa(table, _),
     Promise.all.bind(Promise),
     _.seq,
@@ -130,7 +130,7 @@ const statuses = {unlisted, up, down, capacity};
 
 function restrictOpen(game, capacity, f){
   const g = _.plug(_.get(statuses, game.status), _, capacity, f);
-  session?.username && _.chain(game, _.see("game"), g, dom.html(dom.sel1(".create > p"), _));
+  session?.username && _.chain(game, $.see("game"), g, dom.html(dom.sel1(".create > p"), _));
 }
 
 export async function manageTables(creates){

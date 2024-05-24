@@ -233,7 +233,7 @@ export function nav(self, _at){
   }
 
   if (pos !== at) {
-    _.chain([0, 1, -1], _.mapa(loaded, _), _.tee(_.pipe(_.first, function([offset, pos, touch, frame]){
+    _.chain([0, 1, -1], _.mapa(loaded, _), $.tee(_.pipe(_.first, function([offset, pos, touch, frame]){
       if (frame) {
         $.swap($state, _.assoc(_, "at", pos));
       }

@@ -1,6 +1,6 @@
 import _ from "/libs/atomic_/core.js";
-import dom from "/libs/atomic_/dom.js";
 import $ from "/libs/atomic_/shell.js";
+import dom from "/libs/atomic_/dom.js";
 import {session} from "/libs/session.js";
 import {fmttime} from "/libs/dates.js";
 import {managing, getProfile, onUpdate} from "/components/table/ui.js";
@@ -40,7 +40,7 @@ if (username) {
   dom.attr(document.body, "data-view", "profiles");
 
   _.fmap(profiles(),
-    _.tee(_.plug(reg, "profiles", _)),
+    $.tee(_.plug(reg, "profiles", _)),
     _.map(_.pipe(render, dom.tag('li')), _),
     dom.html(dom.sel1(".profiles ul"), _));
 }

@@ -1,5 +1,6 @@
 import _ from "/libs/atomic_/core.js";
 import $ from "/libs/atomic_/shell.js";
+import dom from "/libs/atomic_/dom.js";
 
 function WorkInProgress($data, $head, $at, $ctx, $wip){
   Object.assign(this, {$data, $head, $at, $ctx, $wip});
@@ -51,3 +52,11 @@ export function wip($story){
 
   return new WorkInProgress($data, $head, $at, $ctx, $wip);
 }
+
+export function closestAttr(el, attr){
+  return _.maybe(el, _.closest(_, `[${attr}]`), dom.attr(_, attr));
+}
+
+export const retainAttr = _.partly(function retainAttr(el, key, value){
+  value == null ? dom.removeAttr(el, key) : dom.attr(el, key, value);
+});

@@ -5,19 +5,11 @@ import * as c from "./core.js";
 import * as g from "/libs/game.js";
 import {moment} from "/libs/story.js";
 import {describe} from "./ancillary.js";
-import {save} from "/libs/wip.js";
+import {save, closestAttr, retainAttr} from "/libs/wip.js";
 import {el, seated, seats, seat, ui, scored, outcome, diff, which} from "/libs/table.js";
 import {reg} from "/libs/cmd.js";
 
 const {img, ol, li, div, kbd, span} = dom.tags(['img', 'ol', 'li', 'div', 'kbd', 'span']);
-
-function closestAttr(el, attr){
-  return _.maybe(el, _.closest(_, `[${attr}]`), dom.attr(_, attr));
-}
-
-const retainAttr = _.partly(function retainAttr(el, key, value){
-  value == null ? dom.removeAttr(el, key) : dom.attr(el, key, value);
-});
 
 async function svg(what){
   return await fetch(import.meta.resolve(`./images/${what}.svg`)).then(function(resp){

@@ -25,7 +25,7 @@ function swap(self, f){
   return $.swap(self.$data, _.update(_, at, f));
 }
 
-_.doto(WorkInProgress,
+$.doto(WorkInProgress,
   _.implement(_.IDeref, {deref}),
   _.implement($.IResettable, {reset}),
   _.implement($.ISwappable, {swap}),

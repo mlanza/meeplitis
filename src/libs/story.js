@@ -154,7 +154,7 @@ async function dispatch(self, command){
   }
 }
 
-_.doto(Story,
+$.doto(Story,
   _.implement($.IDispatch, {dispatch}),
   _.implement($.ISubscribe, {sub}),
   _.implement(_.IDeref, {deref}));

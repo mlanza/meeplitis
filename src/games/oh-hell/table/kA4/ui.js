@@ -1,6 +1,6 @@
 import _ from "/libs/atomic_/core.js";
-import dom from "/libs/atomic_/dom.js";
 import $ from "/libs/atomic_/shell.js";
+import dom from "/libs/atomic_/dom.js";
 import * as c from "./core.js";
 import * as g from "/libs/game.js";
 import {describe} from "./ancillary.js";
@@ -98,7 +98,7 @@ $.sub($hist, function([curr, prior, {step, offset}, game]){
   const cnt = _.count(seated);
   const awarded = event.type == "awarded" ? _.toArray(_.take(cnt, _.drop(cnt - event.details.lead, _.cycle(event.details.trick)))) : null;
 
-  _.each(_.doto(_,
+  $.each($.doto(_,
     dom.removeClass(_, "active"),
     dom.removeClass(_, "selected"),
     dom.prop(_, "disabled", false)),
@@ -106,11 +106,11 @@ $.sub($hist, function([curr, prior, {step, offset}, game]){
 
   _.chain(moves, _.map(function(move){
     return dom.sel1(`button[data-type="${move.type}"]${moveSel(move)}`, els.moves);
-  }, _), _.compact, _.each(dom.addClass(_, "active"), _));
+  }, _), _.compact, $.each(dom.addClass(_, "active"), _));
 
   if (status === "bidding") {
     _.maybe(dom.sel1(`button[data-type="bid"][data-bid="${bid == null ? '' : bid}"]`),
-      _.doto(_,
+      $.doto(_,
         dom.addClass(_, "selected"),
         dom.prop(_, "disabled", true)));
   }
@@ -118,7 +118,7 @@ $.sub($hist, function([curr, prior, {step, offset}, game]){
   dom.attr(el, "data-lead", lead);
   dom.attr(el, "data-played", event.type == "played" ? event.seat : "");
 
-  _.eachIndexed(function(idx, {bid, tricks, hand, played, scored}){
+  $.eachIndexed(function(idx, {bid, tricks, hand, played, scored}){
     const plyd = _.nth(awarded, idx) || played;
     const seat = dom.sel1(`[data-seat="${idx}"]`);
     dom.text(dom.sel1(".points", seat), _.chain(metrics, _.nth(_, idx), _.get(_, "points")));

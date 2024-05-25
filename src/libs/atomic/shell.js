@@ -1,7 +1,95 @@
 import * as _ from './core.js';
 import { protocol, implement, IMergable, IReducible, does } from './core.js';
-export { doto } from './core.js';
+export { doto, guid, implement, rand, randNth, shuffle, specify, uid } from './core.js';
 import * as $ from './shell.js';
+
+function each(f, xs) {
+  let ys = _.seq(xs);
+  while (ys) {
+    f(_.first(ys));
+    ys = _.next(ys);
+  }
+}
+const eachIndexed = _.withIndex(each);
+
+//TODO unnecessary if CQS pattern is that commands return self
+function doing1(f) {
+  return doing2(f, _.identity);
+}
+function doing2(f, order) {
+  return function (self, ...xs) {
+    var _self, _f;
+    each((_f = f, _self = self, function f(_argPlaceholder) {
+      return _f(_self, _argPlaceholder);
+    }), order(xs));
+  };
+}
+const doing = _.overload(null, doing1, doing2); //mutating counterpart to `reducing`
+
+function dorun1(coll) {
+  let xs = _.seq(coll);
+  while (xs) {
+    xs = _.next(xs);
+  }
+}
+function dorun2(n, coll) {
+  let xs = _.seq(coll);
+  while (xs && n > 0) {
+    n++;
+    xs = _.next(xs);
+  }
+}
+const dorun = _.overload(null, dorun1, dorun2);
+function doall1(coll) {
+  dorun(coll);
+  return coll;
+}
+function doall2(n, coll) {
+  dorun(n, coll);
+  return coll;
+}
+const doall = _.overload(null, doall1, doall2);
+function dotimes(n, f) {
+  each(f, _.range(n));
+}
+function eachkv(f, xs) {
+  each(function ([key, value]) {
+    return f(key, value);
+  }, _.entries(xs));
+}
+function eachvk(f, xs) {
+  each(function ([key, value]) {
+    return f(value, key);
+  }, _.entries(xs));
+}
+function doseq3(f, xs, ys) {
+  each(function (x) {
+    each(function (y) {
+      f(x, y);
+    }, ys);
+  }, xs);
+}
+function doseq4(f, xs, ys, zs) {
+  each(function (x) {
+    each(function (y) {
+      each(function (z) {
+        f(x, y, z);
+      }, zs);
+    }, ys);
+  }, xs);
+}
+function doseqN(f, xs, ...colls) {
+  each(function (x) {
+    if (_.seq(colls)) {
+      _.apply(doseq, function (...args) {
+        _.apply(f, x, args);
+      }, colls);
+    } else {
+      f(x);
+    }
+  }, xs || []);
+}
+const doseq = _.overload(null, null, each, doseq3, doseq4, doseqN);
 
 const IEvented = _.protocol({
   on: null,
@@ -112,8 +200,8 @@ const ICollection = _.protocol({
   unconj: null
 });
 
-const conj$2 = _.overload(null, _.noop, ICollection.conj, _.doing(ICollection.conj));
-const unconj$1 = _.overload(null, _.noop, ICollection.unconj, _.doing(ICollection.unconj));
+const conj$2 = _.overload(null, _.noop, ICollection.conj, doing(ICollection.conj));
+const unconj$1 = _.overload(null, _.noop, ICollection.unconj, doing(ICollection.unconj));
 
 const IEmptyableCollection = _.protocol({
   empty: null
@@ -125,13 +213,13 @@ const IAppendable = _.protocol({
   append: null
 });
 
-const append$1 = _.overload(null, _.noop, IAppendable.append, _.doing(IAppendable.append));
+const append$1 = _.overload(null, _.noop, IAppendable.append, doing(IAppendable.append));
 
 const IPrependable = protocol({
   prepend: null
 });
 
-const prepend$1 = _.overload(null, _.noop, IPrependable.prepend, _.doing(IPrependable.prepend, _.reverse));
+const prepend$1 = _.overload(null, _.noop, IPrependable.prepend, doing(IPrependable.prepend, _.reverse));
 
 const IOmissible = _.protocol({
   omit: null
@@ -988,7 +1076,7 @@ function closed(self) {
   return self.terminated;
 }
 function notify(self, f) {
-  _.each(f, self.observers);
+  each(f, self.observers);
 }
 var behave$8 = _.does(reducible, mergable, _.keying("Subject"), _.implement(ISubscribe, {
   sub
@@ -1076,7 +1164,7 @@ const drainEventsMiddleware = _.constructs(DrainEventsMiddleware);
 
 function handle$4(self, command, next) {
   next(command);
-  _.each(function (message) {
+  each(function (message) {
     handle$6(self.eventBus, message, next);
   }, release(self.provider));
 }
@@ -1182,8 +1270,8 @@ function handle$1(self, message, next) {
       var _self$bus, _p$dispatch, _p;
       const queued = self.queued;
       self.queued = [];
-      _.log("draining queued", queued);
-      _.each((_p = p, _p$dispatch = _p.dispatch, _self$bus = self.bus, function dispatch(_argPlaceholder) {
+      $.log("draining queued", queued);
+      $.each((_p = p, _p$dispatch = _p.dispatch, _self$bus = self.bus, function dispatch(_argPlaceholder) {
         return _p$dispatch.call(_p, _self$bus, _argPlaceholder);
       }), queued);
     }
@@ -1250,7 +1338,7 @@ const hist = shared(cell, Observable.hist);
 function fmap(source, f) {
   return map(f, source);
 }
-_.each(_.implement(_.IFunctor, {
+each(_.implement(_.IFunctor, {
   fmap
 }), [Cell, Subject, Observable]);
 function fromPromise2(promise, init) {
@@ -1449,4 +1537,4 @@ function called2(fn, message) {
 }
 const called = _.overload(null, null, called2, called3, called4);
 
-export { Bus, Cell, Command, Cursor, DrainEventsMiddleware, Event, EventMiddleware, HandlerMiddleware, IAppendable, IAssociative, ICollection, IDispatch, IEmptyableCollection, IEventProvider, IEvented, IInsertable, ILogger, IMap, IMiddleware, IOmissible, IPersistent, IPrependable, IPublish, IQueryable, IResettable, IReversible, ISend, ISet, ISubscribe, ISwappable, ITransient, LockingMiddleware, Observable, Observer, Subject, TeeMiddleware, after$1 as after, alter, append$1 as append, assoc$3 as assoc, before$1 as before, bus, called, cell, chan, closed$3 as closed, collect, command, complete$3 as complete, computed, conj$2 as conj, connect, constructs, cursor, defs, disj$1 as disj, dispatch$1 as dispatch, dispatchable, dissoc$2 as dissoc, drainEventsMiddleware, effect, empty$2 as empty, emptySet, err$3 as err, event, eventMiddleware, fixed, fromEvent, fromPromise, handle$6 as handle, handlerMiddleware, hist, interact, isMap, isWeakMap, isolate, latest, lockingMiddleware, log, logging, map, observable, observer, omit$1 as omit, on, once, peek, persistent$1 as persistent, pipe, prepend$1 as prepend, pub$3 as pub, query, raise, release, render, renderDiff, reset$1 as reset, resettable, reverse$1 as reverse, see, seed, send, set, share, shared, sharing, splay, sub$4 as sub, subject, swap$2 as swap, tee, teeMiddleware, then, tick, toObservable, toggles, transient, trigger, unconj$1 as unconj, weakMap, when };
+export { Bus, Cell, Command, Cursor, DrainEventsMiddleware, Event, EventMiddleware, HandlerMiddleware, IAppendable, IAssociative, ICollection, IDispatch, IEmptyableCollection, IEventProvider, IEvented, IInsertable, ILogger, IMap, IMiddleware, IOmissible, IPersistent, IPrependable, IPublish, IQueryable, IResettable, IReversible, ISend, ISet, ISubscribe, ISwappable, ITransient, LockingMiddleware, Observable, Observer, Subject, TeeMiddleware, after$1 as after, alter, append$1 as append, assoc$3 as assoc, before$1 as before, bus, called, cell, chan, closed$3 as closed, collect, command, complete$3 as complete, computed, conj$2 as conj, connect, constructs, cursor, defs, disj$1 as disj, dispatch$1 as dispatch, dispatchable, dissoc$2 as dissoc, doall, doing, dorun, doseq, dotimes, drainEventsMiddleware, each, eachIndexed, eachkv, eachvk, effect, empty$2 as empty, emptySet, err$3 as err, event, eventMiddleware, fixed, fromEvent, fromPromise, handle$6 as handle, handlerMiddleware, hist, interact, isMap, isWeakMap, isolate, latest, lockingMiddleware, log, logging, map, observable, observer, omit$1 as omit, on, once, peek, persistent$1 as persistent, pipe, prepend$1 as prepend, pub$3 as pub, query, raise, release, render, renderDiff, reset$1 as reset, resettable, reverse$1 as reverse, see, seed, send, set, share, shared, sharing, splay, sub$4 as sub, subject, swap$2 as swap, tee, teeMiddleware, then, tick, toObservable, toggles, transient, trigger, unconj$1 as unconj, weakMap, when };

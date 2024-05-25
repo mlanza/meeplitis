@@ -1,6 +1,6 @@
 import _ from "/libs/atomic_/core.js";
-import dom from "/libs/atomic_/dom.js";
 import $ from "/libs/atomic_/shell.js";
+import dom from "/libs/atomic_/dom.js";
 import * as c from "./core.js";
 import * as g from "/libs/game.js";
 import {moment} from "/libs/story.js";
@@ -42,7 +42,7 @@ function emperor(){
   const el = parser.parseFromString(_emperor, "image/svg+xml").childNodes[0];
   dom.attr(el, "data-piece", "emperor");
   return el; //TODO need next bit?
-  return _.doto(pilli({seat: -1}),
+  return $.doto(pilli({seat: -1}),
     dom.removeAttr(_, "data-seat"),
     dom.attr(_, "data-piece", "emperor"));
 }
@@ -230,7 +230,7 @@ function omit(el){
 
 function reconcileTemples(seat, level){
   return function(curr, prior){
-    _.each(function(n){
+    $.each(function(n){
       diff(curr, prior, [n], function(curr, prior){
         if (curr){
           dom.append(at(curr), temple({size: level, seat}));
@@ -315,7 +315,7 @@ function workingCommand([curr, prior], seat, {contents}, game, el){
       break;
     }
   }
-  _.eachkv(retainAttr(el, _, _), attrs);
+  $.eachkv(retainAttr(el, _, _), attrs);
 }
 
 $.sub($both, function([[curr, prior, motion, game], wip, which]){
@@ -334,23 +334,23 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
 
   _.chain(moves, _.map(_.get(_, "type"), _), _.distinct, _.join(" ", _), dom.attr(el, "data-allow-commands", _));
 
-  _.each(dom.removeClass(_, "foundable"), dom.sel(".foundable", demands));
+  $.each(dom.removeClass(_, "foundable"), dom.sel(".foundable", demands));
 
   dom.toggleClass(el, "scoring-round", _.get(state, "scoring-round"));
   dom.text(dom.sel1("#phase", el), phase(g.status(game)));
   dom.attr(els.actions, "data-remaining", status == "actions" ? _.max(6 - spent, 0) : 0);
 
-  _.doseq(function(level){
+  $.doseq(function(level){
     diff(curr, prior, ["state", "nonplayer", "temples", level], reconcileTemples(2, level));
   }, _.range(1, 5));
 
-  _.doseq(function(period, seat, level){
+  $.doseq(function(period, seat, level){
     diff(curr, prior, ["state", "seated", seat, "temples", period, level], reconcileTemples(seat, level));
   }, [0, 1], indices(seated), _.range(1, 5));
 
   const cCapulli = _.getIn(curr, ["state", "capulli", curr?.state?.period]),
         pCapulli = _.getIn(prior, ["state", "capulli", prior?.state?.period]);
-  _.each(function(pos){
+  $.each(function(pos){
     diff(cCapulli, pCapulli, [pos], function(curr, prior){
       dom.html(
         dom.sel1(`[data-demand='${pos}']`, el),
@@ -358,7 +358,7 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
     });
   }, _.range(0, 8));
 
-  _.doseq(function(period, pos){
+  $.doseq(function(period, pos){
     diff(curr, prior, ["state", "capulli", period, pos], function(curr, prior){
       if (curr?.at && !prior?.at){
         dom.append(at(curr.at), capulli(curr));
@@ -378,7 +378,7 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
   _.chain(state, _.getIn(_, ["seated", seat, "pilli"]), dom.attr(el, "data-pilli-at", _));
 
   diff(curr, prior, ["state", "canal2"], function(curr, prior){
-    _.each(function(n){
+    $.each(function(n){
       diff(curr, prior, [n], function(curr, prior){
         if (prior) {
           omit(dom.sel1("[data-piece='canal']", at(prior[0])));
@@ -392,7 +392,7 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
   });
 
   diff(curr, prior, ["state", "canal1"], function(curr, prior){
-    _.each(function(n){
+    $.each(function(n){
       diff(curr, prior, [n], function(curr, prior){
         if (prior) {
           omit(dom.sel1("[data-piece='canal']", at(prior[0])));
@@ -405,7 +405,7 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
   });
 
   diff(curr, prior, ["state", "bridges"], function(curr, prior){
-    _.each(function(n){
+    $.each(function(n){
       diff(curr, prior, [n], function(curr, prior){
         if (prior) {
           omit(dom.sel1("[data-piece='bridge']", at(prior)));
@@ -423,14 +423,14 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
   dom.attr(els.canal1, "data-remaining", remaining(canal1));
   dom.attr(els.canal2, "data-remaining", remaining(canal2));
 
-  _.eachkv(function(seat, {bank, temples, points}){
+  $.eachkv(function(seat, {bank, temples, points}){
     const zone = dom.sel1(`[data-seat='${seat}']`, el),
           area = dom.sel1(".area", zone);
 
     dom.text(dom.sel1(".points", zone), points);
     dom.attr(dom.sel1(".tokens", area), "data-remaining", bank);
 
-    _.chain(temples, _.take(period + 1, _), c.consolidateTemples, _.eachkv(function(level, spots){
+    _.chain(temples, _.take(period + 1, _), c.consolidateTemples, $.eachkv(function(level, spots){
       dom.attr(dom.sel1(`.temples[data-size='${level}'`, area), "data-remaining", remaining(spots));
     }, _));
 
@@ -444,9 +444,9 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
     });
   }, seated);
 
-  _.each(dom.removeClass(_, "scored"), dom.sel(".zone[data-seat] .scored", el));
+  $.each(dom.removeClass(_, "scored"), dom.sel(".zone[data-seat] .scored", el));
   if (step === 1) {
-    _.each(function(seat){
+    $.each(function(seat){
       diff(curr, prior, ["state", "seated", seat, "points"], function(curr, prior){
         if (prior != null && curr != null && curr > prior) {
           dom.addClass(dom.sel1(`.zone[data-seat='${seat}'] div.player`, el), "scored");
@@ -457,7 +457,7 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
 });
 
 function focal(options, what, target){
-  _.each(function(id){
+  $.each(function(id){
     _.maybe(el, dom.sel1(`#${id}`, _), dom.removeAttr(_, "id"));
   }, options);
   _.maybe(what, dom.attr(target, "id", _));

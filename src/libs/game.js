@@ -153,7 +153,7 @@ function singular(xs){
 
 //triggers on discrete updates, like reduce but with side effects for each item
 export function batch($state, f, xs){
-  _.each(function(x){
+  $.each(function(x){
     $.swap($state, function(state){
       return f(state, x);
     });

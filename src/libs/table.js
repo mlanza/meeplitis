@@ -126,7 +126,7 @@ export function ui(make, describe, desc, template){
   }
 
   //render fixed player zones
-  _.eachIndexed(function(seat, {username, avatar_url}){
+  $.eachIndexed(function(seat, {username, avatar_url}){
     dom.append(els.players, zone(seat, username, avatar_url, template(seat)));
   }, seated);
 
@@ -167,13 +167,13 @@ export function ui(make, describe, desc, template){
 
   //manage data-action
   $.sub($hist, function([{up, may}]){
-    _.eachIndexed(function(seat){
+    $.eachIndexed(function(seat){
       dom.attr(dom.sel1(`[data-seat="${seat}"] [data-action]`, els.players), "data-action", _.includes(up, seat) ? "must" : (_.includes(may, seat) ? "may" : ""));
     }, seated);
   });
 
   $.sub($presence, function(presence){
-    _.eachkv(function(username, presence){
+    $.eachkv(function(username, presence){
       const zone = dom.sel1(`.zone[data-username="${username}"]`);
       dom.attr(zone, "data-presence", presence ? "online" : "offline");
     }, presence);
@@ -201,7 +201,7 @@ export function ui(make, describe, desc, template){
     dom.removeClass(el, "ack");
     dom.removeClass(el, "error");
 
-    _.doto(els.event,
+    $.doto(els.event,
       dom.attr(_, "data-type", event.type),
       dom.addClass(_, "posted"),
       dom.removeClass(_, "hidden"));

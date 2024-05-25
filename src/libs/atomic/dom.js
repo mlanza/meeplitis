@@ -36,15 +36,15 @@ const IEmbeddable = _.protocol({
 
 const embeddables$2 = IEmbeddable.embeddables;
 function embed3(add, parent, children) {
-  var _ref, _ref2, _children, _embeddables, _$mapcat, _ref3, _parent$ownerDocument, _embeddables2, _param, _$each, _ref4;
+  var _ref, _ref2, _children, _embeddables, _$mapcat, _ref3, _parent$ownerDocument, _embeddables2, _param, _$$each, _$;
   _ref = (_ref2 = (_children = children, _.flatten(_children)), (_ref3 = _, _$mapcat = _ref3.mapcat, _embeddables = (_embeddables2 = embeddables$2, _parent$ownerDocument = parent.ownerDocument, function embeddables(_argPlaceholder2) {
     return _embeddables2(_argPlaceholder2, _parent$ownerDocument);
   }), function mapcat(_argPlaceholder) {
     return _$mapcat.call(_ref3, _embeddables, _argPlaceholder);
-  })(_ref2)), (_ref4 = _, _$each = _ref4.each, _param = function (child) {
+  })(_ref2)), (_$ = $, _$$each = _$.each, _param = function (child) {
     _.isFunction(child) ? child(parent, add) : add(parent, child);
   }, function each(_argPlaceholder3) {
-    return _$each.call(_ref4, _param, _argPlaceholder3);
+    return _$$each.call(_$, _param, _argPlaceholder3);
   })(_ref);
 }
 function embed2(parent, children) {
@@ -64,7 +64,7 @@ function mounts(self) {
   _.specify(IMountable, {}, self);
   const parent = _.parent(self);
   if (parent) {
-    _.each(function (key) {
+    $.each(function (key) {
       $.trigger(self, key, {
         bubbles: true,
         detail: {
@@ -450,10 +450,10 @@ function omit2(self, node) {
     self.removeChild(node);
   } else if (_.satisfies(_.ISequential, node)) {
     const keys = node;
-    _.each(self.removeAttribute.bind(self), keys);
+    $.each(self.removeAttribute.bind(self), keys);
   } else if (isAttrs(node)) {
     const attrs = node;
-    _.each(function (entry) {
+    $.each(function (entry) {
       const key = entry[0],
         value = entry[1];
       let curr = lookup$3(self, key);
@@ -843,7 +843,7 @@ function access(f) {
       return f(option) == value;
     }, options);
     if (chosen) {
-      _.each(function (option) {
+      $.each(function (option) {
         const selected = f(option) == value;
         if (option.selected != selected) {
           option.selected = selected;
@@ -1116,7 +1116,7 @@ function attr2(self, key) {
   } else {
     var _self, _attr;
     const pairs = key;
-    _.eachkv((_attr = attr3, _self = self, function attr3(_argPlaceholder3, _argPlaceholder4) {
+    $.eachkv((_attr = attr3, _self = self, function attr3(_argPlaceholder3, _argPlaceholder4) {
       return _attr(_self, _argPlaceholder3, _argPlaceholder4);
     }), pairs);
   }
@@ -1138,7 +1138,7 @@ const attr = _.overload(null, null, attr2, attr3, attrN);
 function removeAttr2(self, key) {
   self.removeAttribute(key);
 }
-const removeAttr = _.overload(null, null, removeAttr2, _.doing(removeAttr2));
+const removeAttr = _.overload(null, null, removeAttr2, $.doing(removeAttr2));
 function prop3(self, key, value) {
   self[key] = value;
 }
@@ -1299,7 +1299,7 @@ const toFragment = _.ICoercible.toFragment;
 (function () {
   function embeddables(self, doc) {
     function embed(el) {
-      _.each(function (entry) {
+      $.each(function (entry) {
         $.assoc(el, _.key(entry), _.val(entry)); //attributes
       }, self);
     }

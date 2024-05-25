@@ -153,12 +153,12 @@ try {
         }
         if (decrease) {
           const subtracted = _.mapa(_.getIn(_, ["event", "id"]), _.drop(cf, prior.frames));
-          _.each(function(id){
+          $.each(function(id){
             const el = document.getElementById(id);
             el.remove();
           }, subtracted);
         }
-        _.eachIndexed(function(i, {event}){
+        $.eachIndexed(function(i, {event}){
         _.maybe(document.getElementById(event.id),
           _.does(
           dom.removeClass(_, "past"),

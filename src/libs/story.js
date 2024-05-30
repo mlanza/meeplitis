@@ -144,7 +144,7 @@ async function dispatch(self, command){
 
     const {error, data} = await move(self.tableId, self.seat, [command], self.accessToken);
 
-    _.log('moved', {tableId: self.tableId, command, seat: self.seat}, '->', {error, data});
+    $.log('moved', {tableId: self.tableId, command, seat: self.seat}, '->', {error, data});
 
     if (error) {
       $.pub(self.$error, error);

@@ -1,5 +1,6 @@
 import * as c from "./core.js";
 import _ from "../../libs/atomic_/core.js";
+import $ from "../../libs/atomic_/shell.js";
 
 function styled(styles){
   return _.pipe(
@@ -11,7 +12,7 @@ function style(spots, f, style){
   _.chain(spots,
     _.map(f, _),
     styled(style),
-    _.log);
+    $.log);
 }
 
 style(c.viableSpots, spot => `#table.act:not([data-command-type])[data-found-at~='${spot}'] div[data-spot='${spot}']:hover div.propose`, `

@@ -208,7 +208,7 @@ try {
         try {
           exec(command());
         } catch (ex){
-          _.log("error", ex);
+          $.log("error", ex);
           alert(ex?.message || "There was an error.");
         }
       }
@@ -243,9 +243,9 @@ try {
       }
     });
 
-    _.log("example:");
-    _.log(`  exec({type: "run", commands: [{type: "pass"},{type: "commit"}], seat: 1})`);
-    _.log(`  exec({type: "flush"})`);
+    $.log("example:");
+    $.log(`  exec({type: "run", commands: [{type: "pass"},{type: "commit"}], seat: 1})`);
+    $.log(`  exec({type: "flush"})`);
 
     reg({$state, exec, issue, simulate, effects});
   }

@@ -1,4 +1,5 @@
 import _ from "./src/libs/atomic_/core.js";
+import $ from "./src/libs/atomic_/shell.js";
 import g from "./src/libs/game_.js";
 import supabase from "./src/libs/supabase.js";
 
@@ -30,6 +31,6 @@ let snapshot = null;
 for(const event of events){
   const [curr, prior] = simulate(seats, config, [event], commands, seen, snapshot);
   const data = {seats, config, events: [event], commands, seen, snapshot};
-  _.log(`time curl -i --location --request POST $site/simulate/${slug} --header 'Content-Type: application/json' --data '${JSON.stringify(data)}'`);
+  $.log(`time curl -i --location --request POST $site/simulate/${slug} --header 'Content-Type: application/json' --data '${JSON.stringify(data)}'`);
   snapshot = _.deref(curr);
 }

@@ -1,6 +1,10 @@
 import lume from "lume/mod.ts";
 import "https://cdn.jsdelivr.net/npm/terser/dist/bundle.min.js";
 
+async function maxify(code){
+  return {code};
+}
+
 const minify = globalThis.Terser.minify;
 
 async function simulation(pages){

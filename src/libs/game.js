@@ -1,5 +1,4 @@
 import _ from "./atomic_/core.js";
-import $ from "./atomic_/shell.js";
 
 export const IGame = _.protocol({
   perspective: null,
@@ -149,15 +148,6 @@ function singular(xs){
     throw new Error("Singular value expected");
   }
   return _.first(xs);
-}
-
-//triggers on discrete updates, like reduce but with side effects for each item
-export function batch($state, f, xs){
-  $.each(function(x){
-    $.swap($state, function(state){
-      return f(state, x);
-    });
-  }, xs);
 }
 
 function splitAt(idx, xs){

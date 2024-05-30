@@ -1,5 +1,3 @@
-import * as _$1 from './core.js';
-
 function Nil() {}
 Nil.prototype[Symbol.toStringTag] = "Nil";
 function isNil(x) {
@@ -431,43 +429,6 @@ function everyPred(...preds) {
     }, true, slice(arguments));
   };
 }
-function someFn1(p) {
-  function f1(x) {
-    return p(x);
-  }
-  function f2(x, y) {
-    return p(x) || p(y);
-  }
-  function f3(x, y, z) {
-    return p(x) || p(y) || p(z);
-  }
-  function fn(x, y, z, ...args) {
-    return f3(x, y, z) || some(p, args);
-  }
-  return overload(constantly(null), f1, f2, f3, fn);
-}
-function someFn2(p1, p2) {
-  function f1(x) {
-    return p1(x) || p2(x);
-  }
-  function f2(x, y) {
-    return p1(x) || p1(y) || p2(x) || p2(y);
-  }
-  function f3(x, y, z) {
-    return p1(x) || p1(y) || p1(z) || p2(x) || p2(y) || p2(z);
-  }
-  function fn(x, y, z, ...args) {
-    return f3(x, y, z) || some(or(p1, p2), args);
-  }
-  return overload(constantly(null), f1, f2, f3, fn);
-}
-function someFnN(...ps) {
-  function fn(...args) {
-    return some(or(...ps), args);
-  }
-  return overload(constantly(null), fn);
-}
-const someFn = overload(null, someFn1, someFn2, someFnN);
 function folding1(f) {
   return folding2(f, identity);
 }
@@ -537,7 +498,7 @@ function generate$1() {
     return sym;
   };
 }
-function keys$b() {
+function keys$a() {
   return Object.keys(this[TEMPLATE]);
 }
 function specify1(behavior) {
@@ -621,7 +582,7 @@ Object.assign(Protocol.prototype, {
   extend: extend$1,
   dispatch,
   generate: generate$1,
-  keys: keys$b,
+  keys: keys$a,
   specify: specify$1,
   unspecify: unspecify$1,
   implement: implement$1,
@@ -720,34 +681,7 @@ const IFn = protocol({
   invoke: null
 });
 
-const IDeref = protocol({
-  deref: null
-});
-
-const ISwappable = protocol({
-  swap: null
-});
-
 const invoke$2 = IFn.invoke;
-function invokable(obj) {
-  let state = obj;
-  function invoke(self, ...args) {
-    return IFn.invoke(state, ...args);
-  }
-  function swap(self, f) {
-    state = f(state);
-  }
-  function deref(self) {
-    return state;
-  }
-  return doto(partial(invoke, null), specify(IFn, {
-    invoke
-  }), specify(ISwappable, {
-    swap
-  }), specify(IDeref, {
-    deref
-  }));
-}
 
 const IMapEntry = protocol({
   key: null,
@@ -790,13 +724,6 @@ function hash$7(self) {
     hashTag()(self);
     return self[cache];
   }
-}
-function _IsValueObject(maybeValue) {
-  //from ImmutableJS
-  return Boolean(maybeValue && typeof maybeValue.equals === 'function' && typeof maybeValue.hashCode === 'function');
-}
-function isValueObject(self) {
-  return satisfies(IHashable, self) && satisfies(IEquiv, self) || _IsValueObject(self);
 }
 
 const key$3 = IMapEntry.key;
@@ -923,6 +850,10 @@ const ICounted = protocol({
   count: null
 });
 
+const IDeref = protocol({
+  deref: null
+});
+
 const IDisposable = protocol({
   dispose: null
 });
@@ -994,11 +925,11 @@ const IKVReducible = protocol({
   reducekv: null
 });
 
-function lookup$9(self, key) {
+function lookup$8(self, key) {
   return self && self[key];
 }
 const ILookup = protocol({
-  lookup: lookup$9
+  lookup: lookup$8
 });
 
 const IMap = protocol({
@@ -1060,7 +991,7 @@ function assocN(self, key, value, ...args) {
   const instance = IAssociative.assoc(self, key, value);
   return args.length > 0 ? assocN(instance, ...args) : instance;
 }
-const assoc$8 = overload(null, null, null, IAssociative.assoc, assocN);
+const assoc$7 = overload(null, null, null, IAssociative.assoc, assocN);
 function assocIn(self, keys, value) {
   let key = keys[0];
   switch (keys.length) {
@@ -1118,29 +1049,29 @@ function updateInN(self, keys, f) {
 function contains3(self, key, value) {
   return IAssociative.contains(self, key) && get(self, key) === value;
 }
-const contains$8 = overload(null, null, IAssociative.contains, contains3);
+const contains$7 = overload(null, null, IAssociative.contains, contains3);
 const updateIn = overload(null, null, null, updateIn3, updateIn4, updateIn5, updateIn6, updateInN);
 const rewrite = branch(IAssociative.contains, update, identity);
 const prop = overload(null, function (key) {
   return overload(null, function (v) {
     return get(v, key);
   }, function (v) {
-    return assoc$8(v, key, v);
+    return assoc$7(v, key, v);
   });
-}, get, assoc$8);
+}, get, assoc$7);
 function patch2(target, source) {
   return reducekv$9(function (memo, key, value) {
-    return assoc$8(memo, key, typeof value === "function" ? value(get(memo, key)) : value);
+    return assoc$7(memo, key, typeof value === "function" ? value(get(memo, key)) : value);
   }, target, source);
 }
 const patch = overload(null, identity, patch2, reducing(patch2));
 
 function merge$6(target, source) {
-  return reducekv$9(assoc$8, target, source);
+  return reducekv$9(assoc$7, target, source);
 }
 function mergeWith3(f, init, x) {
   return reducekv$9(function (memo, key, value) {
-    return assoc$8(memo, key, contains$8(memo, key) ? f(get(memo, key), value) : f(value));
+    return assoc$7(memo, key, contains$7(memo, key) ? f(get(memo, key), value) : f(value));
   }, init, x);
 }
 function mergeWithN(f, init, ...xs) {
@@ -1174,11 +1105,6 @@ const IPrependable = protocol({
   prepend: null
 });
 
-const IResettable = protocol({
-  reset: null,
-  resettable: null
-});
-
 const IReversible = protocol({
   reverse: null
 });
@@ -1186,10 +1112,12 @@ const IReversible = protocol({
 const IRevertible = protocol({
   undo: null,
   redo: null,
+  revert: null,
   flush: null,
   crunch: null,
   undoable: null,
   redoable: null,
+  revertible: null,
   flushable: null,
   crunchable: null,
   revision: null
@@ -1207,7 +1135,7 @@ const IOmissible = protocol({
 
 const omit$3 = IOmissible.omit;
 
-const conj$9 = overload(function () {
+const conj$8 = overload(function () {
   return [];
 }, identity, ICollection.conj, reducing(ICollection.conj));
 const unconj$1 = overload(null, identity, ICollection.unconj, reducing(ICollection.unconj));
@@ -1233,10 +1161,10 @@ function excludesN(self, ...args) {
 }
 const includes$a = overload(null, constantly(true), IInclusive.includes, includesN);
 const excludes = overload(null, constantly(false), excludes2, excludesN);
-const transpose = branch(IInclusive.includes, omit$3, conj$9);
+const transpose = branch(IInclusive.includes, omit$3, conj$8);
 
 function unite$1(self, value) {
-  return includes$a(self, value) ? self : conj$9(self, value);
+  return includes$a(self, value) ? self : conj$8(self, value);
 }
 const ISet = protocol({
   unite: unite$1,
@@ -1313,7 +1241,7 @@ function equiv$a(xs, ys) {
 const iequiv = implement(IEquiv, {
   equiv: equiv$a
 });
-var behave$B = does(iequiv, keying("EmptyList"), implement(ISequential$1), implement(IPrependable, {
+var behave$A = does(iequiv, keying("EmptyList"), implement(ISequential$1), implement(IPrependable, {
   prepend: prepend$5
 }), implement(IAppendable, {
   append: append$6
@@ -1342,7 +1270,7 @@ var behave$B = does(iequiv, keying("EmptyList"), implement(ISequential$1), imple
   seq: constantly(null)
 }));
 
-behave$B(EmptyList);
+behave$A(EmptyList);
 
 function compare$6(x, y) {
   if (x === y) {
@@ -1518,7 +1446,7 @@ const clone$8 = identity,
   start$2 = identity,
   end$2 = identity,
   hash$6 = identity;
-var behave$A = does(keying("Number"), implement(ICloneable, {
+var behave$z = does(keying("Number"), implement(ICloneable, {
   clone: clone$8
 }), implement(IHashable, {
   hash: hash$6
@@ -1540,9 +1468,9 @@ var behave$A = does(keying("Number"), implement(ICloneable, {
 const behaviors = {};
 
 Object.assign(behaviors, {
-  Number: behave$A
+  Number: behave$z
 });
-behave$A(Number);
+behave$z(Number);
 
 function LazySeq(perform) {
   this.perform = perform;
@@ -1589,7 +1517,7 @@ function inverse$2(self) {
 function hash$5(self) {
   return self ? 1 : 0;
 }
-var behave$z = does(keying("Boolean"), implement(IHashable, {
+var behave$y = does(keying("Boolean"), implement(IHashable, {
   hash: hash$5
 }), implement(IComparable, {
   compare: compare$4
@@ -1598,9 +1526,9 @@ var behave$z = does(keying("Boolean"), implement(IHashable, {
 }));
 
 Object.assign(behaviors, {
-  Boolean: behave$z
+  Boolean: behave$y
 });
-behave$z(Boolean);
+behave$y(Boolean);
 
 function List(head, tail) {
   this.head = head;
@@ -1623,7 +1551,7 @@ function list(...args) {
 
 const merge$5 = overload(null, identity, IMergable.merge, reducing(IMergable.merge));
 
-function assoc$7(self, key, value) {
+function assoc$6(self, key, value) {
   const obj = {};
   obj[key] = value;
   return obj;
@@ -1637,7 +1565,7 @@ function equiv$9(self, other) {
 function otherwise$5(self, other) {
   return other;
 }
-function conj$8(self, value) {
+function conj$7(self, value) {
   return cons(value);
 }
 function merge$4(self, ...xs) {
@@ -1646,14 +1574,14 @@ function merge$4(self, ...xs) {
 function hash$4(self) {
   return 0;
 }
-var behave$y = does(keying("Nil"), implement(IHashable, {
+var behave$x = does(keying("Nil"), implement(IHashable, {
   hash: hash$4
 }), implement(ICloneable, {
   clone: identity
 }), implement(ICompactible, {
   compact: identity
 }), implement(ICollection, {
-  conj: conj$8
+  conj: conj$7
 }), implement(IBlankable, {
   blank: constantly(true)
 }), implement(IMergable, {
@@ -1673,7 +1601,7 @@ var behave$y = does(keying("Nil"), implement(IHashable, {
 }), implement(IInclusive, {
   includes: constantly(false)
 }), implement(IAssociative, {
-  assoc: assoc$7,
+  assoc: assoc$6,
   contains: constantly(false)
 }), implement(INext, {
   next: identity
@@ -1692,13 +1620,13 @@ var behave$y = does(keying("Nil"), implement(IHashable, {
   reduce: reduce$c
 }));
 
-behave$y(Nil);
+behave$x(Nil);
 
-const deref$6 = IDeref.deref;
+const deref$7 = IDeref.deref;
 
-const fmap$8 = overload(constantly(identity), IFunctor.fmap, reducing(IFunctor.fmap));
+const fmap$9 = overload(constantly(identity), IFunctor.fmap, reducing(IFunctor.fmap));
 function thrushN(unit, init, ...fs) {
-  return deref$6(reduce$e(IFunctor.fmap, unit(init), fs));
+  return deref$7(reduce$e(IFunctor.fmap, unit(init), fs));
 }
 function thrush1(f) {
   return overload(null, f, partial(thrushN, f));
@@ -1882,12 +1810,12 @@ const flatMap$2 = IFlatMappable.flatMap;
 const flat$4 = overload(flat0, IFlatMappable.flat);
 const cat = flat$4;
 
-const keys$a = IMap.keys;
-const vals$5 = IMap.vals;
+const keys$9 = IMap.keys;
+const vals$4 = IMap.vals;
 function dissocN(obj, ...keys) {
   return reduce$e(IMap.dissoc, obj, keys);
 }
-const dissoc$5 = overload(null, identity, IMap.dissoc, dissocN);
+const dissoc$4 = overload(null, identity, IMap.dissoc, dissocN);
 
 const nth$6 = IIndexed.nth;
 const idx$3 = IIndexed.idx;
@@ -1937,7 +1865,7 @@ function mapArgs(xf, f) {
 }
 function keyed(f, keys) {
   return reduce$e(function (memo, key) {
-    return assoc$8(memo, key, f(key));
+    return assoc$7(memo, key, f(key));
   }, {}, keys);
 }
 function transduce3(xform, f, coll) {
@@ -1949,10 +1877,10 @@ function transduce4(xform, f, init, coll) {
 }
 const transduce = overload(null, null, null, transduce3, transduce4);
 function into2(to, from) {
-  return reduce$e(conj$9, to, from);
+  return reduce$e(conj$8, to, from);
 }
 function into3(to, xform, from) {
-  return transduce(xform, conj$9, to, from);
+  return transduce(xform, conj$8, to, from);
 }
 const into = overload(emptyArray, identity, into2, into3);
 function entries2(xs, keys) {
@@ -1961,7 +1889,7 @@ function entries2(xs, keys) {
   }) : emptyList();
 }
 function entries1(xs) {
-  return entries2(xs, keys$a(xs));
+  return entries2(xs, keys$9(xs));
 }
 const entries = overload(null, entries1, entries2);
 function mapkv(f, xs) {
@@ -1982,7 +1910,7 @@ function seek(...fs) {
     }, null, fs);
   };
 }
-function some$1(f, coll) {
+function some(f, coll) {
   let xs = seq$9(coll);
   while (xs) {
     const value = f(first$d(xs));
@@ -1993,7 +1921,44 @@ function some$1(f, coll) {
   }
   return null;
 }
-const notSome = comp(not, some$1);
+function someFn1(p) {
+  function f1(x) {
+    return p(x);
+  }
+  function f2(x, y) {
+    return p(x) || p(y);
+  }
+  function f3(x, y, z) {
+    return p(x) || p(y) || p(z);
+  }
+  function fn(x, y, z, ...args) {
+    return f3(x, y, z) || some(p, args);
+  }
+  return overload(constantly(null), f1, f2, f3, fn);
+}
+function someFn2(p1, p2) {
+  function f1(x) {
+    return p1(x) || p2(x);
+  }
+  function f2(x, y) {
+    return p1(x) || p1(y) || p2(x) || p2(y);
+  }
+  function f3(x, y, z) {
+    return p1(x) || p1(y) || p1(z) || p2(x) || p2(y) || p2(z);
+  }
+  function fn(x, y, z, ...args) {
+    return f3(x, y, z) || some(or(p1, p2), args);
+  }
+  return overload(constantly(null), f1, f2, f3, fn);
+}
+function someFnN(...ps) {
+  function fn(...args) {
+    return some(or(...ps), args);
+  }
+  return overload(constantly(null), fn);
+}
+const someFn = overload(null, someFn1, someFn2, someFnN);
+const notSome = comp(not, some);
 const notAny = notSome;
 function every(pred, coll) {
   let xs = seq$9(coll);
@@ -2587,7 +2552,7 @@ function countBy(f, coll) {
 function groupBy3(init, f, coll) {
   return reduce$e(function (memo, value) {
     return update(memo, f(value), function (group) {
-      return conj$9(group || [], value);
+      return conj$8(group || [], value);
     });
   }, init, coll);
 }
@@ -2597,7 +2562,7 @@ function groupBy2(f, coll) {
 const groupBy = overload(null, null, groupBy2, groupBy3);
 function index4(init, key, val, coll) {
   return reduce$e(function (memo, x) {
-    return assoc$8(memo, key(x), val(x));
+    return assoc$7(memo, key(x), val(x));
   }, init, coll);
 }
 function index3(key, val, coll) {
@@ -2630,24 +2595,24 @@ function unreduced(self) {
   return isReduced(self) ? self.valueOf() : self;
 }
 
-function deref$5(self) {
+function deref$6(self) {
   return self.valueOf();
 }
-var behave$x = does(keying("Reduced"), implement(IDeref, {
-  deref: deref$5
+var behave$w = does(keying("Reduced"), implement(IDeref, {
+  deref: deref$6
 }));
 
-behave$x(Reduced);
+behave$w(Reduced);
 
 const compact1$2 = partial(filter, identity);
 function compact2$1(self, pred) {
   return remove(pred, self);
 }
 const compact$2 = overload(null, compact1$2, compact2$1);
-function fmap$7(self, f) {
+function fmap$8(self, f) {
   return map(f, self);
 }
-function conj$7(self, value) {
+function conj$6(self, value) {
   return cons(value, self);
 }
 function seq$8(self) {
@@ -2773,13 +2738,13 @@ var lazyseq = does(iterable, iequiv, reductive, keying("LazySeq"), implement(ISe
 }), implement(IOmissible, {
   omit: omit$2
 }), implement(IFunctor, {
-  fmap: fmap$7
+  fmap: fmap$8
 }), implement(ICollection, {
-  conj: conj$7
+  conj: conj$6
 }), implement(IAppendable, {
   append: append$5
 }), implement(IPrependable, {
-  prepend: conj$7
+  prepend: conj$6
 }), implement(ICounted, {
   count: count$b
 }), implement(IFind, {
@@ -2827,7 +2792,7 @@ function hashSeq(hs) {
 function hashKeyed(self) {
   return reduce$e(function (memo, key) {
     return hashSeq([memo, key, get(self, key)]);
-  }, 0, sort(keys$a(self)));
+  }, 0, sort(keys$9(self)));
 }
 
 function reverse$2(self) {
@@ -2835,18 +2800,18 @@ function reverse$2(self) {
   return c > 0 ? revSeq(self, c - 1) : null;
 }
 function key$1(self) {
-  return lookup$8(self, 0);
+  return lookup$7(self, 0);
 }
 function val$1(self) {
-  return lookup$8(self, 1);
+  return lookup$7(self, 1);
 }
 function find$3(self, key) {
-  return contains$7(self, key) ? [key, lookup$8(self, key)] : null;
+  return contains$6(self, key) ? [key, lookup$7(self, key)] : null;
 }
-function contains$7(self, key) {
+function contains$6(self, key) {
   return key < count$c(self.seq) - self.start;
 }
-function lookup$8(self, key) {
+function lookup$7(self, key) {
   return get(self.seq, self.start + key);
 }
 function append$4(self, x) {
@@ -2904,7 +2869,7 @@ function includes$8(self, x) {
     return y === x;
   }, drop(self.start, self.seq));
 }
-var behave$w = does(iterable, iequiv, keying("IndexedSeq"), implement(ISequential$1), implement(IHashable, {
+var behave$v = does(iterable, iequiv, keying("IndexedSeq"), implement(ISequential$1), implement(IHashable, {
   hash: hashKeyed
 }), implement(IIndexed, {
   nth: nth$4,
@@ -2919,7 +2884,7 @@ var behave$w = does(iterable, iequiv, keying("IndexedSeq"), implement(ISequentia
 }), implement(IFind, {
   find: find$3
 }), implement(IAssociative, {
-  contains: contains$7
+  contains: contains$6
 }), implement(IAppendable, {
   append: append$4
 }), implement(IPrependable, {
@@ -2931,9 +2896,9 @@ var behave$w = does(iterable, iequiv, keying("IndexedSeq"), implement(ISequentia
 }), implement(IKVReducible, {
   reducekv: reducekv$7
 }), implement(IFn, {
-  invoke: lookup$8
+  invoke: lookup$7
 }), implement(ILookup, {
-  lookup: lookup$8
+  lookup: lookup$7
 }), implement(ICollection, {
   conj: append$4
 }), implement(INext, {
@@ -2947,7 +2912,7 @@ var behave$w = does(iterable, iequiv, keying("IndexedSeq"), implement(ISequentia
   count: count$a
 }));
 
-behave$w(IndexedSeq);
+behave$v(IndexedSeq);
 
 function clone$7(self) {
   return new revSeq(self.coll, self.idx);
@@ -2955,14 +2920,14 @@ function clone$7(self) {
 function count$9(self) {
   return count$c(self.coll);
 }
-function keys$9(self) {
+function keys$8(self) {
   return range(count$9(self));
 }
-function vals$4(self) {
+function vals$3(self) {
   var _self, _nth;
   return map((_nth = nth$3, _self = self, function nth(_argPlaceholder) {
     return _nth(_self, _argPlaceholder);
-  }), keys$9(self));
+  }), keys$8(self));
 }
 function nth$3(self, idx) {
   return nth$6(self.coll, count$9(self) - 1 - idx);
@@ -2976,7 +2941,7 @@ function rest$a(self) {
 function next$8(self) {
   return self.idx > 0 ? revSeq(self.coll, self.idx - 1) : null;
 }
-function conj$6(self, value) {
+function conj$5(self, value) {
   return cons(value, self);
 }
 function reduce2(coll, f) {
@@ -2996,21 +2961,21 @@ function reduce3(coll, f, init) {
   return unreduced(memo);
 }
 const reduce$9 = overload(null, null, reduce2, reduce3);
-var behave$v = does(iterable, keying("RevSeq"), implement(ISequential$1), implement(ICounted, {
+var behave$u = does(iterable, keying("RevSeq"), implement(ISequential$1), implement(ICounted, {
   count: count$9
 }), implement(IIndexed, {
   nth: nth$3
 }), implement(ILookup, {
   lookup: nth$3
 }), implement(IMap, {
-  keys: keys$9,
-  vals: vals$4
+  keys: keys$8,
+  vals: vals$3
 }), implement(IEmptyableCollection, {
   empty: emptyList
 }), implement(IReducible, {
   reduce: reduce$9
 }), implement(ICollection, {
-  conj: conj$6
+  conj: conj$5
 }), implement(ISeq, {
   first: first$a,
   rest: rest$a
@@ -3022,7 +2987,7 @@ var behave$v = does(iterable, keying("RevSeq"), implement(ISequential$1), implem
   clone: clone$7
 }));
 
-behave$v(RevSeq);
+behave$u(RevSeq);
 
 function clone$6(self) {
   return slice(self);
@@ -3045,13 +3010,13 @@ function after$1(self, reference, inserted) {
   _after(arr, reference, inserted);
   return arr;
 }
-function keys$8(self) {
+function keys$7(self) {
   return range(count$8(self));
 }
 function _dissoc(self, idx) {
   self.splice(idx, 1);
 }
-function dissoc$4(self, idx) {
+function dissoc$3(self, idx) {
   let arr = Array.from(self);
   _dissoc(arr, idx);
   return arr;
@@ -3090,23 +3055,23 @@ function val(self) {
   return self[1];
 }
 function find$2(self, key) {
-  return contains$6(self, key) ? [key, lookup$7(self, key)] : null;
+  return contains$5(self, key) ? [key, lookup$6(self, key)] : null;
 }
-function lookup$7(self, key) {
+function lookup$6(self, key) {
   return key in self ? self[key] : null;
 }
-function assoc$6(self, key, value) {
+function assoc$5(self, key, value) {
   if (key < 0 || key > count$8(self)) {
     throw new Error(`Index ${key} out of bounds`);
   }
-  if (lookup$7(self, key) === value) {
+  if (lookup$6(self, key) === value) {
     return self;
   }
   const arr = Array.from(self);
   arr.splice(key, 1, value);
   return arr;
 }
-function contains$6(self, key) {
+function contains$5(self, key) {
   return key > -1 && key < self.length;
 }
 function seq$7(self) {
@@ -3139,12 +3104,12 @@ function includes$7(self, x) {
 function count$8(self) {
   return self.length;
 }
-const nth$2 = lookup$7;
+const nth$2 = lookup$6;
 function idx(self, x) {
   const n = self.indexOf(x);
   return n === -1 ? null : n;
 }
-function fmap$6(self, f) {
+function fmap$7(self, f) {
   return mapa(f, self);
 }
 const blank$3 = complement(seq$7);
@@ -3160,14 +3125,14 @@ function flat$3(self) {
 function flatMap$1(self, f) {
   return self.flatMap(f);
 }
-var behave$u = does(iequiv, iindexed, keying("Array"), implement(ISequential$1), implement(IFlatMappable, {
+var behave$t = does(iequiv, iindexed, keying("Array"), implement(ISequential$1), implement(IFlatMappable, {
   flatMap: flatMap$1,
   flat: flat$3
 }), implement(IHashable, {
   hash: hashSeq
 }), implement(IMap, {
-  dissoc: dissoc$4,
-  keys: keys$8,
+  dissoc: dissoc$3,
+  keys: keys$7,
   vals: identity
 }), implement(IMergable, {
   merge: concat
@@ -3175,7 +3140,7 @@ var behave$u = does(iequiv, iindexed, keying("Array"), implement(ISequential$1),
   before: before$1,
   after: after$1
 }), implement(IFunctor, {
-  fmap: fmap$6
+  fmap: fmap$7
 }), implement(IOmissible, {
   omit: omit$1
 }), implement(IReversible, {
@@ -3194,7 +3159,7 @@ var behave$u = does(iequiv, iindexed, keying("Array"), implement(ISequential$1),
 }), implement(ICloneable, {
   clone: clone$6
 }), implement(IFn, {
-  invoke: lookup$7
+  invoke: lookup$6
 }), implement(IEmptyableCollection, {
   empty: emptyArray
 }), implement(IReducible, {
@@ -3202,10 +3167,10 @@ var behave$u = does(iequiv, iindexed, keying("Array"), implement(ISequential$1),
 }), implement(IKVReducible, {
   reducekv: reducekv$6
 }), implement(ILookup, {
-  lookup: lookup$7
+  lookup: lookup$6
 }), implement(IAssociative, {
-  assoc: assoc$6,
-  contains: contains$6
+  assoc: assoc$5,
+  contains: contains$5
 }), implement(IBlankable, {
   blank: blank$3
 }), implement(ISeqable, {
@@ -3221,12 +3186,12 @@ var behave$u = does(iequiv, iindexed, keying("Array"), implement(ISequential$1),
 }));
 
 Object.assign(behaviors, {
-  Array: behave$u
+  Array: behave$t
 });
-behave$u(Array);
+behave$t(Array);
 
-function conj$5(self, x) {
-  return new self.constructor(conj$9(self.colls, [x]));
+function conj$4(self, x) {
+  return new self.constructor(conj$8(self.colls, [x]));
 }
 function next$6(self) {
   const tail = rest$d(self);
@@ -3263,7 +3228,7 @@ function count$7(self) {
     return memo + 1;
   }, 0);
 }
-var behave$t = does(iterable,
+var behave$s = does(iterable,
 //TODO reductive?
 keying("Concatenated"), implement(IKVReducible, {
   reducekv: reducekv$5
@@ -3274,7 +3239,7 @@ keying("Concatenated"), implement(IKVReducible, {
 }), implement(ISequential$1), implement(IEmptyableCollection, {
   empty: emptyList
 }), implement(ICollection, {
-  conj: conj$5
+  conj: conj$4
 }), implement(INext, {
   next: next$6
 }), implement(ISeq, {
@@ -3286,7 +3251,7 @@ keying("Concatenated"), implement(IKVReducible, {
   count: count$7
 }));
 
-behave$t(Concatenated);
+behave$s(Concatenated);
 
 function date7(year, month, day, hour, minute, second, millisecond) {
   return new Date(year, month || 0, day || 1, hour || 0, minute || 0, second || 0, millisecond || 0);
@@ -3441,37 +3406,37 @@ function untick() {
   return tick(dec);
 }
 
-var p$4 = /*#__PURE__*/Object.freeze({
+var p$3 = /*#__PURE__*/Object.freeze({
   __proto__: null,
-  add: add$3,
-  assoc: assoc$8,
-  assocIn: assocIn,
-  coerce: coerce,
-  contains: contains$8,
-  dec: dec,
   directed: directed,
-  dissoc: dissoc$5,
-  excludes: excludes,
-  get: get,
-  getIn: getIn,
-  inc: inc,
-  includes: includes$a,
-  keys: keys$a,
-  patch: patch,
-  prop: prop,
-  reduce: reduce$e,
-  reducing: reducing,
-  rewrite: rewrite,
   steps: steps,
   subtract: subtract,
+  add: add$3,
+  inc: inc,
+  dec: dec,
+  get: get,
+  getIn: getIn,
+  reduce: reduce$e,
+  reducing: reducing,
+  includes: includes$a,
+  excludes: excludes,
   transpose: transpose,
+  assoc: assoc$7,
+  assocIn: assocIn,
   update: update,
+  contains: contains$7,
   updateIn: updateIn,
-  vals: vals$5
+  rewrite: rewrite,
+  prop: prop,
+  patch: patch,
+  keys: keys$9,
+  vals: vals$4,
+  dissoc: dissoc$4,
+  coerce: coerce
 });
 
 var _Duration, _p$coerce$1, _p$1, _mult;
-const toDuration = (_p$1 = p$4, _p$coerce$1 = _p$1.coerce, _Duration = Duration, function coerce(_argPlaceholder) {
+const toDuration = (_p$1 = p$3, _p$coerce$1 = _p$1.coerce, _Duration = Duration, function coerce(_argPlaceholder) {
   return _p$coerce$1.call(_p$1, _argPlaceholder, _Duration);
 });
 function Duration(units) {
@@ -3483,7 +3448,7 @@ function valueOf() {
 }
 function unit(key) {
   return function (n) {
-    return new Duration(assoc$8({}, key, n));
+    return new Duration(assoc$7({}, key, n));
   };
 }
 const years = unit("year");
@@ -3505,72 +3470,72 @@ Duration.units = ["year", "month", "day", "hour", "minute", "second", "milliseco
 
 function reducekv$4(self, f, init) {
   return reduce$e(function (memo, key) {
-    return f(memo, key, lookup$6(self, key));
-  }, init, keys$7(self));
+    return f(memo, key, lookup$5(self, key));
+  }, init, keys$6(self));
 }
 const merge$3 = partial(mergeWith, add$3);
 function mult(self, n) {
-  return fmap$5(self, function (value) {
+  return fmap$6(self, function (value) {
     return value * n;
   });
 }
-function fmap$5(self, f) {
+function fmap$6(self, f) {
   return new self.constructor(reducekv$4(self, function (memo, key, value) {
-    return assoc$8(memo, key, f(value));
+    return assoc$7(memo, key, f(value));
   }, {}));
 }
-function keys$7(self) {
-  return keys$a(self.units);
+function keys$6(self) {
+  return keys$9(self.units);
 }
-function dissoc$3(self, key) {
-  return new self.constructor(dissoc$5(self.units, key));
+function dissoc$2(self, key) {
+  return new self.constructor(dissoc$4(self.units, key));
 }
-function lookup$6(self, key) {
+function lookup$5(self, key) {
   if (!includes$a(Duration.units, key)) {
     throw new Error("Invalid unit.");
   }
   return get(self.units, key);
 }
-function contains$5(self, key) {
-  return contains$8(self.units, key);
+function contains$4(self, key) {
+  return contains$7(self.units, key);
 }
-function assoc$5(self, key, value) {
+function assoc$4(self, key, value) {
   if (!includes$a(Duration.units, key)) {
     throw new Error("Invalid unit.");
   }
-  return new self.constructor(assoc$8(self.units, key, value));
+  return new self.constructor(assoc$7(self.units, key, value));
 }
 function divide$2(a, b) {
   return a.valueOf() / b.valueOf();
 }
-var behave$s = does(keying("Duration"), implement(IKVReducible, {
+var behave$r = does(keying("Duration"), implement(IKVReducible, {
   reducekv: reducekv$4
 }), implement(IAddable, {
   add: merge$3
 }), implement(IMergable, {
   merge: merge$3
 }), implement(IFunctor, {
-  fmap: fmap$5
+  fmap: fmap$6
 }), implement(IAssociative, {
-  assoc: assoc$5,
-  contains: contains$5
+  assoc: assoc$4,
+  contains: contains$4
 }), implement(ILookup, {
-  lookup: lookup$6
+  lookup: lookup$5
 }), implement(IMap, {
-  keys: keys$7,
-  dissoc: dissoc$3
+  keys: keys$6,
+  dissoc: dissoc$2
 }), implement(IDivisible, {
   divide: divide$2
 }), implement(IMultipliable, {
   mult
 }));
 
-behave$s(Duration);
+behave$r(Duration);
 
 function add$1(self, other) {
   return mergeWith(add$3, self, isNumber(other) ? days(other) : other);
 }
-function lookup$5(self, key) {
+function lookup$4(self, key) {
   switch (key) {
     case "year":
       return self.getFullYear();
@@ -3592,24 +3557,24 @@ function InvalidKeyError(key, target) {
   this.key = key;
   this.target = target;
 }
-function contains$4(self, key) {
-  return keys$6().indexOf(key) > -1;
+function contains$3(self, key) {
+  return keys$5().indexOf(key) > -1;
 }
-function keys$6(self) {
+function keys$5(self) {
   return ["year", "month", "day", "hour", "minute", "second", "millisecond"];
 }
-function vals$3(self) {
+function vals$2(self) {
   return reduce$e(function (memo, key) {
     memo.push(get(self, key));
     return memo;
-  }, [], keys$6());
+  }, [], keys$5());
 }
-function conj$4(self, [key, value]) {
-  return assoc$4(self, key, value);
+function conj$3(self, [key, value]) {
+  return assoc$3(self, key, value);
 }
 
 //the benefit of exposing internal state as a map is assocIn and updateIn
-function assoc$4(self, key, value) {
+function assoc$3(self, key, value) {
   const dt = new Date(self.valueOf());
   switch (key) {
     case "year":
@@ -3642,34 +3607,34 @@ function clone$4(self) {
   return new Date(self.valueOf());
 }
 function equiv$8(self, other) {
-  return other != null && deref$4(self) === deref$6(other);
+  return other != null && deref$5(self) === deref$7(other);
 }
 function compare$3(self, other) {
-  return other == null ? -1 : deref$4(self) - deref$6(other);
+  return other == null ? -1 : deref$5(self) - deref$7(other);
 }
 function reduce$6(self, f, init) {
   return reduce$e(function (memo, key) {
     const value = get(self, key);
     return f(memo, [key, value]);
-  }, init, keys$6());
+  }, init, keys$5());
 }
 function reducekv$3(self, f, init) {
   return reduce$6(self, function (memo, [key, value]) {
     return f(memo, key, value);
   }, init);
 }
-function deref$4(self) {
+function deref$5(self) {
   return self.valueOf();
 }
 function hash$3(self) {
   return self.valueOf();
 }
-var behave$r = does(keying("Date"), implement(IHashable, {
+var behave$q = does(keying("Date"), implement(IHashable, {
   hash: hash$3
 }), implement(IAddable, {
   add: add$1
 }), implement(IDeref, {
-  deref: deref$4
+  deref: deref$5
 }), implement(IBounded, {
   start: identity,
   end: identity
@@ -3682,25 +3647,25 @@ var behave$r = does(keying("Date"), implement(IHashable, {
 }), implement(IEquiv, {
   equiv: equiv$8
 }), implement(IMap, {
-  keys: keys$6,
-  vals: vals$3
+  keys: keys$5,
+  vals: vals$2
 }), implement(IComparable, {
   compare: compare$3
 }), implement(ICollection, {
-  conj: conj$4
+  conj: conj$3
 }), implement(IAssociative, {
-  assoc: assoc$4,
-  contains: contains$4
+  assoc: assoc$3,
+  contains: contains$3
 }), implement(ILookup, {
-  lookup: lookup$5
+  lookup: lookup$4
 }), implement(ICloneable, {
   clone: clone$4
 }));
 
 Object.assign(behaviors, {
-  Date: behave$r
+  Date: behave$q
 });
-behave$r(Date);
+behave$q(Date);
 
 const error = constructs(Error);
 
@@ -3708,9 +3673,9 @@ function isError(self) {
   return ako(self, Error);
 }
 
-var behave$q = keying("Error");
+var behave$p = keying("Error");
 
-behave$q(Error);
+behave$p(Error);
 
 Function.prototype[Symbol.toStringTag] = "Function";
 
@@ -3725,7 +3690,7 @@ function invoke$1(self, ...args) {
 function name$1(self) {
   return self.name ? self.name : get(/function (.+)\s?\(/.exec(self.toString()), 1); //latter is for IE
 }
-var behave$p = does(keying("Function"), implement(INamable, {
+var behave$o = does(keying("Function"), implement(INamable, {
   name: name$1
 }), implement(IAppendable, {
   append: append$2
@@ -3735,7 +3700,7 @@ var behave$p = does(keying("Function"), implement(INamable, {
   invoke: invoke$1
 }));
 
-behave$p(Function);
+behave$o(Function);
 
 function GUID(id) {
   this.id = id;
@@ -3764,13 +3729,13 @@ function equiv$7(self, other) {
 function hash$2(self) {
   return hash$7(self.id);
 }
-var behave$o = does(keying("GUID"), implement(IHashable, {
+var behave$n = does(keying("GUID"), implement(IHashable, {
   hash: hash$2
 }), implement(IEquiv, {
   equiv: equiv$7
 }));
 
-behave$o(GUID);
+behave$n(GUID);
 
 class Chance {
   constructor(seed, hash) {
@@ -3828,17 +3793,17 @@ function seq$6(self) {
   return count$6(self) ? self : null;
 }
 function includes$6(self, value) {
-  return !!some$1(function (x) {
+  return !!some(function (x) {
     return x === value;
   }, self);
 }
-function keys$5(self) {
+function keys$4(self) {
   return range(count$6(self));
 }
-var behave$n = does(iterable, reductive, keying("Indexed"), implement(IHashable, {
+var behave$m = does(iterable, reductive, keying("Indexed"), implement(IHashable, {
   hash: hashKeyed
 }), implement(IMap, {
-  keys: keys$5
+  keys: keys$4
 }), implement(ISequential$1), implement(IInclusive, {
   includes: includes$6
 }), implement(IIndexed, {
@@ -3856,7 +3821,7 @@ var behave$n = does(iterable, reductive, keying("Indexed"), implement(IHashable,
   count: count$6
 }));
 
-behave$n(Indexed);
+behave$m(Indexed);
 
 function Journal(pos, max, history, state) {
   this.pos = pos;
@@ -3939,18 +3904,8 @@ const fork$4 = overload(null, null, (_IForkable = IForkable, _IForkable$fork = _
   return _IForkable$fork.call(_IForkable, _argPlaceholder, _noop, _argPlaceholder2);
 }), IForkable.fork);
 
-const path$1 = IPath.path;
+const path = IPath.path;
 
-function Lens(root, path) {
-  this.root = root;
-  this.path = path;
-}
-Lens.prototype[Symbol.toStringTag] = "Lens";
-function lens(root, path) {
-  return new Lens(root, path || []);
-}
-
-var _juxt, _map;
 function downward(f) {
   return function down(self) {
     const xs = f(self),
@@ -3964,24 +3919,21 @@ function upward(f) {
     return other ? cons(other, up(other)) : emptyList();
   };
 }
-const root$2 = IHierarchy.root;
-const parent$1 = IHierarchy.parent;
-const parents$2 = IHierarchy.parents;
-const closest$2 = IHierarchy.closest;
+const root$1 = IHierarchy.root;
+const parent = IHierarchy.parent;
+const parents$1 = IHierarchy.parents;
+const closest$1 = IHierarchy.closest;
 const ancestors = IHierarchy.parents;
-const children$1 = IHierarchy.children;
-const descendants$1 = IHierarchy.descendants;
-const nextSibling$2 = IHierarchy.nextSibling;
-const prevSibling$2 = IHierarchy.prevSibling;
-const nextSiblings$2 = IHierarchy.nextSiblings;
-const prevSiblings$2 = IHierarchy.prevSiblings;
-const siblings$2 = IHierarchy.siblings;
+const children = IHierarchy.children;
+const descendants = IHierarchy.descendants;
+const nextSibling$1 = IHierarchy.nextSibling;
+const prevSibling$1 = IHierarchy.prevSibling;
+const nextSiblings$1 = IHierarchy.nextSiblings;
+const prevSiblings$1 = IHierarchy.prevSiblings;
+const siblings$1 = IHierarchy.siblings;
 function leaves(self) {
-  return remove(comp(count$c, children$1), descendants$1(self));
+  return remove(comp(count$c, children), descendants(self));
 }
-const asLeaves = comp((_map = map, _juxt = juxt(path$1, deref$6), function map(_argPlaceholder) {
-  return _map(_juxt, _argPlaceholder);
-}), leaves, lens);
 
 const identifier = IIdentifiable.identifier;
 
@@ -4010,15 +3962,14 @@ const otherwise$4 = IOtherwise.otherwise;
 
 const prepend$2 = overload(null, identity, IPrependable.prepend, reducing(IPrependable.prepend, reverse$4));
 
-const reset$2 = IResettable.reset;
-const resettable$1 = IResettable.resettable;
-
 const crunch$1 = IRevertible.crunch;
 const crunchable$1 = IRevertible.crunchable;
 const undo$1 = IRevertible.undo;
 const undoable$1 = IRevertible.undoable;
 const redo$1 = IRevertible.redo;
 const redoable$1 = IRevertible.redoable;
+const revert$1 = IRevertible.revert;
+const revertible$1 = IRevertible.revertible;
 const flush$1 = IRevertible.flush;
 const flushable$1 = IRevertible.flushable;
 const revision$1 = overload(null, function (self) {
@@ -4036,12 +3987,12 @@ const union2 = (_reduce = reduce$e, _ISet$unite = ISet.unite, function reduce(_a
 });
 function intersection2(xs, ys) {
   return reduce$e(function (memo, x) {
-    return includes$a(ys, x) ? conj$9(memo, x) : memo;
+    return includes$a(ys, x) ? conj$8(memo, x) : memo;
   }, empty$2(xs), xs);
 }
 function difference2(xs, ys) {
   return reduce$e(function (memo, x) {
-    return includes$a(ys, x) ? memo : conj$9(memo, x);
+    return includes$a(ys, x) ? memo : conj$8(memo, x);
   }, empty$2(xs), xs);
 }
 function subset(self, other) {
@@ -4060,23 +4011,6 @@ const difference = overload(null, null, difference2, reducing(difference2));
 
 const split$2 = ISplittable.split;
 
-function swap3(self, f, a) {
-  return ISwappable.swap(self, function (state) {
-    return f(state, a);
-  });
-}
-function swap4(self, f, a, b) {
-  return ISwappable.swap(self, function (state) {
-    return f(state, a, b);
-  });
-}
-function swapN(self, f, a, b, cs) {
-  return ISwappable.swap(self, function (state) {
-    return f.apply(null, [state, a, b, ...cs]);
-  });
-}
-const swap$1 = overload(null, null, ISwappable.swap, swap3, swap4, swapN);
-
 const fill$2 = ITemplate.fill;
 function template(self, ...args) {
   return fill$2(self, args);
@@ -4092,144 +4026,140 @@ function verify(self, key, value) {
   }), asserts(self, key));
 }
 
-var p$3 = /*#__PURE__*/Object.freeze({
+var p$2 = /*#__PURE__*/Object.freeze({
   __proto__: null,
+  directed: directed,
+  steps: steps,
+  subtract: subtract,
   add: add$3,
-  after: after,
-  ako: ako,
-  alike: alike,
-  ancestors: ancestors,
+  inc: inc,
+  dec: dec,
   append: append$1,
-  asLeaves: asLeaves,
-  assert: assert,
-  asserts: asserts,
-  assoc: assoc$8,
+  assoc: assoc$7,
   assocIn: assocIn,
-  before: before,
-  between: between,
+  update: update,
+  contains: contains$7,
+  updateIn: updateIn,
+  rewrite: rewrite,
+  prop: prop,
+  patch: patch,
   blank: blank$2,
   blot: blot,
-  cat: cat,
-  children: children$1,
-  clone: clone$5,
-  closest: closest$2,
-  coerce: coerce,
-  compact: compact$1,
-  compare: compare$6,
-  conj: conj$9,
-  contains: contains$8,
-  count: count$c,
-  crunch: crunch$1,
-  crunchable: crunchable$1,
-  dec: dec,
-  deref: deref$6,
-  descendants: descendants$1,
-  difference: difference,
-  directed: directed,
-  disj: disj$1,
-  dispose: dispose,
-  dissoc: dissoc$5,
-  divide: divide$1,
-  downward: downward,
-  empty: empty$2,
+  start: start$1,
   end: end$1,
-  eq: eq,
-  equiv: equiv$b,
-  equivalent: equivalent,
-  excludes: excludes,
-  fill: fill$2,
-  find: find$1,
-  first: first$d,
-  flat: flat$4,
-  flatMap: flatMap$2,
-  flush: flush$1,
-  flushable: flushable$1,
-  fmap: fmap$8,
-  fork: fork$4,
-  get: get,
-  getIn: getIn,
-  gt: gt,
-  gte: gte,
-  hash: hash$7,
-  hashTag: hashTag,
-  identifier: identifier,
-  idx: idx$3,
-  inc: inc,
-  includes: includes$a,
   inside: inside,
-  intersection: intersection,
-  inverse: inverse$1,
-  invokable: invokable,
-  invoke: invoke$2,
-  is: is,
-  isValueObject: isValueObject,
-  key: key$3,
-  keying: keying,
-  keys: keys$a,
-  kin: kin,
-  leaves: leaves,
+  between: between,
+  overlap: overlap,
+  flatMap: flatMap$2,
+  flat: flat$4,
+  cat: cat,
+  clone: clone$5,
+  coerce: coerce,
+  conj: conj$8,
+  unconj: unconj$1,
+  compact: compact$1,
+  only: only,
+  compare: compare$6,
   lt: lt,
   lte: lte,
+  gt: gt,
+  gte: gte,
+  inverse: inverse$1,
+  count: count$c,
+  deref: deref$7,
+  dispose: dispose,
+  divide: divide$1,
+  empty: empty$2,
+  kin: kin,
+  equiv: equiv$b,
+  alike: alike,
+  equivalent: equivalent,
+  eq: eq,
+  notEq: notEq,
+  find: find$1,
+  invoke: invoke$2,
+  fork: fork$4,
+  fmap: fmap$9,
+  thrush: thrush,
+  pipeline: pipeline,
+  hashTag: hashTag,
+  hash: hash$7,
+  downward: downward,
+  upward: upward,
+  root: root$1,
+  parent: parent,
+  parents: parents$1,
+  closest: closest$1,
+  ancestors: ancestors,
+  children: children,
+  descendants: descendants,
+  nextSibling: nextSibling$1,
+  prevSibling: prevSibling$1,
+  nextSiblings: nextSiblings$1,
+  prevSiblings: prevSiblings$1,
+  siblings: siblings$1,
+  leaves: leaves,
+  identifier: identifier,
+  nth: nth$6,
+  idx: idx$3,
+  includes: includes$a,
+  excludes: excludes,
+  transpose: transpose,
+  after: after,
+  before: before,
+  reducekv2: reducekv2,
+  reducekv3: reducekv3,
+  reducekv: reducekv$9,
+  get: get,
+  getIn: getIn,
+  keys: keys$9,
+  vals: vals$4,
+  dissoc: dissoc$4,
+  key: key$3,
+  val: val$2,
+  is: is,
+  ako: ako,
+  keying: keying,
   merge: merge$5,
   mult: mult$2,
   name: name,
   next: next$b,
-  nextSibling: nextSibling$2,
-  nextSiblings: nextSiblings$2,
-  notEq: notEq,
-  nth: nth$6,
-  omit: omit$3,
-  only: only,
   otherwise: otherwise$4,
-  overlap: overlap,
-  parent: parent$1,
-  parents: parents$2,
-  patch: patch,
-  path: path$1,
-  pipeline: pipeline,
+  path: path,
   prepend: prepend$2,
-  prevSibling: prevSibling$2,
-  prevSiblings: prevSiblings$2,
-  prop: prop,
-  redo: redo$1,
-  redoable: redoable$1,
   reduce: reduce$e,
-  reducekv: reducekv$9,
-  reducekv2: reducekv2,
-  reducekv3: reducekv3,
   reducing: reducing,
-  reset: reset$2,
-  resettable: resettable$1,
-  rest: rest$d,
-  retract: retract,
   reverse: reverse$4,
-  revision: revision$1,
-  rewrite: rewrite,
-  root: root$2,
-  seq: seq$9,
-  sequential: sequential,
-  siblings: siblings$2,
-  split: split$2,
-  start: start$1,
-  steps: steps,
-  subset: subset,
-  subtract: subtract,
-  superset: superset,
-  swap: swap$1,
-  template: template,
-  thrush: thrush,
-  transpose: transpose,
-  unconj: unconj$1,
+  crunch: crunch$1,
+  crunchable: crunchable$1,
   undo: undo$1,
   undoable: undoable$1,
-  union: union,
+  redo: redo$1,
+  redoable: redoable$1,
+  revert: revert$1,
+  revertible: revertible$1,
+  flush: flush$1,
+  flushable: flushable$1,
+  revision: revision$1,
+  first: first$d,
+  rest: rest$d,
+  seq: seq$9,
+  sequential: sequential,
+  disj: disj$1,
+  subset: subset,
+  superset: superset,
   unite: unite,
-  update: update,
-  updateIn: updateIn,
-  upward: upward,
-  val: val$2,
-  vals: vals$5,
-  verify: verify
+  union: union,
+  intersection: intersection,
+  difference: difference,
+  split: split$2,
+  fill: fill$2,
+  template: template,
+  assert: assert,
+  asserts: asserts,
+  retract: retract,
+  verify: verify,
+  omit: omit$3
 });
 
 function undo(self) {
@@ -4256,60 +4186,43 @@ function undoable(self) {
 function redoable(self) {
   return self.pos > 0;
 }
-function reset$1(self) {
+function revert(self) {
   const at = count$c(self.history) - 1,
     state = nth$6(self.history, at);
   return new Journal(at, self.max, self.history, state);
 }
-function resettable(self) {
+function revertible(self) {
   return self.pos !== count$c(self.history) - 1;
 }
-function deref$3(self) {
+function deref$4(self) {
   return self.state;
 }
-function fmap$4(self, f) {
+function fmap$5(self, f) {
   const revised = f(self.state);
   return new Journal(0, self.max, prepend$2(self.pos ? slice(self.history, self.pos) : self.history, revised), revised);
 }
 function revision(self, pos) {
   return [self.history[pos], self.history[pos + 1] || null];
 }
-var behave$m = does(keying("Journal"), implement(IDeref, {
-  deref: deref$3
+var behave$l = does(keying("Journal"), implement(IDeref, {
+  deref: deref$4
 }), implement(IFunctor, {
-  fmap: fmap$4
-}), implement(IResettable, {
-  reset: reset$1,
-  resettable
+  fmap: fmap$5
 }), implement(IRevertible, {
   undo,
   redo,
+  revert,
   flush,
   crunch,
   flushable,
   crunchable,
   undoable,
   redoable,
+  revertible,
   revision
 }));
 
-behave$m(Journal);
-
-function monadic(construct, flat) {
-  function fmap(self, f) {
-    return construct(f(self.value));
-  }
-  function deref(self) {
-    return self.value;
-  }
-  return does(implement(IDeref, {
-    deref
-  }), implement(IFlatMappable, {
-    flat
-  }), implement(IFunctor, {
-    fmap
-  }));
-}
+behave$l(Journal);
 
 function otherwise$3(self) {
   return self.value;
@@ -4317,239 +4230,51 @@ function otherwise$3(self) {
 function flat$2(self) {
   return self.value instanceof Just ? self.value : self;
 }
-var behave$l = does(keying("Just"), monadic(maybe, flat$2), implement(IOtherwise, {
+function fmap$4(self, f) {
+  return maybe(f(self.value));
+}
+function deref$3(self) {
+  return self.value;
+}
+var behave$k = does(keying("Just"), implement(IFunctor, {
+  fmap: fmap$4
+}), implement(IFlatMappable, {
+  flat: flat$2
+}), implement(IDeref, {
+  deref: deref$3
+}), implement(IOtherwise, {
   otherwise: otherwise$3
 }));
 
-behave$l(Just);
+behave$k(Just);
 
-function Left(value) {
+function Left$1(value) {
   this.value = value;
 }
-Left.prototype[Symbol.toStringTag] = "Left";
-const left = thrush(constructs(Left));
+Left$1.prototype[Symbol.toStringTag] = "Left";
+const left = thrush(constructs(Left$1));
 
 const fmap$3 = identity;
-const flat$1 = identity;
+function flat$1(self) {
+  return self.value instanceof Right || self.value instanceof Left ? self.value : self;
+}
 function fork$3(self, reject, resolve) {
   reject(self.value);
 }
 function deref$2(self) {
   return self.value;
 }
-var behave$k = does(keying("Left"), monadic(left, flat$1), implement(IDeref, {
+var behave$j = does(keying("Left"), implement(IDeref, {
   deref: deref$2
-}), implement(IForkable, {
-  fork: fork$3
 }), implement(IFunctor, {
   fmap: fmap$3
+}), implement(IFlatMappable, {
+  flat: flat$1
+}), implement(IForkable, {
+  fork: fork$3
 }));
 
-behave$k(Left);
-
-var p$2 = /*#__PURE__*/Object.freeze({
-  __proto__: null,
-  ancestors: ancestors,
-  asLeaves: asLeaves,
-  assoc: assoc$8,
-  assocIn: assocIn,
-  children: children$1,
-  clone: clone$5,
-  closest: closest$2,
-  coerce: coerce,
-  conj: conj$9,
-  contains: contains$8,
-  descendants: descendants$1,
-  dissoc: dissoc$5,
-  downward: downward,
-  excludes: excludes,
-  first: first$d,
-  get: get,
-  getIn: getIn,
-  includes: includes$a,
-  keys: keys$a,
-  leaves: leaves,
-  nextSibling: nextSibling$2,
-  nextSiblings: nextSiblings$2,
-  parent: parent$1,
-  parents: parents$2,
-  patch: patch,
-  prevSibling: prevSibling$2,
-  prevSiblings: prevSiblings$2,
-  prop: prop,
-  rest: rest$d,
-  reverse: reverse$4,
-  rewrite: rewrite,
-  root: root$2,
-  seq: seq$9,
-  siblings: siblings$2,
-  transpose: transpose,
-  unconj: unconj$1,
-  update: update,
-  updateIn: updateIn,
-  upward: upward,
-  vals: vals$5
-});
-
-function path(self) {
-  return self.path;
-}
-function deref$1(self) {
-  return getIn(self.root, self.path);
-}
-function conj$3(self, value) {
-  var _value, _p$conj, _p;
-  return swap(self, (_p = p$2, _p$conj = _p.conj, _value = value, function conj(_argPlaceholder) {
-    return _p$conj.call(_p, _argPlaceholder, _value);
-  }));
-}
-function lookup$4(self, key) {
-  return Object.assign(clone$5(self), {
-    path: conj$9(self.path, key)
-  });
-}
-function assoc$3(self, key, value) {
-  var _key, _value2, _p$assoc, _p2;
-  return swap(self, (_p2 = p$2, _p$assoc = _p2.assoc, _key = key, _value2 = value, function assoc(_argPlaceholder2) {
-    return _p$assoc.call(_p2, _argPlaceholder2, _key, _value2);
-  }));
-}
-function contains$3(self, key) {
-  return includes$a(keys$4(self), key);
-}
-function dissoc$2(self, key) {
-  var _key2, _p$dissoc, _p3;
-  return swap(self, (_p3 = p$2, _p$dissoc = _p3.dissoc, _key2 = key, function dissoc(_argPlaceholder3) {
-    return _p$dissoc.call(_p3, _argPlaceholder3, _key2);
-  }));
-}
-function reset(self, value) {
-  return Object.assign(clone$5(self), {
-    root: assocIn(self.root, self.path, value)
-  });
-}
-function swap(self, f) {
-  return Object.assign(clone$5(self), {
-    root: updateIn(self.root, self.path, f)
-  });
-}
-function fmap$2(self, f) {
-  return Object.assign(clone$5(self), {
-    path: f(self.path)
-  });
-}
-function root$1(self) {
-  return Object.assign(clone$5(self), {
-    path: []
-  });
-}
-function children(self) {
-  return map(function (key) {
-    return Object.assign(clone$5(self), {
-      path: conj$9(self.path, key)
-    });
-  }, keys$4(self));
-}
-function keys$4(self) {
-  const value = deref$1(self);
-  return satisfies(IMap, value) ? keys$a(value) : emptyList();
-}
-function vals$2(self) {
-  var _value3, _p$get, _p4;
-  const value = deref$1(self);
-  return map((_p4 = p$2, _p$get = _p4.get, _value3 = value, function get(_argPlaceholder4) {
-    return _p$get.call(_p4, _value3, _argPlaceholder4);
-  }), keys$4(self));
-}
-function siblings$1(self) {
-  const p = parent(self),
-    ctx = toArray(butlast(self.path)),
-    key = last(self.path);
-  return map(function (key) {
-    return Object.assign(p.clone(self), {
-      path: p.conj(ctx, key)
-    });
-  }, remove(function (k) {
-    return k === key;
-  }, p ? keys$4(p) : []));
-}
-function prevSiblings$1(self) {
-  const p = parent(self),
-    ctx = toArray(butlast(self.path)),
-    key = last(self.path);
-  return map(function (key) {
-    return Object.assign(p.clone(self), {
-      path: p.conj(ctx, key)
-    });
-  }, p.reverse(toArray(take(1, takeWhile(function (k) {
-    return k !== key;
-  }, p ? keys$4(p) : [])))));
-}
-function nextSiblings$1(self) {
-  const p = parent(self),
-    ctx = toArray(butlast(self.path)),
-    key = last(self.path);
-  return map(function (key) {
-    return Object.assign(p.clone(self), {
-      path: p.conj(ctx, key)
-    });
-  }, drop(1, dropWhile(function (k) {
-    return k !== key;
-  }, p ? keys$4(p) : [])));
-}
-const prevSibling$1 = comp(first$d, prevSiblings$1);
-const nextSibling$1 = comp(first$d, nextSiblings$1);
-function parent(self) {
-  return seq$9(self.path) ? Object.assign(clone$5(self), {
-    path: toArray(butlast(self.path))
-  }) : null;
-}
-function parents$1(self) {
-  return lazySeq(function () {
-    const p = parent(self);
-    return p ? cons(p, parents$1(p)) : emptyList();
-  });
-}
-function closest$1(self, pred) {
-  return detect(comp(pred, deref$1), cons(self, parents$1(self)));
-}
-const descendants = downward(children);
-var behave$j = does(keying("Lens"), implement(IPath, {
-  path
-}), implement(ICollection, {
-  conj: conj$3
-}), implement(ILookup, {
-  lookup: lookup$4
-}), implement(IAssociative, {
-  assoc: assoc$3,
-  contains: contains$3
-}), implement(IMap, {
-  keys: keys$4,
-  vals: vals$2,
-  dissoc: dissoc$2
-}), implement(IFunctor, {
-  fmap: fmap$2
-}), implement(ISwappable, {
-  swap
-}), implement(IResettable, {
-  reset
-}), implement(IHierarchy, {
-  root: root$1,
-  children,
-  parents: parents$1,
-  parent,
-  closest: closest$1,
-  descendants,
-  siblings: siblings$1,
-  nextSiblings: nextSiblings$1,
-  nextSibling: nextSibling$1,
-  prevSiblings: prevSiblings$1,
-  prevSibling: prevSibling$1
-}), implement(IDeref, {
-  deref: deref$1
-}));
-
-behave$j(Lens);
+behave$j(Left$1);
 
 function first$6(self) {
   return self.head;
@@ -4572,7 +4297,7 @@ function invoke(self, ...args) {
   const key = self.dispatch.apply(this, args);
   const hashcode = hash$7(key);
   const potentials = self.methods[hashcode];
-  const f = some$1(function ([k, h]) {
+  const f = some(function ([k, h]) {
     return equiv$b(k, key) ? h : null;
   }, potentials) || self.fallback || function () {
     throw new Error("Unable to locate appropriate method.");
@@ -4588,9 +4313,9 @@ behave$h(Multimethod);
 function otherwise$2(self, other) {
   return other;
 }
-const deref = constantly(null);
+const deref$1 = constantly(null);
 var behave$g = does(keying("Nothing"), implement(IDeref, {
-  deref
+  deref: deref$1
 }), implement(IOtherwise, {
   otherwise: otherwise$2
 }), implement(IFlatMappable, {
@@ -4608,53 +4333,52 @@ function emptyObject() {
 
 var p$1 = /*#__PURE__*/Object.freeze({
   __proto__: null,
-  ako: ako,
-  alike: alike,
-  assoc: assoc$8,
-  assocIn: assocIn,
-  clone: clone$5,
-  coerce: coerce,
   compare: compare$6,
-  contains: contains$8,
-  count: count$c,
-  dissoc: dissoc$5,
-  empty: empty$2,
-  eq: eq,
-  equiv: equiv$b,
-  equivalent: equivalent,
-  excludes: excludes,
-  first: first$d,
-  get: get,
-  getIn: getIn,
-  gt: gt,
-  gte: gte,
-  includes: includes$a,
-  invokable: invokable,
-  invoke: invoke$2,
-  is: is,
-  key: key$3,
-  keying: keying,
-  keys: keys$a,
-  kin: kin,
   lt: lt,
   lte: lte,
-  next: next$b,
+  gt: gt,
+  gte: gte,
+  kin: kin,
+  equiv: equiv$b,
+  alike: alike,
+  equivalent: equivalent,
+  eq: eq,
   notEq: notEq,
-  patch: patch,
-  prop: prop,
   reduce: reduce$e,
-  reducekv: reducekv$9,
+  reducing: reducing,
   reducekv2: reducekv2,
   reducekv3: reducekv3,
-  reducing: reducing,
-  rest: rest$d,
-  rewrite: rewrite,
-  seq: seq$9,
-  transpose: transpose,
-  update: update,
-  updateIn: updateIn,
+  reducekv: reducekv$9,
+  get: get,
+  getIn: getIn,
+  keys: keys$9,
+  vals: vals$4,
+  dissoc: dissoc$4,
+  key: key$3,
   val: val$2,
-  vals: vals$5
+  is: is,
+  ako: ako,
+  keying: keying,
+  assoc: assoc$7,
+  assocIn: assocIn,
+  update: update,
+  contains: contains$7,
+  updateIn: updateIn,
+  rewrite: rewrite,
+  prop: prop,
+  patch: patch,
+  clone: clone$5,
+  count: count$c,
+  next: next$b,
+  first: first$d,
+  rest: rest$d,
+  seq: seq$9,
+  includes: includes$a,
+  excludes: excludes,
+  transpose: transpose,
+  empty: empty$2,
+  invoke: invoke$2,
+  coerce: coerce
 });
 
 var _Object, _p$coerce, _p;
@@ -4671,43 +4395,43 @@ function descriptive$1(self) {
 }
 function subsumes(self, other) {
   return reducekv$9(function (memo, key, value) {
-    return memo ? contains$8(self, key, value) : reduced(memo);
+    return memo ? contains$7(self, key, value) : reduced(memo);
   }, true, other);
 }
 const emptied = branch(satisfies(IEmptyableCollection), empty$2, emptyObject);
 function juxtVals(self, value) {
   return reducekv$9(function (memo, key, f) {
-    return assoc$8(memo, key, isFunction(f) ? f(value) : f);
+    return assoc$7(memo, key, isFunction(f) ? f(value) : f);
   }, emptied(self), self);
 }
 function selectKeys(self, keys) {
   return reduce$e(function (memo, key) {
-    return assoc$8(memo, key, get(self, key));
+    return assoc$7(memo, key, get(self, key));
   }, emptied(self), keys);
 }
 function removeKeys(self, keys) {
   return reducekv$9(function (memo, key, value) {
-    return includes$a(keys, key) ? memo : assoc$8(memo, key, value);
+    return includes$a(keys, key) ? memo : assoc$7(memo, key, value);
   }, emptied(self), self);
 }
 function mapKeys(self, f) {
   return reducekv$9(function (memo, key, value) {
-    return assoc$8(memo, f(key), value);
+    return assoc$7(memo, f(key), value);
   }, emptied(self), self);
 }
 function mapVals2(self, f) {
   return reducekv$9(function (memo, key, value) {
-    return assoc$8(memo, key, f(value));
+    return assoc$7(memo, key, f(value));
   }, self, self);
 }
 function mapVals3(init, f, pred) {
   return reduce$e(function (memo, key) {
-    return pred(key) ? assoc$8(memo, key, f(get(memo, key))) : memo;
-  }, init, keys$a(init));
+    return pred(key) ? assoc$7(memo, key, f(get(memo, key))) : memo;
+  }, init, keys$9(init));
 }
 const mapVals = overload(null, null, mapVals2, mapVals3);
 function defaults2(self, defaults) {
-  return reducekv$9(assoc$8, defaults, self);
+  return reducekv$9(assoc$7, defaults, self);
 }
 const defaults = overload(null, null, defaults2, reducing(defaults2));
 function compile(self) {
@@ -4721,7 +4445,7 @@ const vals$1 = Object.values;
 function fill$1(self, params) {
   return reducekv$9(function (memo, key, value) {
     var _value, _params, _p$fill, _p, _params2, _fill;
-    return assoc$8(memo, key, (_value = value, branch(isString, (_p = p$1, _p$fill = _p.fill, _params = params, function fill(_argPlaceholder) {
+    return assoc$7(memo, key, (_value = value, branch(isString, (_p = p$1, _p$fill = _p.fill, _params = params, function fill(_argPlaceholder) {
       return _p$fill.call(_p, _argPlaceholder, _params);
     }), isObject, (_fill = fill$1, _params2 = params, function fill(_argPlaceholder2) {
       return _fill(_argPlaceholder2, _params2);
@@ -4746,7 +4470,7 @@ function compact1(self) {
 }
 function compact2(self, pred) {
   return reducekv$9(function (memo, key, value) {
-    return pred([key, value]) ? memo : assoc$8(memo, key, value);
+    return pred([key, value]) ? memo : assoc$7(memo, key, value);
   }, {}, self);
 }
 const compact = overload(null, compact1, compact2);
@@ -4764,7 +4488,7 @@ function compare$2(self, other) {
   //assume like keys, otherwise use your own comparator!
   return equiv$b(self, other) ? 0 : descriptive$1(other) ? reduce$e(function (memo, key) {
     return memo == 0 ? compare$6(get(self, key), get(other, key)) : reduced$1(memo);
-  }, 0, keys$a(self)) : -1;
+  }, 0, keys$9(self)) : -1;
 }
 function conj$2(self, entry) {
   const key = key$3(entry),
@@ -4774,9 +4498,9 @@ function conj$2(self, entry) {
   return result;
 }
 function equiv$6(self, other) {
-  return self === other ? true : descriptive$1(other) && count$c(keys$a(self)) === count$c(keys$a(other)) && reduce$e(function (memo, key) {
+  return self === other ? true : descriptive$1(other) && count$c(keys$9(self)) === count$c(keys$9(other)) && reduce$e(function (memo, key) {
     return memo ? equiv$b(get(self, key), get(other, key)) : reduced$1(memo);
-  }, true, keys$a(self));
+  }, true, keys$9(self));
 }
 function find(self, key) {
   return contains$2(self, key) ? [key, lookup$3(self, key)] : null;
@@ -4810,7 +4534,7 @@ function next$4(self) {
   return next2(self, next$b(keys$3(self)));
 }
 function dissoc$1(self, key) {
-  if (contains$8(self, key)) {
+  if (contains$7(self, key)) {
     const result = clone$3(self);
     delete result[key];
     return result;
@@ -4911,30 +4635,30 @@ behave$f(Object);
 
 var p = /*#__PURE__*/Object.freeze({
   __proto__: null,
-  add: add$3,
-  alike: alike,
+  start: start$1,
+  end: end$1,
+  inside: inside,
   between: between,
+  overlap: overlap,
+  directed: directed,
+  steps: steps,
+  subtract: subtract,
+  add: add$3,
+  inc: inc,
+  dec: dec,
+  divide: divide$1,
   coerce: coerce,
   compare: compare$6,
-  dec: dec,
-  directed: directed,
-  divide: divide$1,
-  end: end$1,
-  eq: eq,
-  equiv: equiv$b,
-  equivalent: equivalent,
-  gt: gt,
-  gte: gte,
-  inc: inc,
-  inside: inside,
-  kin: kin,
   lt: lt,
   lte: lte,
-  notEq: notEq,
-  overlap: overlap,
-  start: start$1,
-  steps: steps,
-  subtract: subtract
+  gt: gt,
+  gte: gte,
+  kin: kin,
+  equiv: equiv$b,
+  alike: alike,
+  equivalent: equivalent,
+  eq: eq,
+  notEq: notEq
 });
 
 function Period(start, end) {
@@ -4972,7 +4696,7 @@ function seq$4(self) {
     return map((_array = array, _key = key, function array(_argPlaceholder) {
       return _array(_key, _argPlaceholder);
     }), asserts(self, key));
-  }, keys$a(self)));
+  }, keys$9(self)));
 }
 function contains$1(self, key) {
   return self.hasOwnProperty(key);
@@ -5044,7 +4768,7 @@ function record$1(Type, defaults) {
     delete copy[key];
     return includes$a(Object.keys(new Type()), key) ? coerce(copy, Object) : copy;
   }
-  const retract = overload(null, null, dissoc$5, retract3);
+  const retract = overload(null, null, dissoc$4, retract3);
   const make = constructs(Type);
   ICoercible.addMethod([Object, Type], make);
   ICoercible.addMethod([Type, Object], function (attrs) {
@@ -5101,7 +4825,7 @@ function multirecord(Type, defaults, multiple) {
     return maybe(get(self, key), multiple(key) ? identity : array);
   }
   function assert(self, key, value) {
-    return assoc$1(self, key, multiple(key) ? conj$9(get(self, key, defaults(key)), value) : value);
+    return assoc$1(self, key, multiple(key) ? conj$8(get(self, key, defaults(key)), value) : value);
   }
   function retract3(self, key, value) {
     let copy = self;
@@ -5119,7 +4843,7 @@ function multirecord(Type, defaults, multiple) {
     delete copy[key];
     return includes$a(Object.keys(new Type()), key) ? coerce(copy, Object) : copy;
   }
-  const retract = overload(null, null, dissoc$5, retract3);
+  const retract = overload(null, null, dissoc$4, retract3);
   doto(Type, implement(ITopic, {
     asserts,
     assert,
@@ -5235,7 +4959,7 @@ const toPromise = (_coerce = coerce, _Promise = Promise, function coerce(_argPla
 function awaits(f) {
   return function (...args) {
     if (detect(isPromise, args)) {
-      return fmap$8(Promise.all(args), function (args) {
+      return fmap$9(Promise.all(args), function (args) {
         return f.apply(this, args);
       });
     } else {
@@ -5244,14 +4968,14 @@ function awaits(f) {
   };
 }
 
-function fmap$1(self, resolve) {
+function fmap$2(self, resolve) {
   return self.then(resolve);
 }
 function fork$2(self, reject, resolve) {
   self.then(resolve, reject);
 }
 function otherwise$1(self, other) {
-  return fmap$1(self, function (value) {
+  return fmap$2(self, function (value) {
     return value == null ? other : value;
   });
 }
@@ -5265,7 +4989,7 @@ var behave$c = does(keying("Promise"), implement(IEquiv, {
 }), implement(IForkable, {
   fork: fork$2
 }), implement(IFunctor, {
-  fmap: fmap$1
+  fmap: fmap$2
 }));
 
 Object.assign(behaviors, {
@@ -5437,14 +5161,17 @@ var behave$a = keying("RegExp");
 
 behave$a(RegExp);
 
-function Right(value) {
+function Right$1(value) {
   this.value = value;
 }
-Right.prototype[Symbol.toStringTag] = "Right";
-const right = thrush(constructs(Right));
+Right$1.prototype[Symbol.toStringTag] = "Right";
+const right = thrush(constructs(Right$1));
+function result(value) {
+  return value instanceof Error ? left(value) : right(value);
+}
 
 function flat(self) {
-  return self.value instanceof Right || self.value instanceof Left ? self.value : self;
+  return self.value instanceof Right$1 || self.value instanceof Left$1 ? self.value : self;
 }
 function otherwise(self, other) {
   return self.value;
@@ -5452,13 +5179,29 @@ function otherwise(self, other) {
 function fork$1(self, reject, resolve) {
   resolve(self.value);
 }
-var behave$9 = does(keying("Right"), monadic(right, flat), implement(IForkable, {
+function fmap$1(self, f) {
+  try {
+    return result(f(self.value));
+  } catch (error) {
+    return left(error);
+  }
+}
+function deref(self) {
+  return self.value;
+}
+var behave$9 = does(keying("Right"), implement(IDeref, {
+  deref
+}), implement(IFunctor, {
+  fmap: fmap$1
+}), implement(IFlatMappable, {
+  flat
+}), implement(IForkable, {
   fork: fork$1
 }), implement(IOtherwise, {
   otherwise
 }));
 
-behave$9(Right);
+behave$9(Right$1);
 
 function seq$2(self) {
   return seq$9(self.items);
@@ -5619,7 +5362,7 @@ Object.assign(behaviors, {
 behave$7(Set);
 
 function isMap(self) {
-  return _$1.is(self, Map);
+  return is(self, Map);
 }
 function map1(obj) {
   return new Map(obj);
@@ -5627,7 +5370,7 @@ function map1(obj) {
 function map0() {
   return new Map();
 }
-const hashMap = _$1.overload(map0, map1); //cannot reuse `map`
+const hashMap = overload(map0, map1); //cannot reuse `map`
 
 function clone$1(self) {
   return new self.constructor(self);
@@ -5668,7 +5411,7 @@ Object.assign(behaviors, {
 behave$6(Map);
 
 function isWeakMap(self) {
-  return _$1.is(self, WeakMap);
+  return is(self, WeakMap);
 }
 function weakMap1(obj) {
   return new WeakMap(obj);
@@ -5676,7 +5419,7 @@ function weakMap1(obj) {
 function weakMap0() {
   return new WeakMap();
 }
-const weakMap = _$1.overload(weakMap0, weakMap1);
+const weakMap = overload(weakMap0, weakMap1);
 
 var behave$5 = does(behave$6, keying("WeakMap"));
 
@@ -5907,35 +5650,21 @@ var iprotocol = does(implement(IMap, {
   keys: keys$1
 }));
 
-var _behaviors, _behaves, _param, _test, _days, _recurs, _str, _mapkv, _str2, _join, _collapse, _ISeq, _satisfies;
+var _behaviors, _behaves, _param, _test, _days, _recurs, _str, _mapkv, _str2, _join, _collapse, _ISeq, _satisfies, _p$split, _p7;
 const config = _config;
 iprotocol(Protocol);
 const behave = (_behaves = behaves, _behaviors = behaviors, function behaves(_argPlaceholder) {
   return _behaves(_behaviors, _argPlaceholder);
 });
-function fillProp(obj, key, value) {
-  if (!obj.hasOwnProperty(key)) {
-    Object.defineProperty(obj, key, {
-      value,
-      writable: true,
-      enumerable: false,
-      configurable: true
-    });
-  }
-}
-function equals(other) {
-  return equiv$b(this, other);
-}
-fillProp(Object.prototype, "equals", equals);
 const numeric = (_test = test, _param = /^\d+$/i, function test(_argPlaceholder2) {
   return _test(_param, _argPlaceholder2);
 });
 function siblings(self) {
-  const parent = parent$1(self);
-  if (parent) {
+  const parent$1 = parent(self);
+  if (parent$1) {
     return filter(function (sibling) {
       return sibling !== self;
-    }, children$1(parent));
+    }, children(parent$1));
   } else {
     return emptyList();
   }
@@ -5950,12 +5679,12 @@ function nextSiblings(self) {
     return sibling !== self;
   }, siblings(self)));
 }
-const prevSibling = comp(first$d, prevSiblings$2);
-const nextSibling = comp(first$d, nextSiblings$2);
-const parents = upward(parent$1);
+const prevSibling = comp(first$d, prevSiblings$1);
+const nextSibling = comp(first$d, nextSiblings$1);
+const parents = upward(parent);
 const root = comp(last, parents);
 function closest(self, pred) {
-  return detect(pred, cons(self, parents$2(self)));
+  return detect(pred, cons(self, parents$1(self)));
 }
 extend(IHierarchy, {
   siblings,
@@ -6026,8 +5755,8 @@ function plopIn(self, path, value) {
 function deconstruct(dur, ...units) {
   let memo = dur;
   return mapa(function (unit) {
-    const n = fmap$8(divide$1(memo, unit), Math.floor);
-    memo = subtract(memo, fmap$8(unit, constantly(n)));
+    const n = fmap$9(divide$1(memo, unit), Math.floor);
+    memo = subtract(memo, fmap$9(unit, constantly(n)));
     return n;
   }, units);
 }
@@ -6040,12 +5769,14 @@ const toQueryString = opt((_mapkv = mapkv, _str = (_str2 = str, function str(_ar
 }), (_collapse = collapse, function collapse(_argPlaceholder10) {
   return _collapse("?", _argPlaceholder10);
 }));
-function fromQueryString(url) {
-  return fold(function (params, match) {
-    const key = decodeURIComponent(match[1]),
-      val = decodeURIComponent(match[2]);
-    params[key] = val;
-  }, {}, reFindAll(/[?&]([^=&]*)=([^=&]*)/g, url));
+function fromQueryString(search) {
+  const params = new URLSearchParams(search),
+    keys = Array.from(params.keys());
+  const obj = {};
+  for (const key of keys) {
+    obj[key] = params.get(key);
+  }
+  return obj;
 }
 function distinct0() {
   //transducer
@@ -6095,7 +5826,7 @@ function elapsed(self) {
   return duration(end$1(self) - start$1(self));
 }
 function collapse(...args) {
-  return some$1(isBlank, args) ? "" : join("", args);
+  return some(isBlank, args) ? "" : join("", args);
 }
 function impartable(f) {
   return isFunction(f) && !/^[A-Z]./.test(name(f));
@@ -6125,21 +5856,21 @@ function decorating4(target, source, pred, f) {
 const decorating = overload(null, null, decorating2, decorating3, decorating4);
 function include2(self, value) {
   var _value, _p$conj, _p, _value2, _p$omit, _p2, _value3, _p$includes, _p3;
-  return toggles((_p = p$3, _p$conj = _p.conj, _value = value, function conj(_argPlaceholder12) {
+  return toggles((_p = p$2, _p$conj = _p.conj, _value = value, function conj(_argPlaceholder12) {
     return _p$conj.call(_p, _argPlaceholder12, _value);
-  }), (_p2 = p$3, _p$omit = _p2.omit, _value2 = value, function omit(_argPlaceholder13) {
+  }), (_p2 = p$2, _p$omit = _p2.omit, _value2 = value, function omit(_argPlaceholder13) {
     return _p$omit.call(_p2, _argPlaceholder13, _value2);
-  }), (_p3 = p$3, _p$includes = _p3.includes, _value3 = value, function includes(_argPlaceholder14) {
+  }), (_p3 = p$2, _p$includes = _p3.includes, _value3 = value, function includes(_argPlaceholder14) {
     return _p$includes.call(_p3, _argPlaceholder14, _value3);
   }), self);
 }
 function include3(self, value, want) {
   var _value4, _p$conj2, _p4, _value5, _p$omit2, _p5, _value6, _p$includes2, _p6;
-  return toggles((_p4 = p$3, _p$conj2 = _p4.conj, _value4 = value, function conj(_argPlaceholder15) {
+  return toggles((_p4 = p$2, _p$conj2 = _p4.conj, _value4 = value, function conj(_argPlaceholder15) {
     return _p$conj2.call(_p4, _argPlaceholder15, _value4);
-  }), (_p5 = p$3, _p$omit2 = _p5.omit, _value5 = value, function omit(_argPlaceholder16) {
+  }), (_p5 = p$2, _p$omit2 = _p5.omit, _value5 = value, function omit(_argPlaceholder16) {
     return _p$omit2.call(_p5, _argPlaceholder16, _value5);
-  }), (_p6 = p$3, _p$includes2 = _p6.includes, _value6 = value, function includes(_argPlaceholder17) {
+  }), (_p6 = p$2, _p$includes2 = _p6.includes, _value6 = value, function includes(_argPlaceholder17) {
     return _p$includes2.call(_p6, _argPlaceholder17, _value6);
   }), self, want);
 }
@@ -6156,48 +5887,6 @@ function inventory(obj) {
 const fmt = expands(str);
 function when(pred, ...xs) {
   return last(map(realize, pred ? xs : null));
-}
-function readable(keys) {
-  const lookup = keys ? function (self, key) {
-    if (!includes$a(keys, key)) {
-      throw new Error("Cannot read from " + key);
-    }
-    return self[key];
-  } : function (self, key) {
-    return self[key];
-  };
-  return implement(ILookup, {
-    lookup
-  });
-}
-function writable(keys) {
-  function clone(self) {
-    return Object.assign(Object.create(self.constructor.prototype), self);
-  }
-  function contains(self, key) {
-    return self.hasOwnProperty(key);
-  }
-  const assoc = keys ? function (self, key, value) {
-    if (!includes$a(keys, key) || !contains(self, key)) {
-      throw new Error("Cannot write to " + key);
-    }
-    const tgt = clone(self);
-    tgt[key] = value;
-    return tgt;
-  } : function (self, key, value) {
-    if (!contains(self, key)) {
-      throw new Error("Cannot write to " + key);
-    }
-    const tgt = clone(self);
-    tgt[key] = value;
-    return tgt;
-  };
-  return does(implement(ICloneable, {
-    clone
-  }), implement(IAssociative, {
-    assoc,
-    contains
-  }));
 }
 function scanKey1(better) {
   return partial(scanKey, better);
@@ -6227,7 +5916,7 @@ function absorb2(tgt, src) {
     } else {
       absorbed = value;
     }
-    return assoc$8(memo, key, absorbed);
+    return assoc$7(memo, key, absorbed);
   }, tgt, src || empty$2(tgt));
 }
 const absorb = overload(constantly({}), identity, absorb2, reducing(absorb2));
@@ -6252,9 +5941,7 @@ function reduceToArray(self) {
   }, [], self);
 }
 ICoercible.addMethod([Set, Array], unary(Array.from));
-ICoercible.addMethod([Array, Set], function (coll) {
-  return new Set(coll);
-});
+ICoercible.addMethod([Array, Set], unary(set));
 ICoercible.addMethod([Number, String], unary(str));
 ICoercible.addMethod([Number, Date], unary(date));
 ICoercible.addMethod([Duration, Duration], identity);
@@ -6262,8 +5949,8 @@ ICoercible.addMethod([Period, Duration], function (self) {
   return self.end == null || self.start == null ? duration(Number.POSITIVE_INFINITY) : duration(self.end - self.start);
 });
 ICoercible.addMethod([Promise, Promise], identity);
-ICoercible.addMethod([Right, Promise], unfork);
-ICoercible.addMethod([Left, Promise], unfork);
+ICoercible.addMethod([Right$1, Promise], unfork);
+ICoercible.addMethod([Left$1, Promise], unfork);
 ICoercible.addMethod([Error, Promise], unfork);
 ICoercible.addMethod([Task, Promise], unfork);
 ICoercible.addMethod([Object, Object], identity);
@@ -6274,25 +5961,18 @@ ICoercible.addMethod([Array, Object], function (self) {
   }, {}, self);
 });
 ICoercible.addMethod([Array, Array], identity);
-ICoercible.addMethod([Concatenated, Array], reduceToArray);
+ICoercible.addMethod([Concatenated, Array], unary(Array.from));
 ICoercible.addMethod([EmptyList, Array], emptyArray);
-ICoercible.addMethod([List, Array], reduceToArray);
-ICoercible.addMethod([Range, Array], reduceToArray);
+ICoercible.addMethod([List, Array], unary(Array.from));
+ICoercible.addMethod([Array, List], unary(spread(list)));
+ICoercible.addMethod([Range, Array], unary(Array.from));
 ICoercible.addMethod([Nil, Array], emptyArray);
-ICoercible.addMethod([IndexedSeq, Array], reduceToArray);
+ICoercible.addMethod([IndexedSeq, Array], unary(Array.from));
 ICoercible.addMethod([RevSeq, Array], unary(Array.from));
-ICoercible.addMethod([LazySeq, Array], function (xs) {
-  let ys = xs;
-  const zs = [];
-  while (seq$9(ys) != null) {
-    zs.push(first$d(ys));
-    ys = rest$d(ys);
-  }
-  return zs;
-});
+ICoercible.addMethod([LazySeq, Array], unary(Array.from));
 ICoercible.addMethod([Object, Array], reduceToArray);
-ICoercible.addMethod([String, Array], function (self) {
-  return self.split("");
-});
+ICoercible.addMethod([String, Array], (_p7 = p$2, _p$split = _p7.split, function split(_argPlaceholder20) {
+  return _p$split.call(_p7, _argPlaceholder20, "");
+}));
 
-export { Chance, Concatenated, Duration, EmptyList, GUID, IAddable, IAppendable, IAssociative, IBlankable, IBounded, ICloneable, ICoercible, ICollection, ICompactible, IComparable, ICounted, IDeref, IDisposable, IDivisible, IEmptyableCollection, IEquiv, IFind, IFlatMappable, IFn, IForkable, IFunctor, IHashable, IHierarchy, IIdentifiable, IInclusive, IIndexed, IInsertable, IInversive, IKVReducible, ILookup, IMap, IMapEntry, IMergable, IMultipliable, INamable, INext, IOmissible, IOtherwise, IPath, IPrependable, IReducible, IResettable, IReversible, IRevertible, ISeq, ISeqable, ISequential$1 as ISequential, ISet, ISplittable, ISwappable, ITemplate, ITopic, Indexed, IndexedSeq, Journal, Just, LazySeq, Left, Lens, List, Multimethod, Nil, Nothing, Period, PostconditionError, PreconditionError, Protocol, Range, Recurrence, Reduced, RevSeq, Right, Task, UID, absorb, add$3 as add, addMethod, after, ako, alike, all, also, ancestors, and, annually, any, append$1 as append, apply, applying, arity, array, asLeaves, asc, assert, asserts, assoc$8 as assoc, assocIn, assume, attach, attempt, average, awaits, before, behave, behaves, behaviors, best, between, binary, blank$2 as blank, blot, bool, boolean, both, braid, branch, butlast, camelToDashed, cat, chain, chance, children$1 as children, clamp, cleanly, clockHour, clone$5 as clone, closest$2 as closest, coalesce, coerce, collapse, comp, compact$1 as compact, compare$6 as compare, compile, complement, concat, concatenated, cond, config, conj$9 as conj, cons, constantly, construct, constructs, contains$8 as contains, count$c as count, countBy, crunch$1 as crunch, crunchable$1 as crunchable, curry, cycle, date, day, days, dec, deconstruct, decorating, dedupe, defaults, deferring, deref$6 as deref, desc, descendants$1 as descendants, descriptive$1 as descriptive, detach, detect, detectIndex, difference, directed, disj$1 as disj, dispose, dissoc$5 as dissoc, distinct, divide$1 as divide, does, doto, dow, downward, drop, dropLast, dropWhile, duration, edit, editIn, either, elapsed, empty$2 as empty, emptyArray, emptyList, emptyObject, emptyPeriod, emptyRange, emptyRecurrence, emptySet, emptyString, end$1 as end, endsWith, entries, eod, eom, eoy, eq, equiv$b as equiv, equivalent, error, every, everyPair, everyPred, excludes, execute, expands, extend, factory, farg, fill$2 as fill, filled, filter, filtera, find$1 as find, first$d as first, flat$4 as flat, flatMap$2 as flatMap, flatten, flip, float, flush$1 as flush, flushable$1 as flushable, fmap$8 as fmap, fmt, fnil, fold, folding, foldkv, fork$4 as fork, forward, fromQueryString, generate, get, getIn, grab, groupBy, gt, gte, guard, guid, guids, handle, hash$7 as hash, hashMap, hashTag, hour, hours, identifier, identity, idx$3 as idx, impart, implement, inc, include, includes$a as includes, inclusive, index, indexOf, indexed, indexedSeq, initial, inside, int, integers, interleave, interleaved, interpose, intersection, into, inventory, inverse$1 as inverse, invokable, invoke$2 as invoke, invokes, is, isArray, isBlank, isBoolean, isDate, isDistinct, isEmpty, isError, isEven, isFalse, isFloat, isFunction, isIdentical, isInt, isInteger, isMap, isNaN, isNative, isNeg, isNil, isNumber, isObject, isOdd, isPos, isPromise, isReduced, isRegExp, isSome, isString, isSymbol, isTrue, isValueObject, isWeakMap, isZero, iterable, iterate$1 as iterate, join, journal, juxt, juxtVals, keep, keepIndexed, key$3 as key, keyed, keying, keys$a as keys, kin, last, lastN, lazyIterable, lazySeq, least, leaves, left, lens, lift, list, lowerCase, lpad, lt, lte, ltrim, map, mapArgs, mapIndexed, mapKeys, mapSome, mapVals, mapa, mapcat, mapkv, mapvk, max, maxKey, maybe, mdow, measure, memoize, merge$5 as merge, mergeWith, midnight, millisecond, milliseconds, min, minKey, minute, minutes, modulus, month, monthDays, months, most, mult$2 as mult, multi, multimethod, name, nary, negatives, next$b as next, nextSibling$2 as nextSibling, nextSiblings$2 as nextSiblings, nil, noon, noop$1 as noop, not, notAny, notEmpty, notEq, notEvery, notSome, nothing, nth$6 as nth, nullary, num, number, numeric, obj, object, omit$3 as omit, once, only, opt, or, otherwise$4 as otherwise, overlap, overload, parent$1 as parent, parents$2 as parents, parsedo, part, partial, partially, partition, partitionAll, partitionAll1, partitionAll2, partitionAll3, partitionBy, partly, patch, path$1 as path, period, period1, pipe, pipeline, placeholder, plop, plopIn, pluck, plug, plugging, pm, positives, posn, post, pre, prepend$2 as prepend, prevSibling$2 as prevSibling, prevSiblings$2 as prevSiblings, promise, prop, protocol, quarter, quaternary, rand, randInt, randNth, range, rdow, reFind, reFindAll, reGroups, reMatches, rePattern, reSeq, readable, realize, realized, record, recurrence, recurrence1, recurs, redo$1 as redo, redoable$1 as redoable, reduce$e as reduce, reduced$1 as reduced, reducekv$9 as reducekv, reducekv2, reducekv3, reducing, reifiable, remove, removeKeys, repeat, repeatedly, replace, reset$2 as reset, resettable$1 as resettable, rest$d as rest, retract, revSeq, reverse$4 as reverse, revision$1 as revision, rewrite, right, root$2 as root, rpad, rtrim, satisfies, scan, scanKey, second, seconds, seek, selectKeys, seq$9 as seq, sequential, series, set, shuffle, siblings$2 as siblings, sift, signature, signatureHead, slice, sod, som, some$1 as some, someFn, sort, sortBy, soy, specify, splice, split$2 as split, splitAt, splitWith, spread, start$1 as start, startsWith, steps, str, subj, subs, subset, subsumes, subtract, sum, superset, swap$1 as swap, take, takeLast, takeNth, takeWhile, task, template, ternary, test, thin, thrush, tick, time, titleCase, toArray, toDuration, toObject, toPromise, toQueryString, toggles, transduce, transpose, treeSeq, trim, type, uid, uident, uids, unary, unbind, unconj$1 as unconj, undo$1 as undo, undoable$1 as undoable, unfork, union, unique, unite, unreduced, unspecify, unspread, untick, update, updateIn, upperCase, upward, val$2 as val, vals$5 as vals, verify, weakMap, weekday, weekend, weeks, when, withIndex, writable, year, years, zeros, zip };
+export { Chance, Concatenated, Duration, EmptyList, GUID, IAddable, IAppendable, IAssociative, IBlankable, IBounded, ICloneable, ICoercible, ICollection, ICompactible, IComparable, ICounted, IDeref, IDisposable, IDivisible, IEmptyableCollection, IEquiv, IFind, IFlatMappable, IFn, IForkable, IFunctor, IHashable, IHierarchy, IIdentifiable, IInclusive, IIndexed, IInsertable, IInversive, IKVReducible, ILookup, IMap, IMapEntry, IMergable, IMultipliable, INamable, INext, IOmissible, IOtherwise, IPath, IPrependable, IReducible, IReversible, IRevertible, ISeq, ISeqable, ISequential$1 as ISequential, ISet, ISplittable, ITemplate, ITopic, Indexed, IndexedSeq, Journal, Just, LazySeq, Left$1 as Left, List, Multimethod, Nil, Nothing, Period, PostconditionError, PreconditionError, Protocol, Range, Recurrence, Reduced, RevSeq, Right$1 as Right, Task, UID, absorb, add$3 as add, addMethod, after, ako, alike, all, also, ancestors, and, annually, any, append$1 as append, apply, applying, arity, array, asc, assert, asserts, assoc$7 as assoc, assocIn, assume, attach, attempt, average, awaits, before, behave, behaves, behaviors, best, between, binary, blank$2 as blank, blot, bool, boolean, both, braid, branch, butlast, camelToDashed, cat, chain, chance, children, clamp, cleanly, clockHour, clone$5 as clone, closest$1 as closest, coalesce, coerce, collapse, comp, compact$1 as compact, compare$6 as compare, compile, complement, concat, concatenated, cond, config, conj$8 as conj, cons, constantly, construct, constructs, contains$7 as contains, count$c as count, countBy, crunch$1 as crunch, crunchable$1 as crunchable, curry, cycle, date, day, days, dec, deconstruct, decorating, dedupe, defaults, deferring, deref$7 as deref, desc, descendants, descriptive$1 as descriptive, detach, detect, detectIndex, difference, directed, disj$1 as disj, dispose, dissoc$4 as dissoc, distinct, divide$1 as divide, does, doto, dow, downward, drop, dropLast, dropWhile, duration, edit, editIn, either, elapsed, empty$2 as empty, emptyArray, emptyList, emptyObject, emptyPeriod, emptyRange, emptyRecurrence, emptySet, emptyString, end$1 as end, endsWith, entries, eod, eom, eoy, eq, equiv$b as equiv, equivalent, error, every, everyPair, everyPred, excludes, execute, expands, extend, factory, farg, fill$2 as fill, filled, filter, filtera, find$1 as find, first$d as first, flat$4 as flat, flatMap$2 as flatMap, flatten, flip, float, flush$1 as flush, flushable$1 as flushable, fmap$9 as fmap, fmt, fnil, fold, folding, foldkv, fork$4 as fork, forward, fromQueryString, generate, get, getIn, grab, groupBy, gt, gte, guard, guid, guids, handle, hash$7 as hash, hashMap, hashTag, hour, hours, identifier, identity, idx$3 as idx, impart, implement, inc, include, includes$a as includes, inclusive, index, indexOf, indexed, indexedSeq, initial, inside, int, integers, interleave, interleaved, interpose, intersection, into, inventory, inverse$1 as inverse, invoke$2 as invoke, invokes, is, isArray, isBlank, isBoolean, isDate, isDistinct, isEmpty, isError, isEven, isFalse, isFloat, isFunction, isIdentical, isInt, isInteger, isMap, isNaN, isNative, isNeg, isNil, isNumber, isObject, isOdd, isPos, isPromise, isReduced, isRegExp, isSome, isString, isSymbol, isTrue, isWeakMap, isZero, iterable, iterate$1 as iterate, join, journal, juxt, juxtVals, keep, keepIndexed, key$3 as key, keyed, keying, keys$9 as keys, kin, last, lastN, lazyIterable, lazySeq, least, leaves, left, lift, list, lowerCase, lpad, lt, lte, ltrim, map, mapArgs, mapIndexed, mapKeys, mapSome, mapVals, mapa, mapcat, mapkv, mapvk, max, maxKey, maybe, mdow, measure, memoize, merge$5 as merge, mergeWith, midnight, millisecond, milliseconds, min, minKey, minute, minutes, modulus, month, monthDays, months, most, mult$2 as mult, multi, multimethod, name, nary, negatives, next$b as next, nextSibling$1 as nextSibling, nextSiblings$1 as nextSiblings, nil, noon, noop$1 as noop, not, notAny, notEmpty, notEq, notEvery, notSome, nothing, nth$6 as nth, nullary, num, number, numeric, obj, object, omit$3 as omit, once, only, opt, or, otherwise$4 as otherwise, overlap, overload, parent, parents$1 as parents, parsedo, part, partial, partially, partition, partitionAll, partitionAll1, partitionAll2, partitionAll3, partitionBy, partly, patch, path, period, period1, pipe, pipeline, placeholder, plop, plopIn, pluck, plug, plugging, pm, positives, posn, post, pre, prepend$2 as prepend, prevSibling$1 as prevSibling, prevSiblings$1 as prevSiblings, promise, prop, protocol, quarter, quaternary, rand, randInt, randNth, range, rdow, reFind, reFindAll, reGroups, reMatches, rePattern, reSeq, realize, realized, record, recurrence, recurrence1, recurs, redo$1 as redo, redoable$1 as redoable, reduce$e as reduce, reduced$1 as reduced, reducekv$9 as reducekv, reducekv2, reducekv3, reducing, reifiable, remove, removeKeys, repeat, repeatedly, replace, rest$d as rest, result, retract, revSeq, reverse$4 as reverse, revert$1 as revert, revertible$1 as revertible, revision$1 as revision, rewrite, right, root$1 as root, rpad, rtrim, satisfies, scan, scanKey, second, seconds, seek, selectKeys, seq$9 as seq, sequential, series, set, shuffle, siblings$1 as siblings, sift, signature, signatureHead, slice, sod, som, some, someFn, sort, sortBy, soy, specify, splice, split$2 as split, splitAt, splitWith, spread, start$1 as start, startsWith, steps, str, subj, subs, subset, subsumes, subtract, sum, superset, take, takeLast, takeNth, takeWhile, task, template, ternary, test, thin, thrush, tick, time, titleCase, toArray, toDuration, toObject, toPromise, toQueryString, toggles, transduce, transpose, treeSeq, trim, type, uid, uident, uids, unary, unbind, unconj$1 as unconj, undo$1 as undo, undoable$1 as undoable, unfork, union, unique, unite, unreduced, unspecify, unspread, untick, update, updateIn, upperCase, upward, val$2 as val, vals$4 as vals, verify, weakMap, weekday, weekend, weeks, when, withIndex, year, years, zeros, zip };

@@ -80,14 +80,14 @@ const options$2 = ISelection.options;
 
 var p = /*#__PURE__*/Object.freeze({
   __proto__: null,
-  at: at$1,
-  check: check$f,
-  constrain: constrain,
-  constraints: constraints,
-  explain: explain$1,
-  options: options$2,
   parses: parses,
-  scope: scope$1
+  check: check$f,
+  constraints: constraints,
+  constrain: constrain,
+  explain: explain$1,
+  scope: scope$1,
+  at: at$1,
+  options: options$2
 });
 
 function And(constraints) {

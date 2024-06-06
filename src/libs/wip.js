@@ -40,7 +40,7 @@ export function clear(self){
 }
 
 export function wip($story){
-  const $data  = $.cell({}),
+  const $data  = $.atom({}),
         $head  = $.pipe($story, _.map(_.comp(_.last, _.get(_, "touches"))), _.filter(_.isSome)),
         $at    = $.pipe($story, _.map(function({at, touches}){
           return _.get(touches, at);

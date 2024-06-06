@@ -44,7 +44,7 @@ const {div, h1, a, span, img, ol, ul, li} = dom.tags(['div', 'h1', 'a', 'span', 
 _.maybe(session?.username, username => relink("/profiles/", {username}), dom.attr(dom.sel1("a.user"), "href", _));
 
 function table(tableId){
-  const $t = $.cell(null);
+  const $t = $.atom(null);
 
   supabase
     .from('tables')
@@ -77,8 +77,8 @@ export function diff(curr, prior, path, f){
 
 export function ui(make, describe, desc, template){
   const $table = table(tableId),
-        $ready = $.cell(false),
-        $error = $.cell(null),
+        $ready = $.atom(false),
+        $error = $.atom(null),
         $up    = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table),
         $hash  = dom.hash(window);
 

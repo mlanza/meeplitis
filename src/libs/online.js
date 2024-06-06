@@ -3,7 +3,7 @@ import _ from "./atomic_/core.js";
 import $ from "./atomic_/shell.js";
 
 export function online(username){
-  const $online = $.cell(null);
+  const $online = $.atom(null);
 
   const channel = supabase.channel('#online', {
     config: {

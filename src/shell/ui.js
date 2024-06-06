@@ -116,7 +116,7 @@ try {
     }
 
     const li = dom.tag('li'), pre = dom.tag('pre'), details = dom.tag("details"), summary = dom.tag("summary");
-    const $state = $.cell(init({seats, config, seen, evented, hash: location.hash}));
+    const $state = $.atom(init({seats, config, seen, evented, hash: location.hash}));
     const state = _.deref($state);
     const at = _.get(state, "at") ||_.chain(state, _.get(_, "frames"), _.last, _.getIn(_, ["event", "id"]));
     const $hist = $.hist($state);

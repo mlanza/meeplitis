@@ -160,7 +160,7 @@ $.doto(Story,
   _.implement(_.IDeref, {deref}));
 
 export function story(make, accessToken, tableId, seat, seated, config, $hash, $up, $ready, $error){
-  const $state = $.cell({touches: null, history: null, at: null});
+  const $state = $.atom({touches: null, history: null, at: null});
 
   $.reset($ready, true);
 

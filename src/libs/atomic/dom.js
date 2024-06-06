@@ -1,5 +1,5 @@
 import * as _ from './core.js';
-import { protocol, first as first$2, overload } from './core.js';
+import { protocol, first as first$3, overload } from './core.js';
 import * as $ from './shell.js';
 export { after, append, before, empty, omit, prepend } from './shell.js';
 
@@ -77,7 +77,7 @@ function mounts(self) {
 }
 
 function sel1$2(self, selector) {
-  return first$2(ISelectable.sel(self, selector));
+  return first$3(ISelectable.sel(self, selector));
 }
 const ISelectable = protocol({
   sel: null,
@@ -139,97 +139,95 @@ function attrs(node) {
 }
 
 var _Array, _$array, _ref$2;
-function count$2(self) {
+function count$3(self) {
   return self.node.attributes.length;
 }
-function lookup$4(self, key) {
+function lookup$5(self, key) {
   return self.node.getAttribute(key);
 }
-function assoc$3(self, key, value) {
+function assoc$4(self, key, value) {
   self.node.setAttribute(key, value);
 }
-function dissoc$3(self, key) {
+function dissoc$4(self, key) {
   self.node.removeAttribute(key);
 }
-function seq$2(self) {
-  return count$2(self) ? self : null;
+function seq$3(self) {
+  return count$3(self) ? self : null;
 }
-function first$1(self) {
-  return count$2(self) ? [self.node.attributes[0].name, self.node.attributes[0].value] : null;
+function first$2(self) {
+  return count$3(self) ? [self.node.attributes[0].name, self.node.attributes[0].value] : null;
 }
-function rest$1(self) {
-  return next$1(self) || _.emptyList();
+function rest$2(self) {
+  return next(self) || _.emptyList();
 }
 function next2(self, idx) {
-  return idx < count$2(self) ? _.lazySeq(function () {
+  return idx < count$3(self) ? _.lazySeq(function () {
     return _.cons([self.node.attributes[idx].name, self.node.attributes[idx].value], next2(self, idx + 1));
   }) : null;
 }
-function next$1(self) {
+function next(self) {
   return next2(self, 1);
 }
-function keys$2(self) {
+function keys$3(self) {
   return _.map(_.first, next2(self, 0));
 }
-function vals$2(self) {
+function vals$3(self) {
   return _.map(_.second, next2(self, 0));
 }
-function contains$3(self, key) {
+function contains$4(self, key) {
   return self.node.hasAttribute(key);
 }
-function includes$4(self, pair) {
-  return lookup$4(self, _.key(pair)) == _.val(pair);
+function includes$5(self, pair) {
+  return lookup$5(self, _.key(pair)) == _.val(pair);
 }
 function empty$1(self) {
   while (self.node.attributes.length > 0) {
     self.node.removeAttribute(self.node.attributes[0].name);
   }
 }
-var behave$c = _.does(_.keying("Attrs"), _.ICoercible.addMethod((_ref$2 = _, _$array = _ref$2.array, _Array = Array, function array(_argPlaceholder) {
+var behave$d = _.does(_.keying("Attrs"), _.ICoercible.addMethod((_ref$2 = _, _$array = _ref$2.array, _Array = Array, function array(_argPlaceholder) {
   return _$array.call(_ref$2, _argPlaceholder, _Array);
 }), function (self) {
   return _.toArray(next2(self, 0));
 }), _.implement(_.ICounted, {
-  count: count$2
+  count: count$3
 }), _.implement(_.ISeqable, {
-  seq: seq$2
-}), _.implement(_.INext, {
-  next: next$1
+  seq: seq$3
 }), _.implement(_.ISeq, {
-  first: first$1,
-  rest: rest$1
+  first: first$2,
+  rest: rest$2
 }), _.implement(_.IMap, {
-  keys: keys$2,
-  vals: vals$2
+  keys: keys$3,
+  vals: vals$3
 }), _.implement(_.IInclusive, {
-  includes: includes$4
+  includes: includes$5
 }), _.implement(_.IAssociative, {
-  contains: contains$3
+  contains: contains$4
 }), _.implement(_.ILookup, {
-  lookup: lookup$4
+  lookup: lookup$5
 }), _.implement($.IMap, {
-  dissoc: dissoc$3
+  dissoc: dissoc$4
 }), _.implement($.IEmptyableCollection, {
   empty: empty$1
 }), _.implement($.IAssociative, {
-  assoc: assoc$3
+  assoc: assoc$4
 }));
 
-behave$c(Attrs);
+behave$d(Attrs);
 
 function embeddables$1(self) {
   return [self];
 }
-var behave$b = _.does(_.keying("Attrs"), _.implement(IEmbeddable, {
+var behave$c = _.does(_.keying("Attrs"), _.implement(IEmbeddable, {
   embeddables: embeddables$1
 }));
 
 const behaviors = {};
 
 Object.assign(behaviors, {
-  Comment: behave$b
+  Comment: behave$c
 });
-behave$b(Comment);
+behave$c(Comment);
 
 function send2(self, message) {
   send3(self, message, "log");
@@ -238,11 +236,11 @@ function send3(self, message, address) {
   self[address](message);
 }
 const send = _.overload(null, null, send2, send3);
-var behave$a = _.does(_.specify($.ISend, {
+var behave$b = _.does(_.specify($.ISend, {
   send
 }));
 
-behave$a(console);
+behave$b(console);
 
 const fragment = _.assume(isHTMLDocument, document, function fragment(document, ...contents) {
   var _contents, _embed;
@@ -343,7 +341,7 @@ function after(self, content) {
     parent.insertBefore(child, ref);
   }, _.parent(self), [content]);
 }
-const conj$4 = append;
+const conj$5 = append;
 function isAttrs(self) {
   return !_.ako(self, Node) && _.descriptive(self);
 }
@@ -377,10 +375,10 @@ function trigger(self, key, options) {
 function contents$1(self) {
   return self.contentDocument || _.seq(self.childNodes);
 }
-function assoc$2(self, key, value) {
+function assoc$3(self, key, value) {
   self.setAttribute(key, _.str(value));
 }
-function dissoc$2(self, key) {
+function dissoc$3(self, key) {
   self.removeAttribute(key);
 }
 function keys2(self, idx) {
@@ -388,7 +386,7 @@ function keys2(self, idx) {
     return _.cons(self.attributes[idx].name, keys2(self, idx + 1));
   }) : _.emptyList();
 }
-function keys$1(self) {
+function keys$2(self) {
   return keys2(self, 0);
 }
 function vals2(self, idx) {
@@ -396,13 +394,13 @@ function vals2(self, idx) {
     return _.cons(self.attributes[idx].value, keys2(self, idx + 1));
   }) : _.emptyList();
 }
-function vals$1(self) {
+function vals$2(self) {
   return vals2(self, 0);
 }
-function lookup$3(self, key) {
+function lookup$4(self, key) {
   return self.getAttribute(key);
 }
-function contains$2(self, key) {
+function contains$3(self, key) {
   return self.hasAttribute(key);
 }
 function parent$1(self) {
@@ -456,23 +454,23 @@ function omit2(self, node) {
     $.each(function (entry) {
       const key = entry[0],
         value = entry[1];
-      let curr = lookup$3(self, key);
+      let curr = lookup$4(self, key);
       if (_.isObject(curr)) {
         curr = mapa(function (pair) {
           return pair.join(": ") + "; ";
         }, _.toArray(curr)).join("").trim();
       }
-      curr == value && dissoc$2(self, key);
+      curr == value && dissoc$3(self, key);
     }, attrs);
   } else if (_.isString(node)) {
-    node = includes$3(self, node);
+    node = includes$4(self, node);
     self.removeChild(node);
   }
 }
 const omit$3 = _.overload(null, omit1, omit2);
 
 //TODO too overloaded, impure protocol
-function includes$3(self, target) {
+function includes$4(self, target) {
   if (isElement(target)) {
     var _target, _$isIdentical, _ref2;
     return _.detect((_ref2 = _, _$isIdentical = _ref2.isIdentical, _target = target, function isIdentical(_argPlaceholder3) {
@@ -485,7 +483,7 @@ function includes$3(self, target) {
     }, true, keys);
   } else if (isAttrs(target)) {
     return _.reducekv(function (memo, key, value) {
-      return memo ? lookup$3(self, key) == value : reduced(memo);
+      return memo ? lookup$4(self, key) == value : reduced(memo);
     }, true, target);
   } else {
     return _.detect(_.isString(target) ? function (node) {
@@ -500,7 +498,7 @@ function empty(self) {
     self.removeChild(self.firstChild);
   }
 }
-function clone(self) {
+function clone$1(self) {
   return self.cloneNode(true);
 }
 function value1(self) {
@@ -555,7 +553,7 @@ function html2(self, html) {
   return self;
 }
 const html = _.overload(null, html1, html2);
-function reduce$1(self, f, init) {
+function reduce$2(self, f, init) {
   return _.reduce(f, init, _.descendants(self));
 }
 function chan2(el, key) {
@@ -627,7 +625,7 @@ const iselectable = _.implement(ISelectable, {
   sel1
 });
 var ielement = _.does(ihierarchy, icontents, ievented, iselectable, _.keying("Element"), _.implement(_.IReducible, {
-  reduce: reduce$1
+  reduce: reduce$2
 }), _.implement(IValue, {
   value: value$1
 }), _.implement(IText, {
@@ -642,7 +640,7 @@ var ielement = _.does(ihierarchy, icontents, ievented, iselectable, _.keying("El
   before,
   after
 }), _.implement(_.IInclusive, {
-  includes: includes$3
+  includes: includes$4
 }), _.implement(IHideable, {
   show,
   hide,
@@ -650,27 +648,27 @@ var ielement = _.does(ihierarchy, icontents, ievented, iselectable, _.keying("El
 }), _.implement($.IOmissible, {
   omit: omit$3
 }), _.implement(_.ICloneable, {
-  clone
+  clone: clone$1
 }), _.implement($.IAppendable, {
   append
 }), _.implement($.IPrependable, {
   prepend
 }), _.implement($.ICollection, {
-  conj: conj$4
+  conj: conj$5
 }), _.implement(_.ILookup, {
-  lookup: lookup$3
+  lookup: lookup$4
 }), _.implement(_.IMap, {
-  keys: keys$1,
-  vals: vals$1
+  keys: keys$2,
+  vals: vals$2
 }), _.implement($.IMap, {
-  dissoc: dissoc$2
+  dissoc: dissoc$3
 }), _.implement(_.IAssociative, {
-  contains: contains$2
+  contains: contains$3
 }), _.implement($.IAssociative, {
-  assoc: assoc$2
+  assoc: assoc$3
 }));
 
-var behave$9 = _.does(ielement, _.keying("DocumentFragment"), _.implement(_.IHierarchy, {
+var behave$a = _.does(ielement, _.keying("DocumentFragment"), _.implement(_.IHierarchy, {
   nextSibling: _.constantly(null),
   nextSiblings: _.emptyList,
   prevSibling: _.constantly(null),
@@ -678,8 +676,6 @@ var behave$9 = _.does(ielement, _.keying("DocumentFragment"), _.implement(_.IHie
   siblings: _.emptyList,
   parent: _.constantly(null),
   parents: _.emptyList
-}), _.implement(_.INext, {
-  next: _.constantly(null)
 }), _.implement(_.ISeq, {
   first: _.identity,
   rest: _.emptyList
@@ -688,9 +684,9 @@ var behave$9 = _.does(ielement, _.keying("DocumentFragment"), _.implement(_.IHie
 }));
 
 Object.assign(behaviors, {
-  DocumentFragment: behave$9
+  DocumentFragment: behave$a
 });
-behave$9(DocumentFragment);
+behave$a(DocumentFragment);
 
 function replaceWith(self, other) {
   const parent = _.parent(self),
@@ -723,28 +719,28 @@ function seq2(self, idx) {
     return _.cons(self.item(idx), seq2(self, idx + 1));
   }) : null;
 }
-function seq$1(self) {
+function seq$2(self) {
   return seq2(self, 0);
 }
-function lookup$2(self, idx) {
+function lookup$3(self, idx) {
   return self[idx];
 }
-const first = _.comp(_.first, seq$1);
-const rest = _.comp(_.rest, seq$1);
-const next = _.comp(_.next, seq$1);
-const children = _.comp(_.children, seq$1);
-const descendants = _.comp(_.descendants, seq$1);
-const nextSibling = _.comp(_.nextSibling, seq$1);
-const nextSiblings = _.comp(_.nextSiblings, seq$1);
-const prevSibling = _.comp(_.prevSibling, seq$1);
-const prevSiblings = _.comp(_.prevSiblings, seq$1);
-const siblings = _.comp(_.siblings, seq$1);
-const parent = _.comp(_.parent, seq$1);
-const parents = _.comp(_.parents, seq$1);
-const contents = _.comp(IContent.contents, seq$1);
+const first$1 = _.comp(_.first, seq$2);
+const rest$1 = _.comp(_.rest, seq$2);
+_.comp(_.next, seq$2);
+const children = _.comp(_.children, seq$2);
+const descendants = _.comp(_.descendants, seq$2);
+const nextSibling = _.comp(_.nextSibling, seq$2);
+const nextSiblings = _.comp(_.nextSiblings, seq$2);
+const prevSibling = _.comp(_.prevSibling, seq$2);
+const prevSiblings = _.comp(_.prevSiblings, seq$2);
+const siblings = _.comp(_.siblings, seq$2);
+const parent = _.comp(_.parent, seq$2);
+const parents = _.comp(_.parents, seq$2);
+const contents = _.comp(IContent.contents, seq$2);
 function sel(self, selector) {
   var _matches, _$filter, _ref, _selector, _matches2;
-  return _.maybe(self, seq$1, (_ref = _, _$filter = _ref.filter, _matches = (_matches2 = matches, _selector = selector, function matches(_argPlaceholder2) {
+  return _.maybe(self, seq$2, (_ref = _, _$filter = _ref.filter, _matches = (_matches2 = matches, _selector = selector, function matches(_argPlaceholder2) {
     return _matches2(_argPlaceholder2, _selector);
   }), function filter(_argPlaceholder) {
     return _$filter.call(_ref, _matches, _argPlaceholder);
@@ -752,29 +748,27 @@ function sel(self, selector) {
 }
 function closest(self, selector) {
   var _selector2, _$closest, _ref2;
-  return _.maybe(self, seq$1, (_ref2 = _, _$closest = _ref2.closest, _selector2 = selector, function closest(_argPlaceholder3) {
+  return _.maybe(self, seq$2, (_ref2 = _, _$closest = _ref2.closest, _selector2 = selector, function closest(_argPlaceholder3) {
     return _$closest.call(_ref2, _argPlaceholder3, _selector2);
   }));
 }
-function reduce(self, f, init) {
-  return _.reduce(f, init, seq$1(self));
+function reduce$1(self, f, init) {
+  return _.reduce(f, init, seq$2(self));
 }
-function count$1(self) {
+function count$2(self) {
   return self.length;
 }
-var behave$8 = _.does(_.iterable, _.keying("NodeList"), _.implement(_.ILookup, {
-  lookup: lookup$2
+var behave$9 = _.does(_.iterable, _.keying("NodeList"), _.implement(_.ILookup, {
+  lookup: lookup$3
 }), _.implement(_.IIndexed, {
-  nth: lookup$2
+  nth: lookup$3
 }), _.implement(_.ICounted, {
-  count: count$1
+  count: count$2
 }), _.implement(_.ISeq, {
-  first,
-  rest
+  first: first$1,
+  rest: rest$1
 }), _.implement(_.IReducible, {
-  reduce
-}), _.implement(_.INext, {
-  next
+  reduce: reduce$1
 }), _.implement(_.IHierarchy, {
   parent,
   parents,
@@ -787,7 +781,7 @@ var behave$8 = _.does(_.iterable, _.keying("NodeList"), _.implement(_.ILookup, {
   children,
   descendants
 }), _.implement(_.ISequential), _.implement(_.ISeqable, {
-  seq: seq$1
+  seq: seq$2
 }), _.implement(IContent, {
   contents
 }), _.implement(ISelectable, {
@@ -795,11 +789,11 @@ var behave$8 = _.does(_.iterable, _.keying("NodeList"), _.implement(_.ILookup, {
 }));
 
 Object.assign(behaviors, {
-  HTMLCollection: behave$8
+  HTMLCollection: behave$9
 });
-behave$8(HTMLCollection);
+behave$9(HTMLCollection);
 
-var behave$7 = _.does(ielement, _.keying("HTMLDocument"), _.implement(_.IHierarchy, {
+var behave$8 = _.does(ielement, _.keying("HTMLDocument"), _.implement(_.IHierarchy, {
   closest: _.constantly(null),
   nextSibling: _.constantly(null),
   nextSiblings: _.emptyList,
@@ -811,19 +805,19 @@ var behave$7 = _.does(ielement, _.keying("HTMLDocument"), _.implement(_.IHierarc
 }));
 
 Object.assign(behaviors, {
-  HTMLDocument: behave$7
+  HTMLDocument: behave$8
 });
-behave$7(HTMLDocument);
+behave$8(HTMLDocument);
 
-var behave$6 = _.noop;
+var behave$7 = _.noop;
 
 Object.assign(behaviors, {
-  HTMLInputElement: behave$6
+  HTMLInputElement: behave$7
 });
-behave$6(HTMLInputElement);
+behave$7(HTMLInputElement);
 
 var _$either, _ref2;
-function conj$3(self, entry) {
+function conj$4(self, entry) {
   self.append(isElement(entry) ? entry : element("option", {
     value: _.key(entry)
   }, _.val(entry)));
@@ -859,10 +853,10 @@ const text = _.comp((_ref2 = _, _$either = _ref2.either, function either(_argPla
     return _$either.call(_ref2, _argPlaceholder2, "");
   }), access(text$2)),
   value = access(value$2);
-var behave$5 = _.does(_.keying("HTMLSelectElement"), _.implement($.ICollection, {
-  conj: conj$3
+var behave$6 = _.does(_.keying("HTMLSelectElement"), _.implement($.ICollection, {
+  conj: conj$4
 }), _.implement($.IAppendable, {
-  append: conj$3
+  append: conj$4
 }), _.implement(IValue, {
   value
 }), _.implement(IText, {
@@ -870,16 +864,16 @@ var behave$5 = _.does(_.keying("HTMLSelectElement"), _.implement($.ICollection, 
 }));
 
 Object.assign(behaviors, {
-  HTMLSelectElement: behave$5
+  HTMLSelectElement: behave$6
 });
-behave$5(HTMLSelectElement);
+behave$6(HTMLSelectElement);
 
-var behave$4 = _.keying("Location");
+var behave$5 = _.keying("Location");
 
 Object.assign(behaviors, {
-  Location: behave$4
+  Location: behave$5
 });
-behave$4(Location);
+behave$5(Location);
 
 function asText(obj) {
   return _.mapa(function (entry) {
@@ -896,60 +890,60 @@ function deref$1(self) {
     return _.mapa(_.trim, _.split(text, ":"));
   }, _.compact(_.split(text, ";"))));
 }
-function lookup$1(self, key) {
+function lookup$2(self, key) {
   return _.get(deref$1(self), key);
 }
-function contains$1(self, key) {
+function contains$2(self, key) {
   return _.contains(deref$1(self), key);
 }
-function assoc$1(self, key, value) {
+function assoc$2(self, key, value) {
   self.element.setAttribute(self.key, asText(_.assoc(deref$1(self), key, value)));
 }
-function dissoc$1(self, key) {
+function dissoc$2(self, key) {
   self.element.setAttribute(self.key, asText(_.dissoc(deref$1(self), key)));
 }
-function keys(self) {
+function keys$1(self) {
   return _.keys(deref$1(self));
 }
-function vals(self) {
+function vals$1(self) {
   return _.vals(deref$1(self));
 }
-function includes$2(self, pair) {
+function includes$3(self, pair) {
   return _.includes(deref$1(self), pair);
 }
 function omit$2(self, pair) {
   self.element.setAttribute(self.key, asText(_.omit(deref$1(self), pair)));
 }
-function conj$2(self, pair) {
+function conj$3(self, pair) {
   self.element.setAttribute(self.key, asText(_.conj(deref$1(self), pair)));
 }
-var behave$3 = _.does(_.keying("NestedAttrs"), _.implement(_.IDeref, {
+var behave$4 = _.does(_.keying("NestedAttrs"), _.implement(_.IDeref, {
   deref: deref$1
 }), _.implement(_.IMap, {
-  keys,
-  vals
+  keys: keys$1,
+  vals: vals$1
 }), _.implement(_.IInclusive, {
-  includes: includes$2
+  includes: includes$3
 }), _.implement(_.IAssociative, {
-  contains: contains$1
+  contains: contains$2
 }), _.implement(_.ILookup, {
-  lookup: lookup$1
+  lookup: lookup$2
 }), _.implement($.IMap, {
-  dissoc: dissoc$1
+  dissoc: dissoc$2
 }), _.implement($.IAssociative, {
-  assoc: assoc$1
+  assoc: assoc$2
 }), _.implement($.IOmissible, {
   omit: omit$2
 }), _.implement($.ICollection, {
-  conj: conj$2
+  conj: conj$3
 }));
 
-behave$3(NestedAttrs);
+behave$4(NestedAttrs);
 
 Object.assign(behaviors, {
-  NodeList: behave$8
+  NodeList: behave$9
 });
-behave$8(NodeList);
+behave$9(NodeList);
 
 function Props(node) {
   this.node = node;
@@ -958,47 +952,47 @@ function props(node) {
   return new Props(node);
 }
 
-function lookup(self, key) {
+function lookup$1(self, key) {
   return self.node[key];
 }
-function contains(self, key) {
+function contains$1(self, key) {
   return self.node.hasOwnProperty(key);
 }
-function assoc(self, key, value) {
+function assoc$1(self, key, value) {
   self.node[key] = value;
 }
-function dissoc(self, key) {
+function dissoc$1(self, key) {
   delete self.node[key];
 }
-function includes$1(self, entry) {
+function includes$2(self, entry) {
   return self.node[_.key(entry)] === _.val(entry);
 }
 function omit$1(self, entry) {
-  includes$1(self, entry) && _dissoc(self, _.key(entry));
+  includes$2(self, entry) && _dissoc(self, _.key(entry));
 }
-function conj$1(self, entry) {
-  assoc(self, _.key(entry), _.val(entry));
+function conj$2(self, entry) {
+  assoc$1(self, _.key(entry), _.val(entry));
 }
-var behave$2 = _.does(_.keying("Props"), _.implement(_.IMap, {
+var behave$3 = _.does(_.keying("Props"), _.implement(_.IMap, {
   keys: Object.keys,
   vals: Object.values
 }), _.implement(_.IInclusive, {
-  includes: includes$1
+  includes: includes$2
 }), _.implement(_.IAssociative, {
-  contains
+  contains: contains$1
 }), _.implement(_.ILookup, {
-  lookup
+  lookup: lookup$1
 }), _.implement($.IAssociative, {
-  assoc
+  assoc: assoc$1
 }), _.implement($.IMap, {
-  dissoc
+  dissoc: dissoc$1
 }), _.implement($.IOmissible, {
   omit: omit$1
 }), _.implement($.ICollection, {
-  conj: conj$1
+  conj: conj$2
 }));
 
-behave$2(Props);
+behave$3(Props);
 
 function SpaceSeparated(element, key) {
   this.element = element;
@@ -1015,52 +1009,156 @@ function spaceSep1(key) {
 const spaceSep = overload(null, spaceSep1, spaceSep2);
 const classes = spaceSep1("class");
 
-function seq(self) {
+function seq$1(self) {
   const text = self.element.getAttribute(self.key);
   return text && text.length ? text.split(" ") : null;
 }
-function includes(self, text) {
-  const xs = seq(self);
+function includes$1(self, text) {
+  const xs = seq$1(self);
   return xs && _.filter(function (t) {
     return t == text;
   }, xs);
 }
-function conj(self, text) {
+function conj$1(self, text) {
   self.element.setAttribute(self.key, deref(self).concat(text).join(" "));
 }
 function omit(self, text) {
   self.element.setAttribute(self.key, _.filtera(function (t) {
     return t !== text;
-  }, seq(self)).join(" "));
+  }, seq$1(self)).join(" "));
 }
 function deref(self) {
-  return seq(self) || [];
+  return seq$1(self) || [];
 }
-function count(self) {
+function count$1(self) {
   return deref(self).length;
 }
-var behave$1 = _.does(_.keying("SpaceSep"), _.implement(_.ISequential), _.implement(_.ISeqable, {
-  seq
+var behave$2 = _.does(_.keying("SpaceSep"), _.implement(_.ISequential), _.implement(_.ISeqable, {
+  seq: seq$1
 }), _.implement(_.IDeref, {
   deref
 }), _.implement(_.IInclusive, {
-  includes
+  includes: includes$1
 }), _.implement(_.ICounted, {
-  count
+  count: count$1
 }), _.implement($.IOmissible, {
   omit
 }), _.implement($.ICollection, {
-  conj
+  conj: conj$1
 }));
 
-behave$1(SpaceSeparated);
+behave$2(SpaceSeparated);
+
+const urlSearchParams = _.constructs(URLSearchParams);
+
+function equiv(self, other) {
+  return other.constructor === URLSearchParams && _.eq(_.into({}, self), _.into({}, other));
+}
+function clone(self) {
+  const params = new URLSearchParams();
+  for (const [key, value] of self.entries()) {
+    params.set(key, value);
+  }
+  return params;
+}
+function conj(self, [key, value]) {
+  const other = clone(self);
+  other.set(key, value);
+  return other;
+}
+function count(self) {
+  return self.size;
+}
+function lookup(self, key) {
+  return self.get(key);
+}
+function assoc(self, key, value) {
+  self.set(key, value);
+}
+function dissoc(self, key) {
+  self.delete(key);
+}
+function seq(self) {
+  return count(self) ? self : null;
+}
+function reduce(self, f, init) {
+  let memo = init;
+  for (const entry of self.entries()) {
+    if (_.isReduced(memo)) break;
+    memo = f(memo, entry);
+  }
+  return _.unreduced(memo);
+}
+function reducekv(self, f, init) {
+  let memo = init;
+  for (const [key, value] of self.entries()) {
+    if (_.isReduced(memo)) break;
+    memo = f(memo, key, value);
+  }
+  return _.unreduced(memo);
+}
+function first(self) {
+  const ks = keys(self),
+    k = _.first(ks);
+  return k ? [k, lookup(self, k)] : null;
+}
+function rest(self) {
+  const iter = self.entries();
+  iter.next();
+  return _.lazyIterable(iter);
+}
+function keys(self) {
+  return _.lazyIterable(self.keys());
+}
+function vals(self) {
+  return _.lazyIterable(self.values());
+}
+function contains(self, key) {
+  return self.has(key);
+}
+function includes(self, pair) {
+  return lookup(self, _.key(pair)) == _.val(pair);
+}
+var behave$1 = _.does(_.keying("URLSearchParams"), _.implement(_.IEquiv, {
+  equiv
+}), _.implement(_.ICloneable, {
+  clone
+}), _.implement(_.ICounted, {
+  count
+}), _.implement(_.ISeqable, {
+  seq
+}), _.implement(_.ISeq, {
+  first,
+  rest
+}), _.implement(_.IMap, {
+  keys,
+  vals
+}), _.implement(_.IInclusive, {
+  includes
+}), _.implement(_.IAssociative, {
+  contains
+}), _.implement(_.ILookup, {
+  lookup
+}), _.implement(_.IReducible, {
+  reduce
+}), _.implement(_.IKVReducible, {
+  reducekv
+}), _.implement(_.ICollection, {
+  conj
+}), _.implement($.IMap, {
+  dissoc
+}), _.implement($.IAssociative, {
+  assoc
+}));
+
+behave$1(URLSearchParams);
 
 Object.assign(behaviors, {
-  XMLDocument: behave$7
+  XMLDocument: behave$8
 });
-behave$7(XMLDocument);
+behave$8(XMLDocument);
 
-var _behaviors, _$behaves, _ref;
+var _behaviors, _$behaves, _ref, _param5, _$into, _ref9;
 const behave = (_ref = _, _$behaves = _ref.behaves, _behaviors = behaviors, function behaves(_argPlaceholder) {
   return _$behaves.call(_ref, _behaviors, _argPlaceholder);
 });
@@ -1071,12 +1169,12 @@ const ready = _.assume(isHTMLDocument, document, function ready(document, callba
     document.addEventListener("DOMContentLoaded", callback);
   }
 });
-const hash = $.shared($.cell, function (window) {
+const hash = $.shared($.atom, function (window) {
   return $.computed(function (e) {
     return window.location.hash;
   }, $.chan(window, "hashchange"));
 });
-const focus = $.shared($.cell, function (el) {
+const focus = $.shared($.atom, function (el) {
   return $.toggles(el, "focus", "blur", function () {
     return el === el.ownerDocument.activeElement;
   });
@@ -1084,7 +1182,7 @@ const focus = $.shared($.cell, function (el) {
 const click = $.shared($.subject, function (el) {
   return $.chan(el, "click");
 });
-const hover = $.shared($.cell, function (el) {
+const hover = $.shared($.atom, function (el) {
   return $.toggles(el, "mouseenter", "mouseleave", _.constantly(false));
 });
 function scan(step, init) {
@@ -1097,7 +1195,7 @@ function scan(step, init) {
     });
   };
 }
-const depressed = $.shared($.cell, function (el) {
+const depressed = $.shared($.atom, function (el) {
   return $.seed(_.constantly([]), $.pipe($.chan(el, "keydown keyup"), scan(function (memo, e) {
     if (e.type === "keyup") {
       var _e$key, _$notEq, _ref2;
@@ -1322,6 +1420,16 @@ const toFragment = _.ICoercible.toFragment;
 _.ICoercible.addMethod([NodeList, Array], Array.from);
 _.ICoercible.addMethod([SpaceSeparated, Array], _.comp(Array.from, _.seq));
 _.ICoercible.addMethod([NestedAttrs, Object], _.deref);
+_.ICoercible.addMethod([URLSearchParams, Object], (_ref9 = _, _$into = _ref9.into, _param5 = {}, function into(_argPlaceholder10) {
+  return _$into.call(_ref9, _param5, _argPlaceholder10);
+}));
+_.ICoercible.addMethod([Object, URLSearchParams], function (obj) {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(obj)) {
+    params.set(key, value);
+  }
+  return params;
+});
 function stylesheet2(href, document) {
   if (!sel1$1(`link[href='${href}']`, document)) {
     const stylesheet = element(document, "link", {
@@ -1337,4 +1445,4 @@ function stylesheet1(href) {
 }
 const stylesheet = _.overload(null, stylesheet1, stylesheet2);
 
-export { Attrs, IContent, IEmbeddable, IHideable, IHtml, IMountable, ISelectable, IText, IValue, InvalidHostElementError, NestedAttrs, Props, SpaceSeparated, addClass, addStyle, assert, attr, attrs, behave, behaviors, classes, click, contents$2 as contents, depressed, element, elementns, embed, embeddables$2 as embeddables, enable, focus, fragment, hasClass, hash, hide$1 as hide, hover, html$1 as html, isElement, isHTMLDocument, isMountable, isVisible, markup, matches, mount, mounts, nestedAttrs, option, prop, props, ready, removeAttr, removeClass, removeStyle, replaceWith, sel$2 as sel, sel1$1 as sel1, show$1 as show, spaceSep, style, stylesheet, svg, tag, tags, text$2 as text, toFragment, toggle$1 as toggle, toggleClass, value$2 as value, wrap };
+export { Attrs, IContent, IEmbeddable, IHideable, IHtml, IMountable, ISelectable, IText, IValue, InvalidHostElementError, NestedAttrs, Props, SpaceSeparated, addClass, addStyle, assert, attr, attrs, behave, behaviors, classes, click, contents$2 as contents, depressed, element, elementns, embed, embeddables$2 as embeddables, enable, focus, fragment, hasClass, hash, hide$1 as hide, hover, html$1 as html, isElement, isHTMLDocument, isMountable, isVisible, markup, matches, mount, mounts, nestedAttrs, option, prop, props, ready, removeAttr, removeClass, removeStyle, replaceWith, sel$2 as sel, sel1$1 as sel1, show$1 as show, spaceSep, style, stylesheet, svg, tag, tags, text$2 as text, toFragment, toggle$1 as toggle, toggleClass, urlSearchParams, value$2 as value, wrap };

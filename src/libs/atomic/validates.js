@@ -80,14 +80,14 @@ const options$2 = ISelection.options;
 
 var p = /*#__PURE__*/Object.freeze({
   __proto__: null,
-  parses: parses,
-  check: check$f,
-  constraints: constraints,
-  constrain: constrain,
-  explain: explain$1,
-  scope: scope$1,
   at: at$1,
-  options: options$2
+  check: check$f,
+  constrain: constrain,
+  constraints: constraints,
+  explain: explain$1,
+  options: options$2,
+  parses: parses,
+  scope: scope$1
 });
 
 function And(constraints) {
@@ -180,13 +180,8 @@ function empty$1(self) {
 function seq$1(self) {
   return _.seq(self.constraints) ? self : null;
 }
-function next$1(self) {
-  return _.seq(rest$1(self));
-}
 var behave$e = _.does(_.keying("And"), _.implement(_.ISeqable, {
   seq: seq$1
-}), _.implement(_.INext, {
-  next: next$1
 }), _.implement(_.IEmptyableCollection, {
   empty: empty$1
 }), _.implement(_.ICollection, {
@@ -481,13 +476,8 @@ function empty(self) {
 function seq(self) {
   return _.seq(self.constraints) ? self : null;
 }
-function next(self) {
-  return _.seq(rest(self));
-}
 var behave$4 = _.does(_.keying("Or"), _.implement(_.ISeqable, {
   seq
-}), _.implement(_.INext, {
-  next
 }), _.implement(_.IEmptyableCollection, {
   empty
 }), _.implement(_.ICollection, {

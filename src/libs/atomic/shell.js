@@ -308,39 +308,39 @@ const log = ILogger.log;
 
 var p$1 = /*#__PURE__*/Object.freeze({
   __proto__: null,
-  on: on,
+  after: after$1,
+  append: append$1,
+  assoc: assoc$3,
+  before: before$1,
   chan: chan,
-  trigger: trigger,
-  once: once,
-  pub: pub$3,
-  err: err$3,
-  complete: complete$3,
   closed: closed$3,
-  sub: sub$4,
+  complete: complete$3,
+  conj: conj$2,
+  disj: disj$1,
   dispatch: dispatch$1,
+  dissoc: dissoc$2,
+  empty: empty$2,
+  err: err$3,
+  handle: handle$6,
+  log: log,
+  omit: omit$1,
+  on: on,
+  once: once,
+  persistent: persistent$1,
+  prepend: prepend$1,
+  pub: pub$3,
+  query: query,
   raise: raise,
   release: release,
-  handle: handle$6,
-  persistent: persistent$1,
-  transient: transient,
-  assoc: assoc$3,
-  dissoc: dissoc$2,
-  disj: disj$1,
-  conj: conj$2,
-  unconj: unconj$1,
-  empty: empty$2,
-  append: append$1,
-  prepend: prepend$1,
-  omit: omit$1,
-  after: after$1,
-  before: before$1,
-  reverse: reverse$1,
-  swap: swap$2,
   reset: reset$1,
   resettable: resettable,
+  reverse: reverse$1,
   send: send,
-  query: query,
-  log: log
+  sub: sub$4,
+  swap: swap$2,
+  transient: transient,
+  trigger: trigger,
+  unconj: unconj$1
 });
 
 function hist$2(limit) {
@@ -421,25 +421,21 @@ function subject(observers) {
   return new Subject(observers || [], null);
 }
 
-function Cell(state, observer, validate) {
+function Atom(state, observer, validate, primingSub) {
   this.state = state;
   this.observer = observer;
   this.validate = validate;
+  this.primingSub = primingSub;
 }
-Cell.prototype[Symbol.toStringTag] = "Cell";
-function cell0() {
-  return cell1(null);
+Atom.prototype[Symbol.toStringTag] = "Atom";
+function atom(init, options = {}) {
+  const {
+    observer = subject(),
+    validate = null,
+    primingSub = true
+  } = options;
+  return new Atom(init, observer, validate, primingSub);
 }
-function cell1(init) {
-  return cell2(init, subject());
-}
-function cell2(init, observer) {
-  return cell3(init, observer, null);
-}
-function cell3(init, observer, validate) {
-  return new Cell(init, observer, validate);
-}
-const cell = _.overload(cell0, cell1, cell2, cell3);
 
 function Observer(pub, err, complete, terminated) {
   this.pub = pub;
@@ -544,7 +540,7 @@ function interact$1(key, f, el) {
 function indexed(sources) {
   return observable(function (observer) {
     var _param, _$mapIndexed, _ref;
-    return _.right(sources, (_ref = _, _$mapIndexed = _ref.mapIndexed, _param = function (key, source) {
+    return _.chain(sources, (_ref = _, _$mapIndexed = _ref.mapIndexed, _param = function (key, source) {
       return sub$4(source, function (value) {
         pub$3(observer, {
           key,
@@ -907,7 +903,7 @@ function pub$2(self, value) {
       self.state = value;
       pub$3(self.observer, value);
     } else {
-      throw new Error("Cell update failed - invalid value.");
+      throw new Error("Atom update failed - invalid value.");
     }
   }
 }
@@ -920,7 +916,7 @@ function closed$2(self) {
   return closed$3(self.observer);
 }
 function sub$2(self, observer) {
-  pub$3(observer, self.state); //to prime subscriber state
+  self.primingSub && pub$3(observer, self.state);
   return sub$4(self.observer, observer); //return unsubscribe fn
 }
 function deref$1(self) {
@@ -932,7 +928,7 @@ function swap$1(self, f) {
 function dispose(self) {
   _.satisfies(_.IDisposable, self.observer) && _.dispose(self.observer);
 }
-var behave$c = _.does(reducible, mergable, _.keying("Cell"), _.implement(_.IDisposable, {
+var behave$c = _.does(reducible, mergable, _.keying("Atom"), _.implement(_.IDisposable, {
   dispose
 }), _.implement(_.IDeref, {
   deref: deref$1
@@ -949,7 +945,7 @@ var behave$c = _.does(reducible, mergable, _.keying("Cell"), _.implement(_.IDisp
   closed: closed$2
 }));
 
-behave$c(Cell);
+behave$c(Atom);
 
 function Cursor(source, path) {
   this.source = source;
@@ -1302,11 +1298,11 @@ var _behaviors, _$behaves, _ref, _fromPromise;
 const behave = (_ref = _, _$behaves = _ref.behaves, _behaviors = behaviors, function behaves(_argPlaceholder) {
   return _$behaves.call(_ref, _behaviors, _argPlaceholder);
 });
-function collect(cell) {
+function collect(atom) {
   return function (value) {
     var _value, _$conj, _ref2;
     //return observer
-    swap$2(cell, (_ref2 = _, _$conj = _ref2.conj, _value = value, function conj(_argPlaceholder2) {
+    swap$2(atom, (_ref2 = _, _$conj = _ref2.conj, _value = value, function conj(_argPlaceholder2) {
       return _$conj.call(_ref2, _argPlaceholder2, _value);
     }));
   };
@@ -1324,26 +1320,26 @@ function connectN(source) {
 }
 ISubscribe.transducing = connect3;
 const connect = _.overload(null, null, connect2, connect3, connectN); //returns `unsub` fn
-const map = shared(cell, Observable.map);
-const then = shared(cell, Observable.resolve, Observable.map);
-const interact = shared(cell, Observable.interact);
+const map = shared(atom, Observable.map);
+const then = shared(atom, Observable.resolve, Observable.map);
+const interact = shared(atom, Observable.interact);
 const fromEvent = shared(subject, Observable.fromEvent);
-const computed = shared(cell, Observable.computed);
-const fixed = shared(cell, Observable.fixed);
-const latest = shared(cell, Observable.latest);
-const splay = shared(cell, Observable.splay);
+const computed = shared(atom, Observable.computed);
+const fixed = shared(atom, Observable.fixed);
+const latest = shared(atom, Observable.latest);
+const splay = shared(atom, Observable.splay);
 const tick = shared(subject, Observable.tick);
-const when = shared(cell, Observable.when);
-const toggles = shared(cell, Observable.toggles);
-const hist = shared(cell, Observable.hist);
+const when = shared(atom, Observable.when);
+const toggles = shared(atom, Observable.toggles);
+const hist = shared(atom, Observable.hist);
 function fmap(source, f) {
   return map(f, source);
 }
 each(_.implement(_.IFunctor, {
   fmap
-}), [Cell, Subject, Observable]);
+}), [Atom, Subject, Observable]);
 function fromPromise2(promise, init) {
-  return share(Observable.fromPromise(promise), cell(init));
+  return share(Observable.fromPromise(promise), atom(init));
 }
 const fromPromise = _.overload(null, (_fromPromise = fromPromise2, function fromPromise2(_argPlaceholder3) {
   return _fromPromise(_argPlaceholder3, null);
@@ -1410,7 +1406,7 @@ const renderDiff = _.overload(null, null, renderDiff2, renderDiff3);
     self(msg);
   }
   _.doto(Function, reducible,
-  //makes fns work as observers like `cell`, e.g. `$.connect($.tick(3000), $.see("foo"))`
+  //makes fns work as observers like `atom`, e.g. `$.connect($.tick(3000), $.see("foo"))`
   _.implement(IPublish, {
     pub,
     err: _.noop,
@@ -1538,4 +1534,4 @@ function called2(fn, message) {
 }
 const called = _.overload(null, null, called2, called3, called4);
 
-export { Bus, Cell, Command, Cursor, DrainEventsMiddleware, Event, EventMiddleware, HandlerMiddleware, IAppendable, IAssociative, ICollection, IDispatch, IEmptyableCollection, IEventProvider, IEvented, IInsertable, ILogger, IMap, IMiddleware, IOmissible, IPersistent, IPrependable, IPublish, IQueryable, IResettable, IReversible, ISend, ISet, ISubscribe, ISwappable, ITransient, LockingMiddleware, Observable, Observer, Subject, TeeMiddleware, after$1 as after, alter, append$1 as append, assoc$3 as assoc, before$1 as before, behave, behaviors, bus, called, cell, chan, closed$3 as closed, collect, command, complete$3 as complete, computed, conj$2 as conj, connect, constructs, cursor, defs, disj$1 as disj, dispatch$1 as dispatch, dispatchable, dissoc$2 as dissoc, doall, doing, dorun, doseq, dotimes, drainEventsMiddleware, each, eachIndexed, eachkv, eachvk, effect, empty$2 as empty, emptySet, err$3 as err, event, eventMiddleware, fixed, fromEvent, fromPromise, handle$6 as handle, handlerMiddleware, hist, interact, isMap, isWeakMap, isolate, latest, lockingMiddleware, log, logging, map, observable, observer, omit$1 as omit, on, once, peek, persistent$1 as persistent, pipe, prepend$1 as prepend, pub$3 as pub, query, raise, release, render, renderDiff, reset$1 as reset, resettable, reverse$1 as reverse, see, seed, send, set, share, shared, sharing, splay, sub$4 as sub, subject, swap$2 as swap, tee, teeMiddleware, then, tick, toObservable, toggles, transient, trigger, unconj$1 as unconj, weakMap, when };
+export { Atom, Bus, Command, Cursor, DrainEventsMiddleware, Event, EventMiddleware, HandlerMiddleware, IAppendable, IAssociative, ICollection, IDispatch, IEmptyableCollection, IEventProvider, IEvented, IInsertable, ILogger, IMap, IMiddleware, IOmissible, IPersistent, IPrependable, IPublish, IQueryable, IResettable, IReversible, ISend, ISet, ISubscribe, ISwappable, ITransient, LockingMiddleware, Observable, Observer, Subject, TeeMiddleware, after$1 as after, alter, append$1 as append, assoc$3 as assoc, atom, before$1 as before, behave, behaviors, bus, called, atom as cell, chan, closed$3 as closed, collect, command, complete$3 as complete, computed, conj$2 as conj, connect, constructs, cursor, defs, disj$1 as disj, dispatch$1 as dispatch, dispatchable, dissoc$2 as dissoc, doall, doing, dorun, doseq, dotimes, drainEventsMiddleware, each, eachIndexed, eachkv, eachvk, effect, empty$2 as empty, emptySet, err$3 as err, event, eventMiddleware, fixed, fromEvent, fromPromise, handle$6 as handle, handlerMiddleware, hist, interact, isMap, isWeakMap, isolate, latest, lockingMiddleware, log, logging, map, observable, observer, omit$1 as omit, on, once, peek, persistent$1 as persistent, pipe, prepend$1 as prepend, pub$3 as pub, query, raise, release, render, renderDiff, reset$1 as reset, resettable, reverse$1 as reverse, see, seed, send, set, share, shared, sharing, splay, sub$4 as sub, subject, swap$2 as swap, tee, teeMiddleware, then, tick, toObservable, toggles, transient, trigger, unconj$1 as unconj, weakMap, when };

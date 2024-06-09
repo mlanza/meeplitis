@@ -15,8 +15,7 @@ begin
         touched_at = now()
     where id = new.id;
 
-    insert into notifications(type, table_id)
-    values('finished', new.id);
+    --insert into notifications(type, table_id) values('finished', new.id);
   end if;
 
   return new;

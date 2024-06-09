@@ -59,11 +59,9 @@ begin
         up = _up
     where id = new.id;
 
-    insert into notifications(type, table_id)
-    values('started', new.id);
+    --insert into notifications(type, table_id) values('started', new.id);
 
-    insert into notifications(type, table_id, seats)
-    values('up', new.id, _up);
+    --insert into notifications(type, table_id, seats) values('up', new.id, _up);
 
     raise log '$ game `%` started at table `%`', _slug, new.id;
 

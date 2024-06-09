@@ -74,7 +74,7 @@ if _recipients > 0 then
     from jsonb_array_elements_text(_simulated->'notify'))
   into _up;
 
-  insert into notifications(type, table_id, seats) values ('up', _table_id, _up);
+  --insert into notifications(type, table_id, seats) values ('up', _table_id, _up);
 end if;
 
 return query

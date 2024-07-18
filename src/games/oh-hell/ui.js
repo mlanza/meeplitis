@@ -4,7 +4,8 @@ import $ from "/libs/atomic_/shell.js";
 import {session} from "/libs/session.js";
 import {manageTables} from "/components/table/ui.js";
 
-const {div, span, img, a, p, button, submit, form, label, input, radio} = dom.tags(['div', 'span', 'img', 'a', 'p', 'button', 'submit', 'form', 'label', 'input', 'radio', ['input', {type: "radio"}]]);
+const {div, span, img, a, p, button, submit, form, label, input, radio} = dom.tags(['div', 'span', 'img', 'a', 'p', 'button', 'submit', 'form', 'label', 'input']);
+const radio = dom.tag('input', {type: "radio"});
 
 manageTables(function(open, game){
   const el = form({id: "creates"},

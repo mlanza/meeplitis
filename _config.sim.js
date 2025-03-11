@@ -10,7 +10,7 @@ const minify = globalThis.Terser.minify;
 async function simulation(pages){
   const opts = {
     module: true,
-    compress: true,
+    compress: false,
     mangle: false
   }
   for (const page of pages) {

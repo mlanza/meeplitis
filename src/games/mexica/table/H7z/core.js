@@ -10,7 +10,7 @@ const w = "w", //water
       l = "l", //land
       e = "e", //emperor's palace
       b = "b", //bridge
-      c = "c", //capulli
+      c = "c", //calpulli
       t = "t", //temple
       p = "p", //pilli
       n = "-"; //nothing
@@ -35,7 +35,7 @@ export const board = [
  /*15*/ [n,n,w,w,w,w,w,w,w,w,w,w,n,n,n,n,n,n,n,n,n,n,n]
 ]
 
-const capullis = [
+const calpullis = [
   {size: 13, at: null},
   {size: 12, at: null},
   {size: 11, at: null},
@@ -80,13 +80,13 @@ function templesDepleted(temples){
   return !_.chain(temples, _.vals, cat, _.remove(_.isSome, _), _.seq);
 }
 
-function capulliDepleted(capulli, period){
-  return !_.chain(capulli, _.nth(_, period), _.compact, _.map(_.get(_, "at"), _), _.remove(_.isSome, _), _.seq);
+function calpulliDepleted(calpulli, period){
+  return !_.chain(calpulli, _.nth(_, period), _.compact, _.map(_.get(_, "at"), _), _.remove(_.isSome, _), _.seq);
 }
 
 function markScoringRound(state){
-  const {capulli, period, seated} = state;
-  return capulliDepleted(capulli, period) &&
+  const {calpulli, period, seated} = state;
+  return calpulliDepleted(calpulli, period) &&
     _.chain(seated,
       _.mapa(
         _.pipe(
@@ -132,7 +132,7 @@ function init(seats){
     canal1: slots(6),
     canal2: slots(35),
     bridges: slots(11),
-    capulli: null,
+    calpulli: null,
     seated: _.toArray(_.repeat(seats, {
       pilli: null,
       temples,
@@ -150,7 +150,7 @@ function Mexica(seats, config, events, state){
 }
 
 export function mexica(seats, config, events, state){
-  return new Mexica(seats, _.merge({dealCapulli}, config), events, state || _.chain(seats, _.count, init));
+  return new Mexica(seats, _.merge({dealCalpulli}, config), events, state || _.chain(seats, _.count, init));
 }
 
 export const make = mexica;
@@ -265,7 +265,7 @@ const extractTemples =
     }, _));
 
 function committed(state){
-  const {status, seated, capulli, period, up} = state;
+  const {status, seated, calpulli, period, up} = state;
   const seats = _.count(seated);
   const endRound = seats - 1 === up;
   const over = state["scoring-round"] && period === 1;
@@ -285,9 +285,9 @@ function reflectContents(state){
   return _.assoc(state, "contents", _.chain(state, contents));
 }
 
-function dealCapulli(capullis){
+function dealCalpulli(calpullis){
   const xs = _.chain(_.range(15), _.shuffle, _.take(8, _), _.sort);
-  return _.chain(capullis,
+  return _.chain(calpullis,
     _.mapkv(function(k, v){
       return [k, v];
     }, _),
@@ -665,10 +665,10 @@ export function execute(self, command){
   const endOfRound = seat === _.count(state.seated) - 1;
   const cost = price(command);
   const moves = g.moves(self, {type, seat});
-  const automatic = _.includes(["start", "deal-capulli"], type);
+  const automatic = _.includes(["start", "deal-calpulli"], type);
   const matched = _.detect(_.eq(_, _.chain(command, _.compact, _.dissoc(_, "id"))), moves);
   const seated = seat == null ? {pilli: null, bank: 0} : state.seated[seat];
-  const {spent, contents, period, canal1, canal2, capulli, bridges, banked, tokens} = state;
+  const {spent, contents, period, canal1, canal2, calpulli, bridges, banked, tokens} = state;
   const {bank, pilli} = seated;
   const {deficit} = spend(spent, bank, cost);
   const pillis = _.map(_.get(_, "pilli"), state.seated);
@@ -749,12 +749,12 @@ export function execute(self, command){
         g.fold(_, {type: "constructed-canal", seat, details: {at: sortSpots(details.at)}}),
         function(self){
           const state = _.deref(self);
-          const {canal1, canal2, contents, capulli} = state;
+          const {canal1, canal2, contents, calpulli} = state;
           const removed = canalsDepleted(canal1, canal2) ?
             _.chain(districts(board, contents),
               _.remove(dist => founded(contents, dist) || jammed(contents, dist), _),
               _.mapa(_.count, _),
-              _.partial(unfoundables, _.chain(capulli, _.concatenated, _.toArray))) : null;
+              _.partial(unfoundables, _.chain(calpulli, _.concatenated, _.toArray))) : null;
           return _.seq(removed) ? g.fold(self, {type: "removed-unfoundables", details: {removed}}) : self;
         });
     }
@@ -801,7 +801,7 @@ export function execute(self, command){
         throw new Error("Cannot found a founded district.");
       }
       if (!isVacant(board, contents, details.at)) {
-        throw new Error("Cannot place capulli except on empty land spaces.");
+        throw new Error("Cannot place calpulli except on empty land spaces.");
       }
       const points = founds(_.toArray(pillis), seat, dist);
       return _.chain(self, g.fold(_, {type: "founded-district", seat, details: {at: details.at, size: _.count(dist), points}}));
@@ -818,19 +818,42 @@ export function execute(self, command){
       }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "placed-pilli")));
     }
+    /*
+    case "propose-unfoundables": {
+      const sizes = _.chain(command, _.getIn(_, ["details", "calpulli"]), _.mapa(function(idx){
+        const [period, pos] = idx > 8 ? [1, idx - 8] : [0, idx];
+        return _.getIn(state, ["calpulli", period, pos, "size"]);
+      }, _));
+      //TODO ensure no `at`
+      if (!_.seq(sizes)) {
+        throw new Error("No removals proposed.");
+      }
+      return _.chain(self,
+        g.fold(_, _.chain(command,
+          _.assocIn(_, ["type"], "proposed-unfoundables"),
+          _.assocIn(_, ["details", "sizes"], sizes))));
+    }
+    case "answer-proposal": {
+      const answer = _.getIn(command, ["details", "answer"]);
+      if (_.includes([null, "accept", "reject"], answer)) {
+        throw new Error("Invalid answer.");
+      }
+      return g.fold(self, _.assoc(command, "type", "answered-proposal"));
+    }
+*/
     case "finish": {
       return g.fold(self, _.assoc(command, "type", "finished"));
     }
-    case "deal-capulli": {
-      const {dealCapulli} = self.config;
+    case "deal-calpulli": {
+      const {dealCalpulli} = self.config;
       return _.chain(self,
-        g.fold(_, {type: "dealt-capulli", details: {capulli: dealCapulli(capullis)}, seat: null}));
+        g.fold(_, {type: "dealt-calpulli", details: {calpulli: dealCalpulli(calpullis)}, seat: null}));
     }
     case "start": {
       return _.chain(self,
         g.fold(_, {type: "started", seat: null}),
         _.count(state.seated) === 2 ? g.fold(_, {type: "scattered-temples", details: scatterTemples(), seat: null}) : _.identity,
-        g.execute(_, {type: "deal-capulli", seat: null}));
+        g.execute(_, {type: "deal-calpulli", seat: null}));
     }
   }
 }
@@ -841,11 +864,11 @@ function jammed(contents, dist){ //district has no room to build temples
     _.remove(_.includes(_, t), _), _.count) < 2; //fewer than 2 non-temple spots
 }
 
-function unfoundables(capulli, keeping){
-  return _.chain(capulli,
-    _.reduce(function(capulli, size){
-      const which = _.detectIndex(_.eq({at: null, size}, _), capulli);
-      return which == null ? capulli : _.update(capulli, which, _.assoc(_, "feasible", true));
+function unfoundables(calpulli, keeping){
+  return _.chain(calpulli,
+    _.reduce(function(calpulli, size){
+      const which = _.detectIndex(_.eq({at: null, size}, _), calpulli);
+      return which == null ? calpulli : _.update(calpulli, which, _.assoc(_, "feasible", true));
     }, _, keeping),
     _.mapIndexed(function(idx, c){
       return c.at == null && !c.feasible ? idx : null;
@@ -853,14 +876,16 @@ function unfoundables(capulli, keeping){
     _.filtera(_.isSome, _));
 }
 
-function removeCapulli(removed){
-  return _.update(_, "capulli", function(capulli){
-    return _.reduce(function(capulli, idx){
+function removeCalpulli(removed){
+  return _.update(_, "calpulli", function(calpulli){
+    return _.reduce(function(calpulli, idx){
       const [period, i] = idx < 8 ? [0, idx] : [1, idx - 8];
-      return _.assocIn(capulli, [period, i], null);
-    }, capulli, removed);
+      return _.assocIn(calpulli, [period, i], null);
+    }, calpulli, removed);
   });
 }
+
+const clearProposal = _.dissoc(_, "proposed-unfoundables");
 
 function fold(self, event){
   const state = _.deref(self);
@@ -893,7 +918,7 @@ function fold(self, event){
               _.reduce(place(t), contents, _));
           })));
 
-    case "dealt-capulli":
+    case "dealt-calpulli":
       return g.fold(self, event,
         _.pipe(
           _.merge(_, details),
@@ -933,11 +958,36 @@ function fold(self, event){
           _.update(_, "contents", function(contents){
             return _.reduce(place(w), contents, details.at);
           })));
+/*
+    case "proposed-unfoundables":
+      return g.fold(self, event, _.pipe(
+        _.assoc(_, "proposed-unfoundables", {calpulli: details.calpulli, accepted: [event.seat]})));
 
+    case "answered-proposal": {
+      const {answer} = details;
+      const seats = _.count(state.seated);
+      const removed = _.getIn(state, ["proposed-unfoundables", "calpulli"]);
+      return g.fold(self, event,
+        _.pipe(
+        _.updateIn(_, ["proposed-unfoundables", "accepted"], answer == "accept" ? _.chain(_, _.conj(_, event.seat), _.unique) : answer == null ? _.filtera(_.notEq(_, event.seat), _) : _.identity),
+        function(state){
+          const accepted = _.count(_.getIn(state, ["proposed-unfoundables", "accepted"]));
+          const fullyAccepted = seats == accepted;
+          const noneAccepted = accepted == 0;
+          if (fullyAccepted) {
+            return g.fold(self, {type: "removed-unfoundables", details: {removed}}, clearProposal);
+          } else if (answer == "reject" || noneAccepted) {
+            return _.chain(state, clearProposal);
+          } else {
+            return state;
+          }
+        }));
+    }
+*/
     case "removed-unfoundables":
       return g.fold(self, event,
         _.pipe(
-          removeCapulli(details.removed),
+          removeCalpulli(details.removed),
           markScoringRound));
 
     case "constructed-bridge":
@@ -997,12 +1047,12 @@ function fold(self, event){
     case "founded-district":
       return g.fold(self, event,
         _.pipe(
-          _.updateIn(_, ["capulli", period], function(capulli){
+          _.updateIn(_, ["calpulli", period], function(calpulli){
             const idx = _.first(_.keepIndexed(function(idx, marker){
               const {at, size} = marker || {at: null, size: null};
               return at == null && size === details.size ? idx : null;
-            }, capulli));
-            return _.update(capulli, idx, _.assoc(_, "at", details.at));
+            }, calpulli));
+            return _.update(calpulli, idx, _.assoc(_, "at", details.at));
           }),
           _.update(_, ["seated"], _.pipe(_.mapIndexed(function(seat, seated){
             const points = _.nth(details.points, seat);
@@ -1073,7 +1123,7 @@ export function foundable(board, contents, markers, pilli){
 function canalable(board, contents){
   return _.filter(isVacant(board, contents, _), cat(_.remove(function(dist){
     return _.detect(function(at){
-      return _.includes(_.get(contents, at), c); //capulli?
+      return _.includes(_.get(contents, at), c); //calpulli?
     }, dist)
   }, districts(board, contents))));
 }
@@ -1099,7 +1149,7 @@ export const accessibleLand = _.partly(function accessibleLand(contents, pilli, 
 });
 
 function moves1(self){
-  return ["construct-canal", "construct-bridge", "relocate-bridge", "found-district", "bank", "move", "pass", "commit", "place-pilli"];
+  return ["construct-canal", "construct-bridge", "relocate-bridge", "found-district", "bank", "move", "pass", "propose-unfoundables", "answer-proposal", "commit", "place-pilli"];
 }
 
 function moves3(self, type, seat){
@@ -1109,7 +1159,7 @@ function moves3(self, type, seat){
     return [];
   }
 
-  const {contents, capulli, canal1, canal2, bridges, period, status, spent, redeemed, banked, seated} = _.deref(self);
+  const {contents, calpulli, canal1, canal2, bridges, period, status, spent, redeemed, banked, seated} = _.deref(self);
   const {pilli, bank} = _.nth(seated, seat);
   const from = pilli;
   const unspent = remaining(spent, bank, redeemed);
@@ -1139,7 +1189,7 @@ function moves3(self, type, seat){
       }
 
       case "found-district": {
-        const markers = _.nth(capulli, period);
+        const markers = _.nth(calpulli, period);
         return _.map(function(details){
           return {type, seat, details};
         }, foundable(board, contents, markers, pilli));
@@ -1178,6 +1228,10 @@ function moves3(self, type, seat){
         return spent > 5 ? permit : [];
       }
 
+      case "propose-unfoundables": {
+        return permit;
+      }
+
       default: {
         return [];
       }
@@ -1213,7 +1267,7 @@ function perspective(self, seen, reality){
 }
 
 function undoable(self, {type}){
-  return !_.includes(["started", "committed", "finished", "dealt-capulli", "scattered-temples", "concluded-period", "scored-grandeur"], type);
+  return !_.includes(["started", "committed", "finished", "dealt-calpulli", "scattered-temples", "concluded-period", "scored-grandeur", "proposed-unfoundables"], type);
 }
 
 function status(self){

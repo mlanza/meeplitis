@@ -16,7 +16,7 @@ function style(spots, f, style){
 }
 
 style(c.viableSpots, spot => `#table.act:not([data-command-type])[data-found-at~='${spot}'] div[data-spot='${spot}']:hover div.propose`, `
-  background-image: url(./images/capulli.png);
+  background-image: url(./images/calpulli.png);
 `);
 style(c.viableSpots, spot => `#table.act[data-command-type='move'][data-command-from][data-command-destinations~='${spot}'] div[data-spot='${spot}']:hover div.propose`, `
   background-image: url(./images/pilli.svg);

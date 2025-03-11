@@ -1,5 +1,6 @@
 :root {
   --square-size: 30.5px;
+  --demand-size: 31px;
   --board-top-buffer: 6px;
   --board-left-buffer: .5px;
 }
@@ -95,7 +96,7 @@
   text-align: center;
   line-height: 2.5em;
 }
-#table #board img[data-piece='capulli'] {
+#table #board img[data-piece='calpulli'] {
   pointer-events: none;
 }
 #table.act[data-command-type="move"] .proposed:empty {
@@ -104,9 +105,20 @@
 #table.act[data-perspective="0"] [data-piece="pilli"][data-seat="0"]:hover {
   background-color: black;
 }
+#table.act[data-allow-commands~='propose-removal'] .moves button[data-type='propose-removal'],
 #table.act[data-allow-commands~='commit'] .moves button[data-type='commit'],
 #table.act[data-allow-commands~='pass']   .moves button[data-type='pass'] {
-  display: inherit;
+  display: inline;
+}
+#table[data-command-type='propose-removal'] .moves button[data-type='propose-removal'],
+#table[data-command-type='propose-removal'] .moves button[data-type='pass'] {
+  display: none !important;
+}
+#table.act[data-command-type='propose-removal'] .moves button[data-type='done-proposing'] {
+  display: inline;
+}
+#table .moves button[data-type='propose-removal'] { /* temporarily hide */
+  /*display: none !important; */
 }
 #table #guidance,
 #table #guidance p {
@@ -121,6 +133,39 @@
   text-align: center;
   opacity: .5;
 }
+#table[data-command-type='propose-removal'].act ol#demands li {
+  height: var(--demand-size);
+  width: var(--demand-size);
+  position: relative;
+  display: inline-block;
+}
+#table[data-command-type='propose-removal'].act ol#demands li::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  cursor: pointer;
+  opacity: 1;
+  height: var(--square-size);
+  width: var(--square-size);
+}
+#table[data-command-type='propose-removal'][data-period='1'][data-command-calpulli~='8'].act ol#demands li[data-demand='0']::after,
+#table[data-command-type='propose-removal'][data-period='1'][data-command-calpulli~='9'].act ol#demands li[data-demand='1']::after,
+#table[data-command-type='propose-removal'][data-period='1'][data-command-calpulli~='10'].act ol#demands li[data-demand='2']::after,
+#table[data-command-type='propose-removal'][data-period='1'][data-command-calpulli~='11'].act ol#demands li[data-demand='3']::after,
+#table[data-command-type='propose-removal'][data-period='1'][data-command-calpulli~='12'].act ol#demands li[data-demand='4']::after,
+#table[data-command-type='propose-removal'][data-period='1'][data-command-calpulli~='13'].act ol#demands li[data-demand='5']::after,
+#table[data-command-type='propose-removal'][data-period='1'][data-command-calpulli~='14'].act ol#demands li[data-demand='6']::after,
+#table[data-command-type='propose-removal'][data-period='1'][data-command-calpulli~='15'].act ol#demands li[data-demand='7']::after {
+  background: url(./images/remove.svg) no-repeat center center;
+  background-size: cover;
+}
+#table[data-command-type='propose-removal'].act ol#demands li:has(img):hover::after {
+  opacity: 0.5 !important;
+  background: url(./images/remove.svg) no-repeat center center;
+  background-size: cover;
+}
+#table[data-command-type='propose-removal'] #guidance p[data-command-type='propose-removal'],
 #table[data-command-type='place-pilli'] #guidance p[data-command-type='place-pilli'],
 #table[data-command-type='move'] #guidance p[data-command-type='move'],
 #table[data-command-type='build-temple'] #guidance p[data-command-type='build-temple'],
@@ -142,7 +187,7 @@
   height: 30em;
   transition: height .5s, min-height .5s;
 }
-#table #event[data-type='scored-grandeur'] th.at img[src='./images/capulli.png'] {
+#table #event[data-type='scored-grandeur'] th.at img[src='./images/calpulli.png'] {
   opacity: .33;
 }
 
@@ -577,7 +622,7 @@ ol#demands li {
 #table #board svg[data-piece="emperor"] path {
   fill: #D4AF37;
 }
-#table.scoring-round #board .contents img[data-piece="capulli"] {
+#table.scoring-round #board .contents img[data-piece="calpulli"] {
   animation: bump .25s ease-in;
 }
 #table.scoring-round #board svg[data-piece="emperor"] {
@@ -1359,7 +1404,7 @@ body.anon img[data-nav="last-move"] {
 #table.act:not([data-command-type])[data-found-at~='F14'] div[data-spot='F14']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='I14'] div[data-spot='I14']:hover div.propose,
 #table.act:not([data-command-type])[data-found-at~='J14'] div[data-spot='J14']:hover div.propose {
-  background-image: url(./images/capulli.png);
+  background-image: url(./images/calpulli.png);
 }
 
 #table.act[data-command-type='move'][data-command-from][data-command-destinations~='B1'] div[data-spot='B1']:hover div.propose,

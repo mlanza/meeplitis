@@ -5,7 +5,7 @@ import * as c from "./core.js";
 import * as g from "/libs/game.js";
 import {moment} from "/libs/story.js";
 import {describe} from "./ancillary.js";
-import {save, closestAttr, retainAttr} from "/libs/wip.js";
+import {clear, closestAttr, retainAttr} from "/libs/wip.js";
 import {el, seated, seats, seat, ui, scored, outcome, diff, which} from "/libs/table.js";
 import {reg} from "/libs/cmd.js";
 
@@ -59,8 +59,8 @@ function token(){
   return img({src: "./images/token.png", "data-piece": "token"});
 }
 
-function capulli({size}){
-  return img({src: `./images/c${size}.png`, "data-piece": "capulli", "data-size": size});
+function calpulli({size}){
+  return img({src: `./images/c${size}.png`, "data-piece": "calpulli", "data-size": size});
 }
 
 function demand(pos){
@@ -151,8 +151,8 @@ function desc({type, details}){
   switch(type) {
     case "started":
       return "Starts game.";
-    case "dealt-capulli":
-      return "Deals capulli tiles.";
+    case "dealt-calpulli":
+      return "Deals calpulli tiles.";
     case "scattered-temples":
       return "Scattered nonplayer temples.";
     case "placed-pilli":
@@ -180,7 +180,7 @@ function desc({type, details}){
     case "concluded-period":
       return "The 2nd period begins!";
     case "removed-unfoundables":
-      return `Removes ${details.removed.length} unfoundable capulli tile(s).`;
+      return `Removes ${details.removed.length} unfoundable calpulli tile(s).`;
     case "passed":
       return "Passed.";
     case "finished":
@@ -210,7 +210,7 @@ $.sub($snapshot, function(game){
   const {seated} = _.deref(game);
   const pilli = _.chain(seated, _.nth(_, seat), _.get(_, "pilli"));
   if (_.isSome(seat) && _.isNil(pilli) && _.includes(g.up(game), seat)) {
-    save($wip, placePilli);
+    $.reset($wip, placePilli);
   }
 });
 
@@ -270,7 +270,8 @@ function workingCommand([curr, prior], seat, {contents}, game, el){
     "data-command-from": null,
     "data-command-to": null,
     "data-command-destinations": null,
-    "data-command-at": null
+    "data-command-at": null,
+    "data-command-calpulli": null
   };
   switch (type) { //only multi-step commands appear here
     case "place-pilli": {
@@ -314,6 +315,12 @@ function workingCommand([curr, prior], seat, {contents}, game, el){
       attrs["data-command-size"] = details.size;
       break;
     }
+    case "propose-removal": {
+      const {details} = curr;
+      const {calpulli} = details;
+      attrs["data-command-calpulli"] = _.maybe(calpulli, _.seq, _.join(" ", _));
+      break;
+    }
   }
   $.eachkv(retainAttr(el, _, _), attrs);
 }
@@ -322,10 +329,11 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
   const {state, up} = curr;
   const {seated, tokens, canal1, canal2, bridges, period, contents, status, round, spent} = state;
   const {step, present} = motion;
-  const moves = present ? g.moves(game, {type: ["pass", "commit"], seat}) : null;
+  const moves = present ? g.moves(game, {type: ["pass", "commit", "propose-removal"], seat}) : null;
   const foundables = present ? g.moves(game, {type: "found-district", seat}) : null;
 
   dom.attr(el, "data-status", status);
+  dom.attr(el, "data-period", period);
   dom.removeClass(el, "error");
 
   if (which === 1) {
@@ -348,29 +356,29 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
     diff(curr, prior, ["state", "seated", seat, "temples", period, level], reconcileTemples(seat, level));
   }, [0, 1], indices(seated), _.range(1, 5));
 
-  const cCapulli = _.getIn(curr, ["state", "capulli", curr?.state?.period]),
-        pCapulli = _.getIn(prior, ["state", "capulli", prior?.state?.period]);
+  const cCalpulli = _.getIn(curr, ["state", "calpulli", curr?.state?.period]),
+        pCalpulli = _.getIn(prior, ["state", "calpulli", prior?.state?.period]);
   $.each(function(pos){
-    diff(cCapulli, pCapulli, [pos], function(curr, prior){
+    diff(cCalpulli, pCalpulli, [pos], function(curr, prior){
       dom.html(
         dom.sel1(`[data-demand='${pos}']`, el),
-        curr && !curr.at ? capulli(curr) : null);
+        curr && !curr.at ? calpulli(curr) : null);
     });
   }, _.range(0, 8));
 
   $.doseq(function(period, pos){
-    diff(curr, prior, ["state", "capulli", period, pos], function(curr, prior){
+    diff(curr, prior, ["state", "calpulli", period, pos], function(curr, prior){
       if (curr?.at && !prior?.at){
-        dom.append(at(curr.at), capulli(curr));
+        dom.append(at(curr.at), calpulli(curr));
       }
       if (prior?.at && !curr?.at) {
-        omit(dom.sel1("[data-piece='capulli']", at(prior.at)));
+        omit(dom.sel1("[data-piece='calpulli']", at(prior.at)));
       }
     });
   }, _.range(0, 2), _.range(0, 8));
 
   const foundable = _.maybe(foundables, _.filter(_.includes(_, ["type", "found-district"]), _), _.first, _.getIn(_, ["details", "size"]));
-  _.maybe(dom.sel1(`img[data-piece='capulli'][data-size='${foundable}']`, demands), dom.addClass(_, "foundable"));
+  _.maybe(dom.sel1(`img[data-piece='calpulli'][data-size='${foundable}']`, demands), dom.addClass(_, "foundable"));
   retainAttr(el, "data-foundable", foundable);
   _.chain(foundables, _.map(_.getIn(_, ["details", "at"]), _), _.seq, _.join(" ", _), _.blot, retainAttr(el, "data-found-at", _));
 
@@ -492,7 +500,7 @@ function scores(seats, {districts, palace}, {board, contents}){
     const ranked = _.chain(points, _.unique, _.sort(_.desc(_.identity), _));
     const founded = c.founded(contents, c.district(board, contents, at));
     const scored = _.detect(_.gt(_, 0), points);
-    return founded || scored ? tr(th({class: "at"}, founded ? img({src: `./images/c${size}.png`, "data-piece": "capulli", "data-size": size}) : [img({src: `./images/capulli.png`, "data-piece": "capulli", "data-size": size}), div({class: "size"}, size)], span(at)), _.chain(points, _.mapIndexed(function(idx, score){
+    return founded || scored ? tr(th({class: "at"}, founded ? img({src: `./images/c${size}.png`, "data-piece": "calpulli", "data-size": size}) : [img({src: `./images/calpulli.png`, "data-piece": "calpulli", "data-size": size}), div({class: "size"}, size)], span(at)), _.chain(points, _.mapIndexed(function(idx, score){
           const rank = _.indexOf(ranked, score) + 1,
                 ties = _.chain(points, _.filter(_.eq(score, _), _), _.count, _.gt(_, 1));
       return td({"data-score": score}, ranking(rank, score > 0 && ties), span({class: "score"}, score));
@@ -548,7 +556,7 @@ $.on(el, "click", `#table.act[data-command-type="move"][data-command-from] div[d
 $.on(el, "click", `#table.act[data-status='actions'] .zone.yours .area div.temples:not([data-remaining="0"])`, function(e){
   const type = "build-temple",
         size = parseInt(closestAttr(this, "data-size"));
-  save($wip, {type, details: {size}});
+  $.reset($wip, {type, details: {size}});
 });
 
 $.on(el, "click", `#table.act[data-status='actions'][data-command-type="build-temple"] div[data-spot]`, function(e){
@@ -576,6 +584,30 @@ $.on(el, "click", `#table.act .moves button[data-type="commit"], #table.act .mov
   $.dispatch($story, {type});
 });
 
+$.on(el, "click", `#table.act .moves button[data-type="propose-removal"]`, function(e){
+  const type = "propose-removal",
+        calpulli = [];
+  $.reset($wip, {type, details: {calpulli}});
+});
+
+$.on(el, "click", `#table.act .moves button[data-type="done-proposing"]`, function(e){
+  const command = _.deref($wip);
+  const calpulli = _.seq(_.getIn(command, ["details", "calpulli"]));
+  if (calpulli) {
+    $.dispatch($story, command);
+  } else {
+    clear($wip);
+  }
+});
+
+$.on(el, "click", `#table.act #demands li:has(img)`, function(e){
+  const period = _.chain($hist, _.deref, _.getIn(_, [0, "state", "period"]));
+  const calpulli = (period * 8) + _.chain(this, dom.attr(_, "data-demand"), parseInt);
+  $.swap($wip, _.updateIn(_, ["details", "calpulli"], function toggle(items){
+    return _.includes(items, calpulli) ? _.filtera(_.notEq(_, calpulli), items) : _.conj(items, calpulli);
+  }));
+});
+
 $.on(el, "click", `#table.act[data-status='actions'] #supplies div.tokens`, function(e){
   $.dispatch($story, {type: "bank"});
 });
@@ -587,7 +619,7 @@ $.on(el, "click", `#table.act[data-status='actions'][data-command-type="construc
 });
 
 $.on(el, "click", `#table.act[data-status='actions'] #supplies div.bridges`, function(e){
-  save($wip, {type: "construct-bridge"});
+  $.reset($wip, {type: "construct-bridge"});
 });
 
 $.on(el, "click", `#table.act[data-status='actions'][data-command-type="construct-canal"][data-command-size="1"] div[data-spot]`, function(e){
@@ -603,14 +635,14 @@ $.on(el, "click", `#table.act[data-status='actions'][data-command-type="construc
   if(_.count(at) == 2) {
     $.dispatch($story, {type, details: {at}});
   } else {
-    save($wip, {type, details: {size: 2, at}});
+    $.reset($wip, {type, details: {size: 2, at}});
   }
 });
 
 $.on(el, "click", `#table.act[data-status='actions'] #supplies div.canals`, function(e){
   const type = "construct-canal",
         size = parseInt(closestAttr(this, "data-size"));
-  save($wip, {type, details: {size}});
+  $.reset($wip, {type, details: {size}});
 });
 
 $.on(el, "click", `#table.act[data-status='actions']:not([data-command-type="move"]) div[data-spot]`, function(e){
@@ -626,14 +658,14 @@ $.on(el, "click", `#table.act[data-status='actions']:not([data-command-type="mov
     case "pilli": {
       const type = "move",
             from = closestAttr(this, "data-spot");
-      save($wip, {type, details: {from}});
+      $.reset($wip, {type, details: {from}});
       break;
     }
 
     case "bridge": {
       const type = "relocate-bridge",
             from = closestAttr(this, "data-spot");
-      save($wip, {type, details: {from}});
+      $.reset($wip, {type, details: {from}});
       break;
     }
   }

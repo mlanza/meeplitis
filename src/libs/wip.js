@@ -31,10 +31,6 @@ $.doto(WorkInProgress,
   _.implement($.ISwappable, {swap}),
   _.implement($.ISubscribe, {sub}));
 
-export function save(self, command){
-  $.reset(self, command);
-}
-
 export function clear(self){
   $.reset(self.$data, {});
 }

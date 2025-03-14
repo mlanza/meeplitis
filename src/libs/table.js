@@ -104,6 +104,7 @@ export function ui(make, describe, desc, template){
   const multiSeated = _.count(_.unique(_.map(_.get(_, "player_id"), seated))) != _.count(seated);
   dom.toggleClass(el, "multi-seated", multiSeated);
   dom.toggleClass(el, "switch-seats", _.count(seats) > 1);
+  dom.toggleClass(el, "dev", params.get("dev") == 1);
 
   params.get("listed") && dom.attr(dom.sel1("#title", el), "href", href => relink(href, {id: null}, null));
 

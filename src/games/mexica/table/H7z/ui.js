@@ -315,7 +315,7 @@ function workingCommand([curr, prior], seat, {contents}, game, el){
       attrs["data-command-size"] = details.size;
       break;
     }
-    case "propose-removal": {
+    case "propose-unfoundables": {
       const {details} = curr;
       const {calpulli} = details;
       attrs["data-command-calpulli"] = _.maybe(calpulli, _.seq, _.join(" ", _));
@@ -329,7 +329,7 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
   const {state, up} = curr;
   const {seated, tokens, canal1, canal2, bridges, period, contents, status, round, spent} = state;
   const {step, present} = motion;
-  const moves = present ? g.moves(game, {type: ["pass", "commit", "propose-removal"], seat}) : null;
+  const moves = present ? g.moves(game, {type: ["pass", "commit", "propose-unfoundables"], seat}) : null;
   const foundables = present ? g.moves(game, {type: "found-district", seat}) : null;
 
   dom.attr(el, "data-status", status);
@@ -584,8 +584,8 @@ $.on(el, "click", `#table.act .moves button[data-type="commit"], #table.act .mov
   $.dispatch($story, {type});
 });
 
-$.on(el, "click", `#table.act .moves button[data-type="propose-removal"]`, function(e){
-  const type = "propose-removal",
+$.on(el, "click", `#table.act .moves button[data-type="propose-unfoundables"]`, function(e){
+  const type = "propose-unfoundables",
         calpulli = [];
   $.reset($wip, {type, details: {calpulli}});
 });

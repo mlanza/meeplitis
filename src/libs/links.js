@@ -18,7 +18,7 @@ export function keeping(...keys){
   }
 }
 
-export const relink = keeping("id", "listed", "monitor");
+export const relink = keeping("id", "listed", "monitor", "dev");
 
 export function toggleHost(host, localhost = "http://localhost:8080"){
   const origin = location.origin == localhost ? host : localhost;

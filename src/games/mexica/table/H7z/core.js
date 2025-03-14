@@ -72,6 +72,10 @@ function bridgesDepleted(bridges){
   return !_.chain(bridges, _.remove(_.isSome, _), _.seq);
 }
 
+function canProposeUnfoundables(canal1, canal2){
+  return _.chain(_.concat(canal1, canal2), _.remove(_.isSome, _), _.count) <= 5;
+}
+
 function canalsDepleted(canal1, canal2){
   return !_.chain(_.concat(canal1, canal2), _.remove(_.isSome, _), _.seq);
 }
@@ -818,29 +822,38 @@ export function execute(self, command){
       }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "placed-pilli")));
     }
-
     case "propose-unfoundables": {
-      const sizes = _.chain(command, _.getIn(_, ["details", "calpulli"]), _.mapa(function(idx){
-        const [period, pos] = idx > 8 ? [1, idx - 8] : [0, idx];
-        return _.getIn(state, ["calpulli", period, pos, "size"]);
-      }, _));
       //TODO ensure no `at`
-      if (!_.seq(sizes)) {
+      if (!_.seq(_.chain(command, _.getIn(_, ["details", "calpulli"]), _.seq))) {
         throw new Error("No removals proposed.");
       }
-      return _.chain(self,
-        g.fold(_, _.chain(command,
-          _.assocIn(_, ["type"], "proposed-unfoundables"),
-          _.assocIn(_, ["details", "sizes"], sizes))));
+      return g.fold(self, _.chain(command,
+        _.assoc(_, "type", "proposed-unfoundables")));
     }
     case "answer-proposal": {
       const answer = _.getIn(command, ["details", "answer"]);
-      if (_.includes([null, "accept", "reject"], answer)) {
+      if (!_.includes([null, "accept", "reject"], answer)) {
         throw new Error("Invalid answer.");
       }
-      return g.fold(self, _.assoc(command, "type", "answered-proposal"));
+      return _.chain(self,
+        g.fold(_, _.assoc(command, "type", "answered-proposal")),
+        function(self){
+          const state = _.deref(self);
+          const proposedUnfoundables = _.get(state, "proposed-unfoundables");
+          const {seated} = state;
+          const {calpulli, accepted} = proposedUnfoundables;
+          const n = _.count(accepted);
+          const unanimous = n == _.count(seated),
+                unanswered = n == 0;
+          if (unanimous) {
+            return g.fold(self, {type: "removed-unfoundables", details: {removed: calpulli}});
+          } else if (answer == "reject" || unanswered) {
+            return _.fmap(self, clearProposal);
+          } else {
+            return self;
+          }
+        });
     }
-
     case "finish": {
       return g.fold(self, _.assoc(command, "type", "finished"));
     }
@@ -961,34 +974,20 @@ function fold(self, event){
 
     case "proposed-unfoundables":
       return g.fold(self, event, _.pipe(
-        _.assoc(_, "proposed-unfoundables", {calpulli: details.calpulli, accepted: [event.seat]})));
+        _.assoc(_, "proposed-unfoundables", {calpulli: details.calpulli, accepted: _.set([event.seat])})));
 
     case "answered-proposal": {
       const {answer} = details;
-      const seats = _.count(state.seated);
-      const removed = _.getIn(state, ["proposed-unfoundables", "calpulli"]);
-      return g.fold(self, event,
-        _.pipe(
-        _.updateIn(_, ["proposed-unfoundables", "accepted"], answer == "accept" ? _.chain(_, _.conj(_, event.seat), _.unique) : answer == null ? _.filtera(_.notEq(_, event.seat), _) : _.identity),
-        function(state){
-          const accepted = _.count(_.getIn(state, ["proposed-unfoundables", "accepted"]));
-          const fullyAccepted = seats == accepted;
-          const noneAccepted = accepted == 0;
-          if (fullyAccepted) {
-            return g.fold(self, {type: "removed-unfoundables", details: {removed}}, clearProposal);
-          } else if (answer == "reject" || noneAccepted) {
-            return _.chain(state, clearProposal);
-          } else {
-            return state;
-          }
-        }));
+      return _.chain(self,
+        g.fold(_, event, _.updateIn(_, ["proposed-unfoundables", "accepted"], answer == "accept" ? _.conj(_, seat) : answer == null ? _.disj(_, seat) : _.identity)));
     }
 
     case "removed-unfoundables":
       return g.fold(self, event,
         _.pipe(
           removeCalpulli(details.removed),
-          markScoringRound));
+          markScoringRound,
+          clearProposal));
 
     case "constructed-bridge":
       return g.fold(self, event,
@@ -1159,7 +1158,7 @@ function moves3(self, type, seat){
     return [];
   }
 
-  const {contents, calpulli, canal1, canal2, bridges, period, status, spent, redeemed, banked, seated} = _.deref(self);
+  const {contents, calpulli, canal1, canal2, bridges, period, status, spent, redeemed, banked, seated, ["proposed-unfoundables"]: proposedUnfoundables} = _.deref(self);
   const {pilli, bank} = _.nth(seated, seat);
   const from = pilli;
   const unspent = remaining(spent, bank, redeemed);
@@ -1181,6 +1180,12 @@ function moves3(self, type, seat){
       default: {
         return [];
       }
+    }
+  } else if (proposedUnfoundables) {
+    if (type == "answer-proposal") {
+      const {accepted} = proposedUnfoundables;
+      const alreadyIn = _.includes(accepted, seat);
+      return alreadyIn ? [{type, seat, details: {answer: null}}] : [{type, seat, details: {answer: "accept"}}, {type, seat, details: {answer: "reject"}}];
     }
   } else {
     switch(type){
@@ -1229,7 +1234,7 @@ function moves3(self, type, seat){
       }
 
       case "propose-unfoundables": {
-        return permit;
+        return canProposeUnfoundables(canal1, canal2) ? permit : [];
       }
 
       default: {

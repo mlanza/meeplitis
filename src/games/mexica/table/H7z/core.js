@@ -818,7 +818,7 @@ export function execute(self, command){
       }
       return _.chain(self, g.fold(_, _.assoc(command, "type", "placed-pilli")));
     }
-    /*
+
     case "propose-unfoundables": {
       const sizes = _.chain(command, _.getIn(_, ["details", "calpulli"]), _.mapa(function(idx){
         const [period, pos] = idx > 8 ? [1, idx - 8] : [0, idx];
@@ -840,7 +840,7 @@ export function execute(self, command){
       }
       return g.fold(self, _.assoc(command, "type", "answered-proposal"));
     }
-*/
+
     case "finish": {
       return g.fold(self, _.assoc(command, "type", "finished"));
     }
@@ -958,7 +958,7 @@ function fold(self, event){
           _.update(_, "contents", function(contents){
             return _.reduce(place(w), contents, details.at);
           })));
-/*
+
     case "proposed-unfoundables":
       return g.fold(self, event, _.pipe(
         _.assoc(_, "proposed-unfoundables", {calpulli: details.calpulli, accepted: [event.seat]})));
@@ -983,7 +983,7 @@ function fold(self, event){
           }
         }));
     }
-*/
+
     case "removed-unfoundables":
       return g.fold(self, event,
         _.pipe(

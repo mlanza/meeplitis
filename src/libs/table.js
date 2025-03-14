@@ -4,8 +4,7 @@ import $ from "/libs/atomic_/shell.js";
 import supabase from "/libs/supabase.js";
 import {presence} from "/libs/online.js";
 import {$online, session} from "/libs/session.js";
-import {keeping} from "/libs/links.js";
-import {relink} from "/libs/profiles.js";
+import {relink} from "/libs/links.js";
 import {story, nav, hist, snapshot, waypoint, refresh, replay, toPresent, atPresent, inPast} from "/libs/story.js";
 import {wip, clear} from "/libs/wip.js";
 import {rankings} from "/components/table/ui.js";
@@ -34,7 +33,6 @@ if (redirect) {
   location.href = redirect;
 }
 
-const changeSeat = keeping("id", "listed");
 const ttl = dom.sel1("head title");
 const title = _.chain(ttl, dom.text, _.split(_, "|"), _.first, _.trim);
 dom.text(ttl, `${title} #${tableId}`);
@@ -107,7 +105,7 @@ export function ui(make, describe, desc, template){
   dom.toggleClass(el, "multi-seated", multiSeated);
   dom.toggleClass(el, "switch-seats", _.count(seats) > 1);
 
-  params.get("listed") && dom.attr(dom.sel1("#title", el), "href", href => `${href}?listed=${params.get("listed")}`);
+  params.get("listed") && dom.attr(dom.sel1("#title", el), "href", href => relink(href, {id: null}, null));
 
   const els = {
     remarks: dom.sel1("#remarks-button", el),
@@ -296,7 +294,7 @@ export function ui(make, describe, desc, template){
 
 export function player(username, avatar_url, seat, ...contents){
   return div({class: "player"},
-    div({class: "avatar"}, img({src: avatar_url}), a({class: "seat", href: changeSeat("./", {seat}, null)}, seat)),
+    div({class: "avatar"}, img({src: avatar_url}), a({class: "seat", href: relink("./", {seat}, null)}, seat)),
     div(a({class: "username", "href": relink("/profiles/", {username})}, h1(username)), contents),
     img({"data-action": "", src: "/images/pawn.svg"}));
 }

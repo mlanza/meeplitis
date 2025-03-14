@@ -2,7 +2,7 @@ import _ from "/libs/atomic_/core.js";
 import dom from "/libs/atomic_/dom.js";
 import $ from "/libs/atomic_/shell.js";
 import supabase from "/libs/supabase.js";
-import {relink} from "/libs/profiles.js";
+import {relink} from "/libs/links.js";
 import {session} from "/libs/session.js";
 import "/libs/dummy.js";
 

@@ -24,10 +24,13 @@ li {
   list-style-image: url(/images/checked.png);
 }
 #events li {
-  border: solid 1px transparent;
+  border-left: double 3px transparent;
 }
 #events li.present {
-  border-color: white;
+  border-color: greenyellow;
+  box-sizing: border-box;
+  max-width: 100%;
+  width: 100%;
 }
 #events li.future {
   list-style-image: url(/images/unchecked.png);
@@ -60,7 +63,7 @@ details > pre {
 .facts {
   margin-left: 10px;
   padding: 0;
-  color: greenyellow;
+  color: lightsalmon;
 }
 .state {
   margin-left: 10px;

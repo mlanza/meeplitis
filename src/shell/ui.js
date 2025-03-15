@@ -142,11 +142,20 @@ try {
       return i < idx ? "past" : i == idx ? "present" : "future";
     }
 
+    function compactJSON(obj) {
+      const vals = [];
+      for(const key in obj){
+        const val = obj[key];
+        vals.push(`  "${key}": ${JSON.stringify(val)}`);
+      }
+      return _.str("{\n", _.join(",\n", vals), "\n}");
+    }
+
     function formatEvent({event, state, may, up}, klass = ""){
       return li({id: event.id, class: klass},
         details(summary(pre(JSON.stringify(event))),
           pre({class: "facts"}, JSON.stringify({up, may})),
-          pre({class: "state"}, JSON.stringify(state, null, 2))));
+          pre({class: "state"}, compactJSON(state))));
     }
 
     $.sub($hist, function([curr, prior]){

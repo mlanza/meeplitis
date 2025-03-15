@@ -275,7 +275,7 @@ function workingCommand([curr, prior], seat, {contents}, game, el){
     "data-command-to": null,
     "data-command-destinations": null,
     "data-command-at": null,
-    "data-command-calpulli": null
+    "data-command-propose-unfoundables": null
   };
   switch (type) { //only multi-step commands appear here
     case "place-pilli": {
@@ -322,7 +322,7 @@ function workingCommand([curr, prior], seat, {contents}, game, el){
     case "propose-unfoundables": {
       const {details} = curr;
       const {calpulli} = details;
-      attrs["data-command-calpulli"] = _.maybe(calpulli, _.seq, _.join(" ", _));
+      attrs["data-command-propose-unfoundables"] = _.maybe(calpulli, _.seq, _.join(" ", _));
       break;
     }
   }
@@ -344,7 +344,7 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
     return present ? workingCommand(wip, seat, state, game, el) : null;
   }
 
-  dom.attr(el, "data-event-calpulli", _.maybe(state, _.getIn(_, ["proposed-unfoundables", "calpulli"]), _.join(" ", _)));
+  dom.attr(el, "data-proposed-unfoundables", _.maybe(state, _.getIn(_, ["proposed-unfoundables", "calpulli"]), _.join(" ", _)));
 
   _.chain(moves, _.map(_.get(_, "type"), _), _.distinct, _.join(" ", _), _.trim, dom.attr(el, "data-allow-commands", _));
 

@@ -1281,7 +1281,7 @@ function perspective(self, seen, reality){
 }
 
 function undoable(self, {type}){
-  return !_.includes(["started", "committed", "finished", "dealt-calpulli", "scattered-temples", "concluded-period", "scored-grandeur", "proposed-unfoundables"], type);
+  return !_.includes(["started", "committed", "finished", "dealt-calpulli", "scattered-temples", "concluded-period", "scored-grandeur", "proposed-unfoundables", "answered-proposal"], type);
 }
 
 function status(self){

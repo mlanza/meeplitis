@@ -179,6 +179,10 @@ function desc({type, details}){
       ];
     case "concluded-period":
       return "The 2nd period begins!";
+    case "proposed-unfoundables":
+      return "Proposes district(s) which cannot be founded.";
+    case "answered-proposal":
+      return _.get({accept: "Accepts proposal.", reject: "Rejects proposal."}, details.answer, "Reconsiders proposal.");
     case "removed-unfoundables":
       return `Removes ${details.removed.length} unfoundable calpulli tile(s).`;
     case "passed":
@@ -329,7 +333,7 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
   const {state, up} = curr;
   const {seated, tokens, canal1, canal2, bridges, period, contents, status, round, spent} = state;
   const {step, present} = motion;
-  const moves = present ? g.moves(game, {type: ["pass", "commit", "propose-unfoundables"], seat}) : null;
+  const moves = present ? g.moves(game, {type: ["pass", "commit", "propose-unfoundables", "answer-proposal"], seat}) : null;
   const foundables = present ? g.moves(game, {type: "found-district", seat}) : null;
 
   dom.attr(el, "data-status", status);
@@ -340,7 +344,25 @@ $.sub($both, function([[curr, prior, motion, game], wip, which]){
     return present ? workingCommand(wip, seat, state, game, el) : null;
   }
 
-  _.chain(moves, _.map(_.get(_, "type"), _), _.distinct, _.join(" ", _), dom.attr(el, "data-allow-commands", _));
+  dom.attr(el, "data-event-calpulli", _.maybe(state, _.getIn(_, ["proposed-unfoundables", "calpulli"]), _.join(" ", _)));
+
+  _.chain(moves, _.map(_.get(_, "type"), _), _.distinct, _.join(" ", _), _.trim, dom.attr(el, "data-allow-commands", _));
+
+  _.chain(moves, _.filter(cmd => cmd?.type == "answer-proposal", _), _.mapa(_.getIn(_, ["details", "answer"]), _), function(answers){
+    const n = _.count(answers);
+    $.each(function(btn){
+      const type = dom.attr(btn, "data-type");
+      switch(type){
+        case "reconsider":
+          dom.prop(btn, "disabled", n == 2);
+          break;
+        case "accept":
+        case "reject":
+          dom.prop(btn, "disabled", !_.includes(answers, type));
+          break;
+      }
+    }, dom.sel(".moves [data-answer]"))
+  });
 
   $.each(dom.removeClass(_, "foundable"), dom.sel(".foundable", demands));
 
@@ -539,6 +561,12 @@ $.on(el, "click", `#table.act[data-foundable]:not([data-command-type]) div[data-
   }
 });
 
+$.on(el, "click", `#table.act button[data-answer]`, function(e){
+  const type = "answer-proposal",
+        answer = _.maybe(this, dom.attr(_, "data-answer"), _.blot);
+  $.dispatch($story, {type, details: {answer}});
+});
+
 $.on(el, "click", `#table.act[data-command-type="move"][data-command-from] div[data-spot]`, function(e){
   const type = "move",
         from = closestAttr(this, "data-command-from"),
@@ -604,7 +632,7 @@ $.on(el, "click", `#table.act #demands li:has(img)`, function(e){
   const period = _.chain($hist, _.deref, _.getIn(_, [0, "state", "period"]));
   const calpulli = (period * 8) + _.chain(this, dom.attr(_, "data-demand"), parseInt);
   $.swap($wip, _.updateIn(_, ["details", "calpulli"], function toggle(items){
-    return _.includes(items, calpulli) ? _.filtera(_.notEq(_, calpulli), items) : _.conj(items, calpulli);
+    return _.includes(items, calpulli) ? _.omit(items, calpulli) : _.conj(items, calpulli);
   }));
 });
 

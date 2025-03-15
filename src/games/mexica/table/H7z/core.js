@@ -976,12 +976,12 @@ function fold(self, event){
 
     case "proposed-unfoundables":
       return g.fold(self, event, _.pipe(
-        _.assoc(_, "proposed-unfoundables", {calpulli: details.calpulli, accepted: _.set([event.seat])})));
+        _.assoc(_, "proposed-unfoundables", {calpulli: details.calpulli, accepted: [event.seat]})));
 
     case "answered-proposal": {
       const {answer} = details;
       return _.chain(self,
-        g.fold(_, event, _.updateIn(_, ["proposed-unfoundables", "accepted"], answer == "accept" ? _.conj(_, seat) : answer == null ? _.disj(_, seat) : _.identity)));
+        g.fold(_, event, _.updateIn(_, ["proposed-unfoundables", "accepted"], answer == "accept" ? _.comp(_.toArray, _.unique, _.conj(_, seat)) : answer == null ? _.omit(_, seat) : _.identity)));
     }
 
     case "removed-unfoundables":
@@ -1096,7 +1096,7 @@ function actors(f){
   return function(self){
     const state = _.deref(self),
           {up} = state,
-          accepted = _.getIn(state, ["proposed-unfoundables", "accepted"]),
+          accepted = _.maybe(state, _.getIn(_, ["proposed-unfoundables", "accepted"]), _.toArray),
           seated = g.seated(self);
     return accepted ? f(seated, accepted) : _.filtera(_.isSome, [up]);
   }
@@ -1193,7 +1193,7 @@ function moves3(self, type, seat){
   } else if (proposedUnfoundables) {
     if (type == "answer-proposal") {
       const {accepted} = proposedUnfoundables;
-      const alreadyIn = _.includes(accepted, seat);
+      const alreadyIn = _.chain(accepted, _.toArray, _.includes(_, seat));
       return alreadyIn ? [{type, seat, details: {answer: null}}] : [{type, seat, details: {answer: "accept"}}, {type, seat, details: {answer: "reject"}}];
     }
   } else {
@@ -1253,7 +1253,7 @@ function moves3(self, type, seat){
   }
 }
 
-const moves = _.overload(null, moves1, moves1, moves3);
+const moves = _.comp(_.compact, _.overload(null, moves1, moves1, moves3));
 
 function metrics(self){
   const {seated} = _.deref(self);

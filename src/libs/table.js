@@ -97,7 +97,8 @@ export function ui(make, describe, desc, template){
         $present = $.map(_.all, $ready, $.pipe($story, _.map(function({touches, at}){
           return _.count(touches) - 1 == at;
         }), _.dedupe())),
-        $act = $.map(_.all, $present, $up, $ready, $started);
+        $actionable = $.atom(null), //active player have any possible moves?
+        $act = $.map(_.all, $present, $actionable, $ready, $started);
 
   reg({$touch, $started, $status, $scored, $remarks, $described, $presence, $present, $act});
 
@@ -166,6 +167,8 @@ export function ui(make, describe, desc, template){
 
   //manage data-action
   $.sub($hist, function([{up, may}]){
+    const actionable = _.includes(up, seat) || _.includes(may, seat);
+    $.reset($actionable, actionable);
     $.eachIndexed(function(seat){
       dom.attr(dom.sel1(`[data-seat="${seat}"] [data-action]`, els.players), "data-action", _.includes(up, seat) ? "must" : (_.includes(may, seat) ? "may" : ""));
     }, seated);

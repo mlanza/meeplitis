@@ -105,7 +105,8 @@
 #table.act[data-perspective="0"] [data-piece="pilli"][data-seat="0"]:hover {
   background-color: black;
 }
-#table.act.dev[data-allow-commands~='propose-unfoundables'] .moves button[data-type='propose-unfoundables'],
+#table.act[data-allow-commands~='answer-proposal'] .moves button[data-answer],
+#table.act[data-allow-commands~='propose-unfoundables'] .moves button[data-type='propose-unfoundables'],
 #table.act[data-allow-commands~='commit'] .moves button[data-type='commit'],
 #table.act[data-allow-commands~='pass']   .moves button[data-type='pass'] {
   display: inline;
@@ -130,13 +131,13 @@
   text-align: center;
   opacity: .5;
 }
-#table[data-command-type='propose-unfoundables'].act ol#demands li {
+#table:is([data-event-type='proposed-unfoundables'],[data-command-type='propose-unfoundables'].act) ol#demands li {
   height: var(--demand-size);
   width: var(--demand-size);
   position: relative;
   display: inline-block;
 }
-#table[data-command-type='propose-unfoundables'].act ol#demands li::after {
+#table:is([data-event-type='proposed-unfoundables'],[data-command-type='propose-unfoundables'].act) ol#demands li::after {
   content: "";
   position: absolute;
   top: 0;
@@ -146,14 +147,14 @@
   height: var(--square-size);
   width: var(--square-size);
 }
-#table[data-command-type='propose-unfoundables'][data-period='1'][data-command-calpulli~='8'].act ol#demands li[data-demand='0']::after,
-#table[data-command-type='propose-unfoundables'][data-period='1'][data-command-calpulli~='9'].act ol#demands li[data-demand='1']::after,
-#table[data-command-type='propose-unfoundables'][data-period='1'][data-command-calpulli~='10'].act ol#demands li[data-demand='2']::after,
-#table[data-command-type='propose-unfoundables'][data-period='1'][data-command-calpulli~='11'].act ol#demands li[data-demand='3']::after,
-#table[data-command-type='propose-unfoundables'][data-period='1'][data-command-calpulli~='12'].act ol#demands li[data-demand='4']::after,
-#table[data-command-type='propose-unfoundables'][data-period='1'][data-command-calpulli~='13'].act ol#demands li[data-demand='5']::after,
-#table[data-command-type='propose-unfoundables'][data-period='1'][data-command-calpulli~='14'].act ol#demands li[data-demand='6']::after,
-#table[data-command-type='propose-unfoundables'][data-period='1'][data-command-calpulli~='15'].act ol#demands li[data-demand='7']::after {
+#table:is([data-event-calpulli~='8'],[data-command-calpulli~='8'].act) ol#demands li[data-demand='0']::after,
+#table:is([data-event-calpulli~='9'],[data-command-calpulli~='9'].act) ol#demands li[data-demand='1']::after,
+#table:is([data-event-calpulli~='10'],[data-command-calpulli~='10'].act) ol#demands li[data-demand='2']::after,
+#table:is([data-event-calpulli~='11'],[data-command-calpulli~='11'].act) ol#demands li[data-demand='3']::after,
+#table:is([data-event-calpulli~='12'],[data-command-calpulli~='12'].act) ol#demands li[data-demand='4']::after,
+#table:is([data-event-calpulli~='13'],[data-command-calpulli~='13'].act) ol#demands li[data-demand='5']::after,
+#table:is([data-event-calpulli~='14'],[data-command-calpulli~='14'].act) ol#demands li[data-demand='6']::after,
+#table:is([data-event-calpulli~='15'],[data-command-calpulli~='15'].act) ol#demands li[data-demand='7']::after {
   background: url(./images/remove.svg) no-repeat center center;
   background-size: cover;
 }

@@ -9,7 +9,9 @@ const params = new URLSearchParams(document.location.search),
       _table_id = params.get('id'),
       options = params.get('options')?.split(',') || [];
 
-const moves = _.pipe(_.deref, _.get(_, "frames"), _.last, _.get(_, "game"), g.moves, _.compact, _.toArray);
+function moves(){
+  return $.tee(_.pipe(_.get(_, "frames"), _.last, _.get(_, "game"), g.moves, _.compact, _.toArray, $.see("moves")));
+}
 
 reg({supabase, g, moves});
 
@@ -102,23 +104,43 @@ try {
     }
 
     function at(id){
-      return function({seed, frames, at, init}){
+      return function({seed, frames, init}){
         const idx = _.detectIndex(function(frame){
           return frame?.event?.id == id;
         }, frames);
+        const frame = _.nth(frames, idx);
+        const at = frame.event.id;
         return {seed, frames, idx, at, init};
+      }
+    }
+
+    function head(){
+      return function(memo){
+        const {frames} = memo;
+        return at(_.last(frames)?.event.id)(memo);
+      }
+    }
+
+    function tail(){
+      return function(memo){
+        const {frames} = memo;
+        return at(_.first(frames)?.event.id)(memo);
       }
     }
 
     function help(){
       $.log(`From the commands pane or the console \`$.swap($state, ...)\`:
-  exec([{type: "pass"},{type: "commit"}], 1))
-  flush()
-  reset()
-  undo()
-  redo()
+  exec([{type: "pass"},{type: "commit"}], 1)
+  reset
+  undo
+  redo
+  flush
   at(id)
-  help()`);
+  head
+  tail
+  moves
+  help`);
+      return _.identity;
     }
 
     function tempIds(added){
@@ -205,7 +227,7 @@ try {
     });
 
     function commands(){
-      const commands = _.chain(dom.sel1("#commands"), dom.value, _.split(_, "\n"), _.mapa(_.trim, _), _.join(", ", _), _.str("_.pipe(", _, ")"));
+      const commands = _.chain(dom.sel1("#commands"), dom.value, _.split(_, "\n"), _.mapa(_.pipe(_.trim, _.branch(_.includes(_, "("), _.identity, _.str(_, "()"))), _), _.join(", ", _), _.str("_.pipe(", _, ")"));
       return eval(commands);
     }
 
@@ -220,12 +242,15 @@ try {
 
     $.on(dom.sel1("#commands"), "keydown", function(e){
       if (e.key == "Enter") {
-        e.preventDefault();
-        try {
-          $.swap($state, commands());
-        } catch (ex){
-          $.log("error", ex);
-          alert(ex?.message || "There was an error.");
+        if (!e.shiftKey) {
+          e.preventDefault();
+          try {
+            $.swap($state, commands());
+            dom.sel1("#commands").focus();
+          } catch (ex){
+            $.log("error", ex);
+            alert(ex?.message || "There was an error.");
+          }
         }
       }
     });
@@ -250,6 +275,12 @@ try {
             $.swap($state, redo());
             break;
 
+          case "t":
+            e.preventDefault();
+            const {at} = _.deref($state);
+            dom.sel1(`#${at} details summary`)?.click();
+            break;
+
           case "f":
             e.preventDefault();
             $.swap($state, flush());
@@ -261,7 +292,9 @@ try {
 
     help();
 
-    reg({$state, exec, flush, reset, undo, redo, at, help, simulate, effects});
+    reg({$state, exec, flush, reset, undo, redo, at, head, tail, help, simulate, effects});
   }
 } catch (ex) {
+} finally {
+  dom.sel1("#commands").focus();
 }

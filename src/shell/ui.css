@@ -49,7 +49,7 @@ li {
   vertical-align: bottom;
   transition: opacity .5s;
 }
-#commands:hover {
+#commands:hover, #commands:focus {
   opacity: 1;
 }
 summary > pre {

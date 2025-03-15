@@ -34,27 +34,20 @@ li {
 }
 #commands {
   position: fixed;
-  bottom: 1em;
-  left: 1em;
+  bottom: .5em;
+  right: .5em;
   width: calc(100vw - 2em);
-}
-#commands #seat {
-  position: absolute;
-  right: 42em;
-  bottom: 1em;
-  width: 2.5em;
-  min-height: 3em;
-  vertical-align: top;
-  resize: none;
-}
-#commands #move {
-  position: absolute;
-  width: 40em;
-  min-height: 3em;
-  right: 1em;
-  bottom: 1em;
+  width: 60em;
+  min-height: 5em;
   max-height: 15em;
   resize: vertical;
+  padding: 5px;
+  opacity: .25;
+  vertical-align: bottom;
+  transition: opacity .5s;
+}
+#commands:hover {
+  opacity: 1;
 }
 summary > pre {
   margin-top: -15px;

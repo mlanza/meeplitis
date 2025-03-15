@@ -228,7 +228,7 @@ try {
     });
 
     function commands(){
-      const commands = _.chain(dom.sel1("#commands"), dom.value, _.split(_, "\n"), _.mapa(_.pipe(_.trim, _.branch(_.includes(_, "("), _.identity, _.str(_, "()"))), _), _.join(", ", _), _.str("_.pipe(", _, ")"));
+      const commands = _.chain(dom.sel1("#commands"), dom.value, _.trim, _.split(_, "\n"), _.mapa(_.pipe(_.trim, _.branch(_.includes(_, "("), _.identity, _.str(_, "()"))), _), _.join(", ", _), _.str("_.pipe(", _, ")"));
       return eval(commands);
     }
 

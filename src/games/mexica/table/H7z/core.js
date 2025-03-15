@@ -1160,9 +1160,10 @@ function moves1(self){
 }
 
 function moves3(self, type, seat){
-  const up = g.up(self);
+  const up = g.up(self),
+        may = g.may(self);
 
-  if (!_.includes(up, seat)) {
+  if (!_.includes(up, seat) && !_.includes(may, seat)) {
     return [];
   }
 

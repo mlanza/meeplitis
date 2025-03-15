@@ -72,8 +72,10 @@ function bridgesDepleted(bridges){
   return !_.chain(bridges, _.remove(_.isSome, _), _.seq);
 }
 
-function canProposeUnfoundables(canal1, canal2){
-  return _.chain(_.concat(canal1, canal2), _.remove(_.isSome, _), _.count) <= 5;
+function proposalRipe(canal1, canal2){
+  const n = _.chain(_.concat(canal1, canal2), _.remove(_.isSome, _), _.count);
+  const ripe = n <= 5 && n > 0;
+  return ripe;
 }
 
 function canalsDepleted(canal1, canal2){
@@ -1090,12 +1092,18 @@ function fmap(self, f){
     f(self.state));
 }
 
-function up(self){
-  const {up} = _.deref(self);
-  return _.filtera(_.isSome, [up]);
+function actors(f){
+  return function(self){
+    const state = _.deref(self),
+          {up} = state,
+          accepted = _.getIn(state, ["proposed-unfoundables", "accepted"]),
+          seated = g.seated(self);
+    return accepted ? f(seated, accepted) : _.filtera(_.isSome, [up]);
+  }
 }
 
-const may = up;
+const up = actors(_.difference),
+      may = actors(_.identity);
 
 export function foundable(board, contents, markers, pilli){
   const dist = district(board, contents, pilli);
@@ -1234,7 +1242,7 @@ function moves3(self, type, seat){
       }
 
       case "propose-unfoundables": {
-        return canProposeUnfoundables(canal1, canal2) ? permit : [];
+        return !calpulliDepleted(calpulli, period) && proposalRipe(canal1, canal2) ? permit : [];
       }
 
       default: {

@@ -26,7 +26,8 @@ try {
           {make} = await import(`/games/${slug}/table/${release}/core.js`);
 
     const seats = _.toArray(_.repeat(_.count(seated) || 4, {})),
-          seen = _.toArray(_.range(0, _.count(seats))),
+          seat = _.maybe(params.get("seat"), parseInt),
+          seen = _.maybe(params.get("seen"), _.split(_, ","), _.mapa(parseInt, _)) || _.maybe(seat, _.array) || _.toArray(_.range(0, _.count(seats))),
           simulate = g.simulate(make),
           effects = _.comp(g.effects, simulate);
 
@@ -48,7 +49,7 @@ try {
       return {...init, init};
     }
 
-    function exec(commands = [], seat = null){
+    function exec(seat, ...commands){
       return function(memo){
         const {init} = memo;
         const {seed, frames, idx} = flush()(memo);

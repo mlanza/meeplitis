@@ -862,7 +862,7 @@ export function execute(self, command){
         return !tile || tile.at;
       }, details.removed);
       if (invalid) {
-        throw new Error(`Cannot remove calpulli at ${idx}.`);
+        throw new Error(`Invalid calpulli removal.`);
       }
       return g.fold(self, _.assoc(command, "type", "removed-unfoundables"));
     }

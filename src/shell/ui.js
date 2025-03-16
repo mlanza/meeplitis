@@ -174,9 +174,10 @@ try {
       return _.str("{\n", _.join(",\n", vals), "\n}");
     }
 
-    function formatEvent({event, state, may, up}, klass = ""){
+    function formatEvent(idx, {event, state, may, up}, klass = ""){
       return li({id: event.id, class: klass},
         details(summary(pre(JSON.stringify(event))),
+          pre({class: "index"}, idx, "."),
           pre({class: "facts"}, JSON.stringify({up, may})),
           pre({class: "state"}, compactJSON(state))));
     }
@@ -190,7 +191,9 @@ try {
         const decrease = cf < pf ? pf - cf : 0;
         if (increase) {
           dom.append(dom.sel1("#events"),
-            _.mapa(formatEvent, _.drop(pf, curr.frames)));
+            _.mapIndexed(function(idx, ...args){
+              return formatEvent(pf + idx, ...args);
+            }, _.drop(pf, curr.frames)));
         }
         if (decrease) {
           const subtracted = _.mapa(_.getIn(_, ["event", "id"]), _.drop(cf, prior.frames));
@@ -212,7 +215,7 @@ try {
         }
       } else {
         const els = _.mapIndexed(function(i, frame){
-          return formatEvent(frame, when(i, idx));
+          return formatEvent(i, frame, when(i, idx));
         }, frames);
         dom.append(dom.sel1("#events"), els);
       }

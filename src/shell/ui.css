@@ -17,23 +17,32 @@ summary pre {
   white-space: normal;
 }
 li {
-  width: calc(100vw - 15em);
+  width: calc(100vw - 5em);
   padding: 5px;
 }
 #events {
   list-style-image: url(/images/checked.png);
 }
 #events li {
-  border-left: double 3px transparent;
-}
-#events li.present {
-  border-color: greenyellow;
+  border-left: solid 3px transparent;
   box-sizing: border-box;
   max-width: 100%;
   width: 100%;
+  margin-top: 4px;
+  border-bottom: dashed 1px transparent;
+}
+#events li.present {
+  border-color: transparent;
+  border-bottom-color: white;
 }
 #events li.future {
+  border-left-color: lightsalmon;
   list-style-image: url(/images/unchecked.png);
+}
+.index {
+  padding: 0;
+  font-weight: bold;
+  color: lightyellow;
 }
 #commands {
   position: fixed;
@@ -63,10 +72,12 @@ details > pre {
 .facts {
   margin-left: 10px;
   padding: 0;
-  color: lightsalmon;
+  color: yellowgreen;
 }
 .state {
   margin-left: 10px;
   padding: 0;
-  color: antiquewhite;
+  color: lightgray;
+  width: auto;
+  overflow-x: auto;
 }

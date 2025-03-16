@@ -65,6 +65,8 @@ function phase(status){
   const overall = _.first(status);
   if (overall === "finished") {
     return "Finished";
+  } else if (overall == "pending") {
+    return "Pending";
   } else {
     const [[round, rounds], leadSuit, phase] = _.chain(status, _.rest, _.toArray)
     const desc = _.get({"bidding": "Bidding", "playing": `Playing ${leadSuit || ''}`, "wait": null}, phase);

@@ -658,7 +658,7 @@ $.on(el, "click", `#table.act[data-status='actions'][data-command-type="construc
 
 $.on(el, "click", `#table.act[data-status='actions'][data-command-type="construct-canal"][data-command-size="2"] div[data-spot]`, function(e){
   const type = "construct-canal",
-        at   = _.chain(_.compact([closestAttr(this, "data-command-at"), closestAttr(this, "data-spot")]), _.distinct, _.toArray),
+        at   = _.chain(_.compact([closestAttr(this, "data-command-at"), closestAttr(this, "data-spot")]), _.distinct),
         size = parseInt(closestAttr(this, "data-command-size"));
   if(_.count(at) == 2) {
     $.dispatch($story, {type, details: {at}});

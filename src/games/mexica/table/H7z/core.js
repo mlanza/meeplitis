@@ -981,7 +981,7 @@ function fold(self, event){
     case "answered-proposal": {
       const {answer} = details;
       return _.chain(self,
-        g.fold(_, event, _.updateIn(_, ["proposed-unfoundables", "accepted"], answer == "accept" ? _.comp(_.toArray, _.unique, _.conj(_, seat)) : answer == null ? _.omit(_, seat) : _.identity)));
+        g.fold(_, event, _.updateIn(_, ["proposed-unfoundables", "accepted"], answer == "accept" ? _.add(_, seat) : answer == null ? _.omit(_, seat) : _.identity)));
     }
 
     case "removed-unfoundables":

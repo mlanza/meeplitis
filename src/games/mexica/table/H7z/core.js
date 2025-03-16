@@ -1253,7 +1253,7 @@ function moves3(self, type, seat){
   }
 }
 
-const moves = _.comp(_.compact, _.overload(null, moves1, moves1, moves3));
+const moves = _.overload(null, moves1, moves1, moves3);
 
 function metrics(self){
   const {seated} = _.deref(self);

@@ -761,7 +761,7 @@ export function execute(self, command){
               _.remove(dist => founded(contents, dist) || jammed(contents, dist), _),
               _.mapa(_.count, _),
               _.partial(unfoundables, _.chain(calpulli, _.concatenated, _.toArray))) : null;
-          return _.seq(removed) ? g.fold(self, {type: "removed-unfoundables", details: {removed}}) : self;
+          return _.seq(removed) ? g.execute(self, {type: "remove-unfoundables", details: {removed}}) : self;
         });
     }
     case "build-temple": {
@@ -848,7 +848,7 @@ export function execute(self, command){
           const unanimous = n == _.count(seated),
                 unanswered = n == 0;
           if (unanimous) {
-            return g.fold(self, {type: "removed-unfoundables", details: {removed: calpulli}});
+            return g.execute(self, {type: "remove-unfoundables", details: {removed: calpulli}});
           } else if (answer == "reject" || unanswered) {
             return _.fmap(self, clearProposal);
           } else {
@@ -856,6 +856,17 @@ export function execute(self, command){
           }
         });
     }
+    case "remove-unfoundables": {
+      const invalid = _.some(function(idx){
+        const tile = _.getIn(calpulli, [idx > 8 ? 1 : 0, idx > 8 ? idx - 8 : idx]);
+        return !tile || tile.at;
+      }, details.removed);
+      if (invalid) {
+        throw new Error(`Cannot remove calpulli at ${idx}.`);
+      }
+      return g.fold(self, _.assoc(command, "type", "removed-unfoundables"));
+    }
+
     case "finish": {
       return g.fold(self, _.assoc(command, "type", "finished"));
     }

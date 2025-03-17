@@ -3,23 +3,31 @@ returns varchar[]
 language plpgsql
 as $$
 declare
-  _seq bigint;
 begin
 
-  select seq
-  from events
-  where table_id = _table_id
-  and undoable = false
-  order by seq desc
-  limit 1
-  into _seq;
-
-return (select array(select id
-        from events
-        where table_id = _table_id
-        and _seq is not null
-        and seq > _seq
-        order by seq) as undoables);
+return (select array(
+  WITH cutoff AS (
+      SELECT undoable
+      FROM events
+      WHERE table_id = _table_id
+        AND undoable is not null
+      ORDER BY seq DESC
+      LIMIT 1
+  ),
+  feasible AS (
+      SELECT seq
+      FROM events
+      WHERE table_id = _table_id
+        AND undoable = false
+      ORDER BY seq DESC
+      LIMIT 1)
+  SELECT id
+  FROM (
+    SELECT id, type, seq, coalesce(undoable, (select undoable from cutoff)) as undoable FROM events as e
+    WHERE table_id = _table_id
+      AND seq > (SELECT seq FROM feasible)) AS evts
+  WHERE evts.undoable = true
+  ORDER BY evts.seq) AS undoables);
 
 end;
 $$;

@@ -992,7 +992,7 @@ function fold(self, event){
     case "answered-proposal": {
       const {answer} = details;
       return _.chain(self,
-        g.fold(_, event, _.updateIn(_, ["proposed-unfoundables", "accepted"], answer == "accept" ? _.add(_, seat) : answer == null ? _.omit(_, seat) : _.identity)));
+        g.fold(_, event, _.updateIn(_, ["proposed-unfoundables", "accepted"], answer == "accept" ? _.include(_, seat) : answer == null ? _.omit(_, seat) : _.identity)));
     }
 
     case "removed-unfoundables":
@@ -1292,7 +1292,10 @@ function perspective(self, seen, reality){
 }
 
 function undoable(self, {type}){
-  return !_.includes(["started", "committed", "finished", "dealt-calpulli", "scattered-temples", "concluded-period", "scored-grandeur", "proposed-unfoundables", "answered-proposal"], type);
+  if (_.includes(["concluded-period", "scored-grandeur", "removed-unfoundables"], type)) {
+    return null;
+  }
+  return  !_.includes(["started", "committed", "finished", "dealt-calpulli", "scattered-temples", "proposed-unfoundables", "answered-proposal"], type);
 }
 
 function status(self){

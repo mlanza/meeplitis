@@ -55,6 +55,12 @@ export function Story(accessToken, tableId, seat, seated, config, $hash, $up, $r
   Object.assign(this, {accessToken, tableId, seat, seated, config, $hash, $up, $ready, $error, make, $state, $story});
 }
 
+function undoThru(undoables, touch){
+  return _.some(function([key, vals]){
+    return _.includes(vals, touch) ? key : null;
+  }, undoables);
+}
+
 function stepping(self, cstory, pstory){
   const motion = cstory && pstory;
   const at = cstory?.at;
@@ -63,11 +69,12 @@ function stepping(self, cstory, pstory){
   const curr  = cstory ? _.nth(cstory.history, cstory.at) : null,
         prior = pstory ? _.nth(pstory.history, pstory.at) : null;
   const touch = cstory ? _.nth(cstory.touches, cstory.at) : null;
-  const undoable = _.includes(cstory?.undoables, touch);
+  const undoable = undoThru(cstory?.undoables, touch);
+  const {last_acting_seat} = cstory || {};
   const step = motion ? cstory.at - pstory.at : null;
   const offset = cstory ? at - head : null;
   const game = _.maybe(curr, _.partial(moment2, self));
-  return [curr, prior, {step, at, head, present, offset, touch, undoable}, game];
+  return [curr, prior, {step, at, head, present, offset, touch, undoable, last_acting_seat}, game];
 }
 
 export function snapshot(self){
@@ -102,17 +109,17 @@ function sub(self, obs){
   return $.ISubscribe.sub(self.$story, obs);
 }
 
-export function waypoint(self, up, how){
+export function waypoint(self, how){
   const {at, touches, history, undoables} = _.deref(self.$story);
   switch(how) {
     case "do-over":
       const _table_id = self.tableId,
-            _event_id = _.nth(touches, at);
-      if (up && _.includes(undoables, _event_id)){
-        supabase.rpc('undo', {_table_id, _event_id}).then(function(undo){
-          $.swap(self.$state, _.update(_, "history", _.pipe(_.take(at -1, _), _.toArray)));
-        });
-      }
+            _event_id = _.nth(touches, at),
+            event_id = undoThru(undoables, _event_id);
+      event_id && supabase.rpc('undo', {_table_id, _event_id: event_id}).then(function(undo){
+        $.swap(self.$state, _.update(_, "history", _.pipe(_.take(at -1, _), _.toArray)));
+      });
+
       return null;
 
     case "last-move":
@@ -187,7 +194,7 @@ function expand(idx){
 }
 
 export function refresh(self, ...fs){
-  return _.fmap(getTouches(self.tableId), function(touches){
+  return _.fmap(getTouches(self.tableId), _.update(_, "undoables", _.mapVals(_, _.set)), function(touches){
     return _.merge(_, touches);
   }, $.swap(self.$state, _), ...fs);
 }
@@ -196,7 +203,7 @@ let replays = 0;
 
 export function replay(self, how){
   replays++;
-  location.hash = waypoint(self, _.deref(self.$up), how) || location.hash;
+  location.hash = waypoint(self, how) || location.hash;
 }
 
 export function toPresent(self, was){

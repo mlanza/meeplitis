@@ -8,7 +8,10 @@ return query
 select
   (value->>'type')::text as type,
   (value->'details')::jsonb as details,
-  (value->'undoable')::bool as undoable,
+  case
+    when value->'undoable' is null or (value->>'undoable') = 'null' then null
+    else (value->>'undoable')::boolean
+  end as undoable,
   (value->>'seat')::smallint as seat,
   (value->>'snapshot')::jsonb as snapshot
 from (

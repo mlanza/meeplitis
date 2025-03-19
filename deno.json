@@ -1,6 +1,6 @@
 {
   "importMap": "import_map.json",
-  "nodeModulesDir": true,
+  "nodeModulesDir": "auto",
   "tasks": {
     "lume": "echo \"import 'lume/cli.ts'\" | deno run -A -",
     "build": "deno task lume",

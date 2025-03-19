@@ -196,9 +196,10 @@ export function ui(make, describe, desc, template){
   $.sub($depressed, dom.attr(el, "data-depressed", _));
 
   //configure event
-  $.sub($hist, function([curr, prior, {undoable}]){
+  $.sub($hist, function([curr, prior, {touch, undoable, last_acting_seat}]){
     const {event, seen} = curr;
     const player = eventFor(event);
+    const undoer = _.detectIndex(_.comp(_.eq(last_acting_seat, _), _.get(_, "seat_id")), seated);
 
     dom.removeClass(el, "ack");
     dom.removeClass(el, "error");
@@ -213,9 +214,10 @@ export function ui(make, describe, desc, template){
     }, 300);
 
     dom.attr(el, "data-event-type", event.type);
+    dom.attr(el, "data-undoable", undoable == touch ? "1" : undoable ? "0" : null);
+    dom.attr(el, "data-undoer", seat == undoer);
     dom.html(dom.sel1("p", els.event), desc(event));
     dom.text(dom.sel1("span.seat", els.event), event.seat);
-    dom.toggleClass(el, "undoable", undoable);
     dom.toggleClass(els.event, "automatic", !player);
 
     if (player) {

@@ -66,6 +66,7 @@ function stepping(self, cstory, pstory){
   const at = cstory?.at;
   const head  = cstory ? _.count(cstory.touches) - 1 : null;
   const present = at && at === head;
+  const bwd = cstory?.at < pstory?.at;
   const curr  = cstory ? _.nth(cstory.history, cstory.at) : null,
         prior = pstory ? _.nth(pstory.history, pstory.at) : null;
   const touch = cstory ? _.nth(cstory.touches, cstory.at) : null;
@@ -74,7 +75,7 @@ function stepping(self, cstory, pstory){
   const step = motion ? cstory.at - pstory.at : null;
   const offset = cstory ? at - head : null;
   const game = _.maybe(curr, _.partial(moment2, self));
-  return [curr, prior, {step, at, head, present, offset, touch, undoable, last_acting_seat}, game];
+  return [curr, prior, {step, at, bwd, head, present, offset, touch, undoable, last_acting_seat}, game];
 }
 
 export function snapshot(self){

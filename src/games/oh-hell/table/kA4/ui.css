@@ -29,36 +29,38 @@
   display: inline-flex;
   z-index: 99;
 }
-#table[data-played="0"] [data-seat="0"] .area img,
-#table[data-played="1"] [data-seat="1"] .area img,
-#table[data-played="2"] [data-seat="2"] .area img,
-#table[data-played="3"] [data-seat="3"] .area img,
-#table[data-played="4"] [data-seat="4"] .area img,
-#table[data-played="5"] [data-seat="5"] .area img,
-#table[data-played="6"] [data-seat="6"] .area img {
-  animation: play .8s;
-}
-#table[data-event-type="awarded"] .area img {
-  transform: translateX(-80em);
-  animation: award .8s ease-in !important;
-}
-#table[data-event-type="awarded"] :is(.area, .zone) {
-  overflow: visible !important;
+#table:not(.bwd) {
+  &[data-played="0"] [data-seat="0"] .area img,
+  &[data-played="1"] [data-seat="1"] .area img,
+  &[data-played="2"] [data-seat="2"] .area img,
+  &[data-played="3"] [data-seat="3"] .area img,
+  &[data-played="4"] [data-seat="4"] .area img,
+  &[data-played="5"] [data-seat="5"] .area img,
+  &[data-played="6"] [data-seat="6"] .area img {
+    animation: play .8s;
+  }
+  &[data-event-type="awarded"] .area img {
+    transform: translateX(-80em);
+    animation: award .8s ease-in !important;
+  }
+  &[data-event-type="awarded"] :is(.area, .zone) {
+    overflow: visible !important;
+  }
+  &[data-event-winner='0'] .zone[data-seat='0'] .player,
+  &[data-event-winner='1'] .zone[data-seat='1'] .player,
+  &[data-event-winner='2'] .zone[data-seat='2'] .player,
+  &[data-event-winner='3'] .zone[data-seat='3'] .player,
+  &[data-event-winner='4'] .zone[data-seat='4'] .player,
+  &[data-event-winner='5'] .zone[data-seat='5'] .player,
+  &[data-event-winner='6'] .zone[data-seat='6'] .player {
+    animation: bump .25s ease-in;
+  }
+  &[data-event-type='scored'] .zone {
+    animation: bump .25s ease-in;
+  }
 }
 #table.present[data-status="playing"] .hand:hover {
   bottom: -8em;
-}
-#table[data-event-winner='0'] .zone[data-seat='0'] .player,
-#table[data-event-winner='1'] .zone[data-seat='1'] .player,
-#table[data-event-winner='2'] .zone[data-seat='2'] .player,
-#table[data-event-winner='3'] .zone[data-seat='3'] .player,
-#table[data-event-winner='4'] .zone[data-seat='4'] .player,
-#table[data-event-winner='5'] .zone[data-seat='5'] .player,
-#table[data-event-winner='6'] .zone[data-seat='6'] .player {
-  animation: bump .25s ease-in;
-}
-#table[data-event-type='scored'] .zone {
-  animation: bump .25s ease-in;
 }
 #table .hand li {
   transition: padding-top .25s;

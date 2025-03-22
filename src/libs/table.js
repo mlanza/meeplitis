@@ -196,7 +196,7 @@ export function ui(make, describe, desc, template){
   $.sub($depressed, dom.attr(el, "data-depressed", _));
 
   //configure event
-  $.sub($hist, function([curr, prior, {touch, undoable, last_acting_seat}]){
+  $.sub($hist, function([curr, prior, {touch, undoable, bwd, last_acting_seat}]){
     const {event, seen} = curr;
     const player = eventFor(event);
     const undoer = _.detectIndex(_.comp(_.eq(last_acting_seat, _), _.get(_, "seat_id")), seated);
@@ -219,6 +219,7 @@ export function ui(make, describe, desc, template){
     dom.html(dom.sel1("p", els.event), desc(event));
     dom.text(dom.sel1("span.seat", els.event), event.seat);
     dom.toggleClass(els.event, "automatic", !player);
+    dom.toggleClass(el, "bwd", bwd);
 
     if (player) {
       dom.attr(dom.sel1("img.who", els.event), "src", player.avatar_url);

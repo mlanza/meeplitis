@@ -35,7 +35,7 @@ export const board = [
  /*15*/ [n,n,w,w,w,w,w,w,w,w,w,w,n,n,n,n,n,n,n,n,n,n,n]
 ]
 
-const calpullis = [
+const tiles = [
   {size: 13, at: null},
   {size: 12, at: null},
   {size: 11, at: null},
@@ -156,7 +156,7 @@ function Mexica(seats, config, events, state){
 }
 
 export function mexica(seats, config, events, state){
-  return new Mexica(seats, _.merge({dealCalpulli}, config), events, state || _.chain(seats, _.count, init));
+  return new Mexica(seats, config, events, state || _.chain(seats, _.count, init));
 }
 
 export const make = mexica;
@@ -291,9 +291,9 @@ function reflectContents(state){
   return _.assoc(state, "contents", _.chain(state, contents));
 }
 
-function dealCalpulli(calpullis){
+function dealCalpulli(calpulli){
   const xs = _.chain(_.range(15), _.shuffle, _.take(8, _), _.sort);
-  return _.chain(calpullis,
+  return _.chain(calpulli,
     _.mapkv(function(k, v){
       return [k, v];
     }, _),
@@ -871,9 +871,9 @@ export function execute(self, command){
       return g.fold(self, _.assoc(command, "type", "finished"));
     }
     case "deal-calpulli": {
-      const {dealCalpulli} = self.config;
+      const calpulli = dealCalpulli(tiles);
       return _.chain(self,
-        g.fold(_, {type: "dealt-calpulli", details: {calpulli: dealCalpulli(calpullis)}, seat: null}));
+        g.fold(_, {type: "dealt-calpulli", details: {calpulli}, seat: null}));
     }
     case "start": {
       return _.chain(self,

@@ -31,7 +31,7 @@ input[name="remark"] {
 .table:not([data-table-status="finished"]) img.flag {
   display: none;
 }
-.table img[src="/images/trash.png"] {
+.table img[src="/images/asterisk.png"] {
   display: initial !important;
 }
 table.rankings {

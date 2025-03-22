@@ -56,10 +56,10 @@
   width: 10em;
   height: 16em;
 }
-#table.present[data-status="playing"] .hand li img {
+#table.act.present[data-status="playing"] .hand li img {
   cursor: pointer;
 }
-#table.present[data-status="playing"] .hand li:hover {
+#table.act.present[data-status="playing"] .hand li:hover {
   padding-top: 0;
 }
 #table .trump,

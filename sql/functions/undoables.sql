@@ -27,14 +27,20 @@ last_fixed AS (
   AND undoable = false
   ORDER BY seq DESC
   LIMIT 1),
+seq_cutoff AS (
+  SELECT GREATEST(
+    COALESCE((SELECT seq FROM first_other), 0),
+    COALESCE((SELECT seq FROM last_fixed), 0),
+    0
+  ) AS cutoff
+),
 actions AS (
   SELECT *,
          case when undoable IS NULL THEN (select undoable FROM events WHERE table_id = _table_id and undoable is not null and seq < e.seq ORDER BY seq DESC LIMIT 1) else undoable end AS effective_undoable,
          case when undoable IS NULL THEN (select id FROM events WHERE table_id = _table_id and undoable is not null and seq < e.seq ORDER BY seq DESC LIMIT 1) else id end as effective_id
   FROM events e
   WHERE table_id = _table_id
-  AND seq > (SELECT seq FROM first_other)
-  AND seq > (SELECT seq FROM last_fixed)
+  AND seq > (SELECT cutoff FROM seq_cutoff)
   ORDER BY seq desc),
 undoables AS (
   SELECT *
@@ -49,4 +55,3 @@ SELECT json_object_agg(effective_id, ids) AS result  FROM dependencies);
 
 end;
 $$;
-

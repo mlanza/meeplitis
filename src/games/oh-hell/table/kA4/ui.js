@@ -6,7 +6,7 @@ import * as g from "/libs/game.js";
 import {describe} from "./ancillary.js";
 import {el, seated, seats, seat, ui, scored, outcome, diff} from "/libs/table.js";
 
-const {img, li, div, span} = dom.tags(['img', 'li', 'div', 'span']);
+const {img, li, div, span, sup} = dom.tags(['img', 'li', 'div', 'span', 'sup']);
 
 const els = {
   moves: dom.sel1(".moves", el),
@@ -53,8 +53,10 @@ function desc(event){
     case "finished":
       return outcome(seated, event.details);
 
-    case "awarded":
-      return ["Awards trick to ", _.chain(event.details.winner, _.nth(seated, _), _.get(_, "username")), "."];
+    case "awarded": {
+      const winner = _.chain(event.details.winner, _.nth(seated, _), _.get(_, "username"))
+      return span(`Awards trick to ${winner}`, sup(event.details.winner), `.`);
+    }
 
     default:
       return event.type;

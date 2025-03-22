@@ -29,6 +29,12 @@
   display: inline-flex;
   z-index: 99;
 }
+#event sup {
+  display: none;
+}
+#table.multi-seated #event sup {
+  display: inline;
+}
 #table:not(.bwd) {
   &[data-played="0"] [data-seat="0"] .area img,
   &[data-played="1"] [data-seat="1"] .area img,

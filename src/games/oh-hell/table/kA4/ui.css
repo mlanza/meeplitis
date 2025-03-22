@@ -38,12 +38,27 @@
 #table[data-played="6"] [data-seat="6"] .area img {
   animation: play .8s;
 }
-#table[data-event-type="award"] .area img {
-  transform: translateY(-30em);
-  animation: award .8s !important;
+#table[data-event-type="awarded"] .area img {
+  transform: translateX(-80em);
+  animation: award .8s ease-in !important;
+}
+#table[data-event-type="awarded"] :is(.area, .zone) {
+  overflow: visible !important;
 }
 #table.present[data-status="playing"] .hand:hover {
   bottom: -8em;
+}
+#table[data-event-winner='0'] .zone[data-seat='0'] .player,
+#table[data-event-winner='1'] .zone[data-seat='1'] .player,
+#table[data-event-winner='2'] .zone[data-seat='2'] .player,
+#table[data-event-winner='3'] .zone[data-seat='3'] .player,
+#table[data-event-winner='4'] .zone[data-seat='4'] .player,
+#table[data-event-winner='5'] .zone[data-seat='5'] .player,
+#table[data-event-winner='6'] .zone[data-seat='6'] .player {
+  animation: bump .25s ease-in;
+}
+#table[data-event-type='scored'] .zone {
+  animation: bump .25s ease-in;
 }
 #table .hand li {
   transition: padding-top .25s;

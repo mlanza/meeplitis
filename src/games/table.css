@@ -21,8 +21,8 @@
   40% { transform: translateY(0); }
 }
 @keyframes award {
-  0% { transform: translateY(0); }
-  60% { transform: translateY(-21em); }
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-80em); }
 }
 @keyframes updown {
   0% { transform: translateY(0); }

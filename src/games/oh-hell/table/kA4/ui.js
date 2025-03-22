@@ -100,6 +100,8 @@ $.sub($hist, function([curr, prior, {step, offset}, game]){
   const cnt = _.count(seated);
   const awarded = event.type == "awarded" ? _.toArray(_.take(cnt, _.drop(cnt - event.details.lead, _.cycle(event.details.trick)))) : null;
 
+  dom.attr(el, "data-event-winner", event?.details?.winner);
+
   $.each($.doto(_,
     dom.removeClass(_, "active"),
     dom.removeClass(_, "selected"),

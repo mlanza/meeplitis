@@ -10,7 +10,7 @@
 #table[data-lead="6"] [data-seat="6"] .leads {
   visibility: visible;
 }
-#table :is(button.active, button.selected) {
+#table.act button:is(.active, .selected) {
   display: initial;
 }
 #table:is([data-seats='5'],[data-seats='6'],[data-seats='7']) #event[data-type='scored'] {

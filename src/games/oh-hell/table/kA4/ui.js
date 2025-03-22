@@ -55,7 +55,7 @@ function desc(event){
 
     case "awarded": {
       const winner = _.chain(event.details.winner, _.nth(seated, _), _.get(_, "username"))
-      return span(`Awards trick to ${winner}`, sup(event.details.winner), `.`);
+      return [`Awards trick to ${winner}`, sup(event.details.winner), `.`];
     }
 
     default:

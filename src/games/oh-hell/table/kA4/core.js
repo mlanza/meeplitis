@@ -150,6 +150,9 @@ function moves3(self, type, seat){
 const moves = _.overload(null, moves1, moves1, moves3);
 
 function undoable(self, {type}){
+  if (_.includes(["awarded", "broke", "scored"], type)) {
+    return null;
+  }
   return !_.includes(["started", "dealt", "bid", "committed", "finished"], type);
 }
 

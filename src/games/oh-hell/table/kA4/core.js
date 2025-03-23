@@ -149,7 +149,11 @@ function moves3(self, type, seat){
 
 const moves = _.overload(null, moves1, moves1, moves3);
 
-function undoable(self, {type}){
+function undoable(self, {type, seat}){
+  if (type === "played") {
+    //not undoable if you only have 1 card in hand
+    return _.chain(self, _.deref, _.getIn(_, ["seated", seat, "hand"]), _.count, _.gt(_, 1));
+  }
   if (_.includes(["awarded", "broke", "scored"], type)) {
     return null;
   }

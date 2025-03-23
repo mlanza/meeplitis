@@ -37,7 +37,7 @@ const ttl = dom.sel1("head title");
 const title = _.chain(ttl, dom.text, _.split(_, "|"), _.first, _.trim);
 dom.text(ttl, `${title} #${tableId}`);
 
-const {div, h1, a, span, img, ol, ul, li} = dom.tags(['div', 'h1', 'a', 'span', 'img', 'ol', 'ul', 'li']);
+const {div, h1, a, span, img, ol, ul, li, sup} = dom.tags(['div', 'h1', 'a', 'span', 'img', 'ol', 'ul', 'li', 'sup']);
 
 _.maybe(session?.username, username => relink("/profiles/", {username}), dom.attr(dom.sel1("a.user"), "href", _));
 
@@ -336,7 +336,7 @@ export function outcome(seated, {places, metrics, briefs}){
   }, _), _.sort(_.asc(_.get(_, "place")), _));
   const winners = _.filtera(_.pipe(_.get(_, "place"), _.eq(_, 1)), standings);
   const highlight = _.count(winners) === 1 ? victor : victors;
-  return [highlight(winners),
+  return [highlight(winners, seated),
       ol({class: "scored"}, _.mapa(score, standings, standings)),
       rankings({seated, seats})];
 }
@@ -347,10 +347,11 @@ function victors(players) {
     `The victory is shared!`);
 }
 
-function victor([player]){
+function victor([player], seated){
+  const seat = _.detectIndex(_.comp(_.eq(_, player.seat_id), _.get(_, "seat_id")), seated);
   return div({class: "victor"},
     img({alt: player.username, src: player.avatar_url}),
-    `${player.username} wins!`);
+    `${player.username}`, sup(seat), ` wins!`);
 }
 
 export function subject({username, avatar_url}){

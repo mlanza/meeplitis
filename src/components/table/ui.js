@@ -6,8 +6,8 @@ import {relink} from "/libs/links.js";
 import {session} from "/libs/session.js";
 import "/libs/dummy.js";
 
-const tags = dom.tags(['div', 'span', 'img', 'a', 'p', 'button', 'article', 'table', 'tbody', 'thead', 'tr', 'th', 'td']);
-const {div, span, img, a, p, button, article} = tags;
+const tags = dom.tags(['div', 'span', 'sup', 'img', 'a', 'p', 'button', 'article', 'table', 'tbody', 'thead', 'tr', 'th', 'td']);
+const {sup, div, span, img, a, p, button, article} = tags;
 
 const params = new URLSearchParams(document.location.search),
       listed = params.get('listed'),
@@ -233,8 +233,8 @@ export const rankings = (function(){
   const {table, tbody, thead, tr, td, th} = tags;
   return function rankings({seated, seats}){
     const ranks = _.sort(_.asc(_.get(_, "place")), _.map(_.merge, seated, seats));
-    const rows = _.map(function({place, player, brief}){
-      return tr(td({class: "player"}, a({href: relink("/profiles", {username: player.username})}, player.username)), td({class: "place"}, place), td({class: "brief"}, brief));
+    const rows = _.map(function({place, player, brief, seat}){
+      return tr(td({class: "player"}, a({href: relink("/profiles", {username: player.username})}, player.username), sup(seat)), td({class: "place"}, place), td({class: "brief"}, brief));
     }, ranks);
     return table({class: "rankings"},
       thead(tr(th({class: "player"}, "player"), th({class: "place"}, "#"), th({class: "brief"}, "score"))),

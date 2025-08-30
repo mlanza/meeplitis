@@ -57,15 +57,15 @@ try {
         if (seat == null) {
           throw Error("Must specify seat with commands.");
         }
-        const {added} = effects({seats, config, loaded: frame.loaded, events: [], commands, seen: [seat], snapshot: frame.state});
+        const {added} = effects({seats, config, loaded: frame?.loaded, events: [], commands, seen: [seat], snapshot: frame?.state});
         const addframes = _.toArray(_.drop(1, _.fold(function(memo, event){
           const {game, loaded} = _.last(memo);
-          const snapshot = _.deref(game);
+          const snapshot = _.maybe(game, _.deref);
           const result = _.chain({seats, config, events: [event], loaded, commands: [], seen, snapshot}, simulate);
           const [curr] = result;
           const effs = g.effects(result);
           return _.conj(memo, {game: curr, loaded: _.conj(loaded, event), ...effs});
-        },[{game: frame.game, loaded: frame.loaded}], tempIds(added))));
+        },[{game: frame?.game, loaded: frame?.loaded}], tempIds(added))));
         const _frames = _.toArray(_.concat(frames, addframes));
         const at = _.chain(_frames, _.last, _.getIn(_, ["event", "id"]));
         return {seed, frames: _frames, idx: _.count(_frames) - 1, at, init};
@@ -110,7 +110,7 @@ try {
           return frame?.event?.id == id;
         }, frames);
         const frame = _.nth(frames, idx);
-        const at = frame.event.id;
+        const at = frame?.event?.id;
         return {seed, frames, idx, at, init};
       }
     }
@@ -219,9 +219,9 @@ try {
         }, frames);
         dom.append(dom.sel1("#events"), els);
       }
-      const id = frames[idx].event.id;
-      const head = document.getElementById(id);
-      head.scrollIntoView({behavior: "smooth", block: "center"});
+      const id = frames[idx]?.event?.id;
+      const head = id ? document.getElementById(id) : null;
+      head?.scrollIntoView({behavior: "smooth", block: "center"});
     });
 
     const $hash = dom.hash(document);

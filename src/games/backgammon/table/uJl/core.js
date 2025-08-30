@@ -337,7 +337,7 @@ export function execute(self, command) {
 
   switch (status) {
     case "pending":
-      if (type != "roll") { // Assuming 'roll' is the start command
+      if (type != "roll" && type !== "start") { // Assuming 'roll' is the start command
         throw new Error(`Cannot issue '${type}' unless the game has started.`);
       }
       break;
@@ -355,7 +355,7 @@ export function execute(self, command) {
 
   const cmd = _.chain(command, _.compact, _.dissoc(_, "id"), _.dissocIn(_, ["details", "dice"]), noDetails);
 
-  if (!_.detect(_.eq(_, cmd), allValidMoves)) {
+  if (command.type !== "start" && !_.detect(_.eq(_, cmd), allValidMoves)) {
     throw new Error(`Invalid command: ${JSON.stringify(command)}`);
   }
 
@@ -485,7 +485,8 @@ function up(state) {
 
 const may = up;
 
-function metrics(state, seat) {
+function metrics(self, seat) {
+  const state = _.deref(self);
   const conceded = state.conceded == seat;
   const off = state.off[seat];
   return {off, conceded};
@@ -532,4 +533,4 @@ _.doto(Backgammon,
   _.implement(_.ICompactible, {compact}),
   _.implement(_.IAppendable, {append}),
   _.implement(_.IFunctor, {fmap}),
-  _.implement(g.IGame, {perspective, up, may, moves, undoable, metrics, comparator, textualizer, fold, status}));
+  _.implement(g.IGame, {perspective, up, may, moves, undoable, metrics, comparator, textualizer, execute, fold, status}));

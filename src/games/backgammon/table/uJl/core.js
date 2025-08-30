@@ -13,8 +13,7 @@ export function Backgammon(seats, config, events, state){
 
 export function backgammon(seats, config = {}, events = [], state = null){
   const {raiseStakes = false} = config;
-  const self = new Backgammon(_.toArray(seats), config, [], state || init(raiseStakes));
-  return _.reduce(fold, self, events);
+  return new Backgammon(_.toArray(seats), config, events, state || init(raiseStakes));
 }
 
 export const make = backgammon;
@@ -475,8 +474,8 @@ function fold(self, event) {
   }
 }
 
-function perspective(self, seen) {
-  return self.state;
+function perspective(self, seen, reality){
+  return reality; //no hidden info.
 }
 
 function up(state) {
@@ -485,11 +484,13 @@ function up(state) {
 
 const may = up;
 
-function metrics(self, seat) {
+function metrics(self) {
   const state = _.deref(self);
-  const conceded = state.conceded == seat;
-  const off = state.off[seat];
-  return {off, conceded};
+  return _.mapa(function (seat) {
+    const conceded = state.conceded == seat;
+    const off = state.off[seat];
+    return {off, conceded};
+  }, _.range(0, 2));
 }
 
 function comparator(self) {

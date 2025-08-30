@@ -10,3 +10,16 @@ import {el, seated, seats, seat, ui, scored, outcome, diff, which} from "/libs/t
 import {reg} from "/libs/cmd.js";
 
 const {img, ol, li, div, kbd, span} = dom.tags(['img', 'ol', 'li', 'div', 'kbd', 'span']);
+
+dom.addClass(el, "init");
+
+function desc({ type, details }) {
+  return "Description";
+}
+
+const template = _.identity;
+
+const {$ready, $error, $story, $hist, $snapshot, $wip} =
+  ui(c.make, describe, desc, template);
+
+const $both = which($.latest([$hist, $wip]));

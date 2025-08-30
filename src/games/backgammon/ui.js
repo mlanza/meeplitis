@@ -11,7 +11,7 @@ manageTables(function(open, game){
   const el = form({id: "creates"},
     label(span("Players"), _.map(function(value){
       return label(value, radio({name: "players", value}, value === 2 ? {checked: "checked"} : null));
-    }, [2])),
+    }, [2, 3])),
     label(span("Remark"), input({type: "text", name: "remark", maxlength: 100, placeholder: "x moves/day, learning game"})),
     input({type: "submit", value: "Open Table"}));
   el.addEventListener('submit', function(e){

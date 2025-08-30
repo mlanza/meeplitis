@@ -19,20 +19,28 @@ export function backgammon(seats, config = {}, events = [], state = null){
 
 export function init(raiseStakes) {
 	return _.merge({
-		up: 0,
     stakes: 1,
     status: "pending",
 		dice: [],
     rolled: false,
     bar: [0, 0],
 		off: [0, 0],
+		points: _.toArray(_.repeat(24, [0,0]))
+	}, raiseStakes ? {holdsCube: -1} : {});
+}
+
+function started(state) {
+	return {
+		...state,
+		up: 0,
+		status: "started",
 		points: [
 			[2, 0], [0, 0], [0, 0],	[0, 0],	[0, 0],	[0, 5],
 			[0, 0],	[0, 3],	[0, 0],	[0, 0],	[0, 0],	[5, 0],
 			[0, 5],	[0, 0],	[0, 0],	[0, 0],	[3, 0],	[0, 0],
 			[5, 0],	[0, 0],	[0, 0],	[0, 0],	[0, 0],	[0, 2]
 		]
-	}, raiseStakes ? {holdsCube: -1} : {});
+	};
 }
 
 function rolled(state, details) {
@@ -348,6 +356,10 @@ export function execute(self, command) {
   }
 
   switch (command.type) {
+    case 'start':
+      return g.fold(self,
+        _.chain(command,
+          _.assoc(_, "type", "started")));
     case 'roll': {
       const dice = command.details.dice || [_.randInt(6), _.randInt(6)];
       const [a, b] = dice;
@@ -439,6 +451,8 @@ export function execute(self, command) {
 function fold(self, event) {
   const state = _.deref(self);
   switch (event.type) {
+    case "started":
+      return g.fold(self, event, started);
     case "rolled":
       return g.fold(self, event, state => rolled(state, event.details));
     case "entered":

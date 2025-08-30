@@ -17,6 +17,10 @@ export function backgammon(seats, config = {}, events = [], state = null){
   return _.reduce(fold, self, events);
 }
 
+export const make = backgammon;
+
+export default backgammon;
+
 export function init(raiseStakes) {
 	return _.merge({
     stakes: 1,

@@ -7,6 +7,7 @@
     "serve": "deno task lume -s",
     "mexica": "rollup --config rollup.config.js --slug mexica --release H7z",
     "updown": "rollup --config rollup.config.js --slug up-down --release KA4",
+    "backgammon": "rollup --config rollup.config.js --slug backgammon --release uJl",
     "simulate": "lume --config _config.sim.js"
   },
   "compilerOptions": {

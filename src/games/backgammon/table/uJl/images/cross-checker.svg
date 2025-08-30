@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="77.29" height="77.29" viewBox="0 0 77.29 77.29">
+  <title>Backgammon Checker</title>
+  <style>
+    :root {
+      --checker-fill:#d2cbb8;
+      --checker-stroke:#1f2022;
+      --accent:#ffffff;
+      --accent-opacity:0.7;
+    }
+    .disc { fill:var(--checker-fill); stroke:var(--checker-stroke); stroke-width:1px; }
+    .ring { fill:none; stroke:var(--accent); stroke-opacity:var(--accent-opacity); stroke-width:2px; }
+    #cross path { stroke:var(--accent); stroke-opacity:var(--accent-opacity); stroke-width:0; fill:var(--accent); fill-opacity:var(--accent-opacity);  }
+  </style>
+  <defs>
+    <radialGradient id="edgeLight" cx="0.35" cy="0.30" r="0.65">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.12"/>
+      <stop offset="70%" stop-color="#ffffff" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="1.2" result="blur"/>
+      <feOffset dx="0" dy="1.2" result="off"/>
+      <feMerge>
+        <feMergeNode in="off"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Outer disc -->
+  <g filter="url(#softShadow)">
+    <circle class="disc" cx="38.65" cy="38.65" r="36.33"/>
+    <circle cx="38.65" cy="38.65" r="34.01" fill="url(#edgeLight)"/>
+  </g>
+
+  <!-- Inner ring -->
+  <circle class="ring" cx="38.65" cy="38.65" r="30.92"/>
+
+  <g id="cross" transform="translate(38.65,38.65) scale(0.10) translate(-256,-256)">
+    <path d="M486 371.316V142.75a399.056 399.056 0 0 1-185.685 69.28 399.135 399.135 0 0 1 70.973-186.002H142.72A399.056 399.056 0 0 1 212 211.714 399.135 399.135 0 0 1 26 140.74V369.31a399.056 399.056 0 0 1 185.685-69.28 399.135 399.135 0 0 1-70.973 185.944H369.28A399.056 399.056 0 0 1 300 300.342a399.135 399.135 0 0 1 186 70.974z"/>
+  </g>
+</svg>

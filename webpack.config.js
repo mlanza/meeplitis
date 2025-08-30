@@ -2,7 +2,7 @@ var path = require('path');
 
 module.exports = {
   entry: {
-    ohhell: "./src/db/ohhell.js"
+    updown: "./src/db/updown.js"
   },
   resolve: {
     alias: {

@@ -48,19 +48,19 @@ function deck(){
   return _.braid(card, ranks, suits);
 }
 
-function OhHell(seats, config, events, state){
+function UpDown(seats, config, events, state){
   this.seats = seats;
   this.config = config;
   this.events = events;
   this.state = state;
 }
 
-export function ohHell(seats, config, events, state){
-  return new OhHell(seats, config, events, state || {deals: deals(config.start || 1, config.end || 7)});
+export function upDown(seats, config, events, state){
+  return new UpDown(seats, config, events, state || {deals: deals(config.start || 1, config.end || 7)});
 }
 
-export default ohHell;
-export const make = ohHell;
+export default upDown;
+export const make = upDown;
 
 function deal(self){
   return g.execute(self, {type: "deal"});
@@ -399,21 +399,21 @@ function fold(self, event){
 }
 
 function compact(self){
-  return new OhHell(self.seats,
+  return new UpDown(self.seats,
     self.config,
     [],
     self.state);
 }
 
 function append(self, event){
-  return new OhHell(self.seats,
+  return new UpDown(self.seats,
     self.config,
     _.append(self.events, event),
     self.state);
 }
 
 function fmap(self, f){
-  return new OhHell(self.seats,
+  return new UpDown(self.seats,
     self.config,
     self.events,
     f(self.state));
@@ -480,7 +480,7 @@ function status(self){
   }
 }
 
-_.doto(OhHell,
+_.doto(UpDown,
   g.behave,
   _.implement(_.ICompactible, {compact}),
   _.implement(_.IAppendable, {append}),

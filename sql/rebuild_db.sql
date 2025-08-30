@@ -173,8 +173,9 @@ alter table notifications enable row level security;
 create index idx_notifications_status on notifications (completed, seq);
 
 insert into games (id, title, slug, release, seats)
-  values ('8Mj1', 'Oh Hell', 'oh-hell', 'kA4', array[2, 3, 4, 5, 6, 7]),
-  values ('SopC', 'Mexica', 'mexica', 'H7z', array[2, 3, 4]);
+  values ('8Mj1', 'Up & Down the River', 'up-down', 'kA4', array[2, 3, 4, 5, 6, 7]),
+  values ('SopC', 'Mexica', 'mexica', 'H7z', array[2, 3, 4]),
+  values ('rmiH', 'Backgammon', 'backgammon', 'uJl', array[2]);
 
 do $$
 declare

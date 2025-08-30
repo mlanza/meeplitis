@@ -6,7 +6,7 @@
     "build": "deno task lume",
     "serve": "deno task lume -s",
     "mexica": "rollup --config rollup.config.js --slug mexica --release H7z",
-    "ohhell": "rollup --config rollup.config.js --slug oh-hell --release KA4",
+    "updown": "rollup --config rollup.config.js --slug up-down --release KA4",
     "simulate": "lume --config _config.sim.js"
   },
   "compilerOptions": {

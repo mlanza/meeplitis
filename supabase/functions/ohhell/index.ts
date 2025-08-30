@@ -2,8 +2,8 @@
 import {serve} from "https://deno.land/std@0.131.0/http/server.ts";
 import {comp} from "https://meeplistis.pages.dev/atomic/core.js";
 import * as g from "https://meeplitis.pages.dev/libs/game.js";
-import ohhell from "https://meeplitis.pages.dev/games/oh-hell/core.js";
-const simulate = comp(g.effects, g.simulate(ohhell));
+import updown from "https://meeplitis.pages.dev/games/up-down/core.js";
+const simulate = comp(g.effects, g.simulate(updown));
 
 console.log("Let's play Oh Hell!");
 

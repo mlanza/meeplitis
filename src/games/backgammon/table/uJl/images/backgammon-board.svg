@@ -1,91 +1,91 @@
 <?xml version='1.0' encoding='utf-8'?>
-<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" width="1300" height="972" viewBox="0 0 1300 972" role="img" aria-labelledby="title desc">
-  <ns0:title id="title">Backgammon Board (Reusable Oval Pattern + New Dots Pattern on Felt)</ns0:title>
-  <ns0:desc id="desc">Points use the oval chain pattern; charcoal playfields use a new, sparse dot pattern aligned to the same grid with the same offsets. Dots are small white circles with opacity and never touch.</ns0:desc>
-  <ns0:defs>
-    <ns0:radialGradient id="ovalWhiteEdgeBandStrong" cx="50%" cy="50%" r="0.95">
-      <ns0:stop offset="0%" stop-color="#ffffff" stop-opacity="0.19" />
-      <ns0:stop offset="60%" stop-color="#ffffff" stop-opacity="0.15" />
-      <ns0:stop offset="80%" stop-color="#ffffff" stop-opacity="0.12" />
-      <ns0:stop offset="95%" stop-color="#ffffff" stop-opacity="0.30" />
-      <ns0:stop offset="100%" stop-color="#ffffff" stop-opacity="0.30" />
-    </ns0:radialGradient>
-    <ns0:pattern id="ovalColsEdgeBandStrong" width="19.600" height="7.150" patternUnits="userSpaceOnUse">
-      <ns0:ellipse cx="4.900" cy="3.575" rx="4.400" ry="3.575" transform="rotate(-18 4.900 3.575)" fill="url(#ovalWhiteEdgeBandStrong)" />
-      <ns0:ellipse cx="14.700" cy="0.050" rx="4.400" ry="3.575" transform="rotate(18 14.700 0.050)" fill="url(#ovalWhiteEdgeBandStrong)" />
-      <ns0:ellipse cx="14.700" cy="7.100" rx="4.400" ry="3.575" transform="rotate(18 14.700 7.100)" fill="url(#ovalWhiteEdgeBandStrong)" />
-    </ns0:pattern>
-    <ns0:radialGradient id="dotWhiteSoft" cx="50%" cy="50%" r="0.9">
-      <ns0:stop offset="0%" stop-color="#ffffff" stop-opacity="0.10" />
-      <ns0:stop offset="70%" stop-color="#ffffff" stop-opacity="0.08" />
-      <ns0:stop offset="100%" stop-color="#ffffff" stop-opacity="0.06" />
-    </ns0:radialGradient>
-    <ns0:pattern id="dotColsBoard" width="19.600" height="7.150" patternUnits="userSpaceOnUse">
-      <ns0:circle cx="4.900" cy="3.575" r="0.700" fill="url(#dotWhiteSoft)" />
-      <ns0:circle cx="14.700" cy="0.050" r="0.700" fill="url(#dotWhiteSoft)" />
-      <ns0:circle cx="14.700" cy="7.100" r="0.700" fill="url(#dotWhiteSoft)" />
-    </ns0:pattern>
-    <ns0:pattern id="diagLines" patternUnits="userSpaceOnUse" width="4" height="4" patternTransform="rotate(45)">
-      <ns0:line x1="0" y1="0" x2="0" y2="8" stroke="white" stroke-opacity="0.084375" stroke-width="2" />
-    </ns0:pattern>
-  </ns0:defs>
-  <ns0:rect x="565.00" y="38.00" width="70.00" height="895.90" fill="#a07146" />
-  <ns0:rect x="10" y="10" width="1180" height="951.90" rx="20" ry="20" fill="#a07146" />
-  <ns0:rect id="frameTextureOverlay" x="0" y="0" width="1200" height="972" fill="url(#diagLines)" pointer-events="none" mask="url(#exactFrameMask)" />
-  <ns0:rect x="38.00" y="38.00" width="527.00" height="895.90" rx="10" ry="10" fill="#333538" />
-  <ns0:rect x="635.00" y="38.00" width="527.00" height="895.90" rx="10" ry="10" fill="#333538" />
-  <ns0:rect x="38.00" y="38.00" width="527.00" height="895.90" rx="10" ry="10" fill="url(#dotColsBoard)" />
-  <ns0:rect x="635.00" y="38.00" width="527.00" height="895.90" rx="10" ry="10" fill="url(#dotColsBoard)" />
-  <ns0:path id="point-1" d="M 1079.44 933.90 L 1156.73 933.90 L 1124.08 553.43 Q 1118.08 547.43 1112.08 553.43 Z" fill="#d2cbb8" />
-  <ns0:path d="M 1079.44 933.90 L 1156.73 933.90 L 1124.08 553.43 Q 1118.08 547.43 1112.08 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
-  <ns0:path id="point-2" d="M 991.60 933.90 L 1068.90 933.90 L 1036.25 553.43 Q 1030.25 547.43 1024.25 553.43 Z" fill="#b29069" />
-  <ns0:path d="M 991.60 933.90 L 1068.90 933.90 L 1036.25 553.43 Q 1030.25 547.43 1024.25 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
-  <ns0:path id="point-3" d="M 903.77 933.90 L 981.06 933.90 L 948.42 553.43 Q 942.42 547.43 936.42 553.43 Z" fill="#d2cbb8" />
-  <ns0:path d="M 903.77 933.90 L 981.06 933.90 L 948.42 553.43 Q 942.42 547.43 936.42 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
-  <ns0:path id="point-4" d="M 815.94 933.90 L 893.23 933.90 L 860.58 553.43 Q 854.58 547.43 848.58 553.43 Z" fill="#b29069" />
-  <ns0:path d="M 815.94 933.90 L 893.23 933.90 L 860.58 553.43 Q 854.58 547.43 848.58 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
-  <ns0:path id="point-5" d="M 728.10 933.90 L 805.40 933.90 L 772.75 553.43 Q 766.75 547.43 760.75 553.43 Z" fill="#d2cbb8" />
-  <ns0:path d="M 728.10 933.90 L 805.40 933.90 L 772.75 553.43 Q 766.75 547.43 760.75 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
-  <ns0:path id="point-6" d="M 640.27 933.90 L 717.56 933.90 L 684.92 553.43 Q 678.92 547.43 672.92 553.43 Z" fill="#b29069" />
-  <ns0:path d="M 640.27 933.90 L 717.56 933.90 L 684.92 553.43 Q 678.92 547.43 672.92 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
-  <ns0:path id="point-7" d="M 482.44 933.90 L 559.73 933.90 L 527.08 553.43 Q 521.08 547.43 515.08 553.43 Z" fill="#d2cbb8" />
-  <ns0:path d="M 482.44 933.90 L 559.73 933.90 L 527.08 553.43 Q 521.08 547.43 515.08 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
-  <ns0:path id="point-8" d="M 394.60 933.90 L 471.90 933.90 L 439.25 553.43 Q 433.25 547.43 427.25 553.43 Z" fill="#b29069" />
-  <ns0:path d="M 394.60 933.90 L 471.90 933.90 L 439.25 553.43 Q 433.25 547.43 427.25 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
-  <ns0:path id="point-9" d="M 306.77 933.90 L 384.06 933.90 L 351.42 553.43 Q 345.42 547.43 339.42 553.43 Z" fill="#d2cbb8" />
-  <ns0:path d="M 306.77 933.90 L 384.06 933.90 L 351.42 553.43 Q 345.42 547.43 339.42 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
-  <ns0:path id="point-10" d="M 218.94 933.90 L 296.23 933.90 L 263.58 553.43 Q 257.58 547.43 251.58 553.43 Z" fill="#b29069" />
-  <ns0:path d="M 218.94 933.90 L 296.23 933.90 L 263.58 553.43 Q 257.58 547.43 251.58 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
-  <ns0:path id="point-11" d="M 131.10 933.90 L 208.40 933.90 L 175.75 553.43 Q 169.75 547.43 163.75 553.43 Z" fill="#d2cbb8" />
-  <ns0:path d="M 131.10 933.90 L 208.40 933.90 L 175.75 553.43 Q 169.75 547.43 163.75 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
-  <ns0:path id="point-12" d="M 43.27 933.90 L 120.56 933.90 L 87.92 553.43 Q 81.92 547.43 75.92 553.43 Z" fill="#b29069" />
-  <ns0:path d="M 43.27 933.90 L 120.56 933.90 L 87.92 553.43 Q 81.92 547.43 75.92 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
-  <ns0:path id="point-13" d="M 43.27 38.00 L 120.56 38.00 L 87.92 418.47 Q 81.92 424.47 75.92 418.47 Z" fill="#d2cbb8" />
-  <ns0:path d="M 43.27 38.00 L 120.56 38.00 L 87.92 418.47 Q 81.92 424.47 75.92 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
-  <ns0:path id="point-14" d="M 131.10 38.00 L 208.40 38.00 L 175.75 418.47 Q 169.75 424.47 163.75 418.47 Z" fill="#b29069" />
-  <ns0:path d="M 131.10 38.00 L 208.40 38.00 L 175.75 418.47 Q 169.75 424.47 163.75 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
-  <ns0:path id="point-15" d="M 218.94 38.00 L 296.23 38.00 L 263.58 418.47 Q 257.58 424.47 251.58 418.47 Z" fill="#d2cbb8" />
-  <ns0:path d="M 218.94 38.00 L 296.23 38.00 L 263.58 418.47 Q 257.58 424.47 251.58 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
-  <ns0:path id="point-16" d="M 306.77 38.00 L 384.06 38.00 L 351.42 418.47 Q 345.42 424.47 339.42 418.47 Z" fill="#b29069" />
-  <ns0:path d="M 306.77 38.00 L 384.06 38.00 L 351.42 418.47 Q 345.42 424.47 339.42 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
-  <ns0:path id="point-17" d="M 394.60 38.00 L 471.90 38.00 L 439.25 418.47 Q 433.25 424.47 427.25 418.47 Z" fill="#d2cbb8" />
-  <ns0:path d="M 394.60 38.00 L 471.90 38.00 L 439.25 418.47 Q 433.25 424.47 427.25 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
-  <ns0:path id="point-18" d="M 482.44 38.00 L 559.73 38.00 L 527.08 418.47 Q 521.08 424.47 515.08 418.47 Z" fill="#b29069" />
-  <ns0:path d="M 482.44 38.00 L 559.73 38.00 L 527.08 418.47 Q 521.08 424.47 515.08 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
-  <ns0:path id="point-19" d="M 640.27 38.00 L 717.56 38.00 L 684.92 418.47 Q 678.92 424.47 672.92 418.47 Z" fill="#d2cbb8" />
-  <ns0:path d="M 640.27 38.00 L 717.56 38.00 L 684.92 418.47 Q 678.92 424.47 672.92 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
-  <ns0:path id="point-20" d="M 728.10 38.00 L 805.40 38.00 L 772.75 418.47 Q 766.75 424.47 760.75 418.47 Z" fill="#b29069" />
-  <ns0:path d="M 728.10 38.00 L 805.40 38.00 L 772.75 418.47 Q 766.75 424.47 760.75 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
-  <ns0:path id="point-21" d="M 815.94 38.00 L 893.23 38.00 L 860.58 418.47 Q 854.58 424.47 848.58 418.47 Z" fill="#d2cbb8" />
-  <ns0:path d="M 815.94 38.00 L 893.23 38.00 L 860.58 418.47 Q 854.58 424.47 848.58 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
-  <ns0:path id="point-22" d="M 903.77 38.00 L 981.06 38.00 L 948.42 418.47 Q 942.42 424.47 936.42 418.47 Z" fill="#b29069" />
-  <ns0:path d="M 903.77 38.00 L 981.06 38.00 L 948.42 418.47 Q 942.42 424.47 936.42 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
-  <ns0:path id="point-23" d="M 991.60 38.00 L 1068.90 38.00 L 1036.25 418.47 Q 1030.25 424.47 1024.25 418.47 Z" fill="#d2cbb8" />
-  <ns0:path d="M 991.60 38.00 L 1068.90 38.00 L 1036.25 418.47 Q 1030.25 424.47 1024.25 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
-  <ns0:path id="point-24" d="M 1079.44 38.00 L 1156.73 38.00 L 1124.08 418.47 Q 1118.08 424.47 1112.08 418.47 Z" fill="#b29069" />
-  <ns0:path d="M 1079.44 38.00 L 1156.73 38.00 L 1124.08 418.47 Q 1118.08 424.47 1112.08 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
-  <ns0:rect id="off-board-white" class="off-board" x="1200" y="38.00" width="77.29" height="380.47"  />
-  <ns0:rect id="off-board-black" class="off-board" x="1200" y="553.43" width="77.29" height="380.47" />
-  <ns0:rect id="bar-white" class="bar" x="561" y="38.00" width="77.29" height="380.47" />
-  <ns0:rect id="bar-black" class="bar" x="561" y="553.43" width="77.29" height="380.47" />
-</ns0:svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1300" height="972" viewBox="0 0 1300 972" role="img" aria-labelledby="title desc">
+  <title id="title">Backgammon Board (Reusable Oval Pattern + New Dots Pattern on Felt)</title>
+  <desc id="desc">Points use the oval chain pattern; charcoal playfields use a new, sparse dot pattern aligned to the same grid with the same offsets. Dots are small white circles with opacity and never touch.</desc>
+  <defs>
+    <radialGradient id="ovalWhiteEdgeBandStrong" cx="50%" cy="50%" r="0.95">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.19" />
+      <stop offset="60%" stop-color="#ffffff" stop-opacity="0.15" />
+      <stop offset="80%" stop-color="#ffffff" stop-opacity="0.12" />
+      <stop offset="95%" stop-color="#ffffff" stop-opacity="0.30" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.30" />
+    </radialGradient>
+    <pattern id="ovalColsEdgeBandStrong" width="19.600" height="7.150" patternUnits="userSpaceOnUse">
+      <ellipse cx="4.900" cy="3.575" rx="4.400" ry="3.575" transform="rotate(-18 4.900 3.575)" fill="url(#ovalWhiteEdgeBandStrong)" />
+      <ellipse cx="14.700" cy="0.050" rx="4.400" ry="3.575" transform="rotate(18 14.700 0.050)" fill="url(#ovalWhiteEdgeBandStrong)" />
+      <ellipse cx="14.700" cy="7.100" rx="4.400" ry="3.575" transform="rotate(18 14.700 7.100)" fill="url(#ovalWhiteEdgeBandStrong)" />
+    </pattern>
+    <radialGradient id="dotWhiteSoft" cx="50%" cy="50%" r="0.9">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.10" />
+      <stop offset="70%" stop-color="#ffffff" stop-opacity="0.08" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.06" />
+    </radialGradient>
+    <pattern id="dotColsBoard" width="19.600" height="7.150" patternUnits="userSpaceOnUse">
+      <circle cx="4.900" cy="3.575" r="0.700" fill="url(#dotWhiteSoft)" />
+      <circle cx="14.700" cy="0.050" r="0.700" fill="url(#dotWhiteSoft)" />
+      <circle cx="14.700" cy="7.100" r="0.700" fill="url(#dotWhiteSoft)" />
+    </pattern>
+    <pattern id="diagLines" patternUnits="userSpaceOnUse" width="4" height="4" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="8" stroke="white" stroke-opacity="0.084375" stroke-width="2" />
+    </pattern>
+  </defs>
+  <rect x="565.00" y="38.00" width="70.00" height="895.90" fill="#a07146" />
+  <rect x="10" y="10" width="1180" height="951.90" rx="20" ry="20" fill="#a07146" />
+  <rect id="frameTextureOverlay" x="0" y="0" width="1200" height="972" fill="url(#diagLines)" pointer-events="none" mask="url(#exactFrameMask)" />
+  <rect x="38.00" y="38.00" width="527.00" height="895.90" rx="10" ry="10" fill="#333538" />
+  <rect x="635.00" y="38.00" width="527.00" height="895.90" rx="10" ry="10" fill="#333538" />
+  <rect x="38.00" y="38.00" width="527.00" height="895.90" rx="10" ry="10" fill="url(#dotColsBoard)" />
+  <rect x="635.00" y="38.00" width="527.00" height="895.90" rx="10" ry="10" fill="url(#dotColsBoard)" />
+  <path id="point-1" d="M 1079.44 933.90 L 1156.73 933.90 L 1124.08 553.43 Q 1118.08 547.43 1112.08 553.43 Z" fill="#d2cbb8" />
+  <path d="M 1079.44 933.90 L 1156.73 933.90 L 1124.08 553.43 Q 1118.08 547.43 1112.08 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
+  <path id="point-2" d="M 991.60 933.90 L 1068.90 933.90 L 1036.25 553.43 Q 1030.25 547.43 1024.25 553.43 Z" fill="#b29069" />
+  <path d="M 991.60 933.90 L 1068.90 933.90 L 1036.25 553.43 Q 1030.25 547.43 1024.25 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
+  <path id="point-3" d="M 903.77 933.90 L 981.06 933.90 L 948.42 553.43 Q 942.42 547.43 936.42 553.43 Z" fill="#d2cbb8" />
+  <path d="M 903.77 933.90 L 981.06 933.90 L 948.42 553.43 Q 942.42 547.43 936.42 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
+  <path id="point-4" d="M 815.94 933.90 L 893.23 933.90 L 860.58 553.43 Q 854.58 547.43 848.58 553.43 Z" fill="#b29069" />
+  <path d="M 815.94 933.90 L 893.23 933.90 L 860.58 553.43 Q 854.58 547.43 848.58 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
+  <path id="point-5" d="M 728.10 933.90 L 805.40 933.90 L 772.75 553.43 Q 766.75 547.43 760.75 553.43 Z" fill="#d2cbb8" />
+  <path d="M 728.10 933.90 L 805.40 933.90 L 772.75 553.43 Q 766.75 547.43 760.75 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
+  <path id="point-6" d="M 640.27 933.90 L 717.56 933.90 L 684.92 553.43 Q 678.92 547.43 672.92 553.43 Z" fill="#b29069" />
+  <path d="M 640.27 933.90 L 717.56 933.90 L 684.92 553.43 Q 678.92 547.43 672.92 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
+  <path id="point-7" d="M 482.44 933.90 L 559.73 933.90 L 527.08 553.43 Q 521.08 547.43 515.08 553.43 Z" fill="#d2cbb8" />
+  <path d="M 482.44 933.90 L 559.73 933.90 L 527.08 553.43 Q 521.08 547.43 515.08 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
+  <path id="point-8" d="M 394.60 933.90 L 471.90 933.90 L 439.25 553.43 Q 433.25 547.43 427.25 553.43 Z" fill="#b29069" />
+  <path d="M 394.60 933.90 L 471.90 933.90 L 439.25 553.43 Q 433.25 547.43 427.25 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
+  <path id="point-9" d="M 306.77 933.90 L 384.06 933.90 L 351.42 553.43 Q 345.42 547.43 339.42 553.43 Z" fill="#d2cbb8" />
+  <path d="M 306.77 933.90 L 384.06 933.90 L 351.42 553.43 Q 345.42 547.43 339.42 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
+  <path id="point-10" d="M 218.94 933.90 L 296.23 933.90 L 263.58 553.43 Q 257.58 547.43 251.58 553.43 Z" fill="#b29069" />
+  <path d="M 218.94 933.90 L 296.23 933.90 L 263.58 553.43 Q 257.58 547.43 251.58 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
+  <path id="point-11" d="M 131.10 933.90 L 208.40 933.90 L 175.75 553.43 Q 169.75 547.43 163.75 553.43 Z" fill="#d2cbb8" />
+  <path d="M 131.10 933.90 L 208.40 933.90 L 175.75 553.43 Q 169.75 547.43 163.75 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
+  <path id="point-12" d="M 43.27 933.90 L 120.56 933.90 L 87.92 553.43 Q 81.92 547.43 75.92 553.43 Z" fill="#b29069" />
+  <path d="M 43.27 933.90 L 120.56 933.90 L 87.92 553.43 Q 81.92 547.43 75.92 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
+  <path id="point-13" d="M 43.27 38.00 L 120.56 38.00 L 87.92 418.47 Q 81.92 424.47 75.92 418.47 Z" fill="#d2cbb8" />
+  <path d="M 43.27 38.00 L 120.56 38.00 L 87.92 418.47 Q 81.92 424.47 75.92 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
+  <path id="point-14" d="M 131.10 38.00 L 208.40 38.00 L 175.75 418.47 Q 169.75 424.47 163.75 418.47 Z" fill="#b29069" />
+  <path d="M 131.10 38.00 L 208.40 38.00 L 175.75 418.47 Q 169.75 424.47 163.75 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
+  <path id="point-15" d="M 218.94 38.00 L 296.23 38.00 L 263.58 418.47 Q 257.58 424.47 251.58 418.47 Z" fill="#d2cbb8" />
+  <path d="M 218.94 38.00 L 296.23 38.00 L 263.58 418.47 Q 257.58 424.47 251.58 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
+  <path id="point-16" d="M 306.77 38.00 L 384.06 38.00 L 351.42 418.47 Q 345.42 424.47 339.42 418.47 Z" fill="#b29069" />
+  <path d="M 306.77 38.00 L 384.06 38.00 L 351.42 418.47 Q 345.42 424.47 339.42 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
+  <path id="point-17" d="M 394.60 38.00 L 471.90 38.00 L 439.25 418.47 Q 433.25 424.47 427.25 418.47 Z" fill="#d2cbb8" />
+  <path d="M 394.60 38.00 L 471.90 38.00 L 439.25 418.47 Q 433.25 424.47 427.25 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
+  <path id="point-18" d="M 482.44 38.00 L 559.73 38.00 L 527.08 418.47 Q 521.08 424.47 515.08 418.47 Z" fill="#b29069" />
+  <path d="M 482.44 38.00 L 559.73 38.00 L 527.08 418.47 Q 521.08 424.47 515.08 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
+  <path id="point-19" d="M 640.27 38.00 L 717.56 38.00 L 684.92 418.47 Q 678.92 424.47 672.92 418.47 Z" fill="#d2cbb8" />
+  <path d="M 640.27 38.00 L 717.56 38.00 L 684.92 418.47 Q 678.92 424.47 672.92 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
+  <path id="point-20" d="M 728.10 38.00 L 805.40 38.00 L 772.75 418.47 Q 766.75 424.47 760.75 418.47 Z" fill="#b29069" />
+  <path d="M 728.10 38.00 L 805.40 38.00 L 772.75 418.47 Q 766.75 424.47 760.75 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
+  <path id="point-21" d="M 815.94 38.00 L 893.23 38.00 L 860.58 418.47 Q 854.58 424.47 848.58 418.47 Z" fill="#d2cbb8" />
+  <path d="M 815.94 38.00 L 893.23 38.00 L 860.58 418.47 Q 854.58 424.47 848.58 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
+  <path id="point-22" d="M 903.77 38.00 L 981.06 38.00 L 948.42 418.47 Q 942.42 424.47 936.42 418.47 Z" fill="#b29069" />
+  <path d="M 903.77 38.00 L 981.06 38.00 L 948.42 418.47 Q 942.42 424.47 936.42 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
+  <path id="point-23" d="M 991.60 38.00 L 1068.90 38.00 L 1036.25 418.47 Q 1030.25 424.47 1024.25 418.47 Z" fill="#d2cbb8" />
+  <path d="M 991.60 38.00 L 1068.90 38.00 L 1036.25 418.47 Q 1030.25 424.47 1024.25 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
+  <path id="point-24" d="M 1079.44 38.00 L 1156.73 38.00 L 1124.08 418.47 Q 1118.08 424.47 1112.08 418.47 Z" fill="#b29069" />
+  <path d="M 1079.44 38.00 L 1156.73 38.00 L 1124.08 418.47 Q 1118.08 424.47 1112.08 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
+  <rect id="off-board-white" class="off-board" x="1200" y="38.00" width="77.29" height="380.47"  />
+  <rect id="off-board-black" class="off-board" x="1200" y="553.43" width="77.29" height="380.47" />
+  <rect id="bar-white" class="bar" x="561" y="38.00" width="77.29" height="380.47" />
+  <rect id="bar-black" class="bar" x="561" y="553.43" width="77.29" height="380.47" />
+</svg>

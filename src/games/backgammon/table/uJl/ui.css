@@ -8,3 +8,17 @@
   margin-left:0;
   vertical-align: top;
 }
+.off-board, .bar {
+  pointer-events: bounding-box !important;
+  fill: rgba(51, 53, 56, 1);
+  fill-opacity: 0;
+  stroke: black;                 /* stroke color */
+  stroke-width: 2px;             /* stroke thickness */
+  stroke-dasharray: 6, 3;
+}
+.off-board:hover, .bar:hover {
+  fill-opacity: 1;
+  stroke: black;                 /* stroke color */
+  stroke-width: 2px;             /* stroke thickness */
+  stroke-dasharray: 6, 3;
+}

@@ -28,24 +28,6 @@
     <pattern id="diagLines" patternUnits="userSpaceOnUse" width="4" height="4" patternTransform="rotate(45)">
       <line x1="0" y1="0" x2="0" y2="8" stroke="white" stroke-opacity="0.084375" stroke-width="2" />
     </pattern>
-    <style>
-      .cross-checker {
-        --checker-fill: #d2cbb8;
-        --checker-stroke: #1f2022;
-        --accent: #ffffff;
-        --accent-opacity: 0.7;
-      }
-      .crown-checker {
-        --checker-fill: #333538;
-        --checker-stroke: #1f2022;
-        --accent: #ffffff;
-        --accent-opacity: 0.3;
-      }
-      .disc { fill:var(--checker-fill); stroke:var(--checker-stroke); stroke-width:1px; }
-      .ring { fill:none; stroke:var(--accent); stroke-opacity:var(--accent-opacity); stroke-width:2px; }
-      .cross-checker #cross path { stroke:var(--accent); stroke-opacity:var(--accent-opacity); stroke-width:0; fill:var(--accent); fill-opacity:var(--accent-opacity);  }
-      .crown-checker #crown path { stroke:var(--accent); stroke-opacity:var(--accent-opacity); stroke-width:0; fill:var(--accent); fill-opacity:var(--accent-opacity);  }
-    </style>
     <radialGradient id="edgeLight" cx="0.35" cy="0.30" r="0.65">
       <stop offset="0%" stop-color="#ffffff" stop-opacity="0.12"/>
       <stop offset="70%" stop-color="#ffffff" stop-opacity="0.05"/>

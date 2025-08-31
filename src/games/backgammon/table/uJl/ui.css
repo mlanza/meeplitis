@@ -1,47 +1,44 @@
-:root {
-    --cross-checker-fill:#d2cbb8;
-    --cross-checker-stroke:#1f2022;
-    --cross-accent:#ffffff;
-    --cross-accent-opacity:0.7;
-    --crown-checker-fill:#333538;
-    --crown-checker-stroke:#1f2022;
-    --crown-accent:#ffffff;
-    --crown-accent-opacity:0.3;
+.cross-checker {
+  --checker-fill: #d2cbb8;
+  --checker-stroke: #1f2022;
+  --accent: #ffffff;
+  --accent-opacity: 0.7;
+}
+.crown-checker {
+  --checker-fill: #333538;
+  --checker-stroke: #ffffff;
+  --accent: #ffffff;
+  --accent-opacity: 0.3;
+}
+.ring {
+  fill:none;
+  stroke:var(--accent);
+  stroke-opacity:var(--accent-opacity);
+  stroke-width:1px;
 }
 .cross-checker .disc {
-    fill:var(--cross-checker-fill);
-    stroke:var(--cross-checker-stroke); stroke-width:1px;
-}
-.cross-checker .ring {
-    fill:none;
-    stroke:var(--cross-accent);
-    stroke-opacity:var(--cross-accent-opacity);
-    stroke-width:2px;
+  fill:var(--checker-fill);
+  stroke:var(--checker-stroke);
+  stroke-width:1px;
 }
 .cross-checker #cross path {
-    stroke:var(--cross-accent);
-    stroke-opacity:var(--cross-accent-opacity);
-    stroke-width:0;
-    fill:var(--cross-accent);
-    fill-opacity:var(--cross-accent-opacity);
+  stroke:var(--accent);
+  stroke-opacity:var(--accent-opacity);
+  stroke-width:0;
+  fill:var(--accent);
+  fill-opacity:var(--accent-opacity);
 }
 .crown-checker .disc {
-    fill:var(--crown-checker-fill);
-    stroke:var(--crown-checker-stroke);
-    stroke-width:1px;
-}
-.crown-checker .ring {
-    fill:none;
-    stroke:var(--crown-accent);
-    stroke-opacity:var(--crown-accent-opacity);
-    stroke-width:2px;
+  fill:var(--checker-fill);
+  stroke:var(--checker-stroke);
+  stroke-width:1px;
 }
 .crown-checker #crown path {
-    stroke:var(--crown-accent);
-    stroke-opacity:var(--crown-accent-opacity);
-    stroke-width:0;
-    fill:var(--crown-accent);
-    fill-opacity:var(--crown-accent-opacity);
+  stroke:var(--accent);
+  stroke-opacity:var(--accent-opacity);
+  stroke-width:0;
+  fill:var(--accent);
+  fill-opacity:var(--accent-opacity);
 }
 #table #board {
   width: 500px;

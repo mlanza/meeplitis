@@ -11,6 +11,13 @@ import {reg} from "/libs/cmd.js";
 
 const {img, ol, li, div, kbd, span} = dom.tags(['img', 'ol', 'li', 'div', 'kbd', 'span']);
 
+const txt = await (await fetch('./images/backgammon-board.svg')).text();
+const doc = new DOMParser().parseFromString(txt, 'image/svg+xml');
+const svg = document.importNode(doc.documentElement, true);
+const board = document.getElementById('board');
+board.textContent = '';
+board.appendChild(svg);
+
 dom.addClass(el, "init");
 
 function desc({ type, details }) {

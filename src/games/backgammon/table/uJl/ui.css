@@ -3,12 +3,15 @@
   --checker-stroke: #1f2022;
   --accent: #ffffff;
   --accent-opacity: 0.7;
+  pointer-events: none;
 }
 .crown-checker {
   --checker-fill: #333538;
   --checker-stroke: #ffffff;
   --accent: #ffffff;
   --accent-opacity: 0.3;
+  pointer-events: none;
+
 }
 .ring {
   fill:none;
@@ -69,6 +72,9 @@
 .beige {
   fill: #d2cbb8;
 }
+.point:hover, .off-board:hover, .bar:hover {
+  cursor: pointer;
+}
 .point:hover .beige {
   fill: #e5e0cf;
 }
@@ -97,27 +103,9 @@ svg#board:hover #point-numbers {
   pointer-events: bounding-box !important;
   fill: rgba(51, 53, 56, 1);
   fill-opacity: 0;
-  stroke: black;                 /* stroke color */
+  stroke: transparent;                 /* stroke color */
   stroke-width: 2px;             /* stroke thickness */
   stroke-dasharray: 6, 3;
-}
-.off-board:hover,
-.bar:hover {
-  fill-opacity: 1;
-  stroke: black;                 /* stroke color */
-  stroke-width: 2px;             /* stroke thickness */
-  stroke-dasharray: 6, 3;
-}
-
-svg #bar-white:hover  {
-  fill: rgba(255, 255, 255, 1);
-  fill-opacity: 1;
-  cursor: pointer;
-}
-svg #off-board-white:hover  {
-  fill: rgba(255, 255, 255, 1);
-  fill-opacity: 1;
-  cursor: pointer;
 }
 
 [data-point]{

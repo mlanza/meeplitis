@@ -70,7 +70,27 @@
   text-anchor: middle;
 }
 .players {
-  display: none;
+  width: 20em;
+  height: auto;
+  z-index: 99;
+  float: right;
+  margin-top: .5em;
+  position: relative;
+}
+#table .area {
+  min-height: 2em;
+  height: 2.75em;
+  width: 10em;
+  margin: 2px auto 0;
+}
+#table .zone {
+  min-height: 5em;
+  margin-bottom: .5em;
+  heighdt:5em;
+}
+#table div.player {
+  width: 22em;
+  max-width: 22em;
 }
 .brown {
   fill: #b29069
@@ -96,12 +116,18 @@ svg#board:hover #point-numbers {
 }
 #table #board {
   width: 500px;
+  margin-top: -2px;
 }
-#table #board svg,
+#table #board #frame {
+  --filter: drop-shadow(-12px 12px 10px rgba(0, 0, 0, 0.4)) drop-shadow(-4px 4px 3px rgba(0, 0, 0, 0.2));
+}
+#table div.player > div {
+  width: 12em;
+}
 #table #board {
   height: 600px;
   width: 750px;
-  margin-left:0;
+  margin-left: .75em;
   vertical-align: top;
 }
 .off-board,

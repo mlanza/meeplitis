@@ -29,7 +29,13 @@ function desc({type, details}){
   }
 }
 
-const template = _.identity;
+function template(seat){
+  return {
+    stats: div(span({class: "off"}, "0"), " pieces borne off"),
+    resources: [
+    ]
+  };
+}
 
 const {$ready, $error, $story, $hist, $snapshot, $wip} =
   ui(c.make, describe, desc, template);

@@ -115,6 +115,7 @@
   <rect id="off-board-black" class="off-board" x="1200" y="553.43" width="77.29" height="380.47" />
   <rect id="bar-white" class="bar" x="561" y="38.00" width="77.29" height="380.47" />
   <rect id="bar-black" class="bar" x="561" y="553.43" width="77.29" height="380.47" />
+
   <use href="#cross-checker" id="white-1" data-point="home-black" data-pos="1" />
   <use href="#cross-checker" id="white-2" data-point="home-black" data-pos="2" />
   <use href="#cross-checker" id="white-3" data-point="home-black" data-pos="3" />
@@ -131,6 +132,19 @@
   <use href="#cross-checker" id="white-14" data-point="home-black" data-pos="5" />
   <use href="#cross-checker" id="white-15" data-point="home-black" data-pos="5" />
 
-
-  <use href="#crown-checker" x="991.60" y="38.00" />
+  <use href="#crown-checker" id="black-1" data-point="home-white" data-pos="1" />
+  <use href="#crown-checker" id="black-2" data-point="home-white" data-pos="2" />
+  <use href="#crown-checker" id="black-3" data-point="home-white" data-pos="3" />
+  <use href="#crown-checker" id="black-4" data-point="home-white" data-pos="4" />
+  <use href="#crown-checker" id="black-5" data-point="home-white" data-pos="5" />
+  <use href="#crown-checker" id="black-6" data-point="home-white" data-pos="5" />
+  <use href="#crown-checker" id="black-7" data-point="home-white" data-pos="5" />
+  <use href="#crown-checker" id="black-8" data-point="home-white" data-pos="5" />
+  <use href="#crown-checker" id="black-9" data-point="home-white" data-pos="5" />
+  <use href="#crown-checker" id="black-10" data-point="home-white" data-pos="5" />
+  <use href="#crown-checker" id="black-11" data-point="home-white" data-pos="5" />
+  <use href="#crown-checker" id="black-12" data-point="home-white" data-pos="5" />
+  <use href="#crown-checker" id="black-13" data-point="home-white" data-pos="5" />
+  <use href="#crown-checker" id="black-14" data-point="home-white" data-pos="5" />
+  <use href="#crown-checker" id="black-15" data-point="home-white" data-pos="5" />
 </svg>

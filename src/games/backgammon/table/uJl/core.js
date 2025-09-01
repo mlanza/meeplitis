@@ -371,7 +371,7 @@ export function execute(self, command) {
         _.chain(command,
           _.assoc(_, "type", "started")));
     case 'roll': {
-      const dice = command.details.dice || [_.randInt(6), _.randInt(6)];
+      const dice = _.getIn(command, ['details', 'dice']) || [_.randInt(6), _.randInt(6)];
       const [a, b] = dice;
       if (!validDie(a) || !validDie(b)) {
         throw new Error("Invalid dice");

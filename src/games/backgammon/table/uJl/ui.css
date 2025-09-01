@@ -13,7 +13,7 @@
 .ring {
   fill:none;
   stroke:var(--accent);
-  stroke-opacity:var(--accent-opacity);
+  stroke-opacity:1;
   stroke-width:1px;
 }
 .cross-checker .disc {
@@ -39,6 +39,18 @@
   stroke-width:0;
   fill:var(--accent);
   fill-opacity:var(--accent-opacity);
+}
+.checker-edge {
+  fill: var(--checker-fill);
+  stroke: #1f2022;
+  stroke-opacity: 1;
+}
+.cross-checker .checker-edge {
+  stroke-width: 1px;
+}
+.crown-checker .checker-edge {
+  stroke-width: 1px;
+  stroke: white;
 }
 #table #board {
   width: 500px;

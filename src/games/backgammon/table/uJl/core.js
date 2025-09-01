@@ -478,8 +478,10 @@ function perspective(self, seen, reality){
   return reality; //no hidden info.
 }
 
-function up(state) {
-  return [state.up];
+function up(self) {
+  const state = _.deref(self),
+        {up} = state;
+  return [up];
 }
 
 const may = up;

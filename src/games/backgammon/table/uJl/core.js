@@ -207,11 +207,16 @@ export function canBearOff(state, seat) {
   }, outerBoard(seat));
 }
 
-export function moves(self, options = {}) {
+function moves3(self, type, seat) {
   const state = _.deref(self);
-  const { bar, rolled, points, up, dice, stakes, holdsCube } = state;
+  const up = g.up(self),
+        may = g.may(self);
 
-  const playersToConsider = typeof options.seat === 'number' ? [options.seat] : options.seat || [up];
+  const { bar, rolled, points, dice, stakes, holdsCube } = state;
+
+  if (!_.includes(up, seat) && !_.includes(may, seat)) {
+    return [];
+  }
 
   const allMoves = _.mapcat(function(seat) { // Iterate over each seat
     const opponent = opposition(seat);
@@ -290,16 +295,18 @@ export function moves(self, options = {}) {
     }
 
     return moves;
-  }, playersToConsider);
+  }, up);
 
-  // Filter by type if options.type is provided
-  if (options.type) {
-    const typesToFilter = typeof options.type === 'string' ? [options.type] : options.type;
-    return _.filtera(move => _.includes(typesToFilter, move.type), allMoves);
-  }
-
-  return allMoves;
+  return _.filter(function (cmd) {
+    return (type == null || cmd.type == type) && (seat == null || cmd.seat == seat);
+  }, allMoves);
 }
+
+function moves1(self){
+  return ["roll", "propose-double", "accept", "concede", "move", "enter", "bear-off","commit"];
+}
+
+const moves = _.overload(null, moves1, moves1, moves3);
 
 function compact(self){
   return new Backgammon(self.seats,
@@ -519,7 +526,7 @@ function textualizer(self){
 }
 
 function undoable(self, {type}){
-  return _.includes(["rolled", "committed", "double-proposed", "accepted", "conceded"], type);
+  return !_.includes(["rolled", "committed", "double-proposed", "accepted", "conceded"], type);
 }
 
 function status(self) {

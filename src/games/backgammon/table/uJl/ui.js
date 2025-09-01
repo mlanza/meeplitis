@@ -20,8 +20,13 @@ board.appendChild(svg);
 
 dom.addClass(el, "init");
 
-function desc({ type, details }) {
-  return "Description";
+function desc({type, details}){
+  switch(type) {
+    case "started":
+      return "Starts game.";
+    default:
+      return type;
+  }
 }
 
 const template = _.identity;
@@ -30,3 +35,5 @@ const {$ready, $error, $story, $hist, $snapshot, $wip} =
   ui(c.make, describe, desc, template);
 
 const $both = which($.latest([$hist, $wip]));
+
+reg({ $both, g });

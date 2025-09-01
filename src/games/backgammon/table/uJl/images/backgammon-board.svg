@@ -126,6 +126,11 @@
   <rect id="off-board-black" class="off-board" x="1200" y="553.43" width="77.29" height="380.47" />
   <rect id="bar-white" class="bar" x="561" y="38.00" width="77.29" height="380.47" />
   <rect id="bar-black" class="bar" x="561" y="553.43" width="77.29" height="380.47" />
-  <use href="#cross-checker" x="1079.44" y="856.61" />
+  <use href="#cross-checker" data-point="hw" data-pos="1" />
+  <use href="#cross-checker" data-point="hw" data-pos="2" />
+  <use href="#cross-checker" data-point="hw" data-pos="3" />
+  <use href="#cross-checker" data-point="hw" data-pos="4" />
+  <use href="#cross-checker" data-point="hw" data-pos="5" />
+
   <use href="#crown-checker" x="991.60" y="856.61" />
 </svg>

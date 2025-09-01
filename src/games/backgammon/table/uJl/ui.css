@@ -63,6 +63,18 @@
 .players {
   display: none;
 }
+.brown {
+  fill: #b29069
+}
+.beige {
+  fill: #d2cbb8;
+}
+.point:hover .beige {
+  fill: #e5e0cf;
+}
+.point:hover .brown {
+  fill: #c5ab8e;
+}
 #point-numbers {
   opacity: 0;
   transition: .5s;

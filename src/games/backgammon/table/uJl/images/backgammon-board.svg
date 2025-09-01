@@ -67,10 +67,14 @@
   <path d="M 1079.44 933.90 L 1156.73 933.90 L 1124.08 553.43 Q 1118.08 547.43 1112.08 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
   <path id="point-2" d="M 991.60 933.90 L 1068.90 933.90 L 1036.25 553.43 Q 1030.25 547.43 1024.25 553.43 Z" fill="#b29069" />
   <path d="M 991.60 933.90 L 1068.90 933.90 L 1036.25 553.43 Q 1030.25 547.43 1024.25 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
-  <path id="point-3" d="M 903.77 933.90 L 981.06 933.90 L 948.42 553.43 Q 942.42 547.43 936.42 553.43 Z" fill="#d2cbb8" />
-  <path d="M 903.77 933.90 L 981.06 933.90 L 948.42 553.43 Q 942.42 547.43 936.42 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
-  <path id="point-4" d="M 815.94 933.90 L 893.23 933.90 L 860.58 553.43 Q 854.58 547.43 848.58 553.43 Z" fill="#b29069" />
-  <path d="M 815.94 933.90 L 893.23 933.90 L 860.58 553.43 Q 854.58 547.43 848.58 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
+  <g class="point" id="point-3">
+    <path class="beige" d="M 903.77 933.90 L 981.06 933.90 L 948.42 553.43 Q 942.42 547.43 936.42 553.43 Z" />
+    <path class="ovals" d="M 903.77 933.90 L 981.06 933.90 L 948.42 553.43 Q 942.42 547.43 936.42 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
+  </g>
+  <g class="point" id="point-4">
+    <path class="brown" d="M 815.94 933.90 L 893.23 933.90 L 860.58 553.43 Q 854.58 547.43 848.58 553.43 Z" fill="#b29069" />
+    <path class="ovals" d="M 815.94 933.90 L 893.23 933.90 L 860.58 553.43 Q 854.58 547.43 848.58 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
+  </g>
   <path id="point-5" d="M 728.10 933.90 L 805.40 933.90 L 772.75 553.43 Q 766.75 547.43 760.75 553.43 Z" fill="#d2cbb8" />
   <path d="M 728.10 933.90 L 805.40 933.90 L 772.75 553.43 Q 766.75 547.43 760.75 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
   <path id="point-6" d="M 640.27 933.90 L 717.56 933.90 L 684.92 553.43 Q 678.92 547.43 672.92 553.43 Z" fill="#b29069" />

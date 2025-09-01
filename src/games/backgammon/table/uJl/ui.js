@@ -24,6 +24,9 @@ function desc({type, details}){
   switch(type) {
     case "started":
       return "Starts game.";
+    case "rolled":
+      const {dice} = details;
+      return _.count(dice) === 2 ? `Rolled ${dice[0]} and ${dice[1]}.` : `Rolled double ${dice[0]}s.`;
     default:
       return type;
   }

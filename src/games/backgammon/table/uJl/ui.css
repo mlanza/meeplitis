@@ -565,3 +565,9 @@ svg#board:hover #point-numbers {
 [data-point="home-black"][data-pos="5"] {
   transform: translate(1200px, 548.61px);
 }
+[data-allow-commands*=roll] .moves button[data-type="roll"],
+[data-allow-commands*=propose-double] .moves button[data-type="propose-double"],
+[data-allow-commands*=accept] .moves button[data-type="accept"],
+[data-allow-commands*=concede] .moves button[data-type="concede"]{
+  display: inline !important;
+}

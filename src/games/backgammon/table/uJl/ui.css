@@ -11,7 +11,6 @@
   --accent: #ffffff;
   --accent-opacity: 0.3;
   pointer-events: none;
-
 }
 .ring {
   fill:none;
@@ -55,6 +54,12 @@
   stroke-width: 1px;
   stroke: white;
 }
+#point-numbers .top text {
+  transform: translateY(33px);
+}
+#point-numbers .bottom text {
+  transform: translateY(956px);
+}
 #point-numbers {
   font-family: Tahoma;
   font-size: 25px;
@@ -62,6 +67,7 @@
   fill: black;
   stroke: white;
   stroke-width: .750;
+  text-anchor: middle;
 }
 .players {
   display: none;

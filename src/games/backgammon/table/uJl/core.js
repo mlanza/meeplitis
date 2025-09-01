@@ -523,7 +523,7 @@ function undoable(self, {type}){
 }
 
 function status(self) {
-  const { state } = self;
+  const state = _.deref(self);
   if (won(state, WHITE) || won(state, BLACK)) {
     return "finished";
   } else {

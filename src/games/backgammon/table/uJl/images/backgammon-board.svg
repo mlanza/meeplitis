@@ -126,11 +126,22 @@
   <rect id="off-board-black" class="off-board" x="1200" y="553.43" width="77.29" height="380.47" />
   <rect id="bar-white" class="bar" x="561" y="38.00" width="77.29" height="380.47" />
   <rect id="bar-black" class="bar" x="561" y="553.43" width="77.29" height="380.47" />
-  <use href="#cross-checker" data-point="hw" data-pos="1" />
-  <use href="#cross-checker" data-point="hw" data-pos="2" />
-  <use href="#cross-checker" data-point="hw" data-pos="3" />
-  <use href="#cross-checker" data-point="hw" data-pos="4" />
-  <use href="#cross-checker" data-point="hw" data-pos="5" />
+  <use href="#cross-checker" id="white-1" data-point="home-black" data-pos="1" />
+  <use href="#cross-checker" id="white-2" data-point="home-black" data-pos="2" />
+  <use href="#cross-checker" id="white-3" data-point="home-black" data-pos="3" />
+  <use href="#cross-checker" id="white-4" data-point="home-black" data-pos="4" />
+  <use href="#cross-checker" id="white-5" data-point="home-black" data-pos="5" />
+  <use href="#cross-checker" id="white-6" data-point="home-black" data-pos="5" />
+  <use href="#cross-checker" id="white-7" data-point="home-black" data-pos="5" />
+  <use href="#cross-checker" id="white-8" data-point="home-black" data-pos="5" />
+  <use href="#cross-checker" id="white-9" data-point="home-black" data-pos="5" />
+  <use href="#cross-checker" id="white-10" data-point="home-black" data-pos="5" />
+  <use href="#cross-checker" id="white-11" data-point="home-black" data-pos="5" />
+  <use href="#cross-checker" id="white-12" data-point="home-black" data-pos="5" />
+  <use href="#cross-checker" id="white-13" data-point="home-black" data-pos="5" />
+  <use href="#cross-checker" id="white-14" data-point="home-black" data-pos="5" />
+  <use href="#cross-checker" id="white-15" data-point="home-black" data-pos="5" />
 
-  <use href="#crown-checker" x="991.60" y="856.61" />
+
+  <use href="#crown-checker" x="991.60" y="38.00" />
 </svg>

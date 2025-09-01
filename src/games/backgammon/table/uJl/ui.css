@@ -52,6 +52,24 @@
   stroke-width: 1px;
   stroke: white;
 }
+#point-numbers {
+  font-family: Tahoma;
+  font-size: 25px;
+  font-weight: bold;
+  fill: black;
+  stroke: white;
+  stroke-width: .750;
+}
+.players {
+  display: none;
+}
+#point-numbers {
+  opacity: 0;
+  transition: .5s;
+}
+svg#board:hover #point-numbers {
+  opacity: 1;
+}
 #table #board {
   width: 500px;
 }

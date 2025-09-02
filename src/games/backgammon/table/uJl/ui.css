@@ -571,3 +571,16 @@ svg#board:hover #point-numbers {
 [data-allow-commands*=concede] .moves button[data-type="concede"]{
   display: inline !important;
 }
+#dice ol {
+  list-style: none;
+  padding: 0;
+  margin-left: 2em;
+}
+#dice li {
+  float: left;
+  padding: 0;
+  margin:0;
+}
+#dice li img {
+  max-width: 4em;
+}

@@ -49,10 +49,10 @@ reg({ $both, g });
 
 $.sub($both, function ([[curr, prior, motion, game], wip, which]) {
   const { state, up } = curr;
-  const { seated, tokens, canal1, canal2, bridges, period, contents, status, round, spent } = state;
+  const { status, dice } = state;
   const { step, present } = motion;
   const moves = _.toArray(g.moves(game, { type: ["roll", "commit"], seat }));
-
+  _.chain(dice, _.map(_.str, _), _.join(" ", _), dom.attr(el, "data-dice", _));
   _.chain(moves, _.map(_.get(_, "type"), _), _.distinct, _.join(" ", _), _.trim, dom.attr(el, "data-allow-commands", _));
 
 });

@@ -40,15 +40,15 @@ function template(seat){
 function workingCommand([curr, prior], seat, {contents}, game, el){
   const type = curr?.type;
   const attrs = {
-    "data-command-type": type,
+    "data-command-type": type
   };
   switch (type) { //only multi-step commands appear here
     case "move": {
-      attrs["data-froms"] = "";
       attrs["data-from"] = curr.details.from;
       break;
     }
   }
+  $.eachkv(retainAttr(el, _, _), attrs);
 }
 
 const {$ready, $error, $story, $hist, $snapshot, $wip} =

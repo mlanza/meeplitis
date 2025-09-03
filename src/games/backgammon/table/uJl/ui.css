@@ -605,29 +605,61 @@ svg#board:hover #point-numbers {
 #die-3, #die-4 {
   visibility: hidden;
 }
-[data-froms~="1"] #point-1 path:first-child,
-[data-froms~="2"] #point-2 path:first-child,
-[data-froms~="3"] #point-3 path:first-child,
-[data-froms~="4"] #point-4 path:first-child,
-[data-froms~="5"] #point-5 path:first-child,
-[data-froms~="6"] #point-6 path:first-child,
-[data-froms~="7"] #point-7 path:first-child,
-[data-froms~="8"] #point-8 path:first-child,
-[data-froms~="9"] #point-9 path:first-child,
-[data-froms~="10"] #point-10 path:first-child,
-[data-froms~="11"] #point-11 path:first-child,
-[data-froms~="12"] #point-12 path:first-child,
-[data-froms~="13"] #point-13 path:first-child,
-[data-froms~="14"] #point-14 path:first-child,
-[data-froms~="15"] #point-15 path:first-child,
-[data-froms~="16"] #point-16 path:first-child,
-[data-froms~="17"] #point-17 path:first-child,
-[data-froms~="18"] #point-18 path:first-child,
-[data-froms~="19"] #point-19 path:first-child,
-[data-froms~="20"] #point-20 path:first-child,
-[data-froms~="21"] #point-21 path:first-child,
-[data-froms~="22"] #point-22 path:first-child,
-[data-froms~="23"] #point-23 path:first-child,
-[data-froms~="24"] #point-24 path:first-child {
-  fill: red !important;
+[data-froms~="1"]:not([data-from]) #point-1 path:first-child,
+[data-froms~="2"]:not([data-from]) #point-2 path:first-child,
+[data-froms~="3"]:not([data-from]) #point-3 path:first-child,
+[data-froms~="4"]:not([data-from]) #point-4 path:first-child,
+[data-froms~="5"]:not([data-from]) #point-5 path:first-child,
+[data-froms~="6"]:not([data-from]) #point-6 path:first-child,
+[data-froms~="7"]:not([data-from]) #point-7 path:first-child,
+[data-froms~="8"]:not([data-from]) #point-8 path:first-child,
+[data-froms~="9"]:not([data-from]) #point-9 path:first-child,
+[data-froms~="10"]:not([data-from]) #point-10 path:first-child,
+[data-froms~="11"]:not([data-from]) #point-11 path:first-child,
+[data-froms~="12"]:not([data-from]) #point-12 path:first-child,
+[data-froms~="13"]:not([data-from]) #point-13 path:first-child,
+[data-froms~="14"]:not([data-from]) #point-14 path:first-child,
+[data-froms~="15"]:not([data-from]) #point-15 path:first-child,
+[data-froms~="16"]:not([data-from]) #point-16 path:first-child,
+[data-froms~="17"]:not([data-from]) #point-17 path:first-child,
+[data-froms~="18"]:not([data-from]) #point-18 path:first-child,
+[data-froms~="19"]:not([data-from]) #point-19 path:first-child,
+[data-froms~="20"]:not([data-from]) #point-20 path:first-child,
+[data-froms~="21"]:not([data-from]) #point-21 path:first-child,
+[data-froms~="22"]:not([data-from]) #point-22 path:first-child,
+[data-froms~="23"]:not([data-from]) #point-23 path:first-child,
+[data-froms~="24"]:not([data-from]) #point-24 path:first-child {
+  fill: red;
+}
+[data-from] .point path.beige {
+  fill: #e5e0cf;
+}
+[data-from] .point path.brown {
+  fill: #c5ab8e;
+}
+[data-from="1"] #point-1 path:first-child,
+[data-from="2"] #point-2 path:first-child,
+[data-from="3"] #point-3 path:first-child,
+[data-from="4"] #point-4 path:first-child,
+[data-from="5"] #point-5 path:first-child,
+[data-from="6"] #point-6 path:first-child,
+[data-from="7"] #point-7 path:first-child,
+[data-from="8"] #point-8 path:first-child,
+[data-from="9"] #point-9 path:first-child,
+[data-from="10"] #point-10 path:first-child,
+[data-from="11"] #point-11 path:first-child,
+[data-from="12"] #point-12 path:first-child,
+[data-from="13"] #point-13 path:first-child,
+[data-from="14"] #point-14 path:first-child,
+[data-from="15"] #point-15 path:first-child,
+[data-from="16"] #point-16 path:first-child,
+[data-from="17"] #point-17 path:first-child,
+[data-from="18"] #point-18 path:first-child,
+[data-from="19"] #point-19 path:first-child,
+[data-from="20"] #point-20 path:first-child,
+[data-from="21"] #point-21 path:first-child,
+[data-from="22"] #point-22 path:first-child,
+[data-from="23"] #point-23 path:first-child,
+[data-from="24"] #point-24 path:first-child {
+  fill: yellow;
 }

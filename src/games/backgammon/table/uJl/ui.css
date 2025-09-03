@@ -605,3 +605,29 @@ svg#board:hover #point-numbers {
 #die-3, #die-4 {
   visibility: hidden;
 }
+[data-froms~="1"] #point-1 path:first-child,
+[data-froms~="2"] #point-2 path:first-child,
+[data-froms~="3"] #point-3 path:first-child,
+[data-froms~="4"] #point-4 path:first-child,
+[data-froms~="5"] #point-5 path:first-child,
+[data-froms~="6"] #point-6 path:first-child,
+[data-froms~="7"] #point-7 path:first-child,
+[data-froms~="8"] #point-8 path:first-child,
+[data-froms~="9"] #point-9 path:first-child,
+[data-froms~="10"] #point-10 path:first-child,
+[data-froms~="11"] #point-11 path:first-child,
+[data-froms~="12"] #point-12 path:first-child,
+[data-froms~="13"] #point-13 path:first-child,
+[data-froms~="14"] #point-14 path:first-child,
+[data-froms~="15"] #point-15 path:first-child,
+[data-froms~="16"] #point-16 path:first-child,
+[data-froms~="17"] #point-17 path:first-child,
+[data-froms~="18"] #point-18 path:first-child,
+[data-froms~="19"] #point-19 path:first-child,
+[data-froms~="20"] #point-20 path:first-child,
+[data-froms~="21"] #point-21 path:first-child,
+[data-froms~="22"] #point-22 path:first-child,
+[data-froms~="23"] #point-23 path:first-child,
+[data-froms~="24"] #point-24 path:first-child {
+  fill: red !important;
+}

@@ -18,8 +18,6 @@ const board = document.getElementById('board');
 board.textContent = '';
 board.appendChild(svg);
 
-dom.addClass(el, "init");
-
 function desc({type, details}){
   switch(type) {
     case "started":
@@ -35,9 +33,22 @@ function desc({type, details}){
 function template(seat){
   return {
     stats: div(span({class: "off"}, "0"), " pieces borne off"),
-    resources: [
-    ]
+    resources: null
   };
+}
+
+function workingCommand([curr, prior], seat, {contents}, game, el){
+  const type = curr?.type;
+  const attrs = {
+    "data-command-type": type,
+  };
+  switch (type) { //only multi-step commands appear here
+    case "move": {
+      attrs["data-froms"] = "";
+      attrs["data-from"] = curr.details.from;
+      break;
+    }
+  }
 }
 
 const {$ready, $error, $story, $hist, $snapshot, $wip} =
@@ -51,13 +62,33 @@ $.sub($both, function ([[curr, prior, motion, game], wip, which]) {
   const { state, up } = curr;
   const { status, dice } = state;
   const { step, present } = motion;
-  const moves = _.toArray(g.moves(game, { type: ["roll", "commit"], seat }));
-  _.chain(dice, _.map(_.str, _), _.join(" ", _), dom.attr(el, "data-dice", _));
-  _.chain(moves, _.map(_.get(_, "type"), _), _.distinct, _.join(" ", _), _.trim, dom.attr(el, "data-allow-commands", _));
+  const allowed = _.toArray(g.moves(game, { type: ["roll", "commit"], seat }));
 
+  _.chain(dice, _.map(_.str, _), _.join(" ", _), dom.attr(el, "data-dice", _));
+  _.chain(allowed, _.map(_.get(_, "type"), _), _.distinct, _.join(" ", _), _.trim, dom.attr(el, "data-allow-commands", _));
+
+  const froms = _.chain(
+    g.moves(game, { type: ["move"], seat }),
+    _.groupBy(_.pipe(_.getIn(_, ["details", "from"]), _.inc), _),
+    _.keys);
+  dom.attr(el, "data-froms", _.join(" ", froms));
+  dom.attr(el, "data-status", status);
+  dom.removeClass(el, "error");
+
+  if (which === 1) {
+    return present ? workingCommand(wip, seat, state, game, el) : null;
+  }
 });
 
 $.on(el, "click", `#table.act button[data-type="roll"]`, function(e){
   const type = "roll";
   $.dispatch($story, {type});
 });
+
+$.on(el, "click", `#table[data-froms] .point path:nth-child(2)`, function(e){
+  const type = "move";
+  const g = _.closest(this, "g");
+  const from = _.chain(dom.attr(g, "id"), _.split(_, "-"), _.last, parseInt);
+  $.reset($wip, {type, details: {from}});
+});
+

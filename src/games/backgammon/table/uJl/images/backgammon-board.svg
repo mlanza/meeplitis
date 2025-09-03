@@ -66,99 +66,99 @@
   <rect x="635.00" y="38.00" width="527.00" height="895.90" rx="10" ry="10" fill="#333538" />
   <rect x="38.00" y="38.00" width="527.00" height="895.90" rx="10" ry="10" fill="url(#dotColsBoard)" />
   <rect x="635.00" y="38.00" width="527.00" height="895.90" rx="10" ry="10" fill="url(#dotColsBoard)" />
-  <g class="point" id="point-1">
+  <g class="point" id="point-0">
     <path class="beige" d="M 1079.44 933.90 L 1156.73 933.90 L 1124.08 553.43 Q 1118.08 547.43 1112.08 553.43 Z" />
     <path class="ovals" d="M 1079.44 933.90 L 1156.73 933.90 L 1124.08 553.43 Q 1118.08 547.43 1112.08 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
   </g>
-  <g class="point" id="point-2">
+  <g class="point" id="point-1">
     <path class="brown" d="M 991.60 933.90 L 1068.90 933.90 L 1036.25 553.43 Q 1030.25 547.43 1024.25 553.43 Z" />
     <path class="ovals" d="M 991.60 933.90 L 1068.90 933.90 L 1036.25 553.43 Q 1030.25 547.43 1024.25 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
   </g>
-  <g class="point" id="point-3">
+  <g class="point" id="point-2">
     <path class="beige" d="M 903.77 933.90 L 981.06 933.90 L 948.42 553.43 Q 942.42 547.43 936.42 553.43 Z" />
     <path class="ovals" d="M 903.77 933.90 L 981.06 933.90 L 948.42 553.43 Q 942.42 547.43 936.42 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
   </g>
-  <g class="point" id="point-4">
+  <g class="point" id="point-3">
     <path class="brown" d="M 815.94 933.90 L 893.23 933.90 L 860.58 553.43 Q 854.58 547.43 848.58 553.43 Z" />
     <path class="ovals" d="M 815.94 933.90 L 893.23 933.90 L 860.58 553.43 Q 854.58 547.43 848.58 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
   </g>
-  <g class="point" id="point-5">
+  <g class="point" id="point-4">
     <path class="beige" d="M 728.10 933.90 L 805.40 933.90 L 772.75 553.43 Q 766.75 547.43 760.75 553.43 Z" />
     <path class="ovals" d="M 728.10 933.90 L 805.40 933.90 L 772.75 553.43 Q 766.75 547.43 760.75 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
   </g>
-  <g class="point" id="point-6">
+  <g class="point" id="point-5">
     <path class="brown" d="M 640.27 933.90 L 717.56 933.90 L 684.92 553.43 Q 678.92 547.43 672.92 553.43 Z" />
     <path class="ovals" d="M 640.27 933.90 L 717.56 933.90 L 684.92 553.43 Q 678.92 547.43 672.92 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
   </g>
-  <g class="point" id="point-7">
+  <g class="point" id="point-6">
     <path class="beige" d="M 482.44 933.90 L 559.73 933.90 L 527.08 553.43 Q 521.08 547.43 515.08 553.43 Z" />
     <path class="ovals" d="M 482.44 933.90 L 559.73 933.90 L 527.08 553.43 Q 521.08 547.43 515.08 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
   </g>
-  <g class="point" id="point-8">
+  <g class="point" id="point-7">
     <path class="brown" d="M 394.60 933.90 L 471.90 933.90 L 439.25 553.43 Q 433.25 547.43 427.25 553.43 Z" />
     <path class="ovals" d="M 394.60 933.90 L 471.90 933.90 L 439.25 553.43 Q 433.25 547.43 427.25 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
   </g>
-  <g class="point" id="point-9">
+  <g class="point" id="point-8">
     <path class="beige" d="M 306.77 933.90 L 384.06 933.90 L 351.42 553.43 Q 345.42 547.43 339.42 553.43 Z" />
     <path class="ovals" d="M 306.77 933.90 L 384.06 933.90 L 351.42 553.43 Q 345.42 547.43 339.42 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
   </g>
-  <g class="point" id="point-10">
+  <g class="point" id="point-9">
     <path class="brown" d="M 218.94 933.90 L 296.23 933.90 L 263.58 553.43 Q 257.58 547.43 251.58 553.43 Z" />
     <path class="ovals" d="M 218.94 933.90 L 296.23 933.90 L 263.58 553.43 Q 257.58 547.43 251.58 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
   </g>
-  <g class="point" id="point-11">
+  <g class="point" id="point-10">
     <path class="beige" d="M 131.10 933.90 L 208.40 933.90 L 175.75 553.43 Q 169.75 547.43 163.75 553.43 Z" />
     <path class="ovals" d="M 131.10 933.90 L 208.40 933.90 L 175.75 553.43 Q 169.75 547.43 163.75 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
   </g>
-  <g class="point" id="point-12">
+  <g class="point" id="point-11">
     <path class="brown" d="M 43.27 933.90 L 120.56 933.90 L 87.92 553.43 Q 81.92 547.43 75.92 553.43 Z" />
     <path class="ovals" d="M 43.27 933.90 L 120.56 933.90 L 87.92 553.43 Q 81.92 547.43 75.92 553.43 Z" fill="url(#ovalColsEdgeBandStrong)" />
   </g>
-  <g class="point" id="point-13">
+  <g class="point" id="point-12">
     <path class="beige" d="M 43.27 38.00 L 120.56 38.00 L 87.92 418.47 Q 81.92 424.47 75.92 418.47 Z" />
     <path class="ovals" d="M 43.27 38.00 L 120.56 38.00 L 87.92 418.47 Q 81.92 424.47 75.92 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
   </g>
-  <g class="point" id="point-14">
+  <g class="point" id="point-13">
     <path class="brown" d="M 131.10 38.00 L 208.40 38.00 L 175.75 418.47 Q 169.75 424.47 163.75 418.47 Z" />
     <path class="ovals" d="M 131.10 38.00 L 208.40 38.00 L 175.75 418.47 Q 169.75 424.47 163.75 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
   </g>
-  <g class="point" id="point-15">
+  <g class="point" id="point-14">
     <path class="beige" d="M 218.94 38.00 L 296.23 38.00 L 263.58 418.47 Q 257.58 424.47 251.58 418.47 Z" />
     <path class="ovals" d="M 218.94 38.00 L 296.23 38.00 L 263.58 418.47 Q 257.58 424.47 251.58 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
   </g>
-  <g class="point" id="point-16">
+  <g class="point" id="point-15">
     <path class="brown" d="M 306.77 38.00 L 384.06 38.00 L 351.42 418.47 Q 345.42 424.47 339.42 418.47 Z" />
     <path class="ovals" d="M 306.77 38.00 L 384.06 38.00 L 351.42 418.47 Q 345.42 424.47 339.42 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
   </g>
-  <g class="point" id="point-17">
+  <g class="point" id="point-16">
     <path class="beige" d="M 394.60 38.00 L 471.90 38.00 L 439.25 418.47 Q 433.25 424.47 427.25 418.47 Z" />
     <path class="ovals" d="M 394.60 38.00 L 471.90 38.00 L 439.25 418.47 Q 433.25 424.47 427.25 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
   </g>
-  <g class="point" id="point-18">
+  <g class="point" id="point-17">
     <path class="brown" d="M 482.44 38.00 L 559.73 38.00 L 527.08 418.47 Q 521.08 424.47 515.08 418.47 Z" />
     <path class="ovals" d="M 482.44 38.00 L 559.73 38.00 L 527.08 418.47 Q 521.08 424.47 515.08 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
   </g>
-  <g class="point" id="point-19">
+  <g class="point" id="point-18">
     <path class="beige" d="M 640.27 38.00 L 717.56 38.00 L 684.92 418.47 Q 678.92 424.47 672.92 418.47 Z" />
     <path class="ovals" d="M 640.27 38.00 L 717.56 38.00 L 684.92 418.47 Q 678.92 424.47 672.92 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
   </g>
-  <g class="point" id="point-20">
+  <g class="point" id="point-19">
     <path class="brown" d="M 728.10 38.00 L 805.40 38.00 L 772.75 418.47 Q 766.75 424.47 760.75 418.47 Z" />
     <path class="ovals" d="M 728.10 38.00 L 805.40 38.00 L 772.75 418.47 Q 766.75 424.47 760.75 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
   </g>
-  <g class="point" id="point-21">
+  <g class="point" id="point-20">
     <path class="beige" d="M 815.94 38.00 L 893.23 38.00 L 860.58 418.47 Q 854.58 424.47 848.58 418.47 Z" />
     <path class="ovals" d="M 815.94 38.00 L 893.23 38.00 L 860.58 418.47 Q 854.58 424.47 848.58 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
   </g>
-  <g class="point" id="point-22">
+  <g class="point" id="point-21">
     <path class="brown" d="M 903.77 38.00 L 981.06 38.00 L 948.42 418.47 Q 942.42 424.47 936.42 418.47 Z" />
     <path class="ovals" d="M 903.77 38.00 L 981.06 38.00 L 948.42 418.47 Q 942.42 424.47 936.42 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
   </g>
-  <g class="point" id="point-23">
+  <g class="point" id="point-22">
     <path class="beige" d="M 991.60 38.00 L 1068.90 38.00 L 1036.25 418.47 Q 1030.25 424.47 1024.25 418.47 Z" />
     <path class="ovals" d="M 991.60 38.00 L 1068.90 38.00 L 1036.25 418.47 Q 1030.25 424.47 1024.25 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
   </g>
-  <g class="point" id="point-24">
+  <g class="point" id="point-23">
     <path class="brown" d="M 1079.44 38.00 L 1156.73 38.00 L 1124.08 418.47 Q 1118.08 424.47 1112.08 418.47 Z" />
     <path class="ovals" d="M 1079.44 38.00 L 1156.73 38.00 L 1124.08 418.47 Q 1118.08 424.47 1112.08 418.47 Z" fill="url(#ovalColsEdgeBandStrong)" />
   </g>
@@ -167,37 +167,37 @@
   <rect id="bar-white" class="bar" x="561" y="38.00" width="77.29" height="380.47" />
   <rect id="bar-black" class="bar" x="561" y="553.43" width="77.29" height="380.47" />
 
-  <use href="#cross-checker" id="white-1" data-point="1" data-pos="1" />
-  <use href="#cross-checker" id="white-2" data-point="1" data-pos="2" />
-  <use href="#cross-checker" id="white-3" data-point="12" data-pos="1" />
-  <use href="#cross-checker" id="white-4" data-point="12" data-pos="2" />
-  <use href="#cross-checker" id="white-5" data-point="12" data-pos="3" />
-  <use href="#cross-checker" id="white-6" data-point="12" data-pos="4" />
-  <use href="#cross-checker" id="white-7" data-point="12" data-pos="5" />
-  <use href="#cross-checker" id="white-8" data-point="17" data-pos="1" />
-  <use href="#cross-checker" id="white-9" data-point="17" data-pos="2" />
-  <use href="#cross-checker" id="white-10" data-point="17" data-pos="3" />
-  <use href="#cross-checker" id="white-11" data-point="19" data-pos="1" />
-  <use href="#cross-checker" id="white-12" data-point="19" data-pos="2" />
-  <use href="#cross-checker" id="white-13" data-point="19" data-pos="3" />
-  <use href="#cross-checker" id="white-14" data-point="19" data-pos="4" />
-  <use href="#cross-checker" id="white-15" data-point="19" data-pos="5" />
+  <use href="#cross-checker" id="white-1" data-point="0" data-pos="1" />
+  <use href="#cross-checker" id="white-2" data-point="0" data-pos="2" />
+  <use href="#cross-checker" id="white-3" data-point="11" data-pos="1" />
+  <use href="#cross-checker" id="white-4" data-point="11" data-pos="2" />
+  <use href="#cross-checker" id="white-5" data-point="11" data-pos="3" />
+  <use href="#cross-checker" id="white-6" data-point="11" data-pos="4" />
+  <use href="#cross-checker" id="white-7" data-point="11" data-pos="5" />
+  <use href="#cross-checker" id="white-8" data-point="16" data-pos="1" />
+  <use href="#cross-checker" id="white-9" data-point="16" data-pos="2" />
+  <use href="#cross-checker" id="white-10" data-point="16" data-pos="3" />
+  <use href="#cross-checker" id="white-11" data-point="18" data-pos="1" />
+  <use href="#cross-checker" id="white-12" data-point="18" data-pos="2" />
+  <use href="#cross-checker" id="white-13" data-point="18" data-pos="3" />
+  <use href="#cross-checker" id="white-14" data-point="18" data-pos="4" />
+  <use href="#cross-checker" id="white-15" data-point="18" data-pos="5" />
 
-  <use href="#crown-checker" id="black-1" data-point="24" data-pos="1" />
-  <use href="#crown-checker" id="black-2" data-point="24" data-pos="2" />
-  <use href="#crown-checker" id="black-3" data-point="13" data-pos="1" />
-  <use href="#crown-checker" id="black-4" data-point="13" data-pos="2" />
-  <use href="#crown-checker" id="black-5" data-point="13" data-pos="3" />
-  <use href="#crown-checker" id="black-6" data-point="13" data-pos="4" />
-  <use href="#crown-checker" id="black-7" data-point="13" data-pos="5" />
-  <use href="#crown-checker" id="black-8" data-point="8" data-pos="1" />
-  <use href="#crown-checker" id="black-9" data-point="8" data-pos="2" />
-  <use href="#crown-checker" id="black-10" data-point="8" data-pos="3" />
-  <use href="#crown-checker" id="black-11" data-point="6" data-pos="1" />
-  <use href="#crown-checker" id="black-12" data-point="6" data-pos="2" />
-  <use href="#crown-checker" id="black-13" data-point="6" data-pos="3" />
-  <use href="#crown-checker" id="black-14" data-point="6" data-pos="4" />
-  <use href="#crown-checker" id="black-15" data-point="6" data-pos="5" />
+  <use href="#crown-checker" id="black-1" data-point="23" data-pos="1" />
+  <use href="#crown-checker" id="black-2" data-point="23" data-pos="2" />
+  <use href="#crown-checker" id="black-3" data-point="12" data-pos="1" />
+  <use href="#crown-checker" id="black-4" data-point="12" data-pos="2" />
+  <use href="#crown-checker" id="black-5" data-point="12" data-pos="3" />
+  <use href="#crown-checker" id="black-6" data-point="12" data-pos="4" />
+  <use href="#crown-checker" id="black-7" data-point="12" data-pos="5" />
+  <use href="#crown-checker" id="black-8" data-point="7" data-pos="1" />
+  <use href="#crown-checker" id="black-9" data-point="7" data-pos="2" />
+  <use href="#crown-checker" id="black-10" data-point="7" data-pos="3" />
+  <use href="#crown-checker" id="black-11" data-point="5" data-pos="1" />
+  <use href="#crown-checker" id="black-12" data-point="5" data-pos="2" />
+  <use href="#crown-checker" id="black-13" data-point="5" data-pos="3" />
+  <use href="#crown-checker" id="black-14" data-point="5" data-pos="4" />
+  <use href="#crown-checker" id="black-15" data-point="5" data-pos="5" />
 
   <g id="point-numbers" >
     <g class="bottom">

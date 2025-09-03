@@ -37,14 +37,25 @@ function template(seat){
   };
 }
 
-function workingCommand([curr, prior], seat, {contents}, game, el){
+function workingCommand([curr, prior], seat, state, game, el){
   const type = curr?.type;
   const attrs = {
     "data-command-type": type
   };
   switch (type) { //only multi-step commands appear here
     case "move": {
-      attrs["data-from"] = curr.details.from;
+      const from = curr.details.from;
+      const tos = _.chain(
+        g.moves(game, { type: ["move"], seat }),
+        _.filter(function(cmd){
+          return cmd.details.from == from;
+        }, _),
+        _.mapa(_.getIn(_, ["details", "to"]), _),
+        $.see("X"),
+        _.join(" ", _));
+
+      attrs["data-from"] = from;
+      attrs["data-tos"] = tos;
       break;
     }
   }
@@ -69,7 +80,7 @@ $.sub($both, function ([[curr, prior, motion, game], wip, which]) {
 
   const froms = _.chain(
     g.moves(game, { type: ["move"], seat }),
-    _.groupBy(_.pipe(_.getIn(_, ["details", "from"]), _.inc), _),
+    _.groupBy(_.pipe(_.getIn(_, ["details", "from"])), _),
     _.keys);
   dom.attr(el, "data-froms", _.join(" ", froms));
   dom.attr(el, "data-status", status);

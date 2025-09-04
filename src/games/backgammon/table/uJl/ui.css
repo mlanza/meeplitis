@@ -629,6 +629,32 @@ svg#board:hover #point-numbers {
 [data-froms~="21"]:not([data-from]) #point-21 path:first-child,
 [data-froms~="22"]:not([data-from]) #point-22 path:first-child,
 [data-froms~="23"]:not([data-from]) #point-23 path:first-child {
+  fill: #CCCC00;
+}
+[data-froms~="0"]:not([data-from]) #point-0:hover path:first-child,
+[data-froms~="1"]:not([data-from]) #point-1:hover path:first-child,
+[data-froms~="2"]:not([data-from]) #point-2:hover path:first-child,
+[data-froms~="3"]:not([data-from]) #point-3:hover path:first-child,
+[data-froms~="4"]:not([data-from]) #point-4:hover path:first-child,
+[data-froms~="5"]:not([data-from]) #point-5:hover path:first-child,
+[data-froms~="6"]:not([data-from]) #point-6:hover path:first-child,
+[data-froms~="7"]:not([data-from]) #point-7:hover path:first-child,
+[data-froms~="8"]:not([data-from]) #point-8:hover path:first-child,
+[data-froms~="9"]:not([data-from]) #point-9:hover path:first-child,
+[data-froms~="10"]:not([data-from]) #point-10:hover path:first-child,
+[data-froms~="11"]:not([data-from]) #point-11:hover path:first-child,
+[data-froms~="12"]:not([data-from]) #point-12:hover path:first-child,
+[data-froms~="13"]:not([data-from]) #point-13:hover path:first-child,
+[data-froms~="14"]:not([data-from]) #point-14:hover path:first-child,
+[data-froms~="15"]:not([data-from]) #point-15:hover path:first-child,
+[data-froms~="16"]:not([data-from]) #point-16:hover path:first-child,
+[data-froms~="17"]:not([data-from]) #point-17:hover path:first-child,
+[data-froms~="18"]:not([data-from]) #point-18:hover path:first-child,
+[data-froms~="19"]:not([data-from]) #point-19:hover path:first-child,
+[data-froms~="20"]:not([data-from]) #point-20:hover path:first-child,
+[data-froms~="21"]:not([data-from]) #point-21:hover path:first-child,
+[data-froms~="22"]:not([data-from]) #point-22:hover path:first-child,
+[data-froms~="23"]:not([data-from]) #point-23:hover path:first-child {
   fill: yellow;
 }
 [data-from] .point path.beige {
@@ -661,7 +687,7 @@ svg#board:hover #point-numbers {
 [data-from="21"] #point-21 path:first-child,
 [data-from="22"] #point-22 path:first-child,
 [data-from="23"] #point-23 path:first-child {
-  fill: green;
+  fill: yellow;
 }
 [data-tos~="0"]:not([data-to]) #point-0 path:first-child,
 [data-tos~="1"]:not([data-to]) #point-1 path:first-child,
@@ -687,5 +713,5 @@ svg#board:hover #point-numbers {
 [data-tos~="21"]:not([data-to]) #point-21 path:first-child,
 [data-tos~="22"]:not([data-to]) #point-22 path:first-child,
 [data-tos~="23"]:not([data-to]) #point-23 path:first-child {
-  fill: red;
+  fill: olive;
 }

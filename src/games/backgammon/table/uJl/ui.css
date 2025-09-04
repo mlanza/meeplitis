@@ -565,6 +565,7 @@ svg#board:hover #point-numbers {
 [data-point="home-black"][data-pos="5"] {
   transform: translate(1200px, 548.61px);
 }
+[data-allow-commands*=commit] .moves button[data-type="commit"],
 [data-allow-commands*=roll] .moves button[data-type="roll"],
 [data-allow-commands*=propose-double] .moves button[data-type="propose-double"],
 [data-allow-commands*=accept] .moves button[data-type="accept"],
@@ -714,4 +715,8 @@ svg#board:hover #point-numbers {
 [data-tos~="22"]:not([data-to]) #point-22 path:first-child,
 [data-tos~="23"]:not([data-to]) #point-23 path:first-child {
   fill: olive;
+}
+#event img.checker {
+  width: 1.5em;
+  margin-bottom: -0.25em;
 }

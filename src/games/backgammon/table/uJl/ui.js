@@ -18,13 +18,16 @@ const board = document.getElementById('board');
 board.textContent = '';
 board.appendChild(svg);
 
-function desc({type, details}){
+function desc({type, details, seat}){
   switch(type) {
     case "started":
       return "Starts game.";
     case "rolled":
       const {dice} = details;
       return _.count(dice) === 2 ? `Rolled ${dice[0]} and ${dice[1]}.` : `Rolled double ${dice[0]}s.`;
+    case "moved":
+      const {from, to} = details;
+      return [`Moved `, img({class: "checker", src: seat === 0 ? "./images/cross-checker.svg" : "./images/crown-checker.svg"}), ` from ${from} to ${to}.`];
     default:
       return type;
   }
@@ -94,6 +97,18 @@ $.sub($both, function ([[curr, prior, motion, game], wip, which]) {
 $.on(el, "click", `#table.act button[data-type="roll"]`, function(e){
   const type = "roll";
   $.dispatch($story, {type});
+});
+
+$.on(el, "click", `#table[data-from] .point path:nth-child(2)`, function(e){
+  const type = "move";
+  const to = _.chain(dom.attr(_.closest(this, "g"), "id"), _.split(_, "-"), _.last, parseInt);
+  const from = _.chain($wip, _.deref, _.getIn(_, ["details", "from"]));
+  const game = moment($story)
+  if (from != null) {
+    const move = _.chain(g.moves(game, { type: ["move"], seat }), _.detect(function(cmd){
+      return cmd?.details?.from === from && cmd?.details?.to === to;
+    }, _), $.dispatch($story, _));
+  }
 });
 
 $.on(el, "click", `#table[data-froms] .point path:nth-child(2)`, function(e){

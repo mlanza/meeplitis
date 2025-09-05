@@ -125,3 +125,17 @@ It is critical to note that the points within this SVG are also identified using
 ```
 
 This 0-indexed `id` scheme in the SVG directly corresponds to the 0-indexed `points` array in the game state model. This alignment is fundamental for the UI code to render the board correctly based on the model's state and to translate user interactions with the SVG back into valid game moves.
+
+## 6. UI Reconciliation
+
+To ensure the visual representation of the game is always synchronized with the game state, the UI must intelligently update itself based on changes to the model. This process is not just for advancing the game state one step at a time. The user can navigate between any two "frames" in the game's history, such as jumping from the opening setup to the final move. This means the reconciliation logic must be robust enough to handle both small, single-move changes and large-scale changes between distant game states.
+
+The core principle is that all 30 checkers (15 per player) are always present in the SVG DOM. Reconciliation is simply a matter of updating attributes on these existing checker elements to reflect the new state. The primary attributes to update are `data-point` (which point, bar, or off-board area a checker is on) and `data-pos` (the stacking position on that point).
+
+The reconciliation strategy is as follows:
+
+1. **Flatten Locations**: For any two game states (`prior` and `current`), the locations of each player's 15 checkers are "flattened" into a single, comprehensive list. This list accounts for checkers on the 24 points, on the bar, and those that have been borne off.
+
+2. **Calculate Diff**: The `current` and `prior` location lists are compared to produce a diff. This diff identifies exactly which locations have lost checkers (departures) and which have gained them (arrivals), regardless of how large the difference is between the two states.
+
+3. **Minimal DOM Updates**: Instead of re-rendering the board, the diff is used to perform minimal and precise updates. For each checker that departed a location, its corresponding SVG element is identified and its `data-point` and `data-pos` attributes are updated to match a new location from the arrivals list. This ensures that only the checkers that need to move are affected, providing an efficient mechanism for both small and large state transitions.

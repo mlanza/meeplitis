@@ -1,59 +1,54 @@
 # TODO: Backgammon UI Incremental Plan
 
-This document outlines a step-by-step plan for building the Backgammon UI. The goal is to create the UI incrementally, using the Mexica and Up-down games as models.
+This document outlines a step-by-step plan for building the Backgammon UI. The goal is to create the UI incrementally.
 
-## Phase 1: Basic Board and Checker Rendering
+## Phase 1-4 (Completed)
 
-- [ ] 1.  **Render the board points:**
-    - [ ] Create 24 points on the board.
-    - [ ] Assign `id` markers to each point in the format `point-n`, where `n` is the point number (1-24).
-    - [ ] The numbering should follow the standard Backgammon layout, so that white checkers move from 1 to 24 and black checkers move from 24 to 1.
-    - [ ] Style the points to look like triangles, alternating colors.
-    - [ ] Use CSS to position the points correctly on the board.
+(Previous phases for basic rendering and game logic are considered complete for the purpose of this plan.)
 
-- [ ] 2.  **Render the checkers:**
-    - [ ] The `ui.js` file already has basic logic for rendering checkers.
-    - [ ] Style the checkers with the images in the `images` directory (`checker-black.svg`, `checker-white.svg`).
-    - [ ] Position the checkers correctly on the points based on the initial game state.
+## Phase 5: Minimal UI Reconciliation (Point-to-Point)
 
-## Phase 2: Dice and Player Info
+This phase focuses on the essential logic to move a checker from one point to another by updating its `data-point` attribute. The goal is to create a minimal, working reconciliation for the most common move type, deferring more complex scenarios. The entire phase will be implemented as a single unit of work. The result will be functional code that, when executed, visually repositions checkers for point-to-point moves by updating their `data-point` SVG attribute.
 
-- [ ] 1.  **Copy dice images:**
-    - [ ] Copy the temple SVG files from `src/games/mexica/images/` to `src/images/` and rename them to represent dice faces (e.g., `die-1.svg`, `die-2.svg`, etc.).
+- [ ] 1. **Append Reconciliation Logic to Game's `ui.js`**
+    - [ ] Add new helper functions to the `ui.js` file responsible for rendering the game board.
 
-- [ ] 2.  **Render the dice:**
-    - [ ] Create a component to display the dice.
-    - [ ] The dice values will come from the game state.
-    - [ ] Display the correct dice images based on the dice values.
+- [ ] 2. **Implement Minimal State Diffing**
+    - [ ] Create a `diffPoints(currPoints, priorPoints, seat)` function.
+        - This function will *only* compare the `points` array for a given `seat` from the `prior` and `current` states.
+        - It will ignore the `bar` and `off` properties for now.
+        - It will return a list of changes, where each change is an object `{from: number, to: number}`.
+        - `from` represents the prior point index (0-23) of a checker.
+        - `to` represents the current point index (0-23) of that checker.
+        - Example: `[{from: 0, to: 5}]` for a single checker move.
 
-- [ ] 3.  **Display player information:**
-    - [ ] Display the player avatars and usernames.
-    - [ ] Indicate the current player's turn.
+- [ ] 3. **Implement Minimal `data-point` Update**
+    - [ ] Create a `reconcileMovedCheckers(el, seat, changes)` function.
+        - This function will take the list of `{from, to}` changes.
+        - For each change `{from, to}`:
+            - It will find *one* checker element of the specified `seat` at the `data-point` corresponding to `from`.
+            - It will then update that checker's `data-point` attribute to the `point` corresponding to `to`.
+            - This function will not handle `data-pos` or locations other than points 0-23.
+            - **Note:** The reconciliation will search for *any* checker at the `from` location and update its `data-point` to `to`. This is a minimal update, as the specific identity of the checker is not tracked.
 
-## Phase 3: Movement and Game Logic
+- [ ] 4. **Create Minimal Orchestration Function**
+    - [ ] Create and export `diffAndUpdatePoints(el, curr, prior)`.
+        - This function will be the entry point for the minimal reconciliation.
+        - It will iterate through each `seat`.
+        - For each `seat`, it will call `diffPoints` to get the changes.
+        - It will then call `reconcileMovedCheckers` to generate the DOM update effects.
+        - It will pass the effects to `$.doseq` to execute them.
 
-- [ ] 1.  **Implement checker movement:**
-    - [ ] When a player clicks on a point, highlight the possible moves.
-    - [ ] When a player clicks on a valid destination point, move the checker.
-    - [ ] Update the game state after each move.
+## Phase 6: Advanced UI Reconciliation (Deferred)
 
-- [ ] 2.  **Implement bearing off:**
-    - [ ] Create a "bear off" area for each player.
-    - [ ] Implement the logic for bearing off checkers.
+This phase will build upon the minimal reconciliation to handle all other game scenarios.
 
-- [ ] 3.  **Implement the doubling cube:**
-    - [ ] Create a component for the doubling cube.
-    - [ ] Implement the logic for doubling.
+- [ ] 1. **Integrate Bar and Off-board Logic**
+    - [ ] Extend the diffing logic to include changes in the `bar` and `off` properties of the game state.
+    - [ ] Update `diffPoints` to return `{from, to}` changes where `from` or `to` can be "bar" or "off".
+    - [ ] Update `reconcileMovedCheckers` to handle these new `from` and `to` values.
 
-## Phase 4: Game End and Finishing Touches
-
-- [ ] 1.  **Display the game outcome:**
-    - [ ] When the game is over, display the winner.
-    - [ ] Provide an option to play again.
-
-- [ ] 2.  **Add animations and transitions:**
-    - [ ] Add animations for checker movement and dice rolls.
-    - [ ] Add transitions for other UI elements.
-
-- [ ] 3.  **Refine the UI:**
-    - [ ] Review the UI and make any necessary adjustments to improve the user experience.
+- [ ] 2. **Implement `data-pos` Stacking Reconciliation**
+    - [ ] Create a `reconcileCheckerPositions(el)` function.
+    - [ ] This function will execute after the `data-point` updates.
+    - [ ] It will scan all locations (points, bar) and update the `data-pos` attribute of all checkers to ensure they stack correctly.

@@ -43,8 +43,8 @@ graph TD
 
 The user initiates the command by clicking on an element that represents the action they want to take.
 
-*   **User Action:** The user clicks the "Construct Canal" button.
-*   **Code:** An event handler calls `$.reset($wip, {type: "construct-canal", details: {size: 2}})` to set the initial state of the `$wip` stream.
+* **User Action:** The user clicks the "Construct Canal" button.
+* **Code:** An event handler calls `$.reset($wip, {type: "construct-canal", details: {size: 2}})` to set the initial state of the `$wip` stream.
 
 ```javascript
 // From src/games/mexica/table/H7z/ui.js
@@ -60,7 +60,7 @@ $.on(el, "click", `#table.act[data-status='actions'] #supplies div.canals`, func
 
 The UI subscribes to changes in the `$wip` stream. When the stream is updated, a special function called `workingCommand` is called to update the UI.
 
-*   **Code:** The `workingCommand` function reads the state of the `$wip` stream and sets a series of `data-command-*` attributes on a container element.
+* **Code:** The `workingCommand` function reads the state of the `$wip` stream and sets a series of `data-command-*` attributes on a container element.
 
 ```javascript
 // From src/games/mexica/table/H7z/ui.js
@@ -88,14 +88,14 @@ function workingCommand([curr, prior], seat, {contents}, game, el){
 }
 ```
 
-*   **CSS:** CSS rules use these `data-command-*` attributes to provide visual feedback. For example, valid spots for the canal might be highlighted.
+* **CSS:** CSS rules use these `data-command-*` attributes to provide visual feedback. For example, valid spots for the canal might be highlighted.
 
 ### Step 3: Updating the Command
 
 The user performs the next action in the sequence, such as clicking on a valid spot on the board.
 
-*   **User Action:** The user clicks on a valid spot for the canal.
-*   **Code:** An event handler updates the `$wip` stream with the new information.
+* **User Action:** The user clicks on a valid spot for the canal.
+* **Code:** An event handler updates the `$wip` stream with the new information.
 
 ```javascript
 // From src/games/mexica/table/H7z/ui.js
@@ -118,8 +118,8 @@ Notice that if the command is not yet complete (i.e., only one spot has been sel
 
 Once the user has provided all the necessary information, the command is complete.
 
-*   **User Action:** The user clicks on the second valid spot for the canal.
-*   **Code:** The event handler from the previous step now finds that `_.count(at) == 2`. It then reads the final state from the `$wip` stream and dispatches the command to the game engine using `$.dispatch($story, ...)`.
+* **User Action:** The user clicks on the second valid spot for the canal.
+* **Code:** The event handler from the previous step now finds that `_.count(at) == 2`. It then reads the final state from the `$wip` stream and dispatches the command to the game engine using `$.dispatch($story, ...)`.
 
 After the command is dispatched, the `$wip` stream is typically cleared, and the UI returns to its normal state.
 
@@ -210,9 +210,9 @@ In the context of the `workingCommand`, the `$wip` stream holds the state of the
 
 ### `$.reset($wip, ...)` vs `$.swap($wip, ...)`
 
-*   `$.reset($wip, ...)` is used to completely replace the value of the `$wip` stream. This is useful for initiating a new command or for updating the command with a completely new state.
+* `$.reset($wip, ...)` is used to completely replace the value of the `$wip` stream. This is useful for initiating a new command or for updating the command with a completely new state.
 
-*   `$.swap($wip, ...)` is used to update the value of the `$wip` stream based on its current value. It takes a function as its second argument. This function receives the current value of the stream and returns the new value. This is useful for toggling a value or adding an item to a list within the command's state.
+* `$.swap($wip, ...)` is used to update the value of the `$wip` stream based on its current value. It takes a function as its second argument. This function receives the current value of the stream and returns the new value. This is useful for toggling a value or adding an item to a list within the command's state.
 
 Here is an example of `$.swap` from the "propose unfoundables" command in Mexica:
 

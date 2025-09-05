@@ -31,11 +31,11 @@ The entire game logic is encapsulated within a "Functional Core" module, `core.j
 
 The interaction between the FC and the Imperative Shell (the orchestrator, e.g., `main.js`) is very simple:
 
-1.  **Command**: The shell issues a command object to the FC by calling `game.execute(world, cmd, ctx)`.
-2.  **New State**: The `execute` function synchronously returns a `world` object.
+1. **Command**: The shell issues a command object to the FC by calling `game.execute(world, cmd, ctx)`.
+2. **New State**: The `execute` function synchronously returns a `world` object.
     - If the command was valid, this is a **new instance** of the world.
     - If the command was invalid, this is the **original, unmodified instance** of the world.
-3.  **Internal Event Handling**: Inside the FC, the `execute` function is responsible for creating an `event` and passing it to `fold`. The event object is an internal implementation detail and is not exposed to the shell.
+3. **Internal Event Handling**: Inside the FC, the `execute` function is responsible for creating an `event` and passing it to `fold`. The event object is an internal implementation detail and is not exposed to the shell.
 
 This model ensures that the shell is only concerned with dispatching commands and receiving new states, while the FC fully encapsulates the event creation and state transition logic.
 

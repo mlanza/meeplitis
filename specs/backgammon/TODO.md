@@ -1,6 +1,8 @@
 # TODO: Backgammon UI Incremental Plan
 
-This document outlines a step-by-step plan for building the Backgammon UI. The goal is to create the UI incrementally.
+This document outlines a step-by-step plan for building the [Backgammon UI](../../src/games/backgammon/table/uJl/ui.js). The approach is to [build it up incrementally](../todo-management.md).
+
+Ensure you [understand the model](../backgammon/prds/model.md) when working.
 
 ## Phase 1-4 (Completed)
 

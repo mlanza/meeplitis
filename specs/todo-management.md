@@ -33,15 +33,78 @@ Every heavy lift is an elephant—a chunk of work too big to eat in a single bit
 
 ## Workflow
 
-1. **Initial planning:** Read the provided context (specs and/or code). If only code is given, draft a spec to capture and clarify what you’ve learned. Ensure the plan feels solid.
-2. **Task creation:** Build a numbered task list in `TODO.md`.
-3. **Execution:** When implementing, check off the current task. Leave it in place.
-4. **Review:** Pause after each task to validate outcomes.
-5. **Completion handling:**
+This workflow defines **shared roles** between the agent (who owns the work) and the director (who reviews it).
 
-   * A `## Completed` section lives at the bottom of `TODO.md`.
-   * When starting a new task, move the previous completed one(s) down to this section.
-   * The top of the file always shows the current focus.
+### Roles
+- **Agent (you):**
+  - Owns the execution of work and movement of tasks through states.
+  - Marks tasks as **Attempted (a)** when work begins.
+  - If a task is marked **Failed (f)**—either by you or the director—you must move it toward **Clarified (c)**. Clarification means enriching Markdown files, explaining why the work may have gone wrong, and describing your plan for retrying.
+  - You are expected to ask the director clarifying questions if context or specs are insufficient. The director is a resource to use.
+- **Director (me):**
+  - Reviews attempted work and decides whether it is **Completed (x)** or **Failed (f)**.
+  - Provides oversight and clarity so that the workflow remains focused and intentional.
+
+### Task States
+- **Unstarted (default):** A task not yet attempted.
+- **Attempted (a):** Work begun, awaiting review.
+- **Completed (x):** Task reviewed by the director and accepted as finished.
+- **Failed (f):** Task reviewed by the director and not accepted. These are top priority for the agent.
+- **Clarified (c):** Agent has enriched notes/specs to reflect lessons learned from a failure, preparing for another attempt.
+
+### Global Flow
+- If **any tasks are Failed (f)** → agent clarifies them before retrying.
+- If **any tasks are Attempted (a)** → director reviews them, marking them Completed (x) or Failed (f).
+- If no failures or attempted tasks remain, but **Unstarted tasks exist** → the system is Idle until a new task is selected.
+- If **all tasks are Completed (x)** → no work remains.
+
+### Diagram
+The following diagram expresses both the task lifecycle and the global prioritization of what to work on next:
+
+```mermaid
+flowchart TD
+  %% Task Lifecycle
+  subgraph L[Task Lifecycle]
+    U[Unstarted]
+    A[Attempted — a]
+    X[Completed — x]
+    F[Failed — f]
+    C[Clarified — c]
+
+    U -->|start work| A
+    A -->|director review → success| X
+    A -->|director review → fail| F
+    F -->|agent clarifies specs/notes| C
+    C -->|ready to retry| A
+  end
+
+  %% Global Flow
+  subgraph G[Global Flow]
+    G0{Any tasks in state f?}
+    G1{Any tasks in state a?}
+    G2{Any Unstarted tasks?}
+
+    NW[No Work: all tasks are x]
+    ID[Idle: work remains, nothing in progress]
+
+    G0 -- yes → highest priority --> F
+    G0 -- no --> G1
+    G1 -- yes --> A
+    G1 -- no --> G2
+    G2 -- yes --> ID
+    G2 -- no --> NW
+
+    ID -->|select next task| U
+  end
+
+  %% Notes
+  classDef note fill:#fff,stroke:#bbb,color:#333,font-size:12px;
+  N1([Agent only starts a new Unstarted task if all tasks are x.]):::note
+  N2([When failed: agent clarifies specs/notes for director review before retry.]):::note
+
+  G0 --- N1
+  F --- N2
+```
 
 ## Goals
 

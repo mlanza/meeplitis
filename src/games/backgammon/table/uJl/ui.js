@@ -72,7 +72,100 @@ const $both = which($.latest([$hist, $wip]));
 
 reg({ $both, g });
 
+// --- Start of new reconciliation logic ---
+
+const WHITE = 0;
+const BLACK = 1;
+
+// Helper to identify individual checker moves (point-to-point only)
+function diffPoints(currPoints, priorPoints, seat) {
+  const changes = [];
+  const sources = []; // {point: N, count: X}
+  const destinations = []; // {point: N, count: Y}
+
+  for (let i = 0; i < 24; i++) { // Iterate through points 0-23
+    const priorCount = priorPoints[i][seat];
+    const currCount = currPoints[i][seat];
+
+    if (currCount > priorCount) {
+      // Checkers arrived at this point
+      destinations.push({ point: i, count: currCount - priorCount });
+    } else if (currCount < priorCount) {
+      // Checkers departed from this point
+      sources.push({ point: i, count: priorCount - currCount });
+    }
+  }
+
+  // Match sources to destinations to create {from, to} pairs
+  for (const source of sources) {
+    for (let i = 0; i < source.count; i++) {
+      // Find an available destination
+      const destination = destinations.find(d => d.count > 0);
+      if (destination) {
+        changes.push({ from: source.point, to: destination.point });
+        destination.count--;
+      }
+    }
+  }
+  return changes;
+}
+
+// Main orchestration function for minimal UI reconciliation
+function diffAndUpdatePoints(el, curr, prior) {
+  // If there's no prior state, assume all checkers need to be placed according to curr.
+  // This is effectively a full render based on the current state.
+  if (!prior?.state) {
+    for (const seat of [WHITE, BLACK]) {
+      const color = seat === WHITE ? "white" : "black";
+      // Get all 15 checkers for this seat
+      const allCheckers = dom.sel(`use[id^="${color}-"]`, el);
+      let checkerIdx = 0; // To assign checkers sequentially
+
+      for (let i = 0; i < 24; i++) { // Iterate through points 0-23
+        const count = curr.state.points[i][seat];
+        for (let j = 0; j < count; j++) {
+          if (allCheckers[checkerIdx]) {
+            dom.attr(allCheckers[checkerIdx], "data-point", i.toString());
+            checkerIdx++;
+          }
+        }
+      }
+    }
+  } else {
+    // Normal diffing when a prior state exists
+    for (const seat of [WHITE, BLACK]) {
+      const changes = diffPoints(curr.state.points, prior.state.points, seat);
+      const color = seat === WHITE ? "white" : "black";
+      const movedCheckers = new Set(); // Keep track of checkers already processed
+
+      for (const change of changes) {
+        const from = change.from.toString();
+        const to = change.to.toString();
+
+        const allCheckersOfColor = dom.sel(`use[id^="${color}-"]`, el);
+        let checkerToMove = null;
+        for (const checker of allCheckersOfColor) {
+          if (dom.attr(checker, "data-point") === from && !movedCheckers.has(checker)) {
+            checkerToMove = checker;
+            break;
+          }
+        }
+
+        if (checkerToMove) {
+          dom.attr(checkerToMove, "data-point", to);
+          movedCheckers.add(checkerToMove);
+        }
+      }
+    }
+  }
+}
+
+// --- End of new reconciliation logic ---
+
 $.sub($both, function ([[curr, prior, motion, game], wip, which]) {
+  // Call the new reconciliation logic here
+  diffAndUpdatePoints(el, curr, prior); // <--- ADDED THIS LINE
+
   const { state, up } = curr;
   const { status, dice } = state;
   const { step, present } = motion;
@@ -117,4 +210,3 @@ $.on(el, "click", `#table[data-froms] .point path:nth-child(2)`, function(e){
   const from = _.chain(dom.attr(g, "id"), _.split(_, "-"), _.last, parseInt);
   $.reset($wip, {type, details: {from}});
 });
-

@@ -130,6 +130,8 @@ This 0-indexed `id` scheme in the SVG directly corresponds to the 0-indexed `poi
 
 To ensure the visual representation of the game is always synchronized with the game state, the UI must intelligently update itself based on changes to the model. This process is not just for advancing the game state one step at a time. The user can navigate between any two "frames" in the game's history, such as jumping from the opening setup to the final move. This means the reconciliation logic must be robust enough to handle both small, single-move changes and large-scale changes between distant game states.
 
+**Handling Initial Render (No Prior State)**: When the game is first loaded or initialized, the `prior` state will be `null`. In such cases, the reconciliation logic will not perform a diff. Instead, it will assume all checkers need to be placed according to the `current` game state, effectively performing a full render of the board.
+
 The core principle is that all 30 checkers (15 per player) are always present in the SVG DOM. Reconciliation is simply a matter of updating attributes on these existing checker elements to reflect the new state. The primary attributes to update are `data-point` (which point, bar, or off-board area a checker is on) and `data-pos` (the stacking position on that point).
 
 The reconciliation strategy is as follows:

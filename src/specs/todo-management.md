@@ -11,6 +11,8 @@ Every heavy lift is an elephant—a chunk of work too big to eat in a single bit
 - **MVP first:** The first task for each concept is a minimum viable product that validates the chosen approach.
 - **Iterative snowball:** Later tasks fold in deferred details gradually, refining and testing along the way.
 - **Pause and evaluate:** After each task, stop to check outcomes with tests or visual validation.
+- **Context matters:** Work from specs whenever possible. When given code, pause to draft a spec to solidify what you’ve learned. Always aim to understand the broader context before planning.
+- **Seek clarity:** If parts of the context or plan feel shaky, pause and ask the director for clarifying details. Plans should feel well-formed and understandable before moving forward.
 
 ## Task List Format (`TODO.md`)
 
@@ -31,10 +33,12 @@ Every heavy lift is an elephant—a chunk of work too big to eat in a single bit
 
 ## Workflow
 
-1. **Initial planning:** Create a numbered task list in `TODO.md`.
-2. **Execution:** When implementing, check off the current task. Leave it in place.
-3. **Review:** Pause after each task to validate outcomes.
-4. **Completion handling:**
+1. **Initial planning:** Read the provided context (specs and/or code). If only code is given, draft a spec to capture and clarify what you’ve learned. Ensure the plan feels solid.
+2. **Task creation:** Build a numbered task list in `TODO.md`.
+3. **Execution:** When implementing, check off the current task. Leave it in place.
+4. **Review:** Pause after each task to validate outcomes.
+5. **Completion handling:**
+
    * A `## Completed` section lives at the bottom of `TODO.md`.
    * When starting a new task, move the previous completed one(s) down to this section.
    * The top of the file always shows the current focus.
@@ -44,4 +48,6 @@ Every heavy lift is an elephant—a chunk of work too big to eat in a single bit
 * Deliver early successes that prove the foundation is solid.
 * Prevent secondary details from obscuring the core approach.
 * Provide clear checkpoints where progress can be validated.
+* Work from a strong grasp of the context, whether from specs or code.
+* Ask for clarification when needed instead of guessing.
 * Maintain a living, evolving task list that reflects current focus.

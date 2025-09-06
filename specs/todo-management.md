@@ -21,6 +21,7 @@ Every heavy lift is an elephant—a chunk of work too big to eat in a single bit
 - Each task may include approximately **5–10 supporting sub-bullets** (not checkboxes). These describe details or subtasks, in a thoughtful order, and are together treated as a single cohesive unit.
 - Task numbers are unique identifiers. They are not tied to order.
 - **Task numbers are unique identifiers and remain fixed once assigned. They are not renumbered.**
+- **Task numbers must be globally unique within the `TODO.md` file. No two tasks, regardless of their phase or section, may share the same number.**
 - New tasks are added to the working task list and receive a new, unused number.
 
 ### Example

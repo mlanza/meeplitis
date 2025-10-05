@@ -5,25 +5,38 @@ import * as c from "./core.js";
 import * as g from "/libs/game.js";
 import {moment} from "/libs/story.js";
 import {describe} from "./ancillary.js";
-import {clear, closestAttr, retainAttr} from "/libs/wip.js";
+import {retainAttr} from "/libs/wip.js";
 import {el, seated, seats, seat, ui, scored, outcome, diff, which} from "/libs/table.js";
 import {reg} from "/libs/cmd.js";
 
-const {img, ol, li, div, kbd, span} = dom.tags(['img', 'ol', 'li', 'div', 'kbd', 'span']);
+const {img, div, span} = dom.tags(['img', 'div', 'span']);
 
 const txt = await (await fetch('./images/backgammon-board.svg')).text();
 const doc = new DOMParser().parseFromString(txt, 'image/svg+xml');
 const svg = document.importNode(doc.documentElement, true);
-const board = document.getElementById('board');
-board.textContent = '';
-board.appendChild(svg);
+dom.append(dom.sel1("#board", el), svg);
 
-function die(pips){
-  return img({class: 'die', src: `./images/${pips}.svg`});
-}
+const WHITE = 0,
+      BLACK = 1;
+
+const WHITE_CHECKER = "#cross-checker",
+      BLACK_CHECKER = "#crown-checker",
+      CHECKER = [WHITE_CHECKER, BLACK_CHECKER];
+
+const WHITE_BAR = "bar-white";
+const BLACK_BAR = "bar-black";
+const WHITE_OFF = "off-board-white";
+const BLACK_OFF = "off-board-black";
+const POINTS = [...Array(24).keys(), WHITE_BAR, BLACK_BAR, WHITE_OFF, BLACK_OFF];
 
 function checker(seat){
-  return img({class: "checker", src: seat === 0 ? "./images/cross-checker.svg" : "./images/crown-checker.svg"});
+  const src = _.get(["./images/cross-checker.svg", "./images/crown-checker.svg"], seat);
+  return img({class: "checker", src});
+}
+
+function die(pips){
+  const src = `./images/${pips}.svg`;
+  return img({class: 'die', src});
 }
 
 function desc({type, details, seat}){
@@ -68,7 +81,7 @@ function template(seat){
   };
 }
 
-function workingCommand([curr, prior], seat, state, game, el, movableCmds){
+function workingCommand([curr, prior], seat, state, game, el, moves){
   const type = curr?.type;
   const attrs = {
     "data-command-type": type,
@@ -81,7 +94,7 @@ function workingCommand([curr, prior], seat, state, game, el, movableCmds){
     case "bear-off":{
       const from = curr.details.from;
       const tos = _.chain(
-        movableCmds,
+        moves,
         _.filter(function(cmd){
           return cmd.details.from == from;
         }, _),
@@ -102,34 +115,10 @@ function workingCommand([curr, prior], seat, state, game, el, movableCmds){
   $.eachkv(retainAttr(el, _, _), attrs);
 }
 
-const {$ready, $error, $story, $hist, $snapshot, $wip} =
-  ui(c.make, describe, desc, template);
-
-const $both = which($.latest([$hist, $wip]));
-
-reg({ $both, g });
-
-const WHITE = 0,
-      BLACK = 1;
-
-const WHITE_CHECKER = "#cross-checker",
-      BLACK_CHECKER = "#crown-checker",
-      CHECKER = [WHITE_CHECKER, BLACK_CHECKER];
-
-const WHITE_BAR = "bar-white";
-const BLACK_BAR = "bar-black";
-const WHITE_OFF = "off-board-white";
-const BLACK_OFF = "off-board-black";
-const POINTS = [...Array(24).keys(), WHITE_BAR, BLACK_BAR, WHITE_OFF, BLACK_OFF];
-
 function getCheckers(state) {
-  if (!state) {
-    return [];
-  }
+  const { points, bar, off } = state || {};
   const checkers = [];
-  const { points, bar, off } = state;
 
-  // checkers on points
   if (points) {
     for (let i = 0; i < points.length; i++) {
       const [whiteCheckers, blackCheckers] = points[i];
@@ -148,7 +137,6 @@ function getCheckers(state) {
     }
   }
 
-  // checkers on bar
   if (bar) {
     if (bar[WHITE] > 0) {
       for (let pos = 0; pos < bar[WHITE]; pos++) {
@@ -162,7 +150,6 @@ function getCheckers(state) {
     }
   }
 
-  // checkers borne off
   if (off) {
     if (off[WHITE] > 0) {
       for (let pos = 0; pos < off[WHITE]; pos++) {
@@ -201,7 +188,8 @@ function diffCheckers(curr, prior) {
   }, curr);
 
   const removedBySeat = { 0: [], 1: [] };
-  priorMap.forEach((count, key) => {
+
+  $.each(function([key, count]){
     if (count > 0) {
       const parts = key.split(':');
       const seat = parseInt(parts[0]);
@@ -212,7 +200,7 @@ function diffCheckers(curr, prior) {
         removedBySeat[seat].push({ seat, point, pos });
       }
     }
-  });
+  }, priorMap);
 
   const diffs = [];
   for (const seat in addedBySeat) {
@@ -243,17 +231,15 @@ function positioning(seat){
 const initialPositioning = _.juxt(positioning(0), positioning(1));
 
 function updatePositioning(diffs) {
-  const checkers = dom.sel1("#checkers");
-  $.each(function(diff) {
-    const { target, revised } = diff;
+  const checkers = dom.sel1("#checkers", el);
+  $.each(function({ target, revised }) {
     if (target && revised) {
-      const checkerEl = _.last(el.querySelectorAll(`use[href="${CHECKER[target.seat]}"][data-point="${target.point}"][data-pos="${target.pos}"]`));
-      if (checkerEl) {
+      _.maybe(dom.sel(`use[href="${CHECKER[target.seat]}"][data-point="${target.point}"][data-pos="${target.pos}"]`, el), _.last, function(checkerEl){
         checkers.appendChild(checkerEl); // move to end to render on top
         void checkerEl.getBoundingClientRect(); // force reflow: lock in the "before" state
         dom.attr(checkerEl, "data-point", revised.point);
         dom.attr(checkerEl, "data-pos", revised.pos);
-      }
+      });
     }
   }, diffs);
 }
@@ -271,7 +257,7 @@ const overstackedPoints = _.pipe(
 function refreshOverstackCounts(counts) {
   $.each(function(point) {
     const count = counts[point] || 0;
-    _.maybe(dom.sel(`#overstack-counts text[data-point="${point}"]`, el), dom.text(_, count > 5 ? count - 4 : ''));
+    _.maybe(dom.sel1(`#overstack-counts text[data-point="${point}"]`, el), dom.text(_, count > 5 ? count - 4 : ''));
   }, POINTS);
 }
 
@@ -284,6 +270,30 @@ function manageStacks(state){
   }, 200);
 }
 
+function asPoint(position){
+  switch(position){
+    case WHITE_BAR: return -1;
+    case BLACK_BAR: return 24;
+    case WHITE_OFF: return 25;
+    case BLACK_OFF: return 26;
+    default: return position;
+  }
+}
+
+function getMove({from, to}, seat) {
+  const game = moment($story);
+  return _.detect(function(cmd){
+    return cmd.seat == seat && cmd?.details?.from == from && (to == null || cmd?.details?.to == to);
+  }, g.moves(game, { type: ["move", "enter", "bear-off"], seat }));
+}
+
+const {$ready, $error, $story, $hist, $snapshot, $wip} =
+  ui(c.make, describe, desc, template);
+
+const $both = which($.latest([$hist, $wip]));
+
+reg({ $both, g });
+
 $.sub($both, function ([[curr, prior, motion, game], wip, which]) {
   const { state, up } = curr;
   if (!state) return;
@@ -294,10 +304,9 @@ $.sub($both, function ([[curr, prior, motion, game], wip, which]) {
     const checkers = getCheckers(curr.state);
     if (prior) {
       $.eachIndexed(function(seat, off){
-        dom.text(dom.sel1(`[data-seat="${seat}"] span.off`), off);
+        dom.text(dom.sel1(`[data-seat="${seat}"] span.off`, el), off);
       }, off);
-      const diff = diffCheckers(checkers, getCheckers(prior.state));
-      updatePositioning(diff);
+      updatePositioning(diffCheckers(checkers, getCheckers(prior.state)));
     } else {
       initialPositioning(checkers);
     }
@@ -344,17 +353,7 @@ $.on(el, "click", `#table.act button[data-type="commit"]`, function(e){
   $.dispatch($story, {type});
 });
 
-function asPoint(position){
-  switch(position){
-    case WHITE_BAR: return -1;
-    case BLACK_BAR: return 24;
-    case WHITE_OFF: return 25;
-    case BLACK_OFF: return 26;
-    default: return position;
-  }
-}
-
-$.on(el, "click", `#table[data-from] .off-board`, function(e){
+$.on(el, "click", `#table.act[data-from] .off-board`, function(e){
   const from = _.chain($wip, _.deref, _.getIn(_, ["details", "from"]), asPoint);
   const game = moment($story);
   const seat = g.up(game)[0];
@@ -369,14 +368,7 @@ $.on(el, "click", `#table[data-from] .off-board`, function(e){
   $.reset($wip, null);
 });
 
-function getMove({from, to}, seat) {
-  const game = moment($story);
-  return _.detect(function(cmd){
-    return cmd.seat == seat && cmd?.details?.from == from && (to == null || cmd?.details?.to == to);
-  }, g.moves(game, { type: ["move", "enter", "bear-off"], seat }));
-}
-
-$.on(el, "click", `#table[data-from] .point path:nth-child(2)`, function(e){
+$.on(el, "click", `#table.act[data-from] .point path:nth-child(2)`, function(e){
   const to = _.chain(dom.attr(_.closest(this, "g"), "id"), _.split(_, "-"), _.last, parseInt);
   const from = _.chain($wip, _.deref, _.getIn(_, ["details", "from"]), asPoint);
   const move = getMove({from, to}, seat);
@@ -386,7 +378,7 @@ $.on(el, "click", `#table[data-from] .point path:nth-child(2)`, function(e){
   }
 });
 
-$.on(el, "click", `#table[data-froms] .point path:nth-child(2)`, function(e){
+$.on(el, "click", `#table.act[data-froms] .point path:nth-child(2)`, function(e){
   const type = "move";
   const g = _.closest(this, "g");
   const from = _.chain(dom.attr(g, "id"), _.split(_, "-"), _.last, parseInt);
@@ -395,7 +387,7 @@ $.on(el, "click", `#table[data-froms] .point path:nth-child(2)`, function(e){
   }
 });
 
-$.on(el, "click", `#table[data-froms] .bar`, function(e){
+$.on(el, "click", `#table.act[data-froms] .bar`, function(e){
   const from = this.id;
   const type = "enter";
   $.reset($wip, {type, details: {from}});

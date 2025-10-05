@@ -109,8 +109,13 @@ const $both = which($.latest([$hist, $wip]));
 
 reg({ $both, g });
 
-const WHITE = 0;
-const BLACK = 1;
+const WHITE = 0,
+      BLACK = 1;
+
+const WHITE_CHECKER = "#cross-checker",
+      BLACK_CHECKER = "#crown-checker",
+      CHECKER = [WHITE_CHECKER, BLACK_CHECKER];
+
 const WHITE_BAR = "bar-white";
 const BLACK_BAR = "bar-black";
 const WHITE_OFF = "off-board-white";
@@ -221,36 +226,28 @@ function diffCheckers(curr, prior) {
   return diffs;
 }
 
-function initialPositioning(checkers) {
-    const whiteCheckers = checkers.filter(c => c.seat === 0);
-    const blackCheckers = checkers.filter(c => c.seat === 1);
-
-    const whiteElements = Array.from(el.querySelectorAll('use[href="#cross-checker"]'));
-    const blackElements = Array.from(el.querySelectorAll('use[href="#crown-checker"]'));
-
-    whiteElements.forEach((checkerEl, i) => {
-        const checkerData = whiteCheckers[i];
-        if (checkerData) {
-            dom.attr(checkerEl, "data-point", checkerData.point);
-            dom.attr(checkerEl, "data-pos", checkerData.pos);
-        }
-    });
-    blackElements.forEach((checkerEl, i) => {
-        const checkerData = blackCheckers[i];
-        if (checkerData) {
-            dom.attr(checkerEl, "data-point", checkerData.point);
-            dom.attr(checkerEl, "data-pos", checkerData.pos);
-        }
-    });
+function positioning(seat){
+  const id = CHECKER[seat];
+  return function(checkers){
+    const chks = _.filtera(_.pipe(_.get(_, "seat"), _.eq(_, seat)), checkers);
+    $.eachIndexed(function(i, checkerEl){
+      const checkerData = chks[i];
+      if (checkerData) {
+        dom.attr(checkerEl, "data-point", checkerData.point);
+        dom.attr(checkerEl, "data-pos", checkerData.pos);
+      }
+    }, dom.sel(`use[href="${id}"]`, el));
+  }
 }
+
+const initialPositioning = _.juxt(positioning(0), positioning(1));
 
 function updatePositioning(diffs) {
   const checkers = dom.sel1("#checkers");
   $.each(function(diff) {
     const { target, revised } = diff;
     if (target && revised) {
-      const selector = target.seat === 0 ? 'use[href="#cross-checker"]' : 'use[href="#crown-checker"]';
-      const checkerEl = _.last(el.querySelectorAll(`${selector}[data-point="${target.point}"][data-pos="${target.pos}"]`));
+      const checkerEl = _.last(el.querySelectorAll(`use[href="${CHECKER[target.seat]}"][data-point="${target.point}"][data-pos="${target.pos}"]`));
       if (checkerEl) {
         checkers.appendChild(checkerEl); // move to end to render on top
         void checkerEl.getBoundingClientRect(); // force reflow: lock in the "before" state
@@ -265,15 +262,11 @@ function stackedPoints(checkers) {
   return _.countBy(_.get(_, "point"), checkers);
 }
 
-function overstackedPoints(counts) {
-  return _.chain(
-    counts,
-    _.filter(function([point, count]) {
-      return count > 5;
-    }, _),
-    _.mapa(_.first, _)
-  );
-}
+const overstackedPoints = _.pipe(
+  _.filter(function([point, count]) {
+    return count > 5;
+  }, _),
+  _.mapa(_.first, _));
 
 function refreshOverstackCounts(counts) {
   $.each(function(point) {

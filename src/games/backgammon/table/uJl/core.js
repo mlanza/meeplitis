@@ -167,8 +167,8 @@ export function validate({state}) {
   return whiteCheckers === 15 && blackCheckers === 15;
 }
 
-export function barEntry(seat){
-  return seat === WHITE ? [-1] : [24];
+export function barPosition(seat){
+  return seat === WHITE ? -1 : 24;
 }
 
 export function directed(seat) {
@@ -223,9 +223,10 @@ function moves3(self, type, seat) {
     const opponent = opposition(seat);
     const direction = directed(seat);
     const onBar = bar[seat] > 0;
-          const pending = rolled && _.count(dice) > 0;
+    const pending = rolled && _.count(dice) > 0;
 
-          if (state.status === "double-proposed") {      const canRespond = seat === up;
+    if (state.status === "double-proposed") {
+      const canRespond = seat === up;
       const responseMoves = canRespond ? [{type: "accept", seat}, {type: "concede", seat}] : [];
       return responseMoves;
     }
@@ -244,7 +245,7 @@ function moves3(self, type, seat) {
           //const capture = attack(to, opponent, points);
           return {type: "enter", details: {from, to, die}, seat};
         }
-      }, barEntry(seat)));
+      }, [barPosition(seat)]));
     }, _.unique(dice)) : [];
 
     const bearOffMoves = canBearOff(state, seat) ? _.mapcat(function(die) {

@@ -81,14 +81,14 @@ function template(seat){
   };
 }
 
-function workingCommand([curr, prior], seat, state, game, el, moves){
+function workingCommand([curr, prior], seat, state, game, el, moves){ //implements multi-step commands
   const type = curr?.type;
   const attrs = {
     "data-command-type": type,
     "data-from": null,
     "data-tos": null
   };
-  switch (type) { //only multi-step commands appear here
+  switch (type) {
     case "enter":
     case "move":
     case "bear-off":{
@@ -99,12 +99,9 @@ function workingCommand([curr, prior], seat, state, game, el, moves){
           return cmd.details.from == from;
         }, _),
         _.mapa(function(cmd){
-          if (cmd.type === 'bear-off') {
-            return cmd.seat === WHITE ? WHITE_OFF : BLACK_OFF;
-          }
-          return _.getIn(cmd, ["details", "to"]);
+          return cmd.type === 'bear-off' ? c.barPosition(cmd.seat) : _.getIn(cmd, ["details", "to"]);
         }, _),
-        _.compact,
+        _.filter(_.isSome, _),
         _.join(" ", _));
 
       attrs["data-from"] = from;
@@ -381,14 +378,14 @@ $.on(el, "click", `#table.act[data-from] .point path:nth-child(2)`, function(e){
 $.on(el, "click", `#table.act[data-froms] .point path:nth-child(2)`, function(e){
   const type = "move";
   const g = _.closest(this, "g");
-  const from = _.chain(dom.attr(g, "id"), _.split(_, "-"), _.last, parseInt);
+  const from = _.chain(dom.attr(g, "id"), _.split(_, "-"), _.last, asPoint, parseInt);
   if (getMove({from}, seat)) {
     $.reset($wip, {type, details: {from}});
   }
 });
 
 $.on(el, "click", `#table.act[data-froms] .bar`, function(e){
-  const from = this.id;
+  const from = asPoint(this.id);
   const type = "enter";
   $.reset($wip, {type, details: {from}});
 });

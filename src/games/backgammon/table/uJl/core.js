@@ -339,6 +339,18 @@ const asEvent = _.get({
   'bear-off': 'borne-off'
 }, _);
 
+function compel(self){
+  const moves = g.moves(self);
+  if (_.count(moves) === 1) { //destined
+    const cmd = _.first(moves);
+    const {dice, rolled} = _.deref(self);
+    const blocked = cmd.type === "commit" && rolled && _.includes([2, 4], _.count(dice));
+    if (cmd.type === "roll" || blocked) {
+      return g.execute(self, cmd);
+    }
+  }
+  return self;
+}
 
 export function execute(self, command) {
   const { state } = self;
@@ -425,7 +437,12 @@ export function execute(self, command) {
           _.assocIn(_, ["details", "capture"], capture)));
     }
     case 'commit': {
-      const committedSelf = g.fold(self, _.assoc(command, "type", "committed"));
+      const {dice, rolled} = _.deref(self);
+      const blocked = rolled && _.includes([2, 4], _.count(dice));
+      const committedSelf = g.fold(self,
+        _.chain(command,
+          _.assoc(_, "type", "committed"),
+          blocked ? _.assoc(_, "details", {blocked}) : _.identity));
       if (g.status(committedSelf) == "finished") {
         return g.finish(committedSelf);
       }
@@ -553,4 +570,4 @@ _.doto(Backgammon,
   _.implement(_.ICompactible, {compact}),
   _.implement(_.IAppendable, {append}),
   _.implement(_.IFunctor, {fmap}),
-  _.implement(g.IGame, {perspective, up, may, moves, undoable, metrics, comparator, textualizer, execute, fold, status}));
+  _.implement(g.IGame, {perspective, up, may, moves, undoable, metrics, comparator, textualizer, execute: _.comp(compel, execute), fold, status}));

@@ -63,8 +63,10 @@ function desc({type, details, seat}){
       return [`Enters `, checker(seat), ` with `, die(details.die), ` to ${to + 1}.`];
     }
 
-    case "committed":
-      return "I'm done.";
+    case "committed": {
+      const {blocked} = details || {};
+      return blocked ? "I'm done.  I can't move!" : "I'm done.";
+    }
 
     case "finished":
       return outcome(seated, details);

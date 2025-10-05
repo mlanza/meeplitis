@@ -753,6 +753,24 @@ p img.die {
   fill: olive;
 }
 
+#table.act[data-perspective='0'] #off-board-white,
+#table.act[data-perspective='1'] #off-board-black {
+  stroke: black;
+  stroke-opacity: .5;
+  fill: black;
+  fill-opacity: 0.2;
+}
+
+@media (prefers-color-scheme: dark) {
+  #table.act[data-perspective='0'] #off-board-white,
+  #table.act[data-perspective='1'] #off-board-black {
+    stroke: white;
+    stroke-opacity: .5;
+    fill: white;
+    fill-opacity: 0.2;
+  }
+}
+
 /* Highlight for possible 'to' off-board */
 .act[data-from][data-tos~="off-board-white"] #off-board-white,
 .act[data-from][data-tos~="off-board-black"] #off-board-black {

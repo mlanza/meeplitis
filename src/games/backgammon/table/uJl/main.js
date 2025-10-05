@@ -25,29 +25,37 @@ function die(pips){
 function checker(seat){
   return img({class: "checker", src: seat === 0 ? "./images/cross-checker.svg" : "./images/crown-checker.svg"});
 }
+
 function desc({type, details, seat}){
   switch(type) {
     case "started":
       return "Starts game.";
+
     case "rolled":
       const {dice} = details;
       return dice[0] == dice[1] ? [`Rolls double `, die(dice[0]), `s!`] : [`Rolls `, die(dice[0]), ` and `, die(dice[1]), `.`];
+
     case "moved": {
       const {from, to} = details;
       return [`Moved `, checker(seat), ` with `, die(Math.abs(from - to)) ,` from ${from + 1} to ${to + 1}.`];
     }
+
     case "borne-off": {
       const {from} = details;
       return [`Bears off `, checker(seat), ` with`, die(details.die), ` from ${from + 1}.`];
     }
+
     case "entered": {
       const {from, to} = details;
       return [`Enters `, checker(seat), ` with `, die(details.die), ` to ${to + 1}.`];
     }
+
     case "committed":
       return "I'm done.";
+
     case "finished":
       return outcome(seated, details);
+
     default:
       return type;
   }
@@ -103,12 +111,11 @@ reg({ $both, g });
 
 const WHITE = 0;
 const BLACK = 1;
-
-// per reconciliation.md
 const WHITE_BAR = "bar-white";
 const BLACK_BAR = "bar-black";
 const WHITE_OFF = "off-board-white";
 const BLACK_OFF = "off-board-black";
+const POINTS = [...Array(24).keys(), WHITE_BAR, BLACK_BAR, WHITE_OFF, BLACK_OFF];
 
 function getCheckers(state) {
   if (!state) {
@@ -214,7 +221,7 @@ function diffCheckers(curr, prior) {
   return diffs;
 }
 
-function applyInitialRender(checkers) {
+function initialPositioning(checkers) {
     const whiteCheckers = checkers.filter(c => c.seat === 0);
     const blackCheckers = checkers.filter(c => c.seat === 1);
 
@@ -237,7 +244,7 @@ function applyInitialRender(checkers) {
     });
 }
 
-function applyMoveDiff(diffs) {
+function updatePositioning(diffs) {
   const checkers = dom.sel1("#checkers");
   $.each(function(diff) {
     const { target, revised } = diff;
@@ -268,63 +275,69 @@ function overstackedPoints(counts) {
   );
 }
 
-function applyCountToDOM(counts) {
-  const allPointIds = [...Array(24).keys(), 'bar-white', 'bar-black', 'off-board-white', 'off-board-black'];
+function refreshOverstackCounts(counts) {
   $.each(function(point) {
-    const textEl = el.querySelector(`#overstack-counts text[data-point="${point}"]`);
-    if (textEl) {
-      const count = counts[point] || 0;
-      dom.text(textEl, count > 5 ? count - 4 : '');
-    }
-  }, allPointIds);
+    const count = counts[point] || 0;
+    _.maybe(dom.sel(`#overstack-counts text[data-point="${point}"]`, el), dom.text(_, count > 5 ? count - 4 : ''));
+  }, POINTS);
+}
+
+function manageStacks(state){
+  const counts = stackedPoints(getCheckers(state));
+  const overstacked = overstackedPoints(counts);
+  setTimeout(function(){
+    refreshOverstackCounts(counts);
+    dom.attr(el, "data-overstacked", _.join(" ", overstacked));
+  }, 200);
 }
 
 $.sub($both, function ([[curr, prior, motion, game], wip, which]) {
   const { state, up } = curr;
   if (!state) return;
-  const { status, dice } = state;
-  const { step, present } = motion;
-  const allowed = g.moves(game, { type: ["roll", "commit"], seat });
+  const { status, dice, off } = state;
+  const { present } = motion;
 
   if (which !== 1) {
+    const checkers = getCheckers(curr.state);
     if (prior) {
-      const {off} = state;
       $.eachIndexed(function(seat, off){
         dom.text(dom.sel1(`[data-seat="${seat}"] span.off`), off);
       }, off);
-
-      const currCheckers = getCheckers(curr.state);
-      const priorCheckers = getCheckers(prior.state);
-      const checkerDiff = diffCheckers(currCheckers, priorCheckers);
-      applyMoveDiff(checkerDiff);
+      const diff = diffCheckers(checkers, getCheckers(prior.state));
+      updatePositioning(diff);
     } else {
-      const currCheckers = getCheckers(curr.state);
-      applyInitialRender(currCheckers);
+      initialPositioning(checkers);
     }
   }
 
-  const movableCmds = g.moves(game, { type: ["move", "enter", "bear-off"], seat });
+  const moves = g.moves(game, { type: ["move", "enter", "bear-off"], seat });
 
-  _.chain(dice, _.map(_.str, _), _.join(" ", _), dom.attr(el, "data-dice", _));
-  _.chain(allowed, _.map(_.get(_, "type"), _), _.distinct, _.join(" ", _), _.trim, dom.attr(el, "data-allow-commands", _));
+  _.chain(g.moves(game, { type: ["roll", "commit"], seat }),
+    _.map(_.get(_, "type"), _),
+    _.distinct,
+    _.join(" ", _),
+    _.trim,
+    dom.attr(el, "data-allow-commands", _));
 
-  const froms = _.chain(
-    movableCmds,
+  _.chain(dice,
+    _.map(_.str, _),
+    _.join(" ", _),
+    dom.attr(el, "data-dice", _));
+
+  _.chain(
+    moves,
     _.groupBy(_.getIn(_, ["details", "from"]), _),
-    _.keys);
-  const counts = stackedPoints(getCheckers(curr.state));
-  const overstacked = overstackedPoints(counts);
-  setTimeout(function(){
-    applyCountToDOM(counts);
-    dom.attr(el, "data-overstacked", _.join(" ", overstacked));
-  }, 200);
+    _.keys,
+    _.join(" ", _),
+    dom.attr(el, "data-froms", _));
 
-  dom.attr(el, "data-froms", _.join(" ", froms));
+  manageStacks(state);
+
   dom.attr(el, "data-status", status);
   dom.removeClass(el, "error");
 
   if (which === 1) {
-    return present ? workingCommand(wip, seat, state, game, el, movableCmds) : null;
+    return present ? workingCommand(wip, seat, state, game, el, moves) : null;
   }
 });
 
@@ -338,12 +351,14 @@ $.on(el, "click", `#table.act button[data-type="commit"]`, function(e){
   $.dispatch($story, {type});
 });
 
-function asPoint(id){
-  if (id === "bar-white") return -1;
-  if (id === "bar-black") return 24;
-  if (id === "off-board-white") return 25;
-  if (id === "off-board-black") return 26;
-  return id;
+function asPoint(position){
+  switch(position){
+    case WHITE_BAR: return -1;
+    case BLACK_BAR: return 24;
+    case WHITE_OFF: return 25;
+    case BLACK_OFF: return 26;
+    default: return position;
+  }
 }
 
 $.on(el, "click", `#table[data-from] .off-board`, function(e){
@@ -351,13 +366,13 @@ $.on(el, "click", `#table[data-from] .off-board`, function(e){
   const game = moment($story);
   const seat = g.up(game)[0];
 
-  const bearOffCmd = _.detect(function(cmd){
-    return cmd.type === 'bear-off' && cmd?.details?.from === from;
-  }, g.moves(game, { type: ["bear-off"], seat }));
+  _.maybe(
+    g.moves(game, { type: ["bear-off"], seat }),
+    _.detect(function(cmd){
+      return cmd.type === 'bear-off' && cmd?.details?.from === from;
+    }, _),
+    $.dispatch($story, _));
 
-  if (bearOffCmd) {
-    $.dispatch($story, bearOffCmd);
-  }
   $.reset($wip, null);
 });
 
@@ -373,7 +388,7 @@ $.on(el, "click", `#table[data-from] .point path:nth-child(2)`, function(e){
   const from = _.chain($wip, _.deref, _.getIn(_, ["details", "from"]), asPoint);
   const move = getMove({from, to}, seat);
   if (move) {
-    $.dispatch($story, move)
+    $.dispatch($story, move);
     $.reset($wip, null);
   }
 });

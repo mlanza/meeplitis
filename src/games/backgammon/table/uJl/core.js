@@ -198,7 +198,17 @@ function attack(to, opponent, points){
   return bounds(to) && points[to][opponent] === 1;
 }
 
-export function canBearOff(state, seat) {
+//TODO use as optimzation
+export function canEnter(seat, state){
+  const { bar, points } = state;
+  if (bar[seat] < 1) {
+    return false;
+  }
+  const opponent = opposition(seat);
+  return _.some(point => points[point][opponent] <= 1, innerBoard(opponent));
+}
+
+export function canBearOff(seat, state) {
   const { points, bar } = state;
   if (bar[seat] > 0) {
     return false;
@@ -248,7 +258,7 @@ function moves3(self, type, seat) {
       }, [barPosition(seat)]));
     }, _.unique(dice)) : [];
 
-    const bearOffMoves = canBearOff(state, seat) ? _.mapcat(function(die) {
+    const bearOffMoves = canBearOff(seat, state) ? _.mapcat(function(die) {
       const inner = _.toArray(innerBoard(seat));
       return _.compact(_.map(function(from) {
         if (points[from][seat] > 0) {
@@ -285,9 +295,7 @@ function moves3(self, type, seat) {
     }, _.unique(dice));
 
     const moves = onBar ? barMoves : _.concat(bearOffMoves, regularMoves);
-    const blocked = _.count(moves) === 0 && pending;
-
-    if (blocked || (rolled && !pending)) {
+    if (pending ? _.count(moves) === 0 : rolled) {
       return [{type: "commit", seat}];
     }
 
@@ -339,13 +347,26 @@ const asEvent = _.get({
   'bear-off': 'borne-off'
 }, _);
 
-function compel(self){
+export function destined(self){
   const moves = g.moves(self);
-  if (_.count(moves) === 1) { //destined
-    const cmd = _.first(moves);
-    const {dice, rolled} = _.deref(self);
-    const blocked = cmd.type === "commit" && rolled && _.includes([2, 4], _.count(dice));
-    if (cmd.type === "roll" || blocked) {
+  return _.count(moves) === 1 ? _.first(moves) : null;
+}
+
+function blocked2(cmd, self){
+  return cmd.type === "commit" && blocked1(self);
+}
+
+function blocked1(self){
+  const {dice, rolled} = _.deref(self);
+  return rolled && _.includes([2, 4], _.count(dice));
+}
+
+export const blocked = _.overload(null, blocked1, blocked2);
+
+function compel(self){
+  const cmd = destined(self);
+  if (cmd) {
+    if (cmd.type === "roll" || blocked(cmd, self)) {
       return g.execute(self, cmd);
     }
   }
@@ -388,6 +409,7 @@ export function execute(self, command) {
       return g.fold(self,
         _.chain(command,
           _.assoc(_, "type", "started")));
+
     case 'roll': {
       const dice = _.getIn(command, ['details', 'dice']) || [_.randInt(6) + 1, _.randInt(6) + 1];
       const [a, b] = dice;
@@ -399,6 +421,7 @@ export function execute(self, command) {
           _.assoc(_, "type", "rolled"),
           _.assocIn(_, ["details", "dice"], dice)));
     }
+
     case 'bear-off':
     case 'enter':
     case 'move': {
@@ -436,18 +459,18 @@ export function execute(self, command) {
           _.assoc(_, "type", eventType),
           _.assocIn(_, ["details", "capture"], capture)));
     }
+
     case 'commit': {
-      const {dice, rolled} = _.deref(self);
-      const blocked = rolled && _.includes([2, 4], _.count(dice));
-      const committedSelf = g.fold(self,
-        _.chain(command,
-          _.assoc(_, "type", "committed"),
-          blocked ? _.assoc(_, "details", {blocked}) : _.identity));
-      if (g.status(committedSelf) == "finished") {
-        return g.finish(committedSelf);
-      }
-      return committedSelf;
+      return _.chain(self,
+        g.fold(_,
+          _.chain(command,
+            blocked(command, self) ? _.assoc(_, "details", {blocked: true}) : _.identity,
+            _.assoc(_, "type", "committed"))),
+          function(self){
+            return g.status(self) == "finished" ? g.finish(self) : self;
+          });
     }
+
     case 'propose-double': {
       if (status !== "started") {
         throw new Error(`Command not allowed in current status`);
@@ -460,6 +483,7 @@ export function execute(self, command) {
       }
       return g.fold(self, _.assoc(command, "type", "double-proposed"));
     }
+
     case 'accept': {
       if (status !== "double-proposed") {
         throw new Error(`Command not allowed in current status`);
@@ -469,6 +493,7 @@ export function execute(self, command) {
       }
       return g.fold(self, _.assoc(command, "type", "accepted"));
     }
+
     case 'concede': {
       if (status !== "double-proposed") {
         throw new Error(`Command not allowed in current status`);
@@ -478,9 +503,11 @@ export function execute(self, command) {
       }
       return g.fold(self, _.assoc(command, "type", "conceded"));
     }
+
     case 'finish': {
       return g.fold(self, _.assoc(command, "type", "finished"));
     }
+
     default: {
       throw new Error("Unknown command: " + command.type);
     }

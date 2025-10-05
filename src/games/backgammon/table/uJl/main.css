@@ -670,6 +670,15 @@ p img.die {
 .act #bar-black {
   transition: fill .2s ease-in-out, stroke .2s ease-in-out, opacity .2s ease-in-out;
 }
+
+.act[data-perspective='0'] #off-board-white,
+.act[data-perspective='1'] #off-board-black {
+  stroke: black;
+  stroke-opacity: .5;
+  fill: black;
+  fill-opacity: .2;
+}
+
 .act[data-froms~="-1"]:not([data-from],[data-dice='']) #bar-white,
 .act[data-froms~="0"]:not([data-from],[data-dice='']) #point-0 path:first-child,
 .act[data-froms~="1"]:not([data-from],[data-dice='']) #point-1 path:first-child,
@@ -779,6 +788,7 @@ p img.die {
   fill-opacity: .5;
   fill: yellow;
 }
+.act[data-tos~="-1"][data-perspective='0']:not([data-to],[data-dice='']) #off-board-white,
 .act[data-tos~="0"]:not([data-to],[data-dice='']) #point-0 path:first-child,
 .act[data-tos~="1"]:not([data-to],[data-dice='']) #point-1 path:first-child,
 .act[data-tos~="2"]:not([data-to],[data-dice='']) #point-2 path:first-child,
@@ -802,9 +812,14 @@ p img.die {
 .act[data-tos~="20"]:not([data-to],[data-dice='']) #point-20 path:first-child,
 .act[data-tos~="21"]:not([data-to],[data-dice='']) #point-21 path:first-child,
 .act[data-tos~="22"]:not([data-to],[data-dice='']) #point-22 path:first-child,
-.act[data-tos~="23"]:not([data-to],[data-dice='']) #point-23 path:first-child {
+.act[data-tos~="23"]:not([data-to],[data-dice='']) #point-23 path:first-child,
+.act[data-tos~="24"][data-perspective='1']:not([data-to],[data-dice='']) #off-board-black {
   fill: olive;
   fill-opacity: .7;
+}
+.act[data-tos~="-1"][data-perspective='0']:not([data-to],[data-dice='']) #off-board-white,
+.act[data-tos~="24"][data-perspective='1']:not([data-to],[data-dice='']) #off-board-black {
+  fill-opacity: .3;
 }
 .act[data-tos~="0"]:not([data-to],[data-dice='']) #point-0:hover path:first-child,
 .act[data-tos~="1"]:not([data-to],[data-dice='']) #point-1:hover path:first-child,
@@ -832,17 +847,14 @@ p img.die {
 .act[data-tos~="23"]:not([data-to],[data-dice='']) #point-23:hover path:first-child {
   fill-opacity: 1;
 }
-#table.act[data-perspective='0'] #off-board-white,
-#table.act[data-perspective='1'] #off-board-black {
-  stroke: black;
-  stroke-opacity: .5;
-  fill: black;
-  fill-opacity: .2;
+.act[data-tos~="-1"][data-perspective='0']:not([data-to],[data-dice='']) #off-board-white:hover,
+.act[data-tos~="24"][data-perspective='1']:not([data-to],[data-dice='']) #off-board-black:hover {
+  fill-opacity: .5;
 }
 
 @media (prefers-color-scheme: dark) {
-  #table.act[data-perspective='0'] #off-board-white,
-  #table.act[data-perspective='1'] #off-board-black {
+  .act[data-perspective='0'] #off-board-white,
+  .act[data-perspective='1'] #off-board-black {
     stroke: white;
     stroke-opacity: .5;
     fill: white;
@@ -850,25 +862,25 @@ p img.die {
   }
 }
 
-.act[data-from][data-tos~="off-board-white"] #off-board-white,
-.act[data-from][data-tos~="off-board-black"] #off-board-black {
+.act[data-from][data-tos~="-1"] #off-board-white,
+.act[data-from][data-tos~="24"] #off-board-black {
   stroke: olive;
   stroke-opacity: .5;
   fill: olive;
   fill-opacity: .2;
 }
-.act[data-from][data-tos~="off-board-white"] #off-board-white:hover,
-.act[data-from][data-tos~="off-board-black"] #off-board-black:hover {
+.act[data-from][data-tos~="-1"] #off-board-white:hover,
+.act[data-from][data-tos~="24"] #off-board-black:hover {
   stroke-opacity: 1;
-  fill-opacity: .5;
+  fill-opacity: .9;
 }
 #event img.checker {
   width: 1.5em;
   margin-bottom: -0.25em;
 }
 
-:is([data-from="-1"],[data-from="bar-white"]):not([data-dice='']) #bar-white,
-:is([data-from="24"],[data-from="bar-black"]):not([data-dice='']) #bar-black {
+:is([data-from="-1"]):not([data-dice='']) #bar-white,
+:is([data-from="24"]):not([data-dice='']) #bar-black {
   stroke: yellow;
   stroke-opacity: 1;
   fill-opacity: .2;

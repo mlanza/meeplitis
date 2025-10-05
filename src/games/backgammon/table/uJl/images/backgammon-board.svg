@@ -164,41 +164,42 @@
   </g>
   <rect id="off-board-white" class="off-board" x="1200" y="38.00" width="77.29" height="380.47"  />
   <rect id="off-board-black" class="off-board" x="1200" y="553.43" width="77.29" height="380.47" />
-  <rect id="bar-white" class="bar" x="561" y="38.00" width="77.29" height="380.47" />
-  <rect id="bar-black" class="bar" x="561" y="553.43" width="77.29" height="380.47" />
+  <rect id="bar-black" class="bar" x="561" y="38.00" width="77.29" height="380.47" />
+  <rect id="bar-white" class="bar" x="561" y="553.43" width="77.29" height="380.47" />
 
-  <use href="#cross-checker" id="white-1" data-point="0" data-pos="1" />
-  <use href="#cross-checker" id="white-2" data-point="0" data-pos="2" />
-  <use href="#cross-checker" id="white-3" data-point="11" data-pos="1" />
-  <use href="#cross-checker" id="white-4" data-point="11" data-pos="2" />
-  <use href="#cross-checker" id="white-5" data-point="11" data-pos="3" />
-  <use href="#cross-checker" id="white-6" data-point="11" data-pos="4" />
-  <use href="#cross-checker" id="white-7" data-point="11" data-pos="5" />
-  <use href="#cross-checker" id="white-8" data-point="16" data-pos="1" />
-  <use href="#cross-checker" id="white-9" data-point="16" data-pos="2" />
-  <use href="#cross-checker" id="white-10" data-point="16" data-pos="3" />
-  <use href="#cross-checker" id="white-11" data-point="18" data-pos="1" />
-  <use href="#cross-checker" id="white-12" data-point="18" data-pos="2" />
-  <use href="#cross-checker" id="white-13" data-point="18" data-pos="3" />
-  <use href="#cross-checker" id="white-14" data-point="18" data-pos="4" />
-  <use href="#cross-checker" id="white-15" data-point="18" data-pos="5" />
+  <g id="checkers">
+    <use href="#cross-checker" id="white-1" data-point="0" data-pos="1" />
+    <use href="#cross-checker" id="white-2" data-point="0" data-pos="2" />
+    <use href="#cross-checker" id="white-3" data-point="11" data-pos="1" />
+    <use href="#cross-checker" id="white-4" data-point="11" data-pos="2" />
+    <use href="#cross-checker" id="white-5" data-point="11" data-pos="3" />
+    <use href="#cross-checker" id="white-6" data-point="11" data-pos="4" />
+    <use href="#cross-checker" id="white-7" data-point="11" data-pos="5" />
+    <use href="#cross-checker" id="white-8" data-point="16" data-pos="1" />
+    <use href="#cross-checker" id="white-9" data-point="16" data-pos="2" />
+    <use href="#cross-checker" id="white-10" data-point="16" data-pos="3" />
+    <use href="#cross-checker" id="white-11" data-point="18" data-pos="1" />
+    <use href="#cross-checker" id="white-12" data-point="18" data-pos="2" />
+    <use href="#cross-checker" id="white-13" data-point="18" data-pos="3" />
+    <use href="#cross-checker" id="white-14" data-point="18" data-pos="4" />
+    <use href="#cross-checker" id="white-15" data-point="18" data-pos="5" />
 
-  <use href="#crown-checker" id="black-1" data-point="23" data-pos="1" />
-  <use href="#crown-checker" id="black-2" data-point="23" data-pos="2" />
-  <use href="#crown-checker" id="black-3" data-point="12" data-pos="1" />
-  <use href="#crown-checker" id="black-4" data-point="12" data-pos="2" />
-  <use href="#crown-checker" id="black-5" data-point="12" data-pos="3" />
-  <use href="#crown-checker" id="black-6" data-point="12" data-pos="4" />
-  <use href="#crown-checker" id="black-7" data-point="12" data-pos="5" />
-  <use href="#crown-checker" id="black-8" data-point="7" data-pos="1" />
-  <use href="#crown-checker" id="black-9" data-point="7" data-pos="2" />
-  <use href="#crown-checker" id="black-10" data-point="7" data-pos="3" />
-  <use href="#crown-checker" id="black-11" data-point="5" data-pos="1" />
-  <use href="#crown-checker" id="black-12" data-point="5" data-pos="2" />
-  <use href="#crown-checker" id="black-13" data-point="5" data-pos="3" />
-  <use href="#crown-checker" id="black-14" data-point="5" data-pos="4" />
-  <use href="#crown-checker" id="black-15" data-point="5" data-pos="5" />
-
+    <use href="#crown-checker" id="black-1" data-point="23" data-pos="1" />
+    <use href="#crown-checker" id="black-2" data-point="23" data-pos="2" />
+    <use href="#crown-checker" id="black-3" data-point="12" data-pos="1" />
+    <use href="#crown-checker" id="black-4" data-point="12" data-pos="2" />
+    <use href="#crown-checker" id="black-5" data-point="12" data-pos="3" />
+    <use href="#crown-checker" id="black-6" data-point="12" data-pos="4" />
+    <use href="#crown-checker" id="black-7" data-point="12" data-pos="5" />
+    <use href="#crown-checker" id="black-8" data-point="7" data-pos="1" />
+    <use href="#crown-checker" id="black-9" data-point="7" data-pos="2" />
+    <use href="#crown-checker" id="black-10" data-point="7" data-pos="3" />
+    <use href="#crown-checker" id="black-11" data-point="5" data-pos="1" />
+    <use href="#crown-checker" id="black-12" data-point="5" data-pos="2" />
+    <use href="#crown-checker" id="black-13" data-point="5" data-pos="3" />
+    <use href="#crown-checker" id="black-14" data-point="5" data-pos="4" />
+    <use href="#crown-checker" id="black-15" data-point="5" data-pos="5" />
+  </g>
   <g id="point-numbers" >
     <g class="bottom">
       <text x="1118.085" >1</text>
@@ -228,5 +229,39 @@
       <text x="1030.25" >23</text>
       <text x="1118.085" >24</text>
     </g>
+  </g>
+  <g id="overstack-counts">
+    <!-- Bottom Row Points -->
+    <text data-point="0" data-pos="5"></text>
+    <text data-point="1" data-pos="5"></text>
+    <text data-point="2" data-pos="5"></text>
+    <text data-point="3" data-pos="5"></text>
+    <text data-point="4" data-pos="5"></text>
+    <text data-point="5" data-pos="5"></text>
+    <text data-point="6" data-pos="5"></text>
+    <text data-point="7" data-pos="5"></text>
+    <text data-point="8" data-pos="5"></text>
+    <text data-point="9" data-pos="5"></text>
+    <text data-point="10" data-pos="5"></text>
+    <text data-point="11" data-pos="5"></text>
+    <!-- Top Row Points -->
+    <text data-point="12" data-pos="5"></text>
+    <text data-point="13" data-pos="5"></text>
+    <text data-point="14" data-pos="5"></text>
+    <text data-point="15" data-pos="5"></text>
+    <text data-point="16" data-pos="5"></text>
+    <text data-point="17" data-pos="5"></text>
+    <text data-point="18" data-pos="5"></text>
+    <text data-point="19" data-pos="5"></text>
+    <text data-point="20" data-pos="5"></text>
+    <text data-point="21" data-pos="5"></text>
+    <text data-point="22" data-pos="5"></text>
+    <text data-point="23" data-pos="5"></text>
+    <!-- Bar -->
+    <text data-point="bar-white" data-pos="5"></text>
+    <text data-point="bar-black" data-pos="5"></text>
+    <!-- Home/Off -->
+    <text data-point="off-board-white" data-pos="5"></text>
+    <text data-point="off-board-black" data-pos="5"></text>
   </g>
 </svg>

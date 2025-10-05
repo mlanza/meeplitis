@@ -2,5 +2,8 @@
   "name": "meeplitis",
   "version": "1.0.0",
   "type": "module",
-  "scripts": {}
+  "scripts": {},
+  "dependencies": {
+    "gemini-cli-updater": "^1.0.3"
+  }
 }

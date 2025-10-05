@@ -93,7 +93,11 @@ export function ui(make, describe, desc, template){
         $scored = $.map(_.get(_, "scored"), $table),
         $remarks = $.map(_.get(_, "remark"), $table),
         $described = $.map(_.pipe(_.get(_, "config"), describe), $table),
-        $presence = presence($online, _.mapa(_.get(_, "username"), seated)),
+        $presence = presence($online,
+          _.chain(seated,
+            _.mapa(_.get(_, "username"), _),
+            _.unique,
+            _.toArray)),
         $present = $.map(_.all, $ready, $.pipe($story, _.map(function({touches, at}){
           return _.count(touches) - 1 == at;
         }), _.dedupe())),
@@ -176,8 +180,9 @@ export function ui(make, describe, desc, template){
 
   $.sub($presence, function(presence){
     $.eachkv(function(username, presence){
-      const zone = dom.sel1(`.zone[data-username="${username}"]`);
-      dom.attr(zone, "data-presence", presence ? "online" : "offline");
+      _.chain(dom.sel(`.zone[data-username="${username}"]`), $.each(function(zone){
+        dom.attr(zone, "data-presence", presence ? "online" : "offline");
+      }, _));
     }, presence);
   });
 

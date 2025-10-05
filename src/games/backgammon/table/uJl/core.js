@@ -112,12 +112,13 @@ function moved(state, details) {
 
 function committed(state) {
   const { up } = state;
+  const finished = won(state, WHITE) || won(state, BLACK);
   return {
     ...state,
-    up: opposition(up),
+    up: _.maybe(up, opposition),
     rolled: false,
     dice: [],
-    status: "started"
+    status: finished ? "finished" : "started"
   };
 }
 
@@ -222,14 +223,9 @@ function moves3(self, type, seat) {
     const opponent = opposition(seat);
     const direction = directed(seat);
     const onBar = bar[seat] > 0;
-    const pending = rolled && _.count(dice) > 0;
+          const pending = rolled && _.count(dice) > 0;
 
-    if (won(state, WHITE) || won(state, BLACK)) {
-      return [];
-    }
-
-    if (state.status === "double-proposed") {
-      const canRespond = seat === up;
+          if (state.status === "double-proposed") {      const canRespond = seat === up;
       const responseMoves = canRespond ? [{type: "accept", seat}, {type: "concede", seat}] : [];
       return responseMoves;
     }
@@ -261,13 +257,13 @@ function moves3(self, type, seat) {
             if (from === exactFrom) {
               return {type: "bear-off", details: {from, die}, seat};
             }
-            const higherPoints = seat === WHITE ? _.range(exactFrom + 1, 24) : _.range(0, exactFrom);
-            const hasHigherCheckers = _.some(p => points[p][seat] > 0, higherPoints);
-            if (!hasHigherCheckers) {
-              const highestOccupied = _.detect(p => points[p][seat] > 0, seat === WHITE ? _.reverse(inner) : inner);
-              if (from === highestOccupied) {
-                return {type: "bear-off", details: {from, die}, seat};
-              }
+            // With a die roll too large to be an exact roll, a player may
+            // bear-off a checker from a point if all higher-numbered points
+            // are vacant.
+            const pointsToCheck = seat === WHITE ? _.range(exactFrom, from) : _.range(from + 1, exactFrom + 1);
+            const hasCheckersOnHigherPoints = _.some(p => points[p][seat] > 0, pointsToCheck);
+            if (!hasCheckersOnHigherPoints) {
+              return {type: "bear-off", details: {from, die}, seat};
             }
           } else if (available(to, opponent, points)) { // Regular move in innerBoard
             return {type: "move", details: {from, to, die}, seat};
@@ -334,7 +330,14 @@ function noDetails(command){
   return _.eq(details, {}) ? _.dissoc(command, "details") : command;
 }
 
-const validDie = _.includes(_.range(1, 7), _);
+const validDie = _.includes(_.toArray(_.range(1, 7)), _);
+
+const asEvent = _.get({
+  'move': 'moved',
+  'enter': 'entered',
+  'bear-off': 'borne-off'
+}, _);
+
 
 export function execute(self, command) {
   const { state } = self;
@@ -353,8 +356,10 @@ export function execute(self, command) {
       }
       break;
     case "finished":
-      throw new Error(`Cannot issue commands once the game is finished.`);
-      break;
+      if (type !== "finish") {
+        throw new Error(`Cannot issue commands once the game is finished.`);
+      }
+      return g.fold(self, _.assoc(command, "type", "finished"));
   }
 
   const allValidMoves = g.moves(self, {seat, type});
@@ -371,7 +376,7 @@ export function execute(self, command) {
         _.chain(command,
           _.assoc(_, "type", "started")));
     case 'roll': {
-      const dice = _.getIn(command, ['details', 'dice']) || [_.randInt(6), _.randInt(6)];
+      const dice = _.getIn(command, ['details', 'dice']) || [_.randInt(6) + 1, _.randInt(6) + 1];
       const [a, b] = dice;
       if (!validDie(a) || !validDie(b)) {
         throw new Error("Invalid dice");
@@ -381,16 +386,14 @@ export function execute(self, command) {
           _.assoc(_, "type", "rolled"),
           _.assocIn(_, ["details", "dice"], dice)));
     }
+    case 'bear-off':
     case 'enter':
     case 'move': {
       const { from, to, die } = command.details;
       const { bar, dice, points, up } = state;
-      const seat = up; // This 'seat' is already defined from 'command.seat' above, but keeping for clarity
+      const seat = up;
       const opponent = opposition(seat);
-      const direction = directed(seat);
 
-      // These checks are now redundant if 'matched' is true, as 'moves' function already validates them.
-      // However, keeping them for now as they are part of the original logic.
       if (dice.indexOf(die) === -1) {
         throw new Error(`That die is not available.`);
       }
@@ -413,14 +416,19 @@ export function execute(self, command) {
         }
       }
 
+      const eventType = asEvent(type);
       const capture = attack(to, opponent, points);
       return g.fold(self,
         _.chain(command,
-          _.assoc(_, "type", type == "move" ? "moved" : "entered"),
+          _.assoc(_, "type", eventType),
           _.assocIn(_, ["details", "capture"], capture)));
     }
     case 'commit': {
-      return g.fold(self, _.assoc(command, "type", "committed"));
+      const committedSelf = g.fold(self, _.assoc(command, "type", "committed"));
+      if (g.status(committedSelf) == "finished") {
+        return g.finish(committedSelf);
+      }
+      return committedSelf;
     }
     case 'propose-double': {
       if (status !== "started") {
@@ -452,6 +460,9 @@ export function execute(self, command) {
       }
       return g.fold(self, _.assoc(command, "type", "conceded"));
     }
+    case 'finish': {
+      return g.fold(self, _.assoc(command, "type", "finished"));
+    }
     default: {
       throw new Error("Unknown command: " + command.type);
     }
@@ -465,6 +476,7 @@ function fold(self, event) {
       return g.fold(self, event, started);
     case "rolled":
       return g.fold(self, event, state => rolled(state, event.details));
+    case "borne-off":
     case "entered":
     case "moved":
       return g.fold(self, event, state => moved(state, event.details))
@@ -476,6 +488,8 @@ function fold(self, event) {
       return g.fold(self, event, state => accepted(state, event.seat))
     case "conceded":
       return g.fold(self, event, state => conceded(state, event.seat))
+    case "finished":
+      return g.fold(self, event, state => _.pipe(_.dissoc(_, "up"), _.assoc(_, "status", "finished"))(state));
     default:
       return self;
   }
@@ -526,16 +540,11 @@ function textualizer(self){
 }
 
 function undoable(self, {type}){
-  return !_.includes(["rolled", "committed", "double-proposed", "accepted", "conceded"], type);
+  return !_.includes(["finished", "rolled", "committed", "double-proposed", "accepted", "conceded"], type);
 }
 
 function status(self) {
-  const state = _.deref(self);
-  if (won(state, WHITE) || won(state, BLACK)) {
-    return "finished";
-  } else {
-    return state.status;
-  }
+  return _.chain(self, _.deref, _.get(_, "status"));
 }
 
 _.doto(Backgammon,

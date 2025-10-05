@@ -5,21 +5,21 @@ import $ from "./atomic_/shell.js";
 export function online(username){
   const $online = $.atom(null);
 
-  const channel = supabase.channel('#online', {
+  const channel = supabase.channel('online', {
     config: {
       presence: {
         key: username
       }
     }
   })
+    .on('presence', {event: 'sync'}, changed)
+    .on('presence', {event: 'join'}, joined)
+    .on('presence', {event: 'leave'}, left)
     .subscribe(function(status){
       if (status === 'SUBSCRIBED') {
         channel.track({seen: Date.now()});
       }
     })
-    .on('presence', {event: 'sync'}, changed)
-    .on('presence', {event: 'join'}, joined)
-    .on('presence', {event: 'leave'}, left);
 
   function changed(){
     $.reset($online, channel.presenceState());

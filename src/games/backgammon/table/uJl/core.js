@@ -223,7 +223,7 @@ function moves3(self, type, seat) {
   const up = g.up(self),
         may = g.may(self);
 
-  const { bar, rolled, points, dice, stakes, holdsCube } = state;
+  const { bar, rolled, points, dice, stakes, holdsCube, status } = state;
 
   if (!_.includes(up, seat) && !_.includes(may, seat)) {
     return [];
@@ -235,11 +235,11 @@ function moves3(self, type, seat) {
     const onBar = bar[seat] > 0;
     const pending = rolled && _.count(dice) > 0;
 
-    if (state.status === "double-proposed") {
+    if (status === "double-proposed") {
       return _.includes(up, seat) ? [{type: "accept", seat}, {type: "concede", seat}] : [];
     }
 
-    if (!rolled) {
+    if (!rolled && status !== "finished") {
       const canDouble = stakes < 64 && (holdsCube === -1 || holdsCube === seat);
       const doubleMove = canDouble ? [{type: "propose-double", seat}] : [];
       return _.concat([{type: "roll", seat}], doubleMove);
@@ -499,7 +499,9 @@ export function execute(self, command) {
       if (seat !== state.up) {
         throw new Error("Not your turn");
       }
-      return g.fold(self, _.assoc(command, "type", "conceded"));
+      return _.chain(self,
+        g.fold(_, _.assoc(command, "type", "conceded")),
+        g.finish);
     }
 
     case 'finish': {
@@ -551,12 +553,18 @@ function up(self) {
 const may = up;
 
 function metrics(self) {
+  const {config} = self;
+  const {raiseStakes} = config;
   const state = _.deref(self);
-  return _.mapa(function (seat) {
-    const conceded = state.conceded == seat;
+  const stats = _.mapa(function(seat) {
+    const conceded = state.conceded === seat;
     const off = state.off[seat];
     return {off, conceded};
   }, _.range(0, 2));
+  const winner = _.chain(stats, _.sort(comparator(self), _), _.first);
+  return _.mapa(function(stat){
+    return {points: winner === stat ? state.stakes : 0, ...stat};
+  }, stats);
 }
 
 function comparator(self) {
@@ -576,9 +584,14 @@ function comparator(self) {
   };
 }
 
+function pts(points){
+  return points == null ? null : points === 1 ? "1 point" : `${points} points`;
+}
+
 function textualizer(self){
-  return function({off, conceded}){
-    return conceded ? `Conceded` : `${off} off`;
+  const {stakes} = _.deref(self);
+  return function({points, off, conceded}){
+    return _.chain([pts(points), `${off} off`, conceded ? `conceded` : null], _.compact, _.join(", ", _));
   }
 }
 

@@ -1,8 +1,23 @@
 import _ from "../../../../libs/atomic_/core.js";
 import g from "../../../../libs/game_.js";
 
-const WHITE = 0;
-const BLACK = 1;
+export const WHITE = 0;
+export const BLACK = 1;
+
+export function suggestibleRoll(suggested) { //for development/testing purposes
+  const validDie = _.includes(_.toArray(_.range(1, 7)), _);
+  const [a, b] = suggested || roll();
+  if (!validDie(a) || !validDie(b)) {
+    throw new Error("Invalid dice");
+  }
+  return [a, b];
+}
+
+function roll() {
+  return [_.randInt(6) + 1, _.randInt(6) + 1];
+}
+
+const effects = {dice: {roll}};
 
 export function Backgammon(seats, config, events, state){
   this.seats = seats;
@@ -12,8 +27,11 @@ export function Backgammon(seats, config, events, state){
 }
 
 export function backgammon(seats, config = {}, events = [], state = null){
-  const {raiseStakes = false} = config;
-  return new Backgammon(_.toArray(seats), config, events, state || init(raiseStakes));
+  return new Backgammon(
+    _.toArray(seats),
+    _.merge({effects}, config),
+    events,
+    state || init(!!config.raiseStakes));
 }
 
 export const make = backgammon;
@@ -342,8 +360,6 @@ function noDetails(command){
   return _.eq(details, {}) ? _.dissoc(command, "details") : command;
 }
 
-const validDie = _.includes(_.toArray(_.range(1, 7)), _);
-
 const asEvent = _.get({
   'move': 'moved',
   'enter': 'entered',
@@ -377,7 +393,7 @@ function compel(self){
 }
 
 export function execute(self, command) {
-  const { state } = self;
+  const { state, config } = self;
   const { status, stakes } = state;
   const { type, seat } = command;
 
@@ -413,11 +429,7 @@ export function execute(self, command) {
           _.assoc(_, "type", "started")));
 
     case 'roll': {
-      const dice = _.getIn(command, ['details', 'dice']) || [_.randInt(6) + 1, _.randInt(6) + 1];
-      const [a, b] = dice;
-      if (!validDie(a) || !validDie(b)) {
-        throw new Error("Invalid dice");
-      }
+      const dice = config.effects.dice.roll(_.getIn(command, ['details', 'dice']));
       return g.fold(self,
         _.chain(command,
           _.assoc(_, "type", "rolled"),

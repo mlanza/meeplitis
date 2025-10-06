@@ -258,7 +258,7 @@ function updatePositioning(diffs) {
   $.each(function({ target, revised }) {
     if (target && revised) {
       _.maybe(dom.sel(`use[href="${CHECKER[target.seat]}"][data-point="${target.point}"][data-pos="${target.pos}"]`, el), _.last, function(checkerEl){
-        checkers.appendChild(checkerEl); // move to end to render on top
+        dom.append(checkers, checkerEl); // move to end to render on top
         void checkerEl.getBoundingClientRect(); // force reflow: lock in the "before" state
         dom.attr(checkerEl, "data-point", revised.point);
         dom.attr(checkerEl, "data-pos", revised.pos);

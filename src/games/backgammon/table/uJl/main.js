@@ -39,6 +39,21 @@ function die(pips){
   return img({class: 'die', src});
 }
 
+function adjustWhite(rank){
+  return 24 - rank;
+}
+
+function adjustBlack(rank){
+  return rank + 1;
+}
+
+function relativeRank(seat, details){
+  const adjust = seat === BLACK ? adjustBlack : adjustWhite;
+  const from = adjust(details.from),
+        to = adjust(details.to);
+  return {...details, from, to};
+}
+
 function desc({type, details, seat}){
   switch(type) {
     case "started":
@@ -49,18 +64,18 @@ function desc({type, details, seat}){
       return dice[0] == dice[1] ? [`Rolls double `, die(dice[0]), `s!`] : [`Rolls `, die(dice[0]), ` and `, die(dice[1]), `.`];
 
     case "moved": {
-      const {from, to} = details;
-      return [`Moved `, checker(seat), ` with `, die(Math.abs(from - to)) ,` from ${from + 1} to ${to + 1}.`];
+      const {from, to} = relativeRank(seat, details);
+      return [`Moved `, checker(seat), ` with `, die(Math.abs(from - to)) ,` from ${from} to ${to}.`];
     }
 
     case "borne-off": {
-      const {from} = details;
-      return [`Bears off `, checker(seat), ` with`, die(details.die), ` from ${from + 1}.`];
+      const {from} = relativeRank(seat, details);
+      return [`Bears off `, checker(seat), ` with`, die(details.die), ` from ${from}.`];
     }
 
     case "entered": {
-      const {from, to} = details;
-      return [`Enters `, checker(seat), ` with `, die(details.die), ` to ${to + 1}.`];
+      const {from, to} = relativeRank(seat, details);
+      return [`Enters `, checker(seat), ` with `, die(details.die), ` to ${to}.`];
     }
 
     case "committed": {
@@ -310,6 +325,8 @@ $.sub($both, function ([[curr, prior, motion, game], wip, which]) {
       initialPositioning(checkers);
     }
   }
+
+  dom.attr(el, "data-up", up);
 
   const moves = g.moves(game, { type: ["move", "enter", "bear-off"], seat });
 

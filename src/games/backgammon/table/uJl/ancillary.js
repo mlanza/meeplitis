@@ -1,3 +1,3 @@
 export function describe(config){
-  return [];
+  return config.raiseStakes ? ["with doubling cube"] : [];
 }

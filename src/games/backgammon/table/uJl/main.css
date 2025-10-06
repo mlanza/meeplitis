@@ -64,10 +64,24 @@
   font-family: Tahoma;
   font-size: 25px;
   font-weight: bold;
-  fill: black;
-  stroke: white;
   stroke-width: .750;
   text-anchor: middle;
+}
+[data-up=""] #point-numbers {
+  display: none;
+}
+[data-up="1"] #point-numbers {
+  fill: black;
+  stroke: white;
+}
+[data-up="0"] #point-numbers {
+  stroke-width: 1.750;
+  fill: white;
+  stroke: black;
+}
+[data-up="0"] #point-numbers .black,
+[data-up="1"] #point-numbers .white {
+  display: none;
 }
 .players {
   width: 20em;

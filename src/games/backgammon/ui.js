@@ -6,24 +6,19 @@ import {manageTables} from "/components/table/ui.js";
 
 const {div, span, img, a, p, button, submit, form, label, input} = dom.tags(['div', 'span', 'img', 'a', 'p', 'button', 'submit', 'form', 'label', 'input']);
 const radio = dom.tag('input', {type: "radio"});
+const checkbox = dom.tag('input', {type: "checkbox"});
 
 manageTables(function(open, game){
   const el = form({id: "creates"},
-    label(span("Players"), _.map(function(value){
-      return label(value, radio({name: "players", value}, value === 2 ? {checked: "checked"} : null));
-    }, [2, 3])),
+    label(span("Cube?"), checkbox({name: "raise-stakes"}), " Raise stakes with doubling cube"),
     label(span("Remark"), input({type: "text", name: "remark", maxlength: 100, placeholder: "x moves/day, learning game"})),
     input({type: "submit", value: "Open Table"}));
   el.addEventListener('submit', function(e){
     e.preventDefault();
-    const seats = _.maybe(el.elements["players"], _.detect(function(el){
-      return el.checked;
-    }, _), dom.attr(_, "value"), parseInt);
-    const variant = _.maybe(el.elements["variant"], _.detect(function(el){
-      return el.checked;
-    }, _), dom.attr(_, "value"));
+    const seats = 2;
+    const raiseStakes = el.elements["raise-stakes"].checked;
     const remark = el.elements["remark"].value;
-    const config = {};
+    const config = {raiseStakes};
     open({seats, config, remark});
   });
   return el;

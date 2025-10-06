@@ -46,68 +46,72 @@ function started(state) {
 	};
 }
 
-function rolled(state, details) {
-  let { dice } = details;
-  if (dice[0] === dice[1]) {
-    dice = [dice[0], dice[0], dice[0], dice[0]];
+function rolled(details) {
+  return function(state) {
+    let { dice } = details;
+    if (dice[0] === dice[1]) {
+      dice = [dice[0], dice[0], dice[0], dice[0]];
+    }
+    return {
+      ...state,
+      status: "started",
+      rolled: true,
+      dice
+    };
   }
-  return {
-    ...state,
-    status: "started",
-    rolled: true,
-    dice
-  };
 }
 
-function moved(state, details) {
-  const { from, die } = details;
-  let { to } = details;
-  const { bar, dice, off, points, up } = state;
-  const seat = up;
-  const opponent = opposition(seat);
-  const direction = directed(seat);
+function moved(details) {
+  return function(state) {
+    const { from, die } = details;
+    let { to } = details;
+    const { bar, dice, off, points, up } = state;
+    const seat = up;
+    const opponent = opposition(seat);
+    const direction = directed(seat);
 
-  if (to == null) {
-    to = from + die * direction;
-  }
-
-  const newPoints = [...points];
-  const newBar = [...bar];
-  const newOff = [...off];
-
-  const isBarMove = !bounds(from);
-  const isBearOff = !bounds(to);
-
-  if (isBarMove) {
-    newBar[seat]--;
-  } else {
-    const sourcePoint = [...newPoints[from]];
-    sourcePoint[seat]--;
-    newPoints[from] = sourcePoint;
-  }
-
-  if (isBearOff) {
-    newOff[seat]++;
-  } else {
-    const newTargetPoint = [...newPoints[to]];
-    if (newTargetPoint[opponent] === 1) {
-      newTargetPoint[opponent] = 0;
-      newBar[opponent]++;
+    if (to == null) {
+      to = from + die * direction;
     }
-    newTargetPoint[seat]++;
-    newPoints[to] = newTargetPoint;
+
+    const newPoints = [...points];
+    const newBar = [...bar];
+    const newOff = [...off];
+
+    const isBarMove = !bounds(from);
+    const isBearOff = !bounds(to);
+
+    if (isBarMove) {
+      newBar[seat]--;
+    } else {
+      const sourcePoint = [...newPoints[from]];
+      sourcePoint[seat]--;
+      newPoints[from] = sourcePoint;
+    }
+
+    if (isBearOff) {
+      newOff[seat]++;
+    } else {
+      const newTargetPoint = [...newPoints[to]];
+      if (newTargetPoint[opponent] === 1) {
+        newTargetPoint[opponent] = 0;
+        newBar[opponent]++;
+      }
+      newTargetPoint[seat]++;
+      newPoints[to] = newTargetPoint;
+    }
+
+    const newDice = [...dice];
+    newDice.splice(dice.indexOf(die), 1);
+
+    return {
+      ...state,
+      bar: newBar,
+      off: newOff,
+      points: newPoints,
+      dice: newDice
+    };
   }
-
-  const newDice = [...dice];
-  newDice.splice(dice.indexOf(die), 1);
-
-  return {
-    ...state,
-    bar: newBar,
-    off: newOff,
-    points: newPoints,
-    dice: newDice
-  };
 }
 
 function committed(state) {
@@ -131,22 +135,26 @@ function doubleProposed(state) {
   };
 }
 
-function accepted(state, seat) {
-  return {
-    ...state,
-    stakes: state.stakes * 2,
-    up: opposition(seat),
-    holdsCube: seat,
-    status: "started"
-  };
+function accepted(seat) {
+  return function(state) {
+    return {
+      ...state,
+      stakes: state.stakes * 2,
+      up: opposition(seat),
+      holdsCube: seat,
+      status: "started"
+    };
+  }
 }
 
-function conceded(state, seat) {
-  return {
-    ...state,
-    conceded: seat,
-    status: "finished"
-  };
+function conceded(seat) {
+  return function(state){
+    return {
+      ...state,
+      conceded: seat,
+      status: "finished"
+    };
+  }
 }
 
 export function won(state, seat) {
@@ -515,26 +523,25 @@ export function execute(self, command) {
 }
 
 function fold(self, event) {
-  const state = _.deref(self);
   switch (event.type) {
     case "started":
       return g.fold(self, event, started);
     case "rolled":
-      return g.fold(self, event, state => rolled(state, event.details));
+      return g.fold(self, event, rolled(event.details));
     case "borne-off":
     case "entered":
     case "moved":
-      return g.fold(self, event, state => moved(state, event.details))
+      return g.fold(self, event, moved(event.details));
     case "committed":
-      return g.fold(self, event, state => committed(state, event.details))
+      return g.fold(self, event, committed);
     case "double-proposed":
-      return g.fold(self, event, state => doubleProposed(state, event.details))
+      return g.fold(self, event, doubleProposed);
     case "accepted":
-      return g.fold(self, event, state => accepted(state, event.seat))
+      return g.fold(self, event, accepted(event.seat));
     case "conceded":
-      return g.fold(self, event, state => conceded(state, event.seat))
+      return g.fold(self, event, conceded(event.seat));
     case "finished":
-      return g.fold(self, event, state => _.pipe(_.dissoc(_, "up"), _.assoc(_, "status", "finished"))(state));
+      return g.fold(self, event, _.pipe(_.dissoc(_, "up"), _.assoc(_, "status", "finished")));
     default:
       return self;
   }

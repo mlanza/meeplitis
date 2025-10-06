@@ -56,9 +56,6 @@ function relativeRank(seat, details){
 
 function desc({type, details, seat}){
   switch(type) {
-    case "started":
-      return "Starts game.";
-
     case "rolled":
       const {dice} = details;
       return dice[0] == dice[1] ? [`Rolls double `, die(dice[0]), `s!`] : [`Rolls `, die(dice[0]), die(dice[1]), `.`];
@@ -82,6 +79,18 @@ function desc({type, details, seat}){
       const {blocked} = details || {};
       return blocked ? "I'm done.  I can't move!" : "I'm done.";
     }
+
+    case "started":
+      return "Starts game.";
+
+    case "double-proposed":
+      return "Proposes a double.";
+
+    case "accepted":
+      return "Accepts the double.";
+
+    case "conceded":
+      return "Concedes the game.";
 
     case "finished":
       return outcome(seated, details);
@@ -311,7 +320,7 @@ reg({ $both, g });
 $.sub($both, function ([[curr, prior, motion, game], wip, which]) {
   const { state, up } = curr;
   if (!state) return;
-  const { status, dice, off } = state;
+  const { status, dice, off, stakes, holdsCube } = state;
   const { present } = motion;
 
   if (which !== 1) {
@@ -326,11 +335,14 @@ $.sub($both, function ([[curr, prior, motion, game], wip, which]) {
     }
   }
 
+  dom.attr(el, "data-stakes", stakes);
+  dom.text(dom.sel1("#cube", el), _.clamp(stakes, 2, 64));
   dom.attr(el, "data-up", up);
+  dom.attr(el, "data-holds-cube", holdsCube);
 
   const moves = g.moves(game, { type: ["move", "enter", "bear-off"], seat });
 
-  _.chain(g.moves(game, { type: ["roll", "commit"], seat }),
+  _.chain(g.moves(game, { type: ["roll", "commit", "propose-double", "accept", "concede"], seat }),
     _.map(_.get(_, "type"), _),
     _.distinct,
     _.join(" ", _),
@@ -359,14 +371,14 @@ $.sub($both, function ([[curr, prior, motion, game], wip, which]) {
   }
 });
 
-$.on(el, "click", `#table.act button[data-type="roll"]`, function(e){
-  const type = "roll";
-  $.dispatch($story, {type});
-});
+$.each(function(type){
+  $.on(el, "click", `#table.act button[data-type="${type}"]`, function(e){
+    $.dispatch($story, {type});
+  });
+}, ["roll", "commit", "propose-double", "accept", "concede"]);
 
-$.on(el, "click", `#table.act button[data-type="commit"]`, function(e){
-  const type = "commit";
-  $.dispatch($story, {type});
+$.on(el, "click", `#table.act[data-allow-commands~="propose-double"] #cube`, function(e){
+  $.dispatch($story, {type: "propose-double"});
 });
 
 $.on(el, "click", `#table.act[data-from] .off-board`, function(e){

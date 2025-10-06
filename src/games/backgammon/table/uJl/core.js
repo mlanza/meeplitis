@@ -236,7 +236,7 @@ function moves3(self, type, seat) {
     const pending = rolled && _.count(dice) > 0;
 
     if (state.status === "double-proposed") {
-      const canRespond = seat === up;
+      const canRespond = _.includes(up, seat);
       const responseMoves = canRespond ? [{type: "accept", seat}, {type: "concede", seat}] : [];
       return responseMoves;
     }

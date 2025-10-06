@@ -237,7 +237,7 @@ function moves3(self, type, seat) {
     return [];
   }
 
-  const allMoves = _.mapcat(function(seat) { // Iterate over each seat
+  const allMoves = _.mapcat(function(seat) {
     const opponent = opposition(seat);
     const direction = directed(seat);
     const onBar = bar[seat] > 0;
@@ -258,7 +258,6 @@ function moves3(self, type, seat) {
         const to = from + die * direction;
         const open = available(to, opponent, points);
         if (open) {
-          //const capture = attack(to, opponent, points);
           return {type: "enter", details: {from, to, die}, seat};
         }
       }, [barPosition(seat)]));
@@ -269,20 +268,18 @@ function moves3(self, type, seat) {
       return _.compact(_.map(function(from) {
         if (points[from][seat] > 0) {
           const to = from + die * direction;
-          if (!bounds(to)) { // Bearing off
+          if (!bounds(to)) { // bearing off
             const exactFrom = seat === WHITE ? 24 - die : die - 1;
             if (from === exactFrom) {
               return {type: "bear-off", details: {from, die}, seat};
             }
-            // With a die roll too large to be an exact roll, a player may
-            // bear-off a checker from a point if all higher-numbered points
-            // are vacant.
+            // With a die roll too large to be an exact roll, a player may bear-off a checker from a point if all higher-numbered points are vacant.
             const pointsToCheck = seat === WHITE ? _.range(exactFrom, from) : _.range(from + 1, exactFrom + 1);
             const hasCheckersOnHigherPoints = _.some(p => points[p][seat] > 0, pointsToCheck);
             if (!hasCheckersOnHigherPoints) {
               return {type: "bear-off", details: {from, die}, seat};
             }
-          } else if (available(to, opponent, points)) { // Regular move in innerBoard
+          } else if (available(to, opponent, points)) { // Regular move in inner board
             return {type: "move", details: {from, to, die}, seat};
           }
         }
@@ -381,7 +378,7 @@ function compel(self){
 
 export function execute(self, command) {
   const { state } = self;
-  const { status } = state;
+  const { status, stakes } = state;
   const { type, seat } = command;
 
   switch (status) {
@@ -402,11 +399,10 @@ export function execute(self, command) {
       return g.fold(self, _.assoc(command, "type", "finished"));
   }
 
-  const allValidMoves = g.moves(self, {seat, type});
-
+  const moves = g.moves(self, {seat, type});
   const cmd = _.chain(command, _.compact, _.dissoc(_, "id"), _.dissocIn(_, ["details", "dice"]), noDetails);
 
-  if (command.type !== "start" && !_.detect(_.eq(_, cmd), allValidMoves)) {
+  if (command.type !== "start" && !_.detect(_.eq(_, cmd), moves)) {
     throw new Error(`Invalid command: ${JSON.stringify(command)}`);
   }
 
@@ -436,7 +432,7 @@ export function execute(self, command) {
       const seat = up;
       const opponent = opposition(seat);
 
-      if (dice.indexOf(die) === -1) {
+      if (!_.includes(dice, die)) {
         throw new Error(`That die is not available.`);
       }
 
@@ -481,7 +477,7 @@ export function execute(self, command) {
       if (status !== "started") {
         throw new Error(`Command not allowed in current status`);
       }
-      if (state.stakes >= 64) {
+      if (stakes >= 64) {
         throw new Error("Cannot double at stakes of 64 or higher");
       }
       if (seat !== state.up || (state.holdsCube !== -1 && state.holdsCube !== seat)) {

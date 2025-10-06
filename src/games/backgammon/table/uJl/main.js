@@ -61,16 +61,16 @@ function desc({type, details, seat}){
 
     case "rolled":
       const {dice} = details;
-      return dice[0] == dice[1] ? [`Rolls double `, die(dice[0]), `s!`] : [`Rolls `, die(dice[0]), ` and `, die(dice[1]), `.`];
+      return dice[0] == dice[1] ? [`Rolls double `, die(dice[0]), `s!`] : [`Rolls `, die(dice[0]), die(dice[1]), `.`];
 
     case "moved": {
       const {from, to} = relativeRank(seat, details);
-      return [`Moved `, checker(seat), ` with `, die(Math.abs(from - to)) ,` from ${from} to ${to}.`];
+      return [`Moved `, checker(seat), ` with `, die(details.die) ,` from ${from} to ${to}.`];
     }
 
     case "borne-off": {
       const {from} = relativeRank(seat, details);
-      return [`Bears off `, checker(seat), ` with`, die(details.die), ` from ${from}.`];
+      return [`Bears off `, checker(seat), ` with `, die(details.die), ` from ${from}.`];
     }
 
     case "entered": {

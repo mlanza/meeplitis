@@ -188,9 +188,8 @@ function to(id){
   }
 }
 
-async function chooseEvent(){
-  const {frames, idx} = _.deref($state);
-  return await Select.prompt({
+function chooseEvent({frames, idx}){
+  return Select.prompt({
     message: "Choose an event",
     options: _.toArray(_.concat([{name: "None", value: -1}], _.mapIndexed(function(i, {event}){
       const {id} = event;
@@ -213,49 +212,47 @@ function tail(){
   }
 }
 
-function listMoves(){
-  const {frames, idx} = _.deref($state);
+function listMoves({frames, idx}){
   return _.chain(frames[idx], _.get(_, "game"), g.moves, _.compact, _.toArray);
 }
 
-async function chooseMove(){
-  const choices = listMoves();
-  const choice = await Select.prompt({
+function chooseMove(state){
+  const choices = listMoves(state);
+  return _.fmap(Select.prompt({
     message: "Choose a move",
     options: _.toArray(_.concat([{name: "None", value: -1}], _.mapIndexed(function(idx, cmd){
       return {name: JSON.stringify(cmd), value: idx};
     }, choices)))
-  });
-  return _.nth(choices, choice);
+  }), _.nth(choices, _));
 }
 
-function look({lookback, lookahead, lens}, {frames, idx, at}){
-  function peek(idx){
-    const frame = frames[idx];
-    const {event, added, loaded, may, metrics, seen, up} = frame;
-    return _.reduce(function(memo, key){
-      return _.assoc(memo, key, _.get(frame, key));
-    }, {idx}, lens);
+function look({lookback, lookahead, lens}){
+  return function({frames, idx, at}){
+    function peek(idx){
+      const frame = frames[idx];
+      const {event, added, loaded, may, metrics, seen, up} = frame;
+      return _.reduce(function(memo, key){
+        return _.assoc(memo, key, _.get(frame, key));
+      }, {idx}, lens);
+    }
+
+    const total = _.count(frames);
+    const past = _.chain(_.range(0, total), _.takeWhile(function(i){
+      return i <= idx;
+    }, _), _.reverse, _.take(lookback + 1, _), _.reverse, _.mapa(peek, _));
+    const future = _.chain(_.range(0, total), _.dropWhile(function(i){
+      return i <= idx;
+    }, _), _.take(lookahead, _), _.mapa(peek, _));
+
+    return {past, future, total};
   }
-
-  const total = _.count(frames);
-  const past = _.chain(_.range(0, total), _.takeWhile(function(i){
-    return i <= idx;
-  }, _), _.reverse, _.take(lookback + 1, _), _.reverse, _.mapa(peek, _));
-  const future = _.chain(_.range(0, total), _.dropWhile(function(i){
-    return i <= idx;
-  }, _), _.take(lookahead, _), _.mapa(peek, _));
-
-  return {past, future, total};
 }
 
-function state(){
-  const {idx, frames} = _.deref($state);
+function state({idx, frames}){
   return frames[idx]?.state;
 }
 
-function frame(){
-  const {idx, frames} = _.deref($state);
+function frame({idx, frames}){
   return frames[idx];
 }
 
@@ -267,7 +264,7 @@ async function command(params, run){
       switch (line.trim()) {
         case "move":
         case "m":
-          const cmd = await chooseMove();
+          const cmd = await chooseMove(_.deref($state));
           _.maybe(cmd, run);
           break;
 
@@ -300,28 +297,27 @@ async function command(params, run){
           break;
 
         case "moves":
-          logs(listMoves());
+          _.chain($state, _.deref, listMoves, logs);
           break;
 
         case "state":
         case "s":
-          log(state());
+          _.chain($state, _.deref, state, log);
           await requestCommand();
           continue;
           break;
 
         case "frame":
         case "f":
-          log(frame());
+          _.chain($state, _.deref, frame, log);
           await requestCommand();
           continue;
           break;
 
         case "at":
-          const id = await chooseEvent();
+          const id = await chooseEvent(_.deref($state));
           if (id) {
-            $.swap($state, to(id));
-            $.swap($state, flush());
+            $.swap($state, _.pipe(to(id), flush()));
           }
           break;
 
@@ -339,8 +335,7 @@ async function command(params, run){
       $.error(ex.message);
 
     } finally {
-      log(look(params, _.deref($state)));
-
+      _.chain($state, _.deref, look(params), log);
       await requestCommand();
     }
   }
@@ -422,10 +417,9 @@ async function main({table_id, filename, at, atProvided, cmds, drop, seen, seat,
   $.reset($state, init(simulate, {seats, config, seen: _seen, evented, hash}));
 
   if (atProvided) {
-    const id = at == null ? await chooseEvent() : at;
+    const id = at == null ? await chooseEvent(_.deref($state)) : at;
     if (id) {
-      $.swap($state, to(id));
-      $.swap($state, flush());
+      $.swap($state, _.pipe(to(id), flush()));
     }
   }
 
@@ -439,13 +433,13 @@ async function main({table_id, filename, at, atProvided, cmds, drop, seen, seat,
   $.each(run, cmds);
 
   if (move != null) {
-    const cmd = await chooseMove();
+    const cmd = await chooseMove(_.deref($state));
     _.maybe(cmd, run);
   } else if (moves) {
-    logs(listMoves());
+    _.chain($state, _.deref, listMoves, log);
   }
 
-  silent || log(look(params, _.deref($state)));
+  silent || _.chain($state, _.deref, look(params), log);
 
   if (interactive) {
     await command(params, run);

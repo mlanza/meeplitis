@@ -10,3 +10,4 @@ sim/bundle
 fly/src
 secrets.md
 deno.lock
+table-*.json

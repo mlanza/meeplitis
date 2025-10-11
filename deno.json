@@ -5,6 +5,7 @@
     "lume": "echo \"import 'lume/cli.ts'\" | deno run -A -",
     "build": "deno task lume",
     "serve": "deno task lume -s",
+    "jam:backgammon": "deno run --allow-all tablejam.js LHA7KGASbOt -b 1",
     "updown": "deno run -I --unstable-detect-cjs --allow-read --allow-ffi --allow-env --allow-write npm:rollup@4.50.1 --config rollup.config.js --slug updown --release KA4",
     "mexica": "deno run -I --unstable-detect-cjs --allow-read --allow-ffi --allow-env --allow-write npm:rollup@4.50.1 --config rollup.config.js --slug mexica --release H7z",
     "backgammon": "deno run -I --unstable-detect-cjs --allow-read --allow-ffi --allow-env --allow-write npm:rollup@4.50.1 --config rollup.config.js --slug backgammon --release uJl",

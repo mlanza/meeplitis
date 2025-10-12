@@ -259,7 +259,6 @@ function state({idx, frames}){
 }
 
 function frame({idx, frames}){
-  debugger
   return frames[idx];
 }
 
@@ -267,7 +266,6 @@ function prompt({idx, frames}){
   const bounds = [0, idx];
   const {game} = frames[idx];
   return g.prompt(game, {bounds});
-  //return view(["event", "up", "may", "state", "moves"], {bounds}, frames[idx]);
 }
 
 async function command(run){
@@ -356,7 +354,7 @@ async function command(run){
 }
 
 async function requestCommand(){
-  log({commands: "f/rame, s/state, m/ove, moves, u/ndo, r/edo, flush, h/ead, t/ail, moves, at, reset, exit"});
+  log({commands: "f/rame, s/state, m/ove, moves, p/rompt, u/ndo, r/edo, flush, h/ead, t/ail, moves, at, reset, exit, q"});
   const encoder = new TextEncoder();
   await Deno.stdout.write(encoder.encode("> "));  // prompt again after output
 }

@@ -32,6 +32,7 @@ export function prompt(self, meta = {}){
     _.chain(meta,
       _.assoc(_, "up", up(self)),
       _.assoc(_, "may", may(self)),
+      _.assoc(_, "metrics", metrics(self)),
       _.assoc(_, "event", _.chain(self, events, _.last)),
       _.assoc(_, "state", _.deref(self)),
       _.assoc(_, "moves", _.chain(self, moves, _.toArray))));

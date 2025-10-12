@@ -95,7 +95,7 @@ function resolveLens(withList, withoutList) {
   return Array.from(lens);
 }
 
-function init(simulate, {seats, config, seen, evented, hash}){
+function init(simulate, seats, config, seen, evented, hash, lens, lookback, lookahead){
   const at = hash ? hash.replace("#", "") : _.last(evented)?.id;
   const [seed] = simulate({seats, config, seen});
   const frames = _.fold(function(memo, event){
@@ -109,7 +109,7 @@ function init(simulate, {seats, config, seen, evented, hash}){
   const idx = at ? _.detectIndex(function({event}){
     return event.id == at;
   }, frames) : _.count(frames) - 1;
-  const init = {seed, frames, idx, at};
+  const init = {seed, frames, idx, at, lens, lookback, lookahead};
   return {...init, init};
 }
 
@@ -123,7 +123,7 @@ function tempIds(added){
 function play(simulate, effects, seats, seat, seen, config) {
   return function exec(...commands){
     return function(memo){
-      const {init} = memo;
+      const {init, lens, lookback, lookahead} = memo;
       const {seed, frames, idx} = flush()(memo);
       const frame = _.last(frames);
       if (seat == null) {
@@ -140,7 +140,7 @@ function play(simulate, effects, seats, seat, seen, config) {
       }, [{game: frame?.game, loaded: frame?.loaded}], tempIds(added))));
       const _frames = _.toArray(_.concat(frames, addframes));
       const at = _.chain(_frames, _.last, _.getIn(_, ["event", "id"]));
-      return {seed, frames: _frames, idx: _.count(_frames) - 1, at, init};
+      return {seed, frames: _frames, idx: _.count(_frames) - 1, at, lens, lookback, lookahead, init};
     }
   }
 }
@@ -152,39 +152,39 @@ function reset(){
 }
 
 function flush(){
-  return function({seed, frames, idx, at, init}){
-    return {seed, frames: _.toArray(_.take(idx + 1, frames)), idx, at, init};
+  return function({seed, frames, idx, at, init, lens, lookahead, lookback}){
+    return {seed, frames: _.toArray(_.take(idx + 1, frames)), idx, at, lens, lookahead, lookback, init};
   }
 }
 
 function undo(){
   return function(memo){
-    const {seed, frames, idx, init} = memo;
+    const {seed, frames, idx, init, lens, lookback, lookahead} = memo;
     const min = 0;
     const _idx = _.max(0, idx - 1);
     const at = frames[_idx]?.event?.id;
-    return idx <= min ? memo : {seed, frames, idx: _idx, at, init};
+    return idx <= min ? memo : {seed, frames, idx: _idx, at, lens, lookback, lookahead, init};
   }
 }
 
 function redo(){
   return function(memo){
-    const {seed, frames, idx, init} = memo;
+    const {seed, frames, idx, lens, lookahead, lookback, init} = memo;
     const max = _.count(frames) - 1;
     const _idx = _.min(idx + 1, max);
     const at = frames[_idx]?.event?.id;
-    return idx >= max ? memo : {seed, frames, idx: _idx, at, init};
+    return idx >= max ? memo : {seed, frames, idx: _idx, at, lens, lookback, lookahead, init};
   }
 }
 
 function to(id){
-  return function({seed, frames, init}){
+  return function({seed, frames, init, lens, lookback, lookahead}){
     const idx = _.detectIndex(function(frame){
       return frame?.event?.id == id;
     }, frames);
     const frame = _.nth(frames, idx);
     const at = frame?.event?.id;
-    return {seed, frames, idx, at, init};
+    return {seed, frames, idx, at, lens, lookback, lookahead, init};
   }
 }
 
@@ -226,26 +226,32 @@ function chooseMove(state){
   }), _.nth(choices, _));
 }
 
-function look({lookback, lookahead, lens}){
-  return function({frames, idx, at}){
-    function peek(idx){
-      const frame = frames[idx];
-      const {event, added, loaded, may, metrics, seen, up} = frame;
-      return _.reduce(function(memo, key){
-        return _.assoc(memo, key, _.get(frame, key));
-      }, {idx}, lens);
-    }
+function view(lens, target, frame){
+  const moves = _.pipe(_.get(_, "game"), g.moves, _.compact, _.toArray);
+  return _.reduce(function(memo, key){
+    const f = key === "moves" ? moves : _.get(_, key);
+    return _.assoc(memo, key, f(frame));
+  }, target, lens);
+}
 
-    const total = _.count(frames);
-    const past = _.chain(_.range(0, total), _.takeWhile(function(i){
-      return i <= idx;
-    }, _), _.reverse, _.take(lookback + 1, _), _.reverse, _.mapa(peek, _));
-    const future = _.chain(_.range(0, total), _.dropWhile(function(i){
-      return i <= idx;
-    }, _), _.take(lookahead, _), _.mapa(peek, _));
+function moves({game}){
+  return _.chain(game, g.moves, _.compact, _.toArray);
+}
 
-    return {past, future, total};
+function look({frames, lens, lookback, lookahead, idx}){
+  function peek(idx){
+    return view(lens, {idx}, frames[idx]);
   }
+
+  const total = _.count(frames);
+  const past = _.chain(_.range(0, total), _.takeWhile(function(i){
+    return i <= idx;
+  }, _), _.reverse, _.take(lookback + 1, _), _.reverse, _.mapa(peek, _));
+  const future = _.chain(_.range(0, total), _.dropWhile(function(i){
+    return i <= idx;
+  }, _), _.take(lookahead, _), _.mapa(peek, _));
+
+  return {past, future, total};
 }
 
 function state({idx, frames}){
@@ -253,10 +259,15 @@ function state({idx, frames}){
 }
 
 function frame({idx, frames}){
+  debugger
   return frames[idx];
 }
 
-async function command(params, run){
+function prompt({idx, frames}){
+  return view(["event", "up", "may", "state", "moves"], {}, frames[idx]);
+}
+
+async function command(run){
   await requestCommand();
 
   for await (const line of readLines(Deno.stdin)) {
@@ -314,6 +325,13 @@ async function command(params, run){
           continue;
           break;
 
+        case "prompt":
+        case "p":
+          _.chain($state, _.deref, prompt, log);
+          await requestCommand();
+          continue;
+          break;
+
         case "at":
           const id = await chooseEvent(_.deref($state));
           if (id) {
@@ -335,7 +353,6 @@ async function command(params, run){
       $.error(ex.message);
 
     } finally {
-      _.chain($state, _.deref, look(params), log);
       await requestCommand();
     }
   }
@@ -411,10 +428,9 @@ async function main({table_id, filename, at, atProvided, cmds, drop, seen, seat,
   const hash = at;
   const exec = play(simulate, effects, seats, seat, seen, config);
   const run = _.comp($.swap($state, _), exec);
-  const params = {lens, lookback, lookahead};
   $.log(`\x1b]0;tablejam:${table.slug} @ ${table_id}\x07`);
 
-  $.reset($state, init(simulate, {seats, config, seen: _seen, evented, hash}));
+  $.reset($state, init(simulate, seats, config, _seen, evented, hash, lens, lookback, lookahead));
 
   if (atProvided) {
     const id = at == null ? await chooseEvent(_.deref($state)) : at;
@@ -439,9 +455,11 @@ async function main({table_id, filename, at, atProvided, cmds, drop, seen, seat,
     _.chain($state, _.deref, listMoves, log);
   }
 
-  silent || _.chain($state, _.deref, look(params), log);
+  const $look = $.map(look, $state);
+
+  $.sub($look, _.drop(silent ? 1 : 0), log);
 
   if (interactive) {
-    await command(params, run);
+    await command(run);
   }
 }

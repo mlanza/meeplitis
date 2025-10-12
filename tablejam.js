@@ -367,7 +367,7 @@ await new Command()
   .option("--seen <value:string>", "Repeatable or comma-separated list.", { collect: true })
   .option("--seat <number:number>", "Seat index (int).", { default: null })
   .option("--at [id:string]", "Operate at a specific id.")
-  .option("--cache", "Cache fetched table state to <table>.json.")
+  .option("--cache", "Cache fetched table state to table-<table>.json.")
   .option("--drop [count:number]", "Drop last N entries (bare flag = 1).")
   .option("--moves", "Show available moves.")
   .option("--move", "Prompt to choose and execute a move.")
@@ -420,7 +420,7 @@ async function main(args) {
   const {make} = await component(table);
   const simulate = g.simulate(make),
         effects = _.comp(g.effects, simulate);
-  const seats = _.toArray(_.repeat(_.count(seated) || 4, {}));
+  const seats = seated;
   const seen = _.seq(args.seen) ? args.seen :_.toArray(_.range(0, _.count(seats)));
   const hash = args.at;
   const exec = play(simulate, effects, seats, args.seat, seen, config);

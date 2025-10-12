@@ -6,6 +6,7 @@
     "build": "deno task lume",
     "serve": "deno task lume -s",
     "jam": "deno run --allow-all tablejam.js",
+    "jam:i": "deno run --allow-all --inspect-brk tablejam.js",
     "updown": "deno run -I --unstable-detect-cjs --allow-read --allow-ffi --allow-env --allow-write npm:rollup@4.50.1 --config rollup.config.js --slug updown --release KA4",
     "mexica": "deno run -I --unstable-detect-cjs --allow-read --allow-ffi --allow-env --allow-write npm:rollup@4.50.1 --config rollup.config.js --slug mexica --release H7z",
     "backgammon": "deno run -I --unstable-detect-cjs --allow-read --allow-ffi --allow-env --allow-write npm:rollup@4.50.1 --config rollup.config.js --slug backgammon --release uJl",

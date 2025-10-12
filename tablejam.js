@@ -418,46 +418,45 @@ await new Command()
   .parse(Deno.args);
 
 async function main(args) {
-  const {table_id, filename, at, atProvided, cmds, drop, seen, seat, lens, lookback, lookahead, cache, moves, move, silent, interactive} = args;
-  const [table, seated, config, evented] = await load(table_id, filename, cache);
+  const [table, seated, config, evented] = await load(args.table_id, args.filename, args.cache);
   const {make} = await component(table);
   const simulate = g.simulate(make),
         effects = _.comp(g.effects, simulate);
   const seats = _.toArray(_.repeat(_.count(seated) || 4, {}));
-  const _seen = _.seq(seen) ? seen :_.toArray(_.range(0, _.count(seats)));
-  const hash = at;
-  const exec = play(simulate, effects, seats, seat, seen, config);
+  const seen = _.seq(args.seen) ? args.seen :_.toArray(_.range(0, _.count(seats)));
+  const hash = args.at;
+  const exec = play(simulate, effects, seats, args.seat, seen, config);
   const run = _.comp($.swap($state, _), exec);
 
   //$.log(`\x1b]0;tablejam:${table.slug} @ ${table_id}\x07`);
 
-  $.reset($state, init(simulate, seats, config, _seen, evented, hash, lens, lookback, lookahead));
+  $.reset($state, init(simulate, seats, config, seen, evented, hash, args.lens, args.lookback, args.lookahead));
 
-  if (atProvided) {
-    const id = at == null ? await chooseEvent(_.deref($state)) : at;
+  if (args.atProvided) {
+    const id = args.at == null ? await chooseEvent(_.deref($state)) : args.at;
     if (id) {
       $.swap($state, _.pipe(to(id), flush()));
     }
   }
 
-  if (drop) {
+  if (args.drop) {
     $.each(function(){
       $.swap($state, undo());
-    }, _.range(0, drop));
+    }, _.range(0, args.drop));
     $.swap($state, flush());
   }
 
   const $look = $.map(look, $state);
 
-  $.sub($look, _.drop(silent ? 1 : 0), log);
+  $.sub($look, _.drop(args.silent ? 1 : 0), log);
 
-  $.each(run, cmds);
+  $.each(run, args.cmds);
 
-  if (moves) {
+  if (args.moves) {
     _.chain($state, _.deref, listMoves, log);
   }
 
-  if (move) {
+  if (args.move) {
     const cmd = await chooseMove(_.deref($state));
     _.maybe(cmd, run);
   }
@@ -466,7 +465,7 @@ async function main(args) {
     _.chain($state, _.deref, prompt, $.log);
   }
 
-  if (interactive) {
+  if (args.interactive) {
     await command(run);
   }
 }

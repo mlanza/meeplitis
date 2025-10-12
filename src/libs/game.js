@@ -3,6 +3,7 @@ import _ from "./atomic_/core.js";
 export const IGame = _.protocol({
   perspective: null,
   status: null,
+  prompt: null, //returns the game state as a text-based scenario an agent can react to
   up: null, //returns the seat(s) which are required to move
   may: null, //returns the seat(s) which have the option to move
   seats: null,
@@ -25,6 +26,16 @@ export const events = IGame.events;
 export const metrics = IGame.metrics;
 export const comparator = IGame.comparator;
 export const textualizer = IGame.textualizer;
+
+export function prompt(self, meta = {}){
+  return IGame.prompt(self,
+    _.chain(meta,
+      _.assoc(_, "up", up(self)),
+      _.assoc(_, "may", may(self)),
+      _.assoc(_, "event", _.chain(self, events, _.last)),
+      _.assoc(_, "state", _.deref(self)),
+      _.assoc(_, "moves", _.chain(self, moves, _.toArray))));
+}
 
 function perspective2(self, seen){
   return perspective3(self, seen, reality(self));

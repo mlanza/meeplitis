@@ -264,7 +264,10 @@ function frame({idx, frames}){
 }
 
 function prompt({idx, frames}){
-  return view(["event", "up", "may", "state", "moves"], {}, frames[idx]);
+  const bounds = [0, idx];
+  const {game} = frames[idx];
+  return g.prompt(game, {bounds});
+  //return view(["event", "up", "may", "state", "moves"], {bounds}, frames[idx]);
 }
 
 async function command(run){
@@ -314,22 +317,16 @@ async function command(run){
         case "state":
         case "s":
           _.chain($state, _.deref, state, log);
-          await requestCommand();
-          continue;
           break;
 
         case "frame":
         case "f":
           _.chain($state, _.deref, frame, log);
-          await requestCommand();
-          continue;
           break;
 
         case "prompt":
         case "p":
-          _.chain($state, _.deref, prompt, log);
-          await requestCommand();
-          continue;
+          _.chain($state, _.deref, prompt, $.log);
           break;
 
         case "at":
@@ -376,6 +373,7 @@ await new Command()
   .option("--drop [count:number]", "Drop last N entries (bare flag = 1).")
   .option("--moves", "Show available moves.")
   .option("--move", "Prompt to choose and execute a move.")
+  .option("--prompt", "Show a prompt for the current game state.")
   .option("--cmd <object:string>", "Execute a move from a command object, e.g. '{type:\"commit\"}'.")
   .option("--cmds <file:string>", "Execute moves (one command object per line) from a file.")
   .option("--with <value:string>", "Add to lens (repeatable or CSV).", { collect: true })
@@ -394,6 +392,7 @@ await new Command()
     const cache = !!opts.cache;
     const moves = !!opts.moves;
     const move = asCount(opts.move, 0);
+    const prompt = !!opts.prompt;
     const seen = normalizeList(opts.seen);
     const withList = normalizeList(opts.with);
     const withoutList = normalizeList(opts.without);
@@ -408,7 +407,7 @@ await new Command()
     const lookback = opts.lookback === Infinity ? Infinity : Number(opts.lookback);
     const lookahead = Number(opts.lookahead);
 
-    _.chain({table_id, filename, at, atProvided, drop, cmds, seen, seat, lens, lookback, lookahead, cache, moves, move, silent, interactive},
+    _.chain({table_id, filename, at, atProvided, drop, cmds, seen, seat, lens, lookback, lookahead, cache, prompt, moves, move, silent, interactive},
       //$.see("payload"),
       main);
   })
@@ -418,7 +417,8 @@ await new Command()
   .example("Commands", `tablejam ${demo} --cmd '{type:\"commit\"}' --seen 0,1 --seen 0`)
   .parse(Deno.args);
 
-async function main({table_id, filename, at, atProvided, cmds, drop, seen, seat, lens, lookback, lookahead, cache, moves, move, silent, interactive}) {
+async function main(args) {
+  const {table_id, filename, at, atProvided, cmds, drop, seen, seat, lens, lookback, lookahead, cache, moves, move, silent, interactive} = args;
   const [table, seated, config, evented] = await load(table_id, filename, cache);
   const {make} = await component(table);
   const simulate = g.simulate(make),
@@ -428,7 +428,8 @@ async function main({table_id, filename, at, atProvided, cmds, drop, seen, seat,
   const hash = at;
   const exec = play(simulate, effects, seats, seat, seen, config);
   const run = _.comp($.swap($state, _), exec);
-  $.log(`\x1b]0;tablejam:${table.slug} @ ${table_id}\x07`);
+
+  //$.log(`\x1b]0;tablejam:${table.slug} @ ${table_id}\x07`);
 
   $.reset($state, init(simulate, seats, config, _seen, evented, hash, lens, lookback, lookahead));
 
@@ -446,18 +447,24 @@ async function main({table_id, filename, at, atProvided, cmds, drop, seen, seat,
     $.swap($state, flush());
   }
 
-  $.each(run, cmds);
-
-  if (move != null) {
-    const cmd = await chooseMove(_.deref($state));
-    _.maybe(cmd, run);
-  } else if (moves) {
-    _.chain($state, _.deref, listMoves, log);
-  }
-
   const $look = $.map(look, $state);
 
   $.sub($look, _.drop(silent ? 1 : 0), log);
+
+  $.each(run, cmds);
+
+  if (moves) {
+    _.chain($state, _.deref, listMoves, log);
+  }
+
+  if (move) {
+    const cmd = await chooseMove(_.deref($state));
+    _.maybe(cmd, run);
+  }
+
+  if (args.prompt) {
+    _.chain($state, _.deref, prompt, $.log);
+  }
 
   if (interactive) {
     await command(run);

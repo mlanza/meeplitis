@@ -1,5 +1,6 @@
 import _ from "../../../../libs/atomic_/core.js";
 import g from "../../../../libs/game_.js";
+import {stringify} from "../../../../libs/stringify.js";
 
 export const WHITE = 0;
 export const BLACK = 1;
@@ -618,9 +619,23 @@ function status(self) {
   return _.chain(self, _.deref, _.get(_, "status"));
 }
 
+function prompt(self, meta){
+  return `
+What follows is a game of Backgammon in progress.  The doubling cube ${self.config.raiseStakes ? "is" : "is **not**"} in use for this match.  The "up" and/or "may" attributes indicate you're ready to act.  The "state" attribute represents the current state of the game as data.  The checkers are counted as various "points" on the board or on the "bar" or "off" the board.  The "moves" attribute lists what moves are available to you.  The "event" attribute tells you what just happened, what immediate effect brought things to the current game state.
+
+You're an expert Backgammon player.  Evaluate the game state and decide which move will best poise you to win.
+
+In your response, explain your rationale and justify your choice.  Return the move you want to make (from the list) in a js code block—**exactly one move**.
+
+${'```js'}
+${stringify(meta, null, 2)}
+${'```'}
+`;
+}
+
 _.doto(Backgammon,
   g.behave,
   _.implement(_.ICompactible, {compact}),
   _.implement(_.IAppendable, {append}),
   _.implement(_.IFunctor, {fmap}),
-  _.implement(g.IGame, {perspective, up, may, moves, undoable, metrics, comparator, textualizer, execute: _.comp(compel, execute), fold, status}));
+  _.implement(g.IGame, {perspective, prompt, up, may, moves, undoable, metrics, comparator, textualizer, execute: _.comp(compel, execute), fold, status}));

@@ -27,7 +27,7 @@ export const metrics = IGame.metrics;
 export const comparator = IGame.comparator;
 export const textualizer = IGame.textualizer;
 
-export function prompt(self, meta = {}){
+export function prompt(self, seat, meta = {}){
   return IGame.prompt(self,
     _.chain(meta,
       _.assoc(_, "up", up(self)),
@@ -35,7 +35,22 @@ export function prompt(self, meta = {}){
       _.assoc(_, "metrics", metrics(self)),
       _.assoc(_, "event", _.chain(self, events, _.last)),
       _.assoc(_, "state", _.deref(self)),
-      _.assoc(_, "moves", _.chain(self, moves, _.toArray))));
+      _.assoc(_, "moves", _.chain(self, s => moves(s, {seat}), _.toArray))));
+}
+
+function delegates(self){
+  return _.chain(self, seats, _.mapIndexed(function(idx, seated){
+    return _.get(seated, "delegate_id") ? idx : null;
+  }, _), _.filtera(_.isSome, _));
+}
+
+export function prompts(self, meta = {}){
+  return _.maybe(
+    _.intersection(delegates(self), up(self)),
+    _.seq,
+    _.mapa(function(seat){
+      return {seat, prompt: prompt(self, seat, meta)}; //because `prompt` (moves) is expensive, call only when necessary
+    }, _));
 }
 
 function perspective2(self, seen){
@@ -196,13 +211,11 @@ function andSnapshot(events, snapshot){
 export function effects([curr, prior, seen, commands]){
   if (_.seq(commands)) {
     const added = andSnapshot(events(curr), _.partial(reality, curr));
-    const delegate = _.detect(_.get(_, "delegate_id"), seats(curr));
-    const details = delegate ? prompt(curr) : null; //prompt (moves) is expensive; call only when necessary
     return {
       added,
-      details, //jsonb
       up: up(curr),
       notify: notify(curr, prior),
+      prompts: prompts(curr)
     }
   } else {
     return perspective(curr, seen);

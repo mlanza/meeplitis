@@ -265,7 +265,7 @@ function frame({idx, frames}){
 function prompt({idx, frames}){
   const bounds = [0, idx];
   const {game} = frames[idx];
-  return g.prompt(game, {bounds});
+  return g.prompts(game, {bounds});
 }
 
 async function command(run){
@@ -406,7 +406,7 @@ await new Command()
     const lookahead = Number(opts.lookahead);
 
     _.chain({table_id, filename, at, atProvided, drop, cmds, seen, seat, lens, lookback, lookahead, cache, prompt, moves, move, silent, interactive},
-      $.see("payload"),
+      //$.see("payload"),
       main);
   })
   .example("Defaults", `tablejam ${demo}`)

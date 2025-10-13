@@ -36,8 +36,10 @@ alter table logs enable row level security;
 create table agents (
   id uuid primary key default gen_random_uuid(),
   agentname text not null,
-  api_key text,
-  model text
+  model text,
+  system_prompt text,
+  unique (agentname),
+  constraint ck_agentname check (agentname ~ '^[a-zA-Z][a-zA-Z0-9\-_]{2,19}$')
 );
 
 create policy "Users can insert their own log entries."
@@ -55,7 +57,8 @@ create table profiles (
     retain_history boolean not null default false,
     capacity smallint null, -- how many open/started tables can this user be present at?
     unique (username),
-    constraint ck_username check (username ~ '^[a-zA-Z][a-zA-Z0-9\-_]{2,19}$');
+    constraint ck_username check (username ~ '^[a-zA-Z][a-zA-Z0-9\-_]{2,19}$')
+);
 
 alter table profiles enable row level security;
 

@@ -612,7 +612,7 @@ function textualizer(self){
 }
 
 function undoable(self, {type}){
-  return !_.includes(["finished", "rolled", "committed", "double-proposed", "accepted", "conceded"], type);
+  return !_.includes(["started", "finished", "rolled", "committed", "double-proposed", "accepted", "conceded"], type);
 }
 
 function status(self) {

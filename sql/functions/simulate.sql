@@ -8,7 +8,7 @@ _slug text;
 _result jsonb;
 _events jsonb;
 _config jsonb;
-_seat_configs jsonb;
+_seated jsonb;
 _payload jsonb;
 _snapshot jsonb;
 _snapshot_event_id varchar;
@@ -23,8 +23,8 @@ join games g on g.id = t.game_id
 where t.id = _table_id
 into _config, _slug, _fn;
 
-select seat_configs(_table_id)
-into _seat_configs;
+select seated(_table_id)
+into _seated;
 
 select id, seq
 from (
@@ -65,7 +65,7 @@ into _snapshot_event_id, _snapshot;
 
 raise log '$ simulate at % for % from event id % to % with snapshot at % -> %', _table_id, case when _seen = '[null]'::jsonb then 'anon' else _seen::varchar end, _from_event_id, _event_id, _snapshot_event_id, _snapshot;
 
-select '{"game": "' || _slug || '", "fn": "' || _fn || '", "seats": ' || _seat_configs::varchar || ', "config": ' || _config::varchar || ', "events": ' || _events::varchar || ', "commands": ' || _commands::varchar || ', "seen": ' || _seen || ', "snapshot": ' || coalesce(_snapshot, 'null')::varchar || '}'
+select '{"game": "' || _slug || '", "fn": "' || _fn || '", "seats": ' || _seated::varchar || ', "config": ' || _config::varchar || ', "events": ' || _events::varchar || ', "commands": ' || _commands::varchar || ', "seen": ' || _seen || ', "snapshot": ' || coalesce(_snapshot, 'null')::varchar || '}'
 into _payload;
 
 return (select simulate(_fn, _payload));

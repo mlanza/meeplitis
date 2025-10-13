@@ -33,6 +33,13 @@ create table logs(
 
 alter table logs enable row level security;
 
+create table agents (
+  id uuid primary key default gen_random_uuid(),
+  agentname text not null,
+  api_key text,
+  model text
+);
+
 create policy "Users can insert their own log entries."
   on logs for insert with check (created_by = auth.uid());
 
@@ -43,6 +50,7 @@ create table profiles (
     headline character varying null,
     website text null,
     description text null,
+    delegate_id uuid references agents(id),
     last_moved_at timestamp null,
     retain_history boolean not null default false,
     capacity smallint null, -- how many open/started tables can this user be present at?

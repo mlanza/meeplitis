@@ -389,7 +389,7 @@ await new Command()
     const interactive = !!opts.interactive;
     const cache = !!opts.cache;
     const moves = !!opts.moves;
-    const move = asCount(opts.move, 0);
+    const move = !!opts.move;
     const prompt = !!opts.prompt;
     const seen = normalizeList(opts.seen);
     const withList = normalizeList(opts.with);
@@ -406,7 +406,7 @@ await new Command()
     const lookahead = Number(opts.lookahead);
 
     _.chain({table_id, filename, at, atProvided, drop, cmds, seen, seat, lens, lookback, lookahead, cache, prompt, moves, move, silent, interactive},
-      //$.see("payload"),
+      $.see("payload"),
       main);
   })
   .example("Defaults", `tablejam ${demo}`)

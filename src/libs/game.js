@@ -196,10 +196,13 @@ function andSnapshot(events, snapshot){
 export function effects([curr, prior, seen, commands]){
   if (_.seq(commands)) {
     const added = andSnapshot(events(curr), _.partial(reality, curr));
+    const delegate = _.detect(_.get(_, "delegate_id"), seats(curr));
+    const details = delegate ? prompt(curr) : null; //prompt (moves) is expensive; call only when necessary
     return {
       added,
+      details, //jsonb
       up: up(curr),
-      notify: notify(curr, prior)
+      notify: notify(curr, prior),
     }
   } else {
     return perspective(curr, seen);

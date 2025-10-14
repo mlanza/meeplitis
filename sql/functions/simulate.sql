@@ -88,7 +88,7 @@ into _req;
 
 raise log '$ simulate %:% in -> %', _game, _req, _payload;
 
-select simulate_local(_game, _payload)
+select simulate_remote(_game, _payload)
 into _result;
 
 raise log '$ simulate %:% out -> %', _game, _req, _result;

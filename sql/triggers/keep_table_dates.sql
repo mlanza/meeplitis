@@ -1,5 +1,11 @@
 create or replace function keep_table_dates() returns trigger
-AS $$
+as $$
+declare
+  _completed boolean;
+  _type varchar;
+  _title varchar;
+  _slug varchar;
+  _thumbnail_url varchar;
 begin
 
   if (new.status = 'started'::table_status and old.status <> 'started'::table_status) then
@@ -15,7 +21,28 @@ begin
         touched_at = now()
     where id = new.id;
 
+    select
+        g.title,
+        g.slug,
+        g.thumbnail_url
+    from tables t
+    join games g on g.id = t.game_id
+    where t.id = new.id
+    into _title, _slug, _thumbnail_url;
+
     --insert into notifications(type, table_id) values('finished', new.id);
+    perform pgmq.send('notifications',
+      jsonb_build_object(
+        'type', 'finished',
+        'table_id', new.id,
+        'outcome', outcome(new.id),
+        'title', _title,
+        'slug', _slug,
+        'thumbnail_url', _thumbnail_url,
+        'recipients', emails(new.id, null)
+      ),
+      0
+    );
   end if;
 
   return new;

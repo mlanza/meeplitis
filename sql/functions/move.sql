@@ -1,7 +1,7 @@
 create or replace function move(_table_id varchar, _commands jsonb)
 returns table(id varchar, table_id varchar, type varchar, seat_id varchar)
 security definer
-set search_path = public
+set search_path = public, pgmq
 language plpgsql
 as $$
 declare
@@ -20,14 +20,19 @@ $$;
 
 create or replace function move(_table_id varchar, _commands jsonb, _seat int)
 returns table(id varchar, table_id varchar, type varchar, seat_id varchar)
+security definer
+set search_path = public, pgmq
 language plpgsql
 as $$
 declare
-_count int;
-_recipients int;
-_simulated jsonb;
-_up smallint[];
-_status table_status;
+  _count int;
+  _recipients int;
+  _simulated jsonb;
+  _up smallint[];
+  _status table_status;
+  _slug text;
+  _title varchar;
+  _thumbnail_url varchar;
 begin
 
 if _seat is null then
@@ -74,7 +79,30 @@ if _recipients > 0 then
     from jsonb_array_elements_text(_simulated->'notify'))
   into _up;
 
+  select
+      g.title,
+      g.slug,
+      g.thumbnail_url
+  from tables t
+  join games g on g.id = t.game_id
+  where t.id = _table_id
+  into _title, _slug, _thumbnail_url;
+
   --insert into notifications(type, table_id, seats) values ('up', _table_id, _up);
+  perform pgmq.send(
+    'notifications',
+    jsonb_build_object(
+      'type', 'up',
+      'table_id', _table_id,
+      'title', _title,
+      'slug', _slug,
+      'thumbnail_url', _thumbnail_url,
+      'recipients', emails(_table_id, _up),
+      'seats', _up
+    ),
+    0
+  );
+
 end if;
 
 return query

@@ -7,6 +7,8 @@ declare
   _simulated jsonb;
   _up smallint[];
   _slug text;
+  _title varchar;
+  _thumbnail_url varchar;
   _next smallint;
 begin
 
@@ -43,10 +45,10 @@ begin
     from jsonb_array_elements(_simulated->'up')
     into _up;
 
-    select slug
+    select slug, title, thumbnail_url
     from games
     where id = new.game_id
-    into _slug;
+    into _slug, _title, _thumbnail_url;
 
     raise log '$ starting % up, %', _up, _simulated;
 
@@ -60,8 +62,33 @@ begin
     where id = new.id;
 
     --insert into notifications(type, table_id) values('started', new.id);
+    perform pgmq.send(
+      'notifications',
+      jsonb_build_object(
+        'type', 'started',
+        'table_id', new.id,
+        'title', _title,
+        'slug', _slug,
+        'thumbnail_url', _thumbnail_url,
+        'recipients', emails(new.id, null)
+      ),
+      0
+    );
 
     --insert into notifications(type, table_id, seats) values('up', new.id, _up);
+    perform pgmq.send(
+      'notifications',
+      jsonb_build_object(
+        'type', 'up',
+        'table_id', new.id,
+        'title', _title,
+        'slug', _slug,
+        'thumbnail_url', _thumbnail_url,
+        'recipients', emails(new.id, _up),
+        'seats', _up
+      ),
+      0
+    );
 
     raise log '$ game `%` started at table `%`', _slug, new.id;
 

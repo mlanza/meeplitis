@@ -5,5 +5,8 @@
   "scripts": {},
   "dependencies": {
     "gemini-cli-updater": "^1.0.3"
+  },
+  "devDependencies": {
+    "supabase": "^2.51.0"
   }
 }

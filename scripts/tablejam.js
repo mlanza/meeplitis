@@ -1,11 +1,11 @@
-#!/usr/bin/env -S deno run --allow-read
-import supabase from "./src/libs/supabase.js";
+#!/usr/bin/env -S deno run --allow-read --allow-write --allow-net
 import { readLines } from "https://deno.land/std@0.224.0/io/mod.ts";
 import { Command } from "https://deno.land/x/cliffy@v1.0.0-rc.4/command/mod.ts";
 import { Select } from "https://deno.land/x/cliffy@v1.0.0-rc.4/prompt/mod.ts";
-import _ from "./src/libs/atomic_/core.js";
-import $ from "./src/libs/atomic_/shell.js";
-import g from "./src/libs/game_.js";
+import supabase from "../src/libs/supabase.js";
+import _ from "../src/libs/atomic_/core.js";
+import $ from "../src/libs/atomic_/shell.js";
+import g from "../src/libs/game_.js";
 
 const $state = $.atom(null);
 const demo = _.str(_.uids(12)());
@@ -44,7 +44,7 @@ async function load(table_id, filename, cache){
 }
 
 function component({slug, release}){
-  return import(`./src/games/${slug}/table/${release}/core.js`);
+  return import(`../src/games/${slug}/table/${release}/core.js`);
 }
 
 function asCount(v, n = 1) {

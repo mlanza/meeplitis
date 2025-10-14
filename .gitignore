@@ -11,3 +11,4 @@ fly/src
 secrets.md
 deno.lock
 table-*.json
+.temp

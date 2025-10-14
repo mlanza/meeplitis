@@ -1,7 +1,7 @@
-import _ from "./src/libs/atomic_/core.js";
-import $ from "./src/libs/atomic_/shell.js";
-import g from "./src/libs/game_.js";
-import supabase from "./src/libs/supabase.js";
+import _ from "../src/libs/atomic_/core.js";
+import $ from "../src/libs/atomic_/shell.js";
+import g from "../src/libs/game_.js";
+import supabase from "../src/libs/supabase.js";
 
 const tableId = Deno.args[0],
       limit   = Deno.args[1] || 10000;
@@ -23,7 +23,7 @@ const table = _tables.data[0],
       commands = [],
       slug = table.game_id.slug,
       config = table.config,
-      {make} = await import(`./src/games/${slug}/core.js`),
+      {make} = await import(`../src/games/${slug}/core.js`),
       simulate = g.simulate(make);
 
 let snapshot = null;

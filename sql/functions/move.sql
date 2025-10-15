@@ -103,6 +103,22 @@ if _recipients > 0 then
     0
   );
 
+  perform net.http_post(
+    url => 'https://miwfiwpgvfhggfnqtfso.supabase.co/functions/v1/notify-consumer',
+    headers => jsonb_build_object(
+      'authorization', 'Bearer ' || (
+        select decrypted_secret from vault.decrypted_secrets
+        where name = 'SUPABASE_SERVICE_ROLE_KEY' limit 1
+      ),
+      'content-type',  'application/json',
+      'x-wake-secret', (
+        select decrypted_secret from vault.decrypted_secrets
+        where name = 'WAKE_SECRET' limit 1
+      )
+    ),
+    body => '{}'::jsonb
+  );
+
 end if;
 
 return query

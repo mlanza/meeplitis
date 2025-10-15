@@ -104,7 +104,7 @@ export function ui(make, describe, desc, template){
         $actionable = $.atom(null), //active player have any possible moves?
         $act = $.map(_.all, $present, $actionable, $ready, $started);
 
-  reg({$touch, $started, $status, $scored, $remarks, $described, $presence, $present, $act});
+  reg({$touch, $started, $status, $scored, $remarks, $described, $presence, $present, $ready, $act, $actionable});
 
   const multiSeated = _.count(_.unique(_.map(_.get(_, "player_id"), seated))) != _.count(seated);
   dom.toggleClass(el, "multi-seated", multiSeated);

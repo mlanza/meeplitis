@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+const conditional = {};
 const queue_name = "notifications";
 const vt = 30;                 // seconds; keep > your max job time
 const qty = 32;                // batch size per read
@@ -30,19 +31,27 @@ Deno.serve(async function(req){
     // DIRECT call to the extension (no public wrappers)
     const { data: msgs, error } = await supabase
       .schema("pgmq")
-      .rpc("read", { queue_name, vt, qty });
+      .rpc("read", { queue_name, vt, qty , conditional});
 
-    console.log("msgs", msgs, "error", error);
-
-    if (error) return new Response(`read error: ${error.message}`, { status: 501 });
+    if (error) {
+      console.log("$ error", error);
+      return new Response(`read error: ${error.message}`, { status: 500 });
+    } else {
+      console.log("$ msgs", msgs);
+    }
 
     if (!msgs?.length) {
       // brief wait to catch just-enqueued work during this wake
       await sleep(TAIL_WAIT_MS);
       const { data: tail, error: tailErr } = await supabase
         .schema("pgmq")
-        .rpc("read", { queue_name, vt, qty });
-      if (tailErr) return new Response(`read error: ${tailErr.message}`, { status: 502 });
+        .rpc("read", { queue_name, vt, qty, conditional });
+
+      if (tailErr) {
+        console.log("$ tail-error", tailErr);
+        return new Response(`read error: ${tailErr.message}`, { status: 500 });
+      }
+
       if (!tail?.length) break;
       for (const m of tail) {
         await supabase.schema("pgmq").rpc("archive", { queue_name, msg_id: m.msg_id });
@@ -58,6 +67,7 @@ Deno.serve(async function(req){
     }
   }
 
-  return new Response(`drained:${drained}`, { status: drained ? 200 : 204 });
+  return drained
+    ? new Response(`drained:${drained}`, { status: 200 })
+    : new Response(null, { status: 204 });
 });
-

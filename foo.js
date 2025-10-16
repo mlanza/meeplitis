@@ -4,6 +4,13 @@ import $ from "./src/libs/atomic_/shell.js";
 import g from "./src/libs/game_.js";
 
 const table_id = Deno.args[0];
+
+function log(obj){
+  $.log(Deno.inspect(obj, { colors: true, compact: true, depth: Infinity, iterableLimit: Infinity }));
+}
+
+
+/*
 const {data, error} = await supabase.rpc('shell', {_table_id: table_id});
 const {table, seated, evented} = data;
 const {slug, release} = table;
@@ -12,9 +19,6 @@ const {make} = await import(`./src/games/${slug}/table/${release}/core.js`);
 
 const simulate = g.simulate(make);
 
-function log(obj){
-  $.log(Deno.inspect(obj, { colors: true, compact: true, depth: Infinity, iterableLimit: Infinity }));
-}
 
 function persp1(seated, evented){
   const loaded = [];
@@ -58,6 +62,13 @@ const effects = g.effects(resp);
 //log({sim});
 
 //[curr, prior, seen, commands]
+*/
 
-log({table, effects, seen, commands});
+const {data, error} = await supabase.rpc('stuff', {p_table_id: table_id});
+
+
+log(data, error)
+
+
+//log({table, evented});//, effects, seen, commands});
 //log({seats, config, loaded, events, commands, seen, table, resp, effs});

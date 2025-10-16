@@ -638,4 +638,4 @@ _.doto(Backgammon,
   _.implement(_.ICompactible, {compact}),
   _.implement(_.IAppendable, {append}),
   _.implement(_.IFunctor, {fmap}),
-  _.implement(g.IGame, {perspective, prompt, up, may, moves, undoable, metrics, comparator, textualizer, execute: execute, fold, status}));
+  _.implement(g.IGame, {perspective, prompt, up, may, moves, undoable, metrics, comparator, textualizer, execute: _.comp(compel, execute), fold, status}));

@@ -1,1 +1,1 @@
-supabase functions deploy mexica_H7z --project-ref miwfiwpgvfhggfnqtfso
+supabase functions deploy mexica-H7z --project-ref miwfiwpgvfhggfnqtfso

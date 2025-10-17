@@ -181,18 +181,23 @@ function splitAt(idx, xs){
   return [xs.slice(0, idx), xs.slice(idx)];
 }
 
+function state(snapshot){ //just in case the `perspetive` (and not `state`) is received
+  const {up, may, state} = snapshot;
+  return up && may && state ? state : snapshot;
+}
+
 export function simulate(make){
-  return function({seats, config = {}, loaded = [], events = [], commands = [], seen = [], snapshot = null}){
+  return function({event, seats, config = {}, loaded = [], events = [], commands = [], seen = [], snapshot = null}){
     if (!_.seq(seats)) {
       throw new Error("Cannot play a game with no one seated at the table");
     }
     const prior =
-      _.chain(make(_.toArray(seats), config, loaded, snapshot),
+      _.chain(make(_.toArray(seats), config, loaded, _.maybe(snapshot, state)),
         _.reduce(fold, _, events),
         _.seq(commands) ? _.compact : _.identity),
           curr  =
       _.reduce((self, command) => execute(self, command, singular(seen)), prior, commands);
-    return [curr, prior, seen, commands];
+    return [curr, prior, seen, commands, event];
   }
 }
 
@@ -208,7 +213,7 @@ function andSnapshot(events, snapshot){
   }, events);
 }
 
-export function effects([curr, prior, seen, commands]){
+export function effects([curr, prior, seen, commands, event]){
   if (_.seq(commands)) {
     const added = andSnapshot(events(curr), _.partial(reality, curr));
     return {
@@ -218,7 +223,7 @@ export function effects([curr, prior, seen, commands]){
       prompts: prompts(curr)
     }
   } else {
-    return perspective(curr, seen);
+    return _.chain(perspective(curr, seen), event ? _.assoc(_, "event", event) : _.identity);
   }
 }
 

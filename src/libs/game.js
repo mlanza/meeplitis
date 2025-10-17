@@ -181,13 +181,18 @@ function splitAt(idx, xs){
   return [xs.slice(0, idx), xs.slice(idx)];
 }
 
+function state(snapshot){ //just in case the `perspetive` (and not `state`) is received
+  const {up, may, state} = snapshot;
+  return up && may && state ? state : snapshot;
+}
+
 export function simulate(make){
   return function({seats, config = {}, loaded = [], events = [], commands = [], seen = [], snapshot = null}){
     if (!_.seq(seats)) {
       throw new Error("Cannot play a game with no one seated at the table");
     }
     const prior =
-      _.chain(make(_.toArray(seats), config, loaded, snapshot),
+      _.chain(make(_.toArray(seats), config, loaded, _.maybe(snapshot, state)),
         _.reduce(fold, _, events),
         _.seq(commands) ? _.compact : _.identity),
           curr  =

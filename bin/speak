@@ -58,7 +58,7 @@ async function main({legacy, query, command, details}){
     return;
   }
 
-  const {make} = await import(`../src/games/${hydrate.data.game}/table/${hydrate.data.release}/core.js`);
+  const {make} = await import(`../src/games/${hydrate.data.slug}/table/${hydrate.data.release}/core.js`);
 
   _.maybe(hydrate.data,
       $.tee(logging("data")),

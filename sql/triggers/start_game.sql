@@ -61,7 +61,6 @@ begin
         up = _up
     where id = new.id;
 
-    --insert into notifications(type, table_id) values('started', new.id);
     perform pgmq.send(
       'notifications',
       jsonb_build_object(
@@ -75,7 +74,6 @@ begin
       0
     );
 
-    --insert into notifications(type, table_id, seats) values('up', new.id, _up);
     perform pgmq.send(
       'notifications',
       jsonb_build_object(

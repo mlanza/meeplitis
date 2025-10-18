@@ -166,23 +166,6 @@ add constraint fk_last_touch
 foreign key (id, last_touch_id)
 references events(table_id, id);
 
-create type notification_type as enum ('started', 'up', 'finished');
-
-create table notifications (
-  seq bigserial not null primary key,
-  table_id varchar(11) references tables(id) on delete cascade,
-  type notification_type not null,
-  seats smallint[],
-  response jsonb,
-  completed boolean not null default false,
-  created_at timestamp not null default now(),
-  executed_at timestamp,
-  tries smallint default 0);
-
-alter table notifications enable row level security;
-
-create index idx_notifications_status on notifications (completed, seq);
-
 insert into games (id, title, slug, release, seats)
   values ('8Mj1', 'Up & Down the River', 'up-down', 'kA4', array[2, 3, 4, 5, 6, 7]),
   values ('SopC', 'Mexica', 'mexica', 'H7z', array[2, 3, 4]),

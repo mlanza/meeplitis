@@ -30,7 +30,6 @@ begin
     where t.id = new.id
     into _title, _slug, _thumbnail_url;
 
-    --insert into notifications(type, table_id) values('finished', new.id);
     perform pgmq.send('notifications',
       jsonb_build_object(
         'type', 'finished',

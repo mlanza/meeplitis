@@ -88,7 +88,6 @@ if _recipients > 0 then
   where t.id = _table_id
   into _title, _slug, _thumbnail_url;
 
-  --insert into notifications(type, table_id, seats) values ('up', _table_id, _up);
   perform pgmq.send(
     'notifications',
     jsonb_build_object(

@@ -1,1 +1,1 @@
-supabase functions deploy updown-kA4 --project-ref miwfiwpgvfhggfnqtfso
+supabase functions deploy up-down-kA4 --project-ref miwfiwpgvfhggfnqtfso

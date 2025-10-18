@@ -9,7 +9,7 @@ export { List, OrderedMap, OrderedSet } from "../immutable.js";
 import "./shell.js";
 
 function map(obj) {
-  return _.ako(obj, Map) ? obj : _.reduce((function(memo, [key, value]) {
+  return _.reduce((function(memo, [key, value]) {
     return memo.set(key, value);
   }), new Map, obj);
 }
@@ -64,7 +64,7 @@ function seq$2(self) {
   return self.size ? self : null;
 }
 
-function reduce$1(self, f, init) {
+function reduce$2(self, f, init) {
   let memo = init;
   let coll = _.seq(self);
   while (coll) {
@@ -88,7 +88,7 @@ var behave$2 = _.does(_.iterable, _.keying("List"), _.implement(_.IEquiv, {
 }), _.implement(_.ILookup, {
   lookup: lookup$1
 }), _.implement(_.IReducible, {
-  reduce: reduce$1
+  reduce: reduce$2
 }), _.implement(_.IMergable, {
   merge: merge$2
 }), _.implement(_.IEmptyableCollection, {
@@ -146,6 +146,10 @@ function reducekv(self, f, init) {
   }), init, keys(self));
 }
 
+function reduce$1(self, f, init) {
+  return _.reduce(f, init, seq$1(self));
+}
+
 function merge$1(self, other) {
   return _.reducekv(_.assoc, self, other);
 }
@@ -166,7 +170,9 @@ function equiv$1(self, other) {
   return self.equals(other);
 }
 
-var behave$1 = _.does(_.iterable, _.keying("Map"), _.implement(_.IKVReducible, {
+var behave$1 = _.does(_.iterable, _.keying("Map"), _.implement(_.IReducible, {
+  reduce: reduce$1
+}), _.implement(_.IKVReducible, {
   reducekv: reducekv
 }), _.implement(_.IEquiv, {
   equiv: equiv$1
@@ -206,23 +212,7 @@ function emptySet() {
   return new Set;
 }
 
-function distinct2(coll, seen) {
-  return _.seq(coll) ? _.lazySeq((function() {
-    let xs = coll;
-    while (_.seq(xs)) {
-      let x = _.first(xs);
-      xs = _.rest(xs);
-      if (!_.includes(seen, x)) {
-        return _.cons(x, distinct2(xs, _.conj(seen, x)));
-      }
-    }
-    return _.emptyList();
-  })) : _.emptyList();
-}
-
-function distinct(coll) {
-  return distinct2(coll, set());
-}
+const distinct = _.distinctly(set());
 
 function seq(self) {
   return count(self) ? self : null;

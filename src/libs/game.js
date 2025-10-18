@@ -186,6 +186,20 @@ function state(snapshot){ //just in case the `perspetive` (and not `state`) is r
   return up && may && state ? state : snapshot;
 }
 
+//TODO implement as protocol?
+function precipitatedBy2(self, event){
+  const fn = _.constructs(self.constructor);
+  return fn(self.seats, self.config, [event], self.state);
+}
+
+function precipitatedBy1(event){
+  return function(self){
+    return precipitatedBy2(self, event);
+  }
+}
+
+const precipitatedBy = _.overload(null, preciptatedBy1, precipitatedBy2);
+
 export function simulate(make){
   return function({event, seats, config = {}, loaded = [], events = [], commands = [], seen = [], snapshot = null}){
     if (!_.seq(seats)) {
@@ -194,10 +208,10 @@ export function simulate(make){
     const prior =
       _.chain(make(_.toArray(seats), config, loaded, _.maybe(snapshot, state)),
         _.reduce(fold, _, events),
-        _.seq(commands) ? _.compact : _.identity),
+        _.seq(commands) ? _.compact : precipitatedBy(event)),
           curr  =
       _.reduce((self, command) => execute(self, command, singular(seen)), prior, commands);
-    return [curr, prior, seen, commands, event];
+    return [curr, prior, seen, commands];
   }
 }
 
@@ -213,8 +227,10 @@ function andSnapshot(events, snapshot){
   }, events);
 }
 
-export function effects([curr, prior, seen, commands, event]){
-  if (_.seq(commands)) {
+export function effects([curr, prior, seen, commands]){
+  if (curr === prior) {
+    return perspective(curr, seen);
+  } else {
     const added = andSnapshot(events(curr), _.partial(reality, curr));
     return {
       added,
@@ -222,8 +238,6 @@ export function effects([curr, prior, seen, commands, event]){
       notify: notify(curr, prior),
       prompts: prompts(curr)
     }
-  } else {
-    return _.chain(perspective(curr, seen), event ? _.assoc(_, "event", event) : _.identity);
   }
 }
 

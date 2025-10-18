@@ -1,1 +1,1 @@
-supabase functions deploy backgammon_uJl --project-ref miwfiwpgvfhggfnqtfso
+supabase functions deploy backgammon-uJl --project-ref miwfiwpgvfhggfnqtfso

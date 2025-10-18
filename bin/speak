@@ -1,0 +1,69 @@
+#!/usr/bin/env -S deno run --allow-read --allow-write --allow-net
+import supabase from "../src/libs/supabase.js";
+import _ from "../src/libs/atomic_/core.js";
+import $ from "../src/libs/atomic_/shell.js";
+import g from "../src/libs/game_.js";
+import { Command } from "https://deno.land/x/cliffy@v1.0.0-rc.4/command/mod.ts";
+
+await new Command()
+  .name("Speak")
+  .description("Simulated speaking to a game endpoint")
+  .arguments("<table:string>")
+  .option("--event <event:string>", "Event ID")
+  .option("--commands <commands:string>", "Commands string")
+  .option("--seat <seat:number>", "Seat number (integer)")
+  .option("--legacy", "Enable legacy mode") // 👈 boolean flag
+  .action(function (opts, table){
+    const {command, query} = _.chain({
+      _table_id: table,
+      _event_id: opts.event ?? null,
+      _commands: opts.commands ? JSON.parse(opts.commands) : []
+    }, _.compact, _.merge(_, {_seat: opts.seat}), typify);
+    const details = query?.details ?? command?.details;
+    const legacy = !!opts.legacy;
+    _.chain({legacy, query, command, details},
+      _.compact,
+      $.tee(logging("args")),
+      main);
+  })
+  .parse(Deno.args);
+
+function typify(details) {
+  const { _table_id, _event_id, _commands, _seat } = details
+  return _.seq(_commands)
+    ? { command: { type: "move", details } }
+    : { query: { type: "perspective", details } }
+}
+
+function log(obj){
+  $.log(Deno.inspect(obj, { colors: true, compact: true, depth: Infinity, iterableLimit: Infinity }));
+}
+
+function annotate(label){
+  return function(obj){
+    return obj ? [label, obj] : null;
+  }
+}
+
+function logging(label){
+  return _.opt(annotate(label), log);
+}
+
+async function main({legacy, query, command, details}){
+  const hydrate = await supabase.rpc(legacy ? 'hydrate_old' : 'hydrate', details);
+
+  if (hydrate.error) {
+    _.maybe(hydrate.error,
+      $.tee(logging("error")));
+    return;
+  }
+
+  const {make} = await import(`../src/games/${hydrate.data.game}/table/${hydrate.data.release}/core.js`);
+
+  _.maybe(hydrate.data,
+      $.tee(logging("data")),
+      g.simulate(make),
+      $.tee(logging("simulate")),
+      g.effects,
+      $.tee(logging("effects")));
+}

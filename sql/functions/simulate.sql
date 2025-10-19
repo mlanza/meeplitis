@@ -20,7 +20,7 @@ _status int;
 _result jsonb;
 begin
 
-raise log '$ simulating % #% -> %', _slug, _req, _payload;
+--raise log '$ simulating % #% -> %', _slug, _req, _payload;
 
 select status, content
 from http(('POST'::varchar, ('https://miwfiwpgvfhggfnqtfso.supabase.co/functions/v1/' || _slug || '-' || _release)::varchar, ARRAY[http_header('Authorization','Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTYzODUwMzIzMywiZXhwIjoxOTU0MDc5MjMzfQ.i1l7NNGYF7mChifi8X-Cn_tis-us1Zq1ntyVW-Amdf8')], 'application/json', _payload::varchar)::http_request)
@@ -30,7 +30,7 @@ if _result is null or _status > 222 then
   raise exception 'Unable to process % payload % ', _slug, _payload;
 end if;
 
-raise log '$ simulated % #% (%) -> %', _slug, _req, _status, _result;
+--raise log '$ simulated % #% (%) -> %', _slug, _req, _status, _result;
 
 return _result;
 

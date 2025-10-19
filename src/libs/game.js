@@ -39,8 +39,9 @@ export function prompt(self, seat, meta = {}){
 }
 
 export function prompts(self, meta = {}){
+  const acting = _.includes(up(self), _);
   return _.chain(self, seats, _.mapIndexed(function(seat, seated){
-    return _.get(seated, "delegate_id") ? prompt(self, seat, meta) : null;
+    return _.get(seated, "delegate_id") && acting(seat) ? prompt(self, seat, meta) : null;
   }, _), _.toArray, function(prompts){
     return _.chain(prompts, _.compact, _.count) ? prompts : null;
   });

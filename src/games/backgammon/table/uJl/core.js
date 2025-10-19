@@ -619,17 +619,36 @@ function status(self) {
   return _.chain(self, _.deref, _.get(_, "status"));
 }
 
-function prompt(self, meta){
+function prompt(self, meta) {
   return `
-What follows is a game of Backgammon in progress.  The doubling cube ${self.config.raiseStakes ? "is" : "is **not**"} in use for this match.  The "up" and/or "may" attributes indicate you're ready to act.  The "state" attribute represents the current state of the game as data.  The checkers are counted as various "points" on the board or on the "bar" or "off" the board.  The "moves" attribute lists what moves are available to you.  The "event" attribute tells you what just happened, what immediate effect brought things to the current game state.
+You are an expert Backgammon player.
 
-You're an expert Backgammon player.  Evaluate the game state and decide which move will best poise you to win.
+## Task
+Choose exactly one move from **moves**.
 
-In your response, explain your rationale and justify your choice.  Return the move you want to make (from the list) in a js code block—**exactly one move**.
+## Strict Output Contract
+Reply with exactly TWO fenced code blocks, in this order:
 
-${'```js'}
-${stringify(meta, null, 2)}
-${'```'}
+1\) \`js\` — contains exactly the chosen move object copied verbatim from \`moves\`. No extra keys.
+2\) \`md\` — your rationale (not too wordy) for humans (any formatting allowed).
+
+If there is no legal move, the first block must be:
+
+\`\`\`js
+{"error":"no legal move"}
+\`\`\`
+
+## Your Perspective
+
+The \`up\` and/or \`may\` attributes indicate you're ready to act.
+The \`state\` attribute represents the current state of the game as data.
+The checkers are counted as various \`points\` on the board or on the \`bar\` or \`off\` the board.
+The \`moves\` attribute lists what moves are available to you.
+The \`event\` attribute tells you what just happened, what immediate effect brought things to the current game state.
+
+\`\`\`js
+${JSON.stringify(meta, null, 2)}
+\`\`\`
 `;
 }
 

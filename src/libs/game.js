@@ -228,6 +228,31 @@ export function effects([curr, prior, seen]){
   }
 }
 
+export function handle(make, log = _.noop){
+  function see(label){
+    return function(value) {
+      log(label, value);
+      return value;
+    };
+  }
+
+  const f = _.pipe(
+    see("got"),
+    simulate(make),
+    see("simulate"),
+    effects,
+    see("effects"));
+
+  return async function (req){
+    const payload = await req.json(),
+          result = f(payload);
+    return new Response(JSON.stringify(result), {
+      headers: { "Content-Type": "application/json" },
+      status: 200
+    });
+  };
+}
+
 function added(self){
   const events = IGame.events(self);
   const last = _.last(events),

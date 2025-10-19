@@ -86,7 +86,7 @@ function normalizeList(vs) {
     .filter(Boolean);
 }
 
-const LENS_ALLOWED = new Set(["game", "event", "perspective", "prompts", "state", "timeline", "moves"]);
+const LENS_ALLOWED = new Set(["game", "event", "effects", "perspective", "prompts", "state", "timeline", "moves"]);
 
 function resolveLens(withList, withoutList) {
   const lens = new Set(["timeline", "perspective"]); // defaults
@@ -194,11 +194,21 @@ function perspective(seen){
   }
 }
 
+function effects(seen){
+  return function(jnl){
+    debugger
+    const {pos} = jnl;
+    const [curr, prior] = _.revision(jnl, pos);
+    return g.effects([curr, prior, seen]);
+  }
+}
+
 function look({jnl, seen, lens, lookback, lookahead}){
   const keys = {
     game: _.deref,
     prompts: prompts,
     timeline: timeline(lookback, lookahead),
+    effects: effects(seen),
     perspective: perspective(seen),
     event: _.pipe(_.deref, g.events, _.last),
     moves: _.pipe(_.deref, g.moves, _.compact, _.toArray),

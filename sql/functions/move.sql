@@ -97,6 +97,7 @@ if _recipients > 0 then
       'slug', _slug,
       'thumbnail_url', _thumbnail_url,
       'recipients', emails(_table_id, _up),
+      'prompts', (_simulated->'prompts'),
       'seats', _up
     ),
     0

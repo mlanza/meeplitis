@@ -38,19 +38,12 @@ export function prompt(self, seat, meta = {}){
       _.assoc(_, "moves", _.chain(self, s => moves(s, {seat}), _.toArray))));
 }
 
-function delegates(self){
-  return _.chain(self, seats, _.mapIndexed(function(idx, seated){
-    return _.get(seated, "delegate_id") ? idx : null;
-  }, _), _.filtera(_.isSome, _));
-}
-
 export function prompts(self, meta = {}){
-  return _.maybe(
-    _.intersection(delegates(self), up(self)),
-    _.seq,
-    _.mapa(function(seat){
-      return {seat, prompt: prompt(self, seat, meta)}; //because `prompt` (moves) is expensive, call only when necessary
-    }, _));
+  return _.chain(self, seats, _.mapIndexed(function(seat, seated){
+    return _.get(seated, "delegate_id") ? prompt(self, seat, meta) : null;
+  }, _), _.toArray, function(prompts){
+    return _.chain(prompts, _.compact, _.count) ? prompts : null;
+  });
 }
 
 function perspective2(self, seen){

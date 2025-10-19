@@ -4,7 +4,20 @@ import * as g from "https://meeplitis.com/libs/game.js";
 import {make} from "https://meeplitis.com/games/up-down/table/kA4/core.js";
 const simulate = comp(g.effects, g.simulate(make));
 
-console.log("Let's play Up & Down the River!");
+function see(label){
+  return function(value) {
+    console.log(label, value);
+    return value;
+  };
+}
+
+const simulate = pipe(
+  //see("got"),
+  g.simulate(make),
+  //see("simulate"),
+  g.effects,
+  //see("effects")
+);
 
 Deno.serve(async function (req){
   const payload = await req.json(),

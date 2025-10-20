@@ -1,0 +1,56 @@
+[{
+    "data": {
+        "message": "Hello from the Edge Function!",
+        "receivedData": {},
+        "user": {
+            "id": "5e6b12f5-f24c-4fd3-8812-f537778dc5c2",
+            "aud": "authenticated",
+            "role": "authenticated",
+            "email": "brdgamz+capnemo@gmail.com",
+            "email_confirmed_at": "2022-08-17T22:06:00.121523Z",
+            "invited_at": "2022-08-17T22:05:12.738513Z",
+            "phone": "",
+            "confirmation_sent_at": "2022-08-17T22:05:12.738513Z",
+            "confirmed_at": "2022-08-17T22:06:00.121523Z",
+            "recovery_sent_at": "2023-09-04T21:44:22.353323Z",
+            "email_change_sent_at": "2022-11-11T03:53:51.031502Z",
+            "last_sign_in_at": "2025-10-19T12:42:48.505966Z",
+            "app_metadata": {
+                "provider": "email",
+                "providers": [
+                    "email"
+                ]
+            },
+            "user_metadata": {},
+            "identities": [
+                {
+                    "identity_id": "7c034f01-da2d-4c5f-897b-dd489fbf63da",
+                    "id": "5e6b12f5-f24c-4fd3-8812-f537778dc5c2",
+                    "user_id": "5e6b12f5-f24c-4fd3-8812-f537778dc5c2",
+                    "identity_data": {
+                        "email": "brdgamz+capnemo@gmail.com",
+                        "sub": "5e6b12f5-f24c-4fd3-8812-f537778dc5c2"
+                    },
+                    "provider": "email",
+                    "last_sign_in_at": "2022-11-25T00:00:00Z",
+                    "created_at": "2022-11-25T00:00:00Z",
+                    "updated_at": "2022-11-25T00:00:00Z",
+                    "email": "brdgamz+capnemo@gmail.com"
+                }
+            ],
+            "created_at": "2022-08-17T22:05:12.733239Z",
+            "updated_at": "2025-10-19T12:42:48.562198Z",
+            "is_anonymous": false
+        }
+    },
+    "error": null,
+    "response": {}
+},{
+    "data": {
+        "message": "Hello from the Edge Function!",
+        "receivedData": {},
+        "user": null
+    },
+    "error": null,
+    "response": {}
+}]

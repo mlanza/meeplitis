@@ -29,6 +29,7 @@ declare
   _recipients int;
   _simulated jsonb;
   _up smallint[];
+  _notify smallint[];
   _status table_status;
   _slug text;
   _title varchar;
@@ -70,56 +71,58 @@ set last_moved_at = now()
 from seats s
 where p.id = s.player_id and s.table_id = _table_id and s.seat = _seat;
 
+select
+    g.title,
+    g.slug,
+    g.thumbnail_url
+from tables t
+join games g on g.id = t.game_id
+where t.id = _table_id
+into _title, _slug, _thumbnail_url;
+
 select jsonb_array_length((_simulated->'notify')::jsonb)
 into _recipients;
 
-if _recipients > 0 then
-  select array(
-    select cast(value AS smallint)
-    from jsonb_array_elements_text(_simulated->'notify'))
-  into _up;
+select array(
+  select cast(value AS smallint)
+  from jsonb_array_elements_text(_simulated->'up'))
+into _up;
 
-  select
-      g.title,
-      g.slug,
-      g.thumbnail_url
-  from tables t
-  join games g on g.id = t.game_id
-  where t.id = _table_id
-  into _title, _slug, _thumbnail_url;
+select array(
+  select cast(value AS smallint)
+  from jsonb_array_elements_text(_simulated->'notify'))
+into _notify;
 
-  perform pgmq.send(
-    'notifications',
-    jsonb_build_object(
-      'type', 'up',
-      'table_id', _table_id,
-      'title', _title,
-      'slug', _slug,
-      'thumbnail_url', _thumbnail_url,
-      'recipients', emails(_table_id, _up),
-      'prompts', (_simulated->'prompts'),
-      'seats', _up
+perform pgmq.send(
+  'notifications',
+  jsonb_build_object(
+    'type', 'up',
+    'table_id', _table_id,
+    'title', _title,
+    'slug', _slug,
+    'thumbnail_url', _thumbnail_url,
+    'recipients', emails(_table_id, _notify),
+    'prompts', (_simulated->'prompts'),
+    'seats', _up
+  ),
+  0
+);
+
+perform net.http_post(
+  url => 'https://miwfiwpgvfhggfnqtfso.supabase.co/functions/v1/notify-consumer',
+  headers => jsonb_build_object(
+    'authorization', 'Bearer ' || (
+      select decrypted_secret from vault.decrypted_secrets
+      where name = 'SUPABASE_SERVICE_ROLE_KEY' limit 1
     ),
-    0
-  );
-
-  perform net.http_post(
-    url => 'https://miwfiwpgvfhggfnqtfso.supabase.co/functions/v1/notify-consumer',
-    headers => jsonb_build_object(
-      'authorization', 'Bearer ' || (
-        select decrypted_secret from vault.decrypted_secrets
-        where name = 'SUPABASE_SERVICE_ROLE_KEY' limit 1
-      ),
-      'content-type',  'application/json',
-      'x-wake-secret', (
-        select decrypted_secret from vault.decrypted_secrets
-        where name = 'WAKE_SECRET' limit 1
-      )
-    ),
-    body => '{}'::jsonb
-  );
-
-end if;
+    'content-type',  'application/json',
+    'x-wake-secret', (
+      select decrypted_secret from vault.decrypted_secrets
+      where name = 'WAKE_SECRET' limit 1
+    )
+  ),
+  body => '{}'::jsonb
+);
 
 return query
 insert into events (table_id, type, details, undoable, seat_id, snapshot)

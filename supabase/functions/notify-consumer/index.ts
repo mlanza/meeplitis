@@ -23,7 +23,8 @@ const supabase = createClient(
 console.log("Ready");
 
 async function handle(msg, ctx) {
-  console.log({step: `handling ${msg.message.type}`, msg, ctx});
+  //console.log({step: `dispose ${msg.message.type}`, msg});
+  console.log({step: `handling ${msg.message.type}`, msg});
   const msg_id = msg.msg_id;
   if (msg.read_ct > 5) {
     console.error(`Message ${msg_id} exceeded retry threshold.`);
@@ -34,35 +35,35 @@ async function handle(msg, ctx) {
       const {type, seats, table_id, title, slug, thumbnail_url, recipients, prompts} = msg.message;
       for (const seat of seats) {
         const prompt = prompts?.[seat];
-        if (!prompt) continue; // skip if no prompt for this seat
-        try {
-          console.log({step: "deciding", msg_id, prompt});
-          const move = await fetch(`${SUPABASE_URL}/functions/v1/decide-move`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`
-            },
-            body: JSON.stringify({prompt})
-          }).then(resp => resp.json());
-          const commands = [move];
-          const decided = {
-            _table_id: table_id,
-            _seat: seat,
-            _commands: commands
-          };
-          console.log({step: "moving", msg_id, decided});
-          //await sleep(5000);
-          const resp = await supabase.rpc('move', decided);
-          console.log({step: "moved", msg_id, resp});
-          const {data, error, status} = resp;
-          if (error) {
-            console.error(status, error);
+        if (prompt) {
+          try {
+            console.log({step: "deciding", msg_id, prompt});
+            const move = await fetch(`${SUPABASE_URL}/functions/v1/decide-move`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`
+              },
+              body: JSON.stringify({prompt})
+            }).then(resp => resp.json());
+            const commands = [move];
+            const decided = {
+              _table_id: table_id,
+              _seat: seat,
+              _commands: commands
+            };
+            console.log({step: "moving", msg_id, decided});
+            const resp = await supabase.rpc('move', decided);
+            console.log({step: "moved", msg_id, resp});
+            const {data, error, status} = resp;
+            if (error) {
+              console.error({msg_id, status, error});
+              return 1;
+            }
+          } catch (ex) {
+            console.error({msg_id, ex});
             return 1;
           }
-        } catch (err) {
-          console.error(`seat ${seat} failed:`, err);
-          return;
         }
       }
       return 0;

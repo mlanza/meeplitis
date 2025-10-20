@@ -647,11 +647,12 @@ img[data-action="may"] {
 #table .zone[data-presence] {
   transition: box-shadow 0.3s ease-in-out;
 }
-#table .zone[data-presence="offline"] div.player {
+#table .zone[data-presence="offline"][data-delegate="false"] div.player {
   opacity: .7;
   box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0);
 }
-#table .zone[data-presence="online"] div.player {
+#table .zone[data-presence="online"] div.player,
+#table .zone[data-delegate="true"] div.player {
   animation: flare 1s ease-out;
 }
 #table .zone[data-presence="online"].yours div.player {

@@ -131,7 +131,8 @@ export function ui(make, describe, desc, template){
 
   //render fixed player zones
   $.eachIndexed(function(seat, {username, avatar_url}){
-    dom.append(els.players, zone(seat, username, avatar_url, template(seat)));
+    const delegate = _.getIn(seated, [seat, "delegate_id"]);
+    dom.append(els.players, zone(seat, username, avatar_url, delegate, template(seat)));
   }, seated);
 
   _.maybe(dom.sel1(`[data-seat='${seat}']`, el), dom.addClass(_, "yours"));
@@ -311,8 +312,8 @@ export function player(username, avatar_url, seat, ...contents){
     img({"data-action": "", src: "/images/pawn.svg"}));
 }
 
-export function zone(seat, username, avatar_url, {stats, resources}){
-  return div({class: "zone", "data-seat": seat, "data-username": username, "data-presence": ""},
+export function zone(seat, username, avatar_url, delegate, {stats, resources}){
+  return div({class: "zone", "data-delegate": !!delegate, "data-seat": seat, "data-username": username, "data-presence": ""},
     player(username, avatar_url, seat, stats),
     div({class: "area"}, resources));
 }

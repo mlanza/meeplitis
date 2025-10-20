@@ -99,7 +99,7 @@ function init(make, seats, config, seen, evented, hash, lens, lookback, lookahea
   const jnl = _.reduce(function(memo, event){
     return _.fmap(memo, g.fold(_, event));
   }, _.journal(make(seats, config)), evented);
-  const init = {jnl, seen, lens, lookback, lookahead};
+  const init = {jnl, seen, lens, tuckedLens: ["state"], lookback, lookahead};
   return {...init, init};
 }
 
@@ -196,36 +196,60 @@ function perspective(seen){
 
 function effects(seen){
   return function(jnl){
-    debugger
     const {pos} = jnl;
     const [curr, prior] = _.revision(jnl, pos);
     return g.effects([curr, prior, seen]);
   }
 }
 
-function look({jnl, seen, lens, lookback, lookahead}){
-  const keys = {
-    game: _.deref,
-    prompts: prompts,
-    timeline: timeline(lookback, lookahead),
-    effects: effects(seen),
-    perspective: perspective(seen),
-    event: _.pipe(_.deref, g.events, _.last),
-    moves: _.pipe(_.deref, g.moves, _.compact, _.toArray),
-    state: _.pipe(_.deref, _.deref)
+function looking(alt = null){
+  return function look({jnl, seen, lens, lookback, lookahead}){
+    const keys = {
+      game: _.deref,
+      prompts: _.pipe(_.deref, _.plug(g.prompts, _, {})),
+      timeline: timeline(lookback, lookahead),
+      effects: effects(seen),
+      perspective: perspective(seen),
+      event: _.pipe(_.deref, g.events, _.last),
+      moves: _.pipe(_.deref, g.moves, _.compact, _.toArray),
+      state: _.pipe(_.deref, _.deref)
+    }
+    return _.reduce(function(memo, key){
+      const f = _.get(keys, key);
+      return _.assoc(memo, key, f(jnl));
+    }, {}, alt ?? lens);
   }
-  return _.reduce(function(memo, key){
-    const f = _.get(keys, key);
-    return _.assoc(memo, key, f(jnl));
-  }, {}, lens);
 }
 
-function state({jnl}){
-  return _.chain(jnl, _.deref, _.deref);
+const look = looking();
+
+function tuckLens(state){
+  const {lens} = state;
+  const tuckedLens = lens;
+  return {...state, tuckedLens}
 }
 
-function prompts({jnl}){
-  return _.chain(jnl, _.deref, _.plug(g.prompts, _, {}));
+function untuckLens(state){
+  const {tuckedLens} = state;
+  const lens = tuckedLens;
+  return {...state, tuckedLens: state.lens, lens};
+}
+
+const abbrs = {
+  "s": "state",
+  "m": "moves",
+  "h": "head",
+  "t": "tail",
+  "u": "undo",
+  "r": "redo",
+  "g": "game",
+  "p": "perspective",
+  "pr": "prompts",
+  "q": "quit"
+};
+
+function expand(term){
+  return _.get(abbrs, term, term);
 }
 
 async function command(run){
@@ -233,78 +257,85 @@ async function command(run){
 
   for await (const line of readLines(Deno.stdin)) {
     try {
-      switch (line.trim()) {
-        case "move":
-        case "m":
-          const cmd = await _.chain($state, _.deref, chooseMove);
-          _.maybe(cmd, run);
-          break;
+      const str = line.trim();
+      const regex = /^([+\-=])(.+)$/;
+      const match = str.match(regex);
+      if (match) {
+        const [, operator, text] = match;
+        const items = _.split(text, ",");
+        switch (operator) {
+          case "=":
+            $.swap($state, _.pipe(tuckLens, _.assoc(_, "lens", items)));
+            break;
+          case "+":
+            $.swap($state, _.pipe(tuckLens, _.update(_, "lens", _.comp(_.toArray, _.unique, _.conj(_, ...items)))));
+            break;
+          case "-":
+            $.swap($state, _.pipe(tuckLens, _.update(_, "lens", _.reduce(_.omit, _, items))));
+            break;
+        }
+      } else {
+        const term = expand(line.trim());
+        switch (term) {
+          case ".":
+            $.swap($state, untuckLens);
+            break;
 
-        case "reset":
-          $.swap($state, reset());
-          break;
+          case "move":
+            const cmd = await _.chain($state, _.deref, chooseMove);
+            _.maybe(cmd, run);
+            break;
 
-        case "game":
-          _.chain($state, _.deref, _.get(_, "jnl"), _.deref, log);
-          break;
+          case "reset":
+            $.swap($state, reset());
+            break;
 
-        case "undo":
-        case "u":
-          $.swap($state, undo());
-          break;
+          case "undo":
+            $.swap($state, undo());
+            break;
 
-        case "redo":
-        case "r":
-          $.swap($state, redo());
-          break;
+          case "redo":
+            $.swap($state, redo());
+            break;
 
-        case "flush":
-          $.swap($state, flush());
-          break;
+          case "flush":
+            $.swap($state, flush());
+            break;
 
-        case "head":
-        case "h":
-          $.swap($state, head());
-          break;
+          case "head":
+          case "h":
+            $.swap($state, head());
+            break;
 
-        case "tail":
-        case "t":
-          $.swap($state, tail());
-          break;
+          case "tail":
+          case "t":
+            $.swap($state, tail());
+            break;
 
-        case "moves":
-          _.chain($state, _.deref, listMoves, logs);
-          break;
+          case "game":
+          case "state":
+          case "moves":
+          case "timeline":
+          case "prompts":
+          case "perspective":
+            _.chain($state, _.deref, looking([term]), log);
+            break;
 
-        case "state":
-        case "s":
-          _.chain($state, _.deref, state, log);
-          break;
+          case "at":
+            const id = await _.chain($state, _.deref, _.get(_, "jnl"), _.deref, chooseEvent);
+            if (id) {
+              $.swap($state, _.pipe(to(id), flush()));
+            }
+            break;
 
-        case "perspective":
-        case "p":
-          _.chain($state, _.deref, perpective, log);
-          break;
+          case "exit":
+          case "quit":
+            return;
 
-        case "prompts":
-          _.chain($state, _.deref, prompts, $.log);
-          break;
-
-        case "at":
-          const id = await _.chain($state, _.deref, _.get(_, "jnl"), _.deref, chooseEvent);
-          if (id) {
-            $.swap($state, _.pipe(to(id), flush()));
-          }
-          break;
-
-        case "exit":
-        case "quit":
-        case "q":
-          return;
-
-        default:
-          run(line.trim()); //everything else is a command for the game
-          break;
+          default:
+            run(line.trim()); //everything else is a command for the game
+            break;
+        }
       }
 
     } catch (ex) {
@@ -317,7 +348,7 @@ async function command(run){
 }
 
 async function requestCommand(){
-  log({commands: "p/erspective, s/state, m/ove, moves, game, prompts, u/ndo, r/edo, flush, h/ead, t/ail, moves, at, reset, exit, q"});
+  log({commands: "p/erspective, s/tate, move, m/oves, game, pr/ompts, u/ndo, r/edo, flush, h/ead, t/ail, moves, at, reset, +{with[,...]}, +{without[,...]}, ={lens}, (.) swap lens, exit, q"});
   const encoder = new TextEncoder();
   await Deno.stdout.write(encoder.encode("> "));  // prompt again after output
 }
@@ -411,7 +442,7 @@ async function main(args) {
   $.each(run, args.cmds);
 
   if (args.moves) {
-    _.chain($state, _.deref, listMoves, log);
+    _.chain($state, _.deref, looking(["moves"]), log);
   }
 
   if (args.move) {
@@ -420,7 +451,7 @@ async function main(args) {
   }
 
   if (args.prompts) {
-    _.chain($state, _.deref, prompts, $.log);
+    _.chain($state, _.deref, looking(["prompts"]), log);
   }
 
   if (args.interactive) {

@@ -6,6 +6,7 @@ declare
   _seated jsonb;
   _simulated jsonb;
   _up smallint[];
+  _notify smallint[];
   _slug text;
   _title varchar;
   _thumbnail_url varchar;
@@ -45,6 +46,10 @@ begin
     from jsonb_array_elements(_simulated->'up')
     into _up;
 
+    select array_agg(value::smallint)::smallint[]
+    from jsonb_array_elements(_simulated->'notify')
+    into _notify;
+
     select slug, title, thumbnail_url
     from games
     where id = new.game_id
@@ -82,7 +87,8 @@ begin
         'title', _title,
         'slug', _slug,
         'thumbnail_url', _thumbnail_url,
-        'recipients', emails(new.id, _up),
+        'recipients', emails(new.id, _notify),
+        'prompts', (_simulated->'prompts'),
         'seats', _up
       ),
       0

@@ -52,19 +52,17 @@ function logging(label){
 async function main({legacy, query, command, details}){
   const hydrate = await supabase.rpc(legacy ? 'hydrate_old' : 'hydrate', details);
 
-  if (hydrate.error) {
-    _.maybe(hydrate.error,
-      $.tee(logging("error")));
-    return;
-  }
+  const {make} = hydrate.data ? await import(`../src/games/${hydrate.data.slug}/table/${hydrate.data.release}/core.js`) : {};
 
-  const {make} = await import(`../src/games/${hydrate.data.slug}/table/${hydrate.data.release}/core.js`);
+  const $data = $.atom(hydrate.data),
+        $error = $.atom(hydrate.error),
+        $simulate = $.map(g.simulate(make), $data),
+        $effects = $.map(g.effects, $simulate),
+        $moves = $.map(_.pipe(_.first, g.moves(_, {seat: details.seat}), _.toArray), $simulate);
 
-  _.maybe(hydrate.data,
-      $.tee(logging("data")),
-      g.simulate(make),
-      $.tee(logging("simulate")),
-      _.first,
-      _.pipe(g.moves(_, {seat: 0}), _.toArray),
-      $.tee(logging("effects")));
+  $.sub($data, logging("hydrate"));
+  $.sub($simulate, logging("simulate"));
+  $.sub($effects, logging("effects"));
+  $.sub($moves, logging("moves"));
+  $.sub($error, _.filter(_.isSome), logging("error"));
 }

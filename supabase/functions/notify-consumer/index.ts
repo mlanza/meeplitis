@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const conditional = {};
 const queue_name = "notifications";
-const vt = 30;                 // seconds; keep > your max job time
+const vt = 30;                 // seconds; keep > your max *per-message* handling time
 const qty = 32;                // batch size per read
 const TAIL_WAIT_MS = 1500;     // tiny grace to catch tail arrivals
 const MAX_SEC = 55;            // timebox the invocation
@@ -53,12 +53,12 @@ async function handle(msg, ctx) {
               _commands: commands
             };
             console.log({step: "moving", msg_id, decided});
-            const resp = await supabase.rpc('move', decided);
-            console.log({step: "moved", msg_id, resp});
-            const {data, error, status} = resp;
+            const {data, error, status} = await supabase.rpc('move', decided);
             if (error) {
-              console.error({msg_id, status, error});
+              console.error({step: "moved", msg_id, status, error});
               return 1;
+            } else {
+              console.log({step: "moved", msg_id, status, data});
             }
           } catch (ex) {
             console.error({msg_id, ex});

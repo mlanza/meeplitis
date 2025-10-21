@@ -23,6 +23,7 @@ function logs(arr){
 async function load(table_id, filename, cache){
   try {
     await Deno.stat(filename); // throws if not found
+    log(`Read ${filename} cache.`);
     const text = await Deno.readTextFile(filename);
     const [table, seated, config, evented] = JSON.parse(text);
     return [table, seated, config, evented];
@@ -38,6 +39,7 @@ async function load(table_id, filename, cache){
     const data = [{id, slug, game_id, release}, seated, config, evented];
     if (cache) {
       await Deno.writeTextFile(filename, JSON.stringify(data));
+      log(`Wrote ${filename} cache.`);
     }
     return data;
   }

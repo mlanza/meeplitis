@@ -211,12 +211,9 @@ export function simulate(make){
 
 export function effects([curr, prior, seen, view]){
   if (curr === prior) {
-    const seat = _.first(seen);
-    const f = view === "action"
-      ? _.pipe(_.assoc(_, "seat", seat), _.assoc(_, "moves", _.toArray(moves(curr, {seat}))))
-      : _.identity;
-    return f(perspective(curr, seen));
+    return _.chain(perspective(curr, seen), viewing(view, seen));
   } else {
+    const event = _.maybe(self, events, _.last);
     return {
       added: added(curr),
       up: up(curr),
@@ -224,6 +221,13 @@ export function effects([curr, prior, seen, view]){
       prompts: prompts(curr)
     }
   }
+}
+
+function viewing(view, seen){
+  const seat = _.first(seen);
+  return view === "action"
+    ? _.assoc(_, "moves", _.toArray(moves(curr, {seat})))
+    : _.identity;
 }
 
 export function handle(make, log = _.noop){

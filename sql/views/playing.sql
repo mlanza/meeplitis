@@ -5,6 +5,7 @@ select
   g.title,
   g.thumbnail_url,
   t."release",
+  t.up,
   coalesce(
     json_agg(
       json_build_object('email', u.email, 'name', p.username, 'delegate_id', p.delegate_id)

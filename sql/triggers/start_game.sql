@@ -1,34 +1,28 @@
 create or replace function start_game() returns trigger
 security definer
 set search_path = public
-AS $$
+as $$
 declare
   _seated jsonb;
   _simulated jsonb;
   _up smallint[];
   _notify smallint[];
-  _slug text;
-  _title varchar;
-  _thumbnail_url varchar;
-  _next smallint;
+  _message jsonb;
 begin
-
   if (new.status = 'full'::table_status and old.status <> 'full'::table_status) then
-
     -- reorder seats
     update seats
     set seat = os.ord + 100
     from order_seats(new.id) as os
     where seats.table_id = new.id
-    and os.id = seats.id;
+      and os.id = seats.id;
 
     with repositioned as (
-      select
-          id,
-          row_number() over () - 1 AS position
-      FROM seats
-      WHERE table_id = new.id
-      order by seat )
+      select id, row_number() over () - 1 as position
+      from seats
+      where table_id = new.id
+      order by seat
+    )
     update seats
     set seat = r.position
     from repositioned r
@@ -50,11 +44,6 @@ begin
     from jsonb_array_elements(_simulated->'notify')
     into _notify;
 
-    select slug, title, thumbnail_url
-    from games
-    where id = new.game_id
-    into _slug, _title, _thumbnail_url;
-
     raise log '$ starting % up, %', _up, _simulated;
 
     insert into events (table_id, type, details, seat_id)
@@ -64,43 +53,34 @@ begin
     update tables
     set status = 'started'::table_status,
         up = _up
-    where id = new.id;
+    where tables.id = new.id;
 
-    perform pgmq.send(
-      'notifications',
-      jsonb_build_object(
-        'type', 'started',
-        'table_id', new.id,
-        'title', _title,
-        'slug', _slug,
-        'thumbnail_url', _thumbnail_url,
-        'recipients', emails(new.id, null)
-      ),
-      0
-    );
+    -- started message
+    select to_jsonb(pl) || jsonb_build_object('type', 'started')
+    into _message
+    from playing pl
+    where pl.table_id = new.id;
 
-    perform pgmq.send(
-      'notifications',
-      jsonb_build_object(
-        'type', 'up',
-        'table_id', new.id,
-        'title', _title,
-        'slug', _slug,
-        'thumbnail_url', _thumbnail_url,
-        'recipients', emails(new.id, _notify),
-        'prompts', (_simulated->'prompts'),
-        'seats', _up
-      ),
-      0
-    );
+    perform pgmq.send('notifications', _message, 0);
 
-    raise log '$ game `%` started at table `%`', _slug, new.id;
+    -- up message (prompts only; no recipients, no seats in payload)
+    select to_jsonb(pl)
+           || jsonb_build_object(
+                'type', 'up',
+                'prompts', _simulated->'prompts'
+              )
+    into _message
+    from playing pl
+    where pl.table_id = new.id;
+
+    perform pgmq.send('notifications', _message, 0);
+
+    raise log '$ game started at table `%`', new.id;
 
     perform pgmq.wake_notify_consumer();
   end if;
 
   return new;
-
 end;
 $$ language plpgsql;
 

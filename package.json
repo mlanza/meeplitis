@@ -7,6 +7,6 @@
     "gemini-cli-updater": "^1.0.3"
   },
   "devDependencies": {
-    "supabase": "^2.51.0"
+    "supabase": "^2.53.6"
   }
 }

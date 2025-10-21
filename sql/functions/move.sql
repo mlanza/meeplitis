@@ -7,14 +7,13 @@ as $$
 declare
 _seat int;
 begin
+  select seat as seats
+  from seats s
+  where s.table_id = _table_id
+  and player_id = auth.uid()
+  into _seat;
 
-select seat as seats
-from seats s
-where s.table_id = _table_id
-and player_id = auth.uid()
-into _seat;
-
-return query (select move(_table_id, commands, _seat));
+  return query (select move(_table_id, commands, _seat));
 end;
 $$;
 
@@ -26,95 +25,69 @@ language plpgsql
 as $$
 declare
   _count int;
-  _recipients int;
+  _status table_status;
   _simulated jsonb;
   _up smallint[];
   _notify smallint[];
-  _status table_status;
-  _slug text;
-  _title varchar;
-  _thumbnail_url varchar;
+  _message jsonb;
 begin
+  if _seat is null then
+    raise exception 'only players may issue moves';
+  end if;
 
-if _seat is null then
-  raise exception 'only players may issue moves';
-end if;
+  select t.status into _status
+  from tables t
+  where t.id = _table_id;
 
-select t.status
-from tables t
-where t.id = _table_id
-into _status;
+  if _status <> 'started' then
+    raise exception 'can only issue moves at active tables';
+  end if;
 
-if _status <> 'started' then
-  raise exception 'can only issues moves at active tables';
-end if;
+  select count(*) into _count
+  from jsonb_array_elements_text(_commands);
 
-select count(*)
-from jsonb_array_elements_text(_commands)
-into _count;
+  if _count = 0 then
+    raise exception 'must provide command(s)';
+  end if;
 
-if _count = 0 then
-  raise exception 'must provide command(s)';
-end if;
+  raise log '$ seat % at table `%` moves issuing % command(s): %', _seat, _table_id, _count, _commands;
 
-raise log '$ seat % at table `%` moves issuing % command(s): %', _seat, _table_id, _count, _commands;
+  _simulated := (select simulate(_table_id, _commands, _seat));
+  _up := (select array_agg(value::smallint)::smallint[] from jsonb_array_elements(_simulated->'up'));
 
-_simulated := (select simulate(_table_id, _commands, _seat));
-_up := (select array_agg(value::smallint)::smallint[] from jsonb_array_elements(_simulated->'up'));
+  update tables
+  set up = _up
+  where tables.id = _table_id;
 
-update tables
-set up = _up
-where tables.id = _table_id;
+  update profiles p
+  set last_moved_at = now()
+  from seats s
+  where p.id = s.player_id
+    and s.table_id = _table_id
+    and s.seat = _seat;
 
-update profiles p
-set last_moved_at = now()
-from seats s
-where p.id = s.player_id and s.table_id = _table_id and s.seat = _seat;
+  select array(
+    select cast(value as smallint)
+    from jsonb_array_elements_text(_simulated->'notify')
+  ) into _notify;
 
-select
-    g.title,
-    g.slug,
-    g.thumbnail_url
-from tables t
-join games g on g.id = t.game_id
-where t.id = _table_id
-into _title, _slug, _thumbnail_url;
+  select to_jsonb(pl)
+         || jsonb_build_object(
+              'type', 'up',
+              'prompts', _simulated->'prompts'
+            )
+  into _message
+  from playing pl
+  where pl.table_id = _table_id;
 
-select jsonb_array_length((_simulated->'notify')::jsonb)
-into _recipients;
+  perform pgmq.send('notifications', _message, 0);
+  perform pgmq.wake_notify_consumer();
 
-select array(
-  select cast(value AS smallint)
-  from jsonb_array_elements_text(_simulated->'up'))
-into _up;
-
-select array(
-  select cast(value AS smallint)
-  from jsonb_array_elements_text(_simulated->'notify'))
-into _notify;
-
-perform pgmq.send(
-  'notifications',
-  jsonb_build_object(
-    'type', 'up',
-    'table_id', _table_id,
-    'title', _title,
-    'slug', _slug,
-    'thumbnail_url', _thumbnail_url,
-    'recipients', emails(_table_id, _notify),
-    'prompts', (_simulated->'prompts'),
-    'seats', _up
-  ),
-  0
-);
-
-perform pgmq.wake_notify_consumer();
-
-return query
-insert into events (table_id, type, details, undoable, seat_id, snapshot)
-select _table_id, e.type, e.details, e.undoable, s.id as seat_id, e.snapshot
-from addable_events(_simulated->'added') e
-left join seats s on s.table_id = _table_id and s.seat = e.seat
-returning events.id, events.table_id, events.type, events.seat_id;
+  return query
+  insert into events (table_id, type, details, undoable, seat_id, snapshot)
+  select _table_id, e.type, e.details, e.undoable, s.id as seat_id, e.snapshot
+  from addable_events(_simulated->'added') e
+  left join seats s on s.table_id = _table_id and s.seat = e.seat
+  returning events.id, events.table_id, events.type, events.seat_id;
 end;
 $$;

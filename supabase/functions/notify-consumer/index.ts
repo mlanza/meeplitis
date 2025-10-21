@@ -32,8 +32,8 @@ async function handle(msg, ctx) {
   }
   switch (msg.message.type) {
     case "up": {
-      const {type, seats, table_id, title, slug, thumbnail_url, recipients, prompts} = msg.message;
-      for (const seat of seats) {
+      const {type, up, table_id, title, slug, thumbnail_url, seated, prompts} = msg.message;
+      for (const seat of up) {
         const prompt = prompts?.[seat];
         if (prompt) {
           try {

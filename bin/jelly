@@ -64,6 +64,7 @@ async function main({legacy, query, command, details}){
       $.tee(logging("data")),
       g.simulate(make),
       $.tee(logging("simulate")),
-      g.effects,
+      _.first,
+      _.pipe(g.moves(_, {seat: 0}), _.toArray),
       $.tee(logging("effects")));
 }

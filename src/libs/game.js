@@ -211,11 +211,11 @@ export function simulate(make){
 
 export function effects([curr, prior, seen, view]){
   if (curr === prior) {
-    if (view == "action") {
-      return [seen, view, g.moves(curr), perspective(curr, seen)];
-    } else {
-      return perspective(curr, seen);
-    }
+    const seat = _.first(seen);
+    const f = view === "action"
+      ? _.pipe(_.assoc(_, "seat", seat), _.assoc(_, "moves", _.toArray(moves(curr, {seat}))))
+      : _.identity;
+    return f(perspective(curr, seen));
   } else {
     return {
       added: added(curr),

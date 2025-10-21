@@ -195,7 +195,7 @@ const precipitatedBy = _.overload(null, precipitatedBy1, precipitatedBy2);
 //config - game config options
 //commands - issued to update game state
 export function simulate(make){
-  return function({event, seats, config = {}, loaded = [], events = [], commands = [], seen = [], snapshot = null}){
+  return function({event, seats, config = {}, loaded = [], events = [], commands = [], seen = [], snapshot = null, view = null}){
     if (!_.seq(seats)) {
       throw new Error("No one is seated at the table!");
     }
@@ -205,13 +205,17 @@ export function simulate(make){
         _.seq(commands) ? _.compact : _.plug(precipitatedBy, _, event)),
           curr  =
       _.reduce((self, command) => execute(self, command, singular(seen)), prior, commands);
-    return [curr, prior, seen];
+    return [curr, prior, seen, view];
   }
 }
 
-export function effects([curr, prior, seen]){
+export function effects([curr, prior, seen, view]){
   if (curr === prior) {
-    return perspective(curr, seen);
+    if (view == "action") {
+      return [seen, view, g.moves(curr), perspective(curr, seen)];
+    } else {
+      return perspective(curr, seen);
+    }
   } else {
     return {
       added: added(curr),

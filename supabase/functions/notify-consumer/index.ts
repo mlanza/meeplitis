@@ -127,7 +127,7 @@ Deno.serve(async function(req){
       });
       switch (result) {
         case 0: //done, delete!
-          await supabase.schema("pgmq").rpc("archive", { queue_name, msg_id: msg.msg_id });
+          await supabase.schema("pgmq").rpc("delete", { queue_name, msg_id: msg.msg_id });
           drained++;
           break;
 

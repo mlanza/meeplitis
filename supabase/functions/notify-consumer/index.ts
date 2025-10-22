@@ -25,6 +25,7 @@ console.log("Ready");
 async function handle(msg, ctx) {
   //console.log({step: `dispose ${msg.message.type}`, msg});
   console.log({step: `handling ${msg.message.type}`, msg});
+  return 0; //TODO deliberate ignore!
   const msg_id = msg.msg_id;
   if (msg.read_ct > 5) {
     console.error(`Message ${msg_id} exceeded retry threshold.`);

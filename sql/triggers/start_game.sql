@@ -40,10 +40,6 @@ begin
     from jsonb_array_elements(_simulated->'up')
     into _up;
 
-    select array_agg(value::smallint)::smallint[]
-    from jsonb_array_elements(_simulated->'notify')
-    into _notify;
-
     raise log '$ starting % up, %', _up, _simulated;
 
     insert into events (table_id, type, details, seat_id)
@@ -55,29 +51,7 @@ begin
         up = _up
     where tables.id = new.id;
 
-    -- started message
-    select to_jsonb(pl) || jsonb_build_object('type', 'started')
-    into _message
-    from playing pl
-    where pl.table_id = new.id;
-
-    perform pgmq.send('notifications', _message, 0);
-
-    -- up message (prompts only; no recipients, no seats in payload)
-    select to_jsonb(pl)
-           || jsonb_build_object(
-                'type', 'up',
-                'prompts', _simulated->'prompts'
-              )
-    into _message
-    from playing pl
-    where pl.table_id = new.id;
-
-    perform pgmq.send('notifications', _message, 0);
-
     raise log '$ game started at table `%`', new.id;
-
-    perform pgmq.wake_notify_consumer();
   end if;
 
   return new;

@@ -619,42 +619,9 @@ function status(self) {
   return _.chain(self, _.deref, _.get(_, "status"));
 }
 
-function prompt(self, meta) {
-  return `
-You are an expert Backgammon player.
-
-## Task
-Choose exactly one move from **moves**.
-
-## Strict Output Contract
-Reply with exactly TWO fenced code blocks, in this order:
-
-1\) \`js\` — contains exactly the chosen move object copied verbatim from \`moves\`. No extra keys.
-2\) \`md\` — your rationale (not too wordy) for humans (any formatting allowed).
-
-If there is no legal move, the first block must be:
-
-\`\`\`js
-{"error":"no legal move"}
-\`\`\`
-
-## Your Perspective
-
-The \`up\` and/or \`may\` attributes indicate you're ready to act.
-The \`state\` attribute represents the current state of the game as data.
-The checkers are counted as various \`points\` on the board or on the \`bar\` or \`off\` the board.
-The \`moves\` attribute lists what moves are available to you.
-The \`event\` attribute tells you what just happened, what immediate effect brought things to the current game state.
-
-\`\`\`js
-${JSON.stringify(meta, null, 2)}
-\`\`\`
-`;
-}
-
 _.doto(Backgammon,
   g.behave,
   _.implement(_.ICompactible, {compact}),
   _.implement(_.IAppendable, {append}),
   _.implement(_.IFunctor, {fmap}),
-  _.implement(g.IGame, {perspective, prompt, up, may, moves, undoable, metrics, comparator, textualizer, execute: _.comp(compel, execute), fold, status}));
+  _.implement(g.IGame, {perspective, up, may, moves, undoable, metrics, comparator, textualizer, execute: _.comp(compel, execute), fold, status}));

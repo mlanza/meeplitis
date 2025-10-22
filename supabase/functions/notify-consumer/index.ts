@@ -17,12 +17,13 @@ async function handle(msg) {
   switch (msg.message.type) {
     case "up": {
       return "archive";
-      const {type, up, table_id, title, slug, thumbnail_url, seated, prompts} = msg.message;
+      const {type, up, table_id, title, slug, thumbnail_url, seated} = msg.message;
       for (const seat of up) {
-        const prompt = prompts?.[seat];
-        if (prompt) {
+        const delegate_id = seated[seat]?.delegate_id;
+        if (delegate_id) {
           try {
-            console.log({step: "deciding", msg_id, prompt});
+            console.log({step: "deciding", msg_id, delegate_id});
+            //TODO get prompt
             const move = await fetch(`${SUPABASE_URL}/functions/v1/decide-move`, {
               method: "POST",
               headers: {

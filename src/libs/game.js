@@ -3,7 +3,6 @@ import _ from "./atomic_/core.js";
 export const IGame = _.protocol({
   perspective: null,
   status: null,
-  prompt: null, //returns the game state as a text-based scenario an agent can react to
   up: null, //returns the seat(s) which are required to move
   may: null, //returns the seat(s) which have the option to move
   seats: null,
@@ -26,26 +25,6 @@ export const events = IGame.events;
 export const metrics = IGame.metrics;
 export const comparator = IGame.comparator;
 export const textualizer = IGame.textualizer;
-
-export function prompt(self, seat, meta = {}){
-  return IGame.prompt(self,
-    _.chain(meta,
-      _.assoc(_, "up", up(self)),
-      _.assoc(_, "may", may(self)),
-      _.assoc(_, "metrics", metrics(self)),
-      _.assoc(_, "event", _.chain(self, events, _.last)),
-      _.assoc(_, "state", _.deref(self)),
-      _.assoc(_, "moves", _.chain(self, s => moves(s, {seat}), _.toArray))));
-}
-
-export function prompts(self, meta = {}){
-  const acting = _.includes(up(self), _);
-  return _.chain(self, seats, _.mapIndexed(function(seat, seated){
-    return _.get(seated, "delegate_id") && acting(seat) ? prompt(self, seat, meta) : null;
-  }, _), _.toArray, function(prompts){
-    return _.chain(prompts, _.compact, _.count) ? prompts : null;
-  });
-}
 
 function perspective2(self, seen){
   return perspective3(self, seen, reality(self));
@@ -142,10 +121,6 @@ export function moves(self, options = {}){
   return _.flatten(_.braid(_.partial(IGame.moves, self), types, seats));
 }
 
-export function notify(curr, prior){
-  return _.difference(_.chain(curr, up), _.maybe(prior, up) || []);
-}
-
 export function everyone(self){
   return _.toArray(_.mapIndexed(_.identity, seated(self)));
 }
@@ -213,12 +188,9 @@ export function effects([curr, prior, seen, view]){
   if (curr === prior) {
     return _.chain(perspective(curr, seen), viewing(view, seen));
   } else {
-    const event = _.maybe(self, events, _.last);
     return {
       added: added(curr),
-      up: up(curr),
-      notify: notify(curr, prior),
-      prompts: prompts(curr)
+      up: up(curr)
     }
   }
 }

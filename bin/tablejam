@@ -88,7 +88,7 @@ function normalizeList(vs) {
     .filter(Boolean);
 }
 
-const LENS_ALLOWED = new Set(["game", "event", "effects", "perspective", "prompts", "state", "timeline", "moves"]);
+const LENS_ALLOWED = new Set(["game", "event", "effects", "perspective", "state", "timeline", "moves"]);
 
 function resolveLens(withList, withoutList) {
   const lens = new Set(["timeline", "perspective"]); // defaults
@@ -208,7 +208,6 @@ function looking(alt = null){
   return function look({jnl, seen, lens, lookback, lookahead}){
     const keys = {
       game: _.deref,
-      prompts: _.pipe(_.deref, _.plug(g.prompts, _, {})),
       timeline: timeline(lookback, lookahead),
       effects: effects(seen),
       perspective: perspective(seen),
@@ -246,7 +245,6 @@ const abbrs = {
   "r": "redo",
   "g": "game",
   "p": "perspective",
-  "pr": "prompts",
   "q": "quit"
 };
 
@@ -318,7 +316,6 @@ async function command(run){
           case "state":
           case "moves":
           case "timeline":
-          case "prompts":
           case "perspective":
             _.chain($state, _.deref, looking([term]), log);
             break;
@@ -367,7 +364,6 @@ await new Command()
   .option("--drop [count:number]", "Drop last N entries (bare flag = 1).")
   .option("--moves", "Show available moves.")
   .option("--move", "Prompt to choose and execute a move.")
-  .option("--prompts", "Show prompts for the current game state.")
   .option("--cmd <object:string>", "Execute a move from a command object, e.g. '{type:\"commit\"}'.")
   .option("--cmds <file:string>", "Execute moves (one command object per line) from a file.")
   .option("--with <value:string>", "Add to lens (repeatable or CSV).", { collect: true })
@@ -386,7 +382,6 @@ await new Command()
     const cache = !!opts.cache;
     const moves = !!opts.moves;
     const move = !!opts.move;
-    const prompts = !!opts.prompts;
     const seen = normalizeList(opts.seen);
     const withList = normalizeList(opts.with);
     const withoutList = normalizeList(opts.without);
@@ -401,7 +396,7 @@ await new Command()
     const lookback = opts.lookback === Infinity ? Infinity : Number(opts.lookback);
     const lookahead = Number(opts.lookahead);
 
-    _.chain({table_id, filename, at, atProvided, drop, cmds, seen, seat, lens, lookback, lookahead, cache, prompts, moves, move, silent, interactive},
+    _.chain({table_id, filename, at, atProvided, drop, cmds, seen, seat, lens, lookback, lookahead, cache, moves, move, silent, interactive},
       //$.see("payload"),
       main);
   })
@@ -450,10 +445,6 @@ async function main(args) {
   if (args.move) {
     const cmd = await _.chain($state, _.deref, chooseMove);
     _.maybe(cmd, run);
-  }
-
-  if (args.prompts) {
-    _.chain($state, _.deref, looking(["prompts"]), log);
   }
 
   if (args.interactive) {

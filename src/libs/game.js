@@ -188,10 +188,7 @@ export function effects([curr, prior, seen, view]){
   if (curr === prior) {
     return _.chain(perspective(curr, seen), viewing(view, curr, seen));
   } else {
-    return {
-      added: added(curr),
-      up: up(curr)
-    }
+    return _.juxtVals({added, up}, curr);
   }
 }
 

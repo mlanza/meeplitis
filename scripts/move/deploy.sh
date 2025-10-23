@@ -1,1 +1,1 @@
-supabase functions deploy move --project-ref miwfiwpgvfhggfnqtfso
+supabase functions deploy move --project-ref "$MEEPLITIS_PROJECT_REF"

@@ -23,7 +23,7 @@ begin
 --raise log '$ simulating % #% -> %', _slug, _req, _payload;
 
 select status, content
-from http(('POST'::varchar, ('https://miwfiwpgvfhggfnqtfso.supabase.co/functions/v1/' || _slug || '-' || _release)::varchar, ARRAY[http_header('Authorization','Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTYzODUwMzIzMywiZXhwIjoxOTU0MDc5MjMzfQ.i1l7NNGYF7mChifi8X-Cn_tis-us1Zq1ntyVW-Amdf8')], 'application/json', _payload::varchar)::http_request)
+from http(('POST'::varchar, ('https://miwfiwpgvfhggfnqtfso.supabase.co/functions/v1/g-' || _slug || '-' || _release)::varchar, ARRAY[http_header('Authorization','Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTYzODUwMzIzMywiZXhwIjoxOTU0MDc5MjMzfQ.i1l7NNGYF7mChifi8X-Cn_tis-us1Zq1ntyVW-Amdf8')], 'application/json', _payload::varchar)::http_request)
 into _status, _result;
 
 if _result is null or _status > 222 then

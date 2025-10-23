@@ -5,7 +5,7 @@ set search_path = pgmq, public
 language plpgsql
 as $$
 declare
-  _url text := 'https://miwfiwpgvfhggfnqtfso.supabase.co/functions/v1/notify-consumer';
+  _url text := 'https://miwfiwpgvfhggfnqtfso.supabase.co/functions/v1/consume-notifications';
   _auth text;
   _wake text;
 begin

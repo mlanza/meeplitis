@@ -872,7 +872,7 @@ const IFunctor = protocol({
 
 function flatMap$3(self, f) {
   var _f, _IFunctor$fmap, _IFunctor;
-  return chain(self, IFlatMappable.flat, (_IFunctor = IFunctor, _IFunctor$fmap = _IFunctor.fmap,
+  return chain(self, IFlatMappable.flat, (_IFunctor = IFunctor, _IFunctor$fmap = _IFunctor.fmap, 
   _f = f, function fmap(_argPlaceholder) {
     return _IFunctor$fmap.call(_IFunctor, _argPlaceholder, _f);
   }));
@@ -1581,12 +1581,12 @@ const subtract = overload(constantly(0), identity, subtract2, reducing(subtract2
 
 const add$3 = overload(constantly(0), identity, IAddable.add, reducing(IAddable.add));
 
-const inc = overload(constantly(+1), (_IAddable = IAddable, _IAddable$add = _IAddable.add,
+const inc = overload(constantly(+1), (_IAddable = IAddable, _IAddable$add = _IAddable.add, 
 _ = +1, function add(_argPlaceholder) {
   return _IAddable$add.call(_IAddable, _argPlaceholder, _);
 }));
 
-const dec = overload(constantly(-1), (_IAddable2 = IAddable, _IAddable$add2 = _IAddable2.add,
+const dec = overload(constantly(-1), (_IAddable2 = IAddable, _IAddable$add2 = _IAddable2.add, 
 _2 = -1, function add(_argPlaceholder2) {
   return _IAddable$add2.call(_IAddable2, _argPlaceholder2, _2);
 }));
@@ -2034,7 +2034,7 @@ const lowerCase = unbind(String.prototype.toLowerCase);
 
 const upperCase = unbind(String.prototype.toUpperCase);
 
-const titleCase = (_replace = replace, _param$1 = /(^|\s|\.)(\S|\.)/g, _upperCase = upperCase,
+const titleCase = (_replace = replace, _param$1 = /(^|\s|\.)(\S|\.)/g, _upperCase = upperCase, 
 function replace(_argPlaceholder) {
   return _replace(_argPlaceholder, _param$1, _upperCase);
 });
@@ -4611,7 +4611,7 @@ const find$1 = IFind.find;
 
 var _noop, _IForkable$fork, _IForkable;
 
-const fork$2 = overload(null, null, (_IForkable = IForkable, _IForkable$fork = _IForkable.fork,
+const fork$2 = overload(null, null, (_IForkable = IForkable, _IForkable$fork = _IForkable.fork, 
 _noop = noop$1, function fork(_argPlaceholder, _argPlaceholder2) {
   return _IForkable$fork.call(_IForkable, _argPlaceholder, _noop, _argPlaceholder2);
 }), IForkable.fork);
@@ -4964,7 +4964,7 @@ function revision(self, pos) {
 }
 
 function nth$1(self, pos) {
-  const n = clamp(pos, 0, ICounted.count(self) - 1);
+  const n = clamp(pos, 0, self.max);
   const state = self.history[n] || null;
   return new Journal(n, self.max, self.history, state);
 }
@@ -5101,11 +5101,11 @@ function where(self, other) {
 
 const emptied = branch(satisfies(IEmptyableCollection), empty$7, emptyObject);
 
-function juxtVals(self, value) {
+const juxtVals = curry((function(self, value) {
   return reducekv$5((function(memo, key, f) {
     return assoc$9(memo, key, isFunction(f) ? f(value) : f);
   }), emptied(self), self);
-}
+}));
 
 function evolve(template, obj) {
   return template ? reducekv$5((function(memo, key, value) {
@@ -5583,7 +5583,7 @@ const split$1 = overload(null, null, split2, split3$1);
 
 function add(self, dur) {
   var _dur, _p$add, _p;
-  return end$1(self) ? new self.constructor(start$1(self), chain(self, end$1, (_p = p$2,
+  return end$1(self) ? new self.constructor(start$1(self), chain(self, end$1, (_p = p$2, 
   _p$add = _p.add, _dur = dur, function add(_argPlaceholder2) {
     return _p$add.call(_p, _argPlaceholder2, _dur);
   }))) : self;
@@ -6171,7 +6171,7 @@ function empty$3() {
 function assoc$2(self, key, value) {
   var _param, _p$conj, _p;
   const {h: h, idx: idx, candidates: candidates} = getHashIndex(self, key);
-  const mapped = !candidates ? assoc$9(self.mapped, h, [ [ key, value ] ]) : idx == null ? update(self.mapped, h, (_p = p,
+  const mapped = !candidates ? assoc$9(self.mapped, h, [ [ key, value ] ]) : idx == null ? update(self.mapped, h, (_p = p, 
   _p$conj = _p.conj, _param = [ key, value ], function conj(_argPlaceholder) {
     return _p$conj.call(_p, _argPlaceholder, _param);
   })) : assocIn(self.mapped, [ h, idx ], [ key, value ]);
@@ -6571,7 +6571,7 @@ function hashClamp(n) {
   };
 }
 
-const pmap = (_partMap = partMap, _pipe$1 = pipe(hash$7, hashClamp(11)), _constantly$1 = constantly(partMap([], pipe((_str$3 = str,
+const pmap = (_partMap = partMap, _pipe$1 = pipe(hash$7, hashClamp(11)), _constantly$1 = constantly(partMap([], pipe((_str$3 = str, 
 function str(_argPlaceholder2) {
   return _str$3("a", _argPlaceholder2);
 }), hash$7, hashClamp(11)), constantly(partMap([], pipe((_str2$1 = str, function str(_argPlaceholder3) {
@@ -6588,7 +6588,7 @@ function lookup$3(self, key) {
 function assoc$1(self, key, value) {
   var _param, _value, _p$assocIn, _p;
   const part = self.partition(key);
-  return new PartMap(self.partition, self.store, chain(contains$9(self.parts, part) ? self.parts : assoc$9(self.parts, part, self.store(key)), (_p = p$3,
+  return new PartMap(self.partition, self.store, chain(contains$9(self.parts, part) ? self.parts : assoc$9(self.parts, part, self.store(key)), (_p = p$3, 
   _p$assocIn = _p.assocIn, _param = [ part, key ], _value = value, function assocIn(_argPlaceholder) {
     return _p$assocIn.call(_p, _argPlaceholder, _param, _value);
   })));
@@ -6647,7 +6647,7 @@ function partSet(items = [], partition, store, parts = {}) {
   return reduce$7(conj$b, new PartSet(partition, store, parts), items);
 }
 
-const pset = (_partSet = partSet, _pipe = pipe(hash$7, hashClamp(22)), _constantly = constantly(partSet([], pipe((_str$2 = str,
+const pset = (_partSet = partSet, _pipe = pipe(hash$7, hashClamp(22)), _constantly = constantly(partSet([], pipe((_str$2 = str, 
 function str(_argPlaceholder2) {
   return _str$2("1", _argPlaceholder2);
 }), hash$7, hashClamp(22)), constantly(partSet([], pipe((_str2 = str, function str(_argPlaceholder3) {
@@ -6659,8 +6659,8 @@ function str(_argPlaceholder2) {
 function conj$1(self, value) {
   var _part, _p$conj, _p$update, _p, _value, _p$conj2, _p2;
   const part = self.partition(value);
-  return new PartSet(self.partition, self.store, chain(contains$9(self.parts, part) ? self.parts : assoc$9(self.parts, part, self.store(value)), (_p = p$3,
-  _p$update = _p.update, _part = part, _p$conj = (_p2 = p$3, _p$conj2 = _p2.conj,
+  return new PartSet(self.partition, self.store, chain(contains$9(self.parts, part) ? self.parts : assoc$9(self.parts, part, self.store(value)), (_p = p$3, 
+  _p$update = _p.update, _part = part, _p$conj = (_p2 = p$3, _p$conj2 = _p2.conj, 
   _value = value, function conj(_argPlaceholder2) {
     return _p$conj2.call(_p2, _argPlaceholder2, _value);
   }), function update(_argPlaceholder) {
@@ -6671,7 +6671,7 @@ function conj$1(self, value) {
 function disj$1(self, value) {
   var _value2, _p$disj, _p3;
   const part = self.partition(value);
-  return new PartSet(self.partition, self.store, contains$9(self.parts, part) ? update(self.parts, part, (_p3 = p$3,
+  return new PartSet(self.partition, self.store, contains$9(self.parts, part) ? update(self.parts, part, (_p3 = p$3, 
   _p$disj = _p3.disj, _value2 = value, function disj(_argPlaceholder3) {
     return _p$disj.call(_p3, _argPlaceholder3, _value2);
   })) : self.parts);

@@ -88,7 +88,7 @@ export function createDrainHandler(supabase, queue_name, handle, cfg = {}) {
       emptied: becameActive ? (Date.now() >= cleanupUntil) : true
     });
 
-    const status = (counts.archive + counts.delete) > 0 ? 200 : 204;
+    const status = (counts.archive + counts.delete) > 0 ? 200 : 202;
     return new Response(body, {
       status,
       headers: { "content-type": "application/json" }

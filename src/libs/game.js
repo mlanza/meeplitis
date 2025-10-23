@@ -186,7 +186,7 @@ export function simulate(make){
 
 export function effects([curr, prior, seen, view]){
   if (curr === prior) {
-    return _.chain(perspective(curr, seen), viewing(view, seen));
+    return _.chain(perspective(curr, seen), viewing(view, curr, seen));
   } else {
     return {
       added: added(curr),
@@ -195,7 +195,7 @@ export function effects([curr, prior, seen, view]){
   }
 }
 
-function viewing(view, seen){
+function viewing(view, curr, seen){
   const seat = _.first(seen);
   return view === "action"
     ? _.assoc(_, "moves", _.toArray(moves(curr, {seat})))

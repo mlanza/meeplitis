@@ -11,7 +11,7 @@ begin
   where pl.table_id = new.id;
 
   perform pgmq.send('notifications', _message, 0);
-  perform pgmq.wake_notify_consumer();
+  perform pgmq.consume_notifications();
   return null;
 end$$;
 

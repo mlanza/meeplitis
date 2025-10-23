@@ -1,4 +1,4 @@
-create or replace function pgmq.wake_notify_consumer()
+create or replace function pgmq.consume_notifications()
 returns void
 security definer
 set search_path = pgmq, public
@@ -35,7 +35,7 @@ begin
     );
   exception when others then
     -- log and keep going; adjust severity as you like
-    raise log 'notify-consumer wake failed: %', sqlerrm;
+    raise log 'consume-notifications wake up failed: %', sqlerrm;
   end;
 end;
 $$;

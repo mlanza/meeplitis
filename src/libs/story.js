@@ -11,8 +11,8 @@ function digest(result){
   return {error, data};
 }
 
-function getTouches(tableId){
-  return _.fmap(fetch(`https://touches.workers.meeplitis.com?table_id=${tableId}`), resp => resp.json());
+function getTouches(_table_id){
+  return supabase.rpc('touching', {_table_id}).then(_.get(_, "data"));
 }
 
 function getPerspective(tableId, accessToken, eventId, seat, seatId){

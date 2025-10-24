@@ -1,12 +1,6 @@
 // @ts-nocheck
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "access-control-allow-origin": "*",
-  "access-control-allow-headers": "*",
-  "access-control-allow-methods": "GET,OPTIONS"
-};
-
 const pickBearer = (req) => {
   const u = req.headers.get("x-supabase-authorization")?.trim();
   const a = req.headers.get("authorization")?.trim();
@@ -42,18 +36,27 @@ const paramsFromQuery = (url) => {
  * @param {{ permanent?: boolean }} [options]
  * @returns {(req: Request) => Promise<Response>}
  */
-export function makeRpcHandler(rpcName, env, { permanent = false } = {}) {
+export function makeRpcHandler(rpcName, env, hdrs) {
   const { SUPABASE_URL, SUPABASE_KEY } = env;
+
+  const headers = {
+    "content-type": "application/json; charset=UTF-8"
+    "access-control-allow-origin": "*",
+    "access-control-allow-headers": 'accessToken,Apikey,Accept,Content-Type,Authorization',
+    "access-control-allow-methods": "GET,OPTIONS",
+    'Access-Control-Max-Age': '86400'
+    ...hdrs,
+  };
 
   return async (req) => {
     if (req.method === "OPTIONS") {
-      return new Response("", { headers: corsHeaders });
+      return new Response("", { headers });
     }
 
     if (req.method !== "GET") {
       return new Response(JSON.stringify({ error: "Method Not Allowed" }), {
         status: 405,
-        headers: { ...corsHeaders, "content-type": "application/json; charset=UTF-8" }
+        headers
       });
     }
 
@@ -70,30 +73,18 @@ export function makeRpcHandler(rpcName, env, { permanent = false } = {}) {
       if (error) {
         return new Response(JSON.stringify({ error: error.message }), {
           status: 400,
-          headers: { ...corsHeaders, "content-type": "application/json; charset=UTF-8" }
+          headers
         });
-      }
-
-      const responseHeaders = {
-        ...corsHeaders,
-        "content-type": "application/json; charset=UTF-8"
-      };
-
-      if (permanent) {
-        responseHeaders["cache-control"] = "public, max-age=31536000, immutable";
-        responseHeaders["Vary"] = "origin, accept-encoding";
-      } else {
-        responseHeaders["cache-control"] = "no-cache, no-store, must-revalidate";
       }
 
       return new Response(JSON.stringify(data), {
         status: 200,
-        headers: responseHeaders
+        headers
       });
     } catch (err) {
       return new Response(JSON.stringify({ error: String(err?.message ?? err) }), {
         status: 500,
-        headers: { ...corsHeaders, "content-type": "application/json; charset=UTF-8" }
+        headers
       });
     }
   };

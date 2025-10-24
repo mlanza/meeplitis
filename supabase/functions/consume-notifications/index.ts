@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { createDrainHandler } from "./queue-drainer.js";
+import { createDrainHandler } from "../queue-drainer.js";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL"),
       SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"),

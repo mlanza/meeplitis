@@ -7,12 +7,6 @@ const corsHeaders = {
   "access-control-allow-methods": "GET,OPTIONS"
 };
 
-const cacheHeaders = {
-  "cache-control": "public, max-age=31536000, immutable",
-  "content-type": "application/json; charset=UTF-8",
-  Vary: "origin, accept-encoding"
-};
-
 const pickBearer = (req) => {
   const u = req.headers.get("x-supabase-authorization")?.trim();
   const a = req.headers.get("authorization")?.trim();
@@ -45,9 +39,10 @@ const paramsFromQuery = (url) => {
  * makeRpcHandler
  * @param {string} rpcName
  * @param {{ SUPABASE_URL: string, SUPABASE_KEY: string }} env
+ * @param {{ permanent?: boolean }} [options]
  * @returns {(req: Request) => Promise<Response>}
  */
-export function makeRpcHandler(rpcName, env) {
+export function makeRpcHandler(rpcName, env, { permanent = false } = {}) {
   const { SUPABASE_URL, SUPABASE_KEY } = env;
 
   return async (req) => {
@@ -79,9 +74,21 @@ export function makeRpcHandler(rpcName, env) {
         });
       }
 
+      const responseHeaders = {
+        ...corsHeaders,
+        "content-type": "application/json; charset=UTF-8"
+      };
+
+      if (permanent) {
+        responseHeaders["cache-control"] = "public, max-age=31536000, immutable";
+        responseHeaders["Vary"] = "origin, accept-encoding";
+      } else {
+        responseHeaders["cache-control"] = "no-cache, no-store, must-revalidate";
+      }
+
       return new Response(JSON.stringify(data), {
         status: 200,
-        headers: { ...corsHeaders, ...cacheHeaders }
+        headers: responseHeaders
       });
     } catch (err) {
       return new Response(JSON.stringify({ error: String(err?.message ?? err) }), {

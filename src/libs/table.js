@@ -3,7 +3,7 @@ import dom from "/libs/atomic_/dom.js";
 import $ from "/libs/atomic_/shell.js";
 import supabase from "/libs/supabase.js";
 import {presence} from "/libs/online.js";
-import {$online, session} from "/libs/session.js";
+import {$online, session, headers} from "/libs/session.js";
 import {relink} from "/libs/links.js";
 import {story, nav, hist, snapshot, waypoint, refresh, replay, toPresent, atPresent, inPast} from "/libs/story.js";
 import {wip, clear} from "/libs/wip.js";
@@ -15,12 +15,10 @@ export const el = dom.sel1("#table");
 const params = new URLSearchParams(location.search);
 export const tableId = params.get('id');
 
-const accessToken = session?.accessToken;
-
 export const [config, seated, seats] = await Promise.all([
   getConfig(tableId),
   getSeated(tableId),
-  getSeats(tableId, accessToken)
+  getSeats(tableId, session?.accessToken)
 ]);
 
 export const seat = _.count(seats) > 1 ? _.maybe(params.get("seat"), parseInt) : _.first(seats);
@@ -364,8 +362,14 @@ export function subject({username, avatar_url}){
   return span({class: "subject avatar"}, img({alt: username, src: avatar_url}));
 }
 
-function getSeated(tableId){
-  return tableId ? _.fmap(fetch(`https://seated.workers.meeplitis.com?table_id=${tableId}`), resp => resp.json()) : Promise.resolve([]);
+function getSeated(_table_id){
+  const qs = new URLSearchParams({_table_id}).toString();
+  return _table_id ? supabase.auth.getSession().then(function({data: { session }}) {
+    return fetch(`https://miwfiwpgvfhggfnqtfso.supabase.co/functions/v1/seated?${qs}`, {
+      headers,
+      method: 'GET'
+    }).then(resp => resp.json());
+  }) : Promise.resolve([]);
 }
 
 function getSeats(tableId, accessToken){

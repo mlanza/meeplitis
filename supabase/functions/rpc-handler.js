@@ -42,9 +42,9 @@ export function makeRpcHandler(rpcName, env, hdrs) {
   const headers = {
     "content-type": "application/json; charset=UTF-8"
     "access-control-allow-origin": "*",
-    "access-control-allow-headers": 'accessToken,Apikey,Accept,Content-Type,Authorization',
+    "access-control-allow-headers": 'accesstoken,apikey,accept,content-type,authorization',
     "access-control-allow-methods": "GET,OPTIONS",
-    'Access-Control-Max-Age': '86400'
+    'access-control-max-age': '86400',
     ...hdrs,
   };
 

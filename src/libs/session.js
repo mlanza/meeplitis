@@ -30,6 +30,15 @@ export const session = sess ? await registered(sess) : null;
 export const $online = o.online(session?.username);
 export default session;
 
+//TODO slop
+const accessToken = session?.accessToken;
+const apikey = supabase.supabaseKey;
+export const headers = {
+  apikey,
+  authorization: `Bearer ${accessToken ?? apikey}`,
+  accept: 'application/json'
+}
+
 reg({$online, session});
 
 dom.toggleClass(document.body, "anon", !session);

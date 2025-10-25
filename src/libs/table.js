@@ -3,7 +3,7 @@ import dom from "/libs/atomic_/dom.js";
 import $ from "/libs/atomic_/shell.js";
 import supabase from "/libs/supabase.js";
 import {presence} from "/libs/online.js";
-import {$online, session, headers} from "/libs/session.js";
+import {$online, session, getfn} from "/libs/session.js";
 import {relink} from "/libs/links.js";
 import {story, nav, hist, snapshot, waypoint, refresh, replay, toPresent, atPresent, inPast} from "/libs/story.js";
 import {wip, clear} from "/libs/wip.js";
@@ -364,12 +364,7 @@ export function subject({username, avatar_url}){
 
 function getSeated(_table_id){
   const qs = new URLSearchParams({_table_id}).toString();
-  return _table_id ? supabase.auth.getSession().then(function({data: { session }}) {
-    return fetch(`https://miwfiwpgvfhggfnqtfso.supabase.co/functions/v1/seated?${qs}`, {
-      headers,
-      method: 'GET'
-    }).then(resp => resp.json());
-  }) : Promise.resolve([]);
+  return _table_id ? getfn("seated", {_table_id}) : Promise.resolve([]);
 }
 
 function getSeats(tableId, accessToken){

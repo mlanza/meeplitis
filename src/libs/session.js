@@ -30,13 +30,20 @@ export const session = sess ? await registered(sess) : null;
 export const $online = o.online(session?.username);
 export default session;
 
-//TODO slop
 const accessToken = session?.accessToken;
 const apikey = supabase.supabaseKey;
-export const headers = {
+const headers = {
   apikey,
   authorization: `Bearer ${accessToken ?? apikey}`,
   accept: 'application/json'
+}
+
+export function getfn(name, params = null){
+  const qs = params ? new URLSearchParams(params).toString() : null;
+  return fetch(`${supabase.supabaseUrl}/functions/v1/${name}?${qs}`, {
+    headers,
+    method: 'GET'
+  }).then(resp => resp.json());
 }
 
 reg({$online, session});

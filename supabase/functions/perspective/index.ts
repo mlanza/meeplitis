@@ -9,7 +9,7 @@ const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY");
 const CORS = {
   "access-control-allow-origin": "*",
   "access-control-allow-headers": "*",
-  "access-control-allow-methods": "GET,POST,OPTIONS"
+  "access-control-allow-methods": "GET,OPTIONS"
 };
 
 const pickBearer = (req) => {

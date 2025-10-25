@@ -29,7 +29,7 @@ async function handle(msg) {
             const prompt = data ? createPrompt(data) : null;
             if (prompt) {
               console.log({step: "deciding", msg_id, delegate_id, prompt});
-              const move = await fetch(`${SUPABASE_URL}/functions/v1/decide-move`, {
+              const {move, rationale} = await fetch(`${SUPABASE_URL}/functions/v1/decide-move`, {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
@@ -37,6 +37,8 @@ async function handle(msg) {
                 },
                 body: JSON.stringify({prompt})
               }).then(resp => resp.json());
+
+              console.log("move selected", move, "rationale", rationale);
 
               const commands = [move];
               const moving = {

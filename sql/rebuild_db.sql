@@ -1,6 +1,7 @@
 -- TODO define indexes
 
 alter table tables drop constraint fk_last_touch;
+drop table settings;
 drop table events;
 drop table seats;
 drop table tables;
@@ -8,6 +9,15 @@ drop table games;
 
 drop type table_status;
 drop type seating_mode;
+
+create table settings (
+  id boolean primary key default true,  -- enforces single row
+  move_prompt text,
+  updated_at timestamptz not null default now()
+);
+
+create policy "settings are viewable by everyone."
+  on settings for select using (true);
 
 create type table_status as enum ('open', 'vacant', 'full', 'started', 'locked', 'finished', 'abandoned');
 -- open - players may freely join and leave

@@ -5,21 +5,9 @@ console.log("Agent ready.");
 
 const apiKey = Deno.env.get("OPENROUTER_API_KEY");
 
-function extractFencedBlocks(markdown) {
-  const blocks = {};
-  const regex = /```(\w+)?\s*([\s\S]*?)\s*```/g;
-  let match;
+const headers = { "Content-Type": "application/json" };
 
-  while ((match = regex.exec(markdown)) !== null) {
-    const label = match[1] || 'plain';
-    const content = match[2].trim();
-    blocks[label] = content;
-  }
-
-  return blocks;
-}
-
-Deno.serve(async function (req){
+Deno.serve(async function(req){
 
   const {
     prompt: content,
@@ -29,37 +17,40 @@ Deno.serve(async function (req){
     top_p = 1
   } = await req.json();
 
-  const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+  const body = {
+    model,
+    seed,
+    temperature,
+    top_p,
+    messages: [{ role: "user", content }],
+  };
+
+  //console.log({body});
+
+  const completion = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
-    headers: {
-      "Authorization": `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model,
-      seed,
-      temperature,
-      top_p,
-      messages: [{ role: "user", content }],
-    }),
-  });
+    headers: {...headers, "Authorization": `Bearer ${apiKey}` },
+    body: JSON.stringify(body),
+  }).then(resp => resp.json());
 
-  const data = await resp.json();
-
-  console.log({data});
+  console.log({completion});
 
   try {
-    const {js, md} = _.chain(data, _.getIn(_, ["choices", 0, "message", "content"]), extractFencedBlocks);
-    const move = JSON.parse(js);
-    return new Response(JSON.stringify(move), {
-      headers: { "Content-Type": "application/json" },
-      status: 200
-    });
+    const reply = _.chain(completion, _.getIn(_, ["choices", 0, "message", "content"]));
+    console.log({reply});
+
+    const digested = reply.trim().replace(/^```json\s*/i, '').replace(/```$/, '');
+    console.log({digested});
+
+    const {move, rationale} = JSON.parse(digested);
+    console.log({move, rationale});
+
+    return new Response(JSON.stringify(move), { headers, status: 200 });
   } catch (ex) {
     console.error("Move extraction failed:", ex);
     return new Response(JSON.stringify({
       error: "InvalidMove",
       message: "Failed to extract a valid move from model output."
-    }), { status: 422, headers: { "Content-Type": "application/json" } });
+    }), { status: 422, headers });
   }
 });

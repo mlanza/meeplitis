@@ -25,8 +25,9 @@ Deno.serve(async function(req){
     return null
   });
 
-  const {table_id, seat} = request;
-  const commands = JSON.parse(request.commands || "null");
+  console.log("request", request);
+
+  const {table_id, seat, commands} = request;
 
   const authHeader = req.headers.get("Authorization") || "";
 

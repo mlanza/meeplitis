@@ -35,14 +35,9 @@ function getLastMove(_table_id, _event_id, _seat_id){
   });
 }
 
-function move(_table_id, _seat, _commands, accessToken){
-  return fetch("https://move.workers.meeplitis.com", {
-    method: "POST",
-    body: JSON.stringify({_table_id, _seat, _commands}),
-    headers: {
-      accessToken
-    }
-  }).then(resp => resp.json()).then(digest);
+function move(table_id, seat, commands, accessToken){
+  const body = {table_id, seat, commands};
+  return supabase.functions.invoke("move", {body}).then(_.get(_, "data"));
 }
 
 export function Story(accessToken, tableId, seat, seated, config, $hash, $up, $ready, $error, make, $state, $story){

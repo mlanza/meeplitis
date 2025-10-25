@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
     const params = paramsFromQuery(req.url);
     const table_id = params.table_id,
           event_id = params.event_id,
-          seat = params.seat == null ? null : params.seat;
+          seat = params.seat == null ? null : parseInt(params.seat);
     console.log("params", params)
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       global: { headers: bearer ? { Authorization: bearer } : {} }

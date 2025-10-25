@@ -1,6 +1,7 @@
 import _ from "/libs/atomic_/core.js";
 import $ from "/libs/atomic_/shell.js";
 import supabase from "/libs/supabase.js";
+import {getfn} from "/libs/session.js";
 import {reg} from "/libs/cmd.js";
 export {wip} from "/libs/wip.js";
 
@@ -12,7 +13,7 @@ function digest(result){
 }
 
 function getTouches(_table_id){
-  return supabase.rpc('touching', {_table_id}).then(_.get(_, "data"));
+  return getfn('touches', {_table_id});
 }
 
 function getPerspective(tableId, accessToken, eventId, seat, seatId){

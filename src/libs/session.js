@@ -40,9 +40,9 @@ const headers = {
 
 export function getfn(name, params = null){
   const qs = params ? new URLSearchParams(params).toString() : null;
-  return fetch(`${supabase.supabaseUrl}/functions/v1/${name}?${qs}`, {
-    headers,
-    method: 'GET'
+  return fetch(`${supabase.functionsUrl.href}/${name}?${qs}`, {
+    method: 'GET',
+    headers
   }).then(resp => resp.json());
 }
 

@@ -16,17 +16,10 @@ function getTouches(_table_id){
   return getfn('touches', {_table_id});
 }
 
-function getPerspective(tableId, accessToken, eventId, seat, seatId){
-  const params = new URLSearchParams();
-  params.set("table_id", tableId);
-  eventId != null && params.set("event_id", eventId);
-  seat != null && params.set("seat", seat);
-  const perspective = _.fmap(fetch(`https://perspective.workers.meeplitis.com?${params}`, accessToken ? {
-    headers: {
-      accessToken
-    }
-  } : {}), resp => resp.json(), digest);
-  const last_move = getLastMove(tableId, eventId, seatId);
+function getPerspective(table_id, event_id, seat, seat_id){
+  const perspective = getfn("perspective", _.compact({table_id, event_id, seat})).then(digest);
+  //const perspective = supabase.functions.invoke("perspective", {body});
+  const last_move = getLastMove(table_id, event_id, seat_id);
   return Promise.all([perspective, last_move]).then(function([{data, error}, last_move]){
     return Object.assign({}, error || data, last_move);
   });
@@ -249,7 +242,7 @@ export function nav(self, _at){
     })), _.filter(function([offset, pos, touch, frame]){
       return touch && !frame;
     }, _), _.mapa(function([offset, pos, touch]){
-      return _.fmap(getPerspective(tableId, accessToken, touch, seat, seatId), _.array(pos, _));
+      return _.fmap(getPerspective(tableId, touch, seat, seatId), _.array(pos, _));
     }, _), Promise.all.bind(Promise), _.fmap(_, function(results){
       $.swap($state, _.pipe(_.reduce(function(state, [pos, frame]){
         return _.update(state, "history", _.pipe(expand(pos), _.assoc(_, pos, frame)));

@@ -9,7 +9,7 @@ const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY");
 const CORS = {
   "access-control-allow-origin": "*",
   "access-control-allow-headers": "*",
-  "access-control-allow-methods": "POST,OPTIONS"
+  "access-control-allow-methods": "GET,POST,OPTIONS"
 };
 
 const pickBearer = (req) => {
@@ -26,14 +26,35 @@ const pickBearer = (req) => {
   return null;
 };
 
+function paramsFromQuery(url) {
+  const sp = new URL(url).searchParams;
+  const out = {};
+  for (const [k, v] of sp.entries()) {
+    if (Object.prototype.hasOwnProperty.call(out, k)) {
+      const curr = out[k];
+      out[k] = Array.isArray(curr) ? [...curr, v] : [curr, v];
+    } else {
+      out[k] = v == null ? null : v;
+    }
+  }
+  return out;
+}
+
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("", { status: 200, headers: CORS });
-  if (req.method !== "POST") return new Response("Method Not Allowed", { status: 405, headers: CORS });
+  if (req.method !== "GET") return new Response("Method Not Allowed", { status: 405, headers: CORS });
+
+  const bearer = pickBearer(req);
+
+  console.log("req", req.url, "bearer", bearer);
 
   try {
-    const { table_id, event_id, seat } = await req.json();
-
-    const bearer = pickBearer(req);
+    const params = paramsFromQuery(req.url);
+    const table_id = params.table_id,
+          event_id = params.event_id,
+          seat = params.seat == null ? null : params.seat;
+    console.log("params", params)
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       global: { headers: bearer ? { Authorization: bearer } : {} }
     });
@@ -43,6 +64,8 @@ Deno.serve(async (req) => {
       const { data } = await supabase.auth.getUser();
       userId = data?.user?.id ?? null;
     }
+
+    console.log("seat", seat, "userId", userId);
 
     if (seat != null && userId) {
       const { data: seats, error } = await supabase.rpc("seats", { _player_id: userId, _table_id: table_id });

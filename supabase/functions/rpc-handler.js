@@ -15,7 +15,7 @@ const pickBearer = (req) => {
   return null;
 };
 
-const paramsFromQuery = (url) => {
+function paramsFromQuery (url) {
   const sp = new URL(url).searchParams;
   const out = {};
   for (const [k, v] of sp.entries()) {
@@ -27,7 +27,7 @@ const paramsFromQuery = (url) => {
     }
   }
   return out;
-};
+}
 
 /**
  * makeRpcHandler

@@ -367,12 +367,8 @@ function getSeated(_table_id){
   return _table_id ? getfn("seated", {_table_id}) : Promise.resolve([]);
 }
 
-function getSeats(tableId, accessToken){
-  return tableId && accessToken ? _.fmap(fetch(`https://seats.workers.meeplitis.com?table_id=${tableId}`, {
-    headers: {
-      accessToken
-    }
-  }), resp => resp.json()) : Promise.resolve([]);
+function getSeats(_table_id, accessToken){ //TODO test w/ and w/o accessToken
+  return _table_id && accessToken ? getfn("seats", {_table_id}) : Promise.resolve([]);
 }
 
 export function addLog(message, details = null){

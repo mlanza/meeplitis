@@ -12,3 +12,4 @@ secrets.md
 deno.lock
 table-*.json
 .temp
+*.temp.*

@@ -240,7 +240,7 @@ export function canBearOff(seat, state) {
   if (bar[seat] > 0) {
     return false;
   }
-  return !_.detect(function(i){
+  return !_.some(function(i){
     return points[i][seat] > 0;
   }, outerBoard(seat));
 }

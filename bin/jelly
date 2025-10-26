@@ -58,7 +58,7 @@ async function main({legacy, query, command, details}){
         $error = $.atom(hydrate.error),
         $simulate = $.map(g.simulate(make), $data),
         $effects = $.map(g.effects, $simulate),
-        $moves = $.map(_.pipe(_.first, g.moves(_, {seat: details.seat}), _.toArray), $simulate);
+        $moves = $.map(_.pipe(_.getIn(_, ["reel", 0]), g.moves(_, {seat: details.seat}), _.toArray), $simulate);
 
   $.sub($data, logging("hydrate"));
   $.sub($simulate, logging("simulate"));

@@ -180,11 +180,11 @@ export function simulate(make){
         _.seq(commands) ? _.compact : _.plug(precipitatedBy, _, event)),
           curr  =
       _.reduce((self, command) => execute(self, command, singular(seen)), prior, commands);
-    return [curr, prior, seen, included];
+    return { reel: [curr, prior], seen, included };
   }
 }
 
-export function effects([curr, prior, seen, included]){
+export function effects({ reel: [curr, prior], seen, included }){
   if (curr === prior) {
     return _.chain(perspective(curr, seen), including(included, curr, seen));
   } else {

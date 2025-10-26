@@ -33,12 +33,12 @@ try {
 
     function init({seats, config, seen, evented, hash}){
       const at = hash ? hash.replace("#", "") : _.last(evented)?.id;
-      const [seed] = simulate({seats, config, seen});
+      const { reel: [seed] } = simulate({seats, config, seen});
       const frames = _.fold(function(memo, event){
         const {game, loaded} = _.last(memo) || {game: seed, loaded: []};
         const snapshot = _.deref(game);
         const result = _.chain({seats, config, events: [event], loaded, commands: [], seen, snapshot}, simulate);
-        const [curr] = result;
+        const { reel: [curr] } = result;
         const effs = g.effects(result);
         return _.conj(memo, {game: curr, loaded: _.conj(loaded, event), ...effs});
       },[], evented);
@@ -62,7 +62,7 @@ try {
           const {game, loaded} = _.last(memo);
           const snapshot = _.maybe(game, _.deref);
           const result = _.chain({seats, config, events: [event], loaded, commands: [], seen, snapshot}, simulate);
-          const [curr] = result;
+          const { reel: [curr] } = result;
           const effs = g.effects(result);
           return _.conj(memo, {game: curr, loaded: _.conj(loaded, event), ...effs});
         },[{game: frame?.game, loaded: frame?.loaded}], tempIds(added))));

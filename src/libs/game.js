@@ -170,7 +170,7 @@ const precipitatedBy = _.overload(null, precipitatedBy1, precipitatedBy2);
 //config - game config options
 //commands - issued to update game state
 export function simulate(make){
-  return function({event, seats, config = {}, loaded = [], events = [], commands = [], seen = [], snapshot = null, view = null}){
+  return function({event, seats, config = {}, loaded = [], events = [], commands = [], seen = [], snapshot = null, included = null}){
     if (!_.seq(seats)) {
       throw new Error("No one is seated at the table!");
     }
@@ -180,23 +180,30 @@ export function simulate(make){
         _.seq(commands) ? _.compact : _.plug(precipitatedBy, _, event)),
           curr  =
       _.reduce((self, command) => execute(self, command, singular(seen)), prior, commands);
-    return [curr, prior, seen, view];
+    return [curr, prior, seen, included];
   }
 }
 
-export function effects([curr, prior, seen, view]){
+export function effects([curr, prior, seen, included]){
   if (curr === prior) {
-    return _.chain(perspective(curr, seen), viewing(view, curr, seen));
+    return _.chain(perspective(curr, seen), including(included, curr, seen));
   } else {
     return _.chain(curr, _.juxtVals({added, up}));
   }
 }
 
-function viewing(view, curr, seen){
+function including(included, curr, seen){
   const seat = _.first(seen);
-  return view === "action"
-    ? _.assoc(_, "moves", _.toArray(moves(curr, {seat})))
-    : _.identity;
+  return function(memo){
+    return _.reduce(function(memo, key){
+      switch (key) {
+        case "moves":
+          return _.assoc(memo, key, _.toArray(moves(curr, {seat})));
+        default:
+          return memo;
+      }
+    }, memo, included);
+  }
 }
 
 export function handle(make, log = _.noop){

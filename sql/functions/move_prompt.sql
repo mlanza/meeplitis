@@ -13,7 +13,7 @@ begin
   _hydrate := hydrate(_table_id, '[]'::jsonb, _seat);
 
   -- override the view to "action"
-  _hydrate := _hydrate || jsonb_build_object('view', 'action');
+  _hydrate := _hydrate || jsonb_build_object('included', jsonb_build_array('moves'));
 
   -- run the simulation first
   _result := simulate(_hydrate);
@@ -35,8 +35,8 @@ begin
   -- combine prompts with two line breaks
   _prompt := _site_prompt || E'\n\n' || _game_prompt;
 
-  -- add prompt after simulate
-  _result := _result || jsonb_build_object('prompt', _prompt);
+  -- add after simulate
+  _result := _result || jsonb_build_object('prompt', _prompt, 'seat', _seat);
 
   return _result;
 end;

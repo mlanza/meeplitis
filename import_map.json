@@ -3,6 +3,8 @@
     "lume/": "https://deno.land/x/lume/",
     "/libs/atomic_/core.js": "./src/libs/atomic_/core.js",
     "/libs/atomic_/shell.js": "./src/libs/atomic_/shell.js",
+    "/libs/links.js": "./src/libs/links.js",
+    "/libs/cmd.js": "./src/libs/cmd.js",
     "/libs/game.js": "./src/libs/game.js",
     "/libs/game_.js": "./src/libs/game_.js"
   }

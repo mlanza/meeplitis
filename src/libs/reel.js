@@ -232,13 +232,15 @@ await new Command()
     const seat = _.maybe(opts.seat, parseInt);
     const interactive = !!opts.interactive;
     const accessToken =  Deno.env.get("SUPABASE_TEMP_ACCESS_TOKEN") || null;
-    const r = reel(table, {event, seat, accessToken});
+    const $reel = reel(table, {event, seat, accessToken});
 
-    $.sub(r, $.see("reel"));
+    $.sub($reel, function({table, min, max, at}){
+      $.log(`\x1b]0;Table ${table?.id}: ${at + 1} of ${max + 1} \x07`);
+    });
+    $.sub($reel, $.see("reel"));
 
     if (interactive) {
-      command($.dispatch(r, _));
-      console.log("HERE")
+      command($.dispatch($reel, _));
     }
   })
   .parse(Deno.args);

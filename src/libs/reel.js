@@ -32,15 +32,19 @@ function table(tableId){
   return $.pipe($t, _.compact());
 }
 
-function Reel($state, $table, $seated, $seats, $seat, $pos, $at, $max, accessToken){
+function Reel({$state, $table, $up, $seated, $seats, $seat, $perspectives, $pos, $at, $max, $ready, $error}, accessToken){
   this.$state = $state;
   this.$table = $table;
+  this.$up = $up;
   this.$seated = $seated;
   this.$seats = $seats;
   this.$seat = $seat;
+  this.$perspectives = $perspectives;
   this.$pos = $pos;
   this.$at = $at;
   this.$max = $max;
+  this.$ready = $ready;
+  this.$error = $error;
   this.accessToken = accessToken;
 }
 
@@ -169,6 +173,8 @@ function getLastMoveAt(state){
 
 function reel(tableId, {event = null, seat = null, accessToken = null} = {}){
   const $state = $({});
+  const $ready = $(true);
+  const $error = $(null);
   const $tableId = $.fixed(tableId);
   const $accessToken = $.fixed(accessToken);
   const $seat = $.fixed(seat);
@@ -189,14 +195,20 @@ function reel(tableId, {event = null, seat = null, accessToken = null} = {}){
   const $seatId = $(function(seated, seat){
     return _.getIn(seated, [seat, "seat_id"]);
   }, $seated, $seat);
+  const $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table);
+
   $.sub($table, includes($state, "table"));
+  $.sub($error, includes($state, "error"));
+  $.sub($ready, includes($state, "ready"));
   $.sub($seated, includes($state, "seated"));
   $.sub($seats, includes($state, "seats"));
   $.sub($seat, includes($state, "seat"));
   $.sub($pos, includes($state, "pos"));
   $.sub($max, includes($state, "max"));
   $.sub($at, includes($state, "at"));
+  $.sub($up, includes($state, "up"));
   $.sub($perspectives, includes($state, "perspectives"));
+
   const $touch = $.pipe($.map(function(touches, at, perspectives){
     const touch = _.getIn(touches, ["touches", at]);
     const found = !!_.get(perspectives, touch);
@@ -217,7 +229,7 @@ function reel(tableId, {event = null, seat = null, accessToken = null} = {}){
     const perspective = await getPerspective(...args);
     $.swap($perspectives, _.assoc(_, eventId, perspective));
   });
-  return new Reel($state, $table, $seated, $seats, $seat, $pos, $at, $max, accessToken);
+  return new Reel({$state, $table, $up, $seated, $seats, $seat, $perspectives, $pos, $at, $max, $ready, $error}, accessToken);
 }
 
 await new Command()

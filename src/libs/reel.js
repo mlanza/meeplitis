@@ -260,8 +260,7 @@ async function command(run){
           break;
 
         case "q":
-          console.log("QUIT")
-          return;
+          Deno.exit();
 
         default:
           break;

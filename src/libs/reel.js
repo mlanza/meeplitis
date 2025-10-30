@@ -3,6 +3,7 @@ import $ from "./atomic_/shell.js";
 import supabase from "./supabase.js";
 import { keypress } from "https://deno.land/x/cliffy@v0.25.4/keypress/mod.ts";
 import { Command } from "https://deno.land/x/cliffy@v1.0.0-rc.4/command/mod.ts";
+import { Input } from "https://deno.land/x/cliffy@v1.0.0-rc.3/prompt/mod.ts";
 
 function log(obj){
   $.log(Deno.inspect(obj, { colors: true, compact: true, depth: Infinity, iterableLimit: Infinity }));
@@ -80,7 +81,21 @@ function dispatch(self, cmd){
         break;
 
       default:
-        throw cmd;
+        try {
+          if (_.deref(self.$seat) == null) {
+            throw new Error("Spectators are not permitted to issue moves");
+          }
+          $.reset(self.$ready, false);
+          const table_id = _.chain(self.$table, _.deref, _.getIn(_, ["table", "id"]));
+          const seat = _.chain(self.$seat, _.deref);
+          const commands = [cmd];
+          const moved = await move(table_id, seat, commands, self.accessToken);
+          log({moved});
+        } catch (ex) {
+          $.reset(self.$error, ex);
+        } finally {
+          $.reset(self.$ready, true);
+        }
     }
   } catch (ex) {
     log({ex});
@@ -169,6 +184,11 @@ function getLastMoveAt(state){
   const lastMove = _.get(perspective, "last_move");
   const idx = _.indexOf(touches, lastMove);
   return idx === -1 ? at : idx;
+}
+
+function move(table_id, seat, commands, accessToken){
+  const body = {table_id, seat, commands};
+  return supabase.functions.invoke("move", {body}).then(_.get(_, "data"));
 }
 
 function reel(tableId, {event = null, seat = null, accessToken = null} = {}){
@@ -271,6 +291,11 @@ async function command(run){
 
         case "l":
           run({type: "last-move"});
+          break;
+
+        case "m":
+          const json = await Input.prompt("What move?");
+          run(JSON.parse(json));
           break;
 
         case "q":

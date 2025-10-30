@@ -55,18 +55,26 @@ function sub(self, obs){
 function dispatch(self, cmd){
   try {
     switch (cmd.type) {
-      case "head":
+      case "inception":
         $.reset(self.$pos, 0);
         break;
-      case "rewind":
+
+      case "back":
         _.chain(self.$at, _.deref, _.dec, $.reset(self.$pos, _));
         break;
+
       case "forward":
         _.chain(self.$at, _.deref, _.inc, $.reset(self.$pos, _));
         break;
-      case "tail":
+
+      case "present":
         _.chain(self.$max, _.deref, $.reset(self.$pos, _));
         break;
+
+      case "last-move":
+        _.chain(self.$state, _.deref, getLastMoveAt, $.reset(self.$pos, _));
+        break;
+
       default:
         throw cmd;
     }
@@ -150,6 +158,15 @@ function getTouches(_table_id, accessToken){
   return getfn('touches', {_table_id}, accessToken);
 }
 
+function getLastMoveAt(state){
+  const {perspectives, at, touches} = state;
+  const touch = _.get(touches, at);
+  const perspective = _.get(perspectives, touch);
+  const lastMove = _.get(perspective, "last_move");
+  const idx = _.indexOf(touches, lastMove);
+  return idx === -1 ? at : idx;
+}
+
 function reel(tableId, {event = null, seat = null, accessToken = null} = {}){
   const $state = $({});
   const $tableId = $.fixed(tableId);
@@ -160,12 +177,14 @@ function reel(tableId, {event = null, seat = null, accessToken = null} = {}){
   const $seats = seats(tableId, accessToken);
   const $touches = $(null);
   const $pos = $(null);
+  const $min = $.fixed(0);
   const $max = $.pipe($(function(touches){
     return _.maybe(touches?.touches, _.count, _.dec);
   }, $touches), _.filter(_.isSome));
-  const $at = $.pipe($(function(pos, max){
-    return _.maybe(pos, _.clamp(_, 0, max)) || max;
-  }, $pos, $max), _.filter(_.isSome));
+  const $at = $.pipe($(function(pos, min, max){
+    const at = _.maybe(pos, _.clamp(_, min, max));
+    return at == null ? max : at;
+  }, $pos, $min, $max), _.filter(_.isSome));
   const $perspectives = $({});
   const $seatId = $(function(seated, seat){
     return _.getIn(seated, [seat, "seat_id"]);
@@ -219,6 +238,7 @@ await new Command()
 
     if (interactive) {
       command($.dispatch(r, _));
+      console.log("HERE")
     }
   })
   .parse(Deno.args);
@@ -228,14 +248,19 @@ async function command(run){
     try {
       switch (event.key) {
         case "left":
-          run({type: event.shiftKey ? "head" : "rewind"});
+          run({type: event.shiftKey ? "inception" : "back"});
           break;
 
         case "right":
-          run({type: event.shiftKey ? "tail" : "forward"});
+          run({type: event.shiftKey ? "present" : "forward"});
+          break;
+
+        case "l":
+          run({type: "last-move"});
           break;
 
         case "q":
+          console.log("QUIT")
           return;
 
         default:

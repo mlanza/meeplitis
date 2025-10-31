@@ -165,6 +165,8 @@ function toMoment(self, at) {
 
 function dispatch(self, cmd){
   try {
+    //whenever the user does something, the timer aborts
+    self.$timer.stop();
     switch (cmd.type) {
       case "at":
         const {details} = cmd;

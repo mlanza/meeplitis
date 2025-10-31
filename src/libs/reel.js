@@ -57,7 +57,7 @@ function sub(self, obs){
   return $.ISubscribe.sub(self.$state, obs);
 }
 
-function issueMove(self, cmd){
+async function issueMove(self, cmd){
   try {
     if (_.deref(self.$seat) == null) {
       throw new Error("Spectators are not permitted to issue moves");
@@ -75,9 +75,23 @@ function issueMove(self, cmd){
   }
 }
 
+function toMoment(self, at) {
+  if (_.isNumber(at)) {
+    $.reset(self.$pos, at);
+  } else {
+    _.chain(self.$touches, _.deref, _.get(_, "touches"), _.indexOf(_, at), $.reset(self.$pos, _));
+  }
+}
+
 function dispatch(self, cmd){
   try {
     switch (cmd.type) {
+      case "at":
+        const {details} = cmd;
+        const {at} = details;
+        toMoment(self, at);
+        break;
+
       case "inception":
         $.reset(self.$pos, 0);
         break;
@@ -140,13 +154,25 @@ function getSeats(_table_id, accessToken){ //TODO test w/ and w/o accessToken
 
 function seated(tableId){
   const $seated = $.atom(null);
-  _.fmap(getSeated(tableId), $.reset($seated, _));
+  _.fmap(getSeated(tableId),
+    check("seated"),
+    $.reset($seated, _));
   return $seated;
+}
+
+function check(op){
+  return $.tee(function(error){
+    if (error?.code) {
+      throw {error, op: "seats"};
+    }
+  });
 }
 
 function seats(tableId, accessToken){
   const $seats = $.atom(null);
-  _.fmap(getSeats(tableId, accessToken), $.reset($seats, _));
+  _.fmap(getSeats(tableId, accessToken),
+    check("seats"),
+    $.reset($seats, _));
   return $seats;
 }
 
@@ -303,7 +329,7 @@ async function command(run){
 
         case "m":
           const json = await Input.prompt("What move?");
-          run({type: "move", details: {move: JSON.parse(json)});
+          run({type: "move", details: {move: JSON.parse(json)}});
           break;
 
         case "q":

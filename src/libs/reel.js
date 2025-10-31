@@ -372,8 +372,13 @@ function reel(tableId, {event = null, seat = null, accessToken = null} = {}){
   $.sub($touches, function(touches){
     $.swap($state, _.merge(touches, _));
   });
-  $.sub($table, async function(){
+  $.sub($table, async function({last_touch_id}){
+    const present = _.deref($present);
     $.reset($touches, await getTouches(tableId, accessToken));
+    if (present) {
+      //if the user was in the current present the moment the table was touched, catch him up with what happened.
+      $timer.start();
+    }
   });
   $.sub($view, async function(args){
     const [tableId, eventId] = args;

@@ -311,7 +311,7 @@ function move(table_id, seat, commands, accessToken){
   return supabase.functions.invoke("move", {body}).then(_.get(_, "data"));
 }
 
-function reel(tableId, {event = null, seat = null, accessToken = null} = {}){
+function reel(tableId, make, {event = null, seat = null, accessToken = null} = {}){
   const $state = $({});
   const $ready = $(true);
   const $error = $(null);
@@ -338,6 +338,7 @@ function reel(tableId, {event = null, seat = null, accessToken = null} = {}){
   const $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table);
   const $present = $.map(_.eq, $at, $max);
   const $timer = new Timer(1000, Date.now);
+  const $config = $.map(_.getIn(_, ["table", "config"]), $table);
 
   $.sub($timer, function(){
     if (_.deref($present)) {
@@ -350,7 +351,7 @@ function reel(tableId, {event = null, seat = null, accessToken = null} = {}){
   $.sub($table, includes($state, "table"));
   $.sub($error, includes($state, "error"));
   $.sub($ready, includes($state, "ready"));
-  $.sub($seated, includes($state, "seated"));
+  //$.sub($seated, includes($state, "seated"));
   $.sub($seats, includes($state, "seats"));
   $.sub($seat, includes($state, "seat"));
   $.sub($pos, includes($state, "pos"));
@@ -358,20 +359,30 @@ function reel(tableId, {event = null, seat = null, accessToken = null} = {}){
   $.sub($at, includes($state, "at"));
   $.sub($up, includes($state, "up"));
   $.sub($present, includes($state, "present"));
-  $.sub($perspectives, includes($state, "perspectives"));
+  //$.sub($perspectives, includes($state, "perspectives"));
 
   const $touch = $.pipe($.map(function(touches, at, perspectives){
     const touch = _.getIn(touches, ["touches", at]);
     const found = !!_.get(perspectives, touch);
     return found ? null : touch;
   }, $touches, $at, $perspectives), _.filter(_.isSome));
+  const $perspective = $.pipe($.map(_.get, $perspectives, $touch), _.filter(_.isSome));
+  const $snapshot = $.map(function(seated, config, {event, state}){
+    return make(seated, config, [event], state);
+  }, $seated, $config, $perspective);
+
+  //$.sub($perspective, includes($state, "perspective"));
+  $.sub($snapshot, includes($state, "snapshot"));
   const $view = $.pipe($.map(_.array, $tableId, $touch, $seat, $seatId, $accessToken), _.filter(function(what){
     const [tableId, touch, seat, seatId, accessToken] = what || [];
     return touch
   }));
+    $.sub($touch, includes($state, "touch"));
+
   $.sub($touches, function(touches){
     $.swap($state, _.merge(touches, _));
   });
+
   $.sub($table, async function({last_touch_id}){
     const present = _.deref($present);
     $.reset($touches, await getTouches(tableId, accessToken));
@@ -388,6 +399,10 @@ function reel(tableId, {event = null, seat = null, accessToken = null} = {}){
   return new Reel({$state, $table, $up, $seated, $seats, $seat, $perspectives, $pos, $at, $max, $ready, $error, $timer}, accessToken);
 }
 
+function snapshot(self){
+
+}
+
 await new Command()
   .name("reel")
   .description("Reel")
@@ -395,12 +410,15 @@ await new Command()
   .option("--event <event:string>", "Event ID")
   .option("--seat <seat:number>", "Seat number (integer)")
   .option("-i, --interactive", "Keep the program open for further input.")
-  .action(function (opts, table){
+  .action(async function (opts, table){
     const event = opts.event || null;
     const seat = _.maybe(opts.seat, parseInt);
     const interactive = !!opts.interactive;
     const accessToken =  Deno.env.get("SUPABASE_TEMP_ACCESS_TOKEN") || null;
-    const $reel = reel(table, {event, seat, accessToken});
+    const {make} = await import(`../games/backgammon/table/uJl/core.js`);
+
+
+    const $reel = reel(table, make, {event, seat, accessToken});
 
     $.sub($reel, function({table, min, max, at}){
       $.log(`\x1b]0;Table ${table?.id}: ${at + 1} of ${max + 1} \x07`);

@@ -57,6 +57,24 @@ function sub(self, obs){
   return $.ISubscribe.sub(self.$state, obs);
 }
 
+function issueMove(self, cmd){
+  try {
+    if (_.deref(self.$seat) == null) {
+      throw new Error("Spectators are not permitted to issue moves");
+    }
+    $.reset(self.$ready, false);
+    const table_id = _.chain(self.$table, _.deref, _.getIn(_, ["table", "id"]));
+    const seat = _.chain(self.$seat, _.deref);
+    const commands = [cmd];
+    const moved = await move(table_id, seat, commands, self.accessToken);
+    log({moved});
+  } catch (ex) {
+    $.reset(self.$error, ex);
+  } finally {
+    $.reset(self.$ready, true);
+  }
+}
+
 function dispatch(self, cmd){
   try {
     switch (cmd.type) {
@@ -80,22 +98,12 @@ function dispatch(self, cmd){
         _.chain(self.$state, _.deref, getLastMoveAt, $.reset(self.$pos, _));
         break;
 
+      case "move":
+        issueMove(self, cmd);
+        break;
+
       default:
-        try {
-          if (_.deref(self.$seat) == null) {
-            throw new Error("Spectators are not permitted to issue moves");
-          }
-          $.reset(self.$ready, false);
-          const table_id = _.chain(self.$table, _.deref, _.getIn(_, ["table", "id"]));
-          const seat = _.chain(self.$seat, _.deref);
-          const commands = [cmd];
-          const moved = await move(table_id, seat, commands, self.accessToken);
-          log({moved});
-        } catch (ex) {
-          $.reset(self.$error, ex);
-        } finally {
-          $.reset(self.$ready, true);
-        }
+        throw cmd;
     }
   } catch (ex) {
     log({ex});
@@ -295,7 +303,7 @@ async function command(run){
 
         case "m":
           const json = await Input.prompt("What move?");
-          run(JSON.parse(json));
+          run({type: "move", details: {move: JSON.parse(json)});
           break;
 
         case "q":

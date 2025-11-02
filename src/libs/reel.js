@@ -423,6 +423,7 @@ async function command(run){
           break;
 
         case "q":
+        case "escape":
           Deno.exit();
 
         default:

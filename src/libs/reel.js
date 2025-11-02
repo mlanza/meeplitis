@@ -353,10 +353,6 @@ function reel(tableId, make, {event = null, seat = null, accessToken = null} = {
     return touch
   }));
 
-  /*$.sub($touches, function(touches){
-    $.swap($state, _.merge(touches, _));
-  });*/
-
   $.sub($table, async function({last_touch_id}){
     const present = _.deref($present);
     $.reset($touches, await getTouches(tableId, accessToken));
@@ -370,9 +366,9 @@ function reel(tableId, make, {event = null, seat = null, accessToken = null} = {
     const perspective = await getPerspective(...args);
     $.swap($perspectives, _.assoc(_, eventId, perspective));
   });
-  const $state = $.pipe($.map(function(table, error, ready, seated, seats, pos, max, at, up, present, touch, touches, snapshot){
-    return {table, error, ready, seated, seats, pos, max, at, up, present, touch, ...touches, snapshot};
-  }, $table, $error, $ready, $seated, $seats, $pos, $max, $at, $up, $present, $touch, $touches, $snapshot), _.filter(_.isSome));
+  const $state = $.pipe($.map(function(table, error, ready, seated, seats, seat, seatId, pos, max, at, up, present, touch, touches, snapshot){
+    return {table, error, ready, seats, seat, seatId, pos, max, at, up, present, touch, ...touches, snapshot};
+  }, $table, $error, $ready, $seated, $seats, $seat, $seatId, $pos, $max, $at, $up, $present, $touch, $touches, $snapshot), _.filter(_.isSome));
   return new Reel({$state, $table, $up, $seated, $seats, $seat, $perspectives, $pos, $at, $max, $ready, $error, $timer}, accessToken);
 }
 

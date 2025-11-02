@@ -112,7 +112,7 @@ function table(tableId){
   return $.pipe($t, _.compact());
 }
 
-function Reel({$state, $table, $up, $seated, $seats, $seat, $perspectives, $pos, $at, $max, $ready, $error, $timer}, accessToken){
+function Reel({$state, $table, $up, $seated, $seats, $seat, $perspectives, $perspective, $snapshot, $pos, $at, $max, $ready, $error, $timer, $touch, $touches}, accessToken){
   this.$state = $state;
   this.$table = $table;
   this.$up = $up;
@@ -120,12 +120,16 @@ function Reel({$state, $table, $up, $seated, $seats, $seat, $perspectives, $pos,
   this.$seats = $seats;
   this.$seat = $seat;
   this.$perspectives = $perspectives;
+  this.$perspective = $perspective;
   this.$pos = $pos;
   this.$at = $at;
   this.$max = $max;
   this.$ready = $ready;
   this.$error = $error;
   this.$timer = $timer;
+  this.$touch = $touch;
+  this.$touches = $touches;
+  this.$snapshot = $snapshot;
   this.accessToken = accessToken;
 }
 
@@ -161,6 +165,10 @@ function toMoment(self, at) {
   } else {
     _.chain(self.$touches, _.deref, _.get(_, "touches"), _.indexOf(_, at), $.reset(self.$pos, _));
   }
+}
+
+function on(self, key, callback){
+  return $.sub(self[`$${key}`], callback);
 }
 
 function dispatch(self, cmd){
@@ -211,6 +219,7 @@ function dispatch(self, cmd){
 }
 
 $.doto(Reel,
+  _.implement($.IEvented, {on}),
   _.implement($.IDispatch, {dispatch}),
   _.implement($.ISubscribe, {sub}),
   _.implement(_.IDeref, {deref}));
@@ -369,7 +378,7 @@ function reel(tableId, make, {event = null, seat = null, accessToken = null} = {
   const $state = $.pipe($.map(function(table, error, ready, seated, seats, seat, seatId, pos, max, at, up, present, touch, touches, snapshot){
     return {table, error, ready, seats, seat, seatId, pos, max, at, up, present, touch, ...touches, snapshot};
   }, $table, $error, $ready, $seated, $seats, $seat, $seatId, $pos, $max, $at, $up, $present, $touch, $touches, $snapshot), _.filter(_.isSome));
-  return new Reel({$state, $table, $up, $seated, $seats, $seat, $perspectives, $pos, $at, $max, $ready, $error, $timer}, accessToken);
+  return new Reel({$state, $table, $up, $seated, $seats, $seat, $perspectives, $perspective, $snapshot, $pos, $at, $max, $ready, $error, $timer, $touch, $touches}, accessToken);
 }
 
 await new Command()
@@ -387,9 +396,20 @@ await new Command()
     const {make} = await import(`../games/backgammon/table/uJl/core.js`);
     const $reel = reel(table, make, {event, seat, accessToken});
     $.sub($reel, function({table, min, max, at}){
-      $.log(`\x1b]0;Table ${table?.id}: ${at + 1} of ${max + 1} \x07`);
+      //$.log(`\x1b]0;Table ${table?.id}: ${at + 1} of ${max + 1} \x07`);
     });
-    $.sub($reel, $.see("reel"));
+    $.on($reel, "ready", $.see("ready"));
+    $.on($reel, "table", $.see("table"));
+    $.on($reel, "touch", $.see("touch"));
+    $.on($reel, "error", $.see("error"));
+    $.on($reel, "seat", $.see("seat"));
+    $.on($reel, "seats", $.see("seats"));
+    //$.on($reel, "seated", $.see("seated"));
+    $.on($reel, "at", $.see("at"));
+    $.on($reel, "max", $.see("max"));
+    //$.on($reel, "perspective", $.see("perspective"));
+    $.on($reel, "snapshot", $.see("snapshot"));
+    //$.sub($reel, $.see("reel"));
 
     if (interactive) {
       command($.dispatch($reel, _));

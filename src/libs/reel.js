@@ -167,8 +167,12 @@ function toMoment(self, at) {
   }
 }
 
+function chan(self, key){
+  return self[`$${key}`];
+}
+
 function on(self, key, callback){
-  return $.sub(self[`$${key}`], callback);
+  return $.sub($.chan(self, key), callback);
 }
 
 function dispatch(self, cmd){
@@ -219,7 +223,7 @@ function dispatch(self, cmd){
 }
 
 $.doto(Reel,
-  _.implement($.IEvented, {on}),
+  _.implement($.IEvented, {on, chan}),
   _.implement($.IDispatch, {dispatch}),
   _.implement($.ISubscribe, {sub}),
   _.implement(_.IDeref, {deref}));

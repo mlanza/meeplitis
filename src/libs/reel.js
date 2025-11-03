@@ -334,6 +334,7 @@ function reel(tableId, make, {event = null, seat = null, accessToken = null} = {
   const $seat = $.fixed(seat);
   const $table = table(tableId);
   const $status = $.map(_.get(_, "status"), $table);
+  const $started = $.map(_.pipe(_.get(_, "status"), _.eq(_, "started")), $table); //games can be abandoned
   const $seated = seated(tableId);
   const $seats = seats(tableId, accessToken);
   const $touches = $(null);
@@ -373,7 +374,10 @@ function reel(tableId, make, {event = null, seat = null, accessToken = null} = {
   const $undoable = $.map(function(touches, touch){
     return undoThru(touches?.undoables, touch);
   }, $touches, $touch);
-
+  const $actionable = $.map(function({up, may}, seat){
+    return _.includes(up, seat) || _.includes(may, seat);
+  }, $.pipe($perspective, _.filter(_.isSome)), $seat)
+  const $act = $.map(_.all, $present, $actionable, $ready, $started);
   $.sub($table, async function({last_touch_id}){
     const present = _.deref($present);
     $.reset($touches, await getTouches(tableId, accessToken));
@@ -388,7 +392,7 @@ function reel(tableId, make, {event = null, seat = null, accessToken = null} = {
       $.swap($perspectives, _.assoc(_, eventId, await getPerspective(...args)));
     }
   });
-  const $state = $.pipe($.map(function(table, error, ready, seated, seats, seat, seatId, pos, max, at, up, present, touch, touches, undoable, perspectives, perspective, snapshot){
+  const $state = $.pipe($.map(function(table, error, ready, seated, seats, seat, seatId, pos, max, at, up, present, actionable, act, touch, touches, undoable, perspectives, perspective, snapshot){
     return {
       table,
       error,
@@ -399,10 +403,12 @@ function reel(tableId, make, {event = null, seat = null, accessToken = null} = {
       pos,
       //perspectives,
       perspective,
+      actionable,
+      act,
       max, at, up, present, touch, ...touches, undoable,
       //snapshot
     };
-  }, $table, $error, $ready, $seated, $seats, $seat, $seatId, $pos, $max, $at, $up, $present, $touch, $touches, $undoable, $perspectives, $perspective, $snapshot), _.filter(_.isSome));
+  }, $table, $error, $ready, $seated, $seats, $seat, $seatId, $pos, $max, $at, $up, $present, $actionable, $act, $touch, $touches, $undoable, $perspectives, $perspective, $snapshot), _.filter(_.isSome));
   return new Reel({$state, $table, $status, $up, $seated, $seats, $seat, $perspectives, $perspective, $snapshot, $pos, $at, $max, $ready, $error, $timer, $touch, $touches}, accessToken);
 }
 

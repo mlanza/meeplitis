@@ -319,6 +319,13 @@ function move(table_id, seat, commands, accessToken){
   return supabase.functions.invoke("move", {body}).then(_.get(_, "data"));
 }
 
+function undoThru(undoables, touch){
+  return _.some(function([key, vals]){
+    return _.includes(vals, touch) ? key : null;
+  }, undoables);
+}
+
+
 function reel(tableId, make, {event = null, seat = null, accessToken = null} = {}){
   const $ready = $(true);
   const $error = $(null);
@@ -354,19 +361,18 @@ function reel(tableId, make, {event = null, seat = null, accessToken = null} = {
       _.chain($at, _.deref, _.inc, $.reset($pos, _));
     }
   });
-  const $touch = $.pipe($.map(function(touches, at, perspectives){
-    const touch = _.getIn(touches, ["touches", at]);
-    const found = !!_.get(perspectives, touch);
-    return found ? null : touch;
-  }, $touches, $at, $perspectives), _.filter(_.isSome));
-  const $perspective = $.pipe($.map(_.get, $perspectives, $touch), _.filter(_.isSome));
+  const $touch = $.map(function(touches, at){
+    return _.getIn(touches, ["touches", at]);
+  }, $touches, $at);
+  const $perspective = $.map(_.get, $perspectives, $touch);
   const $snapshot = $.map(function(seated, config, {event, state}){
     return make(seated, config, [event], state);
-  }, $seated, $config, $perspective);
-  const $view = $.pipe($.map(_.array, $tableId, $touch, $seat, $seatId, $accessToken), _.filter(function(what){
-    const [tableId, touch, seat, seatId, accessToken] = what || [];
-    return touch
-  }));
+  }, $seated, $config, $.pipe($perspective, _.filter(_.isSome)));
+  const $args = $.map(_.array, $tableId, $touch, $seat, $seatId, $accessToken);
+  const $view = $.pipe($.map(_.array, $args, $perspective), _.filter(_.isSome));
+  const $undoable = $.map(function(touches, touch){
+    return undoThru(touches?.undoables, touch);
+  }, $touches, $touch);
 
   $.sub($table, async function({last_touch_id}){
     const present = _.deref($present);
@@ -376,14 +382,27 @@ function reel(tableId, make, {event = null, seat = null, accessToken = null} = {
       $timer.start();
     }
   });
-  $.sub($view, async function(args){
+  $.sub($view, async function([args, perspective]){
     const [tableId, eventId] = args;
-    const perspective = await getPerspective(...args);
-    $.swap($perspectives, _.assoc(_, eventId, perspective));
+    if (!perspective && eventId) {
+      $.swap($perspectives, _.assoc(_, eventId, await getPerspective(...args)));
+    }
   });
-  const $state = $.pipe($.map(function(table, error, ready, seated, seats, seat, seatId, pos, max, at, up, present, touch, touches, snapshot){
-    return {table, error, ready, seats, seat, seatId, pos, max, at, up, present, touch, ...touches, snapshot};
-  }, $table, $error, $ready, $seated, $seats, $seat, $seatId, $pos, $max, $at, $up, $present, $touch, $touches, $snapshot), _.filter(_.isSome));
+  const $state = $.pipe($.map(function(table, error, ready, seated, seats, seat, seatId, pos, max, at, up, present, touch, touches, undoable, perspectives, perspective, snapshot){
+    return {
+      table,
+      error,
+      ready,
+      seats,
+      seat,
+      seatId,
+      pos,
+      //perspectives,
+      perspective,
+      max, at, up, present, touch, ...touches, undoable,
+      //snapshot
+    };
+  }, $table, $error, $ready, $seated, $seats, $seat, $seatId, $pos, $max, $at, $up, $present, $touch, $touches, $undoable, $perspectives, $perspective, $snapshot), _.filter(_.isSome));
   return new Reel({$state, $table, $status, $up, $seated, $seats, $seat, $perspectives, $perspective, $snapshot, $pos, $at, $max, $ready, $error, $timer, $touch, $touches}, accessToken);
 }
 
@@ -404,6 +423,7 @@ await new Command()
     $.sub($reel, function({table, min, max, at}){
       //$.log(`\x1b]0;Table ${table?.id}: ${at + 1} of ${max + 1} \x07`);
     });
+    /*
     $.on($reel, "ready", $.see("ready"));
     $.on($reel, "table", $.see("table"));
     $.on($reel, "touch", $.see("touch"));
@@ -415,7 +435,8 @@ await new Command()
     $.on($reel, "max", $.see("max"));
     //$.on($reel, "perspective", $.see("perspective"));
     $.on($reel, "snapshot", $.see("snapshot"));
-    //$.sub($reel, $.see("reel"));
+    */
+    $.sub($reel, $.see("reel"));
 
     if (interactive) {
       command($.dispatch($reel, _));

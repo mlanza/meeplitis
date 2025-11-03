@@ -112,9 +112,10 @@ function table(tableId){
   return $.pipe($t, _.compact());
 }
 
-function Reel({$state, $table, $up, $seated, $seats, $seat, $perspectives, $perspective, $snapshot, $pos, $at, $max, $ready, $error, $timer, $touch, $touches}, accessToken){
+function Reel({$state, $table, $status, $up, $seated, $seats, $seat, $perspectives, $perspective, $snapshot, $pos, $at, $max, $ready, $error, $timer, $touch, $touches}, accessToken){
   this.$state = $state;
   this.$table = $table;
+  this.$status = $status;
   this.$up = $up;
   this.$seated = $seated;
   this.$seats = $seats;
@@ -325,6 +326,7 @@ function reel(tableId, make, {event = null, seat = null, accessToken = null} = {
   const $accessToken = $.fixed(accessToken);
   const $seat = $.fixed(seat);
   const $table = table(tableId);
+  const $status = $.map(_.get(_, "status"), $table);
   const $seated = seated(tableId);
   const $seats = seats(tableId, accessToken);
   const $touches = $(null);
@@ -382,7 +384,7 @@ function reel(tableId, make, {event = null, seat = null, accessToken = null} = {
   const $state = $.pipe($.map(function(table, error, ready, seated, seats, seat, seatId, pos, max, at, up, present, touch, touches, snapshot){
     return {table, error, ready, seats, seat, seatId, pos, max, at, up, present, touch, ...touches, snapshot};
   }, $table, $error, $ready, $seated, $seats, $seat, $seatId, $pos, $max, $at, $up, $present, $touch, $touches, $snapshot), _.filter(_.isSome));
-  return new Reel({$state, $table, $up, $seated, $seats, $seat, $perspectives, $perspective, $snapshot, $pos, $at, $max, $ready, $error, $timer, $touch, $touches}, accessToken);
+  return new Reel({$state, $table, $status, $up, $seated, $seats, $seat, $perspectives, $perspective, $snapshot, $pos, $at, $max, $ready, $error, $timer, $touch, $touches}, accessToken);
 }
 
 await new Command()

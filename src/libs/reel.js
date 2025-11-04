@@ -112,7 +112,7 @@ function table(tableId){
   return $.pipe($t, _.compact());
 }
 
-function Reel({$state, $table, $status, $up, $seated, $seats, $seat, $perspectives, $perspective, $snapshot, $pos, $at, $max, $ready, $error, $timer, $touch, $touches}, accessToken){
+function Reel({$state, $table, $status, $up, $seated, $seats, $seat, $perspectives, $perspective, $pos, $at, $max, $ready, $error, $timer, $touch, $touches}, accessToken){
   this.$state = $state;
   this.$table = $table;
   this.$status = $status;
@@ -130,7 +130,6 @@ function Reel({$state, $table, $status, $up, $seated, $seats, $seat, $perspectiv
   this.$timer = $timer;
   this.$touch = $touch;
   this.$touches = $touches;
-  this.$snapshot = $snapshot;
   this.accessToken = accessToken;
 }
 
@@ -369,20 +368,18 @@ function reel(tableId, {event = null, seat = null, accessToken = null} = {}){
   const $game = $.atom(null);
   const $makes = $.atom(null);
   const $make = $.pipe($makes, _.compact());
-  const $maker = $.map(function(table, game){
+  const $maker = $.pipe($.map(function(table, game){
     const {release} = table;
     const {slug} = game;
     return `../games/${slug}/table/${release}/core.js`;
-  }, $table, $.pipe($game, _.compact()));
-  $.sub($maker, _.compact(), async function(url){
+  }, $table, $.pipe($game, _.compact())), _.compact());
+  const unsub = $.sub($maker, async function(url){
     const {make} = await import(url);
     $.reset($makes, make);
-  })
-  const $snapshot = $.pipe($.map(function(make, seated, config, {event, state}){
-    return make(seated, config, [event], state);
-  }, $make, $seated, $config, $.pipe($perspective, _.compact())), _.compact());
+    unsub();
+  });
   const $args = $.map(_.array, $tableId, $touch, $seat, $seatId, $accessToken);
-  const $view = $.pipe($.map(_.array, $args, $perspective), _.compact());
+  const $view = $.pipe($.map(_.array, $args, $perspective, $make, $seated, $config), _.compact());
   const $undoable = $.map(function(touches, touch){
     return undoThru(touches?.undoables, touch);
   }, $touches, $touch);
@@ -403,17 +400,16 @@ function reel(tableId, {event = null, seat = null, accessToken = null} = {}){
     const game = make(seated, config, [event], state);
     return {up, may, seen, event, last_move, game, at, max};
   }, $.pipe($perspective, _.filter(_.isSome)), $seated, $config, $at, $max), _.filter(_.isSome));*/
-  const $timeline = $.pipe($.map(function(make, perspectives, touches, seated, config, at, max){
+  const $timeline = $.pipe($.map(function(perspectives, touches, at, max){
     const touch = _.get(touches?.touches, at);
     const perspective = _.get(perspectives, touch);
     if (perspective) {
-      const {event, state, up, may, seen, last_move} = perspective;
-      const game = make(seated, config, [event], state);
-      return perspective ? {event, up, may, seen, last_move, config, at, max} : null;
+      const {game, event, up, may, seen, last_move} = perspective;
+      return perspective ? {game, event, up, may, seen, last_move, at, max} : null;
     } else {
       return null;
     }
-  }, $make, $perspectives, $touches, $seated, $config, $at, $max), _.compact());
+  }, $perspectives, $touches, $at, $max), _.compact());
   const $hist = $.pipe($.hist($timeline), _.compact());
   $.sub($table, async function({last_touch_id}){
     const present = _.deref($present);
@@ -423,14 +419,17 @@ function reel(tableId, {event = null, seat = null, accessToken = null} = {}){
       $timer.start();
     }
   });
-  $.sub($view, async function([args, perspective]){
+  $.sub($view, async function([args, p, make, seated, config]){
     const [tableId, eventId] = args;
-    if (!perspective && eventId) {
-      $.swap($perspectives, _.assoc(_, eventId, await getPerspective(...args)));
+    if (!p && make && seated && config && eventId) {
+      const perspective = await getPerspective(...args);
+      const {event, state} = perspective;
+      const game = make(seated, config, [event], state);
+      $.swap($perspectives, _.assoc(_, eventId, _.assoc(perspective, "game", game)));
     }
   });
-  $.sub($hist, $.see("hist"));
-  const $state = $.pipe($.map(function(table, error, ready, seated, seats, seat, seatId, pos, max, at, up, present, actionable, act, touch, touches, undoable, perspectives, perspective, snapshot){
+  //$.sub($hist, $.see("hist"));
+  const $state = $.pipe($.map(function(table, error, ready, seated, seats, seat, seatId, pos, max, at, up, present, actionable, act, touch, touches, undoable, perspectives, perspective){
     return {
       table,
       error,
@@ -443,11 +442,10 @@ function reel(tableId, {event = null, seat = null, accessToken = null} = {}){
       perspective,
       actionable,
       act,
-      max, at, up, present, touch, ...touches, undoable,
-      snapshot
+      max, at, up, present, touch, ...touches, undoable
     };
-  }, $table, $error, $ready, $seated, $seats, $seat, $seatId, $pos, $max, $at, $up, $present, $actionable, $act, $touch, $touches, $undoable, $perspectives, $perspective, $snapshot), _.compact());
-  return new Reel({$state, $table, $status, $up, $seated, $seats, $seat, $perspectives, $perspective, $snapshot, $pos, $at, $max, $ready, $error, $timer, $touch, $touches}, accessToken);
+  }, $table, $error, $ready, $seated, $seats, $seat, $seatId, $pos, $max, $at, $up, $present, $actionable, $act, $touch, $touches, $undoable, $perspectives, $perspective), _.compact());
+  return new Reel({$state, $table, $status, $up, $seated, $seats, $seat, $perspectives, $perspective, $pos, $at, $max, $ready, $error, $timer, $touch, $touches}, accessToken);
 }
 
 await new Command()

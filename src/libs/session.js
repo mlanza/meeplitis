@@ -1,9 +1,9 @@
 import supabase from "./supabase.js";
 import * as o from "./online.js";
-import dom from "/libs/atomic_/dom.js";
-import $ from "/libs/atomic_/shell.js";
-import {toggleHost} from "/libs/links.js";
-import {reg} from "/libs/cmd.js";
+import dom from "./atomic_/dom.js";
+import $ from "./atomic_/shell.js";
+import {toggleHost} from "./links.js";
+import {reg} from "./cmd.js";
 
 reg({supabase});
 

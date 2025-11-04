@@ -333,6 +333,8 @@ function reel(tableId, {event = null, seat = null, accessToken = null} = {}){
   const $seat = $.fixed(seat);
   const $table = table(tableId);
   const $status = $.map(_.get(_, "status"), $table);
+  const $remarks = $.map(_.get(_, "remark"), $table);
+  const $scored = $.map(_.get(_, "scored"), $table);
   const $started = $.map(_.pipe(_.get(_, "status"), _.eq(_, "started")), $table); //games can be abandoned
   const $seated = seated(tableId);
   const $seats = seats(tableId, accessToken);
@@ -395,17 +397,12 @@ function reel(tableId, {event = null, seat = null, accessToken = null} = {}){
       .then(_.getIn(_, ["data", 0]))
       .then($.reset($game, _));
   });
-  /*const $timeline = $.pipe($.map(function(perspective, seated, config, at, max){
-    const {event, state, up, may, seen, last_move} = perspective;
-    const game = make(seated, config, [event], state);
-    return {up, may, seen, event, last_move, game, at, max};
-  }, $.pipe($perspective, _.filter(_.isSome)), $seated, $config, $at, $max), _.filter(_.isSome));*/
   const $timeline = $.pipe($.map(function(perspectives, touches, at, max){
     const touch = _.get(touches?.touches, at);
     const perspective = _.get(perspectives, touch);
     if (perspective) {
-      const {game, event, up, may, seen, last_move} = perspective;
-      return perspective ? {game, event, up, may, seen, last_move, at, max} : null;
+      const {game, event, player, up, may, seen, last_move} = perspective;
+      return perspective ? {game, player, event, up, may, seen, last_move, at, max} : null;
     } else {
       return null;
     }
@@ -424,11 +421,12 @@ function reel(tableId, {event = null, seat = null, accessToken = null} = {}){
     if (!p && make && seated && config && eventId) {
       const perspective = await getPerspective(...args);
       const {event, state} = perspective;
+      const player = _.maybe(event.seat, _.nth(seated, _));
       const game = make(seated, config, [event], state);
-      $.swap($perspectives, _.assoc(_, eventId, _.assoc(perspective, "game", game)));
+      $.swap($perspectives, _.assoc(_, eventId, _.assoc(perspective, "game", game, "player", player)));
     }
   });
-  //$.sub($hist, $.see("hist"));
+  $.sub($hist, $.see("hist"));
   const $state = $.pipe($.map(function(table, error, ready, seated, seats, seat, seatId, pos, max, at, up, present, actionable, act, touch, touches, undoable, perspectives, perspective){
     return {
       table,

@@ -326,7 +326,7 @@ function undoThru(undoables, touch){
 }
 
 
-function reel(tableId, make, {event = null, seat = null, accessToken = null} = {}){
+function reel(tableId, {event = null, seat = null, accessToken = null} = {}){
   const $ready = $(true);
   const $error = $(null);
   const $tableId = $.fixed(tableId);
@@ -366,9 +366,21 @@ function reel(tableId, make, {event = null, seat = null, accessToken = null} = {
     return _.getIn(touches, ["touches", at]);
   }, $touches, $at);
   const $perspective = $.map(_.get, $perspectives, $touch);
-  const $snapshot = $.map(function(seated, config, {event, state}){
+  const $game = $.atom(null);
+  const $makes = $.atom(null);
+  const $make = $.pipe($makes, _.filter(_.isSome));
+  const $maker = $.map(function(table, game){
+    const {release} = table;
+    const {slug} = game;
+    return `../games/${slug}/table/${release}/core.js`;
+  }, $.pipe($table, _.filter(_.isSome)), $.pipe($game, _.filter(_.isSome)));
+  $.sub($maker, _.filter(_.isSome), async function(url){
+    const {make} = await import(url);
+    $.reset($makes, make);
+  })
+  const $snapshot = $.pipe($.map(function(make, seated, config, {event, state}){
     return make(seated, config, [event], state);
-  }, $seated, $config, $.pipe($perspective, _.filter(_.isSome)));
+  }, $make, $seated, $config, $.pipe($perspective, _.filter(_.isSome))), _.filter(_.isSome));
   const $args = $.map(_.array, $tableId, $touch, $seat, $seatId, $accessToken);
   const $view = $.pipe($.map(_.array, $args, $perspective), _.filter(_.isSome));
   const $undoable = $.map(function(touches, touch){
@@ -378,12 +390,20 @@ function reel(tableId, make, {event = null, seat = null, accessToken = null} = {
     return _.includes(up, seat) || _.includes(may, seat);
   }, $.pipe($perspective, _.filter(_.isSome)), $seat)
   const $act = $.map(_.all, $present, $actionable, $ready, $started);
+  $.sub($table, function({game_id}){
+    supabase
+      .from('games')
+      .select('*')
+      .eq('id', game_id)
+      .then(_.getIn(_, ["data", 0]))
+      .then($.reset($game, _));
+  });
   /*const $timeline = $.pipe($.map(function(perspective, seated, config, at, max){
     const {event, state, up, may, seen, last_move} = perspective;
     const game = make(seated, config, [event], state);
     return {up, may, seen, event, last_move, game, at, max};
   }, $.pipe($perspective, _.filter(_.isSome)), $seated, $config, $at, $max), _.filter(_.isSome));*/
-  const $timeline = $.pipe($.map(function(perspectives, touches, seated, config, at, max){
+  const $timeline = $.pipe($.map(function(make, perspectives, touches, seated, config, at, max){
     const touch = _.get(touches?.touches, at);
     const perspective = _.get(perspectives, touch);
     if (perspective) {
@@ -393,7 +413,7 @@ function reel(tableId, make, {event = null, seat = null, accessToken = null} = {
     } else {
       return null;
     }
-  }, $perspectives, $touches, $seated, $config, $at, $max), _.filter(_.isSome));
+  }, $make, $perspectives, $touches, $seated, $config, $at, $max), _.filter(_.isSome));
   const $hist = $.pipe($.hist($timeline), _.filter(_.isSome));
   $.sub($table, async function({last_touch_id}){
     const present = _.deref($present);
@@ -424,7 +444,7 @@ function reel(tableId, make, {event = null, seat = null, accessToken = null} = {
       actionable,
       act,
       max, at, up, present, touch, ...touches, undoable,
-      //snapshot
+      snapshot
     };
   }, $table, $error, $ready, $seated, $seats, $seat, $seatId, $pos, $max, $at, $up, $present, $actionable, $act, $touch, $touches, $undoable, $perspectives, $perspective, $snapshot), _.filter(_.isSome));
   return new Reel({$state, $table, $status, $up, $seated, $seats, $seat, $perspectives, $perspective, $snapshot, $pos, $at, $max, $ready, $error, $timer, $touch, $touches}, accessToken);
@@ -442,8 +462,7 @@ await new Command()
     const seat = _.maybe(opts.seat, parseInt);
     const interactive = !!opts.interactive;
     const accessToken =  Deno.env.get("SUPABASE_TEMP_ACCESS_TOKEN") || null;
-    const {make} = await import(`../games/backgammon/table/uJl/core.js`);
-    const $reel = reel(table, make, {event, seat, accessToken});
+    const $reel = reel(table, {event, seat, accessToken});
     $.sub($reel, function({table, min, max, at}){
       //$.log(`\x1b]0;Table ${table?.id}: ${at + 1} of ${max + 1} \x07`);
     });

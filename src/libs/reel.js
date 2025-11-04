@@ -342,11 +342,11 @@ function reel(tableId, {event = null, seat = null, accessToken = null} = {}){
   const $min = $.fixed(0);
   const $max = $.pipe($(function(touches){
     return _.maybe(touches?.touches, _.count, _.dec);
-  }, $touches), _.filter(_.isSome));
+  }, $touches), _.compact());
   const $at = $.pipe($(function(pos, min, max){
     const at = _.maybe(pos, _.clamp(_, min, max));
     return at == null ? max : at;
-  }, $pos, $min, $max), _.filter(_.isSome));
+  }, $pos, $min, $max), _.compact());
   const $perspectives = $({});
   const $seatId = $(function(seated, seat){
     return _.getIn(seated, [seat, "seat_id"]);
@@ -368,27 +368,27 @@ function reel(tableId, {event = null, seat = null, accessToken = null} = {}){
   const $perspective = $.map(_.get, $perspectives, $touch);
   const $game = $.atom(null);
   const $makes = $.atom(null);
-  const $make = $.pipe($makes, _.filter(_.isSome));
+  const $make = $.pipe($makes, _.compact());
   const $maker = $.map(function(table, game){
     const {release} = table;
     const {slug} = game;
     return `../games/${slug}/table/${release}/core.js`;
-  }, $.pipe($table, _.filter(_.isSome)), $.pipe($game, _.filter(_.isSome)));
-  $.sub($maker, _.filter(_.isSome), async function(url){
+  }, $table, $.pipe($game, _.compact()));
+  $.sub($maker, _.compact(), async function(url){
     const {make} = await import(url);
     $.reset($makes, make);
   })
   const $snapshot = $.pipe($.map(function(make, seated, config, {event, state}){
     return make(seated, config, [event], state);
-  }, $make, $seated, $config, $.pipe($perspective, _.filter(_.isSome))), _.filter(_.isSome));
+  }, $make, $seated, $config, $.pipe($perspective, _.compact())), _.compact());
   const $args = $.map(_.array, $tableId, $touch, $seat, $seatId, $accessToken);
-  const $view = $.pipe($.map(_.array, $args, $perspective), _.filter(_.isSome));
+  const $view = $.pipe($.map(_.array, $args, $perspective), _.compact());
   const $undoable = $.map(function(touches, touch){
     return undoThru(touches?.undoables, touch);
   }, $touches, $touch);
   const $actionable = $.map(function({up, may}, seat){
     return _.includes(up, seat) || _.includes(may, seat);
-  }, $.pipe($perspective, _.filter(_.isSome)), $seat)
+  }, $.pipe($perspective, _.compact()), $seat)
   const $act = $.map(_.all, $present, $actionable, $ready, $started);
   $.sub($table, function({game_id}){
     supabase
@@ -413,8 +413,8 @@ function reel(tableId, {event = null, seat = null, accessToken = null} = {}){
     } else {
       return null;
     }
-  }, $make, $perspectives, $touches, $seated, $config, $at, $max), _.filter(_.isSome));
-  const $hist = $.pipe($.hist($timeline), _.filter(_.isSome));
+  }, $make, $perspectives, $touches, $seated, $config, $at, $max), _.compact());
+  const $hist = $.pipe($.hist($timeline), _.compact());
   $.sub($table, async function({last_touch_id}){
     const present = _.deref($present);
     $.reset($touches, await getTouches(tableId, accessToken));
@@ -446,7 +446,7 @@ function reel(tableId, {event = null, seat = null, accessToken = null} = {}){
       max, at, up, present, touch, ...touches, undoable,
       snapshot
     };
-  }, $table, $error, $ready, $seated, $seats, $seat, $seatId, $pos, $max, $at, $up, $present, $actionable, $act, $touch, $touches, $undoable, $perspectives, $perspective, $snapshot), _.filter(_.isSome));
+  }, $table, $error, $ready, $seated, $seats, $seat, $seatId, $pos, $max, $at, $up, $present, $actionable, $act, $touch, $touches, $undoable, $perspectives, $perspective, $snapshot), _.compact());
   return new Reel({$state, $table, $status, $up, $seated, $seats, $seat, $perspectives, $perspective, $snapshot, $pos, $at, $max, $ready, $error, $timer, $touch, $touches}, accessToken);
 }
 
@@ -479,7 +479,7 @@ await new Command()
     //$.on($reel, "perspective", $.see("perspective"));
     $.on($reel, "snapshot", $.see("snapshot"));
     */
-    //$.sub($reel, $.see("reel"));
+    $.sub($reel, $.see("reel"));
 
     if (interactive) {
       command($.dispatch($reel, _));

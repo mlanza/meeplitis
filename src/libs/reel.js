@@ -354,7 +354,7 @@ function reel(tableId, make, {event = null, seat = null, accessToken = null} = {
   const $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table);
   const $present = $.map(_.eq, $at, $max);
   const $timer = new Timer(1000, Date.now);
-  const $config = $.map(_.getIn(_, ["table", "config"]), $table);
+  const $config = $.map(_.get(_, "config"), $table);
   $.sub($timer, function(){
     if (_.deref($present)) {
       $timer.stop();
@@ -378,6 +378,23 @@ function reel(tableId, make, {event = null, seat = null, accessToken = null} = {
     return _.includes(up, seat) || _.includes(may, seat);
   }, $.pipe($perspective, _.filter(_.isSome)), $seat)
   const $act = $.map(_.all, $present, $actionable, $ready, $started);
+  /*const $timeline = $.pipe($.map(function(perspective, seated, config, at, max){
+    const {event, state, up, may, seen, last_move} = perspective;
+    const game = make(seated, config, [event], state);
+    return {up, may, seen, event, last_move, game, at, max};
+  }, $.pipe($perspective, _.filter(_.isSome)), $seated, $config, $at, $max), _.filter(_.isSome));*/
+  const $timeline = $.pipe($.map(function(perspectives, touches, seated, config, at, max){
+    const touch = _.get(touches?.touches, at);
+    const perspective = _.get(perspectives, touch);
+    if (perspective) {
+      const {event, state, up, may, seen, last_move} = perspective;
+      const game = make(seated, config, [event], state);
+      return perspective ? {event, up, may, seen, last_move, config, at, max} : null;
+    } else {
+      return null;
+    }
+  }, $perspectives, $touches, $seated, $config, $at, $max), _.filter(_.isSome));
+  const $hist = $.pipe($.hist($timeline), _.filter(_.isSome));
   $.sub($table, async function({last_touch_id}){
     const present = _.deref($present);
     $.reset($touches, await getTouches(tableId, accessToken));
@@ -392,6 +409,7 @@ function reel(tableId, make, {event = null, seat = null, accessToken = null} = {
       $.swap($perspectives, _.assoc(_, eventId, await getPerspective(...args)));
     }
   });
+  $.sub($hist, $.see("hist"));
   const $state = $.pipe($.map(function(table, error, ready, seated, seats, seat, seatId, pos, max, at, up, present, actionable, act, touch, touches, undoable, perspectives, perspective, snapshot){
     return {
       table,
@@ -442,7 +460,7 @@ await new Command()
     //$.on($reel, "perspective", $.see("perspective"));
     $.on($reel, "snapshot", $.see("snapshot"));
     */
-    $.sub($reel, $.see("reel"));
+    //$.sub($reel, $.see("reel"));
 
     if (interactive) {
       command($.dispatch($reel, _));

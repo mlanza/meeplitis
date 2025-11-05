@@ -401,8 +401,8 @@ function reel(tableId, {event = null, seat = null, accessToken = null} = {}){
     const touch = _.get(touches?.touches, at);
     const perspective = _.get(perspectives, touch);
     if (perspective) {
-      const {game, event, player, up, may, seen, last_move} = perspective;
-      return perspective ? {game, player, event, up, may, seen, last_move, at, max} : null;
+      const {game, event, actor, up, may, seen, last_move} = perspective;
+      return perspective ? {game, actor, event, up, may, seen, last_move, at, max} : null;
     } else {
       return null;
     }
@@ -421,12 +421,12 @@ function reel(tableId, {event = null, seat = null, accessToken = null} = {}){
     if (!p && make && seated && config && eventId) {
       const perspective = await getPerspective(...args);
       const {event, state} = perspective;
-      const player = _.maybe(event.seat, _.nth(seated, _));
+      const actor = _.maybe(event.seat, _.nth(seated, _));
       const game = make(seated, config, [event], state);
-      $.swap($perspectives, _.assoc(_, eventId, _.assoc(perspective, "game", game, "player", player)));
+      $.swap($perspectives, _.assoc(_, eventId, _.assoc(perspective, "game", game, "actor", actor)));
     }
   });
-  $.sub($hist, $.see("hist"));
+  //$.sub($hist, $.see("hist"));
   const $state = $.pipe($.map(function(table, error, ready, seated, seats, seat, seatId, pos, max, at, up, present, actionable, act, touch, touches, undoable, perspectives, perspective){
     return {
       table,

@@ -47,11 +47,8 @@ export const cmd = _.overload(cmd1, cmd1, cmd3, cmd3);
 
 export default cmd;
 
-if (globalThis.document) {
-  const dom = await import("./atomic_/dom.js");
-  reg({_, $, dom});
-} else {
-  reg({_, $});
-}
+const dom = globalThis.document ? (await import("./atomic_/dom.js")).default : null;
+
+_.chain({_, $, dom}, _.compact, reg);
 
 Object.assign(globalThis, {cmd});

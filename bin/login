@@ -1,0 +1,39 @@
+#!/usr/bin/env -S deno run --allow-net
+// run: deno run --allow-net --allow-env login user@example.com "password123"
+
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const [email, password] = Deno.args
+if (!email || !password) {
+  console.error('Usage: deno run --allow-net --allow-env get_tokens.js <email> <password>')
+  Deno.exit(2)
+}
+
+const url = Deno.env.get('SUPABASE_URL')
+const anon = Deno.env.get('SUPABASE_ANON_KEY')
+if (!url || !anon) {
+  console.error('Missing SUPABASE_URL or SUPABASE_ANON_KEY in environment')
+  Deno.exit(2)
+}
+
+const supabase = createClient(url, anon)
+
+try {
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+  if (error) {
+    console.error('Auth error:', error.message)
+    Deno.exit(1)
+  }
+  const s = data?.session
+  if (!s?.access_token || !s?.refresh_token) {
+    console.error('No session returned')
+    Deno.exit(1)
+  }
+  console.log(JSON.stringify({
+    access_token: s.access_token,
+    refresh_token: s.refresh_token
+  }, null, 2))
+} catch (e) {
+  console.error('Unexpected error:', e?.message || e)
+  Deno.exit(1)
+}

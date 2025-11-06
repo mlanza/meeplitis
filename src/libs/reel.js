@@ -1,6 +1,7 @@
 import _ from "./atomic_/core.js";
 import $ from "./atomic_/shell.js";
 import supabase from "./supabase.js";
+import { session } from "./session.js";
 import { keypress } from "https://deno.land/x/cliffy@v0.25.4/keypress/mod.ts";
 import { Command } from "https://deno.land/x/cliffy@v1.0.0-rc.4/command/mod.ts";
 import { Input } from "https://deno.land/x/cliffy@v1.0.0-rc.3/prompt/mod.ts";
@@ -457,7 +458,7 @@ await new Command()
     const event = opts.event || null;
     const seat = _.maybe(opts.seat, parseInt);
     const interactive = !!opts.interactive;
-    const accessToken =  Deno.env.get("SUPABASE_TEMP_ACCESS_TOKEN") || null;
+    const accessToken =  Deno.env.get("SUPABASE_SESSION_ACCESS_TOKEN") || null;
     const $reel = reel(table, {event, seat, accessToken});
     $.sub($reel, function({table, min, max, at}){
       //$.log(`\x1b]0;Table ${table?.id}: ${at + 1} of ${max + 1} \x07`);

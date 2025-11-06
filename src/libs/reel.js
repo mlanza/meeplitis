@@ -113,7 +113,7 @@ function table(tableId){
   return $.pipe($t, _.compact());
 }
 
-function Reel({$state, $table, $status, $up, $seated, $seats, $seat, $perspectives, $perspective, $pos, $at, $max, $ready, $error, $timer, $touch, $touches}, accessToken){
+function Reel({$state, $table, $status, $up, $seated, $seats, $seat, $perspectives, $perspective, $pos, $at, $max, $ready, $error, $timer, $touch, $touches}, session){
   this.$state = $state;
   this.$table = $table;
   this.$status = $status;
@@ -131,7 +131,7 @@ function Reel({$state, $table, $status, $up, $seated, $seats, $seat, $perspectiv
   this.$timer = $timer;
   this.$touch = $touch;
   this.$touches = $touches;
-  this.accessToken = accessToken;
+  this.session = session;
 }
 
 function deref(self){
@@ -151,7 +151,7 @@ async function issueMove(self, cmd){
     const table_id = _.chain(self.$table, _.deref, _.getIn(_, ["table", "id"]));
     const seat = _.chain(self.$seat, _.deref);
     const commands = [cmd];
-    const moved = await move(table_id, seat, commands, self.accessToken);
+    const moved = await move(table_id, seat, commands, self.session.accessToken);
     log({moved});
   } catch (ex) {
     $.reset(self.$error, ex);
@@ -326,11 +326,11 @@ function undoThru(undoables, touch){
 }
 
 
-function reel(tableId, {event = null, seat = null, accessToken = null} = {}){
+function reel(tableId, session, {event = null, seat = null} = {}){
   const $ready = $(true);
   const $error = $(null);
   const $tableId = $.fixed(tableId);
-  const $accessToken = $.fixed(accessToken);
+  const $accessToken = $.fixed(session.accessToken);
   const $seat = $.fixed(seat);
   const $table = table(tableId);
   const $status = $.map(_.get(_, "status"), $table);
@@ -338,7 +338,7 @@ function reel(tableId, {event = null, seat = null, accessToken = null} = {}){
   const $scored = $.map(_.get(_, "scored"), $table);
   const $started = $.map(_.pipe(_.get(_, "status"), _.eq(_, "started")), $table); //games can be abandoned
   const $seated = seated(tableId);
-  const $seats = seats(tableId, accessToken);
+  const $seats = seats(tableId, session.accessToken);
   const $touches = $(null);
   const $pos = $(null);
   const $min = $.fixed(0);
@@ -411,7 +411,7 @@ function reel(tableId, {event = null, seat = null, accessToken = null} = {}){
   const $hist = $.pipe($.hist($timeline), _.compact());
   $.sub($table, async function({last_touch_id}){
     const present = _.deref($present);
-    $.reset($touches, await getTouches(tableId, accessToken));
+    $.reset($touches, await getTouches(tableId, session.accessToken));
     if (present) {
       //if the user was in the current present the moment the table was touched, catch him up with what happened.
       $timer.start();
@@ -444,7 +444,7 @@ function reel(tableId, {event = null, seat = null, accessToken = null} = {}){
       max, at, up, present, touch, ...touches, undoable
     };
   }, $table, $error, $ready, $seated, $seats, $seat, $seatId, $pos, $max, $at, $up, $present, $actionable, $act, $touch, $touches, $undoable, $perspectives, $perspective), _.compact());
-  return new Reel({$state, $table, $status, $up, $seated, $seats, $seat, $perspectives, $perspective, $pos, $at, $max, $ready, $error, $timer, $touch, $touches}, accessToken);
+  return new Reel({$state, $table, $status, $up, $seated, $seats, $seat, $perspectives, $perspective, $pos, $at, $max, $ready, $error, $timer, $touch, $touches}, session);
 }
 
 await new Command()

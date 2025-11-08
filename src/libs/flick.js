@@ -4,20 +4,21 @@ const initialState = {
   tableId: null,
   seat: null,
   session: null,
-  initialAt: null, // eventId to jump to on load
+  initialAt: null,
   table: null,
   seated: null,
   game: null,
   module: null,
   touches: null,
-  perspectives: {}, // Cache of eventId -> perspective
+  perspectives: {},
   cursor: {
     pos: 0,
-    at: null, // This will hold the eventId
+    at: null,
     max: 0
   },
   noCache: false,
-  noStore: false
+  noStore: false,
+  effects: [] // Effects are now part of the state
 };
 
 function checkCacheAndFetch(state, at) {
@@ -38,23 +39,33 @@ function reducer(state = initialState, msg) {
   switch (msg.type) {
     case "Init": {
       const { tableId, seat, session, at, noCache, noStore } = msg.payload;
-      const newState = { ...state, tableId, seat, session, initialAt: at, noCache: !!noCache, noStore: !!noStore };
-      const effects = [
-        { type: "FetchTable", payload: { tableId } },
-        { type: "FetchSeated", payload: { tableId } },
-        { type: "Log", payload: { topic: "Init", data: { tableId, seat, at, noCache, noStore } } }
-      ];
-      return { state: newState, effects };
+      return {
+        ...state,
+        tableId,
+        seat,
+        session,
+        initialAt: at,
+        noCache: !!noCache,
+        noStore: !!noStore,
+        effects: [
+          { type: "FetchTable", payload: { tableId } },
+          { type: "FetchSeated", payload: { tableId } },
+          { type: "Log", payload: { topic: "Init", data: { tableId, seat, at, noCache, noStore } } }
+        ]
+      };
     }
 
     case "TableLoaded": {
       const { table } = msg.payload;
-      const effects = [
-        { type: "SubscribeToTableChannel", payload: { tableId: table.id } },
-        { type: "FetchTouches", payload: { tableId: table.id } },
-        { type: "FetchGame", payload: { gameId: table.game_id } }
-      ];
-      return { state: { ...state, table }, effects };
+      return {
+        ...state,
+        table,
+        effects: [
+          { type: "SubscribeToTableChannel", payload: { tableId: table.id } },
+          { type: "FetchTouches", payload: { tableId: table.id } },
+          { type: "FetchGame", payload: { gameId: table.game_id } }
+        ]
+      };
     }
 
     case "TouchesLoaded": {
@@ -83,18 +94,18 @@ function reducer(state = initialState, msg) {
         effects.push({ type: "FetchGameModule", payload: { gameId: state.game.id } });
       }
       
-      return { state: { ...state, touches, cursor: newCursor, initialAt: null }, effects };
+      return { ...state, touches, cursor: newCursor, initialAt: null, effects };
     }
 
     case "NavigateTo":
     case "Step": {
-      if (!state.touches) return { state, effects: [] };
+      if (!state.touches) return state;
       const { max } = state.cursor;
       let newPos;
 
       if (msg.type === "Step") {
         newPos = _.clamp(state.cursor.pos + msg.payload.delta, 0, max);
-      } else { // NavigateTo
+      } else {
         const { pos, at } = msg.payload;
         if (at) {
           const foundPos = (at === "present") ? max : _.indexOf(state.touches.touches, at);
@@ -106,18 +117,21 @@ function reducer(state = initialState, msg) {
 
       const newAt = state.touches.touches[newPos];
       const newCursor = { ...state.cursor, pos: newPos, at: newAt };
-      const effects = [
-        { type: "Log", payload: { topic: "Navigation", data: { pos: newPos, at: newAt } } },
-        ...checkCacheAndFetch(state, newAt)
-      ];
-      return { state: { ...state, cursor: newCursor }, effects };
+      return {
+        ...state,
+        cursor: newCursor,
+        effects: [
+          { type: "Log", payload: { topic: "Navigation", data: { pos: newPos, at: newAt } } },
+          ...checkCacheAndFetch(state, newAt)
+        ]
+      };
     }
 
     case "PerspectiveLoaded": {
-      if (state.noStore) {
-        return { state, effects: [{ type: "Log", payload: { topic: "Cache", data: { status: "NOT_STORED" } } }] };
-      }
       const { eventId, perspective } = msg.payload;
+      if (state.noStore) {
+        return { ...state, effects: [{ type: "Log", payload: { topic: "Cache", data: { status: "NOT_STORED" } } }] };
+      }
       let perspectiveToCache = perspective;
       if (state.module?.make && perspective.event && perspective.state) {
         const game = state.module.make(state.seated, state.table.config, [perspective.event], perspective.state);
@@ -125,22 +139,25 @@ function reducer(state = initialState, msg) {
         perspectiveToCache = { ...perspective, game, actor };
       }
       const newPerspectives = { ...state.perspectives, [eventId]: perspectiveToCache };
-      return { state: { ...state, perspectives: newPerspectives }, effects: [{ type: "Log", payload: { topic: "Cache", data: { status: "LOADED", at: eventId } } }] };
+      return { ...state, perspectives: newPerspectives, effects: [{ type: "Log", payload: { topic: "Cache", data: { status: "LOADED", at: eventId } } }] };
     }
 
+    case "ClearEffects":
+      return { ...state, effects: [] };
+
     case "SeatedLoaded":
-      return { state: { ...state, seated: msg.payload.seated }, effects: [] };
+      return { ...state, seated: msg.payload.seated, effects: [] };
     case "GameLoaded":
-      return { state: { ...state, game: msg.payload.game }, effects: [] };
+      return { ...state, game: msg.payload.game, effects: [] };
     case "GameModuleLoaded":
-      return { state: { ...state, module: { make: msg.payload.make } }, effects: [] };
+      return { ...state, module: { make: msg.payload.make }, effects: [] };
     case "ClearCache":
-      return { state: { ...state, perspectives: {} }, effects: [] };
+      return { ...state, perspectives: {}, effects: [] };
     case "TableUpdated":
-      return { state: { ...state, table: msg.payload.table }, effects: [{ type: "FetchTouches", payload: { tableId: msg.payload.table.id } }] };
+      return { ...state, table: msg.payload.table, effects: [{ type: "FetchTouches", payload: { tableId: msg.payload.table.id } }] };
 
     default:
-      return { state, effects: [] };
+      return state;
   }
 }
 

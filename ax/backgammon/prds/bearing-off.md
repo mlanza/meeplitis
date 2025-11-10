@@ -6,9 +6,9 @@ This document outlines the requirements to fully implement the "bearing off" pha
 
 This work involves:
 1.  Introducing a new `bear-off` command.
-2.  Handling this command in the `execute` function.
+2.  Handling this command in the `act` function.
 3.  Creating a `borne-off` event to represent the action.
-4.  Updating the `fold` function to apply the state change, which results in a checker being moved to the "off" pile.
+4.  Updating the `actuate` function to apply the state change, which results in a checker being moved to the "off" pile.
 
 ## 2. Core Logic and DRY Principles
 
@@ -44,9 +44,9 @@ This command is issued by a player to remove one of their checkers from the boar
     4.  The move must be valid according to the rules of bearing off.
     *   *Note: All preconditions are already checked by the `moves` function, which serves as the single source of truth for valid commands.*
 
-*   **Effects (in `execute`)**:
+*   **Effects (in `act`)**:
     *   The command is validated against the list of possible moves.
-    *   A `borne-off` event is generated and passed to the `fold` function.
+    *   A `borne-off` event is generated and passed to the `actuate` function.
 
 ## 4. Event: `borne-off`
 
@@ -63,15 +63,15 @@ This event signifies that a checker was successfully removed from the board.
 
 ## 5. State Transitions in `core.js`
 
-To implement this feature, the `execute` and `fold` functions in `src/games/backgammon/table/uJl/core.js` must be modified to unify the logic for all checker movements.
+To implement this feature, the `act` and `actuate` functions in `src/games/backgammon/table/uJl/core.js` must be modified to unify the logic for all checker movements.
 
-### 5.1. `execute(self, command)` Modification
+### 5.1. `act(self, command)` Modification
 
 The `switch` statement should group `bear-off` with `move` and `enter`. A mapping should be used to transform the incoming command `type` into the appropriate event `type` (`moved`, `entered`, `borne-off`).
 
 **Proposed Logic**:
 ```javascript
-// In execute(self, command)
+// In act(self, command)
 // ...
   case 'bear-off': // Add this case
   case 'enter':
@@ -82,25 +82,25 @@ The `switch` statement should group `bear-off` with `move` and `enter`. A mappin
       'bear-off': 'borne-off' // Add this mapping
     }[command.type];
 
-    return g.fold(self, _.assoc(command, "type", eventType));
+    return _.actuate(self, _.assoc(command, "type", eventType));
   }
 // ...
 ```
 
-### 5.2. `fold(self, event)` Modification
+### 5.2. `actuate(self, event)` Modification
 
 The `switch` statement should group the `borne-off` event with `moved` and `entered`. All three events will be handled by the single `moved(state, details)` transition function.
 
 **Proposed Logic**:
 ```javascript
-// In fold(self, event)
+// In actuate(self, event)
 // ...
   switch (event.type) {
     // ...
     case "entered":
     case "moved":
     case "borne-off": // Add this case
-      return g.fold(self, event, state => moved(state, event.details));
+      return _.actuate(self, event, state => moved(state, event.details));
     // ...
   }
 // ...
@@ -121,4 +121,4 @@ No direct changes to the UI are needed for this task, as the existing reconcilia
 ## 7. Winning the Game & Error Handling
 
 *   **Winning**: The existing `won(state, seat)` function, which checks if `state.off[seat] === 15`, remains unchanged.
-*   **Errors**: No new error types are required. The existing validation in `execute` will reject invalid `bear-off` commands.
+*   **Errors**: No new error types are required. The existing validation in `act` will reject invalid `bear-off` commands.

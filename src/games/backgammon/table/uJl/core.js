@@ -387,13 +387,13 @@ function compel(self){
   const cmd = destined(self);
   if (cmd) {
     if (cmd.type === "roll" || blocked(cmd, self)) {
-      return g.execute(self, cmd);
+      return _.act(self, cmd);
     }
   }
   return self;
 }
 
-export function execute(self, command) {
+export function act(self, command) {
   const { state, config } = self;
   const { status, stakes } = state;
   const { type, seat } = command;
@@ -413,7 +413,7 @@ export function execute(self, command) {
       if (type !== "finish") {
         throw new Error(`Cannot issue commands once the game is finished.`);
       }
-      return g.fold(self, _.assoc(command, "type", "finished"));
+      return _.actuate(self, _.assoc(command, "type", "finished"));
   }
 
   const moves = g.moves(self, {seat, type});
@@ -425,13 +425,13 @@ export function execute(self, command) {
 
   switch (command.type) {
     case 'start':
-      return g.fold(self,
+      return _.actuate(self,
         _.chain(command,
           _.assoc(_, "type", "started")));
 
     case 'roll': {
       const dice = config.effects.dice.roll(_.getIn(command, ['details', 'dice']));
-      return g.fold(self,
+      return _.actuate(self,
         _.chain(command,
           _.assoc(_, "type", "rolled"),
           _.assocIn(_, ["details", "dice"], dice)));
@@ -469,7 +469,7 @@ export function execute(self, command) {
 
       const eventType = asEvent(type);
       const capture = attack(to, opponent, points);
-      return g.fold(self,
+      return _.actuate(self,
         _.chain(command,
           _.assoc(_, "type", eventType),
           _.assocIn(_, ["details", "capture"], capture)));
@@ -477,7 +477,7 @@ export function execute(self, command) {
 
     case 'commit': {
       return _.chain(self,
-        g.fold(_,
+        _.actuate(_,
           _.chain(command,
             blocked(command, self) ? _.assoc(_, "details", {blocked: true}) : _.identity,
             _.assoc(_, "type", "committed"))),
@@ -496,7 +496,7 @@ export function execute(self, command) {
       if (seat !== state.up || (state.holdsCube !== -1 && state.holdsCube !== seat)) {
         throw new Error("You do not control the cube or it's not your turn");
       }
-      return g.fold(self, _.assoc(command, "type", "double-proposed"));
+      return _.actuate(self, _.assoc(command, "type", "double-proposed"));
     }
 
     case 'accept': {
@@ -506,7 +506,7 @@ export function execute(self, command) {
       if (seat !== state.up) {
         throw new Error("Not your turn");
       }
-      return g.fold(self, _.assoc(command, "type", "accepted"));
+      return _.actuate(self, _.assoc(command, "type", "accepted"));
     }
 
     case 'concede': {
@@ -517,12 +517,12 @@ export function execute(self, command) {
         throw new Error("Not your turn");
       }
       return _.chain(self,
-        g.fold(_, _.assoc(command, "type", "conceded")),
+        _.actuate(_, _.assoc(command, "type", "conceded")),
         g.finish);
     }
 
     case 'finish': {
-      return g.fold(self, _.assoc(command, "type", "finished"));
+      return _.actuate(self, _.assoc(command, "type", "finished"));
     }
 
     default: {
@@ -531,26 +531,26 @@ export function execute(self, command) {
   }
 }
 
-function fold(self, event) {
+function actuate(self, event) {
   switch (event.type) {
     case "started":
-      return g.fold(self, event, started);
+      return _.actuate(self, event, started);
     case "rolled":
-      return g.fold(self, event, rolled(event.details));
+      return _.actuate(self, event, rolled(event.details));
     case "borne-off":
     case "entered":
     case "moved":
-      return g.fold(self, event, moved(event.details));
+      return _.actuate(self, event, moved(event.details));
     case "committed":
-      return g.fold(self, event, committed);
+      return _.actuate(self, event, committed);
     case "double-proposed":
-      return g.fold(self, event, doubleProposed);
+      return _.actuate(self, event, doubleProposed);
     case "accepted":
-      return g.fold(self, event, accepted(event.seat));
+      return _.actuate(self, event, accepted(event.seat));
     case "conceded":
-      return g.fold(self, event, conceded(event.seat));
+      return _.actuate(self, event, conceded(event.seat));
     case "finished":
-      return g.fold(self, event, _.pipe(_.dissoc(_, "up"), _.assoc(_, "status", "finished")));
+      return _.actuate(self, event, _.pipe(_.dissoc(_, "up"), _.assoc(_, "status", "finished")));
     default:
       return self;
   }
@@ -611,7 +611,7 @@ function textualizer(self){
   }
 }
 
-function undoable(self, {type}){
+function undone(self, {type}){
   return !_.includes(["started", "finished", "rolled", "committed", "double-proposed", "accepted", "conceded"], type);
 }
 
@@ -624,4 +624,5 @@ _.doto(Backgammon,
   _.implement(_.ICompactible, {compact}),
   _.implement(_.IAppendable, {append}),
   _.implement(_.IFunctor, {fmap}),
-  _.implement(g.IGame, {perspective, up, may, moves, undoable, metrics, comparator, textualizer, execute: _.comp(compel, execute), fold, status}));
+  _.implement(_.IActor, {act: _.comp(compel, act), actuate, undone}),
+  _.implement(g.IGame, {perspective, up, may, moves, metrics, comparator, textualizer, status}));

@@ -16,6 +16,6 @@ Ensure you [understand the model](../backgammon/prds/model.md) when working.
 
 - [x] 2. Implement Bearing Off Logic
   - This task was executed entirely within `src/games/backgammon/table/uJl/core.js` as per the [Bearing Off PRD](./prds/bearing-off.md).
-  - **2.1. Update `execute` to handle `bear-off` command:** Completed. The `execute` function now recognizes the `bear-off` command and groups its logic with `move` and `enter`.
-  - **2.2. Update `fold` to handle `borne-off` event:** Completed. The `fold` function now processes the `borne-off` event by leveraging the shared `moved()` state transition function.
+  - **2.1. Update `act` to handle `bear-off` command:** Completed. The `act` function now recognizes the `bear-off` command and groups its logic with `move` and `enter`.
+  - **2.2. Update `actuate` to handle `borne-off` event:** Completed. The `actuate` function now processes the `borne-off` event by leveraging the shared `moved()` state transition function.
   - **2.3. Add a test case:** Skipped per user instruction, as no testing infrastructure is currently in place.

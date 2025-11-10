@@ -6,22 +6,16 @@ export const IGame = _.protocol({
   up: null, //returns the seat(s) which are required to move
   may: null, //returns the seat(s) which have the option to move
   seats: null,
-  events: null,
   moves: null, //what commands can seats/players do?
-  undoable: null, //can event be rewound?
-  execute: null, //validates a command and transforms it into one or more events, potentially executing other commands
-  fold: null, //folds an event into the aggregate state
   metrics: null, //provides facts for assessing performance/score
   comparator: null,
   textualizer: null
 });
 
-export const undoable = IGame.undoable;
 export const status = IGame.status;
 export const up = IGame.up;
 export const may = IGame.may;
 export const seats = IGame.seats;
-export const events = IGame.events;
 export const metrics = IGame.metrics;
 export const comparator = IGame.comparator;
 export const textualizer = IGame.textualizer;
@@ -36,14 +30,6 @@ function perspective3(self, _seen, reality){
 }
 
 export const perspective = _.overload(null, null, perspective2, perspective3);
-
-function fold3(self, event, f){
-  return _.chain(self,
-    _.append(_, {...event, undoable: undoable(self, event)}),
-    _.fmap(_, f));
-}
-
-export const fold = _.overload(null, IGame.fold, IGame.fold, fold3);
 
 export function seated(self){
   return _.chain(self, numSeats, _.range, _.toArray);
@@ -74,11 +60,11 @@ function briefs(self){
   return _.mapa(textualizer(self), metrics(self));
 }
 
-function execute3(self, command, seat){
-  return execute2(self, seat == null ? command : _.merge(command, {seat}));
+function act3(self, command, seat){
+  return act2(self, seat == null ? command : _.merge(command, {seat}));
 }
 
-function execute2(self, command){
+function act2(self, command){
   const {type, seat} = command;
   if (seat == null) {
   } else if (!_.isInt(seat)) {
@@ -101,13 +87,13 @@ function execute2(self, command){
       throw new Error(`Cannot issue commands once the game is finished.`);
       break;
   }
-  return IGame.execute(self, command);
+  return _.act(self, command);
 }
 
-export const execute = _.overload(null, null, execute2, execute3);
+export const act = _.overload(null, null, act2, act3);
 
 export function finish(self){
-  return execute(self, {type: "finish", details: {
+  return _.act(self, {type: "finish", details: {
       metrics: metrics(self),
       briefs: briefs(self),
       places: places(self)
@@ -127,7 +113,7 @@ export function everyone(self){
 
 export function reality(self){
   return {
-    event: _.maybe(self, events, _.last),
+    event: _.maybe(self, _.events, _.last),
     state: _.deref(self),
     up: up(self),
     may: may(self),
@@ -157,7 +143,7 @@ function precipitatedBy2(self, event){
   return fn(self.seats, self.config, [event], self.state);
 }
 
-const precipitatedBy1 = _.comp(_.last, IGame.events)
+const precipitatedBy1 = _.comp(_.last, _.events)
 
 const precipitatedBy = _.overload(null, precipitatedBy1, precipitatedBy2);
 
@@ -176,10 +162,10 @@ export function simulate(make){
     }
     const prior =
       _.chain(make(_.toArray(seats), config, loaded, _.maybe(snapshot, state)),
-        _.reduce(fold, _, events),
+        _.reduce(_.actuate, _, events),
         _.seq(commands) ? _.compact : _.plug(precipitatedBy, _, event)),
           curr  =
-      _.reduce((self, command) => execute(self, command, singular(seen)), prior, commands);
+      _.reduce((self, command) => _.act(self, command, singular(seen)), prior, commands);
     return { reel: [curr, prior], seen, included };
   }
 }
@@ -232,7 +218,7 @@ export function handle(make, log = _.noop){
 }
 
 function added(self){
-  const events = IGame.events(self);
+  const events = _.events(self);
   const last = _.last(events),
         committed = _.detect(function({type}){
           return type === "committed";
@@ -258,4 +244,5 @@ function deref(self){
 
 export const behave = _.does(
   _.implement(_.IDeref, {deref}),
-  _.implement(IGame, {seats: _seats, events: _events}));
+  _.implement(_.IActor, {events: _events}),
+  _.implement(IGame, {seats: _seats}));

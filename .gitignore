@@ -4,6 +4,7 @@ dist
 keys
 .vscode
 .env
+.envrc
 sim/dist
 sim/src
 sim/bundle

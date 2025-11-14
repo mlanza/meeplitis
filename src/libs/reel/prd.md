@@ -1,29 +1,81 @@
-# Product Requirements Document
+# Product Requirements Document: Reel Timeline Navigation
 
-You are going to help me with a significant refactoring, one that I have been working on for a board game site.  It was cobbled together organically, thus, like a city that sprung up unplanned, it lacks order.  I mean to rectify that.
+## 1. Introduction and Purpose
 
-I have this principle of building things from components which run on an `atom` in their centers. An `atom` is a state container, a signal.  Then I wrap that container usually with a `main.js`.  That's where side effects go, how the world actuates itself.
+This document specifies the design and functionality of the "Reel" timeline navigation component, a core module for a board game site. The primary goal is to replace an existing `reel.js` tool with a new implementation that adheres to the principles outlined in the Atomic [AGENTS file](https://github.com/mlanza/atomic/AGENTS.md). This component provides robust, observable, and verifiable timeline navigation for game states, serving as a crucial artifact for future frontend integration. It emphasizes a functional core and imperative shell (FCIS) architecture, with the core designed for purity and the shell handling side effects.
 
-This PRD exists inside a folder called `reel` which is your sandbox.  This is where you are authorized to work.  You may freely add files to this folder, but update nothing outside it.
+## 2. Core Concepts
 
-Before you get started, you will need to read Atomic's [AGENTS file](https://github.com/mlanza/atomic/AGENTS.md). It provides guidance for how we build together: slow, incrementally from a plan of baby steps.  It also explains Atomic's philosophy and principles.  You are to adhere to them.  You are to be doing REPL-driven development using a CLI based tool. I already started one, which can be [found here](../reel.js).  You may run this tool (as demonstrated below), but not modify it.  You are creating a replacement for this very tool here in the sandbox folder.
+### 2.1 The Reel Component
+The Reel component models the timeline of a board game. It simulates loading snapshots of game states, allowing users to navigate through the history of a game. The core is built around a single `atom` as its state container, with side effects managed by `main.js` and `cli.js`.
 
-```zsh
-deno run -A ./src/libs/reel.js QDaitfgARpk --seat 0
-```
+### 2.2 Timeline and Perspectives
+*   **Timeline:** A sequence of game events (`touches`), each identified by a unique event ID (short hash).
+*   **Perspective:** For each event on the timeline, there is a corresponding "perspective" – a point-in-time snapshot of game data visible to a specific player at a specific seat. This data is sourced from the backend.
+*   **`state.perspectives`:** A cache within the core state that stores loaded perspectives, keyed by their event ID (`at`). This cache is the source of truth for perspectives. A separate `state.currentPerspective` is explicitly avoided as the current perspective is always derivable from `state.perspectives` and `cursor.at`.
 
-The existing `reel.js` tool demonstrates the minimal functionality I want.  When run, it reveals the inner state of the core and permits a user to navigate the timeline of a game of Backgammon.  If for some reason you are unable to run this tool successfully, stop all work.  It is likely an environment variable issue and I will have to fix it.
+## 3. State Model
 
-The CRUCIAL ARTIFACT you are creating is the functional core your replacement tool uses.  The `cli.js` is just a wrapper around that core.  The core you create is what I eventually want to have the frontend use.  The site implements 3 games each with its own UI wrapper.  The focus for now is on this one ("./src/games/backgammon/table/uJl/main.js") and its imports.  You are not touching any of that. You're sticking to your sandbox. I just mention the frontend so that you have a frame of reference for other parts of the system one day meant to interact with your core.  I'll handle the transplant.  Just get the core and cli working correctly.
+The core state of the Reel component is managed by an `atom` and includes the following key attributes:
 
-When I built the `reel.js` tool, I forgot my own priciples and based it on too many signals, too many moving parts. I should've built a single-atom core and followed the AGENTS file guidance.  I didn't. Your job is to correct that by building what I ought have built.  But you will want to use the existing tool during your REPL-driven development as a baseline, a reference point to which you can compare how your new REPL/CLI works.
+*   **`id` (string):** The identifier of the game table.
+*   **`seat` (number | null):** The seat number of the player, if applicable.
+*   **`timeline` (object | null):** Contains the game's event history (`touches` array) and other timeline-related data.
+*   **`seated` (array):** Information about seated players.
+*   **`cursor` (object):** Manages the user's position within the timeline.
+    *   **`pos` (number | null):** The integer index of the current event in the `timeline.touches` array.
+    *   **`at` (string | null):** The event ID corresponding to the current `pos`.
+    *   **`max` (number | null):** The maximum valid `pos` (i.e., `timeline.touches.length - 1`).
+    *   **`direction` (number):** Indicates the current navigation orientation.
+        *   `FORWARD` (1): Moving towards the present.
+        *   `BACKWARD` (-1): Moving towards the past.
+        *   Initially `BACKWARD` as the timeline starts at the present. If `pos` is in the past relative to `max`, `direction` automatically reverts to `FORWARD`.
+*   **`perspectives` (object):** A cache for loaded game perspectives, keyed by event ID.
+*   **`error` (any | null):** Stores any error information.
+*   **`ready` (boolean):** Indicates if the initial timeline and perspective loading is complete. Initialized to `false`, set to `true` upon completion of initial data fetching.
 
-The good thing is the existing tool visibly works as it should, mostly.  It wasn't done, but it does model what I meant to model, in that it allows a user to navigate the timeline of a game he is playing.  Study it; spec out its commands.  It must be interactive, allow the user to interactively navigate.  It must also permit you to send a series of keystrokes into the app directly to simulate that interactivity.  Same commands but sent in.
+## 4. Core Functions
 
-The state is held in the inner core.  It knows the table id and seat idx.  That is essentially what a game perspective is.  That perspective informs what a player at a seat at the table is supposed to see (as data); that part is managed by the backend right now.  The backend covers over the details that are supposed to remain out of sight so the Blackjack player, so to speak, doesn't know what's on top of the deck.  The game would be broken if he did.
+The functional core (`core.js`) provides pure functions for state manipulation:
 
-The concept of a Reel, the value type you are designing, is it simulates loading snapshots of the game state along a timeline.  That timeline has a cursor.  `pos` is the int index, one per event in the game.  Of course, all the side-effecting work happens around it in `main.js` and is ushered into it via `$.swap`.  `at` is the event id which exists at that position.  `max` is the number of events minus 1.  The component using it immediately displays the present, the event at `max` in a series of events each of which is a step forward on the game timeline.  As a user navigates the timeline, the component loads successive states.  The `pos` may never fall out of bounds, with 0 being the lowest.   The `clamp` function helps this.
+*   **`init(id, seat)`:** Initializes the Reel component's state.
+*   **`loadSeated(state, seated)`:** Updates the `seated` players in the state.
+*   **`loadTimeline(state, timeline)`:** Loads the game timeline, calculates `max`, and initializes/updates the `cursor`'s `pos`, `at`, and `direction` transactionally.
+*   **`loadPerspective(state, at, perspective)`:** Stores a given `perspective` into the `state.perspectives` cache at the specified `at` (event ID). The `at` argument is explicitly accepted.
+*   **`isPosValid(state, pos)`:** A pure helper function that checks if a given `pos` is within `[0, state.cursor.max]` bounds and if the perspective for the corresponding `at` is already present in `state.perspectives`.
+*   **`reposition(state, pos)`:** The central navigation function. It takes a target `pos`. If `isPosValid` returns `false`, it returns the original state, preventing invalid moves. Otherwise, it updates `cursor.pos` and `cursor.at`.
+*   **`inception(state)`:** Navigates to the beginning of the timeline (`pos: 0`). Internally calls `reposition`. (Renamed from `to_start`).
+*   **`present(state)`:** Navigates to the current moment (`pos: state.cursor.max`). Internally calls `reposition`. (Renamed from `to_end`).
+*   **`forward(state)`:** Moves the cursor one step forward (`pos + 1`). Internally calls `reposition`.
+*   **`backward(state)`:** Moves the cursor one step backward (`pos - 1`). Internally calls `reposition`.
+*   **`at(state, pos)`:** Navigates directly to a specified `pos` (event ID index). It calls `reposition` and then transactionally sets `cursor.direction` to `FORWARD`.
 
-Each visible snapshot of the game is identified by a precipitating event (named for a short hash) that caused that game state.  Married to each event is a point-in-time perspective that shows, at that particular moment, the game data the player is allowed to know about.  This data is handed to the component from the backend.  The existing `reel.js` makes obvious how and where to retrieve data.  You are mirroring all that as the means of sourcing your data.  No change there.  You are just doing so in a safe, controlled, simulated manner, abiding the "make illegal states unrepresentable" principle.
+## 5. Imperative Shell (CLI Interface)
 
-Start with AGENTS.  Mind the Stages as your plan must center on that path, minus the GUI stage.  Mind how you're supposed to organize PRD and TODO.  We are starting, before any coding begins, by developing a chunked plan (an actual `todo.md` file), where each chunk helps narrow your focus, as discussed.  The first phase is your developing that plan.  I know you have other training, but that's your actual first deliverable, not code.  You are working hard to develop a thoughtful plan which helps steer you and keeps you focusing on the most important goals each drive.  If you do well to structure a plan as specified, I'll eventually have you execute the plan.  I just want that plan to be materialized as directed, first.
+The CLI (`cli.js`) acts as the imperative shell, wrapping the core and providing interaction mechanisms. Its design and principles adhere to the guidelines in the Atomic [CLI Implementation Roadmap](https://github.com/mlanza/atomic/agents/cli.md).
+
+### 5.1 Initialization and Readiness
+*   The `bootstrap` function (in `main.js`) initializes the core state and asynchronously fetches the initial timeline and perspective data.
+*   The CLI waits for the `bootstrap` process to complete and `state.ready` to become `true` before executing any commands.
+
+### 5.2 Commands and Options
+The `reel` CLI supports the following:
+
+*   **`reel <table:string>`:** The primary command, requiring a table ID.
+*   **`--seat <seat:number>`:** Optional. Specifies the seat number.
+*   **`-i, --interactive`:** Runs the CLI in interactive mode, allowing keypress navigation.
+*   **`-s, --script <commands:string>`:** Executes a comma-separated string of commands sequentially.
+*   **`--inception`:** Jumps to the initial game state (`pos: 0`).
+*   **`--present`:** Jumps to the current moment (`pos: state.cursor.max`).
+*   **`--at <event_id:string>`:** Jumps directly to a specific event ID.
+*   **`--timeout <seconds:number>`:** Forces the CLI to exit after the specified number of seconds.
+
+### 5.3 Navigation and Pre-caching
+*   **Shell-side Navigation Logic:** The `navigateTo` helper in `main.js` handles navigation requests. Before calling `reposition` in the core, it checks if the target perspective is cached. If not, it fetches the perspective (`getPerspective`) and loads it into the `state.perspectives` cache.
+*   **Pre-caching:** A subscription actively monitors `cursor.direction` to anticipate the next step and pre-load the corresponding perspective into the cache, improving navigation responsiveness.
+
+## 6. Ambiguities and Resolutions
+
+### 6.1 `perspective` vs `perspectives` in State
+*   **Ambiguity:** Initial PRD statements suggested not wanting a "perspective address" in the state, while later sections referred to "cached perspective" and "loading into cache."
+*   **Resolution:** `state.perspectives` (the cache of all loaded perspectives, keyed by event ID) is intended to remain as the source of truth. The "unneeded" `perspective` refers to a *separate* attribute in the state that would hold only the *current* perspective. Such an attribute is redundant because the current perspective can always be derived from `state.perspectives` using `cursor.at`. The `loadPerspective` function signature is correct, with `perspective` being the data to be cached.

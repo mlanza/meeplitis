@@ -69,22 +69,51 @@ await new Command()
   .option("--seat <seat:number>", "Seat number (integer)")
   .option("-i, --interactive", "Run in interactive mode.")
   .option("-s, --script <commands:string>", "Run a script of comma-separated commands.")
+  .option("--inception", "Jump to the initial game state.")
+  .option("--present", "Jump to the current moment; only from here may moves be issued.")
+  .option("--timeout <seconds:number>", "Force the CLI to exit after a specified number of seconds.")
+  .option("--at <event_id:string>", "Jump directly to a specific event ID.")
   .action(async function (opts, table){
     const seat = _.maybe(opts.seat, parseInt);
     const accessToken =  Deno.env.get("SUPABASE_SESSION_ACCESS_TOKEN") || null;
-    bootstrap(table, seat, accessToken);
 
-    // A small delay to allow the initial timeline to load before any actions.
-    await sleep(1000);
+    if (opts.timeout) {
+      setTimeout(() => {
+        console.error(`CLI timed out after ${opts.timeout} seconds.`);
+        Deno.exit(1);
+      }, opts.timeout * 1000);
+    }
+
+    await bootstrap(table, seat, accessToken);
 
     $.sub(registry.$state, logCurrentState);
+
+    const commandsToExecute = [];
+    if (opts.inception) {
+      commandsToExecute.push("inception");
+    }
+    if (opts.present) {
+      commandsToExecute.push("present");
+    }
+    if (opts.at) {
+      commandsToExecute.push(`at ${opts.at}`);
+    }
+
+    for (const cmd of commandsToExecute) {
+      const [commandName, arg] = _.split(cmd, " ");
+      dispatch(commandName, arg);
+      await sleep(500); // Small delay between commands
+    }
 
     if (opts.interactive) {
       interactiveMode();
     } else if (opts.script) {
       scriptedMode(opts.script);
+    } else if (commandsToExecute.length > 0) {
+      // If only flags were used, exit after execution
+      setTimeout(() => Deno.exit(), 2000);
     } else {
-      // If not interactive or scripted, exit after the initial load.
+      // If not interactive, scripted, or flags, exit after initial load.
       setTimeout(() => Deno.exit(), 2000);
     }
   })

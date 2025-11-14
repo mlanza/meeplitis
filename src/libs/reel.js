@@ -1,3 +1,4 @@
+#!/usr/bin/env -S deno run --allow-env --allow-read --allow-write --allow-net
 import _ from "./atomic_/core.js";
 import $ from "./atomic_/shell.js";
 import supabase from "./supabase.js";

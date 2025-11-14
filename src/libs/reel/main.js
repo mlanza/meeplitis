@@ -55,8 +55,13 @@ function getPerspective(table_id, event_id, seat, seat_id, accessToken){
 }
 
 
-export function bootstrap(id, seat, accessToken) {
+export async function bootstrap(id, seat, accessToken) {
   const $state = $.atom(w.init(id, seat));
+
+  let resolveReadyPromise;
+  const readyPromise = new Promise(resolve => {
+    resolveReadyPromise = resolve;
+  });
 
   // When the timeline is loaded, fetch the initial perspective
   const sub = $.sub($.pipe($.map(_.get(_, "timeline"), $state), _.distinct()), function(timeline) {
@@ -71,15 +76,21 @@ export function bootstrap(id, seat, accessToken) {
       getPerspective(state.id, at, state.seat, null, accessToken).then(function(perspective) {
         $.swap($state, w.loadPerspective, at, perspective);
         $.swap($state, _.assoc(_, "ready", true));
+        resolveReadyPromise();
       });
+    } else {
+      $.swap($state, _.assoc(_, "ready", true));
+      resolveReadyPromise();
     }
   });
 
   // Perform the initial side-effect of fetching the timeline
-  getTouches(id, accessToken).then(function(timeline) {
+  await getTouches(id, accessToken).then(function(timeline) {
     $.swap($state, w.loadTimeline, timeline);
   });
 
+  // Wait for the readyPromise to resolve
+  await readyPromise;
 
   // Pre-caching subscription
   $.sub($.pipe($.map(_.get(_, "cursor"), $state), _.distinct()), function(cursor) {

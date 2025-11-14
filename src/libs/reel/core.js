@@ -17,7 +17,7 @@ export function init(id, seat) {
     },
     perspectives: {}, // Cache for loaded perspectives
     error: null,
-    ready: true
+    ready: false
   };
 }
 

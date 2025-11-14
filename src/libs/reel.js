@@ -481,6 +481,12 @@ await new Command()
     if (interactive) {
       command($.dispatch($reel, _));
     }
+
+    setTimeout(function(){
+      if (!interactive) {
+        Deno.exit();
+      }
+    }, 5000);
   })
   .parse(Deno.args);
 

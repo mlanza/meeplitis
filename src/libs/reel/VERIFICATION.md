@@ -24,9 +24,12 @@ deno run -A ./src/libs/reel/cli.js QDaitfgARpk --seat 0 -i
 
 *   **Right Arrow:** Move forward one step in the timeline.
 *   **Left Arrow:** Move backward one step in the timeline.
-*   **Home Key:** Go to the very beginning of the timeline (position 0).
-*   **End Key:** Go to the very end of the timeline (the present).
+*   **Home Key:** Go to the very beginning of the timeline (`inception`).
+*   **End Key:** Go to the very end of the timeline (`present`).
+*   **'l' Key:** Go to the position of the last move in the current perspective.
+*   **'a' Key:** You will be prompted to enter a specific event ID to jump to.
 *   **'p' Key:** You will be prompted to enter a specific position number to jump to.
+*   **Tab Key:** Toggle between elided (default) and full view of the state, particularly for the `perspectives` cache.
 *   **'q' or 'escape':** Exit the application.
 
 ## 3. Scripted Mode
@@ -35,10 +38,11 @@ This command runs the tool and executes a pre-defined sequence of navigation com
 
 The following example script will:
 1.  Load the timeline.
-2.  Go backward one step.
-3.  Go backward another step.
-4.  Go to the end of the timeline.
+2.  Go to the beginning.
+3.  Go to the event with id `73mqk`.
+4.  Go to the position of the last move.
+5.  Go to the end.
 
 ```zsh
-deno run -A ./src/libs/reel/cli.js QDaitfgARpk --seat 0 --script "backward,backward,to-end"
+deno run -A ./src/libs/reel/cli.js QDaitfgARpk --seat 0 --script "inception,at 73mqk,last-move,present"
 ```

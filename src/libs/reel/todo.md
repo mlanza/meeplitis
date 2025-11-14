@@ -1,50 +1,39 @@
 ---
 agent:
-  active_drive: null
-  active_task: null
-  drives: []
-  confirm_on_switch: false
+  active_drive: E
+  active_task: E1
+  drives: [E, F, G]
+  confirm_on_switch: true
   archive_completed: true
 ---
 
 # TODO
 
-This plan outlines the work to refactor the `reel` component, following the principles in `AGENTS.md`.
+This plan outlines the refactoring work based on the new requirements in `prd2.md`.
 
-## Drive A: Project Setup & Initial Simulation Core
+## Drive E: State and Core Logic Refactoring
 
-This drive focuses on establishing the sandbox environment and creating the basic, non-interactive core of the simulation.
+This drive focuses on refactoring the state shape and pure functions in `core.js`.
 
-*   **A1: Create Sandbox Structure.** Establish the directory structure and initial files for the new `reel` component within the `meeplitis/src/libs/reel` sandbox. This includes `core.js`, `main.js`, `cli.js`, and `prd.md`.
-*   **A2: Define Initial State.** In `core.js`, define the `init` function that creates the initial state structure for the Reel atom. This state will include `id` (tableId), `seat` (seatIndex), `pos`, `max`, `at`, and a place for the `timeline` (event touches) and the current `perspective`.
-*   **A3: Implement Data Fetching.** Analyze the existing `reel.js` to understand how it fetches the game timeline data. Replicate this logic as a pure function in `core.js` that accepts the raw data and transforms it into the initial state. The side-effect of fetching will be handled in `main.js`.
-*   **A4: Create Atom & Registry.** In `main.js`, create the central `$.atom` and command registry. The atom will be initialized with the state from `core.js`.
-*   **A5: Implement Basic CLI.** In `cli.js`, create the basic command-line interface using Cliffy. It will accept `tableId` and `seat` as arguments, mimicking the original `reel.js`.
-*   **A6: Verify Initial State.** Add a simple `show` command to the CLI that prints the current state from the atom. This will verify that the initial data loading and state setup are working correctly.
+*   **E1: Refactor State Structure.** Modify `core.js` to introduce a `cursor` object containing `pos`, `at`, `max`, and a new `direction` field. Add `FORWARD` and `BACKWARD` constants. Remove the redundant top-level state fields.
+*   **E2: Update `loadTimeline`.** In `core.js`, modify `loadTimeline` to update the new `cursor` object and correctly set the `direction` based on whether the current position is in the past.
+*   **E3: Update `loadPerspective` API.** In `core.js`, change the `loadPerspective` function signature to `(state, at, perspective)` to explicitly require the event ID.
+*   **E4: Rename Navigation Functions.** In `core.js`, rename `to_start` to `inception` and `to_end` to `present`.
+*   **E5: Implement Validity Check.** Create a pure helper function `isPosValid(state, pos)` in `core.js` that checks if a position's perspective is cached. Modify `reposition` to only move the cursor if the target position is valid.
 
-## Drive B: Timeline Navigation Logic (Pure Core)
+## Drive F: Shell and CLI Refactoring
 
-This drive implements the pure functions for navigating the game timeline.
+This drive updates the imperative shell and CLI to accommodate the new core logic.
 
-*   **B1: Implement Navigation Commands.** In `core.js`, create the pure functions for timeline navigation: `forward`, `backward`, `to_start`, `to_end`, and `to_pos`.
-*   **B2: Ensure State Purity.** These functions will take the current state and arguments, returning a completely new state object with an updated `pos` and `at` value. They must not mutate the input state.
-*   **B3: Implement Clamping.** Create and use a `clamp` helper function in `core.js` to ensure the `pos` value always remains within the valid bounds of `0` and `max`.
-*   **B4: Update Perspective.** The navigation commands will trigger a fetch for the new perspective corresponding to the new `pos`. This will be handled by swapping in a command that performs the fetch effect in `main.js` and then updates the state with the new perspective.
+*   **F1: Update Shell Navigation Logic.** In `main.js`, refactor the navigation logic. The shell will now intercept user commands (e.g., `forward`), check if the target position is valid using `isPosValid`, fetch the perspective if needed, and only then call the core `reposition` function via `$.swap`.
+*   **F2: Implement Pre-caching.** In `main.js`, add a subscription that watches for cursor changes. When the cursor moves, it will determine the next logical position based on `cursor.direction` and pre-fetch its perspective to improve performance.
+*   **F3: Update CLI Commands.** In `cli.js`, update the interactive and scripted modes to use the new command names (`inception`, `present`). Implement the `at` command, which will set the direction to `FORWARD`.
+*   **F4: Update CLI Help Text.** Review and update all command and option descriptions in `cli.js` to ensure the `--help` output is accurate.
 
-## Drive C: Integrating Navigation into the CLI
+## Drive G: Final Verification
 
-This drive wires the pure navigation logic into the CLI, making the tool interactive.
+This drive is for final testing and documentation.
 
-*   **C1: Add Navigation to CLI.** Add the navigation commands (`forward`, `backward`, etc.) to `cli.js`. These CLI commands will invoke `$.swap` with the corresponding pure functions from `core.js`.
-*   **C2: Implement Interactive Mode.** Enhance the CLI to support an interactive mode that listens for keystrokes (e.g., left/right arrow keys) to trigger timeline navigation, similar to the original tool.
-*   **C3: Implement Scripted (Non-Interactive) Mode.** Allow a sequence of navigation commands to be passed as an argument to the CLI, enabling scripted testing and verification.
-*   **C4: Compare with Reference.** Run the new CLI and compare its behavior and output against the original `reel.js` to ensure functional parity.
-
-## Drive D: Finalization & Verification
-
-This drive is for final review, refactoring, and preparing the deliverable.
-
-*   **D1: Adherence Review.** Thoroughly review the entire implementation against the `AGENTS.md` principles. Refactor any code that deviates from the specified patterns (pure core, imperative shell).
-*   **D2: Verify Purity.** Double-check that all functions within `core.js` are pure and free of side effects.
-*   **D3: Isolate Effects.** Confirm that all side effects (DOM manipulation, network requests, logging) are properly contained within `main.js` and `cli.js`.
-*   **D4: Prepare Verification Steps.** As per the "Definition of Done," prepare and document a clear list of CLI commands that the director can use to run and verify the completed `reel` tool.
+*   **G1: Test Scripted Mode.** Create and run a new set of scripted tests to verify all the new logic: `inception`, `present`, `at`, direction changes, and the validity checks for navigation.
+*   **G2: Final `AGENTS.md` Review.** Perform a final review of the codebase to ensure it conforms to all specified principles.
+*   **G3: Update `VERIFICATION.md`.** Update the verification document with the new commands, options, and instructions.

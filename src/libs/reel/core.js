@@ -1,42 +1,62 @@
 import _ from "../atomic_/core.js";
 
+export const FORWARD = 1;
+export const BACKWARD = -1;
+
 export function init(id, seat) {
   return {
     id,
     seat,
     timeline: null,
-    pos: null,
-    max: null,
-    at: null,
-    perspective: null,
+    seated: [],
+    cursor: {
+      pos: null,
+      at: null,
+      max: null,
+      direction: BACKWARD
+    },
     perspectives: {}, // Cache for loaded perspectives
     error: null,
     ready: true
   };
 }
 
-export function loadTimeline(state, timeline) {
-  const max = _.count(timeline.touches) - 1;
-  return _.assoc(state,
-    "timeline", timeline,
-    "max", max,
-    "pos", max,
-    "at", _.nth(timeline.touches, max));
+export function loadSeated(state, seated) {
+  return _.assoc(state, "seated", seated);
 }
 
-export function loadPerspective(state, perspective) {
-  return _.assoc(state,
-    "perspective", perspective,
-    "perspectives", _.assoc(state.perspectives, state.at, perspective));
+export function loadTimeline(state, timeline) {
+  const max = _.count(timeline.touches) - 1;
+  const pos = state.cursor.pos == null ? max : state.cursor.pos;
+  const direction = max > pos ? FORWARD : BACKWARD;
+  const cursor = {
+    max,
+    pos,
+    direction,
+    at: _.nth(timeline.touches, pos)
+  };
+  return _.assoc(state, "timeline", timeline, "cursor", cursor);
+}
+
+export function loadPerspective(state, at, perspective) {
+  return _.assocIn(state, ["perspectives", at], perspective);
+}
+
+export function isPosValid(state, pos) {
+  if (pos < 0 || pos > state.cursor.max) {
+    return false;
+  }
+  const at = _.nth(state.timeline.touches, pos);
+  return state.perspectives[at] != null;
 }
 
 function reposition(state, pos) {
-  const newPos = _.clamp(pos, 0, state.max);
-  const at = _.nth(state.timeline.touches, newPos);
-  return _.assoc(state,
-    "pos", newPos,
-    "at", at,
-    "perspective", _.get(state.perspectives, at, null)); // Immediately load from cache if available
+  if (!isPosValid(state, pos)) {
+    return state; // Do not move if target is not valid
+  }
+  const at = _.nth(state.timeline.touches, pos);
+  const cursor = _.assoc(state.cursor, "pos", pos, "at", at);
+  return _.assoc(state, "cursor", cursor);
 }
 
 export function to_pos(state, pos) {
@@ -44,17 +64,22 @@ export function to_pos(state, pos) {
 }
 
 export function forward(state) {
-  return reposition(state, state.pos + 1);
+  return reposition(state, state.cursor.pos + 1);
 }
 
 export function backward(state) {
-  return reposition(state, state.pos - 1);
+  return reposition(state, state.cursor.pos - 1);
 }
 
-export function to_start(state) {
+export function inception(state) {
   return reposition(state, 0);
 }
 
-export function to_end(state) {
-  return reposition(state, state.max);
+export function present(state) {
+  return reposition(state, state.cursor.max);
+}
+
+export function at(state, pos) {
+  return _.chain(reposition(state, pos),
+    _.assocIn(_, ["cursor", "direction"], FORWARD));
 }

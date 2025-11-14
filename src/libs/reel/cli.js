@@ -1,33 +1,22 @@
-#!/usr/bin/env -S deno run --inspect-brk --allow-read --allow-write --allow-net
+#!/usr/bin/env -S deno run --allow-env --allow-read --allow-write --allow-net
 
 import _ from "../atomic_/core.js";
 import $ from "../atomic_/shell.js";
 import { Command } from "https://deno.land/x/cliffy@v1.0.0-rc.4/command/mod.ts";
 import { keypress } from "https://deno.land/x/cliffy@v0.25.4/keypress/mod.ts";
 import { Input } from "https://deno.land/x/cliffy@v1.0.0-rc.3/prompt/mod.ts";
-import { bootstrap } from "./main.js";
+import { bootstrap, dispatch } from "./main.js";
 import { registry } from "../cmd.js";
 
-function log(obj){
-  $.log(Deno.inspect(obj, { colors: true, compact: true, depth: Infinity, iterableLimit: Infinity }));
-}
+let fullView = false; // State to control logging verbosity
 
-function dispatch(command) {
-  const { $state, w } = registry;
-  switch (command) {
-    case "forward":
-      $.swap($state, w.forward);
-      break;
-    case "backward":
-      $.swap($state, w.backward);
-      break;
-    case "to-start":
-      $.swap($state, w.to_start);
-      break;
-    case "to-end":
-      $.swap($state, w.to_end);
-      break;
+function logCurrentState(){
+  const state = _.deref(registry.$state);
+  const stateToLog = { ...state }; // Create a shallow copy
+  if (!fullView && stateToLog.perspectives) {
+    stateToLog.perspectives = `<elided: ${Object.keys(stateToLog.perspectives).length} entries>`;
   }
+  $.log(Deno.inspect(stateToLog, { colors: true, compact: true, depth: Infinity, iterableLimit: Infinity }));
 }
 
 async function interactiveMode() {
@@ -39,12 +28,24 @@ async function interactiveMode() {
     } else if (event.key === "left") {
       dispatch("backward");
     } else if (event.key === "home") {
-      dispatch("to-start");
+      dispatch("inception");
     } else if (event.key === "end") {
-      dispatch("to-end");
+      dispatch("present");
+    } else if (event.key === "l") {
+      dispatch("last-move");
+    } else if (event.key === "a") {
+      const at = await Input.prompt("Go to event id:");
+      dispatch("at", at);
     } else if (event.key === "p") {
       const pos = await Input.prompt("Go to position:");
-      $.swap(registry.$state, registry.w.to_pos, parseInt(pos));
+      // Note: to_pos is not fully supported by the new proactive navigation
+      // This is a simplification for now.
+      const $state = registry.$state;
+      const { w } = registry;
+      $.swap($state, w.to_pos, parseInt(pos));
+    } else if (event.key === "tab") {
+      fullView = !fullView;
+      logCurrentState(); // Re-log with new view setting
     }
   }
 }
@@ -54,8 +55,9 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 async function scriptedMode(commands) {
   const cmds = _.split(commands, ",");
   for (const cmd of cmds) {
-    dispatch(cmd.trim());
-    await sleep(500); // Wait for potential async operations to settle
+    const [command, arg] = _.split(cmd.trim(), " ");
+    dispatch(command, arg);
+    await sleep(1000); // Wait for potential async operations to settle
   }
   setTimeout(() => Deno.exit(), 2000); // Final wait for last operation
 }
@@ -70,16 +72,16 @@ await new Command()
   .action(async function (opts, table){
     const seat = _.maybe(opts.seat, parseInt);
     const accessToken =  Deno.env.get("SUPABASE_SESSION_ACCESS_TOKEN") || null;
-    const $state = bootstrap(table, seat, accessToken);
+    bootstrap(table, seat, accessToken);
 
-    $.sub($state, log);
+    // A small delay to allow the initial timeline to load before any actions.
+    await sleep(1000);
+
+    $.sub(registry.$state, logCurrentState);
 
     if (opts.interactive) {
       interactiveMode();
     } else if (opts.script) {
-      // Wait a moment for initial load before starting script
-      await sleep(1000);
-
       scriptedMode(opts.script);
     } else {
       // If not interactive or scripted, exit after the initial load.

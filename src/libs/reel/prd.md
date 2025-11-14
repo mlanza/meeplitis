@@ -23,13 +23,13 @@ The core state of the Reel component is managed by an `atom` and includes the fo
 *   **`timeline` (object | null):** Contains the game's event history (`touches` array) and other timeline-related data.
 *   **`seated` (array):** Information about seated players.
 *   **`cursor` (object):** Manages the user's position within the timeline.
-    *   **`pos` (number | null):** The integer index of the current event in the `timeline.touches` array.
-    *   **`at` (string | null):** The event ID corresponding to the current `pos`.
+    *   **`pos` (number | null):** The integer index of the current event within the `timeline.touches` array. This is a 0-based index.
+    *   **`at` (string | null):** The event ID (a hashcode from the database) corresponding to the current `pos`. This value is always one of the entries in the `timeline.touches` array.
     *   **`max` (number | null):** The maximum valid `pos` (i.e., `timeline.touches.length - 1`).
-    *   **`direction` (number):** Indicates the current navigation orientation.
+    *   **`direction` (number):** Indicates the current navigation orientation, anticipating the user's next likely action.
         *   `FORWARD` (1): Moving towards the present.
         *   `BACKWARD` (-1): Moving towards the past.
-        *   Initially `BACKWARD` as the timeline starts at the present. If `pos` is in the past relative to `max`, `direction` automatically reverts to `FORWARD`.
+        *   Initially `BACKWARD` (when at `present`). If `pos` is at `inception` (0), `direction` becomes `FORWARD`. When stepping backward, `direction` is `BACKWARD`. When stepping forward, `direction` is `FORWARD`.
 *   **`perspectives` (object):** A cache for loaded game perspectives, keyed by event ID.
 *   **`error` (any | null):** Stores any error information.
 *   **`ready` (boolean):** Indicates if the initial timeline and perspective loading is complete. Initialized to `false`, set to `true` upon completion of initial data fetching.
@@ -79,3 +79,7 @@ The `reel` CLI supports the following:
 ### 6.1 `perspective` vs `perspectives` in State
 *   **Ambiguity:** Initial PRD statements suggested not wanting a "perspective address" in the state, while later sections referred to "cached perspective" and "loading into cache."
 *   **Resolution:** `state.perspectives` (the cache of all loaded perspectives, keyed by event ID) is intended to remain as the source of truth. The "unneeded" `perspective` refers to a *separate* attribute in the state that would hold only the *current* perspective. Such an attribute is redundant because the current perspective can always be derived from `state.perspectives` using `cursor.at`. The `loadPerspective` function signature is correct, with `perspective` being the data to be cached.
+
+### 6.2 `cursor.at` Validity and "Make Illegal States Unrepresentable"
+*   **Ambiguity:** Previous testing with mocked data led to `cursor.at` values like "event_0", which are not actual database hashcodes.
+*   **Resolution:** Adhering to the "Make Illegal States Unrepresentable" principle, `cursor.at` must *always* contain a valid event ID (hashcode) that exists within the `timeline.touches` array. Furthermore, it must not be possible for the cursor to point to a perspective that is not yet present in the `state.perspectives` cache. The `isPosValid` function and the `reposition` logic (which prevents moves to invalid positions or uncached perspectives) are critical in enforcing this invariant.

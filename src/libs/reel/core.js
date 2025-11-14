@@ -54,8 +54,9 @@ function reposition(state, pos) {
   if (!isPosValid(state, pos)) {
     return state; // Do not move if target is not valid
   }
+  const direction = pos > state.cursor.pos ? FORWARD : BACKWARD;
   const at = _.nth(state.timeline.touches, pos);
-  const cursor = _.assoc(state.cursor, "pos", pos, "at", at);
+  const cursor = _.assoc(state.cursor, "pos", pos, "at", at, "direction", direction);
   return _.assoc(state, "cursor", cursor);
 }
 

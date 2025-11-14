@@ -1,0 +1,27 @@
+# Product Requirements Document
+
+You are going to help me with a significant refactoring, one that I have been working on for a board game site.  It was cobbled together organically, thus, like a city that sprung up unplanned, it lacks order.  I mean to rectify that.
+
+I have this principle of building things from components which run on an `atom` in their centers. An `atom` is a state container, a signal.  Then I wrap that container usually with a `main.js`.  That's where side effects go, how the world actuates itself.
+
+This PRD exists inside a folder called `reel` which is your sandbox.  This is where you are authorized to work.  You may freely add files to this folder, but update nothing outside it.
+
+Before you get started, you will need to read Atomic's [AGENTS file](https://github.com/mlanza/atomic/AGENTS.md). It provides guidance for how we build together: slow, incrementally from a plan of baby steps.  It also explains Atomic's philosophy and principles.  You are to adhere to them.  You are to be doing REPL-driven development using a CLI based tool. I already started one, which can be [found here](../reel.js).  You may run this tool (as demonstrated below), but not modify it.  You are creating a replacement for this very tool here in the sandbox folder.
+
+```zsh
+deno run -A ./src/libs/reel.js QDaitfgARpk --seat 0
+```
+
+The existing `reel.js` tool demonstrates the minimal functionality I want.  When run, it reveals the inner state of the core and permits a user to navigate the timeline of a game of Backgammon.  If for some reason you are unable to run this tool successfully, stop all work.  It is likely an environment variable issue and I will have to fix it.
+
+The CRUCIAL ARTIFACT you are creating is the functional core your replacement tool uses.  The `cli.js` is just a wrapper around that core.  The core you create is what I eventually want to have the frontend use.  The site implements 3 games each with its own UI wrapper.  The focus for now is on this one ("./src/games/backgammon/table/uJl/main.js") and its imports.  You are not touching any of that. You're sticking to your sandbox. I just mention the frontend so that you have a frame of reference for other parts of the system one day meant to interact with your core.  I'll handle the transplant.  Just get the core and cli working correctly.
+
+When I built the `reel.js` tool, I forgot my own priciples and based it on too many signals, too many moving parts. I should've built a single-atom core and followed the AGENTS file guidance.  I didn't. Your job is to correct that by building what I ought have built.  But you will want to use the existing tool during your REPL-driven development as a baseline, a reference point to which you can compare how your new REPL/CLI works.
+
+The good thing is the existing tool visibly works as it should, mostly.  It wasn't done, but it does model what I meant to model, in that it allows a user to navigate the timeline of a game he is playing.  Study it; spec out its commands. The core facts are sent in to the CLI and inner core.  The table id and seat idx.  That is essentially what a game perspective is.  It is what a player at a seat at the table is supposed to see (as data).  The backend covers over the details that are supposed to remain out of sight so the Blackjack player, so to speak, doesn't know what's on top of the deck.  The game would be broken if he did.
+
+The concept of a Reel, the value type you are designing, is it simulates loading snapshots of the game state along a timeline.  That timeline has a cursor.  `pos` is the int index, one per event in the game.  Of course, all the side-effecting work happens around it in `main.js` and is ushered into it via `$.swap`.  `at` is the event id which exists at that position.  `max` is the number of events minus 1.  The component using it immediately displays the present, the event at `max` in a series of events each of which is a step forward on the game timeline.  As a user navigates the timeline, the component loads successive states.  The `pos` may never fall out of bounds, with 0 being the lowest.   The `clamp` function helps this.
+
+Each visible snapshot of the game is identified by a precipitating event (named for a short hash) that caused that game state.  Married to each event is a point-in-time perspective that shows, at that particular moment, the game data the player is allowed to know about.  This data is handed to the component from the backend.  The existing `reel.js` will make obvious how and where to retrieve data.  You are mirroring all that as the means of sourcing your data.  No change there.  You are just doing so in a safe, controlled, simulated manner, abiding the "make illegal states unrepresentable" principle.
+
+Start with AGENTS.  Mind the Stages as your plan will center on that path, minus the GUI stage.  Mind how you're supposed to organize PRD and TODO.  We are starting, before any coding begins, by developing a chunked plan (an actual `todo.md` file), where each chunk helps narrow your focus, as discussed.  The first phase is your developing that plan.  I know you have other training, but that's your actual first deliverable, not code.  You are working hard to develop a thoughtful plan which helps steer you and keeps you focusing on the most important goals each drive.  If you do well to structure a plan as specified, I'll eventually have you execute the plan.  I just want that plan to be materialized as directed, first.

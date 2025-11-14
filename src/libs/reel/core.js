@@ -64,11 +64,23 @@ export function to_pos(state, pos) {
 }
 
 export function forward(state) {
-  return reposition(state, state.cursor.pos + 1);
+  const newPos = state.cursor.pos + 1;
+  if (!isPosValid(state, newPos)) {
+    return state;
+  }
+  const newAt = _.nth(state.timeline.touches, newPos);
+  const newCursor = { ...state.cursor, pos: newPos, at: newAt, direction: FORWARD };
+  return _.assoc(state, "cursor", newCursor);
 }
 
 export function backward(state) {
-  return reposition(state, state.cursor.pos - 1);
+  const newPos = state.cursor.pos - 1;
+  if (!isPosValid(state, newPos)) {
+    return state;
+  }
+  const newAt = _.nth(state.timeline.touches, newPos);
+  const newCursor = { ...state.cursor, pos: newPos, at: newAt, direction: BACKWARD };
+  return _.assoc(state, "cursor", newCursor);
 }
 
 export function inception(state) {

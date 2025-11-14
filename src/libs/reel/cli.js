@@ -16,6 +16,13 @@ function logCurrentState(){
   if (!fullView && stateToLog.perspectives) {
     stateToLog.perspectives = `<elided: ${Object.keys(stateToLog.perspectives).length} entries>`;
   }
+  // Add logic to elide touches
+  if (!fullView && stateToLog.timeline && stateToLog.timeline.touches) {
+    stateToLog.timeline = {
+      ...stateToLog.timeline,
+      touches: `<elided: ${stateToLog.timeline.touches.length} entries>`
+    };
+  }
   $.log(Deno.inspect(stateToLog, { colors: true, compact: true, depth: Infinity, iterableLimit: Infinity }));
 }
 
@@ -52,23 +59,13 @@ async function interactiveMode() {
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-async function scriptedMode(commands) {
-  const cmds = _.split(commands, ",");
-  for (const cmd of cmds) {
-    const [command, arg] = _.split(cmd.trim(), " ");
-    dispatch(command, arg);
-    await sleep(1000); // Wait for potential async operations to settle
-  }
-  setTimeout(() => Deno.exit(), 2000); // Final wait for last operation
-}
-
 await new Command()
   .name("reel")
   .description("A tool for replaying game timelines.")
   .arguments("<table:string>")
   .option("--seat <seat:number>", "Seat number (integer)")
   .option("-i, --interactive", "Run in interactive mode.")
-  .option("-s, --script <commands:string>", "Run a script of comma-separated commands.")
+  .option("-c, --command <command:string>", "Execute one or more commands in order.", { collect: true })
   .option("--inception", "Jump to the initial game state.")
   .option("--present", "Jump to the current moment; only from here may moves be issued.")
   .option("--timeout <seconds:number>", "Force the CLI to exit after a specified number of seconds.")
@@ -98,6 +95,12 @@ await new Command()
     if (opts.at) {
       commandsToExecute.push(`at ${opts.at}`);
     }
+    // Process -c commands
+    if (opts.command) {
+      for (const cmd of opts.command) {
+        commandsToExecute.push(cmd);
+      }
+    }
 
     for (const cmd of commandsToExecute) {
       const [commandName, arg] = _.split(cmd, " ");
@@ -107,10 +110,8 @@ await new Command()
 
     if (opts.interactive) {
       interactiveMode();
-    } else if (opts.script) {
-      scriptedMode(opts.script);
     } else if (commandsToExecute.length > 0) {
-      // If only flags were used, exit after execution
+      // If only flags or -c commands were used, exit after execution
       setTimeout(() => Deno.exit(), 2000);
     } else {
       // If not interactive, scripted, or flags, exit after initial load.

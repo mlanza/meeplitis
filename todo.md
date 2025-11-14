@@ -1,8 +1,8 @@
 ---
 agent:
-  active_drive: null
-  active_task: null
-  drives: []
+  active_drive: G
+  active_task: G1
+  drives: [A, B, C, D, E, F, G, H, I]
   confirm_on_switch: true
   archive_completed: true
 ---
@@ -58,3 +58,17 @@ agent:
 *   F2: Integrate pre-caching logic that uses `cursor.direction` to anticipate and preload the next perspective in the timeline.
 *   F3: Update the CLI to expose the new `at` command.
 *   F4: Verify via CLI that the `at` command functions correctly and pre-caching is active.
+
+**Drive G: Address `cursor.at` validity and data access.**
+*   G1: Revert mock `getTouches` in `src/libs/reel/main.js` to use real data access.
+*   G2: Implement/verify logic to ensure `cursor.at` always points to a valid event ID from `touches` and that the corresponding perspective exists in the cache.
+*   G3: Test `cursor.at` behavior with real data (or at least without the mock) to ensure it's always a valid event ID.
+
+**Drive H: Correct CLI API for command passing.**
+*   H1: Remove `--script` option from `src/libs/reel/cli.js`.
+*   H2: Modify `src/libs/reel/cli.js` to accept multiple `-c <command>` arguments and execute them sequentially.
+*   H3: Update the PRD (`src/libs/reel/prd.md`) to reflect the correct CLI command passing mechanism.
+*   H4: Verify CLI command passing with multiple `-c` arguments.
+
+**Drive I: PRD Clarification for `at` vs `pos`.**
+*   I1: Update `src/libs/reel/prd.md` to clearly differentiate `at` (event ID/hash) from `pos` (integer index).

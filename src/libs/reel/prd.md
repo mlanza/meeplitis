@@ -64,7 +64,7 @@ The `reel` CLI supports the following:
 *   **`reel <table:string>`:** The primary command, requiring a table ID.
 *   **`--seat <seat:number>`:** Optional. Specifies the seat number.
 *   **`-i, --interactive`:** Runs the CLI in interactive mode, allowing keypress navigation.
-*   **`-s, --script <commands:string>`:** Executes a comma-separated string of commands sequentially.
+*   **`-c, --command <command:string>`:** Executes one or more commands in order. This option can be specified multiple times to execute a sequence of commands.
 *   **`--inception`:** Jumps to the initial game state (`pos: 0`).
 *   **`--present`:** Jumps to the current moment (`pos: state.cursor.max`).
 *   **`--at <event_id:string>`:** Jumps directly to a specific event ID.

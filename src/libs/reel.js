@@ -487,6 +487,7 @@ await new Command()
 async function command(run){
   for await (const event of keypress()) {
     try {
+      console.log(`Key pressed: ${event.key}`);
       switch (event.key) {
         case "left":
           run({type: event.shiftKey ? "inception" : "back"});

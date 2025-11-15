@@ -7,6 +7,7 @@ import { reg } from "../cmd.js";
 import supabase from "../supabase.js";
 import { session } from "../session.js";
 import { keypress } from "https://deno.land/x/cliffy@v0.25.4/keypress/mod.ts";
+import { Command } from "https://deno.land/x/cliffy@v1.0.0-rc.4/command/mod.ts";
 
 function elideWith(keys, f){
   const elide = _.includes(keys, _);
@@ -17,20 +18,7 @@ function elideWith(keys, f){
   }
 }
 
-const [tableId, seat] = Deno.args.length ? [Deno.args[0], parseInt(Deno.args[1])] : ["QDaitfgARpk", 0];
-
-const $reel = reel(tableId, seat);
-
-reg({$reel});
-
-const abbr = _.pipe(
-  elideWith(["touches","perspectives","seated"], (value) => `<${_.count(value)} entries>`));
-
-const log = _.comp(console.log, abbr);
-
-$.sub($reel, console.log);
-
-async function tuiMode() {
+async function tuiMode($reel) {
   for await (const event of keypress()) {
     if (event.key === "q" || event.key === "escape") {
       Deno.exit();
@@ -50,4 +38,27 @@ async function tuiMode() {
   }
 }
 
-await tuiMode();
+await new Command()
+  .name("reel")
+  .description("Navigate and append to board game timeline")
+  .arguments("<table:string>")
+  .option("--commands <commands:string>", "Commands string")
+  .option("--seat <seat:number>", "Seat number (integer)")
+  .action(async function (opts, tableId){
+    const seat = opts.seat;
+
+    const $reel = reel(tableId, seat);
+
+    reg({$reel});
+
+    const abbr = _.pipe(
+      elideWith(["touches","perspectives","seated"], (value) => `<${_.count(value)} entries>`));
+
+    const log = _.comp(console.log, abbr);
+
+    $.sub($reel, console.log);
+
+    await tuiMode($reel);
+
+  })
+  .parse(Deno.args);

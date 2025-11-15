@@ -53,7 +53,6 @@ export function resize(max){
       _.assocIn(_, ["cursor", "at"], at),
       _.assocIn(_, ["cursor", "max"], max),
       _.assocIn(_, ["cursor", "pos"], pos));
-
   }
 }
 

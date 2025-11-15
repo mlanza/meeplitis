@@ -102,7 +102,7 @@ $.sub($state, function({table, seat, seated, cursor, touches, perspectives}){
   }
 })
 
-$.sub($state, _.once(function({id}){
+const initialized = $.sub($state, _.once(function({id}){
   //initial configurations
   const $table = table(id);
   $.sub($table, function(table){
@@ -117,6 +117,7 @@ $.sub($state, _.once(function({id}){
   _.fmap(Promise.all([getSeated(id), getSeats(id, session?.accessToken)]), function([seated, seats]){
     $.swap($state, _.assoc(_, "seated", seated, "seats", seats));;
   });
+  setTimeout(() => initialized(), 200);
 }));
 
 $.sub($state, console.log);

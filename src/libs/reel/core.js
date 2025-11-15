@@ -7,19 +7,14 @@ export function init(id, seat) {
   return {
     id,
     seat,
-    make: null,
     touches: null,
-    seated: [],
-    seats: null,
     cursor: {
       pos: null,
       at: null,
       max: null,
       direction: FORWARD
     },
-    perspectives: {}, // cache
-    error: null, //TODO let's make errors bounce off
-    ready: false
+    perspectives: {} // cache
   };
 }
 
@@ -69,12 +64,6 @@ export function addPerspective(at, perspective){
   return _.assocIn(_, ["perspectives", at], perspective);
 }
 
-//seated is everyone's info; seat which are yours (1 seat per player, except at dummy tables)
-export function addSeating(seated, seats){
-  return function(state){
-    return _.chain(state, _.assoc(_, "seated", seated, "seats", seats));
-  }
-}
 
 export function forward(state) {
   return _.chain(state, position(state.cursor.pos + 1));

@@ -6,7 +6,7 @@ import supabase from "../supabase.js";
 import { session } from "../session.js";
 import { keypress } from "https://deno.land/x/cliffy@v0.25.4/keypress/mod.ts";
 
-const [tableId, seat] = Deno.args.length ? Deno.args : ["QDaitfgARpk", 0];
+const [tableId, seat] = Deno.args.length ? [Deno.args[0], parseInt(Deno.args[1])] : ["QDaitfgARpk", 0];
 
 export function getfn(name, params, accessToken){
   const apikey = supabase.supabaseKey;
@@ -93,9 +93,40 @@ function table(tableId){
   return $.pipe($t, _.compact());
 }
 
-const $state = $.atom(r.init(tableId, seat));
+const $timeline = $.atom(r.init(tableId, seat));
 
 const $table = table(tableId);
+
+const $make = $.atom(null);
+
+const $ready = $.atom(true);
+
+const $act = $.map(function(timeline, table, ready){
+  if (!table || !ready) {
+    return false;
+  }
+  const {seat, seated, cursor, touches, perspectives} = timeline;
+  const {at, pos, max} = cursor;
+  const {status} = table;
+  const started = status === "started";
+  const present = pos !== null && pos === max;
+  const perspective = _.maybe(at, _.get(perspectives, _));
+  if (!perspective) {
+    return false;
+  }
+  const {actionable} = perspective;
+  return present && actionable && ready && started;
+}, $timeline, $table, $ready);
+
+//seated is everyone's info.
+const $seated = $.fromPromise(getSeated(tableId));
+
+//seats answers which seats are yours? (1 seat per player, except at dummy tables)
+const $seats = $.fromPromise(getSeats(tableId, session?.accessToken));
+
+const $state = $.pipe($.map(function(table, seated, seats, make, ready, act, timeline){
+  return {...timeline, table, seated, seats, make, ready, act};
+}, $table, $seated, $seats, $.pipe($make, _.compact()), $ready, $act, $timeline), _.filter(_.and(_.get(_, "make"), _.get(_, "table"))));
 
 $.sub($table, _.once(function(table){
   supabase
@@ -105,37 +136,28 @@ $.sub($table, _.once(function(table){
     .then(_.getIn(_, ["data", 0]))
     .then(function({slug}){
       const url = `../../games/${slug}/table/${table.release}/core.js`;
-      _.fmap(import(url), function({make}){
-        $.swap($state, _.assoc(_, "make", make));
-      });
+      _.fmap(import(url), ({make}) => $.reset($make, make));
     })
 }));
 
 $.sub($table, function(table){
-  _.fmap(getTouches(table.id, session?.accessToken), function(touches){
-    $.swap($state,
-      _.pipe(
-        r.table(table),
-        r.addTouches(touches)));
-  });
-});
-
-_.fmap(Promise.all([getSeated(tableId), getSeats(tableId, session?.accessToken)]), function([seated, seats]){
-  $.swap($state, r.addSeating(seated, seats));
+  _.fmap(getTouches(table.id, session?.accessToken),
+    _.pipe(r.addTouches, $.swap($timeline, _)));
 });
 
 $.sub($state, function(state){
   const {table, make, seat, seated, cursor, touches, perspectives} = state;
   const {at} = cursor;
-  if (table && at && make && _.seq(seated) && !_.get(perspectives, at)) {
+  const player = seat;
+  if (table && at && make && _.seq(seated) && seat != null && !_.get(perspectives, at)) {
     const seatId = _.getIn(seated, [seat, "seat_id"]);
     _.fmap(getPerspective(table.id, at, seat, seatId, session?.accessToken), function(perspective){
       const {up, may, event, state} = perspective;
       const {seat} = event;
-      const actionable = _.includes(up, state.seat) || _.includes(may, state.seat);
+      const actionable = _.includes(up, player) || _.includes(may, player);
       const game = make(seated, table.config, [event], state);
       const actor = _.get(seated, seat);
-      $.swap($state, r.addPerspective(at, _.assoc(perspective, "actionable", actionable, "game", game, "actor", actor)));
+      $.swap($timeline, r.addPerspective(at, _.assoc(perspective, "actionable", actionable, "game", game, "actor", actor)));
     });
   }
 });
@@ -164,35 +186,20 @@ const abbr = _.pipe(
 
 const log = _.comp(console.log, abbr);
 
-$.sub($state, console.log);
+$.sub($state, log);
 
 async function interactiveMode() {
   for await (const event of keypress()) {
     if (event.key === "q" || event.key === "escape") {
       Deno.exit();
     } else if (event.key === "right") {
-      $.swap($state, r.forward);
+      $.swap($timeline, r.forward);
     } else if (event.key === "left") {
-      $.swap($state, r.backward);
+      $.swap($timeline, r.backward);
     } else if (event.key === "i") {
-      $.swap($state, r.inception);
+      $.swap($timeline, r.inception);
     } else if (event.key === "p") {
-      $.swap($state, r.present);
-    } else if (event.key === "l") {
-      //dispatch("last-move");
-    } else if (event.key === "a") {
-      //const at = await Input.prompt("Go to event id:");
-      //dispatch("at", at);
-    } else if (event.key === "p") {
-      //const pos = await Input.prompt("Go to position:");
-      // Note: to_pos is not fully supported by the new proactive navigation
-      // This is a simplification for now.
-      //const $state = registry.$state;
-      //const { w } = registry;
-      //$.swap($state, w.to_pos, parseInt(pos));
-    } else if (event.key === "tab") {
-      //fullView = !fullView;
-      //logCurrentState(); // Re-log with new view setting
+      $.swap($timeline, r.present);
     }
   }
 }

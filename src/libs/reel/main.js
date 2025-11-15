@@ -6,6 +6,88 @@ import supabase from "../supabase.js";
 import { session } from "../session.js";
 import { keypress } from "https://deno.land/x/cliffy@v0.25.4/keypress/mod.ts";
 
+
+/**
+ * Creates a new signal that "ticks" at a specified interval.
+ * This signal is a high-resolution timer that attempts to correct for drift,
+ * making it more accurate than `setInterval` for long-running processes.
+ *
+ * The signal is an observable that starts ticking upon subscription and stops
+ * when unsubscribed.
+ *
+ * @param {number} interval - The ticking interval in milliseconds.
+ * @param {function} [f=Date.now] - A function to generate the value for each tick. It receives an object with details about the tick (frame, offage, target).
+ * @returns {Observable} An observable that emits values at the specified interval.
+ */
+function pacemaker(interval, f = Date.now) {
+  return $.observable(function(observer) {
+    const self = {
+      seed: performance.now(),
+      target: 0,
+      frame: 0,
+      stopped: false,
+      offage: 0
+    };
+    self.target = self.seed;
+
+    function callback() {
+      if (self.stopped) {
+        return;
+      }
+      self.offage = performance.now() - self.target;
+      if (self.offage >= 0) {
+        $.pub(observer, f(self));
+        self.frame += 1;
+        self.target = self.seed + self.frame * interval;
+      }
+      const delay = Math.abs(Math.round(Math.min(0, self.offage)));
+      if (!self.stopped) {
+        setTimeout(callback, delay);
+      }
+    }
+
+    setTimeout(callback, 0);
+
+    return function() {
+      self.stopped = true;
+      $.complete(observer);
+    };
+  });
+}
+
+function Timer(interval, f) {
+  this.interval = interval;
+  this.f = f;
+  this.$emitter = $.subject(); // Persistent subject for subscribers
+  this.unsub = null; // To hold the pacemaker's unsub function
+}
+
+Timer.prototype.start = function() {
+  console.log("START TIMER")
+  if (this.unsub === null) { // Only start if stopped
+    const $p = pacemaker(this.interval, this.f);
+    this.unsub = $.sub($p, (tick) => $.pub(this.$emitter, tick));
+  }
+};
+
+Timer.prototype.stop = function() {
+  console.log("STOP TIMER")
+  if (this.unsub !== null) { // Only stop if running
+    this.unsub();
+    this.unsub = null;
+  }
+};
+
+(function(){
+  function sub(self, observer) {
+    return $.sub(self.$emitter, observer);
+  }
+  $.doto(Timer,
+    _.implement($.ISubscribe, { sub })
+  );
+})();
+
+
 function elideWith(keys, f){
   const elide = _.includes(keys, _);
   return function(state){
@@ -161,6 +243,20 @@ const $state = $.pipe($.map(function(table, seated, seats, up, undoable, make, r
   return {...timeline, table, seated, seats, up, undoable, make, ready, act};
 }, $table, $seated, $seats, $up, $undoable, $.pipe($make, _.compact()), $ready, $act, $timeline), _.filter(_.and(_.get(_, "make"), _.get(_, "table"))));
 
+const $timer = new Timer(1000, Date.now);
+
+$.sub($timer, function(){
+  const {cursor} = _.deref($timeline);
+  if (cursor.pos === null) {
+    return;
+  }
+  if (cursor.pos === cursor.max) {
+    $timer.stop();
+  } else {
+    $.swap($timeline, r.forward);
+  }
+});
+
 $.sub($table, _.once(function(table){
   supabase
     .from('games')
@@ -174,6 +270,12 @@ $.sub($table, _.once(function(table){
 }));
 
 $.sub($table, function(table){
+  const {cursor} = _.deref($timeline);
+  const {pos, max} = cursor || {};
+  if (pos === max) {
+    //if the user was in the current present the moment the table was touched, catch him up with what happened.
+    $timer.start();
+  }
   _.fmap(getTouches(table.id, session?.accessToken),
     _.pipe(r.addTouches, $.swap($timeline, _)));
 });
@@ -213,12 +315,18 @@ async function interactiveMode() {
       Deno.exit();
     } else if (event.key === "right") {
       $.swap($timeline, r.forward);
+      $timer.stop();
     } else if (event.key === "left") {
+      $timer.stop();
       $.swap($timeline, r.backward);
     } else if (event.key === "i") {
+      $timer.stop();
       $.swap($timeline, r.inception);
     } else if (event.key === "p") {
+      $timer.stop();
       $.swap($timeline, r.present);
+    } else if (event.key === "f") { //ffwd
+      $timer.start();
     }
   }
 }

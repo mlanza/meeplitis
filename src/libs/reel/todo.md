@@ -4,3 +4,4 @@
 * TODO Toggle full/elided views
 * TODO Timeout in CLI
 * TODO Command mode, e.g. `-c`
+* TODO Implement .option("--at <event:string>", "Event ID")

@@ -9,6 +9,10 @@ import { session } from "../session.js";
 import { keypress } from "https://deno.land/x/cliffy@v0.25.4/keypress/mod.ts";
 import { Command } from "https://deno.land/x/cliffy@v1.0.0-rc.4/command/mod.ts";
 
+function logs(obj){
+  $.log(Deno.inspect(obj, { colors: true, compact: true, depth: Infinity, iterableLimit: Infinity }));
+}
+
 function elideWith(keys, f){
   const elide = _.includes(keys, _);
   return function(state){
@@ -17,6 +21,11 @@ function elideWith(keys, f){
     }, {}, state);
   }
 }
+
+const abbr = _.pipe(
+  elideWith(["touches","perspectives","seated","table"], (value) => `<${_.count(value)} entries>`));
+
+const log = _.comp(logs, abbr);
 
 async function tuiMode($reel) {
   for await (const event of keypress()) {
@@ -46,11 +55,6 @@ await new Command()
     const $reel = reel(tableId, seat);
 
     reg({$reel});
-
-    const abbr = _.pipe(
-      elideWith(["touches","perspectives","seated"], (value) => `<${_.count(value)} entries>`));
-
-    const log = _.comp(console.log, abbr);
 
     $.sub($reel, log);
 

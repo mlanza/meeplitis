@@ -18,12 +18,6 @@ export function init(id, seat) {
   };
 }
 
-export function table(table){
-  return function(state){
-    return _.chain(state, _.assoc(_, "table", table));
-  }
-}
-
 export function position(n) {
   return function(state){
     const max = _.count(state.touches) - 1;
@@ -63,7 +57,6 @@ export function addTouches({touches, undoables, last_acting_seat}){
 export function addPerspective(at, perspective){
   return _.assocIn(_, ["perspectives", at], perspective);
 }
-
 
 export function forward(state) {
   return _.chain(state, position(state.cursor.pos + 1));

@@ -169,6 +169,11 @@ function table(tableId){
   return $.pipe($t, _.compact());
 }
 
+function move(table_id, seat, commands, accessToken){
+  const body = {table_id, seat, commands};
+  return supabase.functions.invoke("move", {body}).then(_.get(_, "data"));
+}
+
 function undoThru(undoables, touch){
   return _.some(function([key, vals]){
     return _.includes(vals, touch) ? key : null;
@@ -336,6 +341,27 @@ function dispatch(self, command){
       self.$timer.start();
       break;
 
+    case "move":
+      try {
+        const ready = _.deref(self.$ready);
+        if (!ready) {
+          throw new Error("Back end still processing; please wait.");
+        }
+        const {id, seat, pos, max} = _.deref(self.$timeline);
+        if (seat == null || session?.accessToken == null) {
+          throw new Error("Spectators are not permitted to issue moves");
+        }
+        $.reset(self.$ready, false);
+        const commands = [details.move];
+        _.fmap(move(id, seat, commands, session?.accessToken), console.log);
+        //TODO register move response somewhere
+      } catch (ex) {
+        throw ex;
+      } finally {
+        $.reset(self.$ready, true);
+      }
+      break;
+
     default:
       break;
   }
@@ -354,4 +380,3 @@ $.doto(Reel,
   _.implement($.IDispatch, {dispatch}),
   _.implement($.ISubscribe, {sub}),
   _.implement(_.IDeref, {deref}));
-

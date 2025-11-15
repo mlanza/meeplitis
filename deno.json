@@ -5,7 +5,7 @@
     "build": "deno task lume",
     "serve": "deno task lume -s",
     "reel": "./src/libs/reel/cli.js QDaitfgARpk --seat 0",
-    "orig-reel": "deno run -A ./src/libs/reel.js QDaitfgARpk --seat 0 -i"
+    "old-reel": "deno run -A ./src/libs/reel/old.js QDaitfgARpk --seat 0 -i"
   },
   "compilerOptions": {
     "types": [

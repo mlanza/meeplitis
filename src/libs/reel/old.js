@@ -1,8 +1,8 @@
 #!/usr/bin/env -S deno run --allow-env --allow-read --allow-write --allow-net
-import _ from "./atomic_/core.js";
-import $ from "./atomic_/shell.js";
-import supabase from "./supabase.js";
-import { session } from "./session.js";
+import _ from "../atomic_/core.js";
+import $ from "../atomic_/shell.js";
+import supabase from "../supabase.js";
+import { session } from "../session.js";
 import { keypress } from "https://deno.land/x/cliffy@v0.25.4/keypress/mod.ts";
 import { Command } from "https://deno.land/x/cliffy@v1.0.0-rc.4/command/mod.ts";
 import { Input } from "https://deno.land/x/cliffy@v1.0.0-rc.3/prompt/mod.ts";
@@ -375,7 +375,7 @@ function reel(tableId, session, {event = null, seat = null} = {}){
   const $maker = $.pipe($.map(function(table, game){
     const {release} = table;
     const {slug} = game;
-    return `../games/${slug}/table/${release}/core.js`;
+    return `../../games/${slug}/table/${release}/core.js`;
   }, $table, $.pipe($game, _.compact())), _.compact());
   const unsub = $.sub($maker, async function(url){
     const {make} = await import(url);

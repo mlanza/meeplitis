@@ -7,7 +7,7 @@ export function init(id, seat) {
   return {
     id,
     seat,
-    timeline: null,
+    touches: null,
     seated: [],
     seats: null,
     cursor: {
@@ -22,22 +22,13 @@ export function init(id, seat) {
   };
 }
 
-export function isPosValid(state, pos) {
-  if (pos < 0 || pos > state.cursor.max) {
-    return false;
-  }
-  const at = _.nth(state.touches, pos);
-  return !!_.get(state.perspectives, at);
-}
-
-export function position(pos) {
+export function position(n) {
   return function(state){
-    if (!isPosValid(state, pos)) {
-      return state; // Do not move if target is not valid
-    }
-    const direction = pos > state.cursor.pos ? FORWARD : BACKWARD;
+    const max = _.count(state.touches) - 1;
+    const pos = _.clamp(n, 0, max);
+    const direction = pos === 0 || pos > state.cursor.pos ? FORWARD : BACKWARD;
     const at = _.nth(state.touches, pos);
-    const cursor = _.assoc(state.cursor, "pos", pos, "at", at, "direction", direction);
+    const cursor = _.assoc(state.cursor, "pos", pos, "max", max, "at", at, "direction", direction);
     return _.assoc(state, "cursor", cursor);
   }
 }
@@ -69,4 +60,31 @@ export function addTouches({touches, undoables, last_acting_seat}){
 
 export function addPerspective(at, perspective){
   return _.assocIn(_, ["perspectives", at], perspective);
+}
+
+export function forward(state) {
+  return _.chain(state, position(state.cursor.pos + 1));
+}
+
+export function backward(state) {
+  return _.chain(state, position(state.cursor.pos - 1));
+}
+
+export function inception(state) {
+  return _.chain(state, position(0));
+}
+
+export function present(state) {
+  return _.chain(state, position(state.cursor.max));
+}
+
+export function at(at) {
+  return function(state){
+    const {cursor, touches} = state;
+    const pos = _.indexOf(touches, at);
+    if (pos === -1) {
+      throw new Error("Unknown moment.");
+    }
+    return _.chain(state, position(pos));
+  }
 }

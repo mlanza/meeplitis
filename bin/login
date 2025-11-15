@@ -3,7 +3,9 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const [email, password] = Deno.args
+const [email] = Deno.args
+const password = prompt("What's your password?");
+
 if (!email || !password) {
   console.error('Usage: deno run --allow-net --allow-env get_tokens.js <email> <password>')
   Deno.exit(2)

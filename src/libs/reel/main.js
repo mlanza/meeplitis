@@ -145,20 +145,26 @@ $.sub($table, function(table){
     _.pipe(r.addTouches, $.swap($timeline, _)));
 });
 
+//perspective caching
 $.sub($state, function(state){
   const {table, make, seat, seated, cursor, touches, perspectives} = state;
-  const {at} = cursor;
+  const {at, direction, max} = cursor;
+  const nextAt = _.maybe(pos + direction, _.clamp(_, 0, max), _.get(touches, _));
   const player = seat;
-  if (table && at && make && _.seq(seated) && seat != null && !_.get(perspectives, at)) {
+  const ats = _.chain([at, nextAt], _.compact, _.remove(_.get(perspectives, _), _), _.toArray);
+  console.log({ats});
+  if (table && _.seq(ats) && make && _.seq(seated) && seat != null) {
     const seatId = _.getIn(seated, [seat, "seat_id"]);
-    _.fmap(getPerspective(table.id, at, seat, seatId, session?.accessToken), function(perspective){
-      const {up, may, event, state} = perspective;
-      const {seat} = event;
-      const actionable = _.includes(up, player) || _.includes(may, player);
-      const game = make(seated, table.config, [event], state);
-      const actor = _.get(seated, seat);
-      $.swap($timeline, r.addPerspective(at, _.assoc(perspective, "actionable", actionable, "game", game, "actor", actor)));
-    });
+    $.each(function(at){
+      _.fmap(getPerspective(table.id, at, seat, seatId, session?.accessToken), function(perspective){
+        const {up, may, event, state} = perspective;
+        const {seat} = event;
+        const actionable = _.includes(up, player) || _.includes(may, player);
+        const game = make(seated, table.config, [event], state);
+        const actor = _.get(seated, seat);
+        $.swap($timeline, r.addPerspective(at, _.assoc(perspective, "actionable", actionable, "game", game, "actor", actor)));
+      });
+    }, ats);
   }
 });
 

@@ -104,8 +104,7 @@ $.sub($state, function({table, seat, seated, cursor, touches, perspectives}){
 
 const initialized = $.sub($state, _.once(function({id}){
   //initial configurations
-  const $table = table(id);
-  $.sub($table, function(table){
+  $.sub(table(id), function(table){
     _.fmap(getTouches(table.id, session?.accessToken), function(touches){
       $.swap($state,
         _.pipe(

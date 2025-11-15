@@ -145,14 +145,13 @@ $.sub($table, function(table){
     _.pipe(r.addTouches, $.swap($timeline, _)));
 });
 
-//perspective caching
+//perspective caching; includes anticipated next step
 $.sub($state, function(state){
   const {table, make, seat, seated, cursor, touches, perspectives} = state;
-  const {at, direction, max} = cursor;
+  const {pos, at, direction, max} = cursor;
   const nextAt = _.maybe(pos + direction, _.clamp(_, 0, max), _.get(touches, _));
   const player = seat;
   const ats = _.chain([at, nextAt], _.compact, _.remove(_.get(perspectives, _), _), _.toArray);
-  console.log({ats});
   if (table && _.seq(ats) && make && _.seq(seated) && seat != null) {
     const seatId = _.getIn(seated, [seat, "seat_id"]);
     $.each(function(at){

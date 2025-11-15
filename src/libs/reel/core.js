@@ -84,3 +84,12 @@ export function at(at) {
     return _.chain(state, position(pos));
   }
 }
+
+export function toLastMove(state){
+  const {perspectives, cursor, touches} = state;
+  const {at} = cursor;
+  const perspective = _.get(perspectives, at);
+  const lastMove = _.get(perspective, "last_move");
+  const pos = _.indexOf(touches, lastMove);
+  return _.chain(state, pos === -1 ? _.identity : position(pos));
+}

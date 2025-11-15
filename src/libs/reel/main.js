@@ -133,15 +133,6 @@ function getTouches(_table_id, accessToken){
   return getfn('touches', {_table_id}, accessToken);
 }
 
-function getLastMoveAt(state){
-  const {perspectives, at, touches} = state;
-  const touch = _.get(touches, at);
-  const perspective = _.get(perspectives, touch);
-  const lastMove = _.get(perspective, "last_move");
-  const idx = _.indexOf(touches, lastMove);
-  return idx === -1 ? at : idx;
-}
-
 function digest(result){
   const code  = result?.code,
         error = code == null ? null : result,
@@ -325,6 +316,8 @@ async function interactiveMode() {
       $.swap($timeline, r.present);
     } else if (event.key === "f") { //ffwd
       $timer.start();
+    } else if (event.key === "l") {
+      $.swap($timeline, r.toLastMove);
     }
   }
 }

@@ -6,7 +6,23 @@ import supabase from "../supabase.js";
 import { session } from "../session.js";
 import { keypress } from "https://deno.land/x/cliffy@v0.25.4/keypress/mod.ts";
 
-const [tableId, seat] = Deno.args.length ? [Deno.args[0], parseInt(Deno.args[1])] : ["QDaitfgARpk", 0];
+function elideWith(keys, f){
+  const elide = _.includes(keys, _);
+  return function(state){
+    return _.reducekv(function(memo, key, value){
+      return _.assoc(memo, key, elide(key) ? f(value, key) : value);
+    }, {}, state);
+  }
+}
+
+function keeping(keys){
+  const keep = _.includes(keys, _);
+  return function(state){
+    return _.reducekv(function(memo, key, value){
+      return keep(key) ? _.assoc(memo, key, value) : memo;
+    }, {}, state);
+  }
+}
 
 export function getfn(name, params, accessToken){
   const apikey = supabase.supabaseKey;
@@ -93,9 +109,19 @@ function table(tableId){
   return $.pipe($t, _.compact());
 }
 
+function undoThru(undoables, touch){
+  return _.some(function([key, vals]){
+    return _.includes(vals, touch) ? key : null;
+  }, undoables);
+}
+
+const [tableId, seat] = Deno.args.length ? [Deno.args[0], parseInt(Deno.args[1])] : ["QDaitfgARpk", 0];
+
 const $timeline = $.atom(r.init(tableId, seat));
 
 const $table = table(tableId);
+
+//const $table = $.pipe($.map(keeping(["up","release","game_id","last_touch_id","remarks","scored","status"]), $tbl), _.compact());
 
 const $make = $.atom(null);
 
@@ -118,15 +144,22 @@ const $act = $.map(function(timeline, table, ready){
   return present && actionable && ready && started;
 }, $timeline, $table, $ready);
 
+const $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table);
+
 //seated is everyone's info.
 const $seated = $.fromPromise(getSeated(tableId));
 
 //seats answers which seats are yours? (1 seat per player, except at dummy tables)
 const $seats = $.fromPromise(getSeats(tableId, session?.accessToken));
 
-const $state = $.pipe($.map(function(table, seated, seats, make, ready, act, timeline){
-  return {...timeline, table, seated, seats, make, ready, act};
-}, $table, $seated, $seats, $.pipe($make, _.compact()), $ready, $act, $timeline), _.filter(_.and(_.get(_, "make"), _.get(_, "table"))));
+const $undoable = $.map(function({undoables, cursor}){
+  const {at} = cursor;
+  return _.maybe(at, at => undoThru(undoables, at));
+}, $timeline);
+
+const $state = $.pipe($.map(function(table, seated, seats, up, undoable, make, ready, act, timeline){
+  return {...timeline, table, seated, seats, up, undoable, make, ready, act};
+}, $table, $seated, $seats, $up, $undoable, $.pipe($make, _.compact()), $ready, $act, $timeline), _.filter(_.and(_.get(_, "make"), _.get(_, "table"))));
 
 $.sub($table, _.once(function(table){
   supabase
@@ -167,31 +200,12 @@ $.sub($state, function(state){
   }
 });
 
-function elideWith(keys, f){
-  const elide = _.includes(keys, _);
-  return function(state){
-    return _.reducekv(function(memo, key, value){
-      return _.assoc(memo, key, elide(key) ? f(value, key) : value);
-    }, {}, state);
-  }
-}
-
-function keeping(keys){
-  const keep = _.includes(keys, _);
-  return function(state){
-    return _.reducekv(function(memo, key, value){
-      return keep(key) ? _.assoc(memo, key, value) : memo;
-    }, {}, state);
-  }
-}
-
 const abbr = _.pipe(
-  elideWith(["touches","perspectives","seated"], (value) => `<${_.count(value)} entries>`),
-  elideWith(["table"], keeping(["up","release","last_touch_id"])));
+  elideWith(["touches","perspectives","seated"], (value) => `<${_.count(value)} entries>`));
 
 const log = _.comp(console.log, abbr);
 
-$.sub($state, log);
+$.sub($state, console.log);
 
 async function interactiveMode() {
   for await (const event of keypress()) {

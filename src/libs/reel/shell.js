@@ -1,11 +1,8 @@
 import _ from "../atomic_/core.js";
 import $ from "../atomic_/shell.js";
 import * as r from "./core.js";
-import { reg } from "../cmd.js";
 import supabase from "../supabase.js";
 import { session } from "../session.js";
-import { keypress } from "https://deno.land/x/cliffy@v0.25.4/keypress/mod.ts";
-
 
 /**
  * Creates a new signal that "ticks" at a specified interval.

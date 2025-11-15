@@ -19,6 +19,8 @@ const [tableId, seat] = Deno.args.length ? [Deno.args[0], parseInt(Deno.args[1])
 
 const $reel = reel(tableId, seat);
 
+reg({$reel});
+
 const abbr = _.pipe(
   elideWith(["touches","perspectives","seated"], (value) => `<${_.count(value)} entries>`));
 

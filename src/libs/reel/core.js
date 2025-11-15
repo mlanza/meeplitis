@@ -58,9 +58,9 @@ export function resize(max){
 }
 
 export function addTouches({touches, undoables, last_acting_seat}){
+  const max = _.count(touches) - 1;
   return function(state){
     const {cursor} = state;
-    const max = _.count(touches) - 1;
     return _.chain(state,
       _.assoc(_, "touches", touches, "undoables", undoables, "last_acting_seat", last_acting_seat),
       resize(max),

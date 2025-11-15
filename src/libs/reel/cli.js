@@ -23,13 +23,9 @@ async function tuiMode($reel) {
     if (event.key === "q" || event.key === "escape") {
       Deno.exit();
     } else if (event.key === "right") {
-      $.dispatch($reel, {type: "forward"});
+      $.dispatch($reel, {type: event.shiftKey ? "present" : "forward"});
     } else if (event.key === "left") {
-      $.dispatch($reel, {type: "backward"});
-    } else if (event.key === "i") {
-      $.dispatch($reel, {type: "inception"});
-    } else if (event.key === "p") {
-      $.dispatch($reel, {type: "present"});
+      $.dispatch($reel, {type: event.shiftKey ? "inception" : "backward"});
     } else if (event.key === "f") {
       $.dispatch($reel, {type: "ffwd"});
     } else if (event.key === "l") {

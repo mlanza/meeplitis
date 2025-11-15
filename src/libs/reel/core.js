@@ -7,6 +7,7 @@ export function init(id, seat) {
   return {
     id,
     seat,
+    make: null,
     touches: null,
     seated: [],
     seats: null,
@@ -14,12 +15,18 @@ export function init(id, seat) {
       pos: null,
       at: null,
       max: null,
-      direction: BACKWARD
+      direction: FORWARD
     },
-    perspectives: {}, // Cache for loaded perspectives
-    error: null,
+    perspectives: {}, // cache
+    error: null, //TODO let's make errors bounce off
     ready: false
   };
+}
+
+export function table(table){
+  return function(state){
+    return _.chain(state, _.assoc(_, "table", table));
+  }
 }
 
 export function position(n) {
@@ -60,6 +67,13 @@ export function addTouches({touches, undoables, last_acting_seat}){
 
 export function addPerspective(at, perspective){
   return _.assocIn(_, ["perspectives", at], perspective);
+}
+
+//seated is everyone's info; seat which are yours (1 seat per player, except at dummy tables)
+export function addSeating(seated, seats){
+  return function(state){
+    return _.chain(state, _.assoc(_, "seated", seated, "seats", seats));
+  }
 }
 
 export function forward(state) {

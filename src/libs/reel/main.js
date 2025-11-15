@@ -115,23 +115,27 @@ $.sub($table, function(table){
   _.fmap(getTouches(table.id, session?.accessToken), function(touches){
     $.swap($state,
       _.pipe(
-        _.assoc(_, "table", table),
+        r.table(table),
         r.addTouches(touches)));
   });
 });
 
 _.fmap(Promise.all([getSeated(tableId), getSeats(tableId, session?.accessToken)]), function([seated, seats]){
-  $.swap($state, _.assoc(_, "seated", seated, "seats", seats));;
+  $.swap($state, r.addSeating(seated, seats));
 });
 
-$.sub($state, function({table, make, seat, seated, cursor, touches, perspectives}){
+$.sub($state, function(state){
+  const {table, make, seat, seated, cursor, touches, perspectives} = state;
   const {at} = cursor;
   if (table && at && make && _.seq(seated) && !_.get(perspectives, at)) {
     const seatId = _.getIn(seated, [seat, "seat_id"]);
     _.fmap(getPerspective(table.id, at, seat, seatId, session?.accessToken), function(perspective){
-      const {event, state} = perspective;
+      const {up, may, event, state} = perspective;
+      const {seat} = event;
+      const actionable = _.includes(up, state.seat) || _.includes(may, state.seat);
       const game = make(seated, table.config, [event], state);
-      $.swap($state, r.addPerspective(at, _.assoc(perspective, "game", game)));
+      const actor = _.get(seated, seat);
+      $.swap($state, r.addPerspective(at, _.assoc(perspective, "actionable", actionable, "game", game, "actor", actor)));
     });
   }
 });
@@ -160,7 +164,7 @@ const abbr = _.pipe(
 
 const log = _.comp(console.log, abbr);
 
-$.sub($state, log);
+$.sub($state, console.log);
 
 async function interactiveMode() {
   for await (const event of keypress()) {

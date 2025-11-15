@@ -1,5 +1,5 @@
 #!/usr/bin/env -S deno run --allow-net
-// run: deno run --allow-net --allow-env login user@example.com "password123"
+// run: deno run login --allow-net --allow-env login user@example.com
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 

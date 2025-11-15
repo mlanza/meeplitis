@@ -3,7 +3,10 @@
   "tasks": {
     "lume": "deno run --import-map=import_map.json -A lume/cli.ts",
     "build": "deno task lume",
-    "serve": "deno task lume -s"
+    "serve": "deno task lume -s",
+    "reel": "deno run -A ./src/libs/reel/main.js QDaitfgARpk 0",
+    "old-reel": "deno run -A ./src/libs/old-reel/cli.js QDaitfgARpk --seat 0",
+    "orig-reel": "deno run -A ./src/libs/reel.js QDaitfgARpk --seat 0"
   },
   "compilerOptions": {
     "types": [

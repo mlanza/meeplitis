@@ -56,7 +56,7 @@ await new Command()
 
     const log = _.comp(console.log, abbr);
 
-    $.sub($reel, console.log);
+    $.sub($reel, log);
 
     await tuiMode($reel);
 

@@ -311,19 +311,17 @@ $.sub($state, console.log);
 
 async function interactiveMode() {
   for await (const event of keypress()) {
+    //whenever the user acts, the timer stops
+    $timer.stop();
     if (event.key === "q" || event.key === "escape") {
       Deno.exit();
     } else if (event.key === "right") {
       $.swap($timeline, r.forward);
-      $timer.stop();
     } else if (event.key === "left") {
-      $timer.stop();
       $.swap($timeline, r.backward);
     } else if (event.key === "i") {
-      $timer.stop();
       $.swap($timeline, r.inception);
     } else if (event.key === "p") {
-      $timer.stop();
       $.swap($timeline, r.present);
     } else if (event.key === "f") { //ffwd
       $timer.start();

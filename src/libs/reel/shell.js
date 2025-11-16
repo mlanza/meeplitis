@@ -292,6 +292,37 @@ export function reel(tableId, seat){
     }
   });
 
+  const $hist = $.hist($state);
+
+  function diff(hist = [], max = 0, depth = 0, address = []) {
+    const [curr, prior] = hist || [];
+    if (depth <= max && (_.isObject(curr) || _.isObject(prior) || _.isArray(curr) || _.isArray(prior))) {
+      const cks = _.maybe(curr, _.keys),
+            pks = _.maybe(prior, _.keys);
+      return _.chain(
+        _.union(cks, pks),
+        _.map(function(key){
+          return {address: _.conj(address, key), hist: [_.get(curr, key), _.get(prior, key)]};
+        }, _),
+        _.filter(function({hist}){
+          return _.apply(_.notEq, hist);
+        }, _),
+        _.mapcat(function({address, hist}){
+          return diff(hist, max, depth + 1, address);
+        }, _),
+        _.toArray);
+    } else {
+      return _.eq(curr, prior) ? [] : address;
+    }
+  }
+
+  const $changes = $.map(function(hist){
+    const changed = diff(hist);
+    return {type: "changed", details: {hist, changed}}; //transactions mean multiple things can change at once
+  }, $.pipe($hist, _.compact()));
+
+  $.sub($changes, _.compact(), $.see("changes"));
+
   return new Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $wip);
 }
 

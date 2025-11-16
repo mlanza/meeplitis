@@ -5,7 +5,7 @@ import * as c from "./core.js";
 import * as g from "/libs/game.js";
 import {moment} from "/libs/story.js";
 import {describe} from "./ancillary.js";
-import {clear, closestAttr, retainAttr} from "/libs/wip.js";
+import {clear} from "/libs/wip.js";
 import {el, seated, seats, seat, ui, scored, outcome, diff, which} from "/libs/table.js";
 import {reg} from "/libs/cmd.js";
 
@@ -16,6 +16,14 @@ async function svg(what){
     return resp.text();
   });
 }
+
+function closestAttr(el, attr){
+  return _.maybe(el, _.closest(_, `[${attr}]`), dom.attr(_, attr));
+}
+
+const retainAttr = _.partly(function(el, key, value){
+  value == null ? dom.removeAttr(el, key) : dom.attr(el, key, value);
+});
 
 const _temple = [await svg(1), await svg(2), await svg(3), await svg(4)],
       _pilli = await svg("pilli"),

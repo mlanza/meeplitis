@@ -1,6 +1,7 @@
 import _ from "../atomic_/core.js";
 import $ from "../atomic_/shell.js";
 import * as r from "./core.js";
+import {wip, clear} from "../wip.js";
 import supabase from "../supabase.js";
 import { session } from "../session.js";
 
@@ -222,9 +223,15 @@ export function reel(tableId, seat){
     return _.maybe(at, at => undoThru(undoables, at));
   }, $timeline);
 
-  const $state = $.pipe($.map(function(table, seated, seats, up, undoable, make, ready, act, timeline){
-    return {...timeline, table, seated, seats, up, undoable, make, ready, act};
-  }, $table, $seated, $seats, $up, $undoable, $.pipe($make, _.compact()), $ready, $act, $timeline), _.filter(_.and(_.get(_, "make"), _.get(_, "table"))));
+  //TODO remove backward compatibility
+  const $wip = wip($.map(function(timeline){
+    const at = timeline?.cursor?.pos;
+    return {...timeline, at};
+  }, $timeline));
+
+  const $state = $.pipe($.map(function(table, wip, seated, seats, up, undoable, make, ready, act, timeline){
+    return {...timeline, table, wip, seated, seats, up, undoable, make, ready, act};
+  }, $table, $wip, $seated, $seats, $up, $undoable, $.pipe($make, _.compact()), $ready, $act, $timeline), _.filter(_.and(_.get(_, "make"), _.get(_, "table"))));
 
   const $timer = new Timer(1000, Date.now);
 
@@ -285,10 +292,10 @@ export function reel(tableId, seat){
     }
   });
 
-  return new Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer);
+  return new Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $wip);
 }
 
-function Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer){
+function Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $wip){
   this.$timeline = $timeline;
   this.$table = $table;
   this.$make = $make;
@@ -300,6 +307,7 @@ function Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $und
   this.$undoable = $undoable;
   this.$state = $state;
   this.$timer = $timer;
+  this.$wip = $wip;
 }
 
 function chan(self, key){

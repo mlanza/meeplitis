@@ -27,11 +27,11 @@ function diff(hist = [], max = 0, depth = 0, address = []) {
   }
 }
 
-function changes($hist, max = 0, depth = 0){
+function changes($state, max = 0, depth = 0){
   return $.map(function(hist){
     const changed = diff(hist, max, depth);
     return {type: "changed", details: {hist, changed}}; //transactions mean multiple things can change at once
-  }, $.pipe($hist, _.compact()));
+  }, $.pipe($.hist($state), _.compact()));
 }
 
 /**
@@ -323,8 +323,7 @@ export function reel(tableId, seat){
     }
   });
 
-  const $hist = $.hist($state);
-  const $changes = changes($hist);
+  const $changes = changes($state);
   //$.sub($changes, _.compact(), $.see("changes"));
 
   return new Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $wip);

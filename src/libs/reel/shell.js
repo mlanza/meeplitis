@@ -27,9 +27,9 @@ function diff(hist = [], max = 0, depth = 0, address = []) {
   }
 }
 
-function changes($hist){
+function changes($hist, max = 0, depth = 0){
   return $.map(function(hist){
-    const changed = diff(hist);
+    const changed = diff(hist, max, depth);
     return {type: "changed", details: {hist, changed}}; //transactions mean multiple things can change at once
   }, $.pipe($hist, _.compact()));
 }

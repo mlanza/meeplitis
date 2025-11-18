@@ -333,12 +333,11 @@ export function reel(tableId, seat){
   });
 
   const $changes = changes($state);
-  //$.sub($changes, _.compact(), $.see("changes"));
 
-  return new Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $wip);
+  return new Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $wip, $changes);
 }
 
-function Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $wip){
+function Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $wip, $changes, channels = {}){
   this.$timeline = $timeline;
   this.$table = $table;
   this.$make = $make;
@@ -351,10 +350,15 @@ function Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $und
   this.$state = $state;
   this.$timer = $timer;
   this.$wip = $wip;
+  this.$changes = $changes;
+  this.channels = channels;
 }
 
 function chan(self, key){
-  return self[`$${key}`];
+  if (!_.get(self.channels, key)){
+    self.channels[key] = $.map(_.get(_, key), self.$state);
+  }
+  return _.get(self.channels, key);
 }
 
 function on(self, key, callback){

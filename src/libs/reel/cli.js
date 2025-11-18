@@ -57,6 +57,10 @@ await new Command()
 
     reg({ $reel });
     const stop = $.sub($reel, log);   // assume this returns a disposer
+    //$.on($reel, "make", $.see("make"));
+    //$.on($reel, "perspective", $.see("perspective"));
+    //$.sub($changes, _.compact(), $.see("changes"));
+
     if (opts.tui) {
       await tuiMode($reel);
     }

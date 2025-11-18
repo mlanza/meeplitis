@@ -328,12 +328,12 @@ export function reel(tableId, seat){
     }
   });
 
-  const $changes = changes($state);
+  const $changed = changes($state);
 
-  return new Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $wip, $changes);
+  return new Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $wip, $changed);
 }
 
-function Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $wip, $changes, channels = {}){
+function Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $wip, $changed, channels = {}){
   this.$timeline = $timeline;
   this.$table = $table;
   this.$make = $make;
@@ -346,19 +346,28 @@ function Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $und
   this.$state = $state;
   this.$timer = $timer;
   this.$wip = $wip;
-  this.$changes = $changes;
+  this.$changed = $changed;
   this.channels = channels;
 }
 
 function chan(self, key){
-  if (_.startsWith(key, "changed:")) {
-    //TODO
-  } else {
-    if (!_.get(self.channels, key)){
+  if (!_.get(self.channels, key)){
+    if (_.startsWith(key, "changed:")) {
+      const prop = _.chain(key, _.split(_, ":"), _.second);
+      self.channels[key] = $.pipe(self.$changed, _.comp(_.filter(function({details}){
+        const {changed} = details;
+        return _.includes(changed, prop);
+      }), _.map(function({type, details}){
+        const root = details.hist;
+        const [curr, prior] = root || [];
+        const hist = [_.get(curr, prop), _.get(prior, prop)];
+        return {type: key, details: {prop, hist, root}};
+      })));
+    } else {
       self.channels[key] = $.map(_.get(_, key), self.$state);
     }
-    return _.get(self.channels, key);
   }
+  return _.get(self.channels, key);
 }
 
 function on(self, key, callback){

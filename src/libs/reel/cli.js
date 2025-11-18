@@ -56,9 +56,11 @@ await new Command()
     const $reel = reel(tableId, seat);
 
     reg({ $reel });
-    const stop = $.sub($reel, log);   // assume this returns a disposer
+    //const stop = $.sub($reel, log);   // assume this returns a disposer
     //$.on($reel, "make", $.see("make"));
     //$.on($reel, "perspective", $.see("perspective"));
+    $.on($reel, "changed:perspective", $.see("changed:perspective"));
+
     //$.sub($changes, _.compact(), $.see("changes"));
   //const $table = $.pipe($.map(keeping(["up","release","game_id","last_touch_id","remarks","scored","status"]), $tbl), _.compact());
 
@@ -66,7 +68,7 @@ await new Command()
       await tuiMode($reel);
     }
     setTimeout(function(){
-      stop();
+      //stop();
       Deno.exit();
     }, 5000);
   })

@@ -50,16 +50,19 @@ await new Command()
   .arguments("<table:string>")
   .option("--commands <commands:string>", "Commands string")
   .option("--seat <seat:number>", "Seat number (integer)")
-  .action(async function (opts, tableId){
+  .option("--tui", "Enable TUI mode") // <-- optional flag
+  .action(async function (opts, tableId) {
     const seat = opts.seat;
-
     const $reel = reel(tableId, seat);
 
-    reg({$reel});
-
-    $.sub($reel, log);
-
-    await tuiMode($reel);
-
+    reg({ $reel });
+    const stop = $.sub($reel, log);   // assume this returns a disposer
+    if (opts.tui) {
+      await tuiMode($reel);
+    }
+    setTimeout(function(){
+      stop();
+      Deno.exit();
+    }, 5000);
   })
   .parse(Deno.args);

@@ -259,9 +259,19 @@ export function reel(tableId, seat){
     return {...timeline, at};
   }, $timeline));
 
+  //primary signal for synching perspective with cursor
+  const $tl = $.pipe($.map(function(table, timeline, seated, make){
+    return {table, timeline, seated, make};
+  }, $table, $timeline, $seated, $make), _.filter(_.and(_.get(_, "table"), _.get(_, "seated"), _.get(_, "make"))));
+
+  function synched(state){ //ensures cursor-perspective parity in main signal
+    const {cursor, perspective} = state || {};
+    return cursor?.at == perspective?.event?.id;
+  }
+
   const $state = $.pipe($.map(function(table, wip, seated, seats, up, undoable, make, ready, act, timeline){
     return {...timeline, table, wip, seated, seats, up, undoable, make, ready, act};
-  }, $table, $wip, $seated, $seats, $up, $undoable, $.pipe($make, _.compact()), $ready, $act, $timeline), _.filter(_.and(_.get(_, "make"), _.get(_, "table"))));
+  }, $table, $wip, $seated, $seats, $up, $undoable, $make, $ready, $act, $timeline), _.filter(synched));
 
   const $timer = new Timer(1000, Date.now);
 
@@ -301,13 +311,13 @@ export function reel(tableId, seat){
   });
 
   //perspective caching; includes anticipated next step
-  $.sub($state, function(state){
-    const {table, make, seat, seated, cursor, touches, perspectives} = state;
+  $.sub($tl, function({table, timeline, make, seated}){
+    const {seat, cursor, touches, perspectives} = timeline;
     const {pos, at, direction, max} = cursor;
     const nextAt = _.maybe(pos + direction, _.clamp(_, 0, max), _.get(touches, _));
     const player = seat;
     const ats = _.chain([at, nextAt], _.compact, _.remove(_.get(perspectives, _), _), _.toArray);
-    if (table && _.seq(ats) && make && _.seq(seated) && seat != null) {
+    if (_.seq(ats) && seat != null) {
       const seatId = _.getIn(seated, [seat, "seat_id"]);
       $.each(function(at){
         _.fmap(getPerspective(table.id, at, seat, seatId, session?.accessToken), function(perspective){

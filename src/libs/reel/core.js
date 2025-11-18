@@ -14,7 +14,8 @@ export function init(id, seat) {
       max: null,
       direction: FORWARD
     },
-    perspectives: {} // cache
+    perspectives: {}, // cache
+    perspective: null
   };
 }
 
@@ -25,7 +26,8 @@ export function position(n) {
     const direction = pos === 0 || pos > state.cursor.pos ? FORWARD : BACKWARD;
     const at = _.nth(state.touches, pos);
     const cursor = _.assoc(state.cursor, "pos", pos, "max", max, "at", at, "direction", direction);
-    return _.assoc(state, "cursor", cursor);
+    const perspective = _.get(state.perspectives, at);
+    return _.assoc(state, "cursor", cursor, "perspective", perspective);
   }
 }
 
@@ -55,7 +57,10 @@ export function addTouches({touches, undoables, last_acting_seat}){
 }
 
 export function addPerspective(at, perspective){
-  return _.assocIn(_, ["perspectives", at], perspective);
+  return function(state) {
+    const s = _.assocIn(state, ["perspectives", at], perspective);
+    return s.cursor.at === at ? _.assoc(s, "perspective", perspective) : s;
+  }
 }
 
 export function forward(state) {

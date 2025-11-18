@@ -1,5 +1,4 @@
-#!/usr/bin/env -S deno run --allow-env --allow-read --allow-write --allow-net
-
+#!/usr/bin/env -S deno run --no-prompt --allow-env --allow-read --allow-write --allow-net
 import _ from "../atomic_/core.js";
 import $ from "../atomic_/shell.js";
 import { reel } from "./shell.js";
@@ -23,6 +22,8 @@ function elideWith(keys, f){
 }
 
 const abbr = _.pipe(
+  elideWith(["perspective"], elideWith(["game"], (value) => `<hidden>`)),
+  elideWith(["perspective"], elideWith(["state"], (value) => `<${_.count(value)} entries>`)),
   elideWith(["touches","perspectives","seated","table"], (value) => `<${_.count(value)} entries>`));
 
 const log = _.comp(logs, abbr);

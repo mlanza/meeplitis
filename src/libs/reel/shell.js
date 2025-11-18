@@ -357,11 +357,12 @@ function chan(self, key){
       self.channels[key] = $.pipe(self.$changed, _.comp(_.filter(function({details}){
         const {changed} = details;
         return _.includes(changed, prop);
-      }), _.map(function({type, details}){
+      }), _.map(function({details}){
+        const type = key;
         const root = details.hist;
         const [curr, prior] = root || [];
         const hist = [_.get(curr, prop), _.get(prior, prop)];
-        return {type: key, details: {prop, hist, root}};
+        return {type, details: {prop, hist, root}};
       })));
     } else {
       self.channels[key] = $.map(_.get(_, key), self.$state);

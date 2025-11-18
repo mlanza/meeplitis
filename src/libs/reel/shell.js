@@ -210,15 +210,10 @@ function undoThru(undoables, touch){
   }, undoables);
 }
 
-
-
 export function reel(tableId, seat){
-
   const $timeline = $.atom(r.init(tableId, seat));
 
   const $table = table(tableId);
-
-  //const $table = $.pipe($.map(keeping(["up","release","game_id","last_touch_id","remarks","scored","status"]), $tbl), _.compact());
 
   const $make = $.atom(null);
 
@@ -269,6 +264,7 @@ export function reel(tableId, seat){
     return cursor?.at == perspective?.event?.id;
   }
 
+  //main signal
   const $state = $.pipe($.map(function(table, wip, seated, seats, up, undoable, make, ready, act, timeline){
     return {...timeline, table, wip, seated, seats, up, undoable, make, ready, act};
   }, $table, $wip, $seated, $seats, $up, $undoable, $make, $ready, $act, $timeline), _.filter(synched));
@@ -310,7 +306,7 @@ export function reel(tableId, seat){
       _.pipe(r.addTouches, $.swap($timeline, _)));
   });
 
-  //perspective caching; includes anticipated next step
+  //manages perspective cache and anticipates next step
   $.sub($tl, function({table, timeline, make, seated}){
     const {seat, cursor, touches, perspectives} = timeline;
     const {pos, at, direction, max} = cursor;
@@ -355,10 +351,14 @@ function Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $und
 }
 
 function chan(self, key){
-  if (!_.get(self.channels, key)){
-    self.channels[key] = $.map(_.get(_, key), self.$state);
+  if (_.startsWith(key, "changed:")) {
+    //TODO
+  } else {
+    if (!_.get(self.channels, key)){
+      self.channels[key] = $.map(_.get(_, key), self.$state);
+    }
+    return _.get(self.channels, key);
   }
-  return _.get(self.channels, key);
 }
 
 function on(self, key, callback){

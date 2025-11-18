@@ -60,6 +60,7 @@ await new Command()
     //$.on($reel, "make", $.see("make"));
     //$.on($reel, "perspective", $.see("perspective"));
     //$.sub($changes, _.compact(), $.see("changes"));
+  //const $table = $.pipe($.map(keeping(["up","release","game_id","last_touch_id","remarks","scored","status"]), $tbl), _.compact());
 
     if (opts.tui) {
       await tuiMode($reel);

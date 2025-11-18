@@ -362,7 +362,7 @@ function chan(self, key){
         const root = details.hist;
         const [curr, prior] = root || [];
         const hist = [_.get(curr, prop), _.get(prior, prop)];
-        return {type, details: {prop, hist, root}};
+        return {type, details: {hist, root}};
       })));
     } else {
       self.channels[key] = $.map(_.get(_, key), self.$state);

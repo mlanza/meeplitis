@@ -228,12 +228,11 @@ export function reel(tableId, seat){
     if (!table || !ready) {
       return false;
     }
-    const {seat, seated, cursor, touches, perspectives} = timeline;
+    const {seat, cursor, perspective} = timeline;
     const {at, pos, max} = cursor;
     const {status} = table;
     const started = status === "started";
     const present = pos !== null && pos === max;
-    const perspective = _.maybe(at, _.get(perspectives, _));
     if (!perspective) {
       return false;
     }

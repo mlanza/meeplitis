@@ -37,11 +37,13 @@ export function resize(max){
     const direction = cursor.max == null || cursor.max < max ? BACKWARD : FORWARD;
     const pos = _.clamp(cursor.pos == null ? max : cursor.pos, 0, max);
     const at = _.get(touches, pos);
+    const perspective = _.get(state.perspectives, at);
     return _.chain(state,
       _.assocIn(_, ["cursor", "direction"], direction),
       _.assocIn(_, ["cursor", "at"], at),
       _.assocIn(_, ["cursor", "max"], max),
-      _.assocIn(_, ["cursor", "pos"], pos));
+      _.assocIn(_, ["cursor", "pos"], pos),
+      _.assoc(_, "perspective", perspective));
   }
 }
 

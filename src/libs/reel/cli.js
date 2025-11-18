@@ -17,7 +17,7 @@ function elideWith(keys, f){
   return function(state){
     return _.reducekv(function(memo, key, value){
       return _.assoc(memo, key, elide(key) ? f(value, key) : value);
-    }, {}, state);
+    }, null, state);
   }
 }
 

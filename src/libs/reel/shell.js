@@ -7,9 +7,20 @@ import { session } from "../session.js";
 
 function diff(hist = [], max = 0, depth = 0, address = []) {
   const [curr, prior] = hist || [];
+
+  // Check if either value is null - if so, report only this path without drilling down
+  const currIsNullish = curr == null;
+  const priorIsNullish = prior == null;
+
+  // If transitioning from/to null, report this path only (don't drill into sub-paths)
+  if (currIsNullish || priorIsNullish) {
+    return _.eq(curr, prior) ? [] : [address];
+  }
+
+  // If both are objects/arrays and we haven't exceeded max depth, drill down
   if (depth <= max && (_.isObject(curr) || _.isObject(prior) || _.isArray(curr) || _.isArray(prior))) {
-    const cks = _.maybe(curr, _.keys),
-          pks = _.maybe(prior, _.keys);
+    const cks = _.maybe(curr, _.keys, _.toArray),
+          pks = _.maybe(prior, _.keys, _.toArray);
     return _.chain(
       _.union(cks, pks),
       _.map(function(key){
@@ -23,14 +34,14 @@ function diff(hist = [], max = 0, depth = 0, address = []) {
       }, _),
       _.toArray);
   } else {
-    return _.eq(curr, prior) ? [] : address;
+    return _.eq(curr, prior) ? [] : [address];
   }
 }
 
-function changes($state, max = 0, depth = 0){
+function changes($state, max = 10, depth = 0){
   return $.map(function(hist){
     const changed = diff(hist, max, depth);
-    return {type: "changed", details: {hist, changed}}; //transactions mean multiple things can change at once
+    return {type: "changed", details: {hist, changed}};
   }, $.pipe($.hist($state), _.compact()));
 }
 
@@ -353,15 +364,17 @@ function Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $und
 function chan(self, key){
   if (!_.get(self.channels, key)){
     if (_.startsWith(key, "changed:")) {
-      const prop = _.chain(key, _.split(_, ":"), _.second);
+      const path = _.chain(key, _.split(_, ":"), _.second, _.split(_, "."), _.toArray);
       self.channels[key] = $.pipe(self.$changed, _.comp(_.filter(function({details}){
         const {changed} = details;
-        return _.includes(changed, prop);
+        return _.some(function(addr){
+          return _.eq(addr, path);
+        }, changed);
       }), _.map(function({details}){
         const type = key;
         const root = details.hist;
         const [curr, prior] = root || [];
-        const hist = [_.get(curr, prop), _.get(prior, prop)];
+        const hist = [_.getIn(curr, path), _.getIn(prior, path)];
         return {type, details: {hist, root}};
       })));
     } else {

@@ -26,6 +26,12 @@ const abbr = _.pipe(
   elideWith(["perspective"], elideWith(["state"], (value) => `<${_.count(value)} entries>`)),
   elideWith(["touches","perspectives","seated","table"], (value) => `<${_.count(value)} entries>`));
 
+const abbrEvent = _.pipe(
+  elideWith(["details"], elideWith(["root"], (value) => `<hidden>`)));
+
+const abbrChanged = _.pipe(
+  elideWith(["details"], elideWith(["hist"], (value) => `<hidden>`)));
+
 const log = _.comp(logs, abbr);
 
 async function tuiMode($reel) {
@@ -59,10 +65,13 @@ await new Command()
     //const stop = $.sub($reel, log);   // assume this returns a disposer
     //$.on($reel, "make", $.see("make"));
     //$.on($reel, "perspective", $.see("perspective"));
-    $.on($reel, "changed:perspective", $.see("changed:perspective"));
+    $.on($reel, "changed:perspective.state", _.pipe(abbrEvent, $.see("changed:perspective.state")));
+    $.on($reel, "changed:perspective", _.pipe(abbrEvent, $.see("changed:perspective")));
+    $.on($reel, "changed:cursor.pos", _.pipe(abbrEvent, $.see("changed:cursor.pos")));
+    $.on($reel, "changed:up", _.pipe(abbrEvent, $.see("changed:up")));
 
-    //$.sub($changes, _.compact(), $.see("changes"));
-  //const $table = $.pipe($.map(keeping(["up","release","game_id","last_touch_id","remarks","scored","status"]), $tbl), _.compact());
+    $.sub($reel.$changed, _.compact(), _.pipe(abbrChanged, $.see("changed")));
+    //const $table = $.pipe($.map(keeping(["up","release","game_id","last_touch_id","remarks","scored","status"]), $tbl), _.compact());
 
     if (opts.tui) {
       await tuiMode($reel);

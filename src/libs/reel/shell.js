@@ -34,7 +34,7 @@ function diff(hist = [], max = 0, depth = 0, address = []) {
       }, _),
       _.toArray);
     // If there are child changes, include this address as a parent
-    return _.seq(childChanges) ? _.cons(address, childChanges) : [];
+    return _.seq(childChanges) ? _.toArray(_.cons(address, childChanges)) : [];
   } else {
     return _.eq(curr, prior) ? [] : [address];
   }

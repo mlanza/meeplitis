@@ -3,6 +3,7 @@ import $ from "/libs/atomic_/shell.js";
 import dom from "/libs/atomic_/dom.js";
 import * as c from "./core.js";
 import * as g from "/libs/game.js";
+import { $reel } from "/libs/reel/gui.js";
 import {moment} from "/libs/story.js";
 import {describe} from "./ancillary.js";
 import {el, seated, seats, seat, ui, scored, outcome, diff, which} from "/libs/table.js";
@@ -323,6 +324,14 @@ const {$ready, $error, $story, $hist, $snapshot, $wip} =
 const $both = which($.latest([$hist, $wip]));
 
 reg({ $both, g });
+
+$.on($reel, "changed", function({details}){
+  const {hist, changed} = details;
+  const [curr, prior] = hist || [];
+  const ctx = "main";
+
+  console.log({ctx, changed, curr, prior});
+});
 
 $.sub($both, function ([[curr, prior, motion, game], wip, which]) {
   const { state, up } = curr;

@@ -18,7 +18,7 @@ function diff(hist = [], max = 0, depth = 0, address = []) {
   }
 
   // If both are objects/arrays and we haven't exceeded max depth, drill down
-  if (depth <= max && (_.isObject(curr) || _.isObject(prior) || _.isArray(curr) || _.isArray(prior))) {
+  if (depth < max && (_.isObject(curr) || _.isObject(prior) || _.isArray(curr) || _.isArray(prior))) {
     const cks = _.maybe(curr, _.keys, _.toArray),
           pks = _.maybe(prior, _.keys, _.toArray);
     const childChanges = _.chain(
@@ -40,7 +40,7 @@ function diff(hist = [], max = 0, depth = 0, address = []) {
   }
 }
 
-function changes($state, max = 10, depth = 0){
+function changes($state, max = 3, depth = 0){
   return $.map(function(hist){
     const changed = diff(hist, max, depth);
     return {type: "changed", details: {hist, changed}};

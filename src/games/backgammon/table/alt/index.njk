@@ -1,0 +1,48 @@
+---
+title: Backgammon
+path: /games/backgammon/
+layout: layouts/table.njk
+---
+<div id="board" class="board"></div>
+<div id="cube">1</div>
+<div id="dice">
+  <ol id="die-1">
+    <li alt="1"><img src="./images/1.svg"></li>
+    <li alt="2"><img src="./images/2.svg"></li>
+    <li alt="3"><img src="./images/3.svg"></li>
+    <li alt="4"><img src="./images/4.svg"></li>
+    <li alt="5"><img src="./images/5.svg"></li>
+    <li alt="6"><img src="./images/6.svg"></li>
+  </ol>
+  <ol id="die-2">
+    <li alt="1"><img src="./images/1.svg"></li>
+    <li alt="2"><img src="./images/2.svg"></li>
+    <li alt="3"><img src="./images/3.svg"></li>
+    <li alt="4"><img src="./images/4.svg"></li>
+    <li alt="5"><img src="./images/5.svg"></li>
+    <li alt="6"><img src="./images/6.svg"></li>
+  </ol>
+  <ol id="die-3">
+    <li alt="1"><img src="./images/1.svg"></li>
+    <li alt="2"><img src="./images/2.svg"></li>
+    <li alt="3"><img src="./images/3.svg"></li>
+    <li alt="4"><img src="./images/4.svg"></li>
+    <li alt="5"><img src="./images/5.svg"></li>
+    <li alt="6"><img src="./images/6.svg"></li>
+  </ol>
+  <ol id="die-4">
+    <li alt="1"><img src="./images/1.svg"></li>
+    <li alt="2"><img src="./images/2.svg"></li>
+    <li alt="3"><img src="./images/3.svg"></li>
+    <li alt="4"><img src="./images/4.svg"></li>
+    <li alt="5"><img src="./images/5.svg"></li>
+    <li alt="6"><img src="./images/6.svg"></li>
+  </ol>
+</div>
+<div class="moves">
+  <button data-type="roll">Roll</button>
+  <button data-type="propose-double">Propose Double</button>
+  <button data-type="accept" data-answer="accept">Accept</button>
+  <button data-type="concede" data-answer="conceded">Concede</button>
+  <button data-type="commit">I'm done</button>
+</div>

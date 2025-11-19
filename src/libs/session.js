@@ -53,7 +53,7 @@ export function getfn(name, params = null){
 reg({$online, session});
 
 if (globalThis.document) {
-  const dom = await import("./atomic_/dom.js");
+  const dom = (await import("./atomic_/dom.js")).default;
   const img = dom.tag("img");
   const you = dom.sel1("#you");
 

@@ -21,7 +21,7 @@ function diff(hist = [], max = 0, depth = 0, address = []) {
   if (depth <= max && (_.isObject(curr) || _.isObject(prior) || _.isArray(curr) || _.isArray(prior))) {
     const cks = _.maybe(curr, _.keys, _.toArray),
           pks = _.maybe(prior, _.keys, _.toArray);
-    return _.chain(
+    const childChanges = _.chain(
       _.union(cks, pks),
       _.map(function(key){
         return {address: _.conj(address, key), hist: [_.get(curr, key), _.get(prior, key)]};
@@ -33,6 +33,8 @@ function diff(hist = [], max = 0, depth = 0, address = []) {
         return diff(hist, max, depth + 1, address);
       }, _),
       _.toArray);
+    // If there are child changes, include this address as a parent
+    return _.seq(childChanges) ? _.cons(address, childChanges) : [];
   } else {
     return _.eq(curr, prior) ? [] : [address];
   }

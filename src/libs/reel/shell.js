@@ -364,14 +364,15 @@ function Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $und
 }
 
 function chan(self, key){
+  if (key === "changed") {
+    return self.$changed;
+  }
   if (!_.get(self.channels, key)){
     if (_.startsWith(key, "changed:")) {
       const path = _.chain(key, _.split(_, ":"), _.second, _.split(_, "."), _.toArray);
       self.channels[key] = $.pipe(self.$changed, _.comp(_.filter(function({details}){
         const {changed} = details;
-        return _.some(function(addr){
-          return _.eq(addr, path);
-        }, changed);
+        return _.some(_.eq(_, path), changed);
       }), _.map(function({details}){
         const type = key;
         const root = details.hist;

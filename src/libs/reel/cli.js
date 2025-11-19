@@ -69,8 +69,7 @@ await new Command()
     $.on($reel, "changed:perspective", _.pipe(abbrEvent, $.see("changed:perspective")));
     $.on($reel, "changed:cursor.pos", _.pipe(abbrEvent, $.see("changed:cursor.pos")));
     $.on($reel, "changed:up", _.pipe(abbrEvent, $.see("changed:up")));
-
-    $.sub($reel.$changed, _.compact(), _.pipe(abbrChanged, $.see("changed")));
+    $.on($reel, "changed", _.pipe(abbrChanged, $.see("changed")));
     //const $table = $.pipe($.map(keeping(["up","release","game_id","last_touch_id","remarks","scored","status"]), $tbl), _.compact());
 
     if (opts.tui) {

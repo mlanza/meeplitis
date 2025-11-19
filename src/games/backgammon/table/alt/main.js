@@ -325,12 +325,9 @@ const $both = which($.latest([$hist, $wip]));
 
 reg({ $both, g });
 
-$.on($reel, "changed", function({details}){
-  const {hist, changed} = details;
-  const [curr, prior] = hist || [];
+$.on($reel, "changed", function({ details: { changed, hist: [curr, prior] = [] } = {} }){
   const ctx = "main";
-
-  console.log({ctx, changed, curr, prior});
+  console.log({ ctx, changed, curr, prior });
 });
 
 $.sub($both, function ([[curr, prior, motion, game], wip, which]) {

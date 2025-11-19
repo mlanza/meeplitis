@@ -11,10 +11,7 @@ const seat = _.maybe(params.get("seat"), parseInt);
 
 export const $reel = reel(tableId, seat);
 
-$.on($reel, "changed", function({details}){
-  const {hist, changed} = details;
-  const [curr, prior] = hist || [];
+$.on($reel, "changed", function({ details: { changed, hist: [curr, prior] = [] } = {} }){
   const ctx = "gui";
-
-  console.log({ctx, curr, prior, changed});
+  console.log({ ctx, changed, curr, prior });
 });

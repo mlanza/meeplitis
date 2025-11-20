@@ -7,6 +7,7 @@ import supabase from "../supabase.js";
 import { session } from "../session.js";
 import { keypress } from "https://deno.land/x/cliffy@v0.25.4/keypress/mod.ts";
 import { Command } from "https://deno.land/x/cliffy@v1.0.0-rc.4/command/mod.ts";
+import { readLines } from "https://deno.land/std@0.224.0/io/mod.ts";
 
 function logs(obj){
   $.log(Deno.inspect(obj, { colors: true, compact: true, depth: Infinity, iterableLimit: Infinity }));
@@ -34,10 +35,12 @@ const abbrChanged = _.pipe(
 
 const log = _.comp(logs, abbr);
 
-async function tuiMode(run) {
+async function tui(run) {
   for await (const event of keypress()) {
     if (event.key === "q" || event.key === "escape") {
-      Deno.exit();
+      //Deno.exit();
+      return;
+      //await after(run);
     } else if (event.key === "right") {
       run({type: event.shiftKey ? "present" : "forward"});
     } else if (event.key === "left") {
@@ -55,7 +58,7 @@ async function requestCommand(){
   await Deno.stdout.write(encoder.encode("> "));
 }
 
-const command = _.partly(function(run, text){
+const command = _.partly(async function(run, text){
   try {
     const [, type, dtls] = text.match(/^(\S+)(?:\s+(.*))?$/) || [];
     const details = JSON.parse(dtls || "null");
@@ -64,6 +67,11 @@ const command = _.partly(function(run, text){
       case "exit":
         Deno.exit();
         break;
+
+      case "tui":
+        await tui(run);
+        break;
+
       default:
         run({type, details});
         break;
@@ -73,7 +81,7 @@ const command = _.partly(function(run, text){
   }
 });
 
-async function replMode(run){
+async function repl(run){
   await requestCommand();
 
   for await (const line of readLines(Deno.stdin)) {
@@ -135,12 +143,12 @@ await new Command()
       $.each(command(run, _), opts.command);
     }, 5000);
 
-    if (opts.repl) {
-      await replMode(run);
+    if (opts.tui) {
+      await tui(run);
     }
 
-    if (opts.tui) {
-      await tuiMode(run);
+    if (opts.repl) {
+      await repl(run);
     }
 
     setTimeout(function(){

@@ -38,9 +38,7 @@ const log = _.comp(logs, abbr);
 async function tui(run) {
   for await (const event of keypress()) {
     if (event.key === "q" || event.key === "escape") {
-      //Deno.exit();
       return;
-      //await after(run);
     } else if (event.key === "right") {
       run({type: event.shiftKey ? "present" : "forward"});
     } else if (event.key === "left") {
@@ -118,8 +116,6 @@ await new Command()
     const $reel = reel(tableId, seat);
     const run = $.dispatch($reel, _);
 
-    reg({ $reel });
-
     let stop = _.noop();
 
     if (opts.watch) {
@@ -137,7 +133,6 @@ await new Command()
         $.on($reel, `changed:${path}`, _.pipe(abbrEvent, $.see(`changed:${path}`)));
       }
     }, opts.changed);
-    //const $table = $.pipe($.map(keeping(["up","release","game_id","last_touch_id","remarks","scored","status"]), $tbl), _.compact());
 
     setTimeout(function(){
       $.each(command(run, _), opts.command);

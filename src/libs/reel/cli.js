@@ -34,19 +34,51 @@ const abbrChanged = _.pipe(
 
 const log = _.comp(logs, abbr);
 
-async function tuiMode($reel) {
+async function tuiMode(run) {
   for await (const event of keypress()) {
     if (event.key === "q" || event.key === "escape") {
       Deno.exit();
     } else if (event.key === "right") {
-      $.dispatch($reel, {type: event.shiftKey ? "present" : "forward"});
+      run({type: event.shiftKey ? "present" : "forward"});
     } else if (event.key === "left") {
-      $.dispatch($reel, {type: event.shiftKey ? "inception" : "backward"});
+      run({type: event.shiftKey ? "inception" : "backward"});
     } else if (event.key === "f") {
-      $.dispatch($reel, {type: "ffwd"});
+      run({type: "ffwd"});
     } else if (event.key === "l") {
-      $.dispatch($reel, {type: "last-move"});
+      run({type: "last-move"});
     }
+  }
+}
+
+async function requestCommand(){
+  const encoder = new TextEncoder();
+  await Deno.stdout.write(encoder.encode("> "));
+}
+
+const command = _.partly(function(run, text){
+  try {
+    const [, type, dtls] = text.match(/^(\S+)(?:\s+(.*))?$/) || [];
+    const details = JSON.parse(dtls || "null");
+    console.log("dispatching", {type, details});
+    switch (type) {
+      case "exit":
+        Deno.exit();
+        break;
+      default:
+        run({type, details});
+        break;
+    }
+  } catch (ex) {
+    $.error(ex.message);
+  }
+});
+
+async function replMode(run){
+  await requestCommand();
+
+  for await (const line of readLines(Deno.stdin)) {
+    command(run, line);
+    await requestCommand();
   }
 }
 
@@ -57,7 +89,8 @@ await new Command()
   .option("-c, --command <command:string>", "Command", {collect: true})
   .option("--seat <seat:number>", "Seat number (integer)")
   .option("--watch", "Enable watch mode")
-  .option("--tui", "Enable TUI mode")
+  .option("--repl", "Enter REPL")
+  .option("--tui", "Enter TUI")
   .option("--chan <name:string>", "Monitor channel", {collect: true})
   .option("--changed <path:string>", "Monitor changed event", {collect: true})
   .example(
@@ -75,6 +108,7 @@ await new Command()
   .action(async function (opts, tableId) {
     const seat = opts.seat;
     const $reel = reel(tableId, seat);
+    const run = $.dispatch($reel, _);
 
     reg({ $reel });
 
@@ -97,9 +131,18 @@ await new Command()
     }, opts.changed);
     //const $table = $.pipe($.map(keeping(["up","release","game_id","last_touch_id","remarks","scored","status"]), $tbl), _.compact());
 
-    if (opts.tui) {
-      await tuiMode($reel);
+    setTimeout(function(){
+      $.each(command(run, _), opts.command);
+    }, 5000);
+
+    if (opts.repl) {
+      await replMode(run);
     }
+
+    if (opts.tui) {
+      await tuiMode(run);
+    }
+
     setTimeout(function(){
       stop();
       Deno.exit();

@@ -84,12 +84,10 @@ await new Command()
       stop = $.sub($reel, log);
     }
 
-    //e.g., --chan make --chan perspective
     $.each(function(name){
       $.on($reel, name, $.see(name));
     }, opts.chan);
 
-    //e.g., --changed perspective.state --changed perspective --changed cursor.pos --changed up
     $.each(function(path){
       if (path === "*") {
         $.on($reel, "changed", _.pipe(abbrChanged, $.see("changed")));

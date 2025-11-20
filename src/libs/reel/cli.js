@@ -56,27 +56,42 @@ await new Command()
   .arguments("<table:string>")
   .option("--commands <commands:string>", "Commands string")
   .option("--seat <seat:number>", "Seat number (integer)")
-  .option("--tui", "Enable TUI mode") // <-- optional flag
+  .option("--watch", "Enable watch mode")
+  .option("--tui", "Enable TUI mode")
+  .option("--chan <name:string>", "Monitor channel", {collect: true})
+  .option("--changed <path:string>", "Monitor changed event", {collect: true})
   .action(async function (opts, tableId) {
     const seat = opts.seat;
     const $reel = reel(tableId, seat);
 
     reg({ $reel });
-    //const stop = $.sub($reel, log);   // assume this returns a disposer
-    //$.on($reel, "make", $.see("make"));
-    //$.on($reel, "perspective", $.see("perspective"));
-    $.on($reel, "changed:perspective.state", _.pipe(abbrEvent, $.see("changed:perspective.state")));
-    $.on($reel, "changed:perspective", _.pipe(abbrEvent, $.see("changed:perspective")));
-    $.on($reel, "changed:cursor.pos", _.pipe(abbrEvent, $.see("changed:cursor.pos")));
-    $.on($reel, "changed:up", _.pipe(abbrEvent, $.see("changed:up")));
-    $.on($reel, "changed", _.pipe(abbrChanged, $.see("changed")));
+
+    let stop = _.noop();
+
+    if (opts.watch) {
+      stop = $.sub($reel, log);
+    }
+
+    //e.g., --chan make --chan perspective
+    $.each(function(name){
+      $.on($reel, name, $.see(name));
+    }, opts.chan);
+
+    //e.g., --changed perspective.state --changed perspective --changed cursor.pos --changed up
+    $.each(function(path){
+      if (path === "*") {
+        $.on($reel, "changed", _.pipe(abbrChanged, $.see("changed")));
+      } else {
+        $.on($reel, `changed:${path}`, _.pipe(abbrEvent, $.see(`changed:${path}`)));
+      }
+    }, opts.changed);
     //const $table = $.pipe($.map(keeping(["up","release","game_id","last_touch_id","remarks","scored","status"]), $tbl), _.compact());
 
     if (opts.tui) {
       await tuiMode($reel);
     }
     setTimeout(function(){
-      //stop();
+      stop();
       Deno.exit();
     }, 5000);
   })

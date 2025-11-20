@@ -60,6 +60,18 @@ await new Command()
   .option("--tui", "Enable TUI mode")
   .option("--chan <name:string>", "Monitor channel", {collect: true})
   .option("--changed <path:string>", "Monitor changed event", {collect: true})
+  .example(
+    "Monitor multiple channels",
+    "reel <table> --seat <seat> --chan make --chan perspective"
+  )
+  .example(
+    "Watch specific change events",
+    "reel <table> --seat <seat> --changed perspective.state --changed perspective --changed cursor.pos --changed up"
+  )
+  .example(
+    "Watch unqualified changes and use TUI",
+    `reel <table> --seat <seat> --changed "*" --tui`
+  )
   .action(async function (opts, tableId) {
     const seat = opts.seat;
     const $reel = reel(tableId, seat);

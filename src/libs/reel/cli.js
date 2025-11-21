@@ -88,7 +88,7 @@ async function repl(run){
   }
 }
 
-await new Command()
+new Command()
   .name("reel")
   .description("Navigate and append to board game timeline")
   .arguments("<table:string>")
@@ -115,12 +115,8 @@ await new Command()
     const seat = opts.seat;
     const $reel = reel(tableId, seat);
     const run = $.dispatch($reel, _);
-
-    let stop = _.noop();
-
-    if (opts.watch) {
-      stop = $.sub($reel, log);
-    }
+    const stop = opts.watch ? $.sub($reel, log) : _.noop;
+    const exit = _.does(stop, Deno.exit);
 
     $.each(function(name){
       $.on($reel, name, $.see(name));
@@ -146,9 +142,6 @@ await new Command()
       await repl(run);
     }
 
-    setTimeout(function(){
-      stop();
-      Deno.exit();
-    }, 5000);
+    setTimeout(exit, 5000);
   })
   .parse(Deno.args);

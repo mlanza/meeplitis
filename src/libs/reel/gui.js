@@ -10,9 +10,11 @@ const tableId = params.get('id');
 const seat = _.maybe(params.get("seat"), parseInt);
 
 export const $reel = reel(tableId, seat);
-const $wip = $.chan($reel, "wip");
+export const $work = $.chan($reel, "wip");
 const $error = $.chan($reel, "error");
 const run = $.dispatch($reel, _);
+
+reg({ $reel, $work });
 
 $.on($reel, "changed", function({ details: { changed, hist: [curr, prior] = [] } = {} }){
   const ctx = "gui";

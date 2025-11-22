@@ -3,7 +3,7 @@ import $ from "/libs/atomic_/shell.js";
 import dom from "/libs/atomic_/dom.js";
 import * as c from "./core.js";
 import * as g from "/libs/game.js";
-import { $reel } from "/libs/reel/gui.js";
+import { $reel, $work } from "/libs/reel/gui.js";
 import {moment} from "/libs/story.js";
 import {describe} from "./ancillary.js";
 import {el, seated, seats, seat, ui, scored, outcome, diff, which} from "/libs/table.js";
@@ -321,11 +321,9 @@ function getMove({from, to}, seat) {
 const {$ready, $error, $story, $hist, $snapshot, $wip} =
   ui(c.make, describe, desc, template);
 
-const $work = $.chan($reel, "wip");
-
 const $both = which($.latest([$hist, $wip]));
 
-reg({ $both, $work, g });
+reg({ $both, g });
 
 $.on($reel, "changed", function({ details: { changed, hist: [curr, prior] = [] } = {} }){
   const ctx = "main";

@@ -109,13 +109,9 @@ new Command()
   .option("--blind", "Don't observe updates.")
   .option("--chan <name:string>", "Observe a channel.", { collect: true })
   .option("--changed <path:string>", "Observe a changed event.", { collect: true })
-  .option("--at <event:string>", "Naviate to designated moment.")
+  .option("--at <event:string>", "Jump to a moment in time.")
   .option("-c, --command <command:string>", "Issue a command.", { collect: true })
   .option("-i, --interactive", "Navigate via keypress.")
-  .example(
-    "Jump to a moment in time",
-    "reel <table> --seat <seat> --at <event>"
-  )
   .example(
     "Observe multiple channels",
     "reel <table> --seat <seat> --chan table --chan perspective"

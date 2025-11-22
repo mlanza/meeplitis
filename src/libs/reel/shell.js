@@ -414,6 +414,10 @@ function dispatch(self, command){
       $.swap(self.$timeline, r.present);
       break;
 
+    case "at":
+      $.swap(self.$timeline, r.at(details.at));
+      break;
+
     case "last-move":
       $.swap(self.$timeline, r.toLastMove);
       break;

@@ -7,6 +7,7 @@ import supabase from "../supabase.js";
 import { session } from "../session.js";
 import { keypress } from "https://deno.land/x/cliffy@v0.25.4/keypress/mod.ts";
 import { Command } from "https://deno.land/x/cliffy@v1.0.0-rc.4/command/mod.ts";
+import { Input } from "https://deno.land/x/cliffy@v1.0.0-rc.4/prompt/mod.ts";
 import { readLines } from "https://deno.land/std@0.224.0/io/mod.ts";
 
 function logs(obj){
@@ -35,10 +36,13 @@ const abbrChanged = _.pipe(
 
 const log = _.comp(logs, abbr);
 
-async function tui(run) {
+async function interactive(run) {
   for await (const event of keypress()) {
     if (event.key === "q" || event.key === "escape") {
-      return;
+      Deno.exit();
+    } else if (event.key === "0") {
+      const text = await Input.prompt("Command:");
+      command(run, text);
     } else if (event.key === "right") {
       run({type: event.shiftKey ? "present" : "forward"});
     } else if (event.key === "left") {
@@ -66,10 +70,6 @@ const command = _.partly(async function(run, text){
         Deno.exit();
         break;
 
-      case "tui":
-        await tui(run);
-        break;
-
       default:
         run({type, details});
         break;
@@ -79,44 +79,35 @@ const command = _.partly(async function(run, text){
   }
 });
 
-async function repl(run){
-  await requestCommand();
-
-  for await (const line of readLines(Deno.stdin)) {
-    command(run, line);
-    await requestCommand();
-  }
-}
-
 new Command()
   .name("reel")
   .description("Navigate and append to board game timeline")
   .arguments("<table:string>")
-  .option("-c, --command <command:string>", "Command", {collect: true})
-  .option("--seat <seat:number>", "Seat number (integer)")
-  .option("--watch", "Enable watch mode")
-  .option("--repl", "Enter REPL")
-  .option("--tui", "Enter TUI")
-  .option("--chan <name:string>", "Monitor channel", {collect: true})
-  .option("--changed <path:string>", "Monitor changed event", {collect: true})
+  .option("--seat <seat:number>", "Seat number (integer).")
+  .option("--inside", "Observe updates inside the signal.")
+  .option("--chan <name:string>", "Observe a channel.", {collect: true})
+  .option("--changed <path:string>", "Observe a changed event.", {collect: true})
+  .option("-c, --command <command:string>", "Issue a command.", {collect: true})
+  .option("-i, --interactive", "Navigate via keypress.")
   .example(
-    "Monitor multiple channels",
+    "Observe multiple channels",
     "reel <table> --seat <seat> --chan make --chan perspective"
   )
   .example(
-    "Watch specific change events",
+    "Observe several change events",
     "reel <table> --seat <seat> --changed perspective.state --changed perspective --changed cursor.pos --changed up"
   )
   .example(
-    "Watch unqualified changes and use TUI",
-    `reel <table> --seat <seat> --changed "*" --tui`
+    "Observe all changes interactively",
+    `reel <table> --seat <seat> --changed "*" -i`
   )
   .action(async function (opts, tableId) {
     const seat = opts.seat;
     const $reel = reel(tableId, seat);
+    const $perspective = $.pipe($.chan($reel, "perspective"), _.compact());
     const run = $.dispatch($reel, _);
-    const stop = opts.watch ? $.sub($reel, log) : _.noop;
-    const exit = _.does(stop, Deno.exit);
+
+    opts.inside && $.sub($reel, log);
 
     $.each(function(name){
       $.on($reel, name, $.see(name));
@@ -130,18 +121,13 @@ new Command()
       }
     }, opts.changed);
 
-    setTimeout(function(){
+    $.sub($perspective, _.once(function(){
       $.each(command(run, _), opts.command);
-    }, 5000);
+      opts.interactive || Deno.exit();
+    }));
 
-    if (opts.tui) {
-      await tui(run);
+    if (opts.interactive) {
+      await interactive(run);
     }
-
-    if (opts.repl) {
-      await repl(run);
-    }
-
-    setTimeout(exit, 5000);
   })
   .parse(Deno.args);

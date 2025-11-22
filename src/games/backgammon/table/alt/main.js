@@ -330,6 +330,27 @@ reg({ $both, $work, g });
 $.on($reel, "changed", function({ details: { changed, hist: [curr, prior] = [] } = {} }){
   const ctx = "main";
   console.log({ ctx, changed, curr, prior });
+
+  if (_.some(_.eq(_, ["perspective"]), changed)) {
+    const { state, up } = curr.perspective || {};
+    if (!state) return;
+    const { status, dice, off, stakes, holdsCube } = state;
+
+    dom.attr(el, "data-stakes", stakes);
+    dom.text(dom.sel1("#cube", el), _.clamp(stakes, 2, 64));
+    dom.attr(el, "data-up", up);
+    dom.attr(el, "data-holds-cube", holdsCube);
+    dom.attr(el, "data-status", status);
+
+    _.chain(dice,
+      _.map(_.str, _),
+      _.join(" ", _),
+      dom.attr(el, "data-dice", _));
+
+    $.eachIndexed(function(seat, off){
+      dom.text(dom.sel1(`[data-seat="${seat}"] span.off`, el), off);
+    }, off);
+  }
 });
 
 $.sub($both, function ([[curr, prior, motion, game], wip, which]) {
@@ -341,19 +362,19 @@ $.sub($both, function ([[curr, prior, motion, game], wip, which]) {
   if (which !== 1) {
     const checkers = getCheckers(curr.state);
     if (prior) {
-      $.eachIndexed(function(seat, off){
-        dom.text(dom.sel1(`[data-seat="${seat}"] span.off`, el), off);
-      }, off);
+      // $.eachIndexed(function(seat, off){
+      //   dom.text(dom.sel1(`[data-seat="${seat}"] span.off`, el), off);
+      // }, off);
       updatePositioning(diffCheckers(checkers, getCheckers(prior.state)));
     } else {
       initialPositioning(checkers);
     }
   }
 
-  dom.attr(el, "data-stakes", stakes);
-  dom.text(dom.sel1("#cube", el), _.clamp(stakes, 2, 64));
-  dom.attr(el, "data-up", up);
-  dom.attr(el, "data-holds-cube", holdsCube);
+  // dom.attr(el, "data-stakes", stakes);
+  // dom.text(dom.sel1("#cube", el), _.clamp(stakes, 2, 64));
+  // dom.attr(el, "data-up", up);
+  // dom.attr(el, "data-holds-cube", holdsCube);
 
   const moves = g.moves(game, { type: ["move", "enter", "bear-off"], seat });
 
@@ -364,10 +385,10 @@ $.sub($both, function ([[curr, prior, motion, game], wip, which]) {
     _.trim,
     dom.attr(el, "data-allow-commands", _));
 
-  _.chain(dice,
-    _.map(_.str, _),
-    _.join(" ", _),
-    dom.attr(el, "data-dice", _));
+  // _.chain(dice,
+  //   _.map(_.str, _),
+  //   _.join(" ", _),
+  //   dom.attr(el, "data-dice", _));
 
   _.chain(
     moves,
@@ -378,7 +399,7 @@ $.sub($both, function ([[curr, prior, motion, game], wip, which]) {
 
   manageStacks(state);
 
-  dom.attr(el, "data-status", status);
+  // dom.attr(el, "data-status", status);
   dom.removeClass(el, "error");
 
   if (which === 1) {

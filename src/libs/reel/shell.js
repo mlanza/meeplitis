@@ -325,9 +325,10 @@ export function reel(tableId, seat){
     const {pos, at, direction, max} = cursor;
     const nextAt = _.maybe(pos + direction, _.clamp(_, 0, max), _.get(touches, _));
     const player = seat;
-    const ats = _.chain([at, nextAt], _.compact, _.remove(_.get(perspectives, _), _), _.toArray);
-    if (_.seq(ats) && seat != null) {
-      const seatId = _.getIn(seated, [seat, "seat_id"]);
+    const seatId = _.getIn(seated, [seat, "seat_id"]);
+    _.chain([at, nextAt],
+      _.compact,
+      _.remove(_.get(perspectives, _), _),
       $.each(function(at){
         _.fmap(getPerspective(table.id, at, seat, seatId, session?.accessToken), function(perspective){
           const {up, may, event, state} = perspective;
@@ -337,8 +338,11 @@ export function reel(tableId, seat){
           const actor = _.get(seated, seat);
           $.swap($timeline, r.addPerspective(at, _.assoc(perspective, "actionable", actionable, "game", game, "actor", actor)));
         });
-      }, ats);
-    }
+      }, _));
+  });
+
+  $.sub($state, function(state){
+    console.log("Reel State:", state);
   });
 
   const $changed = changes($state);

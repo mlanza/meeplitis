@@ -1,6 +1,6 @@
 ---
 agent:
-  active_drive: A
+  active_drive: B
   active_task: null
   drives: [A, B, C, D, E, F]
   confirm_on_switch: true
@@ -41,12 +41,12 @@ handler.
 `_.some(_.eq(_, path), changed)` (PRD §145-147); `moment($story)` →
 `perspective.game` (PRD §62-64); `$snapshot` → `perspective.game` (PRD §66-69).
 
-B1. Add logic to `changed` handler to check `["perspective"]` path B2. Update
-`data-status`, `data-dice`, `data-stakes`, `data-holds-cube` from
-`perspective.state` B3. Update off counts in player zones B4. Comment out
-corresponding logic in old `$.sub($both, ...)` handler B5. Verify UI updates
-correctly from new handler B6. Verify `$work` channel (from Drive A) is
-available for use
+B1. [x] Add logic to `changed` handler to check `["perspective"]` path B2. [x]
+Update `data-status`, `data-dice`, `data-stakes`, `data-holds-cube` from
+`perspective.state` B3. [x] Update off counts in player zones B4. [x] Comment
+out corresponding logic in old `$.sub($both, ...)` handler B5. [x] Verify UI
+updates correctly from new handler B6. [x] Verify `$work` channel (from Drive A)
+is available for use
 
 **Checkpoint:** Basic state migrated, old handler has less logic.
 

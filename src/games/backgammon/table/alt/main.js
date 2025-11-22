@@ -3,19 +3,11 @@ import $ from "/libs/atomic_/shell.js";
 import dom from "/libs/atomic_/dom.js";
 import * as c from "./core.js";
 import * as g from "/libs/game.js";
-import { $reel, $work, outcome, scored, diff } from "/libs/reel/gui.js";
+import { $reel, $work, div, img, span, outcome, scored, diff, closestAttr, retainAttr } from "/libs/reel/gui.js";
 import {moment} from "/libs/story.js";
 import {describe} from "./ancillary.js";
 import {el, seated, seats, seat, ui, which} from "/libs/table.js";
 import {reg} from "/libs/cmd.js";
-
-function closestAttr(el, attr){
-  return _.maybe(el, _.closest(_, `[${attr}]`), dom.attr(_, attr));
-}
-
-const retainAttr = _.partly(function(el, key, value){
-  value == null ? dom.removeAttr(el, key) : dom.attr(el, key, value);
-});
 
 const {img, div, span} = dom.tags(['img', 'div', 'span']);
 

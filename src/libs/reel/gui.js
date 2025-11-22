@@ -21,6 +21,14 @@ export function diff(curr, prior, path, f){
   }
 }
 
+export function closestAttr(el, attr){
+  return _.maybe(el, _.closest(_, `[${attr}]`), dom.attr(_, attr));
+}
+
+export const retainAttr = _.partly(function(el, key, value){
+  value == null ? dom.removeAttr(el, key) : dom.attr(el, key, value);
+});
+
 export function player(username, avatar_url, seat, ...contents){
   return div({class: "player"},
     div({class: "avatar"}, img({src: avatar_url}), a({class: "seat", href: relink("./", {seat}, null)}, seat)),

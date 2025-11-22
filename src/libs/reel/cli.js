@@ -46,10 +46,10 @@ async function interactive(run) {
         Deno.exit();
       } else if (event.key === "c") {
         const cmd = await Input.prompt("Command:");
-        command(run, cmd);
+        exec(run, cmd);
       } else if (event.key === "m") {
         const move = await Input.prompt("Move:");
-        command(run, `move ${move}`);
+        exec(run, `move ${move}`);
       } else if (event.key === "right") {
         run({type: event.shiftKey ? "present" : "forward"});
       } else if (event.key === "left") {
@@ -69,7 +69,7 @@ async function requestCommand(){
   await Deno.stdout.write(encoder.encode("> "));
 }
 
-const command = _.partly(async function(run, text){
+const exec = _.partly(async function(run, text){
   try {
     const [, type, body] = text.match(/^(\S+)(?:\s+(.*))?$/) || [];
     //console.log("dispatching", {type, body});
@@ -150,7 +150,7 @@ new Command()
     }
 
     $.sub($perspective, _.once(function(){
-      $.each(command(run, _), commands);
+      $.each(exec(run, _), commands);
       opts.interactive || setTimeout(Deno.exit, 500);
     }));
 

@@ -22,7 +22,6 @@ async function registered(sess){
 }
 
 if (typeof Deno !== 'undefined' && Deno?.env) {
-  $.log("Recalling session")
   await supabase.auth.setSession({
     "access_token": Deno.env.get("SUPABASE_SESSION_ACCESS_TOKEN"),
     "refresh_token": Deno.env.get("SUPABASE_SESSION_REFRESH_TOKEN")

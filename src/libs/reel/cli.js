@@ -40,7 +40,7 @@ async function interactive(run) {
   for await (const event of keypress()) {
     if (event.key === "q" || event.key === "escape") {
       Deno.exit();
-    } else if (event.key === "0") {
+    } else if (event.key === "c") {
       const text = await Input.prompt("Command:");
       command(run, text);
     } else if (event.key === "m") {

@@ -98,7 +98,7 @@ new Command()
   .option("-i, --interactive", "Navigate via keypress.")
   .example(
     "Observe multiple channels",
-    "reel <table> --seat <seat> --chan make --chan perspective"
+    "reel <table> --seat <seat> --chan table --chan perspective"
   )
   .example(
     "Observe several change events",

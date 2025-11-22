@@ -3,10 +3,10 @@ import $ from "/libs/atomic_/shell.js";
 import dom from "/libs/atomic_/dom.js";
 import * as c from "./core.js";
 import * as g from "/libs/game.js";
-import { $reel, $work } from "/libs/reel/gui.js";
+import { $reel, $work, outcome, scored, diff } from "/libs/reel/gui.js";
 import {moment} from "/libs/story.js";
 import {describe} from "./ancillary.js";
-import {el, seated, seats, seat, ui, scored, outcome, diff, which} from "/libs/table.js";
+import {el, seated, seats, seat, ui, which} from "/libs/table.js";
 import {reg} from "/libs/cmd.js";
 
 function closestAttr(el, attr){

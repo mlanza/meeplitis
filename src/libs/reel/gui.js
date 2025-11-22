@@ -5,10 +5,80 @@ import { reel } from "./shell.js";
 import { reg } from "../cmd.js";
 import supabase from "../supabase.js";
 import { session } from "../session.js";
+import {relink} from "../links.js";
 
 const params = new URLSearchParams(location.search);
 const tableId = params.get('id');
 const seat = _.maybe(params.get("seat"), parseInt);
+
+const {div, h1, a, span, img, ol, ul, li, sup} = dom.tags(['div', 'h1', 'a', 'span', 'img', 'ol', 'ul', 'li', 'sup']);
+
+export function diff(curr, prior, path, f){
+  const c = _.getIn(curr, path),
+        p = _.getIn(prior, path);
+  if (_.notEq(c, p)) {
+    f(c, p);
+  }
+}
+
+export function player(username, avatar_url, seat, ...contents){
+  return div({class: "player"},
+    div({class: "avatar"}, img({src: avatar_url}), a({class: "seat", href: relink("./", {seat}, null)}, seat)),
+    div(a({class: "username", "href": relink("/profiles/", {username})}, h1(username)), contents),
+    img({"data-action": "", src: "/images/pawn.svg"}));
+}
+
+export function zone(seat, username, avatar_url, delegate, {stats, resources}){
+  return div({class: "zone", "data-delegate": !!delegate, "data-seat": seat, "data-username": username, "data-presence": ""},
+    player(username, avatar_url, seat, stats),
+    div({class: "area"}, resources));
+}
+
+function score(player, {points, place, brief}){
+  const title = brief;
+  return li({"data-place": place, title},
+    subject(player),
+    span(points));
+}
+
+export function scored(seated, {scoring}){
+  return ul({class: "scored"}, _.mapIndexed(function(idx, metrics){
+    return score(seated[idx], metrics);
+  }, scoring));
+}
+
+export function outcome(seated, {places, metrics, briefs}){
+  const seats = _.mapa(function(place, metric, brief, player){
+    return {place, metric, brief, player};
+  }, places, metrics, briefs, seated);
+  const standings = _.chain(seated, _.mapIndexed(function(idx, seat){
+    const place = _.nth(places, idx),
+          brief = _.nth(briefs, idx);
+    return Object.assign({place, brief}, _.nth(metrics, idx), seat);
+  }, _), _.sort(_.asc(_.get(_, "place")), _));
+  const winners = _.filtera(_.pipe(_.get(_, "place"), _.eq(_, 1)), standings);
+  const highlight = _.count(winners) === 1 ? victor : victors;
+  return [highlight(winners, seated),
+      ol({class: "scored"}, _.mapa(score, standings, standings)),
+      rankings({seated, seats})];
+}
+
+function victors(players) {
+  return div({class: "victors"},
+    img({src: "/images/trophy.png"}),
+    `The victory is shared!`);
+}
+
+function victor([player], seated){
+  const seat = _.detectIndex(_.comp(_.eq(_, player.seat_id), _.get(_, "seat_id")), seated);
+  return div({class: "victor"},
+    img({alt: player.username, src: player.avatar_url}),
+    `${player.username}`, sup(seat), ` wins!`);
+}
+
+export function subject({username, avatar_url}){
+  return span({class: "subject avatar"}, img({alt: username, src: avatar_url}));
+}
 
 export const el = document.body;
 export const els = {

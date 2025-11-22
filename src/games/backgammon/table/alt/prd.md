@@ -1,147 +1,476 @@
-# Produce Requirements Document
+# Product Requirements Document: Backgammon Table Migration to Reel
 
-I recently built [reel](../../../../libs/reel) and in particular its
-[shell](../../../../libs/reel/shell.js). It is a headless component of the
-variety discussed in [AGENTS](../../../../../../atomic/AGENTS.md) and its
-surrounding docs. I mean for it to be the successor to
-[tables.js](../../../../libs/tables.js) and
-[story.js](../../../../libs/story.js), both of which in the long run go away.
+## Overview
 
-You are not to touch them. You are not to touch reel.js. However, you may run
-the [reel CLI](../../../../libs/reel/cli.js) to see what's going on under the
-hood.
+Migrate the Backgammon table UI from the legacy `table.js`/`story.js`
+architecture to the new `reel` shell. The reel shell is a headless component
+(see [AGENTS](../../../../../../atomic/AGENTS.md)) designed to replace the old
+signal-based approach with a simpler, event-driven model.
+
+**Key Constraints:**
+
+- All work confined to the [alt folder](../alt)
+- The [uJl folder](../uJl) remains untouched as a working reference
+- No modifications to [reel.js](../../../../libs/reel) itself
+- Incremental migration with frequent testing checkpoints
+
+**Success Criteria:**
+
+The migration is complete when the alt folder provides identical functionality
+to uJl, but using only the reel shell's `changed` event handler. At that point,
+`table.js` and `story.js` will be deprecated and no longer needed.
+
+## Understanding Reel
+
+### Exploring Reel State
+
+You can inspect reel's internal state using the CLI:
 
 ```bash
 cli.js QDaitfgARpk --seat 0 --changed "*"
 ```
 
-Issuing the above, will let you see all the properties for which changes are
-tracked, as well as the general shape of its inner state. The JSON snapshots
-lets you see how the state is progressively loaded. The changed events let you
-see what changes are emitted which you can respond to.
+This shows:
 
-I have already set up a "changed" handler [here](./main.js). That is your main
-arena for work: inside the [alt folder](../alt). This folder was sourced from
-[this one](../uJl). That one is NOT being touched. It serves as a safe reference
-point of what works today. But it also permits you to study how messages were
-handled and plan for how messages need to be handled using the new approach,
-which is only just begun in the alt folder.
+- All properties tracked for changes
+- The shape of the internal state
+- JSON snapshots of progressive state loading
+- Changed events emitted during timeline navigation
 
-I want to migrate the code so that what works in the original will also work in
-the new. However, I want to carefully migrate it in small increments which I can
-test. Therefore, don't plan heroic leaps. Just port a bit at a time and halt
-your efforts and permit me to check them. This is your top imperative. Because,
-done correctly, I should be able to bring up a workable DOM-based user interface
-on the web, and navigate the timeline and see in the UI all the same things I
-expect, whether in the original or its replament. That's how I want to work. I
-want side-by-side functioning implementations I can eyeball and evaluate.
+### The Changed Event Handler
 
-Thus, your planning session had better have appropriate breaking points. I still
-want a plan that I can review and follow. But it needs stopping points for my
-review built in. Please study, the docs surrounding
-[quarterbacking](../../../../../../atomic/agents/quarterbacking.md).
+The main integration point is the `changed` event handler in
+[main.js](./main.js):
 
-While I one day hope to segegate the subscriptions (e.g., `$.on`) into all the
-different changes I care about, that effort is further on. Not now.
+```javascript
+$.on(
+  $reel,
+  "changed",
+  function ({ details: { changed, hist: [curr, prior] = [] } = {} }) {
+    // Reconcile UI based on what changed
+  },
+);
+```
 
-The reason is, if you study the orginal code, it is effectively one big
-callback. In it, it does a lot of things top to bottom. That top-to-bottom flow
-ensures a good sequence of updates and that's why I'm starting with a single
-`changed` event handler in the new approach. Because, checking the `changed`
-property in its details allows you to plan out and reconcile the state changes
-with the UI, and have them happen in pretty much the same way.
+- `changed` - array of paths that changed (e.g., `["perspective"]`,
+  `["cursor", "pos"]`)
+- `curr` - current reel state snapshot
+- `prior` - previous reel state snapshot
+
+## Reconnaissance with CLI
+
+**Before starting any drive, use the CLI to understand the data.** The
+[reel CLI](../../../../libs/reel/cli.js) is your primary reconnaissance tool. It
+lets you observe reel's internal state and see exactly what changes are emitted.
+
+### Basic Usage
+
+```bash
+./src/libs/reel/cli.js QDaitfgARpk --seat 0 --changed "*"
+```
+
+This command:
+
+- Connects to table `QDaitfgARpk` as seat `0`
+- Observes all changed events (`--changed "*"`)
+- Shows progressive state loading
+- Exits after initial load (non-interactive)
+
+### What You'll See
+
+The CLI output shows the **progressive loading** of reel state. Each snapshot
+shows the state after a change, and each `changed` event shows what paths were
+modified.
+
+**Initial state (before perspective loads):**
+
+```javascript
+{ id: "QDaitfgARpk",
+  seat: 0,
+  cursor: { pos: null, at: null, max: null, direction: 1 },
+  perspectives: "<0 entries>",
+  table: "<21 entries>",
+  wip: [ undefined ],
+  seats: [],
+  ready: true }
+```
+
+**Progressive changes as state loads:**
+
+```javascript
+changed { type: "changed", details: { hist: "<hidden>", changed: [ [], ["up"] ] } }
+// State now includes: up: true
+
+changed { type: "changed", details: { hist: "<hidden>", changed: [ [], ["act"] ] } }
+// State now includes: act: false
+
+changed { type: "changed", details: { hist: "<hidden>", changed: [ [], ["seated"] ] } }
+// State now includes: seated: "<2 entries>"
+
+changed { type: "changed", details: { hist: "<hidden>", changed: [ [], ["wip"], ["wip", 0] ] } }
+// wip initialized: wip: [ {}, undefined ]
+```
+
+**Final state (after perspective loads):**
+
+```javascript
+{ id: "QDaitfgARpk",
+  seat: 0,
+  touches: "<33 entries>",
+  cursor: { pos: 32, at: "ykEi3", max: 32, direction: -1 },
+  perspectives: "<1 entries>",
+  perspective: {
+    up: [ 0 ],
+    may: [ 0 ],
+    seen: [ 0 ],
+    event: {
+      id: "ykEi3",
+      seat: 0,
+      type: "moved",
+      details: { to: 21, die: 3, from: 18, capture: false }
+    },
+    state: "<8 entries>",
+    metrics: [
+      { off: 0, points: 1, conceded: false },
+      { off: 0, points: 0, conceded: false }
+    ],
+    last_move: "HjCqu",
+    actionable: true,
+    game: "<hidden>",
+    actor: { seat_id: "NjF", username: "capnemo", ... }
+  },
+  undoables: { Lnm0M: ["Lnm0M"], helK3: ["helK3"], ykEi3: ["ykEi3"] },
+  last_acting_seat: "NjF",
+  table: "<21 entries>",
+  wip: [ {}, undefined ],
+  seated: "<2 entries>",
+  seats: [],
+  up: true,
+  undoable: "ykEi3",
+  make: [Function: backgammon],
+  ready: true,
+  act: true
+}
+```
+
+**The big changed event when perspective loads:**
+
+```javascript
+changed {
+  type: "changed",
+  details: {
+    hist: "<hidden>",
+    changed: [
+      [],
+      ["touches"],
+      ["cursor"],
+      ["cursor", "pos"],
+      ["cursor", "at"],
+      ["cursor", "max"],
+      ["cursor", "direction"],
+      ["perspectives"],
+      ["perspectives", "ykEi3"],
+      ["perspective"],
+      ["undoables"],
+      ["last_acting_seat"],
+      ["act"]
+    ]
+  }
+}
+```
+
+### Key Observations
+
+1. **Progressive Loading:** State builds up incrementally. Your `changed`
+   handler must handle partial state gracefully.
+
+2. **Changed Paths:** The `changed` array contains all paths that were modified.
+   Use this to optimize reconciliation - only update UI for what actually
+   changed.
+
+3. **Nested Paths:** Changes can be at any depth:
+   - `["cursor"]` - entire cursor object changed
+   - `["cursor", "pos"]` - just the position changed
+   - `["perspectives", "ykEi3"]` - a specific perspective was added/updated
+
+4. **Perspective Structure:** The `perspective` object contains everything you
+   need:
+   - `perspective.state` - game state (points, bar, off, dice, status)
+   - `perspective.game` - game object with moves (hidden in CLI output)
+   - `perspective.event` - the current event
+   - `perspective.up`, `perspective.may` - turn and action indicators
+
+5. **Work in Progress:** The `wip` array is initialized as `[{}, undefined]`.
+   Extract it as a channel: `$.chan($reel, "wip")`.
+
+### Interactive Mode
+
+For deeper exploration, use interactive mode:
+
+```bash
+./src/libs/reel/cli.js QDaitfgARpk --seat 0 --changed "*" -i
+```
+
+Then use keyboard shortcuts:
+
+- **Left Arrow** - backward one event
+- **Right Arrow** - forward one event
+- **Shift+Left** - jump to inception (beginning)
+- **Shift+Right** - jump to present (end)
+- **q** or **Escape** - quit
+
+Watch how the `changed` events report cursor movements and perspective updates
+as you navigate.
+
+### Using CLI for Each Drive
+
+**Before starting a drive:**
+
+1. Run the CLI to see current state structure
+2. Identify which paths you'll need to check in `changed`
+3. Understand what data is available at each path
+4. Note the shape of nested objects (cursor, perspective, etc.)
+
+**Example for Drive B (basic state migration):**
+
+```bash
+./src/libs/reel/cli.js QDaitfgARpk --seat 0 --changed "perspective.state"
+```
+
+This shows only when `perspective.state` changes, helping you understand when to
+update status, dice, stakes, etc.
+
+## Migration Strategy
+
+### Parallel Migration (The Two Highways)
+
+**Both highways must remain operational during migration.** Think of this like
+building a new highway while the old one stays open to traffic.
+
+**Old Highway:** `$.sub($both, ...)` - the existing subscription handler **New
+Highway:** `$.on($reel, "changed", ...)` - the new reel-based handler
+
+**Process:**
+
+1. Both handlers run in parallel
+2. Gradually move UI update logic from old handler to new handler
+3. Test after each piece is moved
+4. Only remove old handler when it's completely empty
+
+**Why?** This allows incremental testing. After each change, both
+implementations should produce identical UI updates, giving you confidence the
+migration is correct.
+
+### Incremental Drives with Breaking Points
+
+Don't plan heroic leaps. The migration is broken into small "drives" (see
+[quarterbacking](../../../../../../atomic/agents/quarterbacking.md)), each with
+clear stopping points for review.
+
+Each drive should:
+
+- Change only a focused subset of functionality
+- End with a working, verifiable UI
+- Allow side-by-side comparison with the uJl reference
+
+You must be able to bring up the DOM-based UI, navigate the timeline, and see
+the same behavior whether using the old or new implementation.
 
 ## Mapping Old Concepts to New
 
-This entire effort is largely just a mapping: from the old way to the new way.
-You are checking what signals or data points existed before and what exist now
-and determining how to best source the same conceptual signals.
+This migration is primarily a mapping exercise: determining how to source the
+same conceptual signals using reel's state instead of the old signal-based
+approach.
 
-**Key mappings:**
+### State Access
 
-- **`moment`** (old) → **`perspective.game`** (new): The old code used
-  `moment($story)` to get a fully-formed snapshot of the backgammon game in its
-  native model. In reel, this is now found at `perspective.game`.
+| Old Approach                | New Approach                    | Description                                |
+| --------------------------- | ------------------------------- | ------------------------------------------ |
+| `moment($story)`            | `perspective.game`              | Fully-formed game snapshot in native model |
+| `$snapshot` signal          | `perspective.game`              | Game state glimpse; phased out at end      |
+| Access via separate signals | Access via `curr.perspective.*` | All perspective data in one place          |
 
-- **`which`** (old) → **check `["wip"]` in changed** (new): The old code used
-  `which` to determine whether the primary state source updated or the wip (work
-  in progress) updated. This was an optimization to prevent unnecessary
-  reconciliation work. In the new approach, you can achieve the same
-  optimization by checking if `["wip"]` is in the `changed` array.
+The `perspective` object contains:
 
-- **`wip`** (work in progress): A separate atom/scratchpad for building the next
-  command/move the player wishes to execute. Since the UI is primarily driven by
-  clicking, it's impossible to issue some moves (the more complex ones) in a
-  single click. You have to capture part of the command, see what the user is
-  doing, understand what possible move they might be issuing, and progressively
-  flesh out the move so that when it's fully formed it can be executed. In reel,
-  `wip` is still available in the state.
+- `up` - whose turn
+- `may` - (not used in this migration)
+- `seen` - (not used in this migration)
+- `event` - current event
+- `state` - game state (points, bar, off, dice, etc.)
+- `game` - game object with moves
+- `actor` - player who acted
+- `actionable` - can current player act
 
-  **Important**: `$wip` is its own channel and must be pulled out of `$reel`
-  using `$.chan($reel, "wip")`. For the most part, all `$wip` interactions hold
-  exactly as before in the old and new, including calling `clear($wip)` at the
-  appropriate times (e.g., when an error occurs, when a move is issued, or when
-  the user presses Escape).
+### Change Detection
 
-- **`cursor`** (timeline navigation): The cursor concept means the app/user can
-  freely navigate the timeline from one point to any other point. The entire
-  reconciliation must understand this possibility. Navigation is **not always**
-  one moment to the prior or the next—it may be a leap to the very beginning
-  (inception), the very end (present), or to the middle somewhere (via clicking
-  on a specific event). The reconciliation logic must handle arbitrary jumps,
-  not just sequential steps.
+| Old Approach                  | New Approach                   | Description                                       |
+| ----------------------------- | ------------------------------ | ------------------------------------------------- |
+| `which` signal                | Check `["wip"]` in `changed`   | Optimization to detect wip vs. main state updates |
+| Separate signal subscriptions | Check paths in `changed` array | Use `_.some(_.eq(_, path), changed)`              |
+| Multiple `$.sub()` calls      | Single `changed` handler       | One reconciliation point for all updates          |
 
-Many signals are implemented unchanged. However, this new model was simplified
-so there are a few (particularly the ones which are comparing the current and
-prior snapshots) which were not directly ported (e.g., `bwd`, `step`) but which
-can be easily derived.
+### Work in Progress Channel
 
-The final result of this effort is my having a DOM-based UI which gets properly
-reconciled after each changed event. This is the overarching goal. And by the
-end of it, I will no longer need `table.js` or `story.js`. They will be
-deprecated. I will handle that myself. Your job is to just get me there to the
-point where they are no longer serving a purpose.
+| Old Approach  | New Approach           | Description                                  |
+| ------------- | ---------------------- | -------------------------------------------- |
+| `$wip` signal | `$work` channel        | Scratchpad for building multi-click commands |
+| `$.atom()`    | `$.chan($reel, "wip")` | Extract channel from reel                    |
+| `clear($wip)` | `clear($work)`         | Clear on error, move issued, or Escape       |
 
-It is important to note that there are several pieces that are related to the
-DOM and the game in question (Backgammon) which are provided the old way (see
-`desc`, `describe` and `template`). That must still be handled. I don't care to
-much about how you do it, but that will have to be one of teh first things in
-your effort, so that the `ui` call which is immediately wired into `table.js`
-can be omitted. That is probably a good starting point and the fruit of a single
-coherent drive.
+**Important:** The `$work` channel is extracted from `$reel` using
+`$.chan($reel, "wip")`. This is your replacement for the old `$wip` signal. All
+interactions work the same: building up partial commands, clearing on errors,
+etc.
+
+### Timeline Navigation (Cursor)
+
+The cursor enables free navigation through the game timeline. The UI must handle
+arbitrary jumps, not just sequential steps.
+
+**Cursor structure:**
+
+```javascript
+{
+  pos: 32,        // current position
+  at: "ykEi3",    // event ID at current position
+  max: 32,        // maximum position (present)
+  direction: -1   // -1 for backward, 1 for forward
+}
+```
+
+**Derived values:**
+
+- `bwd = cursor.direction === -1` - moving backward in time
+- `present = cursor.pos === cursor.max` - at the latest event
+
+**Navigation types:**
+
+- Sequential: one step forward/backward
+- Jumps: to inception (beginning), present (end), or specific event
+- The reconciliation logic must handle all cases
+
+### UI Signals Remain Until End
+
+**Critical:** The ui signals created by the `ui()` call in `table.js` cannot be
+removed early due to dependencies. These signals must remain in place until the
+very end of the migration, after all logic has been ported from the old handler
+to the new reel-based handler.
+
+The `ui()` call will be removed in the final drive (Drive F), not at the
+beginning.
 
 ## Simplification Imperative
 
-The entire point of reel is to simplify the signal model. The old approach
+The entire point of reel is to **simplify the signal model**. The old approach
 created many separate signals (`$ready`, `$error`, `$story`, `$hist`,
-`$snapshot`, `$wip`, `$both`, etc.). **Do not recreate this complexity.**
+`$snapshot`, `$wip`, `$both`, etc.).
 
-Instead, use reel's single `changed` event handler as the main reconciliation
-point. All UI updates should happen in response to the changed event, checking
-the `changed` paths to determine what needs updating. This is the new model: one
-event handler that reconciles everything.
+**Do not recreate this complexity.**
 
-If you find yourself creating local `$.atom()` signals to mirror reel state,
-you're doing it wrong. Just use the changed event.
+Instead:
 
-## Parallel Migration Strategy
+- Use reel's single `changed` event handler as the main reconciliation point
+- All UI updates happen in response to the `changed` event
+- Check the `changed` paths to determine what needs updating
+- Don't create local `$.atom()` signals to mirror reel state
 
-**Both highways must remain operational.** The old subscription
-(`$.sub($both, ...)`) and the new subscription (`$.on($reel, "changed", ...)`)
-will coexist during the migration. Think of it like building a new highway while
-the old one is still in use.
+If you find yourself creating new local signals, you're doing it wrong. Just use
+the `changed` event.
 
-The strategy:
+## Technical Details
 
-1. **Keep both subscriptions active** - Don't remove the old `$.sub($both, ...)`
-   handler
-2. **Gradually move logic** - Piece by piece, move UI update logic from the old
-   handler to the new `changed` handler
-3. **Verify incrementally** - After each piece is moved, verify both handlers
-   still work
-4. **Remove only when empty** - Only remove the old subscription when ALL logic
-   has been successfully migrated
+### Reel State Structure
 
-Use `_.some(_.eq(_, path), changed)` to check if a specific path changed in the
-new handler. Both handlers will run in parallel until the old one is completely
-empty.
+Based on CLI observation of table `QDaitfgARpk`:
+
+```javascript
+{
+  id: "QDaitfgARpk",
+  seat: 0,
+  touches: <array of event IDs>,
+  cursor: { pos: 32, at: "ykEi3", max: 32, direction: -1 },
+  perspectives: <cache of loaded perspectives>,
+  perspective: {
+    up: [0],
+    may: [0],
+    seen: [0],
+    event: {...},
+    state: {...},
+    game: {...},
+    actor: {...},
+    actionable: true
+  },
+  table: {...},
+  wip: [{}, undefined],
+  seated: [...],
+  seats: [],
+  up: true,
+  undoable: "ykEi3",
+  make: [Function],
+  ready: true,
+  act: true
+}
+```
+
+### Changed Event Paths
+
+Examples of paths reported in the `changed` array:
+
+- `["perspective"]` - entire perspective changed
+- `["perspective", "state"]` - game state changed
+- `["cursor", "pos"]` - cursor position changed
+- `["cursor", "direction"]` - direction changed
+- `["wip"]` - work in progress updated
+- `["up"]` - turn changed
+
+### Checking for Changes
+
+Use this pattern to check if a specific path changed:
+
+```javascript
+if (_.some(_.eq(_, ["perspective"]), changed)) {
+  // perspective changed, update UI
+}
+
+if (_.some(_.eq(_, ["cursor"]), changed)) {
+  // cursor changed, update navigation UI
+}
+
+if (_.some(_.eq(_, ["wip"]), changed)) {
+  // work in progress changed, update selection UI
+}
+```
+
+## Migration Drives
+
+The migration is broken into six drives (A-F), each building on the previous:
+
+**Drive A:** Extract `$work` channel, verify both handlers run in parallel
+**Drive B:** Migrate basic game state (status, dice, stakes, off counts) **Drive
+C:** Migrate cursor and checker positioning **Drive D:** Migrate game object
+access and move calculation **Drive E:** Update event handlers to dispatch
+through reel **Drive F:** Remove old handler and ui signals
+
+See [implementation-plan.md](./implementation-plan.md) for detailed breakdown.
+
+## Verification Approach
+
+After each drive, verify the UI works correctly:
+
+1. Load the page in browser
+2. Navigate timeline (arrow keys, jumps to inception/present)
+3. Verify UI updates match the uJl reference implementation
+4. Test interactions (clicking pieces, making moves, rolling dice)
+5. Check console for errors
+
+**Side-by-side testing:** Keep both alt and uJl implementations running. They
+should behave identically at every checkpoint.
+
+## References
+
+- [Reel Shell](../../../../libs/reel/shell.js) - the headless component
+- [Reel CLI](../../../../libs/reel/cli.js) - for inspecting state
+- [AGENTS](../../../../../../atomic/AGENTS.md) - architectural principles
+- [Quarterbacking](../../../../../../atomic/agents/quarterbacking.md) -
+  incremental planning methodology
+- [uJl Reference](../uJl) - working implementation to compare against

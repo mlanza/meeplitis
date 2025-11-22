@@ -64,8 +64,8 @@ The changed event system reports paths like:
 
 ### Drive A: Setup for parallel migration
 
-**Goal:** Remove dependency on `ui()` from table.js and prepare for parallel
-migration.
+**Goal:** Extract $work channel and prepare for parallel migration with both
+handlers running.
 
 #### Recon: Focused Context for Drive A
 
@@ -73,15 +73,20 @@ migration.
 
 - **Parallel Migration Strategy** (PRD §127-147): Both highways operational—old
   `$.sub($both, ...)` and new `$.on($reel, "changed", ...)` run concurrently
-- **Functional Core, Imperative Shell** (AGENTS §2.1): The `$wip` channel is
+- **Functional Core, Imperative Shell** (AGENTS §2.1): The `$work` channel is
   part of the shell; extract it properly using `$.chan($reel, "wip")`
 - **One-Way Dataflow** (AGENTS §2.1): Simulation → render; verify both handlers
   receive state updates
+- **UI Signals Remain** (PRD §105-111): The ui signals (including those created
+  by the `ui()` call) must remain until the very end; cannot be removed early
+  due to dependencies
 
 **Key Mappings (PRD §54-98):**
 
-- `$wip` must be extracted via `$.chan($reel, "wip")` (PRD §80-84)
-- All `clear($wip)` calls work unchanged (on error, move issued, Escape)
+- Extract `$work` channel via `$.chan($reel, "wip")` (PRD §80-89)
+- `$work` is the replacement for the old `$wip` signal
+- All `clear($work)` calls work unchanged (on error, move issued, Escape)
+- `$snapshot` → `perspective.game` (PRD §66-69)
 
 **Dependencies:**
 
@@ -99,16 +104,15 @@ migration.
 
 #### [MODIFY] [main.js](file:///Users/mlanza/Documents/meeplitis/src/games/backgammon/table/alt/main.js)
 
-- Remove lines 320-322 (the `ui` call)
-- Remove imports from `/libs/table.js`: `ui`, `diff`, `which`
-- Remove import from `/libs/story.js`: `moment`
-- Extract `$wip` channel from `$reel`: `const $wip = $.chan($reel, "wip")`
+- Extract `$work` channel from `$reel`: `const $work = $.chan($reel, "wip")`
+- **Keep the `ui` call** (lines 320-322) - it will be removed in Drive F
 - **Keep both subscriptions active**: The old `$.sub($both, ...)` (lines
   333-385) and the new `$.on($reel, "changed", ...)` (line 328)
 - Both handlers will run in parallel during the migration
 - The `changed` handler is currently just logging; we'll gradually move logic
   into it
-- All `$wip` interactions (including `clear($wip)`) work exactly as before
+- All `$work` interactions (including `clear($work)`) will work exactly as
+  before
 
 ---
 
@@ -176,6 +180,8 @@ $.on(
 
 **In the old `$.sub($both, ...)` handler**, comment out or remove the
 corresponding logic for these properties.
+
+**Note:** `$work` channel was extracted in Drive A and is available for use.
 
 **Verification:** Navigate timeline, verify status/dice/stakes/off update
 correctly from BOTH handlers initially, then only from new handler after
@@ -312,7 +318,7 @@ options from new handler.
 
 - `$.dispatch($story, ...)` (old) →
   `$.dispatch($reel, {type: "move", details: {move: ...}})` (new)
-- `$wip` already extracted in Drive A; all `clear($wip)` calls work unchanged
+- `$work` already extracted in Drive A; all `clear($work)` calls work unchanged
 - Navigation commands (forward, backward, etc.) already work with reel
 
 **Dependencies:**
@@ -337,9 +343,9 @@ options from new handler.
 - Change `$.dispatch($story, ...)` to
   `$.dispatch($reel, {type: "move", details: {move: ...}})`
 - Navigation commands already work with reel (forward, backward, etc.)
-- `$wip` was extracted in Drive A via `$.chan($reel, "wip")` and works exactly
+- `$work` was extracted in Drive A via `$.chan($reel, "wip")` and works exactly
   as before
-- All `clear($wip)` calls work unchanged (on error, on move issued, on Escape)
+- All `clear($work)` calls work unchanged (on error, on move issued, on Escape)
 - Verify `getMove()` function works with `curr.perspective.game`
 
 **Note:** Event handlers are separate from subscriptions, so this doesn't affect
@@ -396,7 +402,10 @@ navigation.
 - Remove the entire old subscription (lines 333-385)
 - Remove `$both` signal (line 324)
 - Remove `reg({ $both, g })` call (line 326)
-- Clean up any unused imports from table.js/story.js
+- **Remove the `ui` call** (lines 320-322) - this is when ui signals are removed
+- Remove imports from `/libs/table.js`: `ui`, `diff`, `which`
+- Remove import from `/libs/story.js`: `moment`
+- Clean up any other unused imports from table.js/story.js
 - Remove console.log from `changed` handler
 
 **Verification:** Complete side-by-side testing with `uJl` implementation. All

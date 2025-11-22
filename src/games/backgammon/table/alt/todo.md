@@ -1,6 +1,6 @@
 ---
 agent:
-  active_drive: null
+  active_drive: A
   active_task: null
   drives: [A, B, C, D, E, F]
   confirm_on_switch: true
@@ -20,11 +20,11 @@ parallel.
 `$.chan($reel, "wip")` (PRD §80-89); both highways operational; ui signals
 remain until end (PRD §105-111).
 
-A1. Extract `$work` channel: `const $work = $.chan($reel, "wip")` A2. Keep the
-`ui` call (lines 320-322) - will be removed in Drive F A3. Keep both
-subscriptions active: old `$.sub($both, ...)` and new
-`$.on($reel, "changed", ...)` A4. Verify page loads and both handlers fire A5.
-Verify `$work` channel is accessible
+A1. [x] Extract `$work` channel: `const $work = $.chan($reel, "wip")` A2. [x]
+Keep the `ui` call (lines 320-322) - will be removed in Drive F A3. [x] Keep
+both subscriptions active: old `$.sub($both, ...)` and new
+`$.on($reel, "changed", ...)` A4. [x] Verify page loads and both handlers fire
+A5. [x] Verify `$work` channel is accessible
 
 **Checkpoint:** Both highways operational, ready to start moving traffic.
 

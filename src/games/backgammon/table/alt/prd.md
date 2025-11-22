@@ -198,7 +198,9 @@ changed {
    - `perspective.state` - game state (points, bar, off, dice, status)
    - `perspective.game` - game object with moves (hidden in CLI output)
    - `perspective.event` - the current event
-   - `perspective.up`, `perspective.may` - turn and action indicators
+   - `perspective.up` - whose turn it is
+   - `perspective.may` - (not used in this migration)
+   - `perspective.seen` - (not used in this migration)
 
 5. **Work in Progress:** The `wip` array is initialized as `[{}, undefined]`.
    Extract it as a channel: `$.chan($reel, "wip")`.

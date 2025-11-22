@@ -321,9 +321,11 @@ function getMove({from, to}, seat) {
 const {$ready, $error, $story, $hist, $snapshot, $wip} =
   ui(c.make, describe, desc, template);
 
+const $work = $.chan($reel, "wip");
+
 const $both = which($.latest([$hist, $wip]));
 
-reg({ $both, g });
+reg({ $both, $work, g });
 
 $.on($reel, "changed", function({ details: { changed, hist: [curr, prior] = [] } = {} }){
   const ctx = "main";

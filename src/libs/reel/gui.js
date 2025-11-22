@@ -9,7 +9,7 @@ import {relink} from "../links.js";
 
 const params = new URLSearchParams(location.search);
 const tableId = params.get('id');
-const seat = _.maybe(params.get("seat"), parseInt);
+export const seat = _.count(seats) > 1 ? _.maybe(params.get("seat"), parseInt) : _.first(seats);
 
 const {div, h1, a, span, img, ol, ul, li, sup} = dom.tags(['div', 'h1', 'a', 'span', 'img', 'ol', 'ul', 'li', 'sup']);
 
@@ -88,7 +88,7 @@ export function subject({username, avatar_url}){
   return span({class: "subject avatar"}, img({alt: username, src: avatar_url}));
 }
 
-export const el = document.body;
+export const el = dom.sel1("#table");
 export const els = {
   remarks: dom.sel1("#remarks-button", el),
   options: dom.sel1("#options-button", el),

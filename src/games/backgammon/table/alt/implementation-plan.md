@@ -67,6 +67,36 @@ The changed event system reports paths like:
 **Goal:** Remove dependency on `ui()` from table.js and prepare for parallel
 migration.
 
+#### Recon: Focused Context for Drive A
+
+**Core Principles:**
+
+- **Parallel Migration Strategy** (PRD §127-147): Both highways operational—old
+  `$.sub($both, ...)` and new `$.on($reel, "changed", ...)` run concurrently
+- **Functional Core, Imperative Shell** (AGENTS §2.1): The `$wip` channel is
+  part of the shell; extract it properly using `$.chan($reel, "wip")`
+- **One-Way Dataflow** (AGENTS §2.1): Simulation → render; verify both handlers
+  receive state updates
+
+**Key Mappings (PRD §54-98):**
+
+- `$wip` must be extracted via `$.chan($reel, "wip")` (PRD §80-84)
+- All `clear($wip)` calls work unchanged (on error, move issued, Escape)
+
+**Dependencies:**
+
+- ✓ Reel shell already running (verified via CLI)
+- ✓ `$reel` signal exists in main.js
+- → No forward dependencies
+
+**Verification Strategy:**
+
+1. Run CLI: `cli.js QDaitfgARpk --seat 0 --changed "*"` to confirm reel state
+2. Load page in browser
+3. Check console: both handlers should log on state changes
+4. Navigate timeline with arrow keys → both handlers fire
+5. No errors in console
+
 #### [MODIFY] [main.js](file:///Users/mlanza/Documents/meeplitis/src/games/backgammon/table/alt/main.js)
 
 - Remove lines 320-322 (the `ui` call)
@@ -80,15 +110,42 @@ migration.
   into it
 - All `$wip` interactions (including `clear($wip)`) work exactly as before
 
-**Verification:** Page loads, board renders, both handlers fire, no console
-errors.
-
 ---
 
 ### Drive B: Migrate basic game state to reel
 
 **Goal:** Move status, dice, stakes, and off count logic from old handler to new
 handler.
+
+#### Recon: Focused Context for Drive B
+
+**Core Principles:**
+
+- **Simplification Imperative** (PRD §113-126): Use reel's single `changed`
+  event handler; don't create new local signals
+- **Check paths, not signals** (PRD §145-147): Use
+  `_.some(_.eq(_, path), changed)` to detect what changed
+- **Parallel Migration** (PRD §127-147): Move logic incrementally; both handlers
+  run until old is empty
+
+**Key Mappings (PRD §54-98):**
+
+- `moment($story)` (old) → `perspective.game` (new) — fully-formed game snapshot
+- Access via `curr.perspective.state` for game state properties
+- `perspective` contains: `up`, `may`, `seen`, `event`, `state`, `game`,
+  `actor`, `actionable`
+
+**Dependencies:**
+
+- ✓ Drive A complete: `$wip` extracted, both handlers active
+- → No forward dependencies
+
+**Verification Strategy:**
+
+1. Navigate timeline forward/backward
+2. Verify `data-status`, `data-dice`, `data-stakes` update from new handler
+3. Comment out old handler logic → verify still works
+4. Check console: no errors, clean state transitions
 
 #### [MODIFY] [main.js](file:///Users/mlanza/Documents/meeplitis/src/games/backgammon/table/alt/main.js)
 
@@ -131,6 +188,38 @@ migration.
 **Goal:** Move checker positioning and navigation logic from old handler to new
 handler.
 
+#### Recon: Focused Context for Drive C
+
+**Core Principles:**
+
+- **Cursor Navigation** (PRD §86-93): Handle arbitrary timeline jumps, not just
+  sequential steps
+- **Data First** (AGENTS §2.1): Derive `bwd`, `present` from cursor state; don't
+  store separately
+- **One-Way Dataflow** (AGENTS §2.1): Cursor changes → derive direction → update
+  DOM
+
+**Key Mappings (PRD §54-98):**
+
+- Derive `bwd` from `curr.cursor.direction === -1`
+- Derive `present` from `curr.cursor.pos === curr.cursor.max`
+- Cursor structure: `{ pos: 32, at: "ykEi3", max: 32, direction: -1 }`
+- Check `["cursor"]` or `["perspective"]` in changed array
+
+**Dependencies:**
+
+- ✓ Drive B complete: basic state migration working
+- → Requires `getCheckers()` and `diffCheckers()` functions (already exist)
+- → No forward dependencies
+
+**Verification Strategy:**
+
+1. Press Left Arrow → `data-bwd` should be "true", checkers move backward
+2. Press Right Arrow → `data-bwd` should be "false", checkers move forward
+3. Press Shift+Left → jump to inception, checkers reset
+4. Press Shift+Right → jump to present, checkers at final positions
+5. Verify smooth animations from new handler
+
 #### [MODIFY] [main.js](file:///Users/mlanza/Documents/meeplitis/src/games/backgammon/table/alt/main.js)
 
 **In the `changed` handler**, add cursor/checker logic:
@@ -155,6 +244,38 @@ checkers animate properly from new handler.
 **Goal:** Move game object access and move calculation from old handler to new
 handler.
 
+#### Recon: Focused Context for Drive D
+
+**Core Principles:**
+
+- **Functional Core** (AGENTS §2.1): Game logic is pure; `g.moves()` calculates
+  valid moves
+- **Make Illegal States Unrepresentable** (AGENTS §2.6): Only show valid moves;
+  UI reflects game rules
+- **Data First** (AGENTS §2.1): Game object contains all move logic; query it,
+  don't duplicate
+
+**Key Mappings (PRD §54-98):**
+
+- `moment($story)` (old) → `curr.perspective.game` (new)
+- Game object has `moves` method: `g.moves(game, ...)`
+- Update `data-allow-commands` with command types (roll, move, commit, etc.)
+- Update `data-froms` with valid source positions for moves
+
+**Dependencies:**
+
+- ✓ Drive C complete: cursor and checker positioning working
+- → Requires `manageStacks(state)` function (already exists)
+- → No forward dependencies
+
+**Verification Strategy:**
+
+1. Navigate to a position where it's your turn
+2. Verify valid pieces are highlighted (data-froms)
+3. Click a piece → destinations should highlight
+4. Verify only legal moves are shown
+5. Check `data-allow-commands` reflects available actions
+
 #### [MODIFY] [main.js](file:///Users/mlanza/Documents/meeplitis/src/games/backgammon/table/alt/main.js)
 
 **In the `changed` handler**, add game/moves logic:
@@ -175,6 +296,39 @@ options from new handler.
 ### Drive E: Migrate event handlers to reel dispatch
 
 **Goal:** Update all click and keyboard handlers to dispatch through reel.
+
+#### Recon: Focused Context for Drive E
+
+**Core Principles:**
+
+- **One-Way Dataflow** (AGENTS §2.1): DOM events → dispatch → simulation →
+  render
+- **Swap, Don't Mutate** (AGENTS §2.1): All state changes via dispatch, not
+  direct mutation
+- **Functional Core, Imperative Shell** (AGENTS §2.1): Event handlers are shell;
+  they dispatch to core
+
+**Key Mappings (PRD §54-98):**
+
+- `$.dispatch($story, ...)` (old) →
+  `$.dispatch($reel, {type: "move", details: {move: ...}})` (new)
+- `$wip` already extracted in Drive A; all `clear($wip)` calls work unchanged
+- Navigation commands (forward, backward, etc.) already work with reel
+
+**Dependencies:**
+
+- ✓ Drive D complete: game/moves logic working
+- → Requires `getMove()` function (already exists)
+- → No forward dependencies
+
+**Verification Strategy:**
+
+1. Click a piece → should select it (via reel dispatch)
+2. Click destination → should make move (via reel dispatch)
+3. Press Escape → should clear selection (clear($wip))
+4. Click "Roll" button → should roll dice
+5. Test all keyboard shortcuts (arrows, Enter, Escape)
+6. Verify error handling: invalid moves should clear $wip
 
 #### [MODIFY] [main.js](file:///Users/mlanza/Documents/meeplitis/src/games/backgammon/table/alt/main.js)
 
@@ -199,6 +353,40 @@ navigation.
 ### Drive F: Remove old highway
 
 **Goal:** Remove the old subscription handler once all logic has been migrated.
+
+#### Recon: Focused Context for Drive F
+
+**Core Principles:**
+
+- **Simplification Imperative** (PRD §113-126): Remove complexity; one event
+  handler, not many signals
+- **Definition of Done** (AGENTS §4.3): CLI-verified, side-by-side tested, fully
+  working
+- **Parallel Migration Complete** (PRD §127-147): Old highway empty; safe to
+  remove
+
+**Key Cleanup:**
+
+- Remove `$.sub($both, ...)` subscription (should be empty/commented by now)
+- Remove `$both` signal creation
+- Remove `reg({ $both, g })` call
+- Remove unused imports: `ui`, `diff`, `which`, `moment` from table.js/story.js
+- Remove debug console.log from `changed` handler
+
+**Dependencies:**
+
+- ✓ Drives A-E complete: ALL logic migrated to new handler
+- → No forward dependencies
+- → This is the final drive
+
+**Verification Strategy:**
+
+1. Complete side-by-side testing with uJl implementation
+2. Run through entire game: roll, move, commit, navigate timeline
+3. Verify identical behavior to uJl version
+4. Check console: no errors, clean output
+5. Verify table.js and story.js are no longer needed
+6. Run CLI: `cli.js QDaitfgARpk --seat 0 --changed "*"` → confirm clean state
 
 #### [MODIFY] [main.js](file:///Users/mlanza/Documents/meeplitis/src/games/backgammon/table/alt/main.js)
 

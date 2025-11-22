@@ -23,10 +23,13 @@ function elideWith(keys, f){
   }
 }
 
+const hidden = _.constantly(`<hidden>`);
+const entries = (value) => `<${_.count(value)} entries>`;
+
 const abbr = _.pipe(
-  elideWith(["perspective"], elideWith(["game"], (value) => `<hidden>`)),
-  elideWith(["perspective"], elideWith(["state"], (value) => `<${_.count(value)} entries>`)),
-  elideWith(["touches","perspectives","seated","table"], (value) => `<${_.count(value)} entries>`));
+  elideWith(["perspective"], elideWith(["game"], hidden)),
+  elideWith(["perspective"], elideWith(["state"], entries)),
+  elideWith(["touches","perspectives","seated","table"], entries));
 
 const abbrEvent = _.pipe(
   elideWith(["details"], elideWith(["root"], (value) => `<hidden>`)));

@@ -32,10 +32,10 @@ const abbr = _.pipe(
   elideWith(["touches","perspectives","seated","table"], entries));
 
 const abbrEvent = _.pipe(
-  elideWith(["details"], elideWith(["root"], (value) => `<hidden>`)));
+  elideWith(["details"], elideWith(["root"], hidden)));
 
 const abbrChanged = _.pipe(
-  elideWith(["details"], elideWith(["hist"], (value) => `<hidden>`)));
+  elideWith(["details"], elideWith(["hist"], hidden)));
 
 const log = _.comp(logs, abbr);
 

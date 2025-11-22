@@ -328,6 +328,9 @@ reg({ $both, g });
 $.on($reel, "changed", function({ details: { changed, hist: [curr, prior] = [] } = {} }){
   const ctx = "main";
   console.log({ ctx, changed, curr, prior });
+  if (_.some(_.eq(_, ["wip"]), changed)) {
+    return;
+  }
 
   if (_.some(_.eq(_, ["perspective"]), changed)) {
     const { state, up } = curr.perspective || {};
@@ -344,9 +347,15 @@ $.on($reel, "changed", function({ details: { changed, hist: [curr, prior] = [] }
       _.join(" ", _),
       dom.attr(el, "data-dice", _));
 
-    $.eachIndexed(function(seat, off){
-      dom.text(dom.sel1(`[data-seat="${seat}"] span.off`, el), off);
-    }, off);
+    const checkers = getCheckers(state);
+    if (prior.perspective) {
+      $.eachIndexed(function(seat, off){
+        dom.text(dom.sel1(`[data-seat="${seat}"] span.off`, el), off);
+      }, off);
+      updatePositioning(diffCheckers(checkers, getCheckers(prior.perspective.state)));
+    } else {
+      initialPositioning(checkers);
+    }
   }
 });
 
@@ -356,17 +365,15 @@ $.sub($both, function ([[curr, prior, motion, game], wip, which]) {
   const { status, dice, off, stakes, holdsCube } = state;
   const { present } = motion;
 
-  if (which !== 1) {
+  /*if (which !== 1) {
     const checkers = getCheckers(curr.state);
     if (prior) {
       // $.eachIndexed(function(seat, off){
       //   dom.text(dom.sel1(`[data-seat="${seat}"] span.off`, el), off);
       // }, off);
-      updatePositioning(diffCheckers(checkers, getCheckers(prior.state)));
     } else {
-      initialPositioning(checkers);
     }
-  }
+  }*/
 
   // dom.attr(el, "data-stakes", stakes);
   // dom.text(dom.sel1("#cube", el), _.clamp(stakes, 2, 64));

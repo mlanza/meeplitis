@@ -401,7 +401,10 @@ function dispatch(self, command){
   //whenever the user acts, the timer stops
   self.$timer.stop();
 
+  console.log("dispatch", {command});
+
   switch (type) {
+    case "back":
     case "backward":
       $.swap(self.$timeline, r.backward);
       break;

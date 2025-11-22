@@ -9,7 +9,9 @@ import {relink} from "../links.js";
 
 const params = new URLSearchParams(location.search);
 const tableId = params.get('id');
-export const seat = _.count(seats) > 1 ? _.maybe(params.get("seat"), parseInt) : _.first(seats);
+//TODO export const seat = _.count(seats) > 1 ? _.maybe(params.get("seat"), parseInt) : _.first(seats);
+
+export const seat = _.maybe(params.get("seat"), parseInt);
 
 const {div, h1, a, span, img, ol, ul, li, sup} = dom.tags(['div', 'h1', 'a', 'span', 'img', 'ol', 'ul', 'li', 'sup']);
 

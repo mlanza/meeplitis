@@ -415,6 +415,7 @@ function dispatch(self, command){
       break;
 
     case "at":
+      console.log({command});
       $.swap(self.$timeline, r.at(details.at));
       break;
 

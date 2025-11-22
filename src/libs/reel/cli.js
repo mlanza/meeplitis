@@ -45,12 +45,11 @@ async function interactive(run) {
       if (event.key === "q" || event.key === "escape") {
         Deno.exit();
       } else if (event.key === "c") {
-        const text = await Input.prompt("Command:");
-        command(run, text);
+        const cmd = await Input.prompt("Command:");
+        command(run, cmd);
       } else if (event.key === "m") {
-        const text = await Input.prompt("Move:");
-        const move = JSON.parse(text);
-        command(run, {cmd: "move", details: {move}});
+        const move = await Input.prompt("Move:");
+        command(run, `move ${move}`);
       } else if (event.key === "right") {
         run({type: event.shiftKey ? "present" : "forward"});
       } else if (event.key === "left") {
@@ -72,16 +71,29 @@ async function requestCommand(){
 
 const command = _.partly(async function(run, text){
   try {
-    const [, type, dtls] = text.match(/^(\S+)(?:\s+(.*))?$/) || [];
-    const details = JSON.parse(dtls || "null");
-    console.log("dispatching", {type, details});
+    const [, type, body] = text.match(/^(\S+)(?:\s+(.*))?$/) || [];
+    //console.log("dispatching", {type, body});
     switch (type) {
       case "exit":
         Deno.exit();
         break;
 
-      default:
+      case "at": {
+        const at = body;
+        const details = {at};
         run({type, details});
+        break;
+      }
+
+      case "move": {
+        const move = JSON.parse(body);
+        const details = {move};
+        run({type, details});
+        break;
+      }
+
+      default:
+        run({type});
         break;
     }
   } catch (ex) {
@@ -97,6 +109,7 @@ new Command()
   .option("--blind", "Don't observe updates.")
   .option("--chan <name:string>", "Observe a channel.", { collect: true })
   .option("--changed <path:string>", "Observe a changed event.", { collect: true })
+  .option("--at <event:string>", "Naviate to designated moment.")
   .option("-c, --command <command:string>", "Issue a command.", { collect: true })
   .option("-i, --interactive", "Navigate via keypress.")
   .example(
@@ -116,6 +129,7 @@ new Command()
     const $reel = reel(tableId, seat);
     const $perspective = $.pipe($.chan($reel, "perspective"), _.compact());
     const run = $.dispatch($reel, _);
+    const commands = opts.command || [];
 
     opts.blind || $.sub($reel, log);
 
@@ -131,9 +145,13 @@ new Command()
       }
     }, opts.changed);
 
+    if (opts.at){
+      commands.unshift(`at ${opts.at}`);
+    }
+
     $.sub($perspective, _.once(function(){
-      $.each(command(run, _), opts.command);
-      opts.interactive || Deno.exit();
+      $.each(command(run, _), commands);
+      opts.interactive || setTimeout(Deno.exit, 500);
     }));
 
     if (opts.interactive) {

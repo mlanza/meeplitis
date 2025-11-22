@@ -91,7 +91,7 @@ new Command()
   .description("Navigate and append to board game timeline")
   .arguments("<table:string>")
   .option("--seat <seat:integer>", "Seat index.")
-  .option("--inside", "Observe updates inside the signal.")
+  .option("--blind", "Don't observe updates.")
   .option("--chan <name:string>", "Observe a channel.", {collect: true})
   .option("--changed <path:string>", "Observe a changed event.", {collect: true})
   .option("-c, --command <command:string>", "Issue a command.", {collect: true})
@@ -114,7 +114,7 @@ new Command()
     const $perspective = $.pipe($.chan($reel, "perspective"), _.compact());
     const run = $.dispatch($reel, _);
 
-    opts.inside && $.sub($reel, log);
+    opts.blind || $.sub($reel, log);
 
     $.each(function(name){
       $.on($reel, name, $.see(name));

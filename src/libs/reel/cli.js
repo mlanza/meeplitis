@@ -43,6 +43,10 @@ async function interactive(run) {
     } else if (event.key === "0") {
       const text = await Input.prompt("Command:");
       command(run, text);
+    } else if (event.key === "m") {
+      const text = await Input.prompt("Move:");
+      const move = JSON.parse(text);
+      command(run, {cmd: "move", details: {move}});
     } else if (event.key === "right") {
       run({type: event.shiftKey ? "present" : "forward"});
     } else if (event.key === "left") {

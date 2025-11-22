@@ -113,6 +113,10 @@ new Command()
   .option("-c, --command <command:string>", "Issue a command.", { collect: true })
   .option("-i, --interactive", "Navigate via keypress.")
   .example(
+    "Jump to a moment in time",
+    "reel <table> --seat <seat> --at <event>"
+  )
+  .example(
     "Observe multiple channels",
     "reel <table> --seat <seat> --chan table --chan perspective"
   )

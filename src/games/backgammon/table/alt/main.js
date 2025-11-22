@@ -331,7 +331,6 @@ $.on($reel, "changed", function({ details: { changed, hist: [curr, prior] = [] }
 
   if (_.some(_.eq(_, ["perspective"]), changed)) {
     const { state, up } = curr.perspective || {};
-    if (!state) return;
     const { status, dice, off, stakes, holdsCube } = state;
 
     dom.attr(el, "data-stakes", stakes);

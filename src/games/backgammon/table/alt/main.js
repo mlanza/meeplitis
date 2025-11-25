@@ -54,6 +54,7 @@ function relativeRank(seat, details){
   return {...details, from, to};
 }
 
+//TODO `seated` was added
 function desc(seated, {type, details, seat}){
   switch(type) {
     case "rolled":
@@ -364,71 +365,15 @@ $.on($reel, "changed", function({ details: { bwd, present, changed, hist: [curr,
     return present ? workingCommand(wip, seat, state, game, el, moves) : null;
   }
 });
-/*
-$.sub($both, function ([[curr, prior, motion, game], wip, which]) {
-  const { state, up } = curr;
-  if (!state) return;
-  const { status, dice, off, stakes, holdsCube } = state;
-  const { present } = motion;
-
-  if (which !== 1) {
-    const checkers = getCheckers(curr.state);
-    if (prior) {
-      // $.eachIndexed(function(seat, off){
-      //   dom.text(dom.sel1(`[data-seat="${seat}"] span.off`, el), off);
-      // }, off);
-    } else {
-    }
-  }
-
-  // dom.attr(el, "data-stakes", stakes);
-  // dom.text(dom.sel1("#cube", el), _.clamp(stakes, 2, 64));
-  // dom.attr(el, "data-up", up);
-  // dom.attr(el, "data-holds-cube", holdsCube);
-
-  const moves = g.moves(game, { type: ["move", "enter", "bear-off"], seat });
-
-  _.chain(g.moves(game, { type: ["roll", "commit", "propose-double", "accept", "concede"], seat }),
-    _.map(_.get(_, "type"), _),
-    _.distinct,
-    _.join(" ", _),
-    _.trim,
-    dom.attr(el, "data-allow-commands", _));
-
-  // _.chain(dice,
-  //   _.map(_.str, _),
-  //   _.join(" ", _),
-  //   dom.attr(el, "data-dice", _));
-
-  _.chain(
-    moves,
-    _.groupBy(_.getIn(_, ["details", "from"]), _),
-    _.keys,
-    _.join(" ", _),
-    dom.attr(el, "data-froms", _));
-
-  //manageStacks(state);
-
-  // dom.attr(el, "data-status", status);
-  //dom.removeClass(el, "error");
-
-  if (which === 1) {
-    return present ? workingCommand(wip, seat, state, game, el, moves) : null;
-  }
-});
-*/
-function issueMove(move){
-  return {type: "move", details: {move}};
-}
 
 $.each(function(type){
   $.on(el, "click", `#table.act button[data-type="${type}"]`, function(e){
-    $.dispatch($reel, issueMove({type}));
+    $.dispatch($reel, {type});
   });
 }, ["roll", "commit", "propose-double", "accept", "concede"]);
 
 $.on(el, "click", `#table.act[data-allow-commands~="propose-double"] #cube`, function(e){
-  $.dispatch($reel, issueMove({type: "propose-double"}));
+  $.dispatch($reel, {type: "propose-double"});
 });
 
 $.on(el, "click", `#table.act[data-from] .off-board`, function(e){
@@ -441,7 +386,7 @@ $.on(el, "click", `#table.act[data-from] .off-board`, function(e){
     _.detect(function(cmd){
       return cmd.type === 'bear-off' && cmd?.details?.from === from;
     }, _),
-    move => $.dispatch($reel, issueMove(move)));
+    $.dispatch($reel, _));
 
   $.reset($wip, null);
 });
@@ -452,7 +397,7 @@ $.on(el, "click", `#table.act[data-from] .point path:nth-child(2)`, function(e){
   const game = _.chain($reel, _.deref, _.getIn(_, ["perspective", "game"]));
   const move = getMove({from, to}, game, seat);
   if (move) {
-    $.dispatch($reel, issueMove(move));
+    $.dispatch($reel, move);
     $.reset($wip, null);
   }
 });

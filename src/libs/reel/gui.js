@@ -113,14 +113,14 @@ export const els = {
 }
 
 export const $reel = reel(tableId, seat);
-export const $work = $.chan($reel, "wip");
+export const $wip = $.chan($reel, "wip");
 export const $table = $.chan($reel, "table");
 export const $changed = $.chan($reel, "changed");
-const $error = $.chan($reel, "error");
+export const $error = $.chan($reel, "error");
 
 const run = $.dispatch($reel, _);
 
-reg({ $reel, $work, $changed, $table, $error });
+reg({ $reel, $wip, $changed, $table, $error });
 
 _.maybe(dom.sel1(`[data-seat='${seat}']`, el), dom.addClass(_, "yours"));
 dom.attr(el, "data-perspective", seat);
@@ -228,11 +228,11 @@ $.on($reel, "changed", function({ details: { bwd, step, offset, present, changed
   dom.toggleClass(el, "bwd", bwd);
 
   if (!ready) {
-    clear($work);
+    clear($wip);
   }
 
   if (!!error) {
-    clear($work);
+    clear($wip);
   }
 
   if (actor) {
@@ -278,7 +278,7 @@ $.on(document, "keydown", function(e){
 
     case "Escape": //cancel work in progress and/or clear error
       e.preventDefault();
-      clear($work);
+      clear($wip);
       $.reset($error, null);
       break;
 

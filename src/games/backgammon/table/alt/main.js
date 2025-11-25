@@ -3,7 +3,7 @@ import $ from "/libs/atomic_/shell.js";
 import dom from "/libs/atomic_/dom.js";
 import * as c from "./core.js";
 import * as g from "/libs/game.js";
-import { $reel, $work, gui, seat, el, outcome, scored, diff, closestAttr, retainAttr } from "/libs/reel/gui.js";
+import { $reel, $wip, gui, seat, el, outcome, scored, diff, closestAttr, retainAttr } from "/libs/reel/gui.js";
 import {moment} from "/libs/story.js";
 import {describe} from "./ancillary.js";
 import {seated, ui, which} from "/libs/table.js";
@@ -432,7 +432,7 @@ $.on(el, "click", `#table.act[data-allow-commands~="propose-double"] #cube`, fun
 });
 
 $.on(el, "click", `#table.act[data-from] .off-board`, function(e){
-  const from = _.chain($work, _.deref, _.getIn(_, ["details", "from"]), asPoint);
+  const from = _.chain($wip, _.deref, _.getIn(_, ["details", "from"]), asPoint);
   const game = _.chain($reel, _.deref, _.getIn(_, ["perspective", "game"]));
   const seat = g.up(game)[0];
 
@@ -443,17 +443,17 @@ $.on(el, "click", `#table.act[data-from] .off-board`, function(e){
     }, _),
     move => $.dispatch($reel, issueMove(move)));
 
-  $.reset($work, null);
+  $.reset($wip, null);
 });
 
 $.on(el, "click", `#table.act[data-from] .point path:nth-child(2)`, function(e){
   const to = _.chain(dom.attr(_.closest(this, "g"), "id"), _.split(_, "-"), _.last, parseInt);
-  const from = _.chain($work, _.deref, _.getIn(_, ["details", "from"]), asPoint);
+  const from = _.chain($wip, _.deref, _.getIn(_, ["details", "from"]), asPoint);
   const game = _.chain($reel, _.deref, _.getIn(_, ["perspective", "game"]));
   const move = getMove({from, to}, game, seat);
   if (move) {
     $.dispatch($reel, issueMove(move));
-    $.reset($work, null);
+    $.reset($wip, null);
   }
 });
 
@@ -463,12 +463,12 @@ $.on(el, "click", `#table.act[data-froms] .point path:nth-child(2)`, function(e)
   const from = _.chain(dom.attr(g, "id"), _.split(_, "-"), _.last, asPoint, parseInt);
   const game = _.chain($reel, _.deref, _.getIn(_, ["perspective", "game"]));
   if (getMove({from}, game, seat)) {
-    $.reset($work, {type, details: {from}});
+    $.reset($wip, {type, details: {from}});
   }
 });
 
 $.on(el, "click", `#table.act[data-froms] .bar`, function(e){
   const from = asPoint(this.id);
   const type = "enter";
-  $.reset($work, {type, details: {from}});
+  $.reset($wip, {type, details: {from}});
 });

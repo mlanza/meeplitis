@@ -3,7 +3,7 @@ import $ from "/libs/atomic_/shell.js";
 import dom from "/libs/atomic_/dom.js";
 import * as c from "./core.js";
 import * as g from "/libs/game.js";
-import { $reel, $work, seat, el, outcome, scored, diff, closestAttr, retainAttr } from "/libs/reel/gui.js";
+import { $reel, $work, gui, seat, el, outcome, scored, diff, closestAttr, retainAttr } from "/libs/reel/gui.js";
 import {moment} from "/libs/story.js";
 import {describe} from "./ancillary.js";
 import {seated, ui, which} from "/libs/table.js";
@@ -311,15 +311,16 @@ function getMove({from, to}, game, seat) {
 
 const {$ready, $error, $story, $hist, $snapshot, $wip} =  ui(c.make, describe, desc, template);
 
-$.on($reel, "changed", function({ details: { changed, hist: [curr, prior] = [] } = {} }){
-  const ctx = "main";
-  const present = curr?.cursor?.pos === curr?.cursor?.max;
+gui(describe, desc, template);
 
-  console.log({ present, ctx, changed, curr, prior });
+$.on($reel, "changed", function({ details: { bwd, present, changed, hist: [curr, prior] = [] } = {} }){
+  const ctx = "main";
 
   const { seat, wip } = curr || {};
   const { state, up, game } = curr.perspective || {};
   const { status, dice, off, stakes, holdsCube } = state || {};
+
+  console.log({ ctx, bwd, present, game, changed, curr, prior });
 
   if (!game) {
     return;

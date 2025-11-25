@@ -341,11 +341,13 @@ export function reel(tableId, seat){
       }, _));
   });
 
-  $.sub($state, function(state){
-    console.log("Reel State:", state);
-  });
-
-  const $changed = changes($state);
+  const $changed = $.pipe($.map(function({type, details}){
+    const {hist} = details;
+    const [curr, prior] = hist;
+    const bwd = curr?.cursor?.pos < prior?.cursor?.pos;
+    const present = curr?.cursor?.pos === curr?.cursor?.max;
+    return {type, details: {bwd, present, ...details}};
+  }, changes($state)), _.compact());
 
   return new Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $wip, $changed);
 }
@@ -370,6 +372,9 @@ function Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $und
 function chan(self, key){
   if (key === "changed") {
     return self.$changed;
+  }
+  if (key === "wip") {
+    return self.$wip;
   }
   if (!_.get(self.channels, key)){
     if (_.startsWith(key, "changed:")) {

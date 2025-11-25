@@ -1,11 +1,12 @@
 import _ from "../atomic_/core.js";
 import $ from "../atomic_/shell.js";
 import dom from "../atomic_/dom.js";
-import { reel } from "./shell.js";
-import { reg } from "../cmd.js";
 import supabase from "../supabase.js";
 import { session } from "../session.js";
-import {relink} from "../links.js";
+import { reg } from "../cmd.js";
+import { reel } from "./shell.js";
+import { relink } from "../links.js";
+import { clear } from "../wip.js";
 
 const params = new URLSearchParams(location.search);
 const tableId = params.get('id');
@@ -105,14 +106,125 @@ export const els = {
 
 export const $reel = reel(tableId, seat);
 export const $work = $.chan($reel, "wip");
+export const $table = $.chan($reel, "table");
 const $error = $.chan($reel, "error");
 const run = $.dispatch($reel, _);
 
 reg({ $reel, $work });
 
-$.on($reel, "changed", function({ details: { changed, hist: [curr, prior] = [] } = {} }){
+_.maybe(dom.sel1(`[data-seat='${seat}']`, el), dom.addClass(_, "yours"));
+dom.attr(el, "data-perspective", seat);
+
+export function gui(describe, desc, template){
+  const $seated = $.pipe($.chan($reel, "seated"), _.compact());
+  const $seats = $.pipe($.chan($reel, "seats"), _.compact());
+  const $described = $.map(_.pipe(_.get(_, "config"), describe), $table);
+  const $event = $.pipe($.map(_.get(_, "event"), $.chan($reel, "perspective")), _.compact());
+
+  $.sub($seats, _.once(function(seats){
+    dom.toggleClass(el, "switch-seats", _.count(seats) > 1);
+  }));
+
+  $.sub($seated, _.once(function(seated){
+    dom.attr(el, "data-seats", _.count(seated));
+
+    //$.sub($event, _.opt(_.partial(desc, seated), dom.html(dom.sel1("p", els.event), _)));
+
+    $.eachIndexed(function(seat, {username, avatar_url}){
+      const delegate = _.getIn(seated, [seat, "delegate_id"]);
+      dom.append(els.players, zone(seat, username, avatar_url, delegate, template(seat)));
+    }, seated);
+
+       /* $.eachIndexed(function(seat){
+          dom.attr(dom.sel1(`[data-seat="${seat}"] [data-action]`, els.players), "data-action", _.includes(up, seat) ? "must" : (_.includes(may, seat) ? "may" : ""));
+        }, seated);*/
+
+
+    const multiSeated = _.count(_.unique(_.map(_.get(_, "player_id"), seated))) != _.count(seated);
+    dom.toggleClass(el, "multi-seated", multiSeated);
+    dom.toggleClass(el, "dev", params.get("dev") == 1);
+
+    params.get("listed") && dom.attr(dom.sel1("#title", el), "href", href => relink(href, {id: null}, null));
+  }));
+
+  $.sub($described, function(described){
+    dom.toggleClass(els.options, "none", !_.seq(described));
+    dom.text(dom.sel1("#options p", el), _.join(", ", described));
+  });
+
+}
+
+$.sub($error, _.filter(_.isSome), function(error){
+  const {message} = error;
+  dom.text(dom.sel1("#error p", el), message);
+  dom.addClass(el, "error");
+  dom.removeClass(el, "ack");
+  addLog(message, {tableId});
+});
+
+$.on($reel, "changed", function({ details: { bwd, present, changed, hist: [curr, prior] = [] } = {} }){
   const ctx = "gui";
-  console.log({ ctx, changed, curr, prior });
+  const { seat, wip, table, act, up, cursor, undoable, ready, error } = curr || {};
+  const { state, game, event, actor } = curr?.perspective || {};
+  const { status, dice, off, stakes, holdsCube } = state || {};
+  const { remark } = table || {};
+  const actionable = _.includes(curr?.perspective?.up, seat) || _.includes(curr?.perspective?.may, seat);
+  const undoer = _.detectIndex(_.comp(_.eq(curr?.last_acting_seat, _), _.get(_, "seat_id")), curr?.seated);
+
+  if (!game) {
+    return;
+  }
+
+  console.log({ ctx, bwd, present, game, event, changed, curr, prior });
+
+  dom.value(els.progress, cursor?.pos + 1);
+  dom.attr(els.progress, "max", cursor?.max + 1);
+  dom.text(els.touch, cursor?.pos + 1);
+  dom.text(els.touches, cursor?.max + 1);
+
+  dom.removeClass(el, "ack");
+  dom.removeClass(el, "error");
+  dom.toggleClass(el, "wait", !ready)
+  dom.toggleClass(el, "act", act);
+  dom.toggleClass(el, "up", up);
+  dom.toggleClass(el, "present", present);
+  dom.attr(el, "data-table-status", table?.status);
+
+  dom.toggleClass(els.remarks, "none", !remark);
+  dom.text(dom.sel1("#remarks p", el), remark);
+
+  event && $.doto(els.event,
+    dom.attr(_, "data-type", event?.type),
+    dom.addClass(_, "posted"),
+    dom.removeClass(_, "hidden"));
+
+  setTimeout(function(){
+    dom.removeClass(els.event, "posted");
+  }, 300);
+
+  dom.attr(el, "data-event-type", event?.type);
+  dom.attr(el, "data-undoable", undoable == event?.id ? "1" : undoable ? "0" : null);
+  dom.attr(el, "data-undoer", seat == undoer);
+  //dom.html(dom.sel1("p", els.event), desc(event));
+  //dom.text(dom.sel1("span.seat", els.event), event.seat);
+  dom.toggleClass(els.event, "automatic", !actor);
+  dom.toggleClass(el, "bwd", bwd);
+
+  if (!ready) {
+    clear($work);
+  }
+
+  if (!!error) {
+    clear($work);
+  }
+
+  if (actor) {
+    dom.attr(dom.sel1("img.who", els.event), "src", actor.avatar_url);
+    dom.text(dom.sel1("p.who", els.event), actor.username);
+  }
+
+  dom.addClass(el, "init");
+
 });
 
 $.on(el, "click", "#replay [data-nav]", function(e){
@@ -123,6 +235,9 @@ $.on(el, "click", "#replay [data-nav]", function(e){
 $.on(el, "click", ".message", function(e){
   dom.addClass(el, "ack");
 });
+
+const $depressed = $.map(_.pipe(_.join(" ", _), _.lowerCase), dom.depressed(document.body));
+$.sub($depressed, dom.attr(el, "data-depressed", _));
 
 $.on(document, "keydown", function(e){
   switch(e.key){
@@ -147,7 +262,7 @@ $.on(document, "keydown", function(e){
 
     case "Escape": //cancel work in progress and/or clear error
       e.preventDefault();
-      clear($wip);
+      clear($work);
       $.reset($error, null);
       break;
 

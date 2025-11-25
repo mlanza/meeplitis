@@ -141,8 +141,10 @@ export function gui(describe, desc, template){
       up && may && $.eachIndexed(function(seat){
         dom.attr(dom.sel1(`[data-seat="${seat}"] [data-action]`, els.players), "data-action", _.includes(up, seat) ? "must" : (_.includes(may, seat) ? "may" : ""));
       }, seated);
-      dom.html(dom.sel1("p", els.event), desc(event));
-      dom.text(dom.sel1("span.seat", els.event), event?.seat);
+      if (event) {
+        dom.html(dom.sel1("p", els.event), desc(seated, event));
+        dom.text(dom.sel1("span.seat", els.event), event?.seat);
+      }
     });
 
     const $presence = presence($online,
@@ -198,6 +200,10 @@ $.on($reel, "changed", function({ details: { bwd, present, changed, hist: [curr,
   }
 
   console.log({ ctx, bwd, present, game, event, changed, curr, prior });
+
+  if (!_.some(_.includes(_, "cursor"), _)) {
+    return;
+  }
 
   dom.value(els.progress, cursor?.pos + 1);
   dom.attr(els.progress, "max", cursor?.max + 1);
@@ -317,4 +323,3 @@ $.on(el, "click", "#replay [data-nav]", function(e){
 $.on(el, "click", ".message", function(e){
   dom.addClass(el, "ack");
 });
-

@@ -8,12 +8,8 @@ import { session } from "../session.js";
 function diff(hist = [], max = 0, depth = 0, address = []) {
   const [curr, prior] = hist || [];
 
-  // Check if either value is null - if so, report only this path without drilling down
-  const currIsNullish = curr == null;
-  const priorIsNullish = prior == null;
-
   // If transitioning from/to null, report this path only (don't drill into sub-paths)
-  if (currIsNullish || priorIsNullish) {
+  if (curr == null || prior == null) {
     return _.eq(curr, prior) ? [] : [address];
   }
 

@@ -137,11 +137,11 @@ export function gui(describe, desc, template){
     dom.attr(el, "data-seats", _.count(seated));
 
     $.on($reel, "changed", function({ details: { changed, hist: [curr, prior] = [] } = {} }){
-      const {up, may, event} = curr?.perspective || {};
-      up && may && $.eachIndexed(function(seat){
-        dom.attr(dom.sel1(`[data-seat="${seat}"] [data-action]`, els.players), "data-action", _.includes(up, seat) ? "must" : (_.includes(may, seat) ? "may" : ""));
-      }, seated);
-      if (event && _.some(_.eq(_, ["perspective", "event"]), changed)) {
+      if (_.some(_.eq(_, ["perspective"]), changed)) {
+        const {up, may, event} = curr?.perspective || {};
+        $.eachIndexed(function(seat){
+          dom.attr(dom.sel1(`[data-seat="${seat}"] [data-action]`, els.players), "data-action", _.includes(up, seat) ? "must" : (_.includes(may, seat) ? "may" : ""));
+        }, seated);
         dom.html(dom.sel1("p", els.event), desc(seated, event));
         dom.text(dom.sel1("span.seat", els.event), event?.seat);
       }

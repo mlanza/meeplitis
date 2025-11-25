@@ -141,7 +141,7 @@ export function gui(describe, desc, template){
       up && may && $.eachIndexed(function(seat){
         dom.attr(dom.sel1(`[data-seat="${seat}"] [data-action]`, els.players), "data-action", _.includes(up, seat) ? "must" : (_.includes(may, seat) ? "may" : ""));
       }, seated);
-      if (event) {
+      if (event && _.some(_.eq(_, ["perspective", "event"]), changed)) {
         dom.html(dom.sel1("p", els.event), desc(seated, event));
         dom.text(dom.sel1("span.seat", els.event), event?.seat);
       }
@@ -201,7 +201,7 @@ $.on($reel, "changed", function({ details: { bwd, present, changed, hist: [curr,
 
   console.log({ ctx, bwd, present, game, event, changed, curr, prior });
 
-  if (!_.some(_.includes(_, "cursor"), _)) {
+  if (!_.some(_.eq(_, ["cursor"]), changed)) {
     return;
   }
 

@@ -54,7 +54,7 @@ function relativeRank(seat, details){
   return {...details, from, to};
 }
 
-function desc({type, details, seat}){
+function desc(seated, {type, details, seat}){
   switch(type) {
     case "rolled":
       const {dice} = details;
@@ -309,7 +309,7 @@ function getMove({from, to}, game, seat) {
   }, g.moves(game, { type: ["move", "enter", "bear-off"], seat }));
 }
 
-const {$ready, $error, $story, $hist, $snapshot, $wip} =  ui(c.make, describe, desc, template);
+//const {$ready, $error, $story, $hist, $snapshot, $wip} =  ui(c.make, describe, desc, template);
 
 gui(describe, desc, template);
 

@@ -163,6 +163,12 @@ function getTouches(_table_id, accessToken){
   return getfn('touches', {_table_id}, accessToken);
 }
 
+export function addLog(message, details = null){
+  return supabase
+    .from('logs')
+    .insert({ message, details });
+}
+
 function digest(result){
   const code  = result?.code,
         error = code == null ? null : result,

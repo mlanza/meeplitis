@@ -128,7 +128,6 @@ export function gui(describe, desc, template){
   const $seated = $.pipe($.chan($reel, "seated"), _.compact());
   const $seats = $.pipe($.chan($reel, "seats"), _.compact());
   const $described = $.map(_.pipe(_.get(_, "config"), describe), $table);
-  const $event = $.pipe($.map(_.get(_, "event"), $.chan($reel, "perspective")), _.compact());
 
   $.sub($seats, _.once(function(seats){
     dom.toggleClass(el, "switch-seats", _.count(seats) > 1);
@@ -138,10 +137,12 @@ export function gui(describe, desc, template){
     dom.attr(el, "data-seats", _.count(seated));
 
     $.on($reel, "changed", function({ details: { changed, hist: [curr, prior] = [] } = {} }){
-      const {up, may} = curr?.perspective || {};
+      const {up, may, event} = curr?.perspective || {};
       up && may && $.eachIndexed(function(seat){
         dom.attr(dom.sel1(`[data-seat="${seat}"] [data-action]`, els.players), "data-action", _.includes(up, seat) ? "must" : (_.includes(may, seat) ? "may" : ""));
       }, seated);
+      dom.html(dom.sel1("p", els.event), desc(event));
+      dom.text(dom.sel1("span.seat", els.event), event?.seat);
     });
 
     const $presence = presence($online,
@@ -157,8 +158,6 @@ export function gui(describe, desc, template){
         }, _));
       }, presence);
     });
-
-    $.sub($event, _.opt(_.partial(desc, seated), dom.html(dom.sel1("p", els.event), _)));
 
     $.eachIndexed(function(seat, {username, avatar_url}){
       const delegate = _.getIn(seated, [seat, "delegate_id"]);
@@ -228,8 +227,6 @@ $.on($reel, "changed", function({ details: { bwd, present, changed, hist: [curr,
   dom.attr(el, "data-event-type", event?.type);
   dom.attr(el, "data-undoable", undoable == event?.id ? "1" : undoable ? "0" : null);
   dom.attr(el, "data-undoer", seat == undoer);
-  //dom.html(dom.sel1("p", els.event), desc(event));
-  //dom.text(dom.sel1("span.seat", els.event), event.seat);
   dom.toggleClass(els.event, "automatic", !actor);
   dom.toggleClass(el, "bwd", bwd);
 

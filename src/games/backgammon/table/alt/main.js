@@ -6,7 +6,7 @@ import * as g from "/libs/game.js";
 import { $reel, $wip, gui, seat, el, outcome, scored, diff, closestAttr, retainAttr } from "/libs/reel/gui.js";
 import {moment} from "/libs/story.js";
 import {describe} from "./ancillary.js";
-import {seated, ui, which} from "/libs/table.js";
+import {ui} from "/libs/table.js";
 import {reg} from "/libs/cmd.js";
 
 const {img, div, span} = dom.tags(['img', 'div', 'span']);

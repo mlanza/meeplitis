@@ -351,8 +351,10 @@ export function reel(tableId, seat){
     const {hist} = details;
     const [curr, prior] = hist;
     const bwd = curr?.cursor?.pos < prior?.cursor?.pos;
+    const step = curr?.cursor?.pos - prior?.cursor?.pos;
+    const offset = curr?.cursor?.pos - curr?.cursor?.max;
     const present = curr?.cursor?.pos === curr?.cursor?.max;
-    return {type, details: {bwd, present, ...details}};
+    return {type, details: {bwd, step, offset, present, ...details}};
   }, changes($state)), _.compact());
 
   return new Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $wip, $changed);

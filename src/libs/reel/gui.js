@@ -187,7 +187,7 @@ $.sub($error, _.filter(_.isSome), function(error){
   addLog(message, {tableId});
 });
 
-$.on($reel, "changed", function({ details: { bwd, present, changed, hist: [curr, prior] = [] } = {} }){
+$.on($reel, "changed", function({ details: { bwd, step, offset, present, changed, hist: [curr, prior] = [] } = {} }){
   const ctx = "gui";
   const { seat, wip, table, act, up, cursor, undoable, ready, error } = curr || {};
   const { state, game, event, actor, actionable } = curr?.perspective || {};
@@ -199,7 +199,7 @@ $.on($reel, "changed", function({ details: { bwd, present, changed, hist: [curr,
     return;
   }
 
-  console.log({ ctx, bwd, present, game, event, changed, curr, prior });
+  console.log({ ctx, bwd, step, offset, present, game, event, changed, curr, prior });
 
   if (!_.some(_.eq(_, ["cursor"]), changed)) {
     return;

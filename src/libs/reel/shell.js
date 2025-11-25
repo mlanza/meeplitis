@@ -1,9 +1,10 @@
 import _ from "../atomic_/core.js";
 import $ from "../atomic_/shell.js";
 import * as r from "./core.js";
-import {wip, clear} from "../wip.js";
+import { wip, clear } from "../wip.js";
 import supabase from "../supabase.js";
 import { session } from "../session.js";
+import { timer } from "../timer/shell.js";
 
 function diff(hist = [], max = 0, depth = 0, address = []) {
   const [curr, prior] = hist || [];
@@ -42,86 +43,6 @@ function changes($state, max = 3, depth = 0){
     return {type: "changed", details: {hist, changed}};
   }, $.pipe($.hist($state), _.compact()));
 }
-
-/**
- * Creates a new signal that "ticks" at a specified interval.
- * This signal is a high-resolution timer that attempts to correct for drift,
- * making it more accurate than `setInterval` for long-running processes.
- *
- * The signal is an observable that starts ticking upon subscription and stops
- * when unsubscribed.
- *
- * @param {number} interval - The ticking interval in milliseconds.
- * @param {function} [f=Date.now] - A function to generate the value for each tick. It receives an object with details about the tick (frame, offage, target).
- * @returns {Observable} An observable that emits values at the specified interval.
- */
-function pacemaker(interval, f = Date.now) {
-  return $.observable(function(observer) {
-    const self = {
-      seed: performance.now(),
-      target: 0,
-      frame: 0,
-      stopped: false,
-      offage: 0
-    };
-    self.target = self.seed;
-
-    function callback() {
-      if (self.stopped) {
-        return;
-      }
-      self.offage = performance.now() - self.target;
-      if (self.offage >= 0) {
-        $.pub(observer, f(self));
-        self.frame += 1;
-        self.target = self.seed + self.frame * interval;
-      }
-      const delay = Math.abs(Math.round(Math.min(0, self.offage)));
-      if (!self.stopped) {
-        setTimeout(callback, delay);
-      }
-    }
-
-    setTimeout(callback, 0);
-
-    return function() {
-      self.stopped = true;
-      $.complete(observer);
-    };
-  });
-}
-
-function Timer(interval, f) {
-  this.interval = interval;
-  this.f = f;
-  this.$emitter = $.subject(); // Persistent subject for subscribers
-  this.unsub = null; // To hold the pacemaker's unsub function
-}
-
-Timer.prototype.start = function() {
-  console.log("START TIMER")
-  if (this.unsub === null) { // Only start if stopped
-    const $p = pacemaker(this.interval, this.f);
-    this.unsub = $.sub($p, (tick) => $.pub(this.$emitter, tick));
-  }
-};
-
-Timer.prototype.stop = function() {
-  console.log("STOP TIMER")
-  if (this.unsub !== null) { // Only stop if running
-    this.unsub();
-    this.unsub = null;
-  }
-};
-
-(function(){
-  function sub(self, observer) {
-    return $.sub(self.$emitter, observer);
-  }
-  $.doto(Timer,
-    _.implement($.ISubscribe, { sub })
-  );
-})();
 
 function keeping(keys){
   const keep = _.includes(keys, _);
@@ -225,6 +146,21 @@ function undoThru(undoables, touch){
   }, undoables);
 }
 
+function reifyMotion({type, details}){
+  const {hist} = details;
+  const [curr, prior] = hist;
+  const bwd = curr?.cursor?.pos < prior?.cursor?.pos;
+  const step = curr?.cursor?.pos - prior?.cursor?.pos;
+  const offset = curr?.cursor?.pos - curr?.cursor?.max;
+  const present = curr?.cursor?.pos === curr?.cursor?.max;
+  return {type, details: {bwd, step, offset, present, ...details}};
+}
+
+function perspectiveChanged({details}){
+  const {changed} = details;
+  return _.some(_.eq(_, ["perspective"]), changed);
+}
+
 export function reel(tableId, seat){
   const $timeline = $.atom(r.init(tableId, seat));
 
@@ -284,14 +220,15 @@ export function reel(tableId, seat){
     return {...timeline, table, wip, seated, seats, up, undoable, make, ready, act};
   }, $table, $wip, $seated, $seats, $up, $undoable, $make, $ready, $act, $timeline), _.filter(synched));
 
-  const $timer = new Timer(1000, Date.now);
+  const $timer = timer(1000);
 
   $.sub($timer, function(){
     const {cursor} = _.deref($timeline);
-    if (cursor.pos === null) {
+    const {pos, max} = cursor;
+    if (pos === null) {
       return;
     }
-    if (cursor.pos === cursor.max) {
+    if (pos === max) {
       $timer.stop();
     } else {
       $.swap($timeline, r.forward);
@@ -343,15 +280,9 @@ export function reel(tableId, seat){
       }, _));
   });
 
-  const $changed = $.pipe($.map(function({type, details}){
-    const {hist} = details;
-    const [curr, prior] = hist;
-    const bwd = curr?.cursor?.pos < prior?.cursor?.pos;
-    const step = curr?.cursor?.pos - prior?.cursor?.pos;
-    const offset = curr?.cursor?.pos - curr?.cursor?.max;
-    const present = curr?.cursor?.pos === curr?.cursor?.max;
-    return {type, details: {bwd, step, offset, present, ...details}};
-  }, changes($state)), _.compact());
+  const $changed = $.pipe(
+    $.map(reifyMotion, changes($state)),
+    _.comp(_.compact(), _.filter(perspectiveChanged)));
 
   return new Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $wip, $changed);
 }

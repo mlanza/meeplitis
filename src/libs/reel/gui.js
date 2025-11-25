@@ -115,11 +115,12 @@ export const els = {
 export const $reel = reel(tableId, seat);
 export const $work = $.chan($reel, "wip");
 export const $table = $.chan($reel, "table");
+export const $changed = $.chan($reel, "changed");
 const $error = $.chan($reel, "error");
 
 const run = $.dispatch($reel, _);
 
-reg({ $reel, $work, $table, $error });
+reg({ $reel, $work, $changed, $table, $error });
 
 _.maybe(dom.sel1(`[data-seat='${seat}']`, el), dom.addClass(_, "yours"));
 dom.attr(el, "data-perspective", seat);
@@ -194,12 +195,6 @@ $.on($reel, "changed", function({ details: { bwd, step, offset, present, changed
   const { state, game, event, actor, actionable } = curr?.perspective || {};
   const { status, dice, off, stakes, holdsCube } = state || {};
   const undoer = _.detectIndex(_.comp(_.eq(curr?.last_acting_seat, _), _.get(_, "seat_id")), curr?.seated);
-
-  if (!_.some(_.eq(_, ["perspective"]), changed)) {
-    return;
-  }
-
-  console.log({ ctx, bwd, step, offset, present, game, event, changed, curr, prior });
 
   dom.value(els.progress, cursor?.pos + 1);
   dom.attr(els.progress, "max", cursor?.max + 1);

@@ -315,16 +315,9 @@ gui(describe, desc, template);
 
 $.on($reel, "changed", function({ details: { bwd, present, changed, hist: [curr, prior] = [] } = {} }){
   const ctx = "main";
-
   const { seat, wip } = curr || {};
   const { state, up, game } = curr.perspective || {};
   const { status, dice, off, stakes, holdsCube } = state || {};
-
-  if (!_.some(_.eq(_, ["perspective"]), changed)) {
-    return;
-  }
-
-  console.log({ ctx, bwd, present, game, changed, curr, prior });
 
   dom.attr(el, "data-stakes", stakes);
   dom.text(dom.sel1("#cube", el), _.clamp(stakes, 2, 64));

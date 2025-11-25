@@ -320,11 +320,11 @@ $.on($reel, "changed", function({ details: { bwd, present, changed, hist: [curr,
   const { state, up, game } = curr.perspective || {};
   const { status, dice, off, stakes, holdsCube } = state || {};
 
-  console.log({ ctx, bwd, present, game, changed, curr, prior });
-
-  if (!game) {
+  if (!_.some(_.eq(_, ["perspective"]), changed)) {
     return;
   }
+
+  console.log({ ctx, bwd, present, game, changed, curr, prior });
 
   dom.attr(el, "data-stakes", stakes);
   dom.text(dom.sel1("#cube", el), _.clamp(stakes, 2, 64));

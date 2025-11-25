@@ -87,8 +87,7 @@ const exec = _.partly(async function(run, text){
 
       case "move": {
         const move = JSON.parse(body);
-        const details = {move};
-        run({type, details});
+        run(move);
         break;
       }
 

@@ -151,7 +151,7 @@ function getSeated(_table_id){
   return getfn("seated", {_table_id});
 }
 
-function getSeats(_table_id, accessToken){ //TODO test w/ and w/o accessToken
+export function getSeats(_table_id, accessToken){ //TODO test w/ and w/o accessToken
   return accessToken ? getfn("seats", {_table_id}, accessToken) : Promise.resolve([]);
 }
 
@@ -442,7 +442,7 @@ function dispatch(self, command){
       self.$timer.start();
       break;
 
-    case "move":
+    default:
       try {
         const ready = _.deref(self.$ready);
         if (!ready) {
@@ -453,7 +453,7 @@ function dispatch(self, command){
           throw new Error("Spectators are not permitted to issue moves");
         }
         $.reset(self.$ready, false);
-        const commands = [details.move];
+        const commands = [command];
         _.fmap(move(id, seat, commands, session?.accessToken), console.log);
         //TODO register move response somewhere
       } catch (ex) {
@@ -461,9 +461,6 @@ function dispatch(self, command){
       } finally {
         $.reset(self.$ready, true);
       }
-      break;
-
-    default:
       break;
   }
 }

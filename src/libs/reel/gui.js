@@ -5,15 +5,16 @@ import supabase from "../supabase.js";
 import { presence } from "../online.js";
 import { $online, session } from "../session.js";
 import { reg } from "../cmd.js";
-import { reel, addLog } from "./shell.js";
+import { reel, addLog, getSeats } from "./shell.js";
 import { relink } from "../links.js";
 import { clear } from "../wip.js";
 
 const params = new URLSearchParams(location.search);
 const tableId = params.get('id');
-//TODO export const seat = _.count(seats) > 1 ? _.maybe(params.get("seat"), parseInt) : _.first(seats);
+const seats = await getSeats(tableId, session?.accessToken);
+export const seat = _.count(seats) > 1 ? _.maybe(params.get("seat"), parseInt) : _.first(seats);
 
-export const seat = _.maybe(params.get("seat"), parseInt);
+//export const seat = _.maybe(params.get("seat"), parseInt);
 
 const ttl = dom.sel1("head title");
 const title = _.chain(ttl, dom.text, _.split(_, "|"), _.first, _.trim);
@@ -192,18 +193,13 @@ $.on($reel, "changed", function({ details: { bwd, step, offset, present, changed
   const { seat, wip, table, act, up, cursor, undoable, ready, error } = curr || {};
   const { state, game, event, actor, actionable } = curr?.perspective || {};
   const { status, dice, off, stakes, holdsCube } = state || {};
-  const { remark } = table || {};
   const undoer = _.detectIndex(_.comp(_.eq(curr?.last_acting_seat, _), _.get(_, "seat_id")), curr?.seated);
 
-  if (!game) {
+  if (!_.some(_.eq(_, ["perspective"]), changed)) {
     return;
   }
 
   console.log({ ctx, bwd, step, offset, present, game, event, changed, curr, prior });
-
-  if (!_.some(_.eq(_, ["cursor"]), changed)) {
-    return;
-  }
 
   dom.value(els.progress, cursor?.pos + 1);
   dom.attr(els.progress, "max", cursor?.max + 1);
@@ -218,8 +214,8 @@ $.on($reel, "changed", function({ details: { bwd, step, offset, present, changed
   dom.toggleClass(el, "present", present);
   dom.attr(el, "data-table-status", table?.status);
 
-  dom.toggleClass(els.remarks, "none", !remark);
-  dom.text(dom.sel1("#remarks p", el), remark);
+  dom.toggleClass(els.remarks, "none", !table?.remark);
+  dom.text(dom.sel1("#remarks p", el), table?.remark);
 
   event && $.doto(els.event,
     dom.attr(_, "data-type", event?.type),
@@ -293,7 +289,7 @@ $.on(document, "keydown", function(e){
 
     case ".": //not always an option
       e.preventDefault();
-      //TODO $.dispatch($story, {type: "pass"});
+      run({type: "pass"});
       break;
 
     case "Enter":
@@ -302,10 +298,10 @@ $.on(document, "keydown", function(e){
       break;
 
     case "s":
-      //if (e.metaKey) {
-      //  e.preventDefault();
-      //  location.href = `${location.origin}/shell/${location.search}${location.hash}`;
-      //}
+      if (e.metaKey) {
+        e.preventDefault();
+        location.href = `${location.origin}/shell/${location.search}${location.hash}`;
+      }
       break;
 
     case ",":
@@ -316,8 +312,8 @@ $.on(document, "keydown", function(e){
 });
 
 $.on(el, "click", "#replay [data-nav]", function(e){
-  const nav = dom.attr(e.target, "data-nav");
-  run({type: nav});
+  const type = dom.attr(e.target, "data-nav");
+  run({type});
 });
 
 $.on(el, "click", ".message", function(e){

@@ -124,8 +124,9 @@ new Command()
     `reel <table> --seat <seat> --changed "*" -i`
   )
   .action(async function (opts, tableId) {
-    const seat = opts.seat;
-    const $reel = reel(tableId, seat);
+    const seat = opts.seat,
+          at = opts.at || null;
+    const $reel = reel(tableId, seat, at);
     const $perspective = $.pipe($.chan($reel, "perspective"), _.compact());
     const run = $.dispatch($reel, _);
     const commands = opts.command || [];
@@ -143,10 +144,6 @@ new Command()
         $.on($reel, `changed:${path}`, _.pipe(abbrEvent, $.see(`changed:${path}`)));
       }
     }, opts.changed);
-
-    if (opts.at){
-      commands.unshift(`at ${opts.at}`);
-    }
 
     $.sub($perspective, _.once(function(){
       $.each(exec(run, _), commands);

@@ -3,7 +3,8 @@ import _ from "../atomic_/core.js";
 export const FORWARD = 1;
 export const BACKWARD = -1;
 
-export function init(id, seat, at = null) {
+export function init(id, seat, eventId = null) {
+  const at = _.maybe(eventId, _.blot);
   return {
     id,
     seat,
@@ -85,7 +86,8 @@ export function present(state) {
   return _.chain(state, position(state.cursor.max));
 }
 
-export function at(at) {
+export function at(eventId) {
+  const at = _.maybe(eventId, _.blot);
   return function(state){
     const {cursor, touches} = state;
     const pos = _.maybe(touches, _.indexOf(_, at));

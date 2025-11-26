@@ -136,6 +136,15 @@ export function gui(describe, desc, template){
   const $seated = $.pipe($.chan($reel, "seated"), _.compact());
   const $seats = $.pipe($.chan($reel, "seats"), _.compact());
   const $described = $.map(_.pipe(_.get(_, "config"), describe), $table);
+  const $hash  = dom.hash(window);
+
+  $.sub($hash, _.comp(_.map(_.replace(_, "#", "")), _.compact()), function(at){
+    $.dispatch($reel, {type: "at", details: {at}});
+  });
+
+  $.sub($reel, _.comp(_.map(_.getIn(_, ["cursor", "at"])), _.compact()), function(at){
+    location.hash = at;
+  });
 
   $.sub($seats, _.once(function(seats){
     dom.toggleClass(el, "switch-seats", _.count(seats) > 1);

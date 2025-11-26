@@ -373,6 +373,14 @@ function dispatch(self, command){
       self.$timer.start();
       break;
 
+    case "do-over":
+      const _table_id = _.chain($timeline, _.deref, _.get(_, "id")),
+            _event_id = _.deref($undoable);
+      event_id && supabase.rpc('undo', {_table_id, _event_id}).then(function(undo){
+        //TODO test - $.swap(self.$state, _.update(_, "history", _.pipe(_.take(at -1, _), _.toArray)));
+      });
+      break;
+
     default:
       try {
         const ready = _.deref(self.$ready);

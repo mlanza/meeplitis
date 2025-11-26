@@ -284,16 +284,15 @@ $.on(document, "keydown", function(e){
       break;
 
     case "Backspace":
-      //if (e.shiftKey) {
-      //e.preventDefault();
-      //replay($story, "do-over");
-      //}
+      if (e.shiftKey) {
+        e.preventDefault();
+        run({type: "do-over"});
+      }
       break;
 
     case "Escape": //cancel work in progress and/or clear error
       e.preventDefault();
-      clear($wip);
-      $.reset($error, null);
+      run({type: "escape"});
       break;
 
     case ".": //not always an option

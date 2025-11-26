@@ -170,6 +170,8 @@ export function reel(tableId, seat, eventId){
 
   const $ready = $.atom(true);
 
+  const $error = $.atom(null);
+
   const $act = $.map(function(timeline, table, ready){
     if (!table || !ready) {
       return false;
@@ -216,9 +218,9 @@ export function reel(tableId, seat, eventId){
   }
 
   //main signal
-  const $state = $.pipe($.map(function(table, wip, seated, seats, up, undoable, make, ready, act, timeline){
-    return {...timeline, table, wip, seated, seats, up, undoable, make, ready, act};
-  }, $table, $wip, $seated, $seats, $up, $undoable, $make, $ready, $act, $timeline), _.filter(synched));
+  const $state = $.pipe($.map(function(table, wip, seated, seats, up, undoable, make, ready, act, error, timeline){
+    return {...timeline, table, wip, seated, seats, up, undoable, make, ready, act, error};
+  }, $table, $wip, $seated, $seats, $up, $undoable, $make, $ready, $act, $error, $timeline), _.filter(synched));
 
   const $timer = timer(1000);
 
@@ -284,10 +286,10 @@ export function reel(tableId, seat, eventId){
     $.map(reifyMotion, changes($state)),
     _.comp(_.compact(), _.filter(perspectiveChanged)));
 
-  return new Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $wip, $changed);
+  return new Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $wip, $changed, $error);
 }
 
-function Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $wip, $changed, channels = {}){
+function Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $wip, $changed, $error, channels = {}){
   this.$timeline = $timeline;
   this.$table = $table;
   this.$make = $make;
@@ -301,6 +303,7 @@ function Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $und
   this.$timer = $timer;
   this.$wip = $wip;
   this.$changed = $changed;
+  this.$error = $error;
   this.channels = channels;
 }
 
@@ -310,6 +313,9 @@ function chan(self, key){
   }
   if (key === "wip") {
     return self.$wip;
+  }
+  if (key === "error") {
+    return self.$error;
   }
   if (!_.get(self.channels, key)){
     if (_.startsWith(key, "changed:")) {
@@ -373,10 +379,16 @@ function dispatch(self, command){
       self.$timer.start();
       break;
 
+    case "escape":
+      clear(self.$wip);
+      $.reset(self.$error, null);
+      break;
+
     case "do-over":
-      const _table_id = _.chain($timeline, _.deref, _.get(_, "id")),
-            _event_id = _.deref($undoable);
-      event_id && supabase.rpc('undo', {_table_id, _event_id}).then(function(undo){
+      const _table_id = _.chain(self.$timeline, _.deref, _.get(_, "id")),
+            _event_id = _.deref(self.$undoable);
+      _event_id && supabase.rpc('undo', {_table_id, _event_id}).then(function({count, data, error, status, statusText}){
+        console.log({count, data, error, status, statusText});
         //TODO test - $.swap(self.$state, _.update(_, "history", _.pipe(_.take(at -1, _), _.toArray)));
       });
       break;

@@ -76,6 +76,10 @@ export function getSeats(_table_id, accessToken){ //TODO test w/ and w/o accessT
   return accessToken ? getfn("seats", {_table_id}, accessToken) : Promise.resolve([]);
 }
 
+function doOver(_table_id, _event_id){
+  return _event_id ? supabase.rpc('undo', {_table_id, _event_id}) : Promise.resolve(null);
+}
+
 function getTouches(_table_id, accessToken){
   return getfn('touches', {_table_id}, accessToken);
 }
@@ -387,7 +391,7 @@ function dispatch(self, command){
     case "do-over":
       const _table_id = _.chain(self.$timeline, _.deref, _.get(_, "id")),
             _event_id = _.deref(self.$undoable);
-      _event_id && supabase.rpc('undo', {_table_id, _event_id}).then(function({count, data, error, status, statusText}){
+      doOver(_table_id, _event_id).then(function({count, data, error, status, statusText}){
         console.log({count, data, error, status, statusText});
         if (error) {
           $.reset(self.$error, error);

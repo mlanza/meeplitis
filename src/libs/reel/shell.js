@@ -416,9 +416,8 @@ function dispatch(self, command){
       break;
 
     default:
-      const commands = [command];
       issueMove(self, function({id, seat}){
-        return move(id, seat, commands, session?.accessToken);
+        return move(id, seat, [command], session?.accessToken);
       });
       break;
   }

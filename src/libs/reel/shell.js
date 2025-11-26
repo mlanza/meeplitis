@@ -389,6 +389,9 @@ function dispatch(self, command){
             _event_id = _.deref(self.$undoable);
       _event_id && supabase.rpc('undo', {_table_id, _event_id}).then(function({count, data, error, status, statusText}){
         console.log({count, data, error, status, statusText});
+        if (error) {
+          $.reset(self.$error, error);
+        }
         //TODO test - $.swap(self.$state, _.update(_, "history", _.pipe(_.take(at -1, _), _.toArray)));
       });
       break;

@@ -3,7 +3,8 @@ import _ from "../atomic_/core.js";
 export const FORWARD = 1;
 export const BACKWARD = -1;
 
-export function init(id, seat, eventId = null) {
+export function init(id, seatIndex = null, eventId = null) {
+  const seat = _.maybe(seatIndex, _.blot);
   const at = _.maybe(eventId, _.blot);
   return {
     id,

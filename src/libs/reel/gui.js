@@ -14,7 +14,13 @@ const tableId = params.get('id');
 const seats = await getSeats(tableId, session?.accessToken);
 export const seat = _.count(seats) > 1 ? _.maybe(params.get("seat"), parseInt) : _.first(seats);
 
-//export const seat = _.maybe(params.get("seat"), parseInt);
+const rejected = seat != null && !_.includes(seats, seat);
+params.delete("seat");
+const redirect = !tableId ? "../" : rejected ? `${location.origin}${location.pathname}?${params.toString()}${location.hash}` : null;
+
+if (redirect) {
+  location.href = redirect;
+}
 
 const ttl = dom.sel1("head title");
 const title = _.chain(ttl, dom.text, _.split(_, "|"), _.first, _.trim);
@@ -155,13 +161,13 @@ export function gui(describe, desc, template){
         _.unique,
         _.toArray));
 
-    $.sub($presence, function(presence){
-      $.eachkv(function(username, presence){
-        _.chain(dom.sel(`.zone[data-username="${username}"]`), $.each(function(zone){
+    $.sub($presence, $.eachkv(function(username, presence){
+      _.chain(
+        dom.sel(`.zone[data-username="${username}"]`),
+        $.each(function(zone){
           dom.attr(zone, "data-presence", presence ? "online" : "offline");
         }, _));
-      }, presence);
-    });
+    }, _));
 
     $.eachIndexed(function(seat, {username, avatar_url}){
       const delegate = _.getIn(seated, [seat, "delegate_id"]);
@@ -178,7 +184,6 @@ export function gui(describe, desc, template){
     dom.toggleClass(els.options, "none", !_.seq(described));
     dom.text(dom.sel1("#options p", el), _.join(", ", described));
   });
-
 }
 
 $.sub($error, _.filter(_.isSome), function(error){
@@ -241,7 +246,6 @@ $.on($reel, "changed", function({ details: { bwd, step, offset, present, changed
   }
 
   dom.addClass(el, "init");
-
 });
 
 const $depressed = $.map(_.pipe(_.join(" ", _), _.lowerCase), dom.depressed(document.body));

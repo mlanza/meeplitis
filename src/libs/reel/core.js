@@ -35,7 +35,6 @@ export function position(n) {
   }
 }
 
-//(cursor.at == null ? max : _.indexOf(touches, cursor.at))
 export function resize(max){
   return function(state){
     const {cursor, touches} = state;

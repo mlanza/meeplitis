@@ -161,8 +161,8 @@ function perspectiveChanged({details}){
   return _.some(_.eq(_, ["perspective"]), changed);
 }
 
-export function reel(tableId, seat){
-  const $timeline = $.atom(r.init(tableId, seat));
+export function reel(tableId, seat, eventId){
+  const $timeline = $.atom(r.init(tableId, seat, eventId));
 
   const $table = table(tableId);
 
@@ -250,7 +250,7 @@ export function reel(tableId, seat){
   $.sub($table, function(table){
     const {cursor} = _.deref($timeline);
     const {pos, max} = cursor || {};
-    if (pos === max) {
+    if (pos !== null && pos === max) {
       //if the user was in the current present the moment the table was touched, catch him up with what happened.
       $timer.start();
     }

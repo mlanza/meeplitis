@@ -118,9 +118,10 @@ export const els = {
   event: dom.sel1("#event", el)
 }
 
-export const $reel = reel(tableId, seat);
+const eventId = _.maybe(location.hash, _.replace(_, "#", ""));
+export const $reel = reel(tableId, seat, eventId);
 export const $wip = $.chan($reel, "wip");
-export const $table = $.chan($reel, "table");
+export const $table = $.pipe($.chan($reel, "table"), _.compact());
 export const $changed = $.chan($reel, "changed");
 export const $error = $.chan($reel, "error");
 

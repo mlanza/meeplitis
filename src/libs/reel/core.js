@@ -3,14 +3,14 @@ import _ from "../atomic_/core.js";
 export const FORWARD = 1;
 export const BACKWARD = -1;
 
-export function init(id, seat) {
+export function init(id, seat, at = null) {
   return {
     id,
     seat,
     touches: null,
     cursor: {
       pos: null,
-      at: null,
+      at,
       max: null,
       direction: FORWARD
     },
@@ -21,6 +21,9 @@ export function init(id, seat) {
 
 export function position(n) {
   return function(state){
+    if (state?.cursor?.pos === n) {
+      return state;
+    }
     const max = _.count(state.touches) - 1;
     const pos = _.clamp(n, 0, max);
     const direction = pos === 0 || pos > state.cursor.pos ? FORWARD : BACKWARD;
@@ -31,11 +34,12 @@ export function position(n) {
   }
 }
 
+//(cursor.at == null ? max : _.indexOf(touches, cursor.at))
 export function resize(max){
   return function(state){
     const {cursor, touches} = state;
     const direction = cursor.max == null || cursor.max < max ? BACKWARD : FORWARD;
-    const pos = _.clamp(cursor.pos == null ? max : cursor.pos, 0, max);
+    const pos = _.clamp(cursor.pos == null ? (cursor.at == null ? max : _.indexOf(touches, cursor.at)) : cursor.pos, 0, max);
     const at = _.get(touches, pos);
     const perspective = _.get(state.perspectives, at);
     return _.chain(state,
@@ -54,7 +58,7 @@ export function addTouches({touches, undoables, last_acting_seat}){
     return _.chain(state,
       _.assoc(_, "touches", touches, "undoables", undoables, "last_acting_seat", last_acting_seat),
       resize(max),
-      cursor.pos != null ? _.identity : position(max));
+      cursor.pos == null && cursor.at == null ? position(max) : _.identity);
   }
 }
 
@@ -84,11 +88,11 @@ export function present(state) {
 export function at(at) {
   return function(state){
     const {cursor, touches} = state;
-    const pos = _.indexOf(touches, at);
+    const pos = _.maybe(touches, _.indexOf(_, at));
     if (pos === -1) {
       throw new Error("Unknown moment.");
     }
-    return _.chain(state, position(pos));
+    return pos == null ? state : _.chain(state, position(pos));
   }
 }
 

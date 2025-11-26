@@ -345,9 +345,30 @@ function on(self, key, callback){
   return $.sub($.chan(self, key), callback);
 }
 
+function issueMove(self, promised){ //perform backend update
+  const {$ready, $error, $timeline} = self;
+  const timeline = _.deref($timeline);
+  const ready = _.deref($ready);
+  if (!ready) {
+    throw new Error("Back end still processing; please wait.");
+  }
+  const {seat} = timeline;
+  if (seat == null || session?.accessToken == null) {
+    throw new Error("Spectators are not permitted to issue moves");
+  }
+  $.reset($ready, false);
+  promised(timeline)
+    .then(function(resp){
+      console.log(resp);
+      _.maybe(resp?.error, $.reset($error, _));
+    })
+    .finally(function(){
+      $.reset($ready, true);
+    });
+}
+
 function dispatch(self, command){
   const {type, details} = command;
-
   //whenever the user acts, the timer stops
   self.$timer.stop();
 
@@ -389,36 +410,16 @@ function dispatch(self, command){
       break;
 
     case "do-over":
-      const _table_id = _.chain(self.$timeline, _.deref, _.get(_, "id")),
-            _event_id = _.deref(self.$undoable);
-      doOver(_table_id, _event_id).then(function({count, data, error, status, statusText}){
-        console.log({count, data, error, status, statusText});
-        if (error) {
-          $.reset(self.$error, error);
-        }
-        //TODO test - $.swap(self.$state, _.update(_, "history", _.pipe(_.take(at -1, _), _.toArray)));
+      issueMove(self, function({id}){
+        return doOver(id, _.deref(self.$undoable));
       });
       break;
 
     default:
-      try {
-        const ready = _.deref(self.$ready);
-        if (!ready) {
-          throw new Error("Back end still processing; please wait.");
-        }
-        const {id, seat, pos, max} = _.deref(self.$timeline);
-        if (seat == null || session?.accessToken == null) {
-          throw new Error("Spectators are not permitted to issue moves");
-        }
-        $.reset(self.$ready, false);
-        const commands = [command];
-        _.fmap(move(id, seat, commands, session?.accessToken), console.log);
-        //TODO register move response somewhere
-      } catch (ex) {
-        throw ex;
-      } finally {
-        $.reset(self.$ready, true);
-      }
+      const commands = [command];
+      issueMove(self, function({id, seat}){
+        return move(id, seat, commands, session?.accessToken);
+      });
       break;
   }
 }

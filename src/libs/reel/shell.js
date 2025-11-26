@@ -345,7 +345,7 @@ function on(self, key, callback){
   return $.sub($.chan(self, key), callback);
 }
 
-function issueMove(self, promised){ //perform backend update
+function touchBackend(self, promised){ //perform touchBackend update
   const {$ready, $error, $timeline} = self;
   const timeline = _.deref($timeline);
   const ready = _.deref($ready);
@@ -410,13 +410,13 @@ function dispatch(self, command){
       break;
 
     case "do-over":
-      issueMove(self, function({id}){
+      touchBackend(self, function({id}){
         return doOver(id, _.deref(self.$undoable));
       });
       break;
 
     default:
-      issueMove(self, function({id, seat}){
+      touchBackend(self, function({id, seat}){
         return move(id, seat, [command], session?.accessToken);
       });
       break;

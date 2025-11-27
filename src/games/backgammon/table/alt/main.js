@@ -313,21 +313,23 @@ function getMove({from, to}, game, seat) {
 
 gui(describe, desc, template);
 
-$.on($reel, "changed", function(event){
+$.on($reel, "changed", function({ details: { bwd, touched, present, changed, hist: [curr, prior] = [] } }){
   const ctx = "main";
-  const { details } = event;
-  const { bwd, present, changed, hist: [curr, prior] = [] } = details;
   const { seat, wip } = curr || {};
   const { state, up, game } = curr.perspective || {};
   const { status, dice, off, stakes, holdsCube } = state || {};
+  const moves = g.moves(game, { type: ["move", "enter", "bear-off"], seat });
+
+  if (present && touched?.wip) {
+    workingCommand(wip, seat, state, game, el, moves);
+    return;
+  }
 
   dom.attr(el, "data-stakes", stakes);
   dom.text(dom.sel1("#cube", el), _.clamp(stakes, 2, 64));
   dom.attr(el, "data-up", up);
   dom.attr(el, "data-holds-cube", holdsCube);
   dom.attr(el, "data-status", status);
-
-  const moves = g.moves(game, { type: ["move", "enter", "bear-off"], seat });
 
   _.chain(g.moves(game, { type: ["roll", "commit", "propose-double", "accept", "concede"], seat }),
     _.map(_.get(_, "type"), _),
@@ -361,8 +363,6 @@ $.on($reel, "changed", function(event){
   }
 
   dom.removeClass(el, "error");
-
-  present && event.details.touched?.wip && workingCommand(wip, seat, state, game, el, moves);
 });
 
 $.each(function(type){

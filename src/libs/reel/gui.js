@@ -8,6 +8,7 @@ import { reg } from "../cmd.js";
 import { reel, addLog, getSeats } from "./shell.js";
 import { relink } from "../links.js";
 import { clear } from "../wip.js";
+export { wasChanged } from "./shell.js";
 
 const params = new URLSearchParams(location.search);
 const tableId = params.get('id');

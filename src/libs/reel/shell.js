@@ -44,6 +44,11 @@ function changes($state, max = 3, depth = 0){
   }, $.pipe($.hist($state), _.compact()));
 }
 
+export const wasChanged = _.curry(function(path, {details}){
+  const {changed} = details;
+  return _.some(_.eq(_, path), changed);
+});
+
 function keeping(keys){
   const keep = _.includes(keys, _);
   return function(state){
@@ -150,19 +155,19 @@ function undoThru(undoables, touch){
   }, undoables);
 }
 
-function reifyMotion({type, details}){
-  const {hist} = details;
+function reifyMotion(paths, {type, details}){
+  const {hist, changed} = details;
   const [curr, prior] = hist;
   const bwd = curr?.cursor?.pos < prior?.cursor?.pos;
   const step = curr?.cursor?.pos - prior?.cursor?.pos;
   const offset = curr?.cursor?.pos - curr?.cursor?.max;
   const present = curr?.cursor?.pos === curr?.cursor?.max;
-  return {type, details: {bwd, step, offset, present, ...details}};
-}
-
-function perspectiveChanged({details}){
-  const {changed} = details;
-  return _.some(_.eq(_, ["perspective"]), changed);
+  const touched = _.reduce(function(memo, path){
+    const key = _.join(".", path);
+    const value = !!_.some(_.eq(_, path), changed);
+    return value ? _.assoc(memo, key, value) : memo;
+  }, null, paths);
+  return {type, details: {touched, bwd, step, offset, present, ...details}};
 }
 
 export function reel(tableId, seat, eventId){
@@ -287,8 +292,8 @@ export function reel(tableId, seat, eventId){
   });
 
   const $changed = $.pipe(
-    $.map(reifyMotion, changes($state)),
-    _.comp(_.compact(), _.filter(perspectiveChanged)));
+    $.map(_.partial(reifyMotion, [["perspective"], ["wip"]]), changes($state)),
+    _.comp(_.compact(), _.filter(_.getIn(_, ["details", "touched"]))));
 
   return new Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $wip, $changed, $error);
 }

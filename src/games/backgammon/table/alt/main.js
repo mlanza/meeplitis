@@ -313,8 +313,10 @@ function getMove({from, to}, game, seat) {
 
 gui(describe, desc, template);
 
-$.on($reel, "changed", function({ details: { bwd, present, changed, hist: [curr, prior] = [] } = {} }){
+$.on($reel, "changed", function(event){
   const ctx = "main";
+  const { details } = event;
+  const { bwd, present, changed, hist: [curr, prior] = [] } = details;
   const { seat, wip } = curr || {};
   const { state, up, game } = curr.perspective || {};
   const { status, dice, off, stakes, holdsCube } = state || {};
@@ -360,9 +362,7 @@ $.on($reel, "changed", function({ details: { bwd, present, changed, hist: [curr,
 
   dom.removeClass(el, "error");
 
-  if (_.some(_.eq(_, ["wip"]), changed)) {
-    return present ? workingCommand(wip, seat, state, game, el, moves) : null;
-  }
+  present && event.details.touched?.wip && workingCommand(wip, seat, state, game, el, moves);
 });
 
 $.each(function(type){

@@ -309,8 +309,6 @@ function getMove({from, to}, game, seat) {
   }, g.moves(game, { type: ["move", "enter", "bear-off"], seat }));
 }
 
-//const {$ready, $error, $story, $hist, $snapshot, $wip} =  ui(c.make, describe, desc, template);
-
 gui(describe, desc, template);
 
 $.on($reel, "changed", function({ details: { bwd, touched, present, changed, hist: [curr, prior] = [] } }){

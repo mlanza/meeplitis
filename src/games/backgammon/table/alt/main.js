@@ -315,7 +315,7 @@ $.on($reel, "changed", function({ details: { bwd, touched, present, changed, his
   const { seat, wip } = curr || {};
   const { state, up, game } = curr.perspective || {};
   const { status, dice, off, stakes, holdsCube } = state || {};
-  const moves = g.moves(game, { type: ["move", "enter", "bear-off"], seat });
+  const moves = game ? g.moves(game, { type: ["move", "enter", "bear-off"], seat }) : null;
 
   if (present && touched?.wip) {
     workingCommand(wip, seat, state, game, el, moves);

@@ -258,14 +258,14 @@ export function reel(tableId, seat, eventId){
       })
   }));
 
-  $.sub($table, function(table){
+  $.sub($table, function({id}){
     const {cursor} = _.deref($timeline);
     const {pos, max} = cursor || {};
     if (pos !== null && pos === max) {
       //if the user was in the current present the moment the table was touched, catch him up with what happened.
       $timer.start();
     }
-    _.fmap(getTouches(table.id, session?.accessToken),
+    _.fmap(getTouches(id, session?.accessToken),
       _.pipe(r.addTouches, $.swap($timeline, _)));
   });
 

@@ -292,7 +292,7 @@ export function reel(tableId, seat, eventId){
   });
 
   const $changed = $.pipe(
-    $.map(_.partial(reifyMotion, [["perspective"], ["wip"]]), changes($state)),
+    $.map(_.partial(reifyMotion, [["perspective"], ["wip"], ["table"]]), changes($state)),
     _.comp(_.compact(), _.filter(_.getIn(_, ["details", "touched"]))));
 
   return new Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $wip, $changed, $error);

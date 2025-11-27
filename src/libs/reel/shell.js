@@ -290,11 +290,11 @@ export function reel(tableId, seat, eventId){
     _.comp(_.compact(), _.filter(_.getIn(_, ["details", "touched"]))));
 
   $.sub($changed, function({ type, details }){
-    const { touched } = details;
-    const { cursor } = _.deref($timeline);
-    const { pos, max } = cursor || {};
-    if (touched?.cursor && touched?.touches && pos < max) {
-      //TODO if the user was in the current present the moment the table was touched, catch him up with what happened.
+    const { touched, hist: [curr, prior] } = details;
+    const wasInPresent = prior.cursor.pos === prior.cursor.max;
+    const isNotInPresent = curr.cursor.pos < curr.cursor.max;
+    if (touched?.touches && wasInPresent && isNotInPresent) {
+      //if the user was in the current present the moment the table was touched, catch him up with what happened.
       $timer.start();
     }
   });

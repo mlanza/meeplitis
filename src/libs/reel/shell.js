@@ -259,12 +259,6 @@ export function reel(tableId, seat, eventId){
   }));
 
   $.sub($table, function({id}){
-    const {cursor} = _.deref($timeline);
-    const {pos, max} = cursor || {};
-    if (pos !== null && pos === max) {
-      //if the user was in the current present the moment the table was touched, catch him up with what happened.
-      $timer.start();
-    }
     _.fmap(getTouches(id, session?.accessToken),
       _.pipe(r.addTouches, $.swap($timeline, _)));
   });
@@ -292,8 +286,18 @@ export function reel(tableId, seat, eventId){
   });
 
   const $changed = $.pipe(
-    $.map(_.partial(reifyMotion, [["perspective"], ["wip"], ["table"]]), changes($state)),
+    $.map(_.partial(reifyMotion, [["perspective"], ["wip"], ["table"], ["cursor"], ["touches"]]), changes($state)),
     _.comp(_.compact(), _.filter(_.getIn(_, ["details", "touched"]))));
+
+  $.sub($changed, function({ type, details }){
+    const { touched } = details;
+    const { cursor } = _.deref($timeline);
+    const { pos, max } = cursor || {};
+    if (touched?.cursor && touched?.touches && pos < max) {
+      //TODO if the user was in the current present the moment the table was touched, catch him up with what happened.
+      $timer.start();
+    }
+  });
 
   return new Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $wip, $changed, $error);
 }

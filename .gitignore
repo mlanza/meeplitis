@@ -13,4 +13,6 @@ secrets.md
 deno.lock
 table-*.json
 .temp
+.opencode
+resources
 *.temp.*

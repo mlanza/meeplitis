@@ -51,7 +51,7 @@ There are currently three games in the project:
 
 ### Common Game File Pattern
 
-Each game follows the "Functional Core, Imperative Shell" (FC/IS) architecture use by [Atomic](./atomic.md), which is reflected in its file structure:
+Each game follows the "Functional Core, Imperative Shell" (FC/IS) architecture use by [Atomic](../.opencode/skills/atomic-way.md), which is reflected in its file structure:
 
 *   **`core.js` (Functional Core)**: This file contains the pure game logic. It exports functions to initialize the game state, execute commands, and query the state, but it never performs side effects.
 *   **`main.js` (Imperative Shell)**: This file orchestrates the game. It listens for user input, dispatches commands to the `core.js` engine, manages the game state atom, and renders the UI. This file often handles complex, multi-step user interactions by managing a temporary `workingCommand` state, providing visual feedback to the user as they build a command.
@@ -63,7 +63,6 @@ Each game follows the "Functional Core, Imperative Shell" (FC/IS) architecture u
 
 The `ax` directory is the "brain" and contains details for the architecture of the Meeplitis project. It holds all the high-level documentation that guides the development process, ensuring consistency and a shared understanding of the project's goals and technical design.
 
-*   **`hats/`**: This directory defines the various roles, or "hats," that the AI assistant can assume (e.g., `Planning`, `Coding`, `Fixing`). Each file outlines the principles and responsibilities associated with that role.
 *   **`prds/`**: Contains Product Requirement Documents (PRDs). These are detailed specifications for major features and architectural patterns, like the `workingCommand` abstraction.
 *   **`backgammon/`**: A game-specific subdirectory containing all documentation related to Backgammon, including its rules, development `TODO.md` list, and PRDs for its features. This serves as a template for how other games should be documented.
 

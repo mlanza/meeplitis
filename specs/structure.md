@@ -51,7 +51,7 @@ There are currently three games in the project:
 
 ### Common Game File Pattern
 
-Each game follows the "Functional Core, Imperative Shell" (FC/IS) architecture use by [Atomic](../.opencode/skills/atomic-way.md), which is reflected in its file structure:
+Each game follows the "Functional Core, Imperative Shell" (FC/IS) architecture use by [[Atomic]] (see also the [[Atomic Way]]), which is reflected in its file structure:
 
 *   **`core.js` (Functional Core)**: This file contains the pure game logic. It exports functions to initialize the game state, execute commands, and query the state, but it never performs side effects.
 *   **`main.js` (Imperative Shell)**: This file orchestrates the game. It listens for user input, dispatches commands to the `core.js` engine, manages the game state atom, and renders the UI. This file often handles complex, multi-step user interactions by managing a temporary `workingCommand` state, providing visual feedback to the user as they build a command.

@@ -1,6 +1,6 @@
 # Backgammon: UI Reconciliation — PRD
 
-To ensure the visual representation of the game is always synchronized with the game state, the [UI](../../../src/games/backgammon/table/uJl/main.js) must intelligently update itself based on changes to the [model](./model.md). This process is not just for advancing the game state one step at a time. The user can navigate between any two "frames" in the game's history, such as jumping from the opening setup to the final move. This means the reconciliation logic must be robust enough to handle both small, single-move changes and large-scale changes between distant game states.  This gets handled in `$.sub($both, ...)`.
+To ensure the visual representation of the game is always synchronized with the game state, the [UI](../../../src/games/backgammon/table/uJl/main.js) must intelligently update itself based on changes to the [model](../../../specs/backgammon/model.md). This process is not just for advancing the game state one step at a time. The user can navigate between any two "frames" in the game's history, such as jumping from the opening setup to the final move. This means the reconciliation logic must be robust enough to handle both small, single-move changes and large-scale changes between distant game states.  This gets handled in `$.sub($both, ...)`.
 
 **Handling Initial Render (No Prior State)**: When the game is first loaded or initialized, the `prior` state will be `null`. In such cases, the reconciliation logic will not perform a diff. Instead, it will assume all checkers need to be placed according to the `curr` (current) game state, effectively performing a full render of the board.
 
@@ -10,7 +10,7 @@ The reconciliation strategy is as follows:
 
 **Flatten Locations**: For any two game states (`prior` and `curr`), the locations of each player's 15 checkers are "flattened" into a single, comprehensive list. This list accounts for checkers on the 24 points, on the bar, and those that have been borne off.
 
-Build a `getCheckers(state)` function such that it takes the game state and returns an array of checker objects.  Each object notes `seat`, `point` and `pos` per the [rules of positioning](./locations.md).  That means, that if more than 5 checkers are in a location, several will be `pos` 5.  That is okay.
+Build a `getCheckers(state)` function such that it takes the game state and returns an array of checker objects.  Each object notes `seat`, `point` and `pos` per the [rules of positioning](../../../specs/backgammon/locations.md).  That means, that if more than 5 checkers are in a location, several will be `pos` 5.  That is okay.
 
 Example:
 

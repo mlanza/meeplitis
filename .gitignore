@@ -16,3 +16,4 @@ table-*.json
 .opencode
 resources
 *.temp.*
+meeplitis.code-workspace

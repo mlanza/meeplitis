@@ -108,9 +108,9 @@ The `switch` statement should group the `borne-off` event with `moved` and `ente
 
 ## 6. UI and Reconciliation Context
 
-While the core logic is the primary focus, understanding the UI impact provides valuable context. The UI reconciliation process, defined in `ax/backgammon/prds/reconciliation.md`, works by updating `data-` attributes on checker elements.
+While the core logic is the primary focus, understanding the UI impact provides valuable context. The UI reconciliation process, defined in the [spec](./reconciliation.md), works by updating `data-` attributes on checker elements.
 
-*   **Board Representation**: The file `src/games/backgammon/table/uJl/images/backgammon-board.svg` defines the visual layout. It contains `<rect>` elements for the areas where checkers that are off the board are placed:
+*   **Board Representation**: The [svg](../../src/games/backgammon/table/uJl/images/backgammon-board.svg) defines the visual layout. It contains `<rect>` elements for the areas where checkers that are off the board are placed:
     *   `<rect id="off-board-white" ... />`
     *   `<rect id="off-board-black" ... />`
 

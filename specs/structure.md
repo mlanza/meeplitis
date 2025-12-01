@@ -7,7 +7,7 @@ This document provides a high-level overview of the Meeplitis project, detailing
 The project is organized into several top-level directories, each with a specific purpose.
 
 *   **`/`**: The project root, containing configuration files and top-level scripts.
-*   **`ax/`**: Contains architectural documents, PRDs, plans, and other guiding materials for development.
+*   **`specs/`**: Contains architectural documents, PRDs, plans, and other guiding materials for development.
 *   **`node_modules/`**: Manages all of the project's Node.js dependencies.
 *   **`sql/`**: Contains all database-related scripts, including schema definitions, functions, and triggers for PostgreSQL.
 *   **`src/`**: The primary source directory for the frontend web application, built using Nunjucks templates.
@@ -46,8 +46,8 @@ The `src/games/` directory is where the implementations for the individual board
 There are currently three games in the project:
 
 *   **Backgammon**: Located at `src/games/backgammon/`. This is an implementation of the classic board game where players race their checkers around the board according to the roll of dice.
-*   **Mexica**: Located at `src/games/mexica/`. While detailed rules are not in the `ax/` directory, the name suggests a historical strategy game based on the Mexica people and the founding of Tenochtitlan.
-*   **Up & Down**: Located at `src/games/up-down/`. The specific rules for this game are not currently documented in the `ax/` directory.
+*   **Mexica**: Located at `src/games/mexica/`. The name suggests a historical strategy game based on the Mexica people and the founding of Tenochtitlan.
+*   **Up & Down**: Located at `src/games/up-down/`.
 
 ### Common Game File Pattern
 

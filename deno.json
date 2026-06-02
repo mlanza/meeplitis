@@ -1,10 +1,14 @@
 {
   "nodeModulesDir": "none",
+  "imports": {
+    "@cliffy/command": "jsr:@cliffy/command",
+    "@cliffy/keypress": "jsr:@cliffy/keypress"
+  },
   "tasks": {
     "lume": "deno run --import-map=import_map.json -A lume/cli.ts",
     "build": "deno task lume",
     "serve": "deno task lume -s",
-    "reel": "./src/libs/reel/cli.js QDaitfgARpk --seat 0",
+    "reel": "./src/libs/reel/cli.js QDaitfgARpk --seat 0 --elide touches --elide perspectives --elide seated --elide table",
     "old-reel": "deno run -A ./src/libs/reel/old.js QDaitfgARpk --seat 0 -i"
   },
   "compilerOptions": {

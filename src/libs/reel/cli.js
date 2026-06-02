@@ -4,10 +4,10 @@ import _ from "../atomic_/core.js";
 import $ from "../atomic_/shell.js";
 import { reel } from "./shell.js";
 import { reg } from "../cmd.js";
-import supabase from "../supabase.js";
-import { session } from "../session.js";
-import { keypress } from "https://deno.land/x/cliffy@v0.25.4/keypress/mod.ts";
-import { Command } from "https://deno.land/x/cliffy@v1.0.0-rc.4/command/mod.ts";
+//import supabase from "../supabase.js";
+//import { session } from "../session.js";
+import { Command } from "@cliffy/command";
+import { keypress } from "@cliffy/keypress";
 
 function logs(obj){
   $.log(Deno.inspect(obj, { colors: true, compact: true, depth: Infinity, iterableLimit: Infinity }));
@@ -21,11 +21,6 @@ function elideWith(keys, f){
     }, {}, state);
   }
 }
-
-const abbr = _.pipe(
-  elideWith(["touches","perspectives","seated","table"], (value) => `<${_.count(value)} entries>`));
-
-const log = _.comp(logs, abbr);
 
 async function tuiMode($reel) {
   for await (const event of keypress()) {
@@ -49,9 +44,14 @@ await new Command()
   .arguments("<table:string>")
   .option("--commands <commands:string>", "Commands string")
   .option("--seat <seat:number>", "Seat number (integer)")
+  .option("--elide <key:string>", "Key to elide in logs", { collect: true })
   .action(async function (opts, tableId){
     const seat = opts.seat;
 
+    const abbr = _.pipe(
+      elideWith(opts.elide, (value) => `<${_.count(value)} entries>`));
+
+    const log = _.comp(logs, abbr);
     const $reel = reel(tableId, seat);
 
     reg({$reel});

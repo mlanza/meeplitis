@@ -10,8 +10,8 @@ import { reg } from "../cmd.js";
 import { Command } from "@cliffy/command";
 import { keypress } from "@cliffy/keypress";
 
-function logs(obj){
-  $.log(Deno.inspect(obj, { colors: true, compact: true, depth: Infinity, iterableLimit: Infinity }));
+function logs(key, obj){
+  $.log(key, Deno.inspect(obj, { colors: true, compact: true, depth: Infinity, iterableLimit: Infinity }));
 }
 
 function elideWith(keys, f){
@@ -26,7 +26,7 @@ function elideWith(keys, f){
 async function tuiMode($reel) {
   for await (const event of keypress()) {
     if (event.key === "q" || event.key === "escape") {
-      Deno.exit();
+      Deno.exit(0);
     } else if (event.key === "right") {
       $.dispatch($reel, {type: event.shiftKey ? "present" : "forward"});
     } else if (event.key === "left") {
@@ -52,20 +52,12 @@ await new Command()
     const abbr = _.pipe(
       elideWith(opts.elide, (value) => `<${_.count(value)} entries>`));
 
-    const log = _.comp(logs, abbr);
     const $reel = reel(tableId, seat);
     const $scratch = sh.scratch($reel);
 
-    reg({$reel, $scratch});
-
-    $.sub($reel, log);
-
-    setTimeout(function(){
-      $.reset($scratch, {"foo": true});
-      setTimeout(function(){
-        sh.clear($scratch);
-      }, 2000)
-    }, 2000)
+    reg({$reel, $scratch}, function(key, _value){
+      logs(key, abbr(_value));
+    });
 
     await tuiMode($reel);
 

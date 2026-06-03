@@ -60,7 +60,7 @@ function Timer(interval, f) {
 }
 
 Timer.prototype.start = function() {
-  console.log("START TIMER")
+  console.log({timer: "started"})
   if (this.unsub === null) { // Only start if stopped
     const $p = pacemaker(this.interval, this.f);
     this.unsub = $.sub($p, (tick) => $.pub(this.$emitter, tick));
@@ -68,7 +68,7 @@ Timer.prototype.start = function() {
 };
 
 Timer.prototype.stop = function() {
-  console.log("STOP TIMER")
+  console.log({timer: "stopped"})
   if (this.unsub !== null) { // Only stop if running
     this.unsub();
     this.unsub = null;
@@ -155,7 +155,7 @@ function table(tableId){
     .then(_.getIn(_, ["data", 0]))
     .then($.reset($t, _));
 
-  const channel = supabase.channel('db-messages').
+  supabase.channel('db-messages').
     on('postgres_changes', {
       event: 'UPDATE',
       schema: 'public',

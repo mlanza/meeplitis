@@ -1,8 +1,8 @@
-import _ from "./atomic_/core.js";
-import $ from "./atomic_/shell.js";
+import _ from './atomic_/core.js';
+import $ from './atomic_/shell.js';
+import imm from './atomic_/immutables.js';
 
-export const registry = {};
-
+const registry = {};
 const params = new URLSearchParams(globalThis.location ? location.search : "");
 const monitor = _.maybe(params.get("monitor"), _.split(_, ","));
 const nomonitor = _.maybe(params.get("nomonitor"), _.split(_, ","));
@@ -30,7 +30,7 @@ function registerWithMonitoring(symbols){
   }
 }
 
-export const reg = monitors === _.noop ? register : registerWithMonitoring;
+const reg = monitors === _.noop ? register : registerWithMonitoring;
 
 function cmd1(target = globalThis){
   Object.assign(target, registry);
@@ -43,12 +43,12 @@ async function cmd3(symbol, path, target = globalThis){
   $.log(`Loaded: ${symbol}`, obj);
 }
 
-export const cmd = _.overload(cmd1, cmd1, cmd3, cmd3);
+const cmd = _.overload(cmd1, cmd1, cmd3, cmd3);
 
-export default cmd;
+const dom = globalThis.document ? (await import('./atomic_/dom.js')).default : null;
 
-const dom = globalThis.document ? (await import("./atomic_/dom.js")).default : null;
-
-_.chain({_, $, dom}, _.compact, reg);
+_.chain({_, $, imm, dom}, _.compact, reg);
 
 Object.assign(globalThis, {cmd});
+
+export { cmd, cmd as default, reg, registry };

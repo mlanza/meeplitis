@@ -11,9 +11,9 @@ const IContent = _.protocol({
 });
 
 function contents2(self, type) {
-  return _.filter((function(node) {
+  return _.filter(function(node) {
     return node.nodeType === type;
-  }), IContent.contents(self));
+  }, IContent.contents(self));
 }
 
 const contents$2 = _.overload(null, IContent.contents, contents2);
@@ -57,9 +57,9 @@ function embed3(add, parent, children) {
 }
 
 function embed2(parent, children) {
-  embed3((function(parent, child) {
+  embed3(function(parent, child) {
     parent.appendChild(child);
-  }), parent, children);
+  }, parent, children);
 }
 
 const embed = _.overload(null, null, embed2, embed3);
@@ -77,14 +77,14 @@ function mounts(self) {
   _.specify(IMountable, {}, self);
   const parent = _.parent(self);
   if (parent) {
-    $.each((function(key) {
+    $.each(function(key) {
       $.trigger(self, key, {
         bubbles: true,
         detail: {
           parent: parent
         }
       });
-    }), [ "mounting", "mounted" ]);
+    }, [ "mounting", "mounted" ]);
   }
   return self;
 }
@@ -98,9 +98,9 @@ const ISelectable = protocol({
   sel1: sel1$2
 });
 
-const sel02 = _.pre((function sel02(selector, context) {
+const sel02 = _.pre(function sel02(selector, context) {
   return ISelectable.sel(context, selector);
-}), _.isString);
+}, _.isString);
 
 function sel01(selector) {
   return sel02(selector, document);
@@ -108,9 +108,9 @@ function sel01(selector) {
 
 const sel$2 = _.overload(null, sel01, sel02);
 
-const sel12 = _.pre((function sel12(selector, context) {
+const sel12 = _.pre(function sel12(selector, context) {
   return ISelectable.sel1(context, selector);
-}), _.isString);
+}, _.isString);
 
 function sel11(selector) {
   return sel12(selector, document);
@@ -134,21 +134,21 @@ function isHTMLDocument(self) {
   return _.is(self, HTMLDocument);
 }
 
-const element = _.assume(isHTMLDocument, document, _.curry((function element(document, name, ...contents) {
+const element = _.assume(isHTMLDocument, document, _.curry(function element(document, name, ...contents) {
   var _contents, _embed;
   return _.doto(document.createElement(name), (_embed = embed, _contents = contents, 
   function embed(_argPlaceholder) {
     return _embed(_argPlaceholder, _contents);
   }));
-}), 2));
+}, 2));
 
-const elementns = _.assume(isHTMLDocument, document, _.curry((function elementns(document, ns, name, ...contents) {
+const elementns = _.assume(isHTMLDocument, document, _.curry(function elementns(document, ns, name, ...contents) {
   var _contents2, _embed2;
   return _.doto(document.createElementNS(ns, name), (_embed2 = embed, _contents2 = contents, 
   function embed(_argPlaceholder2) {
     return _embed2(_argPlaceholder2, _contents2);
   }));
-}), 3));
+}, 3));
 
 function isElement(self) {
   return _.ako(self, Element);
@@ -170,13 +170,13 @@ var behave$8 = _.does(_.specify($.ISend, {
 
 behave$8(console);
 
-const fragment = _.assume(isHTMLDocument, document, (function fragment(document, ...contents) {
+const fragment = _.assume(isHTMLDocument, document, function fragment(document, ...contents) {
   var _contents, _embed;
   return _.doto(document.createDocumentFragment(), (_embed = embed, _contents = contents, 
   function embed(_argPlaceholder) {
     return _embed(_argPlaceholder, _contents);
   }));
-}));
+});
 
 function InvalidHostElementError(el, selector) {
   this.el = el;
@@ -195,9 +195,9 @@ function check(self, selector) {
   return _.isString(selector);
 }
 
-const matches = _.pre((function matches(self, selector) {
+const matches = _.pre(function matches(self, selector) {
   return self.matches ? self.matches(selector) : false;
-}), check);
+}, check);
 
 function assert(el, selector) {
   if (!matches(el, selector)) {
@@ -273,22 +273,22 @@ function append(self, content) {
 }
 
 function prepend(self, content) {
-  embed((function(parent, child) {
+  embed(function(parent, child) {
     parent.insertBefore(child, parent.childNodes[0]);
-  }), self, [ content ]);
+  }, self, [ content ]);
 }
 
 function before(self, content) {
-  embed((function(parent, child) {
+  embed(function(parent, child) {
     parent.insertBefore(child, self);
-  }), _.parent(self), [ content ]);
+  }, _.parent(self), [ content ]);
 }
 
 function after(self, content) {
   const ref = _.nextSibling(self);
-  embed((function(parent, child) {
+  embed(function(parent, child) {
     parent.insertBefore(child, ref);
-  }), _.parent(self), [ content ]);
+  }, _.parent(self), [ content ]);
 }
 
 const conj$2 = append;
@@ -336,9 +336,9 @@ function dissoc$1(self, key) {
 }
 
 function keys2(self, idx) {
-  return idx < self.attributes.length ? _.lazySeq((function() {
+  return idx < self.attributes.length ? _.lazySeq(function() {
     return _.cons(self.attributes[idx].name, keys2(self, idx + 1));
-  })) : _.emptyList();
+  }) : _.emptyList();
 }
 
 function keys$1(self) {
@@ -346,9 +346,9 @@ function keys$1(self) {
 }
 
 function vals2(self, idx) {
-  return idx < self.attributes.length ? _.lazySeq((function() {
+  return idx < self.attributes.length ? _.lazySeq(function() {
     return _.cons(self.attributes[idx].value, keys2(self, idx + 1));
-  })) : _.emptyList();
+  }) : _.emptyList();
 }
 
 function vals$1(self) {
@@ -369,9 +369,9 @@ function parent$1(self) {
   return self && self.parentNode;
 }
 
-const parents$1 = _.upward((function(self) {
+const parents$1 = _.upward(function(self) {
   return self && self.parentElement;
-}));
+});
 
 const root = _.comp(_.last, _.upward(parent$1));
 
@@ -508,22 +508,22 @@ function reduce$2(self, f, init) {
 }
 
 function chan2(el, key) {
-  return $.observable((function(observer) {
+  return $.observable(function(observer) {
     var _observer, _$$pub, _$;
     return on3(el, key, (_$ = $, _$$pub = _$.pub, _observer = observer, function pub(_argPlaceholder2) {
       return _$$pub.call(_$, _observer, _argPlaceholder2);
     }));
-  }));
+  });
 }
 
 function chan3(el, key, selector) {
-  return $.observable((function(observer) {
+  return $.observable(function(observer) {
     var _observer2, _$$pub2, _$2;
     return on4(el, key, selector, (_$2 = $, _$$pub2 = _$2.pub, _observer2 = observer, 
     function pub(_argPlaceholder3) {
       return _$$pub2.call(_$2, _observer2, _argPlaceholder3);
     }));
-  }));
+  });
 }
 
 const chan = _.overload(null, null, chan2, chan3);
@@ -543,7 +543,7 @@ function on3(el, key, callback) {
 }
 
 function on4(el, key, selector, callback) {
-  return on3(el, key, (function(e) {
+  return on3(el, key, function(e) {
     if (e.target.matches(selector)) {
       callback.call(e.target, e);
     } else {
@@ -552,7 +552,7 @@ function on4(el, key, selector, callback) {
         callback.call(target, e);
       }
     }
-  }));
+  });
 }
 
 const on = _.overload(null, null, null, on3, on4);
@@ -687,9 +687,9 @@ ielement(Element);
 ielement(Text);
 
 function seq2(self, idx) {
-  return idx < self.length ? _.lazySeq((function() {
+  return idx < self.length ? _.lazySeq(function() {
     return _.cons(self.item(idx), seq2(self, idx + 1));
-  })) : null;
+  }) : null;
 }
 
 function seq$1(self) {
@@ -832,16 +832,16 @@ function access(f) {
   }
   function value2(self, value) {
     const options = sel$2("option", self);
-    const chosen = _.detect((function(option) {
+    const chosen = _.detect(function(option) {
       return f(option) == value;
-    }), options);
+    }, options);
     if (chosen) {
-      $.each((function(option) {
+      $.each(function(option) {
         const selected = f(option) == value;
         if (option.selected != selected) {
           option.selected = selected;
         }
-      }), options);
+      }, options);
     } else {
       throw new Error("Cannot set value — it is not an option.");
     }
@@ -1016,46 +1016,46 @@ const behave = (_ref = _, _$behaves = _ref.behaves, _behaviors = behaviors, func
   return _$behaves.call(_ref, _behaviors, _argPlaceholder);
 });
 
-const ready = _.assume(isHTMLDocument, document, (function ready(document, callback) {
+const ready = _.assume(isHTMLDocument, document, function ready(document, callback) {
   if (document.readyState !== "loading") {
     callback();
   } else {
     document.addEventListener("DOMContentLoaded", callback);
   }
-}));
+});
 
-const hash = $.shared($.atom, (function(window) {
-  return $.computed((function(e) {
+const hash = $.shared($.atom, function(window) {
+  return $.computed(function(e) {
     return window.location.hash;
-  }), $.chan(window, "hashchange"));
-}));
+  }, $.chan(window, "hashchange"));
+});
 
-const focus = $.shared($.atom, (function(el) {
-  return $.toggles(el, "focus", "blur", (function() {
+const focus = $.shared($.atom, function(el) {
+  return $.toggles(el, "focus", "blur", function() {
     return el === el.ownerDocument.activeElement;
-  }));
-}));
+  });
+});
 
-const click = $.shared($.subject, (function(el) {
+const click = $.shared($.subject, function(el) {
   return $.chan(el, "click");
-}));
+});
 
-const hover = $.shared($.atom, (function(el) {
+const hover = $.shared($.atom, function(el) {
   return $.toggles(el, "mouseenter", "mouseleave", _.constantly(false));
-}));
+});
 
 function scan(step, init) {
   return function(rf) {
     let acc = init;
-    return _.overload(rf, rf, (function(memo, value) {
+    return _.overload(rf, rf, function(memo, value) {
       acc = step(acc, value);
       return rf(memo, acc);
-    }));
+    });
   };
 }
 
-const depressed = $.shared($.atom, (function(el) {
-  return $.seed(_.constantly([]), $.pipe($.chan(el, "keydown keyup"), scan((function(memo, e) {
+const depressed = $.shared($.atom, function(el) {
+  return $.seed(_.constantly([]), $.pipe($.chan(el, "keydown keyup"), scan(function(memo, e) {
     if (e.type === "keyup") {
       var _e$key, _$notEq, _ref2;
       memo = _.filtera((_ref2 = _, _$notEq = _ref2.notEq, _e$key = e.key, function notEq(_argPlaceholder2) {
@@ -1065,15 +1065,15 @@ const depressed = $.shared($.atom, (function(el) {
       memo = _.conj(memo, e.key);
     }
     return memo;
-  }), []), _.dedupe()));
-}));
+  }, []), _.dedupe()));
+});
 
 function attr2(self, key) {
   if (_.isString(key)) {
     return self.getAttribute(key);
   } else {
     const entries = key;
-    $.each((([key, value]) => attr3(self, key, value)), entries);
+    $.each(([key, value]) => attr3(self, key, value), entries);
   }
 }
 
@@ -1151,13 +1151,13 @@ function hasClass(self, name) {
   return self.classList.contains(name);
 }
 
-const markup = _.obj((function(name, ...contents) {
-  const attrs = _.map((function(entry) {
+const markup = _.obj(function(name, ...contents) {
+  const attrs = _.map(function(entry) {
     return _.template('{0}="{1}"', _.key(entry), _.replace(_.val(entry), /"/g, "&quot;"));
-  }), _.apply(_.merge, _.filter(_.isObject, contents)));
+  }, _.apply(_.merge, _.filter(_.isObject, contents)));
   const content = _.map(_.str, _.remove(_.isObject, contents));
   return _.join("", _.concat([ "<" + name + " " + _.join(" ", attrs) + ">" ], content, "</" + name + ">"));
-}), Infinity);
+}, Infinity);
 
 function tags0() {
   return _.factory(element(document));
@@ -1173,10 +1173,10 @@ function tags2(engine, keys) {
 
 function tags3(engine, f, keys) {
   const tag = _.factory(engine);
-  return _.fold((function(memo, key) {
+  return _.fold(function(memo, key) {
     memo[key] = f(tag(key));
     return memo;
-  }), {}, keys);
+  }, {}, keys);
 }
 
 function svg(doc = document, tags = [ "svg", "g", "symbol", "defs", "clipPath", "metadata", "path", "line", "circle", "rect", "ellipse", "polygon", "polyline", "image", "text", "tspan" ]) {
@@ -1194,15 +1194,15 @@ const tags = _.overload(tags0, tags1, tags2, tags3);
 
 const tag = tags();
 
-const option = _.assume(isHTMLDocument, document, _.overload(null, null, (function option(document, entry) {
+const option = _.assume(isHTMLDocument, document, _.overload(null, null, function option(document, entry) {
   return element(document, "option", {
     value: _.key(entry)
   }, _.val(entry));
-}), (function(document, key, value) {
+}, function(document, key, value) {
   return element(document, "option", {
     value: key
   }, value);
-})));
+}));
 
 const toFragment = (_ref4 = _, _$coerce = _ref4.coerce, _DocumentFragment = DocumentFragment, 
 function coerce(_argPlaceholder4) {
@@ -1234,9 +1234,9 @@ function coerce(_argPlaceholder4) {
 (function() {
   function embeddables(self, doc) {
     function embed(el) {
-      $.each((function(entry) {
+      $.each(function(entry) {
         $.assoc(el, _.key(entry), _.val(entry));
-      }), self);
+      }, self);
     }
     return [ embed ];
   }
@@ -1262,13 +1262,13 @@ _param2 = {}, function into(_argPlaceholder5) {
   return _$into2.call(_ref5, _param2, _argPlaceholder5);
 }));
 
-_.addMethod(_.coerce, [ Object, URLSearchParams ], (function(obj) {
+_.addMethod(_.coerce, [ Object, URLSearchParams ], function(obj) {
   const params = new URLSearchParams;
   for (const [key, value] of Object.entries(obj)) {
     params.set(key, value);
   }
   return params;
-}));
+});
 
 function stylesheet2(href, document) {
   if (!sel1$1(`link[href='${href}']`, document)) {

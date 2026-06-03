@@ -9,15 +9,15 @@ export { List, OrderedMap, OrderedSet } from "../immutable.js";
 import "./shell.js";
 
 function map(obj) {
-  return _.reduce((function(memo, [key, value]) {
+  return _.reduce(function(memo, [key, value]) {
     return memo.set(key, value);
-  }), new Map, obj);
+  }, new Map, obj);
 }
 
 function list(obj) {
-  return _.ako(coll, List) ? coll : _.reduce((function(memo, value) {
+  return _.ako(coll, List) ? coll : _.reduce(function(memo, value) {
     return memo.add(value);
-  }), new List, coll || []);
+  }, new List, coll || []);
 }
 
 function equiv$2(self, other) {
@@ -141,9 +141,9 @@ function dissoc(self, key) {
 }
 
 function reducekv(self, f, init) {
-  return _.reduce((function(memo, key) {
+  return _.reduce(function(memo, key) {
     return f(memo, key, _.get(self, key));
-  }), init, keys(self));
+  }, init, keys(self));
 }
 
 function reduce$1(self, f, init) {
@@ -203,9 +203,9 @@ var behave$1 = _.does(_.iterable, _.keying("Map"), _.implement(_.IReducible, {
 behave$1(Map);
 
 function set(coll) {
-  return _.reduce((function(memo, value) {
+  return _.reduce(function(memo, value) {
     return memo.add(value);
-  }), new Set, coll || []);
+  }, new Set, coll || []);
 }
 
 function emptySet() {
@@ -292,17 +292,17 @@ var behave = _.does(_.iterable, _.keying("Set"), _.implement(_.ISequential), _.i
 behave(Set);
 
 function orderedMap(obj) {
-  return _.ako(obj, OrderedMap) ? obj : _.reduce((function(memo, [key, value]) {
+  return _.ako(obj, OrderedMap) ? obj : _.reduce(function(memo, [key, value]) {
     return memo.set(key, value);
-  }), new OrderedMap, obj);
+  }, new OrderedMap, obj);
 }
 
 behave$1(OrderedMap);
 
 function orderedSet(coll) {
-  return _.reduce((function(memo, value) {
+  return _.reduce(function(memo, value) {
     return memo.add(value);
-  }), new OrderedSet, coll || []);
+  }, new OrderedSet, coll || []);
 }
 
 function emptyOrderedSet() {
@@ -321,9 +321,9 @@ function memoize2(f, hash) {
 }
 
 function memoize1(f) {
-  return memoize2(f, (function(self, ...args) {
+  return memoize2(f, function(self, ...args) {
     return args;
-  }));
+  });
 }
 
 const memoize = _.overload(null, memoize1, memoize2);

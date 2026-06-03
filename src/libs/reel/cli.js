@@ -2,6 +2,7 @@
 
 import _ from "../atomic_/core.js";
 import $ from "../atomic_/shell.js";
+import * as sh from "./shell.js";
 import { reel } from "./shell.js";
 import { reg } from "../cmd.js";
 //import supabase from "../supabase.js";
@@ -53,10 +54,18 @@ await new Command()
 
     const log = _.comp(logs, abbr);
     const $reel = reel(tableId, seat);
+    const $scratch = sh.scratch($reel);
 
-    reg({$reel});
+    reg({$reel, $scratch});
 
     $.sub($reel, log);
+
+    setTimeout(function(){
+      $.reset($scratch, {"foo": true});
+      setTimeout(function(){
+        sh.clear($scratch);
+      }, 2000)
+    }, 2000)
 
     await tuiMode($reel);
 

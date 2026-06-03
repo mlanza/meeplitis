@@ -180,11 +180,23 @@ function undoThru(undoables, touch){
   }, undoables);
 }
 
+export const path = _.pipe(_.deref, _.getIn(_, ["cursor", "at"]), _.array);
+
+export function scratch(self){
+  return $.cursor(self.$scratch, () => path(self));
+}
+
+export function clear($scratch){
+  $.reset($scratch, null);
+}
+
 export function reel(tableId, seat){
 
   const $timeline = $.atom(r.init(tableId, seat));
 
   const $table = table(tableId);
+
+  const $scratch = $.atom({});
 
   //const $table = $.pipe($.map(keeping(["up","release","game_id","last_touch_id","remarks","scored","status"]), $tbl), _.compact());
 
@@ -222,9 +234,9 @@ export function reel(tableId, seat){
     return _.maybe(at, at => undoThru(undoables, at));
   }, $timeline);
 
-  const $state = $.pipe($.map(function(table, seated, seats, up, undoable, make, ready, act, timeline){
-    return {...timeline, table, seated, seats, up, undoable, make, ready, act};
-  }, $table, $seated, $seats, $up, $undoable, $.pipe($make, _.compact()), $ready, $act, $timeline), _.filter(_.and(_.get(_, "make"), _.get(_, "table"))));
+  const $state = $.pipe($.map(function(table, seated, seats, up, undoable, scratch, make, ready, act, timeline){
+    return {...timeline, table, seated, seats, up, undoable, scratch, make, ready, act};
+  }, $table, $seated, $seats, $up, $undoable, $scratch, $.pipe($make, _.compact()), $ready, $act, $timeline), _.filter(_.and(_.get(_, "make"), _.get(_, "table"))));
 
   const $timer = new Timer(1000, Date.now);
 
@@ -285,10 +297,10 @@ export function reel(tableId, seat){
     }
   });
 
-  return new Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer);
+  return new Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $scratch);
 }
 
-function Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer){
+function Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $scratch){
   this.$timeline = $timeline;
   this.$table = $table;
   this.$make = $make;
@@ -300,6 +312,7 @@ function Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $und
   this.$undoable = $undoable;
   this.$state = $state;
   this.$timer = $timer;
+  this.$scratch = $scratch;
 }
 
 function chan(self, key){

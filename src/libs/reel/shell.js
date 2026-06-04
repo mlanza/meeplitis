@@ -3,6 +3,7 @@ import $ from "../atomic_/shell.js";
 import * as r from "./core.js";
 import supabase from "../supabase.js";
 import { session } from "../session.js";
+export { perspective } from "./core.js";
 
 /**
  * Creates a new signal that "ticks" at a specified interval.
@@ -155,16 +156,17 @@ function table(tableId){
     .then(_.getIn(_, ["data", 0]))
     .then($.reset($t, _));
 
-  supabase.channel('db-messages').
-    on('postgres_changes', {
+  supabase
+    .channel('db-messages')
+    .on('postgres_changes', {
       event: 'UPDATE',
       schema: 'public',
       table: 'tables',
       filter: `id=eq.${tableId}`,
     }, function(payload){
       $.reset($t, payload.new);
-    }).
-    subscribe();
+    })
+    .subscribe();
 
   return $.pipe($t, _.compact());
 }
@@ -208,7 +210,7 @@ export function reel(tableId, seat){
     if (!table || !ready) {
       return false;
     }
-    const {seat, seated, cursor, touches, perspectives} = timeline;
+    const {cursor, perspectives} = timeline;
     const {at, pos, max} = cursor;
     const {status} = table;
     const started = status === "started";
@@ -323,6 +325,21 @@ function on(self, key, callback){
   return $.sub($.chan(self, key), callback);
 }
 
+function can($ready, what, f){
+  try {
+    const ready = _.deref($ready);
+    if (!ready) {
+      throw new Error("Back end still processing; please wait.");
+    }
+    $.reset($ready, false);
+    f();
+  } catch (cause) {
+    throw new Error(`${what} failed`, {cause});
+  } finally {
+    $.reset($ready, true);
+  }
+}
+
 function dispatch(self, command){
   const {type, details} = command;
 
@@ -355,28 +372,35 @@ function dispatch(self, command){
       break;
 
     case "move":
-      try {
-        const ready = _.deref(self.$ready);
-        if (!ready) {
-          throw new Error("Back end still processing; please wait.");
-        }
-        const {id, seat, pos, max} = _.deref(self.$timeline);
+      can(self.$ready, type, function(){
+        const {id, seat} = _.deref(self);
         if (seat == null || session?.accessToken == null) {
           throw new Error("Spectators are not permitted to issue moves");
         }
-        $.reset(self.$ready, false);
         const commands = [details.move];
         _.fmap(move(id, seat, commands, session?.accessToken), console.log);
         //TODO register move response somewhere
-      } catch (ex) {
-        throw ex;
-      } finally {
-        $.reset(self.$ready, true);
-      }
+      });
+      break;
+
+    case "do-over": //TODO test
+      can(self.$ready, type, function(){
+        const {id, undoables, cursor} = _.deref(self);
+        const {at} = cursor;
+        const _table_id = id,
+              _event_id = undoThru(undoables, at);
+        if (_event_id) {
+          console.log("do-over", {_event_id});
+          return; //TODO
+          supabase.rpc('undo', {_table_id, _event_id}).then(function(undo){
+            //TODO $.swap(self.$state, _.update(_, "history", _.pipe(_.take(at -1, _), _.toArray)));
+          });
+        }
+      });
       break;
 
     default:
-      break;
+      throw new Error(`Unknown command ${type}`);
   }
 }
 

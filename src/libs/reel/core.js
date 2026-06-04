@@ -74,9 +74,14 @@ export function present(state) {
   return _.chain(state, position(state.cursor.max));
 }
 
+export function perspective({cursor, perspectives}) {
+  const {at} = cursor;
+  return _.get(perspectives, at);
+}
+
 export function at(at) {
   return function(state){
-    const {cursor, touches} = state;
+    const {touches} = state;
     const pos = _.indexOf(touches, at);
     if (pos === -1) {
       throw new Error("Unknown moment.");
@@ -88,8 +93,7 @@ export function at(at) {
 export function toLastMove(state){
   const {perspectives, cursor, touches} = state;
   const {at} = cursor;
-  const perspective = _.get(perspectives, at);
-  const lastMove = _.get(perspective, "last_move");
+  const lastMove = _.getIn(perspectives, [at, "last_move"]);
   const pos = _.indexOf(touches, lastMove);
   return _.chain(state, pos === -1 ? _.identity : position(pos));
 }

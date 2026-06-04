@@ -35,6 +35,8 @@ async function tuiMode($reel) {
       $.dispatch($reel, {type: "ffwd"});
     } else if (event.key === "l") {
       $.dispatch($reel, {type: "last-move"});
+    } else if (event.key === "backspace") {
+      $.dispatch($reel, {type: "do-over"});
     }
   }
 }
@@ -53,9 +55,10 @@ await new Command()
       elideWith(opts.elide, (value) => `<${_.count(value)} entries>`));
 
     const $reel = reel(tableId, seat);
+    const $perspective = $.map(sh.perspective, $reel);
     const $scratch = sh.scratch($reel);
 
-    reg({$reel, $scratch}, function(key, _value){
+    reg({$reel, $scratch, $perspective}, function(key, _value){
       logs(key, abbr(_value));
     });
 

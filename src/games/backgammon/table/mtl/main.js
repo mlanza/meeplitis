@@ -313,24 +313,24 @@ function getMove({from, to}, seat) {
   }, g.moves(game, { type: ["move", "enter", "bear-off"], seat }));
 }
 
-const {$reel, $wip} = ui(describe, desc, template);
-const $hist = $.hist($reel);
+const {$hist, $wip} = ui(describe, desc, template);
 
 //const {$ready, $error, $story, $hist, $snapshot, $wip} = ui(c.make, describe, desc, template);
 
-reg({ g, $hist });
 //TOOD filter must not be needed
-$.sub($hist, _.filter(_.isSome), function ([curr, prior]) {
-  const { up, perspective: state, cursor } = curr;
-  const { max, pos } = cursor;
+$.sub($hist, _.filter(_.isSome), function ([now, past]) {
+  const curr = now?.perspective;
+  const prior = past?.perspective;
+  const {cursor} = now ?? {};
+  const { max, pos } = cursor ?? {};
   const present = max === pos;
-  const wip = [curr.scratch, prior?.scratch];
-  const which = wip[0] === wip[1] ? 0 : 1;
+  const wip = now?.scratch;
+  const which = now?.scratch === past?.scratch ? 0 : 1;
+  const { up, state, game } = curr || {};
   if (!state) return;
-  const {game} = state;
-  debugger
-
   const { status, dice, off, stakes, holdsCube } = state;
+
+  //const { status, dice, off, stakes, holdsCube } = state;
 
   if (which !== 1) {
     const checkers = getCheckers(curr.state);

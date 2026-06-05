@@ -13,9 +13,11 @@ export const tableId = params.get('id');
 export function ui(describe, desc, template) {
   console.log({tableId, seat})
   const $reel = reel(tableId, seat);
-  const $wip = scratch($reel);
-  reg({$reel, $wip});
+  const $scratch = scratch($reel);
+  const $hist = $.hist($reel);
 
-  return {$reel, $wip};
+  reg({$hist, $scratch});
+
+  return {$hist, $wip: $scratch};
 }
 

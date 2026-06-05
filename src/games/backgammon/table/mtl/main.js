@@ -9,6 +9,7 @@ import {retainAttr} from "/libs/wip.js";
 import {el, seated, seats, seat, scored, outcome, diff, which} from "/libs/table.js";
 import {reg} from "/libs/cmd.js";
 import {ui} from "/libs/reel/ui.js";
+import { perspective } from "../../../../libs/reel/core.js";
 
 const {img, div, span} = dom.tags(['img', 'div', 'span']);
 
@@ -320,7 +321,7 @@ const $hist = $.hist($reel);
 reg({ g, $hist });
 //TOOD filter must not be needed
 $.sub($hist, _.filter(_.isSome), function ([curr, prior]) {
-  const { up, state, cursor } = curr;
+  const { up, perspective: state, cursor } = curr;
   const { max, pos } = cursor;
   const present = max === pos;
   const wip = [curr.scratch, prior?.scratch];

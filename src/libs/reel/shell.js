@@ -3,7 +3,6 @@ import $ from "../atomic_/shell.js";
 import * as r from "./core.js";
 import supabase from "../supabase.js";
 import { session } from "../session.js";
-export { perspective } from "./core.js";
 
 /**
  * Creates a new signal that "ticks" at a specified interval.
@@ -237,10 +236,8 @@ export function reel(tableId, seat){
   }, $timeline);
 
   const $state = $.pipe($.map(function(table, seated, seats, up, undoable, scratch, make, ready, act, timeline){
-    const {perspectives, cursor} = timeline;
-    const {at} = cursor;
-    const state = _.get(perspectives, at);
-    return {...timeline, state, table, seated, seats, up, undoable, scratch, make, ready, act};
+    const perspective = r.perspective(timeline);
+    return {...timeline, perspective, table, seated, seats, up, undoable, scratch, make, ready, act};
   }, $table, $seated, $seats, $up, $undoable, $scratch, $.pipe($make, _.compact()), $ready, $act, $timeline), _.filter(_.and(_.get(_, "make"), _.get(_, "table"))));
 
   const $timer = new Timer(1000, Date.now);

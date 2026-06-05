@@ -2,12 +2,10 @@ import _ from "../atomic_/core.js";
 import $ from "../atomic_/shell.js";
 import dom from "../atomic_/dom.js";
 import {reel, scratch} from "./shell.js";
-import {reg} from "../cmd.js";
-import supabase from "/libs/supabase.js";
-import {presence} from "/libs/online.js";
-import {$online, session, getfn} from "/libs/session.js";
-import {relink} from "/libs/links.js";
-import {rankings} from "/components/table/ui.js";
+import { presence } from "/libs/online.js";
+import { $online, session } from "/libs/session.js";
+import { relink } from "/libs/links.js";
+import { rankings } from "/components/table/ui.js";
 import "/libs/dummy.js";
 
 const {div, h1, a, span, img, ol, ul, li, sup} = dom.tags(['div', 'h1', 'a', 'span', 'img', 'ol', 'ul', 'li', 'sup']);
@@ -59,11 +57,10 @@ export async function ui(describe, desc, template) {
   const $ready = $.map(_.get(_, "ready"), $reel);
   const $table = $.map(_.get(_, "table"), $reel);
   const $status = $.map(_.get(_, "status"), $table);
-  const $present = $.map(function({cursor}){
-    const {max, pos} = cursor ?? {};
+  const $present = $.map(function({max, pos}){
     return _.isNumber(pos) && max === pos;
-  }, $reel);
-  const $scored = $.map(_.get(_, "scored"), $table);
+  }, $cursor);
+  //const $scored = $.map(_.get(_, "scored"), $table);
   const $remarks = $.map(_.get(_, "remark"), $table);
   const $described = $.map(_.pipe(_.get(_, "config"), describe), $table);
   const seated = await later($.map(_.get(_, "seated"), $reel));
@@ -74,7 +71,11 @@ export async function ui(describe, desc, template) {
       _.unique,
       _.toArray));
 
-  //const seat = _.count(seats) > 1 ? _.maybe(params.get("seat"), parseInt) : _.first(seats);
+  //TODO const seat = _.count(seats) > 1 ? _.maybe(params.get("seat"), parseInt) : _.first(seats);
+
+  function eventFor(event){
+    return _.maybe(event.seat, _.nth(seated, _));
+  }
 
   const rejected = seat != null && !_.includes(seats, seat);
   params.delete("seat");
@@ -108,7 +109,7 @@ export async function ui(describe, desc, template) {
     addLog(message, {tableId});
   });
 
-  $.sub($error, _.filter(_.isSome), function(error){ //when an error occurs...
+  $.sub($error, _.filter(_.isSome), function(){ //when an error occurs...
     clear($wip);
   });
 
@@ -155,9 +156,118 @@ export async function ui(describe, desc, template) {
     dom.text(els.touches, max + 1);
   });
 
-
   const $depressed = $.map(_.pipe(_.join(" ", _), _.lowerCase), dom.depressed(document.body));
   $.sub($depressed, dom.attr(el, "data-depressed", _));
+
+  $.sub($hist, _.filter(_.getIn(_, [0])), function([now]){
+    const bwd =  now?.cursor?.direction > 0; //TODO review
+    const touch = now?.cursor?.at;
+    const curr = now?.perspective;
+    const last_acting_seat = now?.last_acting_seat;
+    const undoable = null;
+    if (!curr) {
+      return;
+    }
+    //const [curr, prior, {touch, undoable, bwd, last_acting_seat}] = what;
+
+    const {event} = curr;
+    const player = eventFor(event);
+    const undoer = _.detectIndex(_.comp(_.eq(last_acting_seat, _), _.get(_, "seat_id")), seated);
+
+    dom.removeClass(el, "ack");
+    dom.removeClass(el, "error");
+
+    $.doto(els.event,
+      dom.attr(_, "data-type", event.type),
+      dom.addClass(_, "posted"),
+      dom.removeClass(_, "hidden"));
+
+    setTimeout(function(){
+      dom.removeClass(els.event, "posted");
+    }, 300);
+
+    dom.attr(el, "data-event-type", event.type);
+    dom.attr(el, "data-undoable", undoable == touch ? "1" : undoable ? "0" : null);
+    dom.attr(el, "data-undoer", seat == undoer);
+    dom.html(dom.sel1("p", els.event), desc(event));
+    dom.text(dom.sel1("span.seat", els.event), event.seat);
+    dom.toggleClass(els.event, "automatic", !player);
+    dom.toggleClass(el, "bwd", bwd);
+
+    if (player) {
+      dom.attr(dom.sel1("img.who", els.event), "src", player.avatar_url);
+      dom.text(dom.sel1("p.who", els.event), player.username);
+    }
+
+    dom.addClass(el, "init");
+  });
+
+  $.on(els.options, "click", function(e){
+    dom.sel1("#options", el).scrollIntoView();
+  });
+
+  $.on(els.remarks, "click", function(e){
+    dom.sel1("#remarks", el).scrollIntoView();
+  });
+
+  $.on(document, "keydown", function(e){
+    switch(e.key){
+      case "ArrowUp":
+      case "ArrowLeft":
+        e.preventDefault();
+        $.dispatch($reel, e.shiftKey ? "inception" : "back");
+        break;
+
+      case "ArrowDown":
+      case "ArrowRight":
+        e.preventDefault();
+        $.dispatch($reel, e.shiftKey ? "present": "forward");
+        break;
+
+      case "Backspace":
+        if (e.shiftKey) {
+          e.preventDefault();
+          $.dispatch($reel, "do-over");
+        }
+        break;
+
+      case "Escape": //cancel work in progress and/or clear error
+        e.preventDefault();
+        clear($wip);
+        //TODO $.reset($error, null);
+        break;
+
+      case ".": //not always an option
+        e.preventDefault();
+        $.dispatch($reel, {type: "pass"});
+        break;
+
+      case "Enter":
+        e.preventDefault();
+        $.dispatch($reel, {type: "commit"});
+        break;
+
+      case "s":
+        if (e.metaKey) {
+          e.preventDefault();
+          location.href = `${location.origin}/shell/${location.search}${location.hash}`;
+        }
+        break;
+
+      case ",":
+        e.preventDefault();
+        $.dispatch($reel, "last-move");
+        break;
+    }
+  });
+
+  $.on(el, "click", "#replay [data-nav]", function(e){
+    replay($story, dom.attr(e.target, "data-nav"));
+  });
+
+  $.on(el, "click", ".message", function(e){
+    dom.addClass(el, "ack");
+  });
 
   return {$reel, $wip: $scratch, $hist};
 }

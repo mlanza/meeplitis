@@ -313,7 +313,7 @@ function getMove({from, to}, seat) {
   }, g.moves(game, { type: ["move", "enter", "bear-off"], seat }));
 }
 
-const {$hist, $wip} = await ui(describe, desc, template);
+const {$reel, $hist, $wip} = await ui(describe, desc, template);
 
 //const {$ready, $error, $story, $hist, $snapshot, $wip} = ui(c.make, describe, desc, template);
 

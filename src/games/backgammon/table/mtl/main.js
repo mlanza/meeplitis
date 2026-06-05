@@ -8,7 +8,7 @@ import {describe} from "./ancillary.js";
 import {retainAttr} from "/libs/wip.js";
 import {el, seated, seats, seat, scored, outcome, diff, which} from "/libs/table.js";
 import {reg} from "/libs/cmd.js";
-import {ui, perspective} from "/libs/reel/ui.js";
+import {ui} from "/libs/reel/ui.js";
 
 const {img, div, span} = dom.tags(['img', 'div', 'span']);
 
@@ -305,6 +305,7 @@ function asPoint(position){
 }
 
 function getMove({from, to}, seat) {
+  debugger
   const game = moment($story);
   return _.detect(function(cmd){
     return cmd.seat == seat && cmd?.details?.from == from && (to == null || cmd?.details?.to == to);
@@ -312,22 +313,23 @@ function getMove({from, to}, seat) {
 }
 
 const {$reel, $wip} = ui(describe, desc, template);
-
 const $hist = $.hist($reel);
 
 //const {$ready, $error, $story, $hist, $snapshot, $wip} = ui(c.make, describe, desc, template);
 
 reg({ g, $hist });
 //TOOD filter must not be needed
-$.sub($hist, _.filter(_.isSome), function ([curr, prior]) { //[[curr, prior, motion, game], wip, which]
-
-  debugger
-  const state = perspective(curr); //TODO receive as `  const { up, state } = curr;`
-
-  const { up } = curr;
+$.sub($hist, _.filter(_.isSome), function ([curr, prior]) {
+  const { up, state, cursor } = curr;
+  const { max, pos } = cursor;
+  const present = max === pos;
+  const wip = [curr.scratch, prior?.scratch];
+  const which = wip[0] === wip[1] ? 0 : 1;
   if (!state) return;
+  const {game} = state;
+  debugger
+
   const { status, dice, off, stakes, holdsCube } = state;
-  const { present } = motion;
 
   if (which !== 1) {
     const checkers = getCheckers(curr.state);
@@ -389,6 +391,7 @@ $.on(el, "click", `#table.act[data-allow-commands~="propose-double"] #cube`, fun
 
 $.on(el, "click", `#table.act[data-from] .off-board`, function(e){
   const from = _.chain($wip, _.deref, _.getIn(_, ["details", "from"]), asPoint);
+  debugger
   const game = moment($story);
   const seat = g.up(game)[0];
 

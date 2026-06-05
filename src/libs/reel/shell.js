@@ -237,7 +237,10 @@ export function reel(tableId, seat){
   }, $timeline);
 
   const $state = $.pipe($.map(function(table, seated, seats, up, undoable, scratch, make, ready, act, timeline){
-    return {...timeline, table, seated, seats, up, undoable, scratch, make, ready, act};
+    const {perspectives, cursor} = timeline;
+    const {at} = cursor;
+    const state = _.get(perspectives, at);
+    return {...timeline, state, table, seated, seats, up, undoable, scratch, make, ready, act};
   }, $table, $seated, $seats, $up, $undoable, $scratch, $.pipe($make, _.compact()), $ready, $act, $timeline), _.filter(_.and(_.get(_, "make"), _.get(_, "table"))));
 
   const $timer = new Timer(1000, Date.now);

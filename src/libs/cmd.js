@@ -1,6 +1,6 @@
-import _ from "./atomic_/core.js";
-import $ from "./atomic_/shell.js";
-import imm from "./atomic_/immutables.js";
+import _ from './atomic_/core.js';
+import $ from './atomic_/shell.js';
+import imm from './atomic_/immutables.js';
 
 const registry = {};
 const params = new URLSearchParams(globalThis.location ? location.search : "");
@@ -29,17 +29,17 @@ function reg1(symbols, log = $.log){
   }
 }
 
-export const reg = _.overload(reg0, reg1);
+const reg = _.overload(reg0, reg1);
 
-export function cmd(target = globalThis, log = $.log){
+function cmd(target = globalThis, log = $.log){
   Object.assign(target, registry);
   log("Loaded", registry);
 }
 
-export default cmd;
-
-const dom = globalThis.document ? (await import("./atomic_/dom.js")).default : null;
+const dom = globalThis.document ? (await import('./atomic_/dom.js')).default : null;
 
 _.chain({_, $, imm, dom}, _.compact, reg);
 
 Object.assign(globalThis, {cmd, reg});
+
+export { cmd, cmd as default, reg };

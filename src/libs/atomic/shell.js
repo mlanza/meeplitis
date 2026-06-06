@@ -991,7 +991,7 @@ function map1(entries = []) {
 }
 
 function map0() {
-  return new Map;
+  return new Map();
 }
 
 const nativeMap = _.overload(map0, map1);
@@ -1029,7 +1029,7 @@ function weakMap1(obj) {
 }
 
 function weakMap0() {
-  return new WeakMap;
+  return new WeakMap();
 }
 
 const weakMap = _.overload(weakMap0, weakMap1);
@@ -1047,7 +1047,7 @@ function set(entries) {
 }
 
 function emptySet() {
-  return new Set;
+  return new Set();
 }
 
 function empty$3(self) {
@@ -1088,7 +1088,7 @@ function weakSet1(arr) {
 }
 
 function weakSet0() {
-  return new WeakSet;
+  return new WeakSet();
 }
 
 const weakSet = _.overload(weakSet0, weakSet1);
@@ -1562,7 +1562,7 @@ Event.prototype[Symbol.toStringTag] = "Event";
 const event = constructs(Event);
 
 function effect(message, type) {
-  const e = new Event;
+  const e = new Event();
   return Object.assign(e, message, {
     type: type
   });

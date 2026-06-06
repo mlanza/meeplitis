@@ -45,7 +45,7 @@ await new Command()
   .name("reel")
   .description("Navigate and append to board game timeline")
   .arguments("<table:string>")
-  .option("--commands <commands:string>", "Commands string")
+  //TODO .option("--commands <commands:string>", "Commands string")
   .option("--seat <seat:number>", "Seat number (integer)")
   .option("--elide <key:string>", "Key to elide in logs", { collect: true })
   .action(async function (opts, tableId){

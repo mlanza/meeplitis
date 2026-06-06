@@ -11,13 +11,13 @@ import "./shell.js";
 function map(obj) {
   return _.reduce(function(memo, [key, value]) {
     return memo.set(key, value);
-  }, new Map, obj);
+  }, new Map(), obj);
 }
 
 function list(obj) {
   return _.ako(coll, List) ? coll : _.reduce(function(memo, value) {
     return memo.add(value);
-  }, new List, coll || []);
+  }, new List(), coll || []);
 }
 
 function equiv$2(self, other) {
@@ -205,11 +205,11 @@ behave$1(Map);
 function set(coll) {
   return _.reduce(function(memo, value) {
     return memo.add(value);
-  }, new Set, coll || []);
+  }, new Set(), coll || []);
 }
 
 function emptySet() {
-  return new Set;
+  return new Set();
 }
 
 const distinct = _.distinctly(set());
@@ -294,7 +294,7 @@ behave(Set);
 function orderedMap(obj) {
   return _.ako(obj, OrderedMap) ? obj : _.reduce(function(memo, [key, value]) {
     return memo.set(key, value);
-  }, new OrderedMap, obj);
+  }, new OrderedMap(), obj);
 }
 
 behave$1(OrderedMap);
@@ -302,11 +302,11 @@ behave$1(OrderedMap);
 function orderedSet(coll) {
   return _.reduce(function(memo, value) {
     return memo.add(value);
-  }, new OrderedSet, coll || []);
+  }, new OrderedSet(), coll || []);
 }
 
 function emptyOrderedSet() {
-  return new OrderedSet;
+  return new OrderedSet();
 }
 
 behave(OrderedSet);

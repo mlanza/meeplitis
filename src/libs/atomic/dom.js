@@ -187,7 +187,7 @@ function toString() {
   return `Element "${this.el.tagName}" failed to match "${this.selector}".`;
 }
 
-InvalidHostElementError.prototype = Object.assign(new Error, {
+InvalidHostElementError.prototype = Object.assign(new Error(), {
   toString: toString
 });
 
@@ -890,7 +890,7 @@ function equiv(self, other) {
 }
 
 function clone(self) {
-  const params = new URLSearchParams;
+  const params = new URLSearchParams();
   for (const [key, value] of self.entries()) {
     params.set(key, value);
   }
@@ -1263,7 +1263,7 @@ _param2 = {}, function into(_argPlaceholder5) {
 }));
 
 _.addMethod(_.coerce, [ Object, URLSearchParams ], function(obj) {
-  const params = new URLSearchParams;
+  const params = new URLSearchParams();
   for (const [key, value] of Object.entries(obj)) {
     params.set(key, value);
   }

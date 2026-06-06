@@ -127,7 +127,6 @@ function digest(result){
 }
 
 function getPerspective(table_id, event_id, seat, seat_id, accessToken){
-  console.log({table_id, event_id, seat, seat_id, accessToken})
   const perspective = getfn("perspective", _.compact({table_id, event_id, seat}), accessToken).then(digest);
   const last_move = getLastMove(table_id, event_id, seat_id);
   return Promise.all([perspective, last_move]).then(function([{data, error}, last_move]){

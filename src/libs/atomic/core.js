@@ -274,7 +274,7 @@ function applying(...args) {
 
 function constructs(Type) {
   return function(...args) {
-    return new (Function.prototype.bind.apply(Type, [ null ].concat(args)));
+    return new (Function.prototype.bind.apply(Type, [ null ].concat(args)))();
   };
 }
 
@@ -350,7 +350,7 @@ function PreconditionError(f, pred, args) {
   this.args = args;
 }
 
-PreconditionError.prototype = new Error;
+PreconditionError.prototype = new Error();
 
 function PostconditionError(f, pred, args, result) {
   this.f = f;
@@ -359,7 +359,7 @@ function PostconditionError(f, pred, args, result) {
   this.result = result;
 }
 
-PostconditionError.prototype = new Error;
+PostconditionError.prototype = new Error();
 
 function pre(f, pred) {
   return function() {
@@ -656,12 +656,12 @@ function satisfies0() {
 }
 
 function satisfies1(obj) {
-  const target = obj == null ? new Nil : obj, key = this[INDEX]["__marker__"] || MISSING;
+  const target = obj == null ? new Nil() : obj, key = this[INDEX]["__marker__"] || MISSING;
   return target[key] || (target.constructor === Object ? target.constructor[key] : null);
 }
 
 function satisfies2(method, obj) {
-  const target = obj == null ? new Nil : obj, key = this[INDEX][method] || MISSING;
+  const target = obj == null ? new Nil() : obj, key = this[INDEX][method] || MISSING;
   return target[key] || (target.constructor === Object ? target.constructor[key] : null) || this[TEMPLATE][method];
 }
 
@@ -1095,7 +1095,7 @@ function Multimethod(dispatch, methods, fallback) {
 }
 
 function multimethod(dispatch, fallback) {
-  const behavior = new Multimethod(dispatch, new HashMap, fallback);
+  const behavior = new Multimethod(dispatch, new HashMap(), fallback);
   const fn = partial(invoke$2, behavior);
   fn.behavior = behavior;
   return fn;
@@ -1452,7 +1452,7 @@ function method(self, ...args) {
 function EmptyList() {}
 
 function emptyList() {
-  return new EmptyList;
+  return new EmptyList();
 }
 
 EmptyList.prototype[Symbol.toStringTag] = "EmptyList";
@@ -1567,7 +1567,7 @@ function directed(start, step) {
 function steps(Type, pred) {
   return function(start, end, step) {
     if (start == null && end == null) {
-      return new Type;
+      return new Type();
     }
     if (start != null && !pred(start)) {
       throw Error(Type.name + " passed invalid start value.");
@@ -1970,7 +1970,7 @@ function Nothing() {}
 
 Nothing.prototype[Symbol.toStringTag] = "Nothing";
 
-const nothing = new Nothing;
+const nothing = new Nothing();
 
 function Just(value) {
   this.value = value;
@@ -1996,7 +1996,7 @@ function Range(start, end, step, direction) {
 }
 
 function emptyRange() {
-  return new Range;
+  return new Range();
 }
 
 function range0() {
@@ -3017,7 +3017,7 @@ function scan(n, xs) {
 }
 
 function isDistinct1(coll) {
-  let seen = new Set;
+  let seen = new Set();
   return reduce$7(function(memo, x) {
     if (memo && seen.has(x)) {
       return reduced(false);
@@ -5261,7 +5261,7 @@ function dissoc$4(self, key) {
 }
 
 function assoc$4(self, key, value) {
-  if (equiv$b(get(self, key), value)) {
+  if (contains$9(self, key) && equiv$b(get(self, key), value)) {
     return self;
   } else {
     const result = clone$8(self);
@@ -5373,7 +5373,7 @@ function Period(start, end) {
 }
 
 function emptyPeriod() {
-  return new Period;
+  return new Period();
 }
 
 function period1(obj) {
@@ -5461,11 +5461,11 @@ function equiv$5(self, other) {
 }
 
 function construct(Type, attrs) {
-  return Object.assign(new Type, attrs);
+  return Object.assign(new Type(), attrs);
 }
 
 function emptyable(Type) {
-  const empty = constantly(new Type);
+  const empty = constantly(new Type());
   implement(IEmptyableCollection, {
     empty: empty
   }, Type);
@@ -5473,7 +5473,7 @@ function emptyable(Type) {
 
 function record(Type) {
   function clone(self) {
-    return Object.assign(new Type, self);
+    return Object.assign(new Type(), self);
   }
   function assert2(self, key) {
     var _param, _param2, _fold;
@@ -5495,7 +5495,7 @@ function record(Type) {
   function dissoc(self, key) {
     const copy = clone$8(self);
     delete copy[key];
-    return includes$d(Object.keys(new Type), key) ? coerce(copy, Object) : copy;
+    return includes$d(Object.keys(new Type()), key) ? coerce(copy, Object) : copy;
   }
   const retract = overload(null, null, dissoc$7, retract3);
   const make = constructs(Type);
@@ -5563,7 +5563,7 @@ function multirecord(Type, {defaults: defaults, multiple: multiple} = {
   function dissoc(self, key) {
     const copy = clone$8(self);
     delete copy[key];
-    return includes$d(Object.keys(new Type), key) ? coerce(copy, Object) : copy;
+    return includes$d(Object.keys(new Type()), key) ? coerce(copy, Object) : copy;
   }
   const retract = overload(null, null, dissoc$7, retract3);
   doto(Type, implement(ITopic, {
@@ -5583,7 +5583,7 @@ function Recurrence(start, end, step, direction) {
 }
 
 function emptyRecurrence() {
-  return new Recurrence;
+  return new Recurrence();
 }
 
 function recurrence1(obj) {
@@ -6244,14 +6244,14 @@ function dissoc$2(self, key) {
 
 function keys$4(self) {
   var _param2, _map;
-  return mapcat((_map = map, _param2 = ([key, _]) => key, function map(_argPlaceholder2) {
+  return mapcat((_map = map, _param2 = (([key, _]) => key), function map(_argPlaceholder2) {
     return _map(_param2, _argPlaceholder2);
   }), vals$6(self.mapped));
 }
 
 function vals$1(self) {
   var _param3, _map2;
-  return mapcat((_map2 = map, _param3 = ([_, val]) => val, function map(_argPlaceholder3) {
+  return mapcat((_map2 = map, _param3 = (([_, val]) => val), function map(_argPlaceholder3) {
     return _map2(_param3, _argPlaceholder3);
   }), vals$6(self.mapped));
 }

@@ -311,7 +311,6 @@ function getMove({from, to}, seat) {
 }
 
 const {seated, $reel, $hist, $wip} = await gui(describe, desc, template);
-console.log({seated}); //TODO fix `reg` for one offs
 
 //TOOD `filter` must be factored out
 $.sub($hist, _.filter(_.isSome), function ([now, past]) {

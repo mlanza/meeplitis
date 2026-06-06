@@ -5,8 +5,6 @@ import $ from "../atomic_/shell.js";
 import * as sh from "./shell.js";
 import { reel } from "./shell.js";
 import { reg } from "../cmd.js";
-//import supabase from "../supabase.js";
-//import { session } from "../session.js";
 import { Command } from "@cliffy/command";
 import { keypress } from "@cliffy/keypress";
 
@@ -15,12 +13,18 @@ function logs(key, obj){
 }
 
 function elideWith(keys, f){
-  const elide = _.includes(keys, _);
   return function(state){
-    return _.reducekv(function(memo, key, value){
-      return _.assoc(memo, key, elide(key) ? f(value, key) : value);
-    }, {}, state);
+    return _.reduce(function(memo, key){
+      const path = _.split(key, ".");
+      return _.updateIn(memo, path, f);
+    }, state, keys);
   }
+}
+
+function elides(elide){
+  return elideWith(elide, value => _.isObject(value) || _.isArray(value) ?
+    `<${_.count(value)} entries>` :
+    `<object>`);
 }
 
 async function tuiMode(exec) {
@@ -49,16 +53,11 @@ await new Command()
   .option("--seat <seat:number>", "Seat number (integer)")
   .option("--elide <key:string>", "Key to elide in logs", { collect: true })
   .action(async function (opts, tableId){
-    const seat = opts.seat;
-
-    const abbr = _.pipe(
-      elideWith(opts.elide, (value) => `<${_.count(value)} entries>`));
-
-    const $reel = reel(tableId, seat);
-    const $perspective = $.map(sh.perspective, $reel);
+    const abbr = elides(opts.elide);
+    const $reel = reel(tableId, opts.seat);
     const $scratch = sh.scratch($reel);
 
-    reg({$reel, $scratch, $perspective}, function(key, _value){
+    reg({$reel, $scratch}, function(key, _value){
       logs(key, abbr(_value));
     });
 

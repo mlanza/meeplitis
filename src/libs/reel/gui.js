@@ -51,7 +51,7 @@ function later($what){
   });
 }
 
-export async function ui(describe, desc, template) {
+export async function gui(describe, desc, template) {
   const $reel = reel(tableId, seat);
   const $scratch = scratch($reel);
   const $wip = $scratch;

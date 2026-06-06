@@ -4,7 +4,7 @@ import dom from "/libs/atomic_/dom.js";
 import * as c from "./core.js";
 import * as g from "/libs/game.js";
 import {describe} from "./ancillary.js";
-import {el, ui, outcome} from "/libs/reel/ui.js";
+import {el, gui, outcome} from "/libs/reel/gui.js";
 //import {seat} from "/libs/table.js"; //TODO work out the seat concept and whether different from the one in reel
 
 const {img, div, span} = dom.tags(['img', 'div', 'span']);
@@ -310,7 +310,7 @@ function getMove({from, to}, seat) {
   }, g.moves(game, { type: ["move", "enter", "bear-off"], seat }));
 }
 
-const {seated, $reel, $hist, $wip} = await ui(describe, desc, template);
+const {seated, $reel, $hist, $wip} = await gui(describe, desc, template);
 console.log({seated}); //TODO fix `reg` for one offs
 
 //TOOD `filter` must be factored out

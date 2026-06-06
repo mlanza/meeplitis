@@ -3,18 +3,25 @@ import $ from "../atomic_/shell.js";
 import dom from "../atomic_/dom.js";
 import {reel, scratch} from "./shell.js";
 import { presence } from "/libs/online.js";
-import { $online, session } from "/libs/session.js";
+import { $online, session, getfn } from "/libs/session.js";
 import { relink } from "/libs/links.js";
 import { rankings } from "/components/table/ui.js";
 import "/libs/dummy.js";
+import { reg } from "../cmd.js";
 
 const {div, h1, a, span, img, ol, ul, li, sup} = dom.tags(['div', 'h1', 'a', 'span', 'img', 'ol', 'ul', 'li', 'sup']);
 
-export const seat = 0; //TODO
+function getSeats(_table_id, accessToken){ //TODO test w/ and w/o accessToken
+  return _table_id && accessToken ? getfn("seats", {_table_id}) : Promise.resolve([]);
+}
 
 export const el = dom.sel1("#table");
 const params = new URLSearchParams(location.search);
 export const tableId = params.get('id');
+
+const seats = await getSeats(tableId, session?.accessToken); //user can hold multiple seats in dummy games, these are held seats, empty denotes a spectator
+//export const seat = _.count(seats) > 1 ? _.maybe(params.get("seat"), parseInt) : _.first(seats) ?? null;
+const seat = 0; //TODO resolve
 
 const ttl = dom.sel1("head title");
 const title = _.chain(ttl, dom.text, _.split(_, "|"), _.first, _.trim);
@@ -269,7 +276,9 @@ export async function ui(describe, desc, template) {
     dom.addClass(el, "ack");
   });
 
-  return {$reel, $wip: $scratch, $hist};
+  reg({seats, seated, $reel, $wip: $scratch, $hist});
+
+  return {seats, seated, $reel, $wip: $scratch, $hist};
 }
 
 export function player(username, avatar_url, seat, ...contents){
@@ -326,6 +335,10 @@ function victor([player], seated){
     img({alt: player.username, src: player.avatar_url}),
     `${player.username}`, sup(seat), ` wins!`);
 }
+
+export const retainAttr = _.partly(function retainAttr(el, key, value){
+  value == null ? dom.removeAttr(el, key) : dom.attr(el, key, value);
+});
 
 export function subject({username, avatar_url}){
   return span({class: "subject avatar"}, img({alt: username, src: avatar_url}));

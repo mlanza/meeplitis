@@ -3,13 +3,9 @@ import $ from "/libs/atomic_/shell.js";
 import dom from "/libs/atomic_/dom.js";
 import * as c from "./core.js";
 import * as g from "/libs/game.js";
-import {moment} from "/libs/story.js";
 import {describe} from "./ancillary.js";
-import {retainAttr} from "/libs/wip.js";
-import {el, seated, seats, seat, scored, outcome, diff, which} from "/libs/table.js";
-import {reg} from "/libs/cmd.js";
-import {ui} from "/libs/reel/ui.js";
-import { perspective } from "../../../../libs/reel/core.js";
+import {el, ui, outcome} from "/libs/reel/ui.js";
+//import {seat} from "/libs/table.js"; //TODO work out the seat concept and whether different from the one in reel
 
 const {img, div, span} = dom.tags(['img', 'div', 'span']);
 
@@ -58,9 +54,10 @@ function relativeRank(seat, details){
 
 function desc({type, details, seat}){
   switch(type) {
-    case "rolled":
+    case "rolled": {
       const {dice} = details;
       return dice[0] == dice[1] ? [`Rolls double `, die(dice[0]), `s!`] : [`Rolls `, die(dice[0]), die(dice[1]), `.`];
+    }
 
     case "moved": {
       const {from, to} = relativeRank(seat, details);
@@ -306,21 +303,21 @@ function asPoint(position){
 }
 
 function getMove({from, to}, seat) {
+  const game = _.chain($reel, _.deref, _.getIn(_, ["perspective", "game"])); //TODO test
   debugger
-  const game = moment($story);
   return _.detect(function(cmd){
     return cmd.seat == seat && cmd?.details?.from == from && (to == null || cmd?.details?.to == to);
   }, g.moves(game, { type: ["move", "enter", "bear-off"], seat }));
 }
 
-const {$reel, $hist, $wip} = await ui(describe, desc, template);
+const {seated, $reel, $hist, $wip} = await ui(describe, desc, template);
+console.log({seated}); //TODO fix `reg` for one offs
 
-//const {$ready, $error, $story, $hist, $snapshot, $wip} = ui(c.make, describe, desc, template);
-
-//TOOD filter must not be needed
+//TOOD `filter` must be factored out
 $.sub($hist, _.filter(_.isSome), function ([now, past]) {
   const curr = now?.perspective;
   const prior = past?.perspective;
+  const seat = now?.seat; //TODO
   const {cursor} = now ?? {};
   const { max, pos } = cursor ?? {};
   const present = max === pos;
@@ -392,8 +389,8 @@ $.on(el, "click", `#table.act[data-allow-commands~="propose-double"] #cube`, fun
 
 $.on(el, "click", `#table.act[data-from] .off-board`, function(e){
   const from = _.chain($wip, _.deref, _.getIn(_, ["details", "from"]), asPoint);
+  const game = _.chain($reel, _.deref, _.getIn(_, ["perspective", "game"])); //TODO test
   debugger
-  const game = moment($story);
   const seat = g.up(game)[0];
 
   _.maybe(

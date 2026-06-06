@@ -12,7 +12,7 @@ function logs(key, obj){
   $.log(key, Deno.inspect(obj, { colors: true, compact: true, depth: Infinity, iterableLimit: Infinity }));
 }
 
-function elideWith(keys, f){
+function elides2(keys, f){
   return function(state){
     return _.reduce(function(memo, key){
       const path = _.split(key, ".");
@@ -21,11 +21,13 @@ function elideWith(keys, f){
   }
 }
 
-function elides(elide){
-  return elideWith(elide, value => _.isObject(value) || _.isArray(value) ?
+function elides1(elide){
+  return elides2(elide, value => _.isObject(value) || _.isArray(value) ?
     `<${_.count(value)} entries>` :
     `<object>`);
 }
+
+const elides = _.overload(null, elides1, elides2);
 
 async function tuiMode(exec) {
   for await (const event of keypress()) {

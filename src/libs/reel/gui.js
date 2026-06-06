@@ -19,9 +19,8 @@ export const el = dom.sel1("#table");
 const params = new URLSearchParams(location.search);
 export const tableId = params.get('id');
 
-const seats = await getSeats(tableId, session?.accessToken); //user can hold multiple seats in dummy games, these are held seats, empty denotes a spectator
-//export const seat = _.count(seats) > 1 ? _.maybe(params.get("seat"), parseInt) : _.first(seats) ?? null;
-const seat = 0; //TODO resolve
+const seats = await getSeats(tableId, session?.accessToken); //user can hold multiple seats in dummy games or, as a spectator, none at all
+export const seat = _.count(seats) > 1 ? _.maybe(params.get("seat"), parseInt) : _.first(seats) ?? null;
 
 const ttl = dom.sel1("head title");
 const title = _.chain(ttl, dom.text, _.split(_, "|"), _.first, _.trim);
@@ -269,16 +268,19 @@ export async function gui(describe, desc, template) {
   });
 
   $.on(el, "click", "#replay [data-nav]", function(e){
-    replay($story, dom.attr(e.target, "data-nav"));
+    const type = dom.attr(e.target, "data-nav");
+    $.dispatch($reel, {type});
   });
 
   $.on(el, "click", ".message", function(e){
     dom.addClass(el, "ack");
   });
 
-  reg({seats, seated, $reel, $wip: $scratch, $hist});
+  const registered = {seats, seated, $reel, $wip, $hist};
 
-  return {seats, seated, $reel, $wip: $scratch, $hist};
+  reg(registered);
+
+  return registered;
 }
 
 export function player(username, avatar_url, seat, ...contents){

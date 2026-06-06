@@ -108,7 +108,6 @@ export function getfn(name, params, accessToken){
 }
 
 function getSeated(_table_id){
-  const qs = new URLSearchParams({_table_id}).toString();
   return getfn("seated", {_table_id});
 }
 
@@ -128,6 +127,7 @@ function digest(result){
 }
 
 function getPerspective(table_id, event_id, seat, seat_id, accessToken){
+  console.log({table_id, event_id, seat, seat_id, accessToken})
   const perspective = getfn("perspective", _.compact({table_id, event_id, seat}), accessToken).then(digest);
   const last_move = getLastMove(table_id, event_id, seat_id);
   return Promise.all([perspective, last_move]).then(function([{data, error}, last_move]){
@@ -191,7 +191,7 @@ export function clear($scratch){
   $.reset($scratch, null);
 }
 
-export function reel(tableId, seat){
+export function reel(tableId, seat = null){
 
   const $timeline = $.atom(r.init(tableId, seat));
 
@@ -284,7 +284,7 @@ export function reel(tableId, seat){
     const nextAt = _.maybe(pos + direction, _.clamp(_, 0, max), _.get(touches, _));
     const player = seat;
     const ats = _.chain([at, nextAt], _.compact, _.remove(_.get(perspectives, _), _), _.toArray);
-    if (table && _.seq(ats) && make && _.seq(seated) && seat != null) {
+    if (table && _.seq(ats) && make && _.seq(seated)) {
       const seatId = _.getIn(seated, [seat, "seat_id"]);
       $.each(function(at){
         _.fmap(getPerspective(table.id, at, seat, seatId, session?.accessToken), function(perspective){
@@ -348,6 +348,7 @@ function dispatch(self, command){
 
   switch (type) {
     case "backward":
+    case "back":
       $.swap(self.$timeline, r.backward);
       break;
 

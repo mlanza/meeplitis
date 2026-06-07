@@ -51,8 +51,16 @@ function later($what){
   });
 }
 
+function undoThru(undoables, touch){
+  return _.some(function([key, vals]){
+    return _.includes(vals, touch) ? key : null;
+  }, undoables);
+}
+
+
 export async function gui(describe, desc, template) {
   const $reel = reel(tableId, seat);
+  const exec = $.dispatch($reel, _);
   const $scratch = scratch($reel),
         $wip = $scratch;
   const $error = error($reel);
@@ -60,7 +68,12 @@ export async function gui(describe, desc, template) {
   const $gui = $.pipe($.map(function([now, past]){
     const curr = now?.perspective;
     const prior = past?.perspective;
+    const motion = curr && prior && now?.cursor?.pos !== past?.cursor?.pos;
+    const step = motion ? now?.cursor?.pos - past?.cursor?.pos : 0;
+    const offset = now?.cursor ? now?.cursor?.pos - now?.cursor?.max : null;
     const touch = now?.cursor?.at;
+    const undoables = now?.undoables;
+    const undoable = undoThru(undoables, touch);
     const last_acting_seat = now?.last_acting_seat;
     const player = _.maybe(curr?.event, eventFor);
     const game = curr?.game;
@@ -74,9 +87,12 @@ export async function gui(describe, desc, template) {
     const time = { //TODO
       bwd,
       touch,
+      step,
+      offset,
+      motion,
       present
     }
-    return {curr, prior, wip, which, game, seat, last_acting_seat, player, time};
+    return {curr, prior, wip, which, game, seat, last_acting_seat, undoable, player, time};
   }, $hist), _.filter(_.getIn(_, ["curr", "state"])));
   const $cursor = $.map(_.get(_, "cursor"), $reel);
   const $act = $.map(_.get(_, "act"), $reel);
@@ -183,8 +199,7 @@ export async function gui(describe, desc, template) {
   const $depressed = $.map(_.pipe(_.join(" ", _), _.lowerCase), dom.depressed(document.body));
   $.sub($depressed, dom.attr(el, "data-depressed", _));
 
-  $.sub($gui, function({curr: {event}, last_acting_seat, player, time: {bwd, touch}}){
-    const undoable = null; //TODO
+  $.sub($gui, function({curr: {event}, last_acting_seat, undoable, player, time: {bwd, touch}}){
     const undoer = _.detectIndex(_.comp(_.eq(last_acting_seat, _), _.get(_, "seat_id")), seated);
 
     dom.removeClass(el, "ack");
@@ -228,19 +243,19 @@ export async function gui(describe, desc, template) {
       case "ArrowUp":
       case "ArrowLeft":
         e.preventDefault();
-        $.dispatch($reel, e.shiftKey ? "inception" : "back");
+        exec({type: e.shiftKey ? "inception" : "back"});
         break;
 
       case "ArrowDown":
       case "ArrowRight":
         e.preventDefault();
-        $.dispatch($reel, e.shiftKey ? "present": "forward");
+        exec({type: e.shiftKey ? "present": "forward"});
         break;
 
       case "Backspace":
         if (e.shiftKey) {
           e.preventDefault();
-          $.dispatch($reel, "do-over");
+          exec({type: "do-over"});
         }
         break;
 
@@ -252,12 +267,12 @@ export async function gui(describe, desc, template) {
 
       case ".": //not always an option
         e.preventDefault();
-        $.dispatch($reel, {type: "pass"});
+        exec({type: "pass"});
         break;
 
       case "Enter":
         e.preventDefault();
-        $.dispatch($reel, {type: "commit"});
+        exec({type: "commit"});
         break;
 
       case "s":
@@ -269,21 +284,19 @@ export async function gui(describe, desc, template) {
 
       case ",":
         e.preventDefault();
-        $.dispatch($reel, "last-move");
+        exec({type: "last-move"});
         break;
     }
   });
 
   $.on(el, "click", "#replay [data-nav]", function(e){
     const type = dom.attr(e.target, "data-nav");
-    $.dispatch($reel, {type});
+    exec({type});
   });
 
   $.on(el, "click", ".message", function(e){
     dom.addClass(el, "ack");
   });
-
-  const exec = $.dispatch($reel, _);
 
   const registered = {seats, seated, exec, $reel, $wip, $gui};
 

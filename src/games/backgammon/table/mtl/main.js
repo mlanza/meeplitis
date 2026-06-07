@@ -303,8 +303,7 @@ function asPoint(position){
 }
 
 function getMove({from, to}, seat) {
-  const game = _.chain($gui, _.deref, _.get(_, "game")); //TODO test
-  debugger //TODO
+  const game = _.chain($gui, _.deref, _.get(_, "game"));
   return _.detect(function(cmd){
     return cmd.seat == seat && cmd?.details?.from == from && (to == null || cmd?.details?.to == to);
   }, g.moves(game, { type: ["move", "enter", "bear-off"], seat }));
@@ -373,8 +372,7 @@ $.on(el, "click", `#table.act[data-allow-commands~="propose-double"] #cube`, fun
 
 $.on(el, "click", `#table.act[data-from] .off-board`, function(e){
   const from = _.chain($wip, _.deref, _.getIn(_, ["details", "from"]), asPoint);
-  const game = _.chain($gui, _.deref, _.get(_, "game")); //TODO test
-  debugger
+  const game = _.chain($gui, _.deref, _.get(_, "game"));
   const seat = g.up(game)[0];
 
   _.maybe(

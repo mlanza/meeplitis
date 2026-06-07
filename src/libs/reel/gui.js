@@ -1,6 +1,7 @@
 import _ from "../atomic_/core.js";
 import $ from "../atomic_/shell.js";
 import dom from "../atomic_/dom.js";
+import supabase from "/libs/supabase.js";
 import {reel, scratch, error} from "./shell.js";
 import { presence } from "/libs/online.js";
 import { $online, session, getfn } from "/libs/session.js";
@@ -8,8 +9,6 @@ import { relink } from "/libs/links.js";
 import { rankings } from "/components/table/ui.js";
 import "/libs/dummy.js";
 import { reg } from "../cmd.js";
-
-const {div, h1, a, span, img, ol, ul, li, sup} = dom.tags(['div', 'h1', 'a', 'span', 'img', 'ol', 'ul', 'li', 'sup']);
 
 function getSeats(_table_id, accessToken){ //TODO test w/ and w/o accessToken
   return _table_id && accessToken ? getfn("seats", {_table_id}) : Promise.resolve([]);
@@ -26,6 +25,8 @@ export const seat = _.count(seats) > 1 ? _.maybe(params.get("seat"), parseInt) :
 const ttl = dom.sel1("head title");
 const title = _.chain(ttl, dom.text, _.split(_, "|"), _.first, _.trim);
 dom.text(ttl, `${title} #${tableId}`);
+
+const {div, h1, a, span, img, ol, ul, li, sup} = dom.tags(['div', 'h1', 'a', 'span', 'img', 'ol', 'ul', 'li', 'sup']);
 
 _.maybe(session?.username, username => relink("/profiles/", {username}), dom.attr(dom.sel1("a.user"), "href", _));
 
@@ -298,11 +299,7 @@ export async function gui(describe, desc, template) {
     dom.addClass(el, "ack");
   });
 
-  const registered = {seats, seated, exec, $reel, $wip, $gui};
-
-  reg(registered);
-
-  return registered;
+  return $.doto({seats, seated, exec, $reel, $wip, $gui}, reg);
 }
 
 export function player(username, avatar_url, seat, ...contents){
@@ -366,6 +363,12 @@ export const retainAttr = _.partly(function retainAttr(el, key, value){
 
 export function subject({username, avatar_url}){
   return span({class: "subject avatar"}, img({alt: username, src: avatar_url}));
+}
+
+export function addLog(message, details = null){
+  return supabase
+    .from('logs')
+    .insert({ message, details });
 }
 
 export function diff(curr, prior, path, f){

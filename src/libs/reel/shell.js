@@ -84,15 +84,6 @@ Timer.prototype.stop = function() {
   );
 })();
 
-function keeping(keys){
-  const keep = _.includes(keys, _);
-  return function(state){
-    return _.reducekv(function(memo, key, value){
-      return keep(key) ? _.assoc(memo, key, value) : memo;
-    }, {}, state);
-  }
-}
-
 export function getfn(name, params, accessToken){
   const apikey = supabase.supabaseKey;
   const headers = {
@@ -195,67 +186,45 @@ export function clear($scratch){
 }
 
 export function reel(tableId, seat = null){
-
   const $timeline = $.atom(r.init(tableId, seat));
-
   const $table = table(tableId);
-
   const $scratch = $.atom({});
-
-  //const $table = $.pipe($.map(keeping(["up","release","game_id","last_touch_id","remarks","scored","status"]), $tbl), _.compact());
-
   const $make = $.atom(null);
-
   const $ready = $.atom(true);
-
   const $error = $(null);
-
   const $act = $.map(function(timeline, table, ready){
-    if (!table || !ready) {
-      return false;
-    }
+    if (!table || !ready) return false;
     const {cursor, perspectives} = timeline;
     const {at, pos, max} = cursor;
     const {status} = table;
     const started = status === "started";
     const present = pos !== null && pos === max;
     const perspective = _.maybe(at, _.get(perspectives, _));
-    if (!perspective) {
-      return false;
-    }
+    if (!perspective) return false;
     const {actionable} = perspective;
     return present && actionable && ready && started;
   }, $timeline, $table, $ready);
-
   const $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table);
-
-  //seated is everyone's info.
-  const $seated = $.fromPromise(getSeated(tableId));
-
-  //seats answers which seats are yours? (1 seat per player, except at dummy tables)
-  const $seats = $.fromPromise(getSeats(tableId, session?.accessToken));
-
+  const $seated = $.fromPromise(getSeated(tableId));   //seated is everyone's info.
+  const $seats = $.fromPromise(getSeats(tableId, session?.accessToken)); //seats answers which seats are yours? (1 seat per player, except at dummy tables)
   const $undoable = $.map(function({undoables, cursor}){
     const {at} = cursor;
     return _.maybe(at, at => undoThru(undoables, at));
   }, $timeline);
-
   const $state = $.pipe($.map(function(table, error, seated, seats, up, undoable, scratch, make, ready, act, timeline){
     const perspective = r.perspective(timeline);
     return {...timeline, perspective, table, error, seated, seats, up, undoable, scratch, make, ready, act};
   }, $table, $error, $seated, $seats, $up, $undoable, $scratch, $.pipe($make, _.compact()), $ready, $act, $timeline), _.filter(_.and(_.get(_, "make"), _.get(_, "table"))));
-
   const $timer = new Timer(1000, Date.now);
 
   $.sub($timer, function(){
-    const {cursor} = _.deref($timeline);
-    if (cursor.pos === null) {
-      return;
-    }
-    if (cursor.pos === cursor.max) {
-      $timer.stop();
-    } else {
-      $.swap($timeline, r.forward);
+    const {cursor: {pos, max}} = _.deref($timeline);
+    if (pos !== null) {
+      if (pos === max) {
+        $timer.stop();
+      } else {
+        $.swap($timeline, r.forward);
+      }
     }
   });
 

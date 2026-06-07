@@ -107,7 +107,7 @@ export async function gui(describe, desc, template) {
       motion,
       present
     }
-    return {curr, prior, wip, which, game, seat, last_acting_seat, undoable, undoer, player, time};
+    return {curr, prior, wip, which, game, seat, undoable, undoer, player, time};
   }, $hist), _.filter(_.getIn(_, ["curr", "state"])));
 
   //TODO const seat = _.count(seats) > 1 ? _.maybe(params.get("seat"), parseInt) : _.first(seats);

@@ -86,11 +86,13 @@ export async function gui(describe, desc, template) {
     const step = motion ? now?.cursor?.pos - past?.cursor?.pos : 0;
     const offset = now?.cursor ? now?.cursor?.pos - now?.cursor?.max : null;
     const touch = now?.cursor?.at;
-    const undoable = now?.undoable;
     const last_acting_seat = now?.last_acting_seat;
+    const seated = now?.seated;
+    const seat = now?.seat; //TODO
+    const undoable = now?.undoable;
+    const undoer = seat === _.detectIndex(_.comp(_.eq(last_acting_seat, _), _.get(_, "seat_id")), seated);
     const player = _.maybe(curr?.event, eventFor);
     const game = curr?.game;
-    const seat = now?.seat; //TODO
     const { cursor } = now ?? {};
     const { max, pos } = cursor ?? {};
     const present = max === pos;
@@ -105,7 +107,7 @@ export async function gui(describe, desc, template) {
       motion,
       present
     }
-    return {curr, prior, wip, which, game, seat, last_acting_seat, undoable, player, time};
+    return {curr, prior, wip, which, game, seat, last_acting_seat, undoable, undoer, player, time};
   }, $hist), _.filter(_.getIn(_, ["curr", "state"])));
 
   //TODO const seat = _.count(seats) > 1 ? _.maybe(params.get("seat"), parseInt) : _.first(seats);
@@ -193,9 +195,7 @@ export async function gui(describe, desc, template) {
   const $depressed = $.map(_.pipe(_.join(" ", _), _.lowerCase), dom.depressed(document.body));
   $.sub($depressed, dom.attr(el, "data-depressed", _));
 
-  $.sub($gui, function({curr: {event}, last_acting_seat, undoable, player, time: {bwd, touch}}){
-    const undoer = _.detectIndex(_.comp(_.eq(last_acting_seat, _), _.get(_, "seat_id")), seated);
-
+  $.sub($gui, function({curr: {event}, undoer, undoable, player, time: {bwd, touch}}){
     dom.removeClass(el, "ack");
     dom.removeClass(el, "error");
 
@@ -210,7 +210,7 @@ export async function gui(describe, desc, template) {
 
     dom.attr(el, "data-event-type", event.type);
     dom.attr(el, "data-undoable", undoable == touch ? "1" : undoable ? "0" : null);
-    dom.attr(el, "data-undoer", seat == undoer);
+    dom.attr(el, "data-undoer", undoer);
     dom.html(dom.sel1("p", els.event), desc(event));
     dom.text(dom.sel1("span.seat", els.event), event.seat);
     dom.toggleClass(els.event, "automatic", !player);

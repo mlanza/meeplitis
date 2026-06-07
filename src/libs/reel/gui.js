@@ -57,6 +57,21 @@ export async function gui(describe, desc, template) {
         $wip = $scratch;
   const $error = error($reel);
   const $hist = $.hist($reel);
+  const $gui = $.pipe($.map(function([now, past]){
+    const curr = now?.perspective;
+    const prior = past?.perspective;
+    const game = curr?.game;
+    const seat = now?.seat; //TODO
+    const { cursor } = now ?? {};
+    const { max, pos } = cursor ?? {};
+    const present = max === pos;
+    const wip = now?.scratch;
+    const which = now?.scratch === past?.scratch ? 0 : 1;
+    const time = { //TODO
+      present
+    }
+    return {curr, prior, wip, which, game, seat, time};
+  }, $hist), _.filter(_.getIn(_, ["curr", "state"])));
   const $cursor = $.map(_.get(_, "cursor"), $reel);
   const $act = $.map(_.get(_, "act"), $reel);
   const $up = $.map(_.get(_, "up"), $reel);
@@ -167,7 +182,7 @@ export async function gui(describe, desc, template) {
     const touch = now?.cursor?.at;
     const curr = now?.perspective;
     const last_acting_seat = now?.last_acting_seat;
-    const undoable = null;
+    const undoable = null; //TODO
     if (!curr) {
       return;
     }
@@ -273,7 +288,7 @@ export async function gui(describe, desc, template) {
     dom.addClass(el, "ack");
   });
 
-  const registered = {seats, seated, $reel, $wip, $hist};
+  const registered = {seats, seated, $reel, $wip, $hist, $gui};
 
   reg(registered);
 

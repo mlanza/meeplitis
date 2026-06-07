@@ -310,24 +310,9 @@ function getMove({from, to}, seat) {
   }, g.moves(game, { type: ["move", "enter", "bear-off"], seat }));
 }
 
-const {seated, $reel, $hist, $wip} = await gui(describe, desc, template);
+const {seated, $reel, $gui, $wip} = await gui(describe, desc, template);
 
-//TOOD `filter` must be factored out
-$.sub($hist, _.filter(_.isSome), function ([now, past]) {
-  const curr = now?.perspective;
-  const prior = past?.perspective;
-  const seat = now?.seat; //TODO
-  const {cursor} = now ?? {};
-  const { max, pos } = cursor ?? {};
-  const present = max === pos;
-  const wip = now?.scratch;
-  const which = now?.scratch === past?.scratch ? 0 : 1;
-  const { up, state, game } = curr || {};
-  if (!state) return;
-  const { status, dice, off, stakes, holdsCube } = state;
-
-  //const { status, dice, off, stakes, holdsCube } = state;
-
+$.sub($gui, function ({ curr, prior, curr: { up, state, state: { status, dice, off, stakes, holdsCube } }, wip, which, game, seat, time: { present } }) {
   if (which !== 1) {
     const checkers = getCheckers(curr.state);
     if (prior) {

@@ -172,6 +172,10 @@ export async function gui(describe, desc, template) {
     dom.text(dom.sel1("#options p", el), _.join(", ", described));
   });
 
+  $.sub($gui, function({time: {touch}}){
+    location.hash = touch;
+  });
+
   $.sub($gui, function({hist: [{up, may}]}){
     $.eachIndexed(function(seat){
       dom.attr(dom.sel1(`[data-seat="${seat}"] [data-action]`, els.players), "data-action", _.includes(up, seat) ? "must" : (_.includes(may, seat) ? "may" : ""));
@@ -292,6 +296,12 @@ export async function gui(describe, desc, template) {
   $.on(el, "click", ".message", function(e){
     dom.addClass(el, "ack");
   });
+
+  //reposition the game according to the hash
+  location.hash && $.sub($reel, _.filter(_.get(_, "touches")), _.once(function(){
+    const touch = location.hash.substring(1);
+    exec({type: "at", details: {touch}});
+  }));
 
   return $.doto({seats, seated, exec, $reel, $wip, $gui}, reg);
 }

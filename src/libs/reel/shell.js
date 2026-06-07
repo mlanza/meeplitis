@@ -322,6 +322,10 @@ function dispatch(self, command){
   self.$timer.stop();
 
   switch (type) {
+    case "at":
+      $.swap(self.$timeline, r.at(details.touch));
+      break;
+
     case "backward":
     case "back":
       $.swap(self.$timeline, r.backward);

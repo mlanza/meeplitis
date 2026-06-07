@@ -79,12 +79,12 @@ export function perspective({cursor, perspectives}) {
   return _.get(perspectives, at);
 }
 
-export function at(at) {
+export function at(touch) {
   return function(state){
     const {touches} = state;
-    const pos = _.indexOf(touches, at);
+    const pos = _.indexOf(touches, touch);
     if (pos === -1) {
-      throw new Error("Unknown moment.");
+      throw new Error("Unknown moment in timeline.");
     }
     return _.chain(state, position(pos));
   }

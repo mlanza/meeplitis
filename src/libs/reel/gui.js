@@ -52,13 +52,6 @@ function later($what){
   });
 }
 
-function undoThru(undoables, touch){
-  return _.some(function([key, vals]){
-    return _.includes(vals, touch) ? key : null;
-  }, undoables);
-}
-
-
 export async function gui(describe, desc, template) {
   const $reel = reel(tableId, seat);
   const exec = $.dispatch($reel, _);
@@ -93,8 +86,7 @@ export async function gui(describe, desc, template) {
     const step = motion ? now?.cursor?.pos - past?.cursor?.pos : 0;
     const offset = now?.cursor ? now?.cursor?.pos - now?.cursor?.max : null;
     const touch = now?.cursor?.at;
-    const undoables = now?.undoables;
-    const undoable = undoThru(undoables, touch);
+    const undoable = now?.undoable;
     const last_acting_seat = now?.last_acting_seat;
     const player = _.maybe(curr?.event, eventFor);
     const game = curr?.game;

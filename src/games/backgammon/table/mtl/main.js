@@ -303,14 +303,14 @@ function asPoint(position){
 }
 
 function getMove({from, to}, seat) {
-  const game = _.chain($reel, _.deref, _.getIn(_, ["perspective", "game"])); //TODO test
-  debugger
+  const game = _.chain($gui, _.deref, _.get(_, "game")); //TODO test
+  debugger //TODO
   return _.detect(function(cmd){
     return cmd.seat == seat && cmd?.details?.from == from && (to == null || cmd?.details?.to == to);
   }, g.moves(game, { type: ["move", "enter", "bear-off"], seat }));
 }
 
-const {seated, $reel, $gui, $wip} = await gui(describe, desc, template);
+const {seated, exec, $gui, $wip} = await gui(describe, desc, template);
 
 $.sub($gui, function ({ curr, prior, curr: { up, state, state: { status, dice, off, stakes, holdsCube } }, wip, which, game, seat, time: { present } }) {
   if (which !== 1) {
@@ -363,17 +363,17 @@ $.sub($gui, function ({ curr, prior, curr: { up, state, state: { status, dice, o
 
 $.each(function(type){
   $.on(el, "click", `#table.act button[data-type="${type}"]`, function(e){
-    $.dispatch($reel, {type});
+    exec({type});
   });
 }, ["roll", "commit", "propose-double", "accept", "concede"]);
 
 $.on(el, "click", `#table.act[data-allow-commands~="propose-double"] #cube`, function(e){
-  $.dispatch($reel, {type: "propose-double"});
+  exec({type: "propose-double"});
 });
 
 $.on(el, "click", `#table.act[data-from] .off-board`, function(e){
   const from = _.chain($wip, _.deref, _.getIn(_, ["details", "from"]), asPoint);
-  const game = _.chain($reel, _.deref, _.getIn(_, ["perspective", "game"])); //TODO test
+  const game = _.chain($gui, _.deref, _.get(_, "game")); //TODO test
   debugger
   const seat = g.up(game)[0];
 
@@ -382,7 +382,7 @@ $.on(el, "click", `#table.act[data-from] .off-board`, function(e){
     _.detect(function(cmd){
       return cmd.type === 'bear-off' && cmd?.details?.from === from;
     }, _),
-    $.dispatch($reel, _));
+    exec);
 
   $.reset($wip, null);
 });
@@ -392,7 +392,7 @@ $.on(el, "click", `#table.act[data-from] .point path:nth-child(2)`, function(e){
   const from = _.chain($wip, _.deref, _.getIn(_, ["details", "from"]), asPoint);
   const move = getMove({from, to}, seat);
   if (move) {
-    $.dispatch($reel, move);
+    exec(move);
     $.reset($wip, null);
   }
 });

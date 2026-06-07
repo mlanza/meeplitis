@@ -83,8 +83,8 @@ export async function gui(describe, desc, template) {
     const present = max === pos;
     const wip = now?.scratch;
     const which = now?.scratch === past?.scratch ? 0 : 1;
-    const bwd =  now?.cursor?.direction <= 0; //TODO review
-    const time = { //TODO
+    const bwd =  now?.cursor?.direction <= 0;
+    const time = {
       bwd,
       touch,
       step,
@@ -189,7 +189,7 @@ export async function gui(describe, desc, template) {
     }, presence);
   });
 
-  $.sub($cursor, function({pos, max}){ //TODO review
+  $.sub($cursor, function({pos, max}){
     dom.value(els.progress, pos + 1);
     dom.attr(els.progress, "max", max + 1);
     dom.text(els.touch, pos + 1);

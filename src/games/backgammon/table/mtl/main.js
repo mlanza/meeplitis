@@ -311,7 +311,7 @@ function getMove({from, to}, seat) {
 
 const {seated, exec, $gui, $wip} = await gui(describe, desc, template);
 
-$.sub($gui, function ({ curr, prior, curr: { up, state, state: { status, dice, off, stakes, holdsCube } }, wip, which, game, seat, time: { present } }) {
+$.sub($gui, function ({ hist: [curr, prior], hist: [{ up, state, state: { status, dice, off, stakes, holdsCube } }], wip, which, game, seat, time: { present } }) {
   if (which !== 1) {
     const checkers = getCheckers(curr.state);
     if (prior) {

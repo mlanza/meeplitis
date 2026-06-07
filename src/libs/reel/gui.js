@@ -80,8 +80,9 @@ export async function gui(describe, desc, template) {
       _.toArray));
 
   const $gui = $.pipe($.map(function([now, past]){
-    const curr = now?.perspective;
-    const prior = past?.perspective;
+    const curr = now?.perspective ?? null;
+    const prior = past?.perspective ?? null;
+    const hist = [curr, prior];
     const motion = curr && prior && now?.cursor?.pos !== past?.cursor?.pos;
     const step = motion ? now?.cursor?.pos - past?.cursor?.pos : 0;
     const offset = now?.cursor ? now?.cursor?.pos - now?.cursor?.max : null;
@@ -107,8 +108,8 @@ export async function gui(describe, desc, template) {
       motion,
       present
     }
-    return {curr, prior, wip, which, game, seat, undoable, undoer, player, time};
-  }, $hist), _.filter(_.getIn(_, ["curr", "state"])));
+    return {hist, wip, which, game, seat, undoable, undoer, player, time};
+  }, $hist), _.filter(function({hist}){ return _.getIn(_.first(hist), ["state"]); }));
 
   //TODO const seat = _.count(seats) > 1 ? _.maybe(params.get("seat"), parseInt) : _.first(seats);
 
@@ -171,7 +172,7 @@ export async function gui(describe, desc, template) {
     dom.text(dom.sel1("#options p", el), _.join(", ", described));
   });
 
-  $.sub($gui, function({curr: {up, may}}){
+  $.sub($gui, function({hist: [{up, may}]}){
     $.eachIndexed(function(seat){
       dom.attr(dom.sel1(`[data-seat="${seat}"] [data-action]`, els.players), "data-action", _.includes(up, seat) ? "must" : (_.includes(may, seat) ? "may" : ""));
     }, seated);
@@ -195,7 +196,7 @@ export async function gui(describe, desc, template) {
   const $depressed = $.map(_.pipe(_.join(" ", _), _.lowerCase), dom.depressed(document.body));
   $.sub($depressed, dom.attr(el, "data-depressed", _));
 
-  $.sub($gui, function({curr: {event}, undoer, undoable, player, time: {bwd, touch}}){
+  $.sub($gui, function({hist: [{event}], undoer, undoable, player, time: {bwd, touch}}){
     dom.removeClass(el, "ack");
     dom.removeClass(el, "error");
 

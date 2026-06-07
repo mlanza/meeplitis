@@ -66,6 +66,26 @@ export async function gui(describe, desc, template) {
         $wip = $scratch;
   const $error = error($reel);
   const $hist = $.hist($reel);
+  const $cursor = $.map(_.get(_, "cursor"), $reel);
+  const $act = $.map(_.get(_, "act"), $reel);
+  const $up = $.map(_.get(_, "up"), $reel);
+  const $ready = $.map(_.get(_, "ready"), $reel);
+  const $table = $.map(_.get(_, "table"), $reel);
+  const $status = $.map(_.get(_, "status"), $table);
+  const $present = $.map(function({max, pos}){
+    return _.isNumber(pos) && max === pos;
+  }, $cursor);
+  //const $scored = $.map(_.get(_, "scored"), $table);
+  const $remarks = $.map(_.get(_, "remark"), $table);
+  const $described = $.map(_.pipe(_.get(_, "config"), describe), $table);
+  const seated = await later($.map(_.get(_, "seated"), $reel));
+  const seats = await later($.map(_.get(_, "seats"), $reel));
+  const $presence = presence($online,
+    _.chain(seated,
+      _.mapa(_.get(_, "username"), _),
+      _.unique,
+      _.toArray));
+
   const $gui = $.pipe($.map(function([now, past]){
     const curr = now?.perspective;
     const prior = past?.perspective;
@@ -95,25 +115,6 @@ export async function gui(describe, desc, template) {
     }
     return {curr, prior, wip, which, game, seat, last_acting_seat, undoable, player, time};
   }, $hist), _.filter(_.getIn(_, ["curr", "state"])));
-  const $cursor = $.map(_.get(_, "cursor"), $reel);
-  const $act = $.map(_.get(_, "act"), $reel);
-  const $up = $.map(_.get(_, "up"), $reel);
-  const $ready = $.map(_.get(_, "ready"), $reel);
-  const $table = $.map(_.get(_, "table"), $reel);
-  const $status = $.map(_.get(_, "status"), $table);
-  const $present = $.map(function({max, pos}){
-    return _.isNumber(pos) && max === pos;
-  }, $cursor);
-  //const $scored = $.map(_.get(_, "scored"), $table);
-  const $remarks = $.map(_.get(_, "remark"), $table);
-  const $described = $.map(_.pipe(_.get(_, "config"), describe), $table);
-  const seated = await later($.map(_.get(_, "seated"), $reel));
-  const seats = await later($.map(_.get(_, "seats"), $reel));
-  const $presence = presence($online,
-    _.chain(seated,
-      _.mapa(_.get(_, "username"), _),
-      _.unique,
-      _.toArray));
 
   //TODO const seat = _.count(seats) > 1 ? _.maybe(params.get("seat"), parseInt) : _.first(seats);
 

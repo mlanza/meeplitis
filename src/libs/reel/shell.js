@@ -186,6 +186,10 @@ export function scratch(self){
   return $.cursor(self.$scratch, () => path(self));
 }
 
+export function error(self){
+  return self.$error;
+}
+
 export function clear($scratch){
   $.reset($scratch, null);
 }
@@ -203,6 +207,8 @@ export function reel(tableId, seat = null){
   const $make = $.atom(null);
 
   const $ready = $.atom(true);
+
+  const $error = $(null);
 
   const $act = $.map(function(timeline, table, ready){
     if (!table || !ready) {
@@ -234,10 +240,10 @@ export function reel(tableId, seat = null){
     return _.maybe(at, at => undoThru(undoables, at));
   }, $timeline);
 
-  const $state = $.pipe($.map(function(table, seated, seats, up, undoable, scratch, make, ready, act, timeline){
+  const $state = $.pipe($.map(function(table, error, seated, seats, up, undoable, scratch, make, ready, act, timeline){
     const perspective = r.perspective(timeline);
-    return {...timeline, perspective, table, seated, seats, up, undoable, scratch, make, ready, act};
-  }, $table, $seated, $seats, $up, $undoable, $scratch, $.pipe($make, _.compact()), $ready, $act, $timeline), _.filter(_.and(_.get(_, "make"), _.get(_, "table"))));
+    return {...timeline, perspective, table, error, seated, seats, up, undoable, scratch, make, ready, act};
+  }, $table, $error, $seated, $seats, $up, $undoable, $scratch, $.pipe($make, _.compact()), $ready, $act, $timeline), _.filter(_.and(_.get(_, "make"), _.get(_, "table"))));
 
   const $timer = new Timer(1000, Date.now);
 
@@ -298,12 +304,13 @@ export function reel(tableId, seat = null){
     }
   });
 
-  return new Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $scratch);
+  return new Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $scratch);
 }
 
-function Reel($timeline, $table, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $scratch){
+function Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $scratch){
   this.$timeline = $timeline;
   this.$table = $table;
+  this.$error = $error;
   this.$make = $make;
   this.$ready = $ready;
   this.$act = $act;

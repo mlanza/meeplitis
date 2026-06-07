@@ -1,7 +1,7 @@
 import _ from "../atomic_/core.js";
 import $ from "../atomic_/shell.js";
 import dom from "../atomic_/dom.js";
-import {reel, scratch} from "./shell.js";
+import {reel, scratch, error} from "./shell.js";
 import { presence } from "/libs/online.js";
 import { $online, session, getfn } from "/libs/session.js";
 import { relink } from "/libs/links.js";
@@ -19,6 +19,7 @@ export const el = dom.sel1("#table");
 const params = new URLSearchParams(location.search);
 export const tableId = params.get('id');
 
+//TODO this is an intrusive dep
 const seats = await getSeats(tableId, session?.accessToken); //user can hold multiple seats in dummy games or, as a spectator, none at all
 export const seat = _.count(seats) > 1 ? _.maybe(params.get("seat"), parseInt) : _.first(seats) ?? null;
 
@@ -52,11 +53,10 @@ function later($what){
 
 export async function gui(describe, desc, template) {
   const $reel = reel(tableId, seat);
-  const $scratch = scratch($reel);
-  const $wip = $scratch;
+  const $scratch = scratch($reel),
+        $wip = $scratch;
+  const $error = error($reel);
   const $hist = $.hist($reel);
-  const $actionable = $.atom(null); //TODO
-  const $error = $.map(_.get(_, "error"), $reel); //TODO
   const $cursor = $.map(_.get(_, "cursor"), $reel);
   const $act = $.map(_.get(_, "act"), $reel);
   const $up = $.map(_.get(_, "up"), $reel);
@@ -87,7 +87,7 @@ export async function gui(describe, desc, template) {
   params.delete("seat");
   const redirect = !tableId ? "../" : rejected ? `${location.origin}${location.pathname}?${params.toString()}${location.hash}` : null;
 
-  if (redirect) {
+  if (redirect) { //TODO
     //location.href = redirect;
   }
 
@@ -138,10 +138,7 @@ export async function gui(describe, desc, template) {
     dom.text(dom.sel1("#options p", el), _.join(", ", described));
   });
 
-  $.sub($hist, _.filter(_.getIn(_, [0, "perspective"])), function([{perspective}]){
-    const {up, may} = perspective;
-    const actionable = _.includes(up, seat) || _.includes(may, seat);
-    $.reset($actionable, actionable);
+  $.sub($hist, _.filter(_.getIn(_, [0, "perspective"])), function([{perspective: {up, may}}]){
     $.eachIndexed(function(seat){
       dom.attr(dom.sel1(`[data-seat="${seat}"] [data-action]`, els.players), "data-action", _.includes(up, seat) ? "must" : (_.includes(may, seat) ? "may" : ""));
     }, seated);
@@ -240,7 +237,7 @@ export async function gui(describe, desc, template) {
       case "Escape": //cancel work in progress and/or clear error
         e.preventDefault();
         clear($wip);
-        //TODO $.reset($error, null);
+        $.reset($error, null);
         break;
 
       case ".": //not always an option

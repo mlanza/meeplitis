@@ -173,22 +173,16 @@ function undoThru(undoables, touch){
 
 export const path = _.pipe(_.deref, _.getIn(_, ["cursor", "at"]), _.array);
 
-export function scratch(self){
-  return $.cursor(self.$scratch, () => path(self));
-}
-
-export function error(self){
-  return self.$error;
-}
-
-export function clear($scratch){
-  $.reset($scratch, null);
+export function ports(self){
+  const {$wip, $error} = self;
+  return {$wip, $error};
 }
 
 export function reel(tableId, seat = null){
   const $timeline = $.atom(r.init(tableId, seat));
   const $table = table(tableId);
   const $scratch = $.atom({});
+  const $wip = $.cursor($scratch, () => path(self));
   const $make = $.atom(null);
   const $ready = $.atom(true);
   const $error = $(null);
@@ -273,10 +267,11 @@ export function reel(tableId, seat = null){
     }
   });
 
-  return new Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $scratch);
+  const self = new Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $scratch, $wip);
+  return self;
 }
 
-function Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $scratch){
+function Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $scratch, $wip){
   this.$timeline = $timeline;
   this.$table = $table;
   this.$error = $error;
@@ -290,6 +285,7 @@ function Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $sea
   this.$state = $state;
   this.$timer = $timer;
   this.$scratch = $scratch;
+  this.$wip = $wip;
 }
 
 function chan(self, key){

@@ -2,7 +2,7 @@ import _ from "../atomic_/core.js";
 import $ from "../atomic_/shell.js";
 import dom from "../atomic_/dom.js";
 import supabase from "/libs/supabase.js";
-import {reel, scratch, error} from "./shell.js";
+import {reel, ports} from "./shell.js";
 import { presence } from "/libs/online.js";
 import { $online, session, getfn } from "/libs/session.js";
 import { relink } from "/libs/links.js";
@@ -42,10 +42,6 @@ const els = {
   event: dom.sel1("#event", el)
 }
 
-function clear($wip) {
-  $.reset($wip, {});
-}
-
 function later($what){
   return new Promise(function(resolve){
     $.sub($what, _.filter(_.isSome), resolve);
@@ -55,9 +51,7 @@ function later($what){
 export async function gui(describe, desc, template) {
   const $reel = reel(tableId, seat);
   const exec = $.dispatch($reel, _);
-  const $scratch = scratch($reel),
-        $wip = $scratch;
-  const $error = error($reel);
+  const {$wip, $error} = ports($reel);
   const $hist = $.hist($reel);
   const $cursor = $.map(_.get(_, "cursor"), $reel);
   const $act = $.map(_.get(_, "act"), $reel);
@@ -150,11 +144,11 @@ export async function gui(describe, desc, template) {
   });
 
   $.sub($error, _.filter(_.isSome), function(){ //when an error occurs...
-    clear($wip);
+    $.reset($wip, null);
   });
 
   $.sub($ready, _.filter(_.not), function(){ //upon issuing a move...
-    clear($wip);
+    $.reset($wip, null);
   });
 
   $.sub($status, dom.attr(el, "data-table-status", _));
@@ -260,7 +254,7 @@ export async function gui(describe, desc, template) {
 
       case "Escape": //cancel work in progress and/or clear error
         e.preventDefault();
-        clear($wip);
+        $.reset($wip, null);
         $.reset($error, null);
         break;
 

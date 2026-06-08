@@ -68,10 +68,10 @@ await new Command()
   .action(async function (opts, tableId){
     const abbr = elides(opts.elide);
     const $reel = reel(tableId, opts.seat);
-    const $scratch = sh.scratch($reel);
+    const {$wip} = sh.ports($reel);
     const exec = $.dispatch($reel, _);
 
-    reg({$reel, $scratch}, function(key, _value){
+    reg({$reel, $wip}, function(key, _value){
       logs(key, abbr(_value));
     });
 

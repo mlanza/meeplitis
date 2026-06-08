@@ -63,17 +63,23 @@ await new Command()
   .arguments("<table:string>")
   //TODO .option("--commands <commands:string>", "Commands string")
   .option("--seat <seat:number>", "Seat number (integer)")
+  .option("--at <eventId:string>", "Navigate to moment in timeline")
   .option("--elide <key:string>", "Key to elide in logs", { collect: true })
   .action(async function (opts, tableId){
     const abbr = elides(opts.elide);
     const $reel = reel(tableId, opts.seat);
     const $scratch = sh.scratch($reel);
+    const exec = $.dispatch($reel, _);
 
     reg({$reel, $scratch}, function(key, _value){
       logs(key, abbr(_value));
     });
 
-    await tuiMode($.dispatch($reel, _));
+    opts.at && $.sub($reel, _.filter(_.get(_, "touches")), _.once(function(){
+      const touch = opts.at;
+      exec({type: "at", details: {touch}});
+    }));
 
+    await tuiMode(exec);
   })
   .parse(Deno.args);

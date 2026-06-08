@@ -7,6 +7,7 @@ import { reel } from "./shell.js";
 import { reg } from "../cmd.js";
 import { Command } from "@cliffy/command";
 import { keypress } from "@cliffy/keypress";
+import { Input } from "@cliffy/prompt";
 
 function logs(key, obj){
   $.log(key, Deno.inspect(obj, { colors: true, compact: true, depth: Infinity, iterableLimit: Infinity }));
@@ -43,6 +44,15 @@ async function tuiMode(exec) {
       exec({type: "last-move"});
     } else if (event.key === "backspace") {
       exec({type: "do-over"});
+    } else if (event.key === "tab") {
+      const eventId = await Input.prompt({
+        message: "What is the event id?",
+        minLength: 5,
+        maxLength: 5
+      });
+      if (eventId) {
+        exec({type: "at", details: {touch: eventId}});
+      }
     }
   }
 }

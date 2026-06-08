@@ -4,7 +4,7 @@ import dom from "/libs/atomic_/dom.js";
 import * as c from "./core.js";
 import * as g from "/libs/game.js";
 import {describe} from "./ancillary.js";
-import {el, gui, outcome} from "/libs/reel/gui.js";
+import {el, gui, outcome, retainAttr} from "/libs/reel/gui.js";
 //import {seat} from "/libs/table.js"; //TODO work out the seat concept and whether different from the one in reel
 
 const {img, div, span} = dom.tags(['img', 'div', 'span']);

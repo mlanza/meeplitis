@@ -106,18 +106,17 @@ function template(seat){
   };
 }
 
-function workingCommand([curr, prior], seat, state, game, el, moves){ //implements multi-step commands
-  const type = curr?.type;
+function workingCommand(wip, seat, state, game, el, moves){ //implements multi-step commands
   const attrs = {
-    "data-command-type": type,
+    "data-command-type": wip?.type,
     "data-from": null,
     "data-tos": null
   };
-  switch (type) {
+  switch (wip?.type) {
     case "enter":
     case "move":
     case "bear-off":{
-      const from = curr.details.from;
+      const from = wip?.details.from;
       const tos = _.chain(
         moves,
         _.filter(function(cmd){

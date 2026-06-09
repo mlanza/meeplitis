@@ -13,7 +13,7 @@ import $ from "../atomic_/shell.js";
  * @param {function} [f=Date.now] - A function to generate the value for each tick. It receives an object with details about the tick (frame, offage, target).
  * @returns {Observable} An observable that emits values at the specified interval.
  */
-function pacemaker(interval, f = Date.now) {
+function ticker(interval, f = Date.now) {
   return $.observable(function(observer) {
     const self = {
       seed: performance.now(),
@@ -53,14 +53,14 @@ export function Timer(interval, f) {
   this.interval = interval;
   this.f = f;
   this.$emitter = $.subject(); // Persistent subject for subscribers
-  this.unsub = null; // To hold the pacemaker's unsub function
+  this.unsub = null; // To hold the ticker's unsub function
 }
 
 Timer.prototype.start = function() {
   console.log({timer: "started"})
   if (this.unsub === null) { // Only start if stopped
-    const $p = pacemaker(this.interval, this.f);
-    this.unsub = $.sub($p, (tick) => $.pub(this.$emitter, tick));
+    const $ticker = ticker(this.interval, this.f);
+    this.unsub = $.sub($ticker, (tick) => $.pub(this.$emitter, tick));
   }
 };
 

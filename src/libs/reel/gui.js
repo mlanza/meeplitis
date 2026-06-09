@@ -10,20 +10,19 @@ import { relink } from "/libs/links.js";
 import { rankings } from "/components/table/ui.js";
 import "/libs/dummy.js";
 
-export const el = dom.sel1("#table");
 const params = new URLSearchParams(location.search);
-export const tableId = params.get('id');
+const tableId = params.get('id');
 
-//TODO this is an intrusive dep
-const seats = await getSeats(tableId, session?.accessToken);
-const wanted = _.maybe(params.get("seat"), parseInt) ?? null;
-export const seat = wanted === null ? null : _.detect(s => s === wanted, seats) || _.first(seats);
+if (!tableId) {
+  location.href = "../../";
+}
 
+const selectedSeat = _.maybe(params.get("seat"), parseInt) ?? null;
 const ttl = dom.sel1("head title");
-const title = _.chain(ttl, dom.text, _.split(_, "|"), _.first, _.trim);
-dom.text(ttl, `${title} #${tableId}`);
 
 const {div, h1, a, span, img, ol, ul, li, sup} = dom.tags(['div', 'h1', 'a', 'span', 'img', 'ol', 'ul', 'li', 'sup']);
+
+export const el = dom.sel1("#table");
 
 _.maybe(session?.username, username => relink("/profiles/", {username}), dom.attr(dom.sel1("a.user"), "href", _));
 
@@ -46,6 +45,14 @@ function later($what){
 }
 
 export async function gui(describe, desc, template) {
+  const seats = await getSeats(tableId, session?.accessToken);
+  const seat = selectedSeat === null ? null : _.detect(s => s === selectedSeat, seats) || _.first(seats);
+  const misselected = seat !== selectedSeat;
+  if (misselected) {
+    params.delete("seat");
+    location.href = `${location.origin}${location.pathname}?${params.toString()}${location.hash}`;
+  }
+
   const $reel = reel(tableId, seat, session?.accessToken);
   const exec = $.dispatch($reel, _);
   const {$wip, $error} = ports($reel);
@@ -63,7 +70,7 @@ export async function gui(describe, desc, template) {
   const $remarks = $.map(_.get(_, "remark"), $table);
   const $described = $.map(_.pipe(_.get(_, "config"), describe), $table);
   const seated = await later($.map(_.get(_, "seated"), $reel));
-  const seats = await later($.map(_.get(_, "seats"), $reel));
+  //const seats = await later($.map(_.get(_, "seats"), $reel));
   const $presence = presence($online,
     _.chain(seated,
       _.mapa(_.get(_, "username"), _),
@@ -102,18 +109,11 @@ export async function gui(describe, desc, template) {
     return {hist, wip, which, game, seat, undoable, undoer, player, time};
   }, $hist), _.filter(function({hist}){ return _.getIn(_.first(hist), ["state"]); }));
 
-  //TODO const seat = _.count(seats) > 1 ? _.maybe(params.get("seat"), parseInt) : _.first(seats);
+  const title = _.chain(ttl, dom.text, _.split(_, "|"), _.first, _.trim);
+  dom.text(ttl, `${title} #${tableId}`);
 
   function eventFor(event){
     return _.maybe(event.seat, _.nth(seated, _));
-  }
-
-  const rejected = seat != null && !_.includes(seats, seat);
-  params.delete("seat");
-  const redirect = !tableId ? "../" : rejected ? `${location.origin}${location.pathname}?${params.toString()}${location.hash}` : null;
-
-  if (redirect) { //TODO
-    //location.href = redirect;
   }
 
   const multiSeated = _.count(_.unique(_.map(_.get(_, "player_id"), seated))) != _.count(seated);

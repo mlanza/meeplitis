@@ -2,7 +2,6 @@ import _ from "../atomic_/core.js";
 import $ from "../atomic_/shell.js";
 import * as r from "./core.js";
 import supabase from "../supabase.js";
-import { session } from "../session.js";
 import {timer} from "./timer.js";
 
 export function getfn(name, params, accessToken){
@@ -19,11 +18,11 @@ export function getfn(name, params, accessToken){
   }).then(resp => resp.json());
 }
 
-function getSeated(_table_id){
-  return getfn("seated", {_table_id});
+export function getSeated(_table_id, accessToken = null){
+  return getfn("seated", {_table_id}, accessToken);
 }
 
-function getSeats(_table_id, accessToken){ //TODO test w/ and w/o accessToken
+export function getSeats(_table_id, accessToken){ //user can hold multiple seats in dummy games or, as a spectator, none at all
   return accessToken ? getfn("seats", {_table_id}, accessToken) : Promise.resolve([]);
 }
 
@@ -46,7 +45,7 @@ function getPerspective(table_id, event_id, seat, seat_id, accessToken){
   });
 }
 
-function getLastMove(_table_id, _event_id, _seat_id){
+function getLastMove(_table_id, _event_id, _seat_id){ //TODO send access token
   return supabase.rpc('last_move', {
     _table_id,
     _event_id,
@@ -81,7 +80,7 @@ function table(tableId){
   return $.pipe($t, _.compact());
 }
 
-function move(table_id, seat, commands, accessToken){
+function move(table_id, seat, commands, accessToken){ //TODO send access token, move should otherwise be barred
   const body = {table_id, seat, commands};
   return supabase.functions.invoke("move", {body}).then(_.get(_, "data"));
 }
@@ -99,7 +98,7 @@ export function ports(self){
   return {$wip, $error};
 }
 
-export function reel(tableId, seat = null){
+export function reel(tableId, seat = null, accessToken = null){
   const $timeline = $.atom(r.init(tableId, seat));
   const $table = table(tableId);
   const $scratch = $.atom({});
@@ -120,8 +119,8 @@ export function reel(tableId, seat = null){
     return present && actionable && ready && started;
   }, $timeline, $table, $ready);
   const $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table);
-  const $seated = $.fromPromise(getSeated(tableId));   //seated is everyone's info.
-  const $seats = $.fromPromise(getSeats(tableId, session?.accessToken)); //seats answers which seats are yours? (1 seat per player, except at dummy tables)
+  const $seated = $.fromPromise(getSeated(tableId, accessToken));   //seated is everyone's info.
+  const $seats = $.fromPromise(getSeats(tableId, accessToken)); //seats answers which seats are yours? (1 seat per player, except at dummy tables)
   const $undoable = $.map(function({undoables, cursor}){
     const {at} = cursor;
     return _.maybe(at, at => undoThru(undoables, at));
@@ -131,6 +130,12 @@ export function reel(tableId, seat = null){
     return {...timeline, perspective, table, error, seated, seats, up, undoable, scratch, make, ready, act};
   }, $table, $error, $seated, $seats, $up, $undoable, $scratch, $.pipe($make, _.compact()), $ready, $act, $timeline), _.filter(_.and(_.get(_, "make"), _.get(_, "table"))));
   const $timer = timer(1000, Date.now);
+
+  seat === null || $.sub($seats, _.filter(_.isSome), _.once(function(seats){
+    if (!_.includes(seats, seat)) {
+      throw new Error(`You are not authorized for seat ${seat}.`);
+    }
+  }));
 
   $.sub($timer, function(){
     const {cursor: {pos, max}} = _.deref($timeline);
@@ -158,11 +163,11 @@ export function reel(tableId, seat = null){
   $.sub($table, function(table){
     const {cursor} = _.deref($timeline);
     const {pos, max} = cursor || {};
-    if (pos === max) {
-      //if the user was in the current present the moment the table was touched, catch him up with what happened.
+    const present = pos === max;
+    if (present) { //if the user was in the present when the table was touched, catch him up with what just happened.
       $timer.start();
     }
-    _.fmap(getTouches(table.id, session?.accessToken),
+    _.fmap(getTouches(table.id, accessToken),
       _.pipe(r.addTouches, $.swap($timeline, _)));
   });
 
@@ -176,7 +181,7 @@ export function reel(tableId, seat = null){
     if (table && _.seq(ats) && make && _.seq(seated)) {
       const seatId = _.getIn(seated, [seat, "seat_id"]);
       $.each(function(at){
-        _.fmap(getPerspective(table.id, at, seat, seatId, session?.accessToken), function(perspective){
+        _.fmap(getPerspective(table.id, at, seat, seatId, accessToken), function(perspective){
           const {up, may, event, state} = perspective;
           const {seat} = event;
           const actionable = _.includes(up, player) || _.includes(may, player);
@@ -188,11 +193,11 @@ export function reel(tableId, seat = null){
     }
   });
 
-  const self = new Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $scratch, $wip);
+  const self = new Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $scratch, $wip, accessToken);
   return self;
 }
 
-function Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $scratch, $wip){
+function Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $scratch, $wip, accessToken){
   this.$timeline = $timeline;
   this.$table = $table;
   this.$error = $error;
@@ -207,6 +212,7 @@ function Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $sea
   this.$timer = $timer;
   this.$scratch = $scratch;
   this.$wip = $wip;
+  this.accessToken = accessToken;
 }
 
 function chan(self, key){
@@ -271,11 +277,11 @@ function dispatch(self, command){
     case "move":
       can(self.$ready, type, function(){
         const {id, seat} = _.deref(self);
-        if (seat == null || session?.accessToken == null) {
+        if (seat == null || self.accessToken == null) {
           throw new Error("Spectators are not permitted to issue moves");
         }
         const commands = [details.move];
-        _.fmap(move(id, seat, commands, session?.accessToken), console.log);
+        _.fmap(move(id, seat, commands, self.accessToken), console.log);
         //TODO register move response somewhere
       });
       break;

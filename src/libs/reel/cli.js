@@ -63,11 +63,12 @@ await new Command()
   .arguments("<table:string>")
   //TODO .option("--commands <commands:string>", "Commands string")
   .option("--seat <seat:number>", "Seat number (integer)")
+  .option("--token <accessToken:string>", "Access token")
   .option("--at <eventId:string>", "Navigate to moment in timeline")
   .option("--elide <key:string>", "Key to elide in logs", { collect: true })
   .action(async function (opts, tableId){
     const abbr = elides(opts.elide);
-    const $reel = reel(tableId, opts.seat);
+    const $reel = reel(tableId, opts.seat ?? null, opts.token ?? null);
     const {$wip} = sh.ports($reel);
     const exec = $.dispatch($reel, _);
 

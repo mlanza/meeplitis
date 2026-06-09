@@ -6,6 +6,8 @@ import {reg} from "/libs/cmd.js";
 import "/libs/session.js";
 
 _.fmap(open_games(),
-  $.tee(_.plug(reg, "games", _)),
+  $.tee(function(open_games){
+    reg({open_games})
+  }),
   _.map(_.pipe(render, dom.tag('li')), _),
   dom.html(dom.sel1(".games > ul"), _));

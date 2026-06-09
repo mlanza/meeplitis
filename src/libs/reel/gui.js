@@ -1,26 +1,23 @@
 import _ from "../atomic_/core.js";
 import $ from "../atomic_/shell.js";
 import dom from "../atomic_/dom.js";
+import { reg } from "../cmd.js";
 import supabase from "/libs/supabase.js";
-import {reel, ports} from "./shell.js";
+import {reel, ports, getSeats} from "./shell.js";
 import { presence } from "/libs/online.js";
 import { $online, session, getfn } from "/libs/session.js";
 import { relink } from "/libs/links.js";
 import { rankings } from "/components/table/ui.js";
 import "/libs/dummy.js";
-import { reg } from "../cmd.js";
-
-function getSeats(_table_id, accessToken){ //TODO test w/ and w/o accessToken
-  return _table_id && accessToken ? getfn("seats", {_table_id}) : Promise.resolve([]);
-}
 
 export const el = dom.sel1("#table");
 const params = new URLSearchParams(location.search);
 export const tableId = params.get('id');
 
 //TODO this is an intrusive dep
-const seats = await getSeats(tableId, session?.accessToken); //user can hold multiple seats in dummy games or, as a spectator, none at all
-export const seat = _.count(seats) > 1 ? _.maybe(params.get("seat"), parseInt) : _.first(seats) ?? null;
+const seats = await getSeats(tableId, session?.accessToken);
+const wanted = _.maybe(params.get("seat"), parseInt) ?? null;
+export const seat = wanted === null ? null : _.detect(s => s === wanted, seats) || _.first(seats);
 
 const ttl = dom.sel1("head title");
 const title = _.chain(ttl, dom.text, _.split(_, "|"), _.first, _.trim);
@@ -49,7 +46,7 @@ function later($what){
 }
 
 export async function gui(describe, desc, template) {
-  const $reel = reel(tableId, seat);
+  const $reel = reel(tableId, seat, session?.accessToken);
   const exec = $.dispatch($reel, _);
   const {$wip, $error} = ports($reel);
   const $hist = $.hist($reel);

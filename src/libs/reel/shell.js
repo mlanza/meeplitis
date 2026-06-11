@@ -223,18 +223,23 @@ function on(self, key, callback){
   return $.sub($.chan(self, key), callback);
 }
 
-function can($ready, what, f){
+function can(self, what, f){
   try {
-    const ready = _.deref($ready);
+    const ready = _.deref(self.$ready);
+    const state = _.deref(self);
+    const {seat} = state;
+    if (seat == null || self.accessToken == null) {
+      throw new Error("Spectators cannot participate");
+    }
     if (!ready) {
       throw new Error("Back end still processing; please wait.");
     }
-    $.reset($ready, false);
-    f();
+    $.reset(self.$ready, false);
+    f(state);
   } catch (cause) {
     throw new Error(`${what} failed`, {cause});
   } finally {
-    $.reset($ready, true);
+    $.reset(self.$ready, true);
   }
 }
 
@@ -274,36 +279,22 @@ function dispatch(self, command){
       self.$timer.start();
       break;
 
-    case "move":
-      can(self.$ready, type, function(){
-        const {id, seat} = _.deref(self);
-        if (seat == null || self.accessToken == null) {
-          throw new Error("Spectators are not permitted to issue moves");
-        }
-        const commands = [details.move];
-        _.fmap(move(id, seat, commands, self.accessToken), console.log);
-        //TODO register move response somewhere
-      });
-      break;
-
     case "do-over": //TODO test
-      can(self.$ready, type, function(){
-        const {id, undoables, cursor} = _.deref(self);
-        const {at} = cursor;
-        const _table_id = id,
-              _event_id = undoThru(undoables, at);
-        if (_event_id) {
-          console.log("do-over", {_event_id});
-          return; //TODO
-          supabase.rpc('undo', {_table_id, _event_id}).then(function(undo){
-            //TODO $.swap(self.$state, _.update(_, "history", _.pipe(_.take(at -1, _), _.toArray)));
-          });
-        }
+      can(self, type, async function({id: _table_id, undoable: _event_id, cursor: {at}}){
+        if (!_event_id) return;
+        console.log("do-over", {at, _table_id, _event_id});
+        const {data, error, status} = await supabase.rpc('undo', {_table_id, _event_id});
+        console.log({type, data, error, status});
+        //TODO $.swap(self.$state, _.update(_, "history", _.pipe(_.take(at -1, _), _.toArray)));
       });
       break;
 
     default:
-      throw new Error(`Unknown command ${type}`);
+      can(self, type, async function({id, seat}){
+        const {data, error, status} = await move(id, seat, [command], self.accessToken);
+        console.log({type, data, error, status});
+      });
+      break;
   }
 }
 

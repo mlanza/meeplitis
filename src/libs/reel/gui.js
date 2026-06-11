@@ -46,11 +46,11 @@ function later($what){
 
 export async function gui(describe, desc, template) {
   const seats = await getSeats(tableId, session?.accessToken);
-  const seat = selectedSeat === null ? null : _.detect(s => s === selectedSeat, seats) || _.first(seats);
+  const seat = selectedSeat === null ? _.first(seats) : _.detect(s => s === selectedSeat, seats) || _.first(seats);
   const misselected = seat !== selectedSeat;
   if (misselected) {
     params.delete("seat");
-    location.href = `${location.origin}${location.pathname}?${params.toString()}${location.hash}`;
+    //location.href = `${location.origin}${location.pathname}?${params.toString()}${location.hash}`;
   }
 
   const $reel = reel(tableId, seat, session?.accessToken);

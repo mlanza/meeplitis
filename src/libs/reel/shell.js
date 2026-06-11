@@ -223,7 +223,7 @@ function on(self, key, callback){
   return $.sub($.chan(self, key), callback);
 }
 
-function can(self, what, f){
+function can(self, f){
   try {
     const ready = _.deref(self.$ready);
     const state = _.deref(self);
@@ -236,8 +236,6 @@ function can(self, what, f){
     }
     $.reset(self.$ready, false);
     f(state);
-  } catch (cause) {
-    throw new Error(`${what} failed`, {cause});
   } finally {
     $.reset(self.$ready, true);
   }
@@ -280,7 +278,7 @@ function dispatch(self, command){
       break;
 
     case "do-over": //TODO test
-      can(self, type, async function({id: _table_id, undoable: _event_id, cursor: {at}}){
+      can(self, async function({id: _table_id, undoable: _event_id, cursor: {at}}){
         if (!_event_id) return;
         console.log("do-over", {at, _table_id, _event_id});
         const {data, error, status} = await supabase.rpc('undo', {_table_id, _event_id});
@@ -290,7 +288,7 @@ function dispatch(self, command){
       break;
 
     default:
-      can(self, type, async function({id, seat}){
+      can(self, async function({id, seat}){
         const {data, error, status} = await move(id, seat, [command], self.accessToken);
         console.log({type, data, error, status});
       });

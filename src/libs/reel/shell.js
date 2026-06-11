@@ -91,7 +91,7 @@ function undoThru(undoables, touch){
   }, undoables);
 }
 
-export const path = _.pipe(_.deref, _.getIn(_, ["cursor", "at"]), _.array);
+export const path = _.pipe(_.deref, _.getIn(_, ["cursor", "at"]), _.otherwise(_, "^^^^^"), _.array);
 
 export function ports(self){
   const {$wip, $error} = self;
@@ -102,7 +102,9 @@ export function reel(tableId, seat = null, accessToken = null){
   const $timeline = $.atom(r.init(tableId, seat));
   const $table = table(tableId);
   const $scratch = $.atom({});
-  const $wip = $.cursor($scratch, () => path(self));
+  const $wip = $.cursor($scratch, function(){
+    return path(self);
+  });
   const $make = $.atom(null);
   const $ready = $.atom(true);
   const $error = $(null);

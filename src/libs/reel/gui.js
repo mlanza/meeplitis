@@ -77,7 +77,7 @@ export async function gui(describe, desc, template) {
       _.unique,
       _.toArray));
 
-  const $gui = $.pipe($.map(function([now, past]){
+  const $gui = $.pipe($.map(function([now, past], wip){
     const curr = now?.perspective ?? null;
     const prior = past?.perspective ?? null;
     const hist = [curr, prior];
@@ -95,7 +95,6 @@ export async function gui(describe, desc, template) {
     const { cursor } = now ?? {};
     const { max, pos } = cursor ?? {};
     const present = max === pos;
-    const wip = now?.scratch;
     const which = now?.scratch === past?.scratch ? 0 : 1;
     const bwd =  now?.cursor?.direction <= 0;
     const time = {
@@ -107,7 +106,7 @@ export async function gui(describe, desc, template) {
       present
     }
     return {hist, wip, which, game, seat, undoable, undoer, player, time};
-  }, $hist), _.filter(function({hist}){ return _.getIn(_.first(hist), ["state"]); }));
+  }, $hist, $wip), _.filter(function({hist}){ return _.getIn(_.first(hist), ["state"]); }));
 
   const title = _.chain(ttl, dom.text, _.split(_, "|"), _.first, _.trim);
   dom.text(ttl, `${title} #${tableId}`);
@@ -294,7 +293,7 @@ export async function gui(describe, desc, template) {
     exec({type: "at", details: {touch}});
   }));
 
-  return $.doto({seats, seated, exec, $reel, $wip, $gui}, reg);
+  return $.doto({seat, seats, seated, exec, $reel, $wip, $gui}, reg);
 }
 
 export function player(username, avatar_url, seat, ...contents){

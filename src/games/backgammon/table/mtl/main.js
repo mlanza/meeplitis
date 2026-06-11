@@ -307,7 +307,8 @@ function getMove({from, to}, seat) {
   }, g.moves(game, { type: ["move", "enter", "bear-off"], seat }));
 }
 
-const {seated, exec, $gui, $wip} = await gui(describe, desc, template);
+const {seat, seated, exec, $gui, $wip} = await gui(describe, desc, template);
+debugger
 
 $.sub($gui, function ({ hist: [curr, prior], hist: [{ up, state, state: { status, dice, off, stakes, holdsCube } }], wip, which, game, seat, time: { present } }) {
   if (which !== 1) {

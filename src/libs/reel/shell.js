@@ -26,6 +26,10 @@ export function getSeats(_table_id, accessToken){ //user can hold multiple seats
   return accessToken ? getfn("seats", {_table_id}, accessToken) : Promise.resolve([]);
 }
 
+export function isPresent(pos, max){
+  return _.isNumber(pos) && max === pos;
+}
+
 function getTouches(_table_id, accessToken){
   return getfn('touches', {_table_id}, accessToken);
 }
@@ -114,7 +118,7 @@ export function reel(tableId, seat = null, accessToken = null){
     const {at, pos, max} = cursor;
     const {status} = table;
     const started = status === "started";
-    const present = pos !== null && pos === max;
+    const present = isPresent(pos, max);
     const perspective = _.maybe(at, _.get(perspectives, _));
     if (!perspective) return false;
     const {actionable} = perspective;
@@ -132,6 +136,9 @@ export function reel(tableId, seat = null, accessToken = null){
     return {...timeline, perspective, table, error, seated, seats, up, undoable, scratch, make, ready, act};
   }, $table, $error, $seated, $seats, $up, $undoable, $scratch, $.pipe($make, _.compact()), $ready, $act, $timeline), _.filter(_.and(_.get(_, "make"), _.get(_, "table"))));
   const $timer = timer(1000, Date.now);
+  function catchUp(){
+    $timer.start();
+  }
 
   seat === null || $.sub($seats, _.filter(_.isSome), _.once(function(seats){
     if (!_.includes(seats, seat)) {
@@ -142,7 +149,8 @@ export function reel(tableId, seat = null, accessToken = null){
   $.sub($timer, function(){
     const {cursor: {pos, max}} = _.deref($timeline);
     if (pos !== null) {
-      if (pos === max) {
+      const present = isPresent(pos, max);
+      if (present) {
         $timer.stop();
       } else {
         $.swap($timeline, r.forward);
@@ -165,12 +173,10 @@ export function reel(tableId, seat = null, accessToken = null){
   $.sub($table, function(table){
     const {cursor} = _.deref($timeline);
     const {pos, max} = cursor || {};
-    const present = pos === max;
-    if (present) { //if the user was in the present when the table was touched, catch him up with what just happened.
-      $timer.start();
-    }
+    const present = isPresent(pos, max);
     _.fmap(getTouches(table.id, accessToken),
-      _.pipe(r.addTouches, $.swap($timeline, _)));
+      _.pipe(r.addTouches, $.swap($timeline, _)),
+      present ? catchUp : _.noop); //if already in the present when the game is touched, catch things up.
   });
 
   //perspective caching; includes anticipated next step

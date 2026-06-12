@@ -3,7 +3,7 @@ import $ from "../atomic_/shell.js";
 import dom from "../atomic_/dom.js";
 import { reg } from "../cmd.js";
 import supabase from "/libs/supabase.js";
-import {reel, ports, getSeats} from "./shell.js";
+import {reel, ports, getSeats, isPresent} from "./shell.js";
 import { presence } from "/libs/online.js";
 import { $online, session, getfn } from "/libs/session.js";
 import { relink } from "/libs/links.js";
@@ -64,7 +64,7 @@ export async function gui(describe, desc, template) {
   const $table = $.map(_.get(_, "table"), $reel);
   const $status = $.map(_.get(_, "status"), $table);
   const $present = $.map(function({max, pos}){
-    return _.isNumber(pos) && max === pos;
+    return isPresent(pos, max);
   }, $cursor);
   //const $scored = $.map(_.get(_, "scored"), $table);
   const $remarks = $.map(_.get(_, "remark"), $table);
@@ -94,7 +94,7 @@ export async function gui(describe, desc, template) {
     const game = curr?.game;
     const { cursor } = now ?? {};
     const { max, pos } = cursor ?? {};
-    const present = max === pos;
+    const present = isPresent(pos, max);
     const which = now?.scratch === past?.scratch ? 0 : 1;
     const bwd =  now?.cursor?.direction <= 0;
     const time = {

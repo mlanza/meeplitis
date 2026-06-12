@@ -136,9 +136,6 @@ export function reel(tableId, seat = null, accessToken = null){
     return {...timeline, perspective, table, error, seated, seats, up, undoable, scratch, make, ready, act};
   }, $table, $error, $seated, $seats, $up, $undoable, $scratch, $.pipe($make, _.compact()), $ready, $act, $timeline), _.filter(_.and(_.get(_, "make"), _.get(_, "table"))));
   const $timer = timer(1000, Date.now);
-  function catchUp(){
-    $timer.start();
-  }
 
   seat === null || $.sub($seats, _.filter(_.isSome), _.once(function(seats){
     if (!_.includes(seats, seat)) {
@@ -176,7 +173,7 @@ export function reel(tableId, seat = null, accessToken = null){
     const present = isPresent(pos, max);
     _.fmap(getTouches(table.id, accessToken),
       _.pipe(r.addTouches, $.swap($timeline, _)),
-      present ? catchUp : _.noop); //if already in the present when the game is touched, catch things up.
+      present ? () => $timer.start() : _.noop); //if already in the present when the game is touched, catch things up.
   });
 
   //perspective caching; includes anticipated next step

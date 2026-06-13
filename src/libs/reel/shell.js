@@ -99,8 +99,8 @@ function undoThru(undoables, touch){
 export const path = _.pipe(_.deref, _.getIn(_, ["cursor", "at"]), _.otherwise(_, "^^^^^"), _.array);
 
 export function ports(self){
-  const {$wip, $error, $hist, $diff} = self;
-  return {$wip, $error, $hist, $diff};
+  const {$wip, $error, $hist, $diff, $updated} = self;
+  return {$wip, $error, $hist, $diff, $updated};
 }
 
 function settled(state){
@@ -213,6 +213,8 @@ export function reel(tableId, seat = null, accessToken = null){
     return {diff, hist};
   }, $hist);
 
+  const $updated = $.map(_.pipe(_.get(_, "diff"), _.mapa(_.get(_, "path"), _)), $diff);
+
   const $state = $.pipe($diff, _.comp(_.filter(function({diff}){ //regulate visibility of internal change events to the outside world
     return _.reduce(function(memo, {path: [prop]}){
       const suppress = _.includes(["perspectives", "touches", "undoables", "cursor", "table", "undoable"], prop);
@@ -222,11 +224,11 @@ export function reel(tableId, seat = null, accessToken = null){
     return curr;
   })));
 
-  const self = new Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $timer, $scratch, $wip, accessToken);
+  const self = new Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $timer, $scratch, $wip, accessToken);
   return self;
 }
 
-function Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $timer, $scratch, $wip, accessToken){
+function Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $timer, $scratch, $wip, accessToken){
   this.$timeline = $timeline;
   this.$table = $table;
   this.$error = $error;
@@ -240,6 +242,7 @@ function Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $sea
   this.$state = $state;
   this.$hist = $hist;
   this.$diff = $diff,
+  this.$updated = $updated;
   this.$timer = $timer;
   this.$scratch = $scratch;
   this.$wip = $wip;

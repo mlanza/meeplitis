@@ -15,7 +15,7 @@ function logs(key, obj){
 
 function elides2(keys, f){
   return function(state){
-    return _.reduce(function(memo, key){
+    return _.isArray(state) ? state : _.reduce(function(memo, key){
       const path = _.split(key, ".");
       return _.updateIn(memo, path, f);
     }, state, keys);
@@ -23,7 +23,7 @@ function elides2(keys, f){
 }
 
 function elides1(elide){
-  return elides2(elide, value => _.isObject(value) || _.isArray(value) ?
+  return elides2(elide, value => _.isObject(value) ?
     `<${_.count(value)} entries>` :
     `<object>`);
 }
@@ -69,16 +69,10 @@ await new Command()
   .action(async function (opts, tableId){
     const abbr = elides(opts.elide);
     const $reel = reel(tableId, opts.seat ?? null, opts.token ?? null);
-    const {$wip, $diff} = sh.ports($reel);
+    const {$wip, $updated} = sh.ports($reel);
     const exec = $.dispatch($reel, _);
 
-    reg({$reel, $wip, $diff}, function(key, _value){
-      if (key == "$diff") {
-        const {diff} = _value;
-        const paths = _.mapa(_.get(_, "path"), diff);
-        console.log("@touched", paths);
-        return;
-      }
+    reg({$reel, $wip, $updated}, function(key, _value){
       logs(key, abbr(_value));
     });
 

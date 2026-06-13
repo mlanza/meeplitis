@@ -73,8 +73,8 @@ await new Command()
     const $updated = $.chan($reel, "updated");
     const exec = $.dispatch($reel, _);
 
-    reg({$reel, $wip, $updated}, function(key, _value){
-      logs(key, abbr(_value));
+    reg({$reel, $wip, $updated}, function(key, value){
+      logs(key, abbr(value));
     });
 
     opts.at && $.sub($reel, _.filter(_.get(_, "touches")), _.once(function(){

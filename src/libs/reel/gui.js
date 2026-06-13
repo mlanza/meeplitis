@@ -3,7 +3,7 @@ import $ from "../atomic_/shell.js";
 import dom from "../atomic_/dom.js";
 import { reg } from "../cmd.js";
 import supabase from "/libs/supabase.js";
-import {reel, ports, getSeats, isPresent} from "./shell.js";
+import {reel, getSeats, isPresent} from "./shell.js";
 import { presence } from "/libs/online.js";
 import { $online, session, getfn } from "/libs/session.js";
 import { relink } from "/libs/links.js";
@@ -55,7 +55,8 @@ export async function gui(describe, desc, template) {
 
   const $reel = reel(tableId, seat, session?.accessToken);
   const exec = $.dispatch($reel, _);
-  const {$wip, $error} = ports($reel);
+  const $wip = $.chan($reel, "wip");
+  const $error = $.chan($reel, "error");
   const $hist = $.hist($reel);
   const $cursor = $.map(_.get(_, "cursor"), $reel);
   const $act = $.map(_.get(_, "act"), $reel);

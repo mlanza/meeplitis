@@ -31,10 +31,11 @@ export class Workboard {
       return Promise.reject(new Error(`Workboard is not ready to run "${key}"`));
     }
 
+    const {blocking} = entry;
     const startedAt = Date.now(),
           ticketId = `${this._nextTicket++}`;
 
-    this._addTicket(ticketId, {key, args, startedAt});
+    this._addTicket(ticketId, {key, args, blocking, startedAt});
 
     let result;
     try {

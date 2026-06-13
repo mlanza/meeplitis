@@ -8,7 +8,8 @@
   - Document how consumers should interact with the tracker so future async touch points (perspective refreshes, undo chains, move batches) can participate safely.
 
 - [ ] 2. Build the Workboard class and wiring
-  - Construct a Workboard helper/class that takes the `$workboard` atom, `$error` atom, and derived `$ready` signal and keeps an internal counter of in-flight requests keyed by incremental ids.
+  - Construct a Workboard helper/class that takes the `$queue` atom, `$error` atom, and derived `$ready` signal and keeps an internal counter of in-flight requests keyed by incremental ids.
+  - Create the `$queue` atom and its derived `$altReady` signal so we can observe readiness while the rest of the platform remains unchanged.
   - Provide `register(key, op, blocking?)` so each async operation (touches, timer ticks, perspective fetches, moves/do-overs) can describe itself in terms of a promise-producing function and whether it must wait for `$ready` before starting.
   - Replace the `can` helper with `request(key, ...args)` so every request passes through the Workboard, adds a ticket to the registry, executes the registered op, and drops the ticket in a `finally` handler regardless of resolve or reject.
   - Keep `$workboard` as the pure state object that holds only in-flight items; derive `$ready` from whether this object is empty (ready when empty). `request` should reject/block blocking operations while the board is non-empty but should allow domino-triggered work to add tickets immediately.

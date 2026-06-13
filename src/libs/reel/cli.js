@@ -13,22 +13,29 @@ function logs(key, obj){
   $.log(key, Deno.inspect(obj, { colors: true, compact: true, depth: Infinity, iterableLimit: Infinity }));
 }
 
-function elides2(keys, f){
-  return function(state){
-    return _.isArray(state) ? state : _.reduce(function(memo, key){
-      const path = _.split(key, ".");
-      return _.updateIn(memo, path, f);
-    }, state, keys);
+function elides3(omit, paths, f){
+  return function(key, value){
+    try {
+      if (omit(key, value)) {
+        return value;
+      } else {
+        return _.reduce(function(memo, path){
+          return _.updateIn(memo, path, f);
+        }, value, paths);
+      }
+    } catch {
+      return value;
+    }
   }
 }
 
-function elides1(elide){
-  return elides2(elide, value => _.isObject(value) ?
+function elides2(omit, props){
+  return elides3(omit, props, value => _.isObject(value) ?
     `<${_.count(value)} entries>` :
     `<object>`);
 }
 
-const elides = _.overload(null, elides1, elides2);
+const elides = _.overload(null, null, elides2, elides3);
 
 const hr = _.chain(_.repeat(100, "-"), _.toArray, _.join("", _)); //horizontal rule
 
@@ -72,16 +79,21 @@ await new Command()
   .option("--seat <seat:number>", "Seat number (integer)")
   .option("--token <accessToken:string>", "Access token")
   .option("--at <eventId:string>", "Navigate to moment in timeline")
-  .option("--elide <key:string>", "Key to elide in logs", { collect: true })
+  .option("--elide <prop:string>", "Property to elide in logged object", { collect: true })
+  .option("--not <chan:string>", "Channel not elided", { collect: true })
   .action(async function (opts, tableId){
-    const abbr = elides(opts.elide);
+    const elide = elides(function(key, value){
+      return _.includes(opts?.not, key) || _.isArray(value);
+    },  _.mapa(_.split(_, "."), opts.elide));
     const $reel = reel(tableId, opts.seat ?? null, opts.token ?? null);
     const $wip = $.chan($reel, "wip");
+    const $ready = $.chan($reel, "ready");
     const $updated = $.chan($reel, "updated");
+    const $queue = $.chan($reel, "queue");
     const exec = $.dispatch($reel, _);
 
-    reg({$reel, $wip, $updated}, function(key, value){
-      logs(key, abbr(value));
+    reg({$reel, $wip, $updated, $queue, $ready}, function(key, value){
+      logs(key, elide(key, value));
     });
 
     opts.at && $.sub($reel, _.filter(_.get(_, "touches")), _.once(function(){

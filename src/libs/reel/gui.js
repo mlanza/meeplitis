@@ -64,9 +64,10 @@ export async function gui(describe, desc, template) {
   const $ready = $.map(_.get(_, "ready"), $reel);
   const $table = $.map(_.get(_, "table"), $reel);
   const $status = $.map(_.get(_, "status"), $table);
-  const $present = $.map(function({max, pos}){
+  const $present = $.pipe($.map(function(cursor){
+    const {pos, max} = cursor ?? {};
     return isPresent(pos, max);
-  }, $cursor);
+  }, $cursor), _.filter(_.isSome));
   //const $scored = $.map(_.get(_, "scored"), $table);
   const $remarks = $.map(_.get(_, "remark"), $table);
   const $described = $.map(_.pipe(_.get(_, "config"), describe), $table);

@@ -4,6 +4,7 @@ import * as r from "./core.js";
 import supabase from "../supabase.js";
 import {timer} from "./timer.js";
 import * as d from  "./diff.js";
+import {Workboard} from "./workboard.js";
 
 export function getfn(name, params, accessToken){
   const apikey = supabase.supabaseKey;
@@ -60,6 +61,10 @@ function getLastMove(_table_id, _event_id, _seat_id){ //TODO send access token
   });
 }
 
+function isQueueEmpty(queue){
+  return queue == null || Object.keys(queue).length === 0;
+}
+
 function table(tableId){
   const $t = $.atom(null);
 
@@ -90,6 +95,13 @@ function move(table_id, seat, commands, accessToken){ //TODO send access token, 
   return supabase.functions.invoke("move", {body}).then(_.get(_, "data"));
 }
 
+function undoMove(_table_id, _event_id){
+  return supabase.rpc('undo', {
+    _table_id,
+    _event_id
+  });
+}
+
 function undoThru(undoables, touch){
   return _.some(function([key, vals]){
     return _.includes(vals, touch) ? key : null;
@@ -97,13 +109,6 @@ function undoThru(undoables, touch){
 }
 
 export const path = _.pipe(_.deref, _.getIn(_, ["cursor", "at"]), _.otherwise(_, "^^^^^"), _.array);
-
-function settled(state){
-  const {make, table, cursor, perspective} = state || {};
-  const eventId = perspective?.event?.id;
-  const {at} = cursor || {}
-  return make && table && at && eventId === at;
-}
 
 export function reel(tableId, seat = null, accessToken = null){
   const $timeline = $.atom(r.init(tableId, seat));
@@ -113,8 +118,25 @@ export function reel(tableId, seat = null, accessToken = null){
     return path(self);
   });
   const $make = $.atom(null);
-  const $ready = $.atom(true);
   const $error = $(null);
+  const $queue = $.atom({}, {validate: function(state){
+    return _.reducekv(function(memo, key){
+      return memo && _.numeric(key);
+    }, true, state);
+  }});
+  const $ready = $.map(isQueueEmpty, $queue);
+
+  function spectator(){
+    const {seat} = _.deref(self) || {};
+    return seat == null || self.accessToken == null;
+  }
+
+  const wb = new Workboard({spectator, $queue, $error, $ready});
+  wb.register("getTouches", getTouches);
+  wb.register("getPerspective", getPerspective);
+  wb.register("move", move, true);
+  wb.register("undo", undoMove, true);
+
   const $act = $.map(function(timeline, table, ready){
     if (!table || !ready) return false;
     const {cursor, perspectives} = timeline;
@@ -174,7 +196,7 @@ export function reel(tableId, seat = null, accessToken = null){
     const {cursor} = _.deref($timeline);
     const {pos, max} = cursor || {};
     const present = isPresent(pos, max);
-    _.fmap(getTouches(table.id, accessToken),
+    _.fmap(wb.request("getTouches", table.id, accessToken),
       _.pipe(r.addTouches, $.swap($timeline, _)),
       present ? () => $timer.start() : _.noop); //if already in the present when the game is touched, catch things up.
   });
@@ -189,7 +211,7 @@ export function reel(tableId, seat = null, accessToken = null){
     if (table && _.seq(ats) && make && _.seq(seated)) {
       const seatId = _.getIn(seated, [seat, "seat_id"]);
       $.each(function(at){
-        _.fmap(getPerspective(table.id, at, seat, seatId, accessToken), function(perspective){
+        _.fmap(wb.request("getPerspective", table.id, at, seat, seatId, accessToken), function(perspective){
           const {up, may, event, state} = perspective;
           const {seat} = event;
           const actionable = _.includes(up, player) || _.includes(may, player);
@@ -219,11 +241,11 @@ export function reel(tableId, seat = null, accessToken = null){
     return curr;
   })));
 
-  const self = new Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $timer, $scratch, $wip, accessToken);
+  const self = new Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $timer, $scratch, $wip, $queue, wb, accessToken);
   return self;
 }
 
-function Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $timer, $scratch, $wip, accessToken){
+function Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $timer, $scratch, $wip, $queue, wb, accessToken){
   this.$timeline = $timeline;
   this.$table = $table;
   this.$error = $error;
@@ -241,6 +263,8 @@ function Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $sea
   this.$timer = $timer;
   this.$scratch = $scratch;
   this.$wip = $wip;
+  this.$queue = $queue;
+  this.workboard = wb;
   this.accessToken = accessToken;
 }
 
@@ -250,24 +274,6 @@ function chan(self, key){
 
 function on(self, key, callback){
   return $.sub($.chan(self, key), callback);
-}
-
-function can(self, f){
-  try {
-    const ready = _.deref(self.$ready);
-    const state = _.deref(self);
-    const {seat} = state;
-    if (seat == null || self.accessToken == null) {
-      throw new Error("Spectators cannot participate");
-    }
-    if (!ready) {
-      throw new Error("Back end still processing; please wait.");
-    }
-    $.reset(self.$ready, false);
-    f(state);
-  } finally {
-    $.reset(self.$ready, true);
-  }
 }
 
 function dispatch(self, command){
@@ -306,22 +312,24 @@ function dispatch(self, command){
       self.$timer.start();
       break;
 
-    case "do-over": //TODO test
-      can(self, async function({id: _table_id, undoable: _event_id, cursor: {at}}){
-        if (!_event_id) return;
-        console.log("do-over", {at, _table_id, _event_id});
-        const {data, error, status} = await supabase.rpc('undo', {_table_id, _event_id});
+    case "do-over": { // TODO test
+      const {id: _table_id, undoable: _event_id, cursor: {at}} = _.deref($state);
+      if (!_event_id) return;
+      console.log("do-over", {at, _table_id, _event_id});
+      _.fmap(wb.request("undoMove", _table_id, _event_id), function({data, error, status}) {
         console.log({type, data, error, status});
-        //TODO $.swap(self.$state, _.update(_, "history", _.pipe(_.take(at -1, _), _.toArray)));
       });
+      //TODO $.swap(self.$state, _.update(_, "history", _.pipe(_.take(at -1, _), _.toArray)));
       break;
+    }
 
-    default:
-      can(self, async function({id, seat}){
-        const {data, error, status} = await move(id, seat, [command], self.accessToken);
+    default: {
+      const {id, seat} = _.deref($state);
+      _.fmap(wb.request("move", id, seat, [command], self.accessToken), function({data, error, status}) {
         console.log({type, data, error, status});
       });
       break;
+    }
   }
 }
 

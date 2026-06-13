@@ -61,7 +61,7 @@ await new Command()
   .name("reel")
   .description("Navigate and append to board game timeline")
   .arguments("<table:string>")
-  //TODO .option("--commands <commands:string>", "Commands string")
+  //TODO .option("--command <command:string>", "Command string")
   .option("--seat <seat:number>", "Seat number (integer)")
   .option("--token <accessToken:string>", "Access token")
   .option("--at <eventId:string>", "Navigate to moment in timeline")
@@ -69,10 +69,16 @@ await new Command()
   .action(async function (opts, tableId){
     const abbr = elides(opts.elide);
     const $reel = reel(tableId, opts.seat ?? null, opts.token ?? null);
-    const {$wip} = sh.ports($reel);
+    const {$wip, $diff} = sh.ports($reel);
     const exec = $.dispatch($reel, _);
 
-    reg({$reel, $wip}, function(key, _value){
+    reg({$reel, $wip, $diff}, function(key, _value){
+      if (key == "$diff") {
+        const {diff} = _value;
+        const paths = _.mapa(_.get(_, "path"), diff);
+        console.log("@touched", paths);
+        return;
+      }
       logs(key, abbr(_value));
     });
 

@@ -3,6 +3,7 @@ import $ from "../atomic_/shell.js";
 import * as r from "./core.js";
 import supabase from "../supabase.js";
 import {timer} from "./timer.js";
+import * as d from  "./diff.js";
 
 export function getfn(name, params, accessToken){
   const apikey = supabase.supabaseKey;
@@ -98,8 +99,15 @@ function undoThru(undoables, touch){
 export const path = _.pipe(_.deref, _.getIn(_, ["cursor", "at"]), _.otherwise(_, "^^^^^"), _.array);
 
 export function ports(self){
-  const {$wip, $error} = self;
-  return {$wip, $error};
+  const {$wip, $error, $hist, $diff} = self;
+  return {$wip, $error, $hist, $diff};
+}
+
+function settled(state){
+  const {make, table, cursor, perspective} = state || {};
+  const eventId = perspective?.event?.id;
+  const {at} = cursor || {}
+  return make && table && at && eventId === at;
 }
 
 export function reel(tableId, seat = null, accessToken = null){
@@ -131,7 +139,7 @@ export function reel(tableId, seat = null, accessToken = null){
     const {at} = cursor;
     return _.maybe(at, at => undoThru(undoables, at));
   }, $timeline);
-  const $state = $.pipe($.map(function(table, error, seated, seats, up, undoable, scratch, make, ready, act, timeline){
+  const $base = $.pipe($.map(function(table, error, seated, seats, up, undoable, scratch, make, ready, act, timeline){
     const perspective = r.perspective(timeline);
     return {...timeline, perspective, table, error, seated, seats, up, undoable, scratch, make, ready, act};
   }, $table, $error, $seated, $seats, $up, $undoable, $scratch, $.pipe($make, _.compact()), $ready, $act, $timeline), _.filter(_.and(_.get(_, "make"), _.get(_, "table"))));
@@ -177,7 +185,7 @@ export function reel(tableId, seat = null, accessToken = null){
   });
 
   //perspective caching; includes anticipated next step
-  $.sub($state, function(state){
+  $.sub($base, function(state){
     const {table, make, seat, seated, cursor, touches, perspectives} = state;
     const {pos, at, direction, max} = cursor;
     const nextAt = _.maybe(pos + direction, _.clamp(_, 0, max), _.get(touches, _));
@@ -198,11 +206,27 @@ export function reel(tableId, seat = null, accessToken = null){
     }
   });
 
-  const self = new Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $scratch, $wip, accessToken);
+  const $hist = $.hist($base);
+  const $diff = $.map(function(hist){
+    const [curr, prior] = hist ?? [];
+    const diff = d.diff(curr, prior);
+    return {diff, hist};
+  }, $hist);
+
+  const $state = $.pipe($diff, _.comp(_.filter(function({diff}){ //regulate visibility of internal change events to the outside world
+    return _.reduce(function(memo, {path: [prop]}){
+      const suppress = _.includes(["perspectives", "touches", "undoables", "cursor", "table", "undoable"], prop);
+      return memo || !suppress;
+    }, false, diff);
+  }), _.map(function({hist: [curr]}){
+    return curr;
+  })));
+
+  const self = new Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $timer, $scratch, $wip, accessToken);
   return self;
 }
 
-function Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $timer, $scratch, $wip, accessToken){
+function Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $timer, $scratch, $wip, accessToken){
   this.$timeline = $timeline;
   this.$table = $table;
   this.$error = $error;
@@ -214,6 +238,8 @@ function Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $sea
   this.$seats = $seats;
   this.$undoable = $undoable;
   this.$state = $state;
+  this.$hist = $hist;
+  this.$diff = $diff,
   this.$timer = $timer;
   this.$scratch = $scratch;
   this.$wip = $wip;

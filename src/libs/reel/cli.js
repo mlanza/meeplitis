@@ -69,7 +69,8 @@ await new Command()
   .action(async function (opts, tableId){
     const abbr = elides(opts.elide);
     const $reel = reel(tableId, opts.seat ?? null, opts.token ?? null);
-    const {$wip, $updated} = sh.ports($reel);
+    const $wip = $.chan($reel, "wip");
+    const $updated = $.chan($reel, "updated");
     const exec = $.dispatch($reel, _);
 
     reg({$reel, $wip, $updated}, function(key, _value){

@@ -98,11 +98,6 @@ function undoThru(undoables, touch){
 
 export const path = _.pipe(_.deref, _.getIn(_, ["cursor", "at"]), _.otherwise(_, "^^^^^"), _.array);
 
-export function ports(self){
-  const {$wip, $error, $hist, $diff, $updated} = self;
-  return {$wip, $error, $hist, $diff, $updated};
-}
-
 function settled(state){
   const {make, table, cursor, perspective} = state || {};
   const eventId = perspective?.event?.id;

@@ -30,9 +30,17 @@ function elides1(elide){
 
 const elides = _.overload(null, elides1, elides2);
 
+const hr = _.chain(_.repeat(100, "-"), _.toArray, _.join("", _)); //horizontal rule
+
 async function tuiMode(exec) {
+  let counter = 0;
   for await (const event of keypress()) {
-    if (event.key === "q" || event.key === "escape") {
+    if (event.key === "c") {
+      console.clear();
+    } else if (event.key === "h") {
+      console.log(hr, ++counter);
+      console.log("");
+    } else if (event.key === "q" || event.key === "escape") {
       Deno.exit(0);
     } else if (event.key === "right") {
       exec({type: event.shiftKey ? "present" : "forward"});

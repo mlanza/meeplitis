@@ -30,7 +30,7 @@ function elides1(elide){
 
 const elides = _.overload(null, elides1, elides2);
 
-const hr = _.chain(_.repeat(100, "_"), _.toArray, _.join("", _)); //horizontal rule
+const hr = _.chain(_.repeat(100, "-"), _.toArray, _.join("", _)); //horizontal rule
 
 async function tuiMode(exec) {
   let counter = 0;
@@ -39,7 +39,6 @@ async function tuiMode(exec) {
       console.clear();
     } else if (event.key === "h") {
       console.log(hr, ++counter);
-      console.log("");
     } else if (event.key === "q" || event.key === "escape") {
       Deno.exit(0);
     } else if (event.key === "right") {

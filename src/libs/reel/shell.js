@@ -61,7 +61,7 @@ function getLastMove(_table_id, _event_id, _seat_id){ //TODO send access token
   });
 }
 
-function isSettled(queue){
+function isWorking(queue){
   return queue == null || Object.keys(queue).length === 0;
 }
 
@@ -128,7 +128,7 @@ export function reel(tableId, seat = null, accessToken = null){
   const $error = $(null);
   const $queue = $.atom({});
   const $ready = $.map(isReady, $queue);
-  const $settled = $.map(isSettled, $queue);
+  const $working = $.map(isWorking, $queue);
 
   function spectator(){
     const {seat} = _.deref(self) || {};
@@ -160,10 +160,10 @@ export function reel(tableId, seat = null, accessToken = null){
     const {at} = cursor;
     return _.maybe(at, at => undoThru(undoables, at));
   }, $timeline);
-  const $base = $.pipe($.map(function(table, error, seated, seats, up, undoable, scratch, make, ready, settled, act, timeline){
+  const $base = $.pipe($.map(function(table, error, seated, seats, up, undoable, scratch, make, ready, working, act, timeline){
     const perspective = r.perspective(timeline);
-    return {...timeline, perspective, table, error, seated, seats, up, undoable, scratch, make, ready, settled, act};
-  }, $table, $error, $seated, $seats, $up, $undoable, $scratch, $.pipe($make, _.compact()), $ready, $settled, $act, $timeline), _.filter(_.and(_.get(_, "make"), _.get(_, "table"))));
+    return {...timeline, perspective, table, error, seated, seats, up, undoable, scratch, make, ready, working, act};
+  }, $table, $error, $seated, $seats, $up, $undoable, $scratch, $.pipe($make, _.compact()), $ready, $working, $act, $timeline), _.filter(_.and(_.get(_, "make"), _.get(_, "table"))));
   const $timer = timer(1000, Date.now);
 
   seat === null || $.sub($seats, _.filter(_.isSome), _.once(function(seats){
@@ -238,18 +238,18 @@ export function reel(tableId, seat = null, accessToken = null){
 
   const $state = $.pipe($diff, _.comp(_.filter(function({diff}){ //regulate visibility of internal change events to the outside world
     return _.reduce(function(memo, {path: [prop]}){
-      const suppress = _.includes(["perspectives", "touches", "undoables", "cursor", "table", "undoable", "settled"], prop);
+      const suppress = _.includes(["perspectives", "touches", "undoables", "cursor", "table", "undoable", "working"], prop);
       return memo || !suppress;
     }, false, diff);
   }), _.map(function({hist: [curr]}){
     return curr;
   })));
 
-  const self = new Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $settled, $timer, $scratch, $wip, $queue, wb, accessToken);
+  const self = new Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $working, $timer, $scratch, $wip, $queue, wb, accessToken);
   return self;
 }
 
-function Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $settled, $timer, $scratch, $wip, $queue, wb, accessToken){
+function Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $working, $timer, $scratch, $wip, $queue, wb, accessToken){
   this.$timeline = $timeline;
   this.$table = $table;
   this.$error = $error;
@@ -266,7 +266,7 @@ function Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $sea
   this.$updated = $updated;
   this.$timer = $timer;
   this.$scratch = $scratch;
-  this.$settled = $settled;
+  this.$working = $working;
   this.$wip = $wip;
   this.$queue = $queue;
   this.workboard = wb;
@@ -284,7 +284,7 @@ function on(self, key, callback){
 function dispatch(self, command){
   const {type, details} = command;
 
-  //whenever the user acts, the timer stops
+  //whenever direct action is taken, the timer stops
   self.$timer.stop();
 
   switch (type) {

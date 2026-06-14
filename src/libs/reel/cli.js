@@ -90,9 +90,10 @@ await new Command()
     const $ready = $.chan($reel, "ready");
     const $updated = $.chan($reel, "updated");
     const $queue = $.chan($reel, "queue");
+    const $timer = $.chan($reel, "timer");
     const exec = $.dispatch($reel, _);
 
-    reg({$reel, $wip, $updated, $queue, $ready}, function(key, value){
+    reg({$reel, $wip, $updated, $queue, $ready, $timer}, function(key, value){
       logs(key, elide(key, value));
     });
 

@@ -52,31 +52,37 @@ function ticker(interval, f = Date.now) {
 export function Timer(interval, f) {
   this.interval = interval;
   this.f = f;
-  this.$emitter = $.subject(); // Persistent subject for subscribers
+  this.$state = $.atom({ticks: 0, starts: 0, stops: 0, status: "stopped"});
   this.unsub = null; // To hold the ticker's unsub function
 }
 
 Timer.prototype.start = function() {
-  console.log({timer: "started"})
   if (this.unsub === null) { // Only start if stopped
+    const $state = this.$state;
     const $ticker = ticker(this.interval, this.f);
-    this.unsub = $.sub($ticker, (tick) => $.pub(this.$emitter, tick));
+    this.unsub = $.sub($ticker, () => $.swap($state, _.update(_, "ticks", _.inc)));
+    $.swap(this.$state, _.pipe(_.assoc(_, "status", "started"), _.update(_, "starts", _.inc)));
   }
 };
 
 Timer.prototype.stop = function() {
-  console.log({timer: "stopped"})
   if (this.unsub !== null) { // Only stop if running
     this.unsub();
     this.unsub = null;
+    $.swap(this.$state, _.pipe(_.assoc(_, "status", "stopped"), _.update(_, "stops", _.inc)));
   }
 };
 
+function deref(self){
+  return _.deref(self.$state);
+}
+
 function sub(self, observer) {
-  return $.sub(self.$emitter, observer);
+  return $.sub(self.$state, observer);
 }
 
 $.doto(Timer,
+  _.implement(_.IDeref, { deref }),
   _.implement($.ISubscribe, { sub }));
 
 export function timer(interval, f = Date.now){

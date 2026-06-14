@@ -337,7 +337,8 @@ function dispatch(self, command){
     }
 
     default: {
-      const {id, seat} = _.deref($state);
+      throw new Error(command)
+      const {id, seat} = _.deref(self.$state);
       _.fmap(wb.request("move", id, seat, [command], self.accessToken), function({data, error, status}) {
         console.log({type, data, error, status});
       });

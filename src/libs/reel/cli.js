@@ -2,10 +2,8 @@
 
 import _ from "../atomic_/core.js";
 import $ from "../atomic_/shell.js";
-import * as sh from "./shell.js";
 import { reel } from "./shell.js";
 import { reg } from "../cmd.js";
-import { timer } from "./timer.js";
 import { Command } from "@cliffy/command";
 import { keypress } from "@cliffy/keypress";
 import { Input } from "@cliffy/prompt";
@@ -73,14 +71,12 @@ async function tuiMode(exec) {
 }
 
 function enqueues(exec){
-  return function queue(cmd){
+  return function queue(command){
     return function(){
-      return exec(cmd);
+      return exec(command);
     }
   }
-
 }
-
 
 await new Command()
   .name("reel")
@@ -93,8 +89,7 @@ await new Command()
   .option("--at <eventId:string>", "Navigate to moment in timeline")
   .option("--elide <prop:string>", "Property to elide in logged object", { collect: true })
   .option("--not <chan:string>", "Channel not elided", { collect: true })
-  .action(async function (opts, tableId){
-    const $executor = timer(3000);
+  .action(function (opts, tableId){
     const elide = elides(function(key, value){
       return _.includes(opts?.not, key) || _.isArray(value);
     },  _.mapa(_.split(_, "."), opts.elide));
@@ -107,39 +102,33 @@ await new Command()
     const $timer = $.chan($reel, "timer");
     const exec = $.dispatch($reel, _);
     const queue = enqueues(exec);
-    const commands = _.mapa(queue, opts?.command ?? []);
+    const commands = _.mapa(function(type){
+      return queue({type});
+    }, opts?.command ?? []);
 
     if (opts.at) {
       const touch = opts.at;
       commands.unshift(queue({type: "at", details: {touch}}));
     }
 
+    commands.push(async function(){
+      if (opts.interactive) {
+        commands.unshift(() => clearInterval(iv));
+        console.log("Press keys to drive...q to quit.");
+        await tuiMode(exec);
+      }
+      Deno.exit(0);
+    });
+
     reg({$reel, $wip, $updated, $queue, $ready, $timer}, function(key, value){
       logs(key, elide(key, value));
     });
 
-    $.sub($reel, _.noop); //one subscriber minimum causes life.
-
     const iv = setInterval(function(){
-      const working = _.deref($working);
-      if (working) return;
-      clearInterval(iv);
-      const unsub = $.sub($executor, async function(){
-        if (!_.deref($working) && _.seq(commands)) {
-          const run = commands.shift();
-          run();
-        }
-      });
-      async function lastly(){
-        if (opts.interactive) {
-          commands.unshift(unsub);
-          console.log("Press keys to drive...q to quit.")
-          await tuiMode(exec);
-        }
-        Deno.exit(0);
+      if (!_.deref($working) && _.seq(commands)) {
+        const run = commands.shift();
+        run();
       }
-      commands.unshift(lastly);
-      $executor.start();
     }, 2000);
   })
   .parse(Deno.args);

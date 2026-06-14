@@ -135,7 +135,15 @@ export function reel(tableId, seat = null, accessToken = null){
     return seat == null || self.accessToken == null;
   }
 
-  const wb = new Workboard({spectator, $queue, $error, $ready});
+  function ready(){
+    return _.deref($ready);
+  }
+
+  function reject(error){
+    $.reset($error, error);
+  }
+
+  const wb = new Workboard(spectator, ready, reject, $queue);
   wb.register("getTouches", getTouches);
   wb.register("getPerspective", getPerspective);
   wb.register("move", move, true);

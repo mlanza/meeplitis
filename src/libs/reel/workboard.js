@@ -2,11 +2,11 @@ import _ from "../atomic_/core.js";
 import $ from "../atomic_/shell.js";
 
 export class Workboard {
-  constructor({spectator, $queue, $error, $ready} = {}) {
+  constructor(spectator, ready, reject, $queue) {
     this.spectator = spectator;
+    this.ready = ready;
+    this.reject = reject;
     this.$queue = $queue;
-    this.$error = $error;
-    this.$ready = $ready;
     this._operations = {};
     this._nextTicket = 0;
   }
@@ -26,7 +26,7 @@ export class Workboard {
       return Promise.reject(new Error("Spectators cannot participate"));
     }
 
-    const ready = entry.blocking ? _.deref(this.$ready) : true;
+    const ready = entry.blocking ? this.ready() : true;
     if (entry.blocking && !ready) {
       return Promise.reject(new Error(`Workboard is not ready to run "${key}"`));
     }
@@ -65,7 +65,6 @@ export class Workboard {
   }
 
   _recordError(error) {
-    if (!this.$error) return;
-    $.reset(this.$error, error);
+    this.reject(error);
   }
 }

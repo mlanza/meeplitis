@@ -78,6 +78,7 @@ await new Command()
   //TODO .option("--command <command:string>", "Command string")
   .option("--seat <seat:number>", "Seat number (integer)")
   .option("--token <accessToken:string>", "Access token")
+  .option("-i, --interactive", "Interact via the keyboard")
   .option("--at <eventId:string>", "Navigate to moment in timeline")
   .option("--elide <prop:string>", "Property to elide in logged object", { collect: true })
   .option("--not <chan:string>", "Channel not elided", { collect: true })
@@ -102,6 +103,8 @@ await new Command()
       exec({type: "at", details: {touch}});
     }));
 
-    await tuiMode(exec);
+    if (opts.interactive) {
+      await tuiMode(exec);
+    }
   })
   .parse(Deno.args);

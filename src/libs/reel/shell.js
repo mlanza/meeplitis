@@ -2,9 +2,9 @@ import _ from "../atomic_/core.js";
 import $ from "../atomic_/shell.js";
 import * as r from "./core.js";
 import supabase from "../supabase.js";
-import {timer} from "./timer.js";
+import { timer } from "./timer.js";
 import * as d from  "./diff.js";
-import {Workboard} from "./workboard.js";
+import { Workboard } from "./workboard.js";
 
 export function getfn(name, params, accessToken){
   const apikey = supabase.supabaseKey;
@@ -62,7 +62,7 @@ function getLastMove(_table_id, _event_id, _seat_id){ //TODO send access token
 }
 
 function isWorking(queue){
-  return queue == null || Object.keys(queue).length === 0;
+  return Object.keys(queue || {}).length > 0;
 }
 
 function isReady(queue){
@@ -172,7 +172,7 @@ export function reel(tableId, seat = null, accessToken = null){
     const perspective = r.perspective(timeline);
     return {...timeline, perspective, table, error, seated, seats, up, undoable, scratch, make, ready, working, act};
   }, $table, $error, $seated, $seats, $up, $undoable, $scratch, $.pipe($make, _.compact()), $ready, $working, $act, $timeline), _.filter(_.and(_.get(_, "make"), _.get(_, "table"))));
-  const $timer = timer(1000, Date.now);
+  const $timer = timer(1000);
 
   seat === null || $.sub($seats, _.filter(_.isSome), _.once(function(seats){
     if (!_.includes(seats, seat)) {

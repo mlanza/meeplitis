@@ -49,7 +49,7 @@ function ticker(interval, f = Date.now) {
   });
 }
 
-export function Timer(interval, f) {
+export function Timer(interval, f = Date.now) {
   this.interval = interval;
   this.f = f;
   this.$state = $.atom({ticks: 0, starts: 0, stops: 0, status: "stopped"});

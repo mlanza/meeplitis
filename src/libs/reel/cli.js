@@ -5,6 +5,7 @@ import $ from "../atomic_/shell.js";
 import * as sh from "./shell.js";
 import { reel } from "./shell.js";
 import { reg } from "../cmd.js";
+import { timer } from "./timer.js";
 import { Command } from "@cliffy/command";
 import { keypress } from "@cliffy/keypress";
 import { Input } from "@cliffy/prompt";
@@ -75,20 +76,23 @@ await new Command()
   .name("reel")
   .description("Navigate and append to board game timeline")
   .arguments("<table:string>")
-  //TODO .option("--command <command:string>", "Command string")
   .option("--seat <seat:number>", "Seat number (integer)")
   .option("--token <accessToken:string>", "Access token")
   .option("-i, --interactive", "Interact via the keyboard")
+  .option("-c, --command <command:string>", "Keypress to invoke", { collect: true })
   .option("--at <eventId:string>", "Navigate to moment in timeline")
   .option("--elide <prop:string>", "Property to elide in logged object", { collect: true })
   .option("--not <chan:string>", "Channel not elided", { collect: true })
   .action(async function (opts, tableId){
+    const $executor = timer(3000);
+    const commands = _.clone(opts.command);
     const elide = elides(function(key, value){
       return _.includes(opts?.not, key) || _.isArray(value);
     },  _.mapa(_.split(_, "."), opts.elide));
     const $reel = reel(tableId, opts.seat ?? null, opts.token ?? null);
     const $wip = $.chan($reel, "wip");
     const $ready = $.chan($reel, "ready");
+    const $working = $.chan($reel, "working");
     const $updated = $.chan($reel, "updated");
     const $queue = $.chan($reel, "queue");
     const $timer = $.chan($reel, "timer");
@@ -98,13 +102,32 @@ await new Command()
       logs(key, elide(key, value));
     });
 
+    const iv = setInterval(function(){
+      const working = _.deref($working);
+      if (working) return;
+      clearInterval(iv);
+      const unsub = $.sub($executor, async function(){
+        const working = _.deref($working);
+        console.log({working, commands});
+        if (working) return;
+        if (_.seq(commands)) {
+          const type = commands.shift();
+          exec({type});
+        } else if (opts.interactive) {
+          console.log(hr)
+          console.log("You may interact now.");
+          unsub();
+          await tuiMode(exec);
+        } else {
+          Deno.exit(0);
+        }
+      });
+      $executor.start();
+    }, 2000)
+
     opts.at && $.sub($reel, _.filter(_.get(_, "touches")), _.once(function(){
       const touch = opts.at;
       exec({type: "at", details: {touch}});
     }));
-
-    if (opts.interactive) {
-      await tuiMode(exec);
-    }
   })
   .parse(Deno.args);

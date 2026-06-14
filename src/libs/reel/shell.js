@@ -125,7 +125,7 @@ export function reel(tableId, seat = null, accessToken = null){
     return path(self);
   });
   const $make = $.atom(null);
-  const $error = $(null);
+  const $error = $.atom(null);
   const $queue = $.atom({});
   const $ready = $.map(isReady, $queue);
   const $working = $.map(isWorking, $queue);

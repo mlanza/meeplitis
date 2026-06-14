@@ -102,9 +102,7 @@ await new Command()
     const $timer = $.chan($reel, "timer");
     const exec = $.dispatch($reel, _);
     const queue = enqueues(exec);
-    const commands = _.mapa(function(type){
-      return queue({type});
-    }, opts?.command ?? []);
+    const commands = _.mapa(type => queue({type}), opts?.command ?? []);
 
     if (opts.at) {
       const touch = opts.at;

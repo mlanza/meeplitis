@@ -72,6 +72,16 @@ async function tuiMode(exec) {
   }
 }
 
+function enqueues(exec){
+  return function queue(cmd){
+    return function(){
+      return exec(cmd);
+    }
+  }
+
+}
+
+
 await new Command()
   .name("reel")
   .description("Navigate and append to board game timeline")
@@ -85,7 +95,6 @@ await new Command()
   .option("--not <chan:string>", "Channel not elided", { collect: true })
   .action(async function (opts, tableId){
     const $executor = timer(3000);
-    const commands = _.clone(opts.command);
     const elide = elides(function(key, value){
       return _.includes(opts?.not, key) || _.isArray(value);
     },  _.mapa(_.split(_, "."), opts.elide));
@@ -97,37 +106,40 @@ await new Command()
     const $queue = $.chan($reel, "queue");
     const $timer = $.chan($reel, "timer");
     const exec = $.dispatch($reel, _);
+    const queue = enqueues(exec);
+    const commands = _.mapa(queue, opts?.command ?? []);
+
+    if (opts.at) {
+      const touch = opts.at;
+      commands.unshift(queue({type: "at", details: {touch}}));
+    }
 
     reg({$reel, $wip, $updated, $queue, $ready, $timer}, function(key, value){
       logs(key, elide(key, value));
     });
+
+    $.sub($reel, _.noop); //one subscriber minimum causes life.
 
     const iv = setInterval(function(){
       const working = _.deref($working);
       if (working) return;
       clearInterval(iv);
       const unsub = $.sub($executor, async function(){
-        const working = _.deref($working);
-        console.log({working, commands});
-        if (working) return;
-        if (_.seq(commands)) {
-          const type = commands.shift();
-          exec({type});
-        } else if (opts.interactive) {
-          console.log(hr)
-          console.log("You may interact now.");
-          unsub();
-          await tuiMode(exec);
-        } else {
-          Deno.exit(0);
+        if (!_.deref($working) && _.seq(commands)) {
+          const run = commands.shift();
+          run();
         }
       });
+      async function lastly(){
+        if (opts.interactive) {
+          commands.unshift(unsub);
+          console.log("Press keys to drive...q to quit.")
+          await tuiMode(exec);
+        }
+        Deno.exit(0);
+      }
+      commands.unshift(lastly);
       $executor.start();
-    }, 2000)
-
-    opts.at && $.sub($reel, _.filter(_.get(_, "touches")), _.once(function(){
-      const touch = opts.at;
-      exec({type: "at", details: {touch}});
-    }));
+    }, 2000);
   })
   .parse(Deno.args);

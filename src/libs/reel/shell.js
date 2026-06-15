@@ -171,7 +171,7 @@ export function reel(tableId, seat = null, accessToken = null){
   const $base = $.pipe($.map(function(table, error, seated, seats, up, undoable, scratch, make, ready, act, timeline){
     const perspective = r.perspective(timeline);
     return {...timeline, perspective, table, error, seated, seats, up, undoable, scratch, make, ready, act};
-  }, $table, $error, $seated, $seats, $up, $undoable, $scratch, $.pipe($make, _.compact()), $ready, $act, $timeline), _.filter(_.and(_.get(_, "make"), _.get(_, "table"))));
+  }, $table, $error, $seated, $seats, $up, $undoable, $scratch, $.pipe($make, _.compact()), $ready, $act, $timeline), _.filter(_.and(_.getIn(_, ["cursor", "at"]), _.get(_, "make"), _.get(_, "table"))));
   const $timer = timer(1000);
 
   seat === null || $.sub($seats, _.filter(_.isSome), _.once(function(seats){
@@ -251,7 +251,7 @@ export function reel(tableId, seat = null, accessToken = null){
     }, false, diff);
   }), _.map(function({hist: [curr]}){
     return curr;
-  }), _.filter(_.get(_, "perspective"))));
+  })));
 
   const self = new Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $working, $timer, $scratch, $wip, $queue, wb, accessToken);
   return self;

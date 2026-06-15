@@ -118,7 +118,7 @@ await new Command()
       Deno.exit(0);
     });
 
-    reg({$reel, $wip, $updated, $queue, $ready, $timer}, function(key, value){
+    reg({$reel, $wip, $updated, $queue, $ready, $working, $timer}, function(key, value){
       logs(key, elide(key, value));
     });
 

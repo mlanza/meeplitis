@@ -84,6 +84,7 @@ await new Command()
   .arguments("<table:string>")
   .option("--seat <seat:number>", "Seat number (integer)")
   .option("--token <accessToken:string>", "Access token")
+  .option("--json", "Format as JSON")
   .option("-i, --interactive", "Interact via the keyboard")
   .option("-c, --command <command:string>", "Keypress to invoke", { collect: true })
   .option("--at <eventId:string>", "Navigate to moment in timeline")
@@ -93,6 +94,9 @@ await new Command()
     const elide = elides(function(key, value){
       return _.includes(opts?.not, key) || _.isArray(value);
     },  _.mapa(_.split(_, "."), opts.elide));
+    const fmt = opts.json ? _.pipe(_.assoc(null, _, _), JSON.stringify, console.log) : function(key, value){
+      logs(key, elide(key, value));
+    };
     const $reel = reel(tableId, opts.seat ?? null, opts.token ?? null);
     const $wip = $.chan($reel, "wip");
     const $ready = $.chan($reel, "ready");
@@ -112,15 +116,12 @@ await new Command()
     commands.push(async function(){
       if (opts.interactive) {
         commands.unshift(() => clearInterval(iv));
-        console.log("Press keys to drive...q to quit.");
         await tuiMode(exec);
       }
       Deno.exit(0);
     });
 
-    reg({$reel, $wip, $updated, $queue, $ready, $working, $timer}, function(key, value){
-      logs(key, elide(key, value));
-    });
+    reg({$reel, $wip, $updated, $queue, $ready, $working, $timer}, fmt);
 
     const iv = setInterval(function(){
       if (!_.deref($working) && _.seq(commands)) {

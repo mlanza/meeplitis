@@ -127,6 +127,6 @@ await new Command()
         const run = commands.shift();
         run();
       }
-    }, 2000);
+    }, 1000);
   })
   .parse(Deno.args);

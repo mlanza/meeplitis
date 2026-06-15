@@ -29,7 +29,7 @@ function elides3(omit, paths, f){
 }
 
 function elides2(omit, props){
-  return elides3(omit, props, value => _.isObject(value) ?
+  return elides3(omit, props, value => value == null ? value : _.isObject(value) ?
     `<${_.count(value)} entries>` :
     `<object>`);
 }

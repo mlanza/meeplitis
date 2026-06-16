@@ -332,18 +332,17 @@ function dispatch(self, command){
       self.$timer.start();
       break;
 
-    case "do-over": { // TODO test
+    case "do-over": { // TODO fix
       const {id: _table_id, undoable: _event_id, cursor: {at}} = _.deref(self);
       if (!_event_id) return;
-      console.log("do-over", {at, _table_id, _event_id});
       _.fmap(self.workboard.request("do-over", _table_id, _event_id), function({data, error, status}) {
         console.log({type, data, error, status});
+        //TODO $.swap(self.$state, _.update(_, "history", _.pipe(_.take(at -1, _), _.toArray)));
       });
-      //TODO $.swap(self.$state, _.update(_, "history", _.pipe(_.take(at -1, _), _.toArray)));
       break;
     }
 
-    default: {
+    default: { // TODO fix
       const {id, seat} = _.deref(self);
       _.fmap(self.workboard.request("move", id, seat, [command], self.accessToken), function({data, error, status}) {
         console.log({type, data, error, status});

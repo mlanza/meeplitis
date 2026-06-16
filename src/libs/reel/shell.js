@@ -236,28 +236,35 @@ export function reel(tableId, seat = null, accessToken = null){
   });
 
   const $hist = $.hist($base);
-  const $diff = $.map(function(hist){
-    const [curr, prior] = hist ?? [];
-    const diff = d.diff(curr, prior);
+  const $diff = $.map(function(h){
+    const hist = h ?? [];
+    const diff = d.diff(hist[0], hist[1]);
     return {diff, hist};
   }, $hist);
 
   const $updated = $.map(_.pipe(_.get(_, "diff"), _.mapa(_.get(_, "path"), _)), $diff);
 
-  const $state = $.pipe($diff, _.comp(_.filter(function({diff}){ //regulate visibility of internal change events to the outside world
-    return _.reduce(function(memo, {path: [prop]}){
-      const suppress = _.includes(["perspectives", "touches", "undoables", "cursor", "table", "undoable", "working"], prop);
-      return memo || !suppress;
-    }, false, diff);
-  }), _.map(function({hist: [curr]}){
-    return curr;
-  })));
+  const $state = $.pipe($diff, _.comp(
+    _.filter(function({hist: [curr], diff}){ //regulate visibility of internal change events to the outside world
+      return curr && _.reduce(function(memo, {path: [prop]}){
+        const suppress = _.includes(["perspectives", "touches", "undoables", "cursor", "table", "undoable", "working"], prop);
+        return memo || !suppress;
+      }, false, diff);
+    }),
+    _.map(function({hist: [curr]}){
+      return curr;
+    })));
 
   const self = new Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $working, $timer, $scratch, $wip, $queue, wb, accessToken);
+
+  $.sub($state, function(state){
+    self.state = state; //keep the latest
+  });
+
   return self;
 }
 
-function Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $working, $timer, $scratch, $wip, $queue, wb, accessToken){
+function Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $working, $timer, $scratch, $wip, $queue, workboard, accessToken){
   this.$timeline = $timeline;
   this.$table = $table;
   this.$error = $error;
@@ -277,7 +284,7 @@ function Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $sea
   this.$working = $working;
   this.$wip = $wip;
   this.$queue = $queue;
-  this.workboard = wb;
+  this.workboard = workboard;
   this.accessToken = accessToken;
 }
 
@@ -326,10 +333,10 @@ function dispatch(self, command){
       break;
 
     case "do-over": { // TODO test
-      const {id: _table_id, undoable: _event_id, cursor: {at}} = _.deref($state);
+      const {id: _table_id, undoable: _event_id, cursor: {at}} = _.deref(self);
       if (!_event_id) return;
       console.log("do-over", {at, _table_id, _event_id});
-      _.fmap(wb.request("undoMove", _table_id, _event_id), function({data, error, status}) {
+      _.fmap(self.workboard.request("undoMove", _table_id, _event_id), function({data, error, status}) {
         console.log({type, data, error, status});
       });
       //TODO $.swap(self.$state, _.update(_, "history", _.pipe(_.take(at -1, _), _.toArray)));
@@ -337,9 +344,8 @@ function dispatch(self, command){
     }
 
     default: {
-      throw new Error(command)
-      const {id, seat} = _.deref(self.$state);
-      _.fmap(wb.request("move", id, seat, [command], self.accessToken), function({data, error, status}) {
+      const {id, seat} = _.deref(self);
+      _.fmap(self.workboard.request("move", id, seat, [command], self.accessToken), function({data, error, status}) {
         console.log({type, data, error, status});
       });
       break;
@@ -352,7 +358,7 @@ function sub(self, callback){
 }
 
 function deref(self){
-  return _.deref(self.$state);
+  return self.state;
 }
 
 $.doto(Reel,

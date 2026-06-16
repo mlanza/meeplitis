@@ -357,7 +357,7 @@ function fmap(self, f){
 }
 
 function noDetails(command){
-  const {details} = command;
+  const details = _.get(command, "details", {});
   return _.eq(details, {}) ? _.dissoc(command, "details") : command;
 }
 

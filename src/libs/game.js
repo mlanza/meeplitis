@@ -188,7 +188,7 @@ export function effects({ reel: [curr, prior], seen, included }){
   if (curr === prior) {
     return _.chain(perspective(curr, seen), including(included, curr, seen));
   } else {
-    return _.chain(curr, _.juxtVals({added, up}));
+    return _.chain(curr, _.juxto({added, up}));
   }
 }
 

@@ -1,0 +1,6 @@
+{
+  "imports": {
+    "https://meeplitis.com/libs/game.js": "../../../src/libs/game.js",
+    "https://meeplitis.com/games/backgammon/table/uJl/core.js": "../../../src/games/backgammon/table/uJl/core.js"
+  }
+}

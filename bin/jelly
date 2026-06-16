@@ -12,6 +12,7 @@ await new Command()
   .option("--event <event:string>", "Event ID")
   .option("--commands <commands:string>", "Commands string")
   .option("--seat <seat:number>", "Seat number (integer)")
+  .option("--remote", "Use remote code") // 👈 boolean flag
   .option("--legacy", "Enable legacy mode") // 👈 boolean flag
   .action(function (opts, table){
     const {command, query} = _.chain({
@@ -21,7 +22,8 @@ await new Command()
     }, _.compact, _.merge(_, {_seat: opts.seat}), typify);
     const details = query?.details ?? command?.details;
     const legacy = !!opts.legacy;
-    _.chain({legacy, query, command, details},
+    const remote = !!opts.remote;
+    _.chain({legacy, remote, query, command, details},
       _.compact,
       $.tee(logging("args")),
       main);
@@ -49,11 +51,13 @@ function logging(label){
   return _.opt(annotate(label), log);
 }
 
-async function main({legacy, query, command, details}){
+async function main({legacy, remote, query, command, details}){
   const hydrate = await supabase.rpc(legacy ? 'hydrate_old' : 'hydrate', details);
+  const url = hydrate.data ? `${ remote ? "https://meeplitis.com" : "../src" }/games/${hydrate.data.slug}/table/${hydrate.data.release}/core.js` : null;
 
-  const {make} = hydrate.data ? await import(`../src/games/${hydrate.data.slug}/table/${hydrate.data.release}/core.js`) : {};
+  const {make} = url ? await import(url) : {};
 
+  console.log({url, make});
   const $data = $.atom(hydrate.data),
         $error = $.atom(hydrate.error),
         $simulate = $.map(g.simulate(make), $data),

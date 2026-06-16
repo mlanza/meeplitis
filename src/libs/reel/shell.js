@@ -208,7 +208,7 @@ export function reel(tableId, seat = null, accessToken = null){
     const {cursor} = _.deref($timeline);
     const {pos, max} = cursor || {};
     const present = isPresent(pos, max);
-    _.fmap(wb.request("getTouches", table.id, accessToken),
+    _.fmap(wb.request("getTouches", tableId, accessToken),
       _.pipe(r.addTouches, $.swap($timeline, _)),
       present ? () => $timer.start() : _.noop); //if already in the present when the game is touched, catch things up.
   });
@@ -223,7 +223,7 @@ export function reel(tableId, seat = null, accessToken = null){
     if (table && _.seq(ats) && make && _.seq(seated)) {
       const seatId = _.getIn(seated, [seat, "seat_id"]);
       $.each(function(at){
-        _.fmap(wb.request("getPerspective", table.id, at, seat, seatId, accessToken), function(perspective){
+        _.fmap(wb.request("getPerspective", tableId, at, seat, seatId, accessToken), function(perspective){
           const {up, may, event, state} = perspective;
           const {seat} = event;
           const actionable = _.includes(up, player) || _.includes(may, player);

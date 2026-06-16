@@ -147,7 +147,7 @@ export function reel(tableId, seat = null, accessToken = null){
   wb.register("getTouches", getTouches);
   wb.register("getPerspective", getPerspective);
   wb.register("move", move, true);
-  wb.register("undo", undoMove, true);
+  wb.register("do-over", undoMove, true);
 
   const $act = $.map(function(timeline, table, ready){
     if (!table || !ready) return false;
@@ -336,7 +336,7 @@ function dispatch(self, command){
       const {id: _table_id, undoable: _event_id, cursor: {at}} = _.deref(self);
       if (!_event_id) return;
       console.log("do-over", {at, _table_id, _event_id});
-      _.fmap(self.workboard.request("undoMove", _table_id, _event_id), function({data, error, status}) {
+      _.fmap(self.workboard.request("do-over", _table_id, _event_id), function({data, error, status}) {
         console.log({type, data, error, status});
       });
       //TODO $.swap(self.$state, _.update(_, "history", _.pipe(_.take(at -1, _), _.toArray)));

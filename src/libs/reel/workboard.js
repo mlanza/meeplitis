@@ -57,6 +57,8 @@ export class Workboard {
   }
 
   _addTicket(id, ticket) {
+    const {key, args, blocking, startedAt} = ticket;
+    console.log({id, key, args, blocking, startedAt});
     $.swap(this.$queue, _.assoc(_, id, ticket));
   }
 

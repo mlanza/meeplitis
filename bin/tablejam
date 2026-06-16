@@ -99,7 +99,7 @@ function resolveLens(withList, withoutList) {
 
 function init(make, seats, config, seen, evented, hash, lens, lookback, lookahead){
   const jnl = _.reduce(function(memo, event){
-    return _.fmap(memo, g.fold(_, event));
+    return _.fmap(memo, _.actuate(_, event));
   }, _.journal(make(seats, config)), evented);
   const init = {jnl, seen, lens, tuckedLens: ["state"], lookback, lookahead};
   return {...init, init};
@@ -109,7 +109,7 @@ function play(seat) {
   return function(...commands){
     return function(memo){
       return _.update(memo, "jnl", _.reduce(function(memo, command){
-        return _.fmap(memo, g.execute(_, command, seat));
+        return _.fmap(memo, _.act(_, command, seat));
       }, _, commands));
     }
   }
@@ -137,7 +137,7 @@ function to(id){
   //TODO
   return _.update(_, "jnl", function(jnl){
     const idx = _.detectIndex(function(game){
-      const event = _.chain(game, g.events, _.last);
+      const event = _.chain(game, _.events, _.last);
       return event.id === id;
     }, jnl.history);
     return _.nth(jnl, idx);
@@ -145,7 +145,7 @@ function to(id){
 }
 
 function chooseEvent(game){
-  const events = g.events(game);
+  const events = _.events(game);
   return Select.prompt({
     message: "Choose an event",
     options: _.toArray(_.concat([{name: "None", value: -1}], _.mapIndexed(function(i, event){
@@ -181,9 +181,9 @@ function timeline(lookback, lookahead){
   return function(jnl){
     const curr = _.deref(jnl),
           latest = jnl.history[0];
-    const history = g.events(curr);
+    const history = _.events(curr);
     const n = _.count(history);
-    const future = _.chain(latest, g.events, _.drop(n, _), _.toArray, _.take(lookahead, _), _.toArray);
+    const future = _.chain(latest, _.events, _.drop(n, _), _.toArray, _.take(lookahead, _), _.toArray);
     const past = _.chain(history, _.butlast, _.reverse, _.toArray, _.take(lookback, _), _.reverse, _.toArray);
     const present = _.last(history);
     return {past, present, future};
@@ -211,7 +211,7 @@ function looking(alt = null){
       timeline: timeline(lookback, lookahead),
       effects: effects(seen),
       perspective: perspective(seen),
-      event: _.pipe(_.deref, g.events, _.last),
+      event: _.pipe(_.deref, _.events, _.last),
       moves: _.pipe(_.deref, g.moves, _.compact, _.toArray),
       state: _.pipe(_.deref, _.deref)
     }

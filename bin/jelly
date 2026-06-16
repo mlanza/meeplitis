@@ -54,6 +54,7 @@ function logging(label){
 async function main({legacy, remote, query, command, details}){
   const hydrate = await supabase.rpc(legacy ? 'hydrate_old' : 'hydrate', details);
   const url = hydrate.data ? `${ remote ? "https://meeplitis.com" : "../src" }/games/${hydrate.data.slug}/table/${hydrate.data.release}/core.js` : null;
+  //const url = hydrate.data ? `${ remote ? "https://meeplitis.com" : "../src" }/games/${hydrate.data.slug}/table/mtl/core.js` : null;
 
   const {make} = url ? await import(url) : {};
 

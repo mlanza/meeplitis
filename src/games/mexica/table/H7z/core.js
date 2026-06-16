@@ -665,7 +665,7 @@ function contiguous(at){
   }, true, _.scan(2, at));
 }
 
-export function execute(self, command){
+export function act(self, command){
   const state = _.deref(self);
   const {type, details, seat} = command;
   const endOfRound = seat === _.count(state.seated) - 1;
@@ -694,10 +694,10 @@ export function execute(self, command){
         throw new Error("Cannot end turn while actions remain.");
       }
       return _.chain(self,
-        g.fold(_, _.assoc(command, "type", "committed")),
+        _.actuate(_, _.assoc(command, "type", "committed")),
         _.get(state, "scoring-round") && endOfRound
           ? _.pipe(
-              g.fold(_, {
+              _.actuate(_, {
                 type: "scored-grandeur",
                 details: {
                   period,
@@ -705,7 +705,7 @@ export function execute(self, command){
                   districts: scores(self)
                 }
               }),
-              period === 0 ? g.fold(_, {type: "concluded-period"}) : g.finish)
+              period === 0 ? _.actuate(_, {type: "concluded-period"}) : g.finish)
           : _.identity);
     }
     case "bank": {
@@ -718,7 +718,7 @@ export function execute(self, command){
       if (!matched) {
         throw new Error("Cannot bank actions at this time.");
       }
-      return _.chain(self, g.fold(_, {type: "banked", seat}));
+      return _.chain(self, _.actuate(_, {type: "banked", seat}));
     }
     case "move": {
       const {by, from, to} = details;
@@ -734,7 +734,7 @@ export function execute(self, command){
       if (wet(board, contents, to) && !contains([b], contents, to)) {
         throw new Error("Cannot move to water.");
       }
-      return _.chain(self, g.fold(_, _.assoc(command, "type", "moved")));
+      return _.chain(self, _.actuate(_, _.assoc(command, "type", "moved")));
     }
     case "construct-canal": {
       if (!contiguous(details.at)){
@@ -752,7 +752,7 @@ export function execute(self, command){
         throw new Error("Cannot place canals at the foot of a bridge.");
       }
       return _.chain(self,
-        g.fold(_, {type: "constructed-canal", seat, details: {at: sortSpots(details.at)}}),
+        _.actuate(_, {type: "constructed-canal", seat, details: {at: sortSpots(details.at)}}),
         function(self){
           const state = _.deref(self);
           const {canal1, canal2, contents, calpulli} = state;
@@ -761,7 +761,7 @@ export function execute(self, command){
               _.remove(dist => founded(contents, dist) || jammed(contents, dist), _),
               _.mapa(_.count, _),
               _.partial(unfoundables, _.chain(calpulli, _.concatenated, _.toArray))) : null;
-          return _.seq(removed) ? g.execute(self, {type: "remove-unfoundables", details: {removed}}) : self;
+          return _.seq(removed) ? _.act(self, {type: "remove-unfoundables", details: {removed}}) : self;
         });
     }
     case "build-temple": {
@@ -775,13 +775,13 @@ export function execute(self, command){
       if (!_.chain(state, _.getIn(_, ["seated", seat, "temples"]), _.take(period + 1, _), consolidateTemples, _.get(_, details.level), _.filter(_.isNil, _), _.count)){
         throw new Error(`Cannot build level-${details.level} temples.  Supply depleted.`);
       }
-      return _.chain(self, g.fold(_, _.assoc(command, "type", "built-temple")));
+      return _.chain(self, _.actuate(_, _.assoc(command, "type", "built-temple")));
     }
     case "construct-bridge": {
       if (!isBridgable(board, contents, details.at)) {
         throw new Error("Cannot construct bridge there.");
       }
-      return _.chain(self, g.fold(_, _.assoc(command, "type", "constructed-bridge")));
+      return _.chain(self, _.actuate(_, _.assoc(command, "type", "constructed-bridge")));
     }
     case "relocate-bridge": {
       if (hasUnconstructedBridge(bridges)) {
@@ -796,7 +796,7 @@ export function execute(self, command){
       if (contains([p], contents, details.from)){
         throw new Error("Cannot relocate occupied bridges.");
       }
-      return _.chain(self, g.fold(_, _.assoc(command, "type", "relocated-bridge")));
+      return _.chain(self, _.actuate(_, _.assoc(command, "type", "relocated-bridge")));
     }
     case "found-district": {
       if (!matched){
@@ -810,26 +810,26 @@ export function execute(self, command){
         throw new Error("Cannot place calpulli except on empty land spaces.");
       }
       const points = founds(_.toArray(pillis), seat, dist);
-      return _.chain(self, g.fold(_, {type: "founded-district", seat, details: {at: details.at, size: _.count(dist), points}}));
+      return _.chain(self, _.actuate(_, {type: "founded-district", seat, details: {at: details.at, size: _.count(dist), points}}));
     }
     case "pass": {
       if (!matched){
         throw new Error("Cannot pass once initial actions are spent.");
       }
-      return _.chain(self, g.fold(_, _.assoc(command, "type", "passed")));
+      return _.chain(self, _.actuate(_, _.assoc(command, "type", "passed")));
     }
     case "place-pilli": {
       if (!matched) {
         throw new Error("Cannot place Mexica Pilli there.");
       }
-      return _.chain(self, g.fold(_, _.assoc(command, "type", "placed-pilli")));
+      return _.chain(self, _.actuate(_, _.assoc(command, "type", "placed-pilli")));
     }
     case "propose-unfoundables": {
       //TODO ensure no `at`
       if (!_.seq(_.chain(command, _.getIn(_, ["details", "calpulli"]), _.seq))) {
         throw new Error("No removals proposed.");
       }
-      return g.fold(self, _.chain(command,
+      return _.actuate(self, _.chain(command,
         _.assoc(_, "type", "proposed-unfoundables")));
     }
     case "answer-proposal": {
@@ -838,7 +838,7 @@ export function execute(self, command){
         throw new Error("Invalid answer.");
       }
       return _.chain(self,
-        g.fold(_, _.assoc(command, "type", "answered-proposal")),
+        _.actuate(_, _.assoc(command, "type", "answered-proposal")),
         function(self){
           const state = _.deref(self);
           const proposedUnfoundables = _.get(state, "proposed-unfoundables");
@@ -848,7 +848,7 @@ export function execute(self, command){
           const unanimous = n == _.count(seated),
                 unanswered = n == 0;
           if (unanimous) {
-            return g.execute(self, {type: "remove-unfoundables", details: {removed: calpulli}});
+            return _.act(self, {type: "remove-unfoundables", details: {removed: calpulli}});
           } else if (answer == "reject" || unanswered) {
             return _.fmap(self, clearProposal);
           } else {
@@ -864,22 +864,22 @@ export function execute(self, command){
       if (invalid) {
         throw new Error(`Invalid calpulli removal.`);
       }
-      return g.fold(self, _.assoc(command, "type", "removed-unfoundables"));
+      return _.actuate(self, _.assoc(command, "type", "removed-unfoundables"));
     }
 
     case "finish": {
-      return g.fold(self, _.assoc(command, "type", "finished"));
+      return _.actuate(self, _.assoc(command, "type", "finished"));
     }
     case "deal-calpulli": {
       const calpulli = dealCalpulli(tiles);
       return _.chain(self,
-        g.fold(_, {type: "dealt-calpulli", details: {calpulli}, seat: null}));
+        _.actuate(_, {type: "dealt-calpulli", details: {calpulli}, seat: null}));
     }
     case "start": {
       return _.chain(self,
-        g.fold(_, {type: "started", seat: null}),
-        _.count(state.seated) === 2 ? g.fold(_, {type: "scattered-temples", details: scatterTemples(), seat: null}) : _.identity,
-        g.execute(_, {type: "deal-calpulli", seat: null}));
+        _.actuate(_, {type: "started", seat: null}),
+        _.count(state.seated) === 2 ? _.actuate(_, {type: "scattered-temples", details: scatterTemples(), seat: null}) : _.identity,
+        _.act(_, {type: "deal-calpulli", seat: null}));
     }
   }
 }
@@ -913,7 +913,7 @@ function removeCalpulli(removed){
 
 const clearProposal = _.dissoc(_, "proposed-unfoundables");
 
-function fold(self, event){
+function actuate(self, event){
   const state = _.deref(self);
   const {period, spent, status} = state;
   const {type, details, seat} = event;
@@ -923,7 +923,7 @@ function fold(self, event){
 
   switch (type) {
     case "started":
-      return g.fold(self, event,
+      return _.actuate(self, event,
         _.pipe(
           _.update(_, "contents", _.pipe(
             place(w, "O6"),
@@ -934,7 +934,7 @@ function fold(self, event){
 
     case "scattered-temples":
       const temples = details;
-      return g.fold(self, event,
+      return _.actuate(self, event,
         _.pipe(
           _.assoc(_, "nonplayer", {temples}),
           _.update(_, "contents", function(contents){
@@ -945,28 +945,28 @@ function fold(self, event){
           })));
 
     case "dealt-calpulli":
-      return g.fold(self, event,
+      return _.actuate(self, event,
         _.pipe(
           _.merge(_, details),
           _.assoc(_, "status", "placing-pilli"),
           _.assoc(_, "up", 0)));
 
     case "placed-pilli":
-      return g.fold(self, event,
+      return _.actuate(self, event,
         _.pipe(
           _.assocIn(_, ["seated", seat, "pilli"], details.at),
           _.update(_, "contents", place(p, details.at))));
 
     case "committed":
-      return g.fold(self, event, committed);
+      return _.actuate(self, event, committed);
 
     case "passed":
-      return g.fold(self, event,
+      return _.actuate(self, event,
         _.pipe(
           _.update(_, "spent", _.inc)));
 
     case "banked":
-      return g.fold(self, event,
+      return _.actuate(self, event,
         _.pipe(
           redeem(seat, redeemed),
           _.update(_, "spent", _.inc),
@@ -976,7 +976,7 @@ function fold(self, event){
 
     case "constructed-canal":
       const size = _.count(details.at);
-      return g.fold(self, event,
+      return _.actuate(self, event,
         _.pipe(
           redeem(seat, redeemed),
           _.update(_, "spent", _.inc),
@@ -986,24 +986,24 @@ function fold(self, event){
           })));
 
     case "proposed-unfoundables":
-      return g.fold(self, event, _.pipe(
+      return _.actuate(self, event, _.pipe(
         _.assoc(_, "proposed-unfoundables", {calpulli: details.calpulli, accepted: [event.seat]})));
 
     case "answered-proposal": {
       const {answer} = details;
       return _.chain(self,
-        g.fold(_, event, _.updateIn(_, ["proposed-unfoundables", "accepted"], answer == "accept" ? _.include(_, seat) : answer == null ? _.omit(_, seat) : _.identity)));
+        _.actuate(_, event, _.updateIn(_, ["proposed-unfoundables", "accepted"], answer == "accept" ? _.include(_, seat) : answer == null ? _.omit(_, seat) : _.identity)));
     }
 
     case "removed-unfoundables":
-      return g.fold(self, event,
+      return _.actuate(self, event,
         _.pipe(
           removeCalpulli(details.removed),
           markScoringRound,
           clearProposal));
 
     case "constructed-bridge":
-      return g.fold(self, event,
+      return _.actuate(self, event,
         _.pipe(
           redeem(seat, redeemed),
           _.update(_, "spent", _.inc),
@@ -1011,7 +1011,7 @@ function fold(self, event){
           _.update(_, "contents", place(b, details.at))));
 
     case "relocated-bridge":
-      return g.fold(self, event,
+      return _.actuate(self, event,
         _.pipe(
           redeem(seat, redeemed),
           _.update(_, "spent", _.inc),
@@ -1019,7 +1019,7 @@ function fold(self, event){
           _.update(_, "contents", _.pipe(displace(b, details.from), place(b, details.to)))));
 
     case "built-temple":
-      return g.fold(self, event,
+      return _.actuate(self, event,
         _.pipe(
           redeem(seat, redeemed),
           _.update(_, "spent", _.add(_, details.level)),
@@ -1033,7 +1033,7 @@ function fold(self, event){
           markScoringRound));
 
     case "moved":
-      return g.fold(self, event,
+      return _.actuate(self, event,
         _.pipe(
           redeem(seat, redeemed),
           _.update(_, "spent", _.add(_, cost)),
@@ -1041,7 +1041,7 @@ function fold(self, event){
           _.update(_, "contents", _.pipe(displace(p, pilli), place(p, details.to)))));
 
     case "scored-grandeur":
-      return g.fold(self, event,
+      return _.actuate(self, event,
         _.update(_, ["seated"], _.pipe(_.mapIndexed(function(seat, seated){
           const {districts, palace} = event.details;
           const points = _.sum(_.cons(_.nth(palace, seat), _.map(function({at, points}){
@@ -1051,13 +1051,13 @@ function fold(self, event){
         }, _), _.toArray)));
 
     case "concluded-period":
-      return g.fold(self, event,
+      return _.actuate(self, event,
         _.pipe(
           _.update(_, "period", _.inc),
           _.assoc(_, "scoring-round", false)));
 
     case "founded-district":
-      return g.fold(self, event,
+      return _.actuate(self, event,
         _.pipe(
           _.updateIn(_, ["calpulli", period], function(calpulli){
             const idx = _.first(_.keepIndexed(function(idx, marker){
@@ -1074,10 +1074,10 @@ function fold(self, event){
           markScoringRound));
 
     case "finished":
-      return g.fold(self, event, _.pipe(_.dissoc(_, "up"), _.assoc(_, "status", "finished")));
+      return _.actuate(self, event, _.pipe(_.dissoc(_, "up"), _.assoc(_, "status", "finished")));
 
     default:
-      return g.fold(self, event, _.merge(_, details)); //plain events
+      return _.actuate(self, event, _.merge(_, details)); //plain events
 
   }
 }
@@ -1291,7 +1291,7 @@ function perspective(self, seen, reality){
   return reality; //no hidden info.
 }
 
-function undoable(self, {type}){
+function undone(self, {type}){
   if (_.includes(["concluded-period", "scored-grandeur", "removed-unfoundables"], type)) {
     return null;
   }
@@ -1312,4 +1312,5 @@ _.doto(Mexica,
   _.implement(_.ICompactible, {compact}),
   _.implement(_.IAppendable, {append}),
   _.implement(_.IFunctor, {fmap}),
-  _.implement(g.IGame, {perspective, status, up, may, moves, undoable, metrics, comparator, textualizer, execute, fold}));
+  _.implement(_.IActor, {act, actuate, undone}),
+  _.implement(g.IGame, {perspective, status, up, may, moves, metrics, comparator, textualizer}));

@@ -344,6 +344,8 @@ function dispatch(self, command){
 
     default: { // TODO fix
       const {id, seat} = _.deref(self);
+      //const cmd = {type: "commit", seat: 0, details: null};
+      //console.log({command, cmd})
       _.fmap(self.workboard.request("move", id, seat, [command], self.accessToken), function({data, error, status}) {
         console.log({type, data, error, status});
       });

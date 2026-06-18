@@ -420,7 +420,7 @@ export function act(self, command) {
   const cmd = _.chain(command, _.compact, _.dissoc(_, "id"), _.dissocIn(_, ["details", "dice"]), noDetails);
 
   if (command.type !== "start" && !_.detect(_.eq(_, cmd), moves)) {
-    throw new Error(`Invalid command: ${JSON.stringify(command)}`);
+    throw new Error(`Invalid command ${JSON.stringify(command)} not present in ${JSON.stringify(_.toArray(moves))}.`);
   }
 
   switch (command.type) {

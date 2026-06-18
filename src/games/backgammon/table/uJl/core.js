@@ -419,8 +419,10 @@ export function act(self, command) {
   const moves = g.moves(self, {seat, type});
   const cmd = _.chain(command, _.compact, _.dissoc(_, "id"), _.dissocIn(_, ["details", "dice"]), noDetails);
 
+console.log({moves: _.toArray(moves)});
+
   if (command.type !== "start" && !_.detect(_.eq(_, cmd), moves)) {
-    throw new Error(`Invalid command: ${JSON.stringify(command)}`);
+    throw new Error(`Invalid command ${JSON.stringify(command)} not present in ${JSON.stringify(_.toArray(moves))}.`);
   }
 
   switch (command.type) {

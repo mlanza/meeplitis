@@ -97,7 +97,8 @@ function table(tableId){
   return $.pipe($t, _.compact());
 }
 
-function move(table_id, seat, commands, accessToken){ //TODO send access token, move should otherwise be barred
+function move(table_id, seat, cmds, accessToken){ //TODO send access token, move should otherwise be barred
+  const commands = _.mapa(_.assoc(_, "seat", seat), cmds);
   const body = {table_id, seat, commands};
   return supabase.functions.invoke("move", {body}).then(_.get(_, "data"));
 }
@@ -344,8 +345,6 @@ function dispatch(self, command){
 
     default: { // TODO fix
       const {id, seat} = _.deref(self);
-      //const cmd = {type: "commit", seat: 0, details: null};
-      //console.log({command, cmd})
       _.fmap(self.workboard.request("move", id, seat, [command], self.accessToken), function({data, error, status}) {
         console.log({type, data, error, status});
       });

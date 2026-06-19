@@ -11,6 +11,11 @@
     "serve": "deno task lume -s",
     "reel": "deno run -A --location 'https://meetlitis.com?monitor=$reel' ./src/libs/reel/cli.js QDaitfgARpk -i --not '$queue' --not '$timer' --elide perspective --elide touches --elide perspectives --elide seated --elide table"
   },
+  "lint": {
+    "rules": {
+      "exclude": ["no-unused-vars"]
+    }
+  },
   "compilerOptions": {
     "types": [
       "lume/types.ts"

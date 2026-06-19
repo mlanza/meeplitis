@@ -419,8 +419,6 @@ export function act(self, command) {
   const moves = g.moves(self, {seat, type});
   const cmd = _.chain(command, _.compact, _.dissoc(_, "id"), _.dissocIn(_, ["details", "dice"]), noDetails);
 
-console.log({moves: _.toArray(moves)});
-
   if (command.type !== "start" && !_.detect(_.eq(_, cmd), moves)) {
     throw new Error(`Invalid command ${JSON.stringify(command)} not present in ${JSON.stringify(_.toArray(moves))}.`);
   }
@@ -465,7 +463,7 @@ console.log({moves: _.toArray(moves)});
       if (bounds(to)) {
         const targetPoint = points[to];
         if (targetPoint[opponent] > 1) {
-          throw new Error(`That point — ${to} — is blocked.`);
+          throw new Error(`That point (${to}) is blocked.`);
         }
       }
 
@@ -558,7 +556,7 @@ function actuate(self, event) {
   }
 }
 
-function perspective(self, seen, reality){
+function perspective(_self, _seen, reality){
   return reality; //no hidden info.
 }
 

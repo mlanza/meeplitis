@@ -97,7 +97,7 @@ function table(tableId){
   return $.pipe($t, _.compact());
 }
 
-function move(table_id, seat, cmds, accessToken){ //TODO send access token, move should otherwise be barred
+function move(table_id, seat, cmds){ //TODO send access token, move should otherwise be barred
   const commands = _.mapa(_.assoc(_, "seat", seat), cmds);
   const body = {table_id, seat, commands};
   return supabase.functions.invoke("move", {body}).then(_.get(_, "data"));
@@ -333,20 +333,21 @@ function dispatch(self, command){
       self.$timer.start();
       break;
 
-    case "do-over": { // TODO fix
+    case "do-over": {
       const {id: _table_id, undoable: _event_id, cursor: {at}} = _.deref(self);
       if (!_event_id) return;
       _.fmap(self.workboard.request("do-over", _table_id, _event_id), function({data, error, status}) {
-        console.log({type, data, error, status});
-        //TODO $.swap(self.$state, _.update(_, "history", _.pipe(_.take(at -1, _), _.toArray)));
+        error && $.reset($.chan(self, "error"), new Error(`Do over failed.`));
+        console.log({status, data, error});
       });
       break;
     }
 
-    default: { // TODO fix
-      const {id, seat} = _.deref(self);
+    default: {
+      const {id, seat} = _.deref(self); //TODO diagnose Observable deref workaround
       _.fmap(self.workboard.request("move", id, seat, [command], self.accessToken), function({data, error, status}) {
-        console.log({type, data, error, status});
+        error && $.reset($.chan(self, "error"), new Error(`Move failed.`));
+        console.log({status, data, error});
       });
       break;
     }

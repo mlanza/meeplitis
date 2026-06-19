@@ -120,7 +120,9 @@ export const path = _.pipe(_.deref, _.getIn(_, ["cursor", "at"]), _.otherwise(_,
 
 export function reel(tableId, seat = null, accessToken = null){
   const $timeline = $.atom(r.init(tableId, seat));
+  const $cursor = $.map(_.get(_, "cursor"), $timeline);
   const $table = table(tableId);
+  const $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), _.filter(_.isSome));
   const $scratch = $.atom({});
   const $wip = $.cursor($scratch, function(){
     return path(self);
@@ -205,7 +207,7 @@ export function reel(tableId, seat = null, accessToken = null){
       })
   }));
 
-  $.sub($table, function(table){
+  $.sub($touch, function(touch){
     const {cursor} = _.deref($timeline);
     const {pos, max} = cursor || {};
     const present = isPresent(pos, max);
@@ -214,29 +216,26 @@ export function reel(tableId, seat = null, accessToken = null){
       present ? () => $timer.start() : _.noop); //if already in the present when the game is touched, catch things up.
   });
 
-  //perspective caching; includes anticipated next step
-  $.sub($base, function(state){
-    const {table, make, seat, seated, cursor, touches, perspectives} = state;
-    const {pos, at, direction, max} = cursor;
+  const $hist = $.hist($base);
+
+  //perspective caching anticipates next step
+  $.sub($hist, _.filter(_.isSome), function([curr, prior]){
+    const {table, make, seat, seated, cursor, cursor: {pos, at, direction, max}, touches, perspectives} = curr;
+    if (!table || !make || !_.seq(seated) || at === prior?.cursor?.at) return;
     const nextAt = _.maybe(pos + direction, _.clamp(_, 0, max), _.get(touches, _));
     const player = seat;
-    const ats = _.chain([at, nextAt], _.compact, _.remove(_.get(perspectives, _), _), _.toArray);
-    if (table && _.seq(ats) && make && _.seq(seated)) {
-      const seatId = _.getIn(seated, [seat, "seat_id"]);
-      $.each(function(at){
-        _.fmap(wb.request("getPerspective", tableId, at, seat, seatId, accessToken), function(perspective){
-          const {up, may, event, state} = perspective;
-          const {seat} = event;
-          const actionable = _.includes(up, player) || _.includes(may, player);
-          const game = make(seated, table.config, [event], state);
-          const actor = _.get(seated, seat);
-          $.swap($timeline, r.addPerspective(at, _.assoc(perspective, "actionable", actionable, "game", game, "actor", actor)));
-        });
-      }, ats);
-    }
+    const seatId = _.getIn(seated, [seat, "seat_id"]);
+    _.chain([at, nextAt], _.compact, _.unique, _.remove(_.get(perspectives, _), _), _.seq, $.each(function(at){
+      _.fmap(wb.request("getPerspective", tableId, at, seat, seatId, accessToken), function(perspective){
+        const {up, may, event, event: {seat}, state} = perspective;
+        const actionable = _.includes(up, player) || _.includes(may, player);
+        const game = make(seated, table.config, [event], state);
+        const actor = _.get(seated, seat);
+        $.swap($timeline, r.addPerspective(at, _.assoc(perspective, "actionable", actionable, "game", game, "actor", actor)));
+      });
+    }, _));
   });
 
-  const $hist = $.hist($base);
   const $diff = $.map(function(h){
     const hist = h ?? [];
     const diff = d.diff(hist[0], hist[1]);
@@ -256,7 +255,7 @@ export function reel(tableId, seat = null, accessToken = null){
       return curr;
     })));
 
-  const self = new Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $working, $timer, $scratch, $wip, $queue, wb, accessToken);
+  const self = new Reel($timeline, $table, $touch, $cursor, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $working, $timer, $scratch, $wip, $queue, wb, accessToken);
 
   $.sub($state, function(state){ //TODO fix this workaround
     self.state = state; //keep the latest
@@ -265,9 +264,11 @@ export function reel(tableId, seat = null, accessToken = null){
   return self;
 }
 
-function Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $working, $timer, $scratch, $wip, $queue, workboard, accessToken){
+function Reel($timeline, $table, $touch, $cursor, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $working, $timer, $scratch, $wip, $queue, workboard, accessToken){
   this.$timeline = $timeline;
   this.$table = $table;
+  this.$touch = $touch;
+  this.$cursor = $cursor;
   this.$error = $error;
   this.$make = $make;
   this.$ready = $ready;

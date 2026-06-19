@@ -258,7 +258,7 @@ export function reel(tableId, seat = null, accessToken = null){
 
   const self = new Reel($timeline, $table, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $working, $timer, $scratch, $wip, $queue, wb, accessToken);
 
-  $.sub($state, function(state){
+  $.sub($state, function(state){ //TODO fix this workaround
     self.state = state; //keep the latest
   });
 

@@ -191,12 +191,12 @@ export function reel(tableId, seat = null, accessToken = null){
   const $base = $.pipe($.map(function(error, seated, seats, up, undoable, scratch, setting, ready, act, timeline){
     return $.doto({...setting, ...timeline, error, seated, seats, up, undoable, scratch, ready, act}, fetchPerspectives);
   }, $error, $seated, $seats, $up, $undoable, $scratch, $setting, $ready, $act, $tl), _.filter(_.isSome));
-  const $feed = $.pipe($base, _.comp(_.filter(_.and(_.isSome, function({cursor, perspective}){
+  const $feed = $.pipe($base, _.filter(_.and(_.isSome, function({cursor, perspective}){
     return !!(cursor && perspective && cursor.at && cursor.at === perspective?.event?.id) || !cursor.at;
   })), _.map(_.pipe(
     _.dissoc(_, "perspectives"),
     _.dissoc(_, "touches"),
-    _.dissoc(_, "undoables")))));
+    _.dissoc(_, "undoables"))));
 
   const $timer = timer(1000);
 
@@ -250,8 +250,7 @@ export function reel(tableId, seat = null, accessToken = null){
   }, $hist);
   const $updated = $.map(_.pipe(_.get(_, "diff"), _.mapa(_.get(_, "path"), _)), $diff);
 
-
-  const $state = $.pipe($diff, _.comp(
+  const $state = $.pipe($diff,
     _.filter(function({diff}){
       return _.reduce(function(memo, {path}){
         const [prop] = path;
@@ -261,7 +260,7 @@ export function reel(tableId, seat = null, accessToken = null){
     }),
     _.map(function({hist: [curr]}){
       return curr;
-    })));
+    }), _.dedupe());
 
   const self = new Reel($timeline, $setting, $table, $touch, $cursor, $error, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $working, $timer, $scratch, $wip, $queue, wb, accessToken);
   $.sub($state, function(state){ //TODO fix this workaround

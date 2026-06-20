@@ -463,7 +463,7 @@ export function act(self, command) {
       if (bounds(to)) {
         const targetPoint = points[to];
         if (targetPoint[opponent] > 1) {
-          throw new Error(`That point — ${to} — is blocked.`);
+          throw new Error(`That point (${to}) is blocked.`);
         }
       }
 

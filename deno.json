@@ -1,6 +1,8 @@
 {
   "nodeModulesDir": "none",
   "imports": {
+    "/libs/": "./src/libs/",
+    "/components/": "./src/components/",
     "@cliffy/command": "jsr:@cliffy/command",
     "@cliffy/keypress": "jsr:@cliffy/keypress",
     "@cliffy/prompt": "jsr:@cliffy/prompt"

@@ -127,7 +127,6 @@ export function reel(tableId, seat = null, accessToken = null){
   const $wip = $.cursor($scratch, function(){
     return path(self);
   });
-  const $make = $.atom(null);
   const $error = $.atom(null);
   const $queue = $.atom({});
   const $ready = $.map(isReady, $queue);
@@ -167,28 +166,30 @@ export function reel(tableId, seat = null, accessToken = null){
   const $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table);
   const $seated = $.fromPromise(getSeated(tableId, accessToken));   //seated is everyone's info.
   const $seats = $.fromPromise(getSeats(tableId, accessToken)); //seats answers which seats are yours? (1 seat per player, except at dummy tables)
-  const $fundamentals = $.pipe($.then(async function(table, seated, seats){
-    const { id, release, game_id } = table;
+  const $tableInfo = $.map(function({ id, release, game_id }){
+
+  }, $table);
+  const $setting = $.pipe($.then(async function({ id, release, game_id }, seated, seats){
     const { slug, make } = await supabase
       .from('games')
       .select('slug')
-      .eq('id', table.game_id)
+      .eq('id', game_id)
       .then(_.getIn(_, ["data", 0]))
       .then(async function({slug}){
-        const url = `../../games/${slug}/table/${table.release}/core.js`;
+        const url = `../../games/${slug}/table/${release}/core.js`;
         const { make } = await import(url);
         return { slug, make };
       });
     return { id, slug, release, game_id, make, seated, seats };
-  }, $table, $seated, $seats), _.filter(_.isSome));
+  }, $.pipe($.map(_.selectKeys(_, ["id", "release", "game_id"]), $table), _.filter(_.isSome)), $seated, $seats), _.filter(_.isSome));
   const $undoable = $.map(function({undoables, cursor}){
     const {at} = cursor;
     return _.maybe(at, at => undoThru(undoables, at));
   }, $timeline);
-  const $base = $.pipe($.map(function(table, error, seated, seats, up, undoable, scratch, make, ready, act, timeline){
+  const $base = $.pipe($.map(function(table, error, seated, seats, up, undoable, scratch, setting, ready, act, timeline){
     const perspective = r.perspective(timeline);
-    return {...timeline, perspective, table, error, seated, seats, up, undoable, scratch, make, ready, act};
-  }, $table, $error, $seated, $seats, $up, $undoable, $scratch, $.pipe($make, _.compact()), $ready, $act, $timeline), _.filter(_.and(_.getIn(_, ["cursor", "at"]), _.get(_, "make"), _.get(_, "table"))));
+    return {...setting, ...timeline, perspective, table, error, seated, seats, up, undoable, scratch, ready, act};
+  }, $table, $error, $seated, $seats, $up, $undoable, $scratch, $setting, $ready, $act, $timeline), _.filter(_.and(_.getIn(_, ["cursor", "at"]), _.get(_, "make"), _.get(_, "table"))));
   const $timer = timer(1000);
 
   seat === null || $.sub($seats, _.filter(_.isSome), _.once(function(seats){
@@ -208,18 +209,6 @@ export function reel(tableId, seat = null, accessToken = null){
       }
     }
   });
-
-  $.sub($table, _.once(function(table){
-    supabase
-      .from('games')
-      .select('slug')
-      .eq('id', table.game_id)
-      .then(_.getIn(_, ["data", 0]))
-      .then(function({slug}){
-        const url = `../../games/${slug}/table/${table.release}/core.js`;
-        _.fmap(import(url), ({make}) => $.reset($make, make));
-      })
-  }));
 
   $.sub($touch, function(touch){
     const {cursor} = _.deref($timeline);
@@ -269,7 +258,7 @@ export function reel(tableId, seat = null, accessToken = null){
       return curr;
     })));
 
-  const self = new Reel($timeline, $fundamentals, $table, $touch, $cursor, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $working, $timer, $scratch, $wip, $queue, wb, accessToken);
+  const self = new Reel($timeline, $setting, $table, $touch, $cursor, $error, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $working, $timer, $scratch, $wip, $queue, wb, accessToken);
 
   $.sub($state, function(state){ //TODO fix this workaround
     self.state = state; //keep the latest
@@ -278,14 +267,13 @@ export function reel(tableId, seat = null, accessToken = null){
   return self;
 }
 
-function Reel($timeline, $fundamentals, $table, $touch, $cursor, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $working, $timer, $scratch, $wip, $queue, workboard, accessToken){
+function Reel($timeline, $setting, $table, $touch, $cursor, $error, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $working, $timer, $scratch, $wip, $queue, workboard, accessToken){
   this.$timeline = $timeline;
-  this.$fundamentals = $fundamentals;
+  this.$setting = $setting;
   this.$table = $table;
   this.$touch = $touch;
   this.$cursor = $cursor;
   this.$error = $error;
-  this.$make = $make;
   this.$ready = $ready;
   this.$act = $act;
   this.$up = $up;

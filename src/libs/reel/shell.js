@@ -250,7 +250,7 @@ export function reel(tableId, seat = null, accessToken = null){
   }, $hist);
   const $updated = $.map(_.pipe(_.get(_, "diff"), _.mapa(_.get(_, "path"), _)), $diff);
 
-  const $state = $.pipe($diff,
+  const $less = $.pipe($diff,
     _.filter(function({diff}){
       return _.reduce(function(memo, {path}){
         const [prop] = path;
@@ -262,10 +262,11 @@ export function reel(tableId, seat = null, accessToken = null){
       return curr;
     }), _.dedupe());
 
+  const $sink = $.atom(null);
+  $.sub($less, $.reset($sink, _));
+  const $state = $.map(_.identity, $sink);
+
   const self = new Reel($timeline, $setting, $table, $touch, $cursor, $error, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $working, $timer, $scratch, $wip, $queue, wb, accessToken);
-  $.sub($state, function(state){ //TODO fix this workaround
-    self.state = state; //keep the latest
-  });
 
   return self;
 }
@@ -366,7 +367,7 @@ function sub(self, callback){
 }
 
 function deref(self){
-  return self.state;
+  return _.deref(self.$state);
 }
 
 $.doto(Reel,

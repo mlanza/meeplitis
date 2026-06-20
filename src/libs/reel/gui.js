@@ -66,7 +66,6 @@ export async function gui(describe, desc, template) {
   const $up = $.map(_.get(_, "up"), $reel);
   const $ready = $.map(_.get(_, "ready"), $reel);
   const $working = $.chan($reel, "working");
-  const $undoable = $.chan($reel, "undoable");
   const $table = $.chan($reel, "table");
   const $touch = $.chan($reel, "touch");
   const $diff = $.chan($reel, "diff");
@@ -86,7 +85,7 @@ export async function gui(describe, desc, template) {
       _.unique,
       _.toArray));
 
-  const $gui = $.pipe($.map(function([now, past], wip, undoable){
+  const $gui = $.pipe($.map(function([now, past], wip){
     const curr = now?.perspective ?? null;
     const prior = past?.perspective ?? null;
     const frame = now;
@@ -99,6 +98,7 @@ export async function gui(describe, desc, template) {
     const last_acting_seat = now?.last_acting_seat;
     const seated = now?.seated;
     const seat = now?.seat; //TODO
+    const undoable = now?.undoable;
     const undoer = seat === _.detectIndex(_.comp(_.eq(last_acting_seat, _), _.get(_, "seat_id")), seated);
     const player = curr?.actor;
     const game = curr?.game;
@@ -116,7 +116,7 @@ export async function gui(describe, desc, template) {
       present
     }
     return {hist, diff, frame, wip, which, game, seat, undoable, undoer, player, time};
-  }, $hist, $wip, $undoable), _.filter(function({hist}){ return _.getIn(_.first(hist), ["state"]); }));
+  }, $hist, $wip), _.filter(function({hist}){ return _.getIn(_.first(hist), ["state"]); }));
 
   const title = _.chain(ttl, dom.text, _.split(_, "|"), _.first, _.trim);
   dom.text(ttl, `${title} #${tableId}`);

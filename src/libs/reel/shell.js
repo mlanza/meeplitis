@@ -188,15 +188,15 @@ export function reel(tableId, seat = null, accessToken = null){
   }, $timeline);
   const $perspective = $.map(r.perspective, $timeline);
   const $tl = $.map(_.merge, $timeline, $.pipe($perspective, _.map(_.assoc(null, "perspective", _))));
-  const $base = $.pipe($.map(function(error, seated, seats, up, scratch, setting, ready, act, timeline){
-    return $.doto({...setting, ...timeline, error, seated, seats, up, scratch, ready, act}, fetchPerspectives);
-  }, $error, $seated, $seats, $up, $scratch, $setting, $ready, $act, $tl), _.filter(_.isSome));
-  const $state = $.pipe($base, _.comp(_.filter(_.and(_.isSome, function({cursor, perspective}){
+  const $base = $.pipe($.map(function(error, seated, seats, up, undoable, scratch, setting, ready, act, timeline){
+    return $.doto({...setting, ...timeline, error, seated, seats, up, undoable, scratch, ready, act}, fetchPerspectives);
+  }, $error, $seated, $seats, $up, $undoable, $scratch, $setting, $ready, $act, $tl), _.filter(_.isSome));
+  const $feed = $.pipe($base, _.comp(_.filter(_.and(_.isSome, function({cursor, perspective}){
     return !!(cursor && perspective && cursor.at && cursor.at === perspective?.event?.id) || !cursor.at;
   })), _.map(_.pipe(
     _.dissoc(_, "perspectives"),
     _.dissoc(_, "touches"),
-    _.dissoc(_, "undoables"))), _.dedupe()));
+    _.dissoc(_, "undoables")))));
 
   const $timer = timer(1000);
 
@@ -242,16 +242,14 @@ export function reel(tableId, seat = null, accessToken = null){
     }, _));
   }
 
-  const $hist = $.hist($state);
+  const $hist = $.hist($feed);
   const $diff = $.map(function(h){
     const hist = h ?? [];
     const diff = _.seq(d.diff(...hist));
     return {hist, diff};
   }, $hist);
 
-  const $updated = $.map(_.pipe(_.get(_, "diff"), _.mapa(_.get(_, "path"), _)), $diff);
-
-  /*const $state = $feed $.pipe($diff, _.comp(
+  const $state = $.pipe($diff, _.comp(
     _.filter(function({diff}){
       return _.reduce(function(memo, {path}){
         const [prop] = path;
@@ -261,17 +259,17 @@ export function reel(tableId, seat = null, accessToken = null){
     }),
     _.map(function({hist: [curr]}){
       return curr;
-    })));*/
+    })));
 
-  const self = new Reel($timeline, $setting, $table, $touch, $cursor, $error, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $working, $timer, $scratch, $wip, $queue, wb, accessToken);
-  /*$.sub($state, function(state){ //TODO fix this workaround
+  const self = new Reel($timeline, $setting, $table, $touch, $cursor, $error, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $working, $timer, $scratch, $wip, $queue, wb, accessToken);
+  $.sub($state, function(state){ //TODO fix this workaround
     self.state = state; //keep the latest
-  });*/
+  });
 
   return self;
 }
 
-function Reel($timeline, $setting, $table, $touch, $cursor, $error, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $working, $timer, $scratch, $wip, $queue, workboard, accessToken){
+function Reel($timeline, $setting, $table, $touch, $cursor, $error, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $working, $timer, $scratch, $wip, $queue, workboard, accessToken){
   this.$timeline = $timeline;
   this.$setting = $setting;
   this.$table = $table;
@@ -287,7 +285,6 @@ function Reel($timeline, $setting, $table, $touch, $cursor, $error, $ready, $act
   this.$state = $state;
   this.$hist = $hist;
   this.$diff = $diff,
-  this.$updated = $updated;
   this.$timer = $timer;
   this.$scratch = $scratch;
   this.$working = $working;
@@ -367,7 +364,7 @@ function sub(self, callback){
 }
 
 function deref(self){
-  return _.deref(self.$state);
+  return self.state;
 }
 
 $.doto(Reel,

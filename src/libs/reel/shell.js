@@ -191,9 +191,13 @@ export function reel(tableId, seat = null, accessToken = null){
   const $base = $.pipe($.map(function(error, seated, seats, up, undoable, scratch, setting, ready, act, timeline){
     return $.doto({...setting, ...timeline, error, seated, seats, up, undoable, scratch, ready, act}, fetchPerspectives);
   }, $error, $seated, $seats, $up, $undoable, $scratch, $setting, $ready, $act, $tl), _.filter(_.isSome));
-  const $feed = $.pipe($base, _.filter(_.and(_.isSome, function({cursor, perspective}){
+  const $feed = $.pipe($base, _.comp(_.filter(_.and(_.isSome, function({cursor, perspective}){
     return !!(cursor && perspective && cursor.at && cursor.at === perspective?.event?.id) || !cursor.at;
-  })));
+  })), _.map(_.pipe(
+    _.dissoc(_, "perspectives"),
+    _.dissoc(_, "touches"),
+    _.dissoc(_, "undoables")))));
+
   const $timer = timer(1000);
 
   seat === null || $.sub($seats, _.filter(_.isSome), _.once(function(seats){
@@ -249,7 +253,7 @@ export function reel(tableId, seat = null, accessToken = null){
     _.filter(function({diff}){
       return _.reduce(function(memo, {path}){
         const [prop] = path;
-        const suppress = _.includes(["perspectives", "touches", "undoables", "cursor", "table", "undoable", "working"], prop);
+        const suppress = _.includes(["perspectives", "touches", "undoables", "undoable"], prop);
         return memo || !suppress;
       }, false, diff);
     }),

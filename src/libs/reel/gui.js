@@ -299,7 +299,7 @@ export async function gui(describe, desc, template) {
     exec({type: "at", details: {touch}});
   }));
 
-  return $.doto({seat, seats, seated, exec, $reel, $setting, $queue, $ready, $working, $act, $wip, $gui, $table, $touch, $hist, $diff}, reg);
+  return $.doto({seat, seats, seated, exec, $reel, $setting, $queue, $ready, $working, $act, $wip, $gui, $table, $touch, $hist, $diff, $updated}, reg);
 }
 
 export function player(username, avatar_url, seat, ...contents){

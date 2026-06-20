@@ -248,6 +248,8 @@ export function reel(tableId, seat = null, accessToken = null){
     const diff = _.seq(d.diff(...hist));
     return {hist, diff};
   }, $hist);
+  const $updated = $.map(_.pipe(_.get(_, "diff"), _.mapa(_.get(_, "path"), _)), $diff);
+
 
   const $state = $.pipe($diff, _.comp(
     _.filter(function({diff}){
@@ -261,7 +263,7 @@ export function reel(tableId, seat = null, accessToken = null){
       return curr;
     })));
 
-  const self = new Reel($timeline, $setting, $table, $touch, $cursor, $error, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $working, $timer, $scratch, $wip, $queue, wb, accessToken);
+  const self = new Reel($timeline, $setting, $table, $touch, $cursor, $error, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $working, $timer, $scratch, $wip, $queue, wb, accessToken);
   $.sub($state, function(state){ //TODO fix this workaround
     self.state = state; //keep the latest
   });
@@ -269,7 +271,7 @@ export function reel(tableId, seat = null, accessToken = null){
   return self;
 }
 
-function Reel($timeline, $setting, $table, $touch, $cursor, $error, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $working, $timer, $scratch, $wip, $queue, workboard, accessToken){
+function Reel($timeline, $setting, $table, $touch, $cursor, $error, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $working, $timer, $scratch, $wip, $queue, workboard, accessToken){
   this.$timeline = $timeline;
   this.$setting = $setting;
   this.$table = $table;
@@ -285,6 +287,7 @@ function Reel($timeline, $setting, $table, $touch, $cursor, $error, $ready, $act
   this.$state = $state;
   this.$hist = $hist;
   this.$diff = $diff,
+  this.$updated = $updated;
   this.$timer = $timer;
   this.$scratch = $scratch;
   this.$working = $working;

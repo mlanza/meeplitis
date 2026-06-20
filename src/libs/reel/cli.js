@@ -12,30 +12,6 @@ function logs(key, obj){
   $.log(key, Deno.inspect(obj, { colors: true, compact: true, depth: Infinity, iterableLimit: Infinity }));
 }
 
-function elides3(omit, paths, f){
-  return function(key, value){
-    try {
-      if (omit(key, value)) {
-        return value;
-      } else {
-        return _.reduce(function(memo, path){
-          return _.updateIn(memo, path, f);
-        }, value, paths);
-      }
-    } catch {
-      return value;
-    }
-  }
-}
-
-function elides2(omit, props){
-  return elides3(omit, props, value => value == null ? value : _.isObject(value) ?
-    `<${_.count(value)} entries>` :
-    `<object>`);
-}
-
-const elides = _.overload(null, null, elides2, elides3);
-
 const hr = _.chain(_.repeat(100, "-"), _.toArray, _.join("", _)); //horizontal rule
 
 async function tuiMode(exec) {
@@ -78,6 +54,11 @@ function enqueues(exec){
   }
 }
 
+const elide = _.pipe(
+  _.assocIn(_, ["perspective", "game"], "<hidden>"),
+  _.assocIn(_, ["seated"], "<hidden>"),
+  _.assocIn(_, ["perspective", "actor"], "<hidden>"));
+
 await new Command()
   .name("reel")
   .description("Navigate and append to board game timeline")
@@ -88,25 +69,20 @@ await new Command()
   .option("-i, --interactive", "Interact via the keyboard")
   .option("-c, --command <command:string>", "Keypress to invoke", { collect: true })
   .option("--at <eventId:string>", "Navigate to moment in timeline")
-  .option("--elide <prop:string>", "Property to elide in logged object", { collect: true })
-  .option("--not <chan:string>", "Channel not elided", { collect: true })
+  .option("--elide", "Hide extraneous data")
   .action(function (opts, tableId){
-    const elide = elides(function(key, value){
-      return _.includes(opts?.not, key) || _.isArray(value);
-    },  _.mapa(_.split(_, "."), opts.elide));
-    const fmt = opts.json ? _.pipe(_.assoc(null, _, _), JSON.stringify, console.log) : function(key, value){
-      logs(key, elide(key, value));
-    };
-    const $reel = reel(tableId, opts.seat ?? null, opts.token ?? null);
-    const $state = $.chan($reel, "state");
-    const $wip = $.chan($reel, "wip");
-    const $ready = $.chan($reel, "ready");
-    const $act = $.chan($reel, "act");
-    const $working = $.chan($reel, "working");
-    const $diff = $.chan($reel, "diff");
-    const $queue = $.chan($reel, "queue");
-    const $timer = $.chan($reel, "timer");
-    const exec = $.dispatch($reel, _);
+    const $source = reel(tableId, opts.seat ?? null, opts.token ?? null);
+    const $reel = opts.elide ? $.map(elide, $source) : $source;
+    const $state = $.chan($source, "state");
+    const $wip = $.chan($source, "wip");
+    const $ready = $.chan($source, "ready");
+    const $act = $.chan($source, "act");
+    const $working = $.chan($source, "working");
+    const $diff = $.chan($source, "diff");
+    const $updated = $.chan($source, "updated");
+    const $queue = $.chan($source, "queue");
+    const $timer = $.chan($source, "timer");
+    const exec = $.dispatch($source, _);
     const queue = enqueues(exec);
     const commands = _.mapa(type => queue({type}), opts?.command ?? []);
 
@@ -123,7 +99,7 @@ await new Command()
       Deno.exit(0);
     });
 
-    reg({$reel, $state, $wip, $diff, $queue, $act, $ready, $working, $timer}, fmt);
+    reg({$reel, $state, $wip, $diff, $updated, $queue, $act, $ready, $working, $timer}, logs);
 
     const iv = setInterval(function(){
       if (!_.deref($working) && _.seq(commands)) {

@@ -3,7 +3,6 @@ import $ from "../atomic_/shell.js";
 import * as r from "./core.js";
 import supabase from "../supabase.js";
 import { timer } from "./timer.js";
-import * as d from  "./diff.js";
 import { Workboard } from "./workboard.js";
 
 export function getfn(name, params, accessToken){
@@ -167,6 +166,21 @@ export function reel(tableId, seat = null, accessToken = null){
   const $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table);
   const $seated = $.fromPromise(getSeated(tableId, accessToken));   //seated is everyone's info.
   const $seats = $.fromPromise(getSeats(tableId, accessToken)); //seats answers which seats are yours? (1 seat per player, except at dummy tables)
+  const $fundamentals = $.pipe($.then(async function(table, seated, seats){
+    const { id, release, game_id } = table;
+    const { slug, make } = await supabase
+      .from('games')
+      .select('slug')
+      .eq('id', table.game_id)
+      .then(_.getIn(_, ["data", 0]))
+      .then(async function({slug}){
+        const url = `../../games/${slug}/table/${table.release}/core.js`;
+        const { make } = await import(url);
+        return { slug, make };
+      });
+    return { id, slug, release, game_id, make, seated, seats };
+  }, $table, $seated, $seats), _.filter(_.isSome));
+
   const $undoable = $.map(function({undoables, cursor}){
     const {at} = cursor;
     return _.maybe(at, at => undoThru(undoables, at));
@@ -236,26 +250,17 @@ export function reel(tableId, seat = null, accessToken = null){
     }, _));
   });
 
-  const $diff = $.map(function(h){
-    const hist = h ?? [];
-    const diff = d.diff(hist[0], hist[1]);
-    return {diff, hist};
-  }, $hist);
+  const $state = $.pipe($hist, _.comp(_.filter(_.isSome), _.filter(function([curr, prior]){
+    return curr.perspectives !== prior?.perspectives
+      || curr.touches !== prior?.touches
+      || curr.undoables !== prior?.undoables
+      || curr.undoable !== prior?.undoable
+      || curr.cursor !== prior?.cursor
+      || curr.table !== prior?.table
+      || curr.working !== prior?.working;
+  }), _.map(([curr]) => curr)));
 
-  const $updated = $.map(_.pipe(_.get(_, "diff"), _.mapa(_.get(_, "path"), _)), $diff);
-
-  const $state = $.pipe($diff, _.comp(
-    _.filter(function({hist: [curr], diff}){ //regulate visibility of internal change events to the outside world
-      return curr && _.reduce(function(memo, {path: [prop]}){
-        const suppress = _.includes(["perspectives", "touches", "undoables", "cursor", "table", "undoable", "working"], prop);
-        return memo || !suppress;
-      }, false, diff);
-    }),
-    _.map(function({hist: [curr]}){
-      return curr;
-    })));
-
-  const self = new Reel($timeline, $table, $touch, $cursor, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $working, $timer, $scratch, $wip, $queue, wb, accessToken);
+  const self = new Reel($timeline, $fundamentals, $table, $touch, $cursor, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $working, $timer, $scratch, $wip, $queue, wb, accessToken);
 
   $.sub($state, function(state){ //TODO fix this workaround
     self.state = state; //keep the latest
@@ -264,8 +269,9 @@ export function reel(tableId, seat = null, accessToken = null){
   return self;
 }
 
-function Reel($timeline, $table, $touch, $cursor, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $working, $timer, $scratch, $wip, $queue, workboard, accessToken){
+function Reel($timeline, $fundamentals, $table, $touch, $cursor, $error, $make, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $working, $timer, $scratch, $wip, $queue, workboard, accessToken){
   this.$timeline = $timeline;
+  this.$fundamentals = $fundamentals;
   this.$table = $table;
   this.$touch = $touch;
   this.$cursor = $cursor;
@@ -279,8 +285,6 @@ function Reel($timeline, $table, $touch, $cursor, $error, $make, $ready, $act, $
   this.$undoable = $undoable;
   this.$state = $state;
   this.$hist = $hist;
-  this.$diff = $diff,
-  this.$updated = $updated;
   this.$timer = $timer;
   this.$scratch = $scratch;
   this.$working = $working;

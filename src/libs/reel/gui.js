@@ -2,6 +2,7 @@ import _ from "../atomic_/core.js";
 import $ from "../atomic_/shell.js";
 import dom from "../atomic_/dom.js";
 import { reg } from "../cmd.js";
+import * as d from  "./diff.js";
 import supabase from "/libs/supabase.js";
 import {reel, getSeats, isPresent} from "./shell.js";
 import { presence } from "/libs/online.js";
@@ -59,6 +60,7 @@ export async function gui(describe, desc, template) {
   const $error = $.chan($reel, "error");
   const $queue = $.chan($reel, "queue");
   const $hist = $.chan($reel, "hist");
+  const $fundamentals = $.chan($reel, "fundamentals");
   const $cursor = $.map(_.get(_, "cursor"), $reel);
   const $act = $.map(_.get(_, "act"), $reel);
   const $up = $.map(_.get(_, "up"), $reel);
@@ -87,6 +89,7 @@ export async function gui(describe, desc, template) {
     const curr = now?.perspective ?? null;
     const prior = past?.perspective ?? null;
     const hist = [curr, prior];
+    const diff = _.chain(d.diff(curr, prior), _.seq);
     const motion = curr && prior && now?.cursor?.pos !== past?.cursor?.pos;
     const step = motion ? now?.cursor?.pos - past?.cursor?.pos : 0;
     const offset = now?.cursor ? now?.cursor?.pos - now?.cursor?.max : null;
@@ -111,8 +114,12 @@ export async function gui(describe, desc, template) {
       motion,
       present
     }
-    return {hist, wip, which, game, seat, undoable, undoer, player, time};
-  }, $hist, $wip), _.filter(function({hist}){ return _.getIn(_.first(hist), ["state"]); }));
+    return {hist, diff, wip, which, game, seat, undoable, undoer, player, time};
+  }, $hist, $wip),
+    _.filter(function({hist}){
+      const state = hist[0]?.state;
+      return state;
+    }));
 
   const title = _.chain(ttl, dom.text, _.split(_, "|"), _.first, _.trim);
   dom.text(ttl, `${title} #${tableId}`);
@@ -299,7 +306,7 @@ export async function gui(describe, desc, template) {
     exec({type: "at", details: {touch}});
   }));
 
-  return $.doto({seat, seats, seated, exec, $reel, $queue, $ready, $working, $wip, $gui, $table, $touch, $updated}, reg);
+  return $.doto({seat, seats, seated, exec, $reel, $fundamentals, $queue, $ready, $working, $wip, $gui, $table, $touch, $updated}, reg);
 }
 
 export function player(username, avatar_url, seat, ...contents){

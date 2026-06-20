@@ -186,10 +186,14 @@ export function reel(tableId, seat = null, accessToken = null){
     const {at} = cursor;
     return _.maybe(at, at => undoThru(undoables, at));
   }, $timeline);
+  const $perspective = $.map(r.perspective, $timeline);
+  const $tl = $.map(_.merge, $timeline, $.pipe($perspective, _.map(_.assoc(null, "perspective", _))));
   const $base = $.pipe($.map(function(table, error, seated, seats, up, undoable, scratch, setting, ready, act, timeline){
-    const perspective = r.perspective(timeline);
-    return {...setting, ...timeline, perspective, table, error, seated, seats, up, undoable, scratch, ready, act};
-  }, $table, $error, $seated, $seats, $up, $undoable, $scratch, $setting, $ready, $act, $timeline), _.filter(_.and(_.getIn(_, ["cursor", "at"]), _.get(_, "make"), _.get(_, "table"))));
+    return $.doto({...setting, ...timeline, table, error, seated, seats, up, undoable, scratch, ready, act}, fetchPerspectives);
+  }, $table, $error, $seated, $seats, $up, $undoable, $scratch, $setting, $ready, $act, $tl), _.filter(_.isSome));
+  const $feed = $.pipe($base, _.filter(_.and(_.isSome, function({cursor, perspective}){
+    return !!(cursor && perspective && cursor.at && cursor.at === perspective?.event?.id) || !cursor.at;
+  })));
   const $timer = timer(1000);
 
   seat === null || $.sub($seats, _.filter(_.isSome), _.once(function(seats){
@@ -219,12 +223,7 @@ export function reel(tableId, seat = null, accessToken = null){
       present ? () => $timer.start() : _.noop); //if already in the present when the game is touched, catch things up.
   });
 
-  const $hist = $.hist($base);
-
-  //perspective caching anticipates next step
-  $.sub($hist, _.filter(_.isSome), function([curr, prior]){
-    const {table, make, seat, seated, cursor, cursor: {pos, at, direction, max}, touches, perspectives} = curr;
-    if (!table || !make || !_.seq(seated) || at === prior?.cursor?.at) return;
+  function fetchPerspectives({table, make, seat, seated, cursor, cursor: {pos, at, direction, max}, touches, perspectives}){
     const nextAt = _.maybe(pos + direction, _.clamp(_, 0, max), _.get(touches, _));
     const player = seat;
     const seatId = _.getIn(seated, [seat, "seat_id"]);
@@ -237,7 +236,9 @@ export function reel(tableId, seat = null, accessToken = null){
         $.swap($timeline, r.addPerspective(at, _.assoc(perspective, "actionable", actionable, "game", game, "actor", actor)));
       });
     }, _));
-  });
+  }
+
+  const $hist = $.hist($feed);
 
   const $diff = $.map(function(h){
     const hist = h ?? [];

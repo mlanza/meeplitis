@@ -104,6 +104,7 @@ await new Command()
     const $act = $.chan($reel, "act");
     const $working = $.chan($reel, "working");
     const $diff = $.chan($reel, "diff");
+    const $updated = $.chan($reel, "updated");
     const $queue = $.chan($reel, "queue");
     const $timer = $.chan($reel, "timer");
     const exec = $.dispatch($reel, _);
@@ -123,7 +124,7 @@ await new Command()
       Deno.exit(0);
     });
 
-    reg({$reel, $state, $wip, $diff, $queue, $act, $ready, $working, $timer}, fmt);
+    reg({$reel, $state, $wip, $diff, $updated, $queue, $act, $ready, $working, $timer}, fmt);
 
     const iv = setInterval(function(){
       if (!_.deref($working) && _.seq(commands)) {

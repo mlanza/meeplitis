@@ -6,7 +6,7 @@ export function diff(curr, prior, path = [], eq = _.eq) {
   }
 
   if (!_.isObject(curr) || !_.isObject(prior)) {
-    return [{ path, curr, prior }];
+    return [{ hist: [curr, prior], path }];
   }
 
   const keys = new Set([

@@ -98,6 +98,7 @@ await new Command()
       logs(key, elide(key, value));
     };
     const $reel = reel(tableId, opts.seat ?? null, opts.token ?? null);
+    const $state = $.chan($reel, "state");
     const $wip = $.chan($reel, "wip");
     const $ready = $.chan($reel, "ready");
     const $working = $.chan($reel, "working");
@@ -121,7 +122,7 @@ await new Command()
       Deno.exit(0);
     });
 
-    reg({$reel, $wip, $updated, $queue, $ready, $working, $timer}, fmt);
+    reg({$reel, $state, $wip, $updated, $queue, $ready, $working, $timer}, fmt);
 
     const iv = setInterval(function(){
       if (!_.deref($working) && _.seq(commands)) {

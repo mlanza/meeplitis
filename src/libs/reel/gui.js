@@ -68,7 +68,7 @@ export async function gui(describe, desc, template) {
   const $working = $.chan($reel, "working");
   const $table = $.chan($reel, "table");
   const $touch = $.chan($reel, "touch");
-  const $updated = $.chan($reel, "updated");
+  const $diff = $.chan($reel, "diff");
   const $status = $.map(_.get(_, "status"), $table);
   const $present = $.pipe($.map(function(cursor){
     const {pos, max} = cursor ?? {};
@@ -302,7 +302,7 @@ export async function gui(describe, desc, template) {
     exec({type: "at", details: {touch}});
   }));
 
-  return $.doto({seat, seats, seated, exec, $reel, $setting, $queue, $ready, $working, $wip, $gui, $table, $touch, $updated}, reg);
+  return $.doto({seat, seats, seated, exec, $reel, $setting, $queue, $ready, $working, $wip, $gui, $table, $touch, $hist, $diff}, reg);
 }
 
 export function player(username, avatar_url, seat, ...contents){

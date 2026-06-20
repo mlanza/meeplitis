@@ -169,7 +169,7 @@ export function reel(tableId, seat = null, accessToken = null){
   const $tableInfo = $.map(function({ id, release, game_id }){
 
   }, $table);
-  const $setting = $.pipe($.then(async function({ id, release, game_id }, seated, seats){
+  const $setting = $.pipe($.then(async function({ id, release, game_id, config }, seated, seats){
     const { slug, make } = await supabase
       .from('games')
       .select('slug')
@@ -180,17 +180,17 @@ export function reel(tableId, seat = null, accessToken = null){
         const { make } = await import(url);
         return { slug, make };
       });
-    return { id, slug, release, game_id, make, seated, seats };
-  }, $.pipe($.map(_.selectKeys(_, ["id", "release", "game_id"]), $table), _.filter(_.isSome)), $seated, $seats), _.filter(_.isSome));
+    return { id, slug, release, config, game_id, make, seated, seats };
+  }, $.pipe($.map(_.selectKeys(_, ["id", "release", "config", "game_id"]), $table), _.filter(_.isSome)), $seated, $seats), _.filter(_.isSome));
   const $undoable = $.map(function({undoables, cursor}){
     const {at} = cursor;
     return _.maybe(at, at => undoThru(undoables, at));
   }, $timeline);
   const $perspective = $.map(r.perspective, $timeline);
   const $tl = $.map(_.merge, $timeline, $.pipe($perspective, _.map(_.assoc(null, "perspective", _))));
-  const $base = $.pipe($.map(function(table, error, seated, seats, up, undoable, scratch, setting, ready, act, timeline){
-    return $.doto({...setting, ...timeline, table, error, seated, seats, up, undoable, scratch, ready, act}, fetchPerspectives);
-  }, $table, $error, $seated, $seats, $up, $undoable, $scratch, $setting, $ready, $act, $tl), _.filter(_.isSome));
+  const $base = $.pipe($.map(function(error, seated, seats, up, undoable, scratch, setting, ready, act, timeline){
+    return $.doto({...setting, ...timeline, error, seated, seats, up, undoable, scratch, ready, act}, fetchPerspectives);
+  }, $error, $seated, $seats, $up, $undoable, $scratch, $setting, $ready, $act, $tl), _.filter(_.isSome));
   const $feed = $.pipe($base, _.filter(_.and(_.isSome, function({cursor, perspective}){
     return !!(cursor && perspective && cursor.at && cursor.at === perspective?.event?.id) || !cursor.at;
   })));
@@ -223,7 +223,7 @@ export function reel(tableId, seat = null, accessToken = null){
       present ? () => $timer.start() : _.noop); //if already in the present when the game is touched, catch things up.
   });
 
-  function fetchPerspectives({table, make, seat, seated, cursor, cursor: {pos, at, direction, max}, touches, perspectives}){
+  function fetchPerspectives({make, seat, seated, config, cursor, cursor: {pos, at, direction, max}, touches, perspectives}){
     const nextAt = _.maybe(pos + direction, _.clamp(_, 0, max), _.get(touches, _));
     const player = seat;
     const seatId = _.getIn(seated, [seat, "seat_id"]);
@@ -231,7 +231,7 @@ export function reel(tableId, seat = null, accessToken = null){
       _.fmap(wb.request("getPerspective", tableId, at, seat, seatId, accessToken), function(perspective){
         const {up, may, event, event: {seat}, state} = perspective;
         const actionable = _.includes(up, player) || _.includes(may, player);
-        const game = make(seated, table.config, [event], state);
+        const game = make(seated, config, [event], state);
         const actor = _.get(seated, seat);
         $.swap($timeline, r.addPerspective(at, _.assoc(perspective, "actionable", actionable, "game", game, "actor", actor)));
       });
@@ -239,18 +239,16 @@ export function reel(tableId, seat = null, accessToken = null){
   }
 
   const $hist = $.hist($feed);
-
   const $diff = $.map(function(h){
     const hist = h ?? [];
-    const diff = d.diff(hist[0], hist[1]);
-    return {diff, hist};
+    const diff = _.seq(d.diff(...hist));
+    return {hist, diff};
   }, $hist);
 
-  const $updated = $.map(_.pipe(_.get(_, "diff"), _.mapa(_.get(_, "path"), _)), $diff);
-
   const $state = $.pipe($diff, _.comp(
-    _.filter(function({hist: [curr], diff}){ //regulate visibility of internal change events to the outside world
-      return curr && _.reduce(function(memo, {path: [prop]}){
+    _.filter(function({diff}){
+      return _.reduce(function(memo, {path}){
+        const [prop] = path;
         const suppress = _.includes(["perspectives", "touches", "undoables", "cursor", "table", "undoable", "working"], prop);
         return memo || !suppress;
       }, false, diff);
@@ -259,8 +257,7 @@ export function reel(tableId, seat = null, accessToken = null){
       return curr;
     })));
 
-  const self = new Reel($timeline, $setting, $table, $touch, $cursor, $error, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $working, $timer, $scratch, $wip, $queue, wb, accessToken);
-
+  const self = new Reel($timeline, $setting, $table, $touch, $cursor, $error, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $working, $timer, $scratch, $wip, $queue, wb, accessToken);
   $.sub($state, function(state){ //TODO fix this workaround
     self.state = state; //keep the latest
   });
@@ -268,7 +265,7 @@ export function reel(tableId, seat = null, accessToken = null){
   return self;
 }
 
-function Reel($timeline, $setting, $table, $touch, $cursor, $error, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $working, $timer, $scratch, $wip, $queue, workboard, accessToken){
+function Reel($timeline, $setting, $table, $touch, $cursor, $error, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $working, $timer, $scratch, $wip, $queue, workboard, accessToken){
   this.$timeline = $timeline;
   this.$setting = $setting;
   this.$table = $table;
@@ -284,7 +281,6 @@ function Reel($timeline, $setting, $table, $touch, $cursor, $error, $ready, $act
   this.$state = $state;
   this.$hist = $hist;
   this.$diff = $diff,
-  this.$updated = $updated;
   this.$timer = $timer;
   this.$scratch = $scratch;
   this.$working = $working;

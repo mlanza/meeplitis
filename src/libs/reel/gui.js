@@ -2,7 +2,7 @@ import _ from "../atomic_/core.js";
 import $ from "../atomic_/shell.js";
 import dom from "../atomic_/dom.js";
 import { reg } from "../cmd.js";
-import * as d from  "./diff.js";
+import * as d from "./diff.js";
 import supabase from "/libs/supabase.js";
 import {reel, getSeats, isPresent} from "./shell.js";
 import { presence } from "/libs/online.js";
@@ -115,11 +115,7 @@ export async function gui(describe, desc, template) {
       present
     }
     return {hist, diff, wip, which, game, seat, undoable, undoer, player, time};
-  }, $hist, $wip),
-    _.filter(function({hist}){
-      const state = hist[0]?.state;
-      return state;
-    }));
+  }, $hist, $wip), _.filter(function({hist}){ return _.getIn(_.first(hist), ["state"]); }));
 
   const title = _.chain(ttl, dom.text, _.split(_, "|"), _.first, _.trim);
   dom.text(ttl, `${title} #${tableId}`);

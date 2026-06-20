@@ -88,6 +88,7 @@ export async function gui(describe, desc, template) {
   const $gui = $.pipe($.map(function([now, past], wip){
     const curr = now?.perspective ?? null;
     const prior = past?.perspective ?? null;
+    const frame = now;
     const hist = [curr, prior];
     const diff = _.chain(d.diff(curr, prior), _.seq);
     const motion = curr && prior && now?.cursor?.pos !== past?.cursor?.pos;
@@ -99,7 +100,7 @@ export async function gui(describe, desc, template) {
     const seat = now?.seat; //TODO
     const undoable = now?.undoable;
     const undoer = seat === _.detectIndex(_.comp(_.eq(last_acting_seat, _), _.get(_, "seat_id")), seated);
-    const player = _.maybe(curr?.event, eventFor);
+    const player = curr?.actor;
     const game = curr?.game;
     const { cursor } = now ?? {};
     const { max, pos } = cursor ?? {};
@@ -114,15 +115,11 @@ export async function gui(describe, desc, template) {
       motion,
       present
     }
-    return {hist, diff, wip, which, game, seat, undoable, undoer, player, time};
+    return {hist, diff, frame, wip, which, game, seat, undoable, undoer, player, time};
   }, $hist, $wip), _.filter(function({hist}){ return _.getIn(_.first(hist), ["state"]); }));
 
   const title = _.chain(ttl, dom.text, _.split(_, "|"), _.first, _.trim);
   dom.text(ttl, `${title} #${tableId}`);
-
-  function eventFor(event){
-    return _.maybe(event.seat, _.nth(seated, _));
-  }
 
   const multiSeated = _.count(_.unique(_.map(_.get(_, "player_id"), seated))) != _.count(seated);
   dom.toggleClass(el, "multi-seated", multiSeated);

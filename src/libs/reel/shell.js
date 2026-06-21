@@ -219,7 +219,7 @@ export function reel(tableId, seat = null, accessToken = null){
   const $queue = $.atom({});
   const $ready = $.map(isReady, $queue);
   const $working = $.map(isWorking, $queue);
-  //const $blocking = $.atom(null);
+  const $blocking = $.atom(false);
 
   function spectator(){
     const {seat} = _.deref(self) || {};
@@ -271,9 +271,9 @@ export function reel(tableId, seat = null, accessToken = null){
     return {...state, resolved};
   }, $inner);
 
-  const $act = $.map(function(ready, started, {perspective, cursor: {present}, resolved}){
-    return ready && resolved && present && started && perspective?.actionable;
-  }, $ready, $started, $base);
+  const $act = $.map(function(ready, started, blocking, {perspective, cursor: {present}, resolved}){
+    return ready && resolved && present && started && !blocking && perspective?.actionable;
+  }, $ready, $started, $blocking, $base);
 
   const $feed = $.pipe($base, _.filter(_.and(_.isSome, function({resolved, cursor}){
     return resolved || !cursor.at;
@@ -335,6 +335,12 @@ export function reel(tableId, seat = null, accessToken = null){
   }, $hist));
   const $updated = $.map(_.pipe(_.get(_, "diff"), _.mapa(_.get(_, "path"), _)), $diff);
 
+  $.sub($diff, function({diff}){
+    if (_.detect(_.eq(_, {hist: [true, false], path: ["cursor", "present"]}), diff)) {
+      $.reset($blocking, false);
+    }
+  });
+
   const $change = $.pipe($diff,
     _.filter(_.get(_, "diff")),
     _.filter(function({diff, props}){
@@ -349,17 +355,18 @@ export function reel(tableId, seat = null, accessToken = null){
   $.sub($change, _.map(({hist: [curr]}) => curr), $.reset($sink, _));
   const $state = $.map(_.identity, $sink);
 
-  const self = new Reel($timeline, $setting, $table, $touch, $cursor, $error, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $change, $updated, $working, $timer, $scratch, $wip, $queue, wb, accessToken);
+  const self = new Reel($timeline, $setting, $table, $touch, $cursor, $blocking, $error, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $change, $updated, $working, $timer, $scratch, $wip, $queue, wb, accessToken);
 
   return self;
 }
 
-function Reel($timeline, $setting, $table, $touch, $cursor, $error, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $change, $updated, $working, $timer, $scratch, $wip, $queue, workboard, accessToken){
+function Reel($timeline, $setting, $table, $touch, $cursor, $blocking, $error, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $change, $updated, $working, $timer, $scratch, $wip, $queue, workboard, accessToken){
   this.$timeline = $timeline;
   this.$setting = $setting;
   this.$table = $table;
   this.$touch = $touch;
   this.$cursor = $cursor;
+  this.$blocking = $blocking;
   this.$error = $error;
   this.$ready = $ready;
   this.$act = $act;
@@ -436,10 +443,11 @@ function dispatch(self, command){
     }
 
     default: {
-      //$.swap(self.$blocking, _.pipe(_.conj(_, {hist: [true, false], path: ["cursor", "present"]}), _.toArray, _.seq));
+      $.reset(self.$blocking, true);
       const {id, seat} = _.deref(self); //TODO diagnose Observable deref workaround
       _.fmap(self.workboard.request("move", id, seat, [command], self.accessToken), function({data, error, status}) {
         error && $.reset($.chan(self, "error"), new Error(`Move failed.`));
+        error && $.reset(self.$blocking, false);
         console.log({status, data, error});
       });
       break;

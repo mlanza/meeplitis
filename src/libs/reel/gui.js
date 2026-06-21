@@ -87,7 +87,7 @@ export async function gui(describe, desc, template) {
       _.unique,
       _.toArray));
 
-  const $gui = $.pipe($.map(function(d){
+  const $gui = $.pipe($change, _.map(function(d){
     const {diff, gui} = d;
     const [now, past] = d.hist;
     const curr = now?.perspective ?? null;
@@ -95,7 +95,7 @@ export async function gui(describe, desc, template) {
     const frame = now;
     const hist = [curr, prior];
     return {hist, diff, frame, ...gui};
-  }, $change), _.filter(function({hist}){ return _.getIn(_.first(hist), ["state"]); }));
+  }), _.filter(function({hist}){ return _.getIn(_.first(hist), ["state"]); }));
 
   const title = _.chain(ttl, dom.text, _.split(_, "|"), _.first, _.trim);
   dom.text(ttl, `${title} #${tableId}`);
@@ -191,7 +191,7 @@ export async function gui(describe, desc, template) {
     dom.attr(el, "data-event-type", event.type);
     dom.attr(el, "data-undoable", undoable == touch ? "1" : undoable ? "0" : null);
     dom.attr(el, "data-undoer", undoer);
-    dom.html(dom.sel1("p", els.event), desc(event));
+    dom.html(dom.sel1("p", els.event), desc(event, seated));
     dom.text(dom.sel1("span.seat", els.event), event.seat);
     dom.toggleClass(els.event, "automatic", !player);
     dom.toggleClass(el, "bwd", bwd);

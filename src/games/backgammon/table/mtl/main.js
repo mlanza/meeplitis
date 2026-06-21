@@ -51,7 +51,7 @@ function relativeRank(seat, details){
   return {...details, from, to};
 }
 
-function desc({type, details, seat}){
+function desc({type, details, seat}, seated){
   switch(type) {
     case "rolled": {
       const {dice} = details;
@@ -307,15 +307,15 @@ function getMove({from, to}, seat) {
   }, g.moves(game, { type: ["move", "enter", "bear-off"], seat }));
 }
 
-const {seat, seated, exec, $gui, $wip} = await gui(describe, desc, template);
+const {seat, exec, $gui, $wip} = await gui(describe, desc, template);
 
 $.sub($gui, function ({ hist: [curr, prior], hist: [{ up, state, state: { status, dice, off, stakes, holdsCube } }], wip, which, game, seat, time: { present } }) {
   if (which !== 1) {
     const checkers = getCheckers(curr.state);
+    $.eachIndexed(function(seat, off){
+      dom.text(dom.sel1(`[data-seat="${seat}"] span.off`, el), off);
+    }, off);
     if (prior) {
-      $.eachIndexed(function(seat, off){
-        dom.text(dom.sel1(`[data-seat="${seat}"] span.off`, el), off);
-      }, off);
       updatePositioning(diffCheckers(checkers, getCheckers(prior.state)));
     } else {
       initialPositioning(checkers);

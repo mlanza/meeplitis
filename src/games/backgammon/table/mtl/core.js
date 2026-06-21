@@ -377,8 +377,8 @@ function blocked2(cmd, self){
 }
 
 function blocked1(self){
-  const {dice, rolled} = _.deref(self);
-  return rolled && _.includes([2, 4], _.count(dice));
+  const {dice, rolled, off, up} = _.deref(self);
+  return rolled  && _.get(off, up) !== 15 && _.includes([2, 4], _.count(dice));
 }
 
 export const blocked = _.overload(null, blocked1, blocked2);

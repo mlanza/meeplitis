@@ -4,7 +4,7 @@ import dom from "../atomic_/dom.js";
 import { reg } from "../cmd.js";
 import * as d from "./diff.js";
 import supabase from "/libs/supabase.js";
-import {reel, getSeats, isPresent} from "./shell.js";
+import {reel, getSeats} from "./shell.js";
 import { presence } from "/libs/online.js";
 import { $online, session, getfn } from "/libs/session.js";
 import { relink } from "/libs/links.js";
@@ -67,15 +67,14 @@ export async function gui(describe, desc, template) {
   const $up = $.chan($reel, "up");
   const $ready = $.chan($reel, "ready");
   const $working = $.chan($reel, "working");
+  const $resolved = $.chan($reel, "resolved");
   const $table = $.chan($reel, "table");
+  const $timer = $.chan($reel, "timer");
   const $touch = $.chan($reel, "touch");
   const $diff = $.chan($reel, "diff");
   const $change = $.chan($reel, "change");
   const $status = $.map(_.get(_, "status"), $table);
-  const $present = $.pipe($.map(function(cursor){
-    const {pos, max} = cursor ?? {};
-    return isPresent(pos, max);
-  }, $cursor), _.filter(_.isSome));
+  const $present = $.pipe($.map(_.get(_, "present"), $cursor), _.filter(_.isSome));
   //const $scored = $.map(_.get(_, "scored"), $table);
   const $remarks = $.map(_.get(_, "remark"), $table);
   const $described = $.map(_.pipe(_.get(_, "config"), describe), $table);
@@ -278,7 +277,7 @@ export async function gui(describe, desc, template) {
     exec({type: "at", details: {touch}});
   }));
 
-  return $.doto({seat, seats, seated, exec, $reel, $setting, $queue, $ready, $working, $act, $wip, $gui, $table, $touch, $diff, $change, $updated}, reg);
+  return $.doto({seat, seats, seated, exec, $reel, $setting, $queue, $ready, $working, $resolved, $act, $wip, $gui, $table, $touch, $diff, $timer, $change, $updated}, reg);
 }
 
 export function player(username, avatar_url, seat, ...contents){

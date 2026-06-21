@@ -32,10 +32,9 @@ export class Workboard {
     }
 
     const {blocking} = entry;
-    const startedAt = Date.now(),
-          ticketId = `${this._nextTicket++}`;
+    const ticketId = `${this._nextTicket++}`;
 
-    this._addTicket(ticketId, {key, args, blocking, startedAt});
+    this._addTicket(ticketId, {key, args, blocking});
 
     let result;
     try {

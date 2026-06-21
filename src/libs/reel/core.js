@@ -12,7 +12,8 @@ export function init(id, seat) {
       pos: null,
       at: null,
       max: null,
-      direction: FORWARD
+      present: null,
+      direction: FORWARD,
     },
     perspectives: {} // cache
   };
@@ -22,9 +23,10 @@ export function position(n) {
   return function(state){
     const max = _.count(state.touches) - 1;
     const pos = _.clamp(n, 0, max);
+    const present = pos === max;
     const direction = pos === 0 || pos > state.cursor.pos ? FORWARD : BACKWARD;
     const at = _.nth(state.touches, pos);
-    const cursor = _.assoc(state.cursor, "pos", pos, "max", max, "at", at, "direction", direction);
+    const cursor = _.assoc(state.cursor, "pos", pos, "max", max, "at", at, "present", present, "direction", direction);
     return _.assoc(state, "cursor", cursor);
   }
 }
@@ -35,11 +37,13 @@ export function resize(max){
     const direction = cursor.max == null || cursor.max < max ? BACKWARD : FORWARD;
     const pos = _.clamp(cursor.pos == null ? max : cursor.pos, 0, max);
     const at = _.get(touches, pos);
+    const present = pos === max;
     return _.chain(state,
       _.assocIn(_, ["cursor", "direction"], direction),
       _.assocIn(_, ["cursor", "at"], at),
       _.assocIn(_, ["cursor", "max"], max),
-      _.assocIn(_, ["cursor", "pos"], pos));
+      _.assocIn(_, ["cursor", "pos"], pos),
+      _.assocIn(_, ["cursor", "present"], present));
   }
 }
 

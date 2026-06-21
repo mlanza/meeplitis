@@ -58,6 +58,8 @@ function throttledOn(source, pred, ms = 1000){
   }));
 }
 
+const throttedBool = s => throttledOn(s, value => value === true);
+
 export function getfn(name, params, accessToken){
   const apikey = supabase.supabaseKey;
   const headers = {
@@ -78,10 +80,6 @@ export function getSeated(_table_id, accessToken = null){
 
 export function getSeats(_table_id, accessToken){ //user can hold multiple seats in dummy games or, as a spectator, none at all
   return accessToken ? getfn("seats", {_table_id}, accessToken) : Promise.resolve([]);
-}
-
-export function isPresent(pos, max){
-  return _.isNumber(pos) && max === pos;
 }
 
 function getTouches(_table_id, accessToken){
@@ -175,6 +173,7 @@ export function reel(tableId, seat = null, accessToken = null){
   const $cursor = $.map(_.get(_, "cursor"), $timeline);
   const $table = table(tableId);
   const $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), _.filter(_.isSome));
+  const $started = $.map(({status}) => status === "started", $table);
   const $scratch = $.atom({});
   const $sink = $.atom(null);
   const $wip = $.cursor($scratch, function(){
@@ -182,8 +181,9 @@ export function reel(tableId, seat = null, accessToken = null){
   });
   const $error = $.atom(null);
   const $queue = $.atom({});
-  const $ready = _.chain($.map(isReady, $queue), s => throttledOn(s, value => value === true));
+  const $ready = $.map(isReady, $queue);
   const $working = $.map(isWorking, $queue);
+  const $blockers = $.atom(null);
 
   function spectator(){
     const {seat} = _.deref(self) || {};
@@ -204,25 +204,9 @@ export function reel(tableId, seat = null, accessToken = null){
   wb.register("move", move, true);
   wb.register("do-over", undoMove, true);
 
-  const $act = $.map(function(timeline, table, ready){
-    if (!table || !ready) return false;
-    const {cursor, perspectives} = timeline;
-    const {at, pos, max} = cursor;
-    const {status} = table;
-    const started = status === "started";
-    const present = isPresent(pos, max);
-    const perspective = _.maybe(at, _.get(perspectives, _));
-    if (!perspective) return false;
-    const {actionable} = perspective;
-    return present && actionable && ready && started;
-  }, $timeline, $table, $ready);
-
   const $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table);
   const $seated = $.fromPromise(getSeated(tableId, accessToken));   //seated is everyone's info.
   const $seats = $.fromPromise(getSeats(tableId, accessToken)); //seats answers which seats are yours? (1 seat per player, except at dummy tables)
-  const $tableInfo = $.map(function({ id, release, game_id }){
-
-  }, $table);
   const $setting = $.pipe($.then(async function({ id, release, game_id, config }, seated, seats){
     const { slug, make } = await supabase
       .from('games')
@@ -242,11 +226,21 @@ export function reel(tableId, seat = null, accessToken = null){
   }, $timeline);
   const $perspective = $.map(r.perspective, $timeline);
   const $tl = $.map(_.merge, $timeline, $.pipe($perspective, _.map(_.assoc(null, "perspective", _))));
-  const $base = $.pipe($.map(function(error, seated, seats, up, undoable, setting, wip, timeline){
+  const $inner = $.pipe($.map(function(error, seated, seats, up, undoable, setting, wip, timeline){
     return $.doto({...setting, ...timeline, error, seated, seats, up, undoable, wip}, fetchPerspectives);
   }, $error, $seated, $seats, $up, $undoable, $setting, $wip, $tl), _.filter(_.isSome));
-  const $feed = $.pipe($base, _.filter(_.and(_.isSome, function({cursor, perspective}){
-    return !!(cursor && perspective && cursor.at && cursor.at === perspective?.event?.id) || !cursor.at;
+  const $base = $.map(function(state){
+    const {cursor} = state;
+    const resolved = isResolved(state);
+    return {...state, resolved};
+  }, $inner);
+
+  const $act = $.map(function(ready, started, {perspective, cursor: {present}, resolved}){
+    return ready && resolved && present && started && perspective?.actionable;
+  }, $ready, $started, $base);
+
+  const $feed = $.pipe($base, _.filter(_.and(_.isSome, function({resolved, cursor}){
+    return resolved || !cursor.at;
   })), _.map(_.pipe(
     _.dissoc(_, "perspectives"),
     _.dissoc(_, "touches"),
@@ -261,9 +255,8 @@ export function reel(tableId, seat = null, accessToken = null){
   }));
 
   $.sub($timer, function(){
-    const {cursor: {pos, max}} = _.deref($timeline);
+    const {cursor: {pos, max, present}} = _.deref($timeline);
     if (pos !== null) {
-      const present = isPresent(pos, max);
       if (present) {
         $timer.stop();
       } else {
@@ -274,8 +267,7 @@ export function reel(tableId, seat = null, accessToken = null){
 
   $.sub($touch, function(touch){
     const {cursor} = _.deref($timeline);
-    const {pos, max} = cursor || {};
-    const present = isPresent(pos, max);
+    const {present} = cursor || {};
     _.fmap(wb.request("getTouches", tableId, accessToken),
       _.pipe(r.addTouches, $.swap($timeline, _)),
       present ? () => $timer.start() : _.noop); //if already in the present when the game is touched, catch things up.
@@ -296,6 +288,10 @@ export function reel(tableId, seat = null, accessToken = null){
     }, _));
   }
 
+  function isResolved({cursor, perspective}){
+    return !!(cursor && perspective && cursor.at && cursor.at === perspective?.event?.id);
+  }
+
   function toGui(now, past){
     const curr = now?.perspective ?? null;
     const prior = past?.perspective ?? null;
@@ -312,8 +308,7 @@ export function reel(tableId, seat = null, accessToken = null){
     const player = curr?.actor;
     const game = curr?.game;
     const { cursor } = now ?? {};
-    const { max, pos } = cursor ?? {};
-    const present = isPresent(pos, max);
+    const { max, pos, present } = cursor ?? {};
     const which = now?.wip === past?.wip ? 0 : 1;
     const wip = now?.wip;
     const bwd =  now?.cursor?.direction <= 0;

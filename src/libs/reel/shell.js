@@ -124,8 +124,9 @@ export function reel(tableId, seat = null, accessToken = null){
   const $table = table(tableId);
   const $touch = $.pipe($.map(_.get(_, "last_touch_id"), $table), _.filter(_.isSome));
   const $scratch = $.atom({});
+  const $sink = $.atom(null);
   const $wip = $.cursor($scratch, function(){
-    return path(self);
+    return path($sink);
   });
   const $error = $.atom(null);
   const $queue = $.atom({});
@@ -188,9 +189,9 @@ export function reel(tableId, seat = null, accessToken = null){
   }, $timeline);
   const $perspective = $.map(r.perspective, $timeline);
   const $tl = $.map(_.merge, $timeline, $.pipe($perspective, _.map(_.assoc(null, "perspective", _))));
-  const $base = $.pipe($.map(function(error, seated, seats, up, undoable, scratch, setting, ready, act, timeline){
-    return $.doto({...setting, ...timeline, error, seated, seats, up, undoable, scratch, ready, act}, fetchPerspectives);
-  }, $error, $seated, $seats, $up, $undoable, $scratch, $setting, $ready, $act, $tl), _.filter(_.isSome));
+  const $base = $.pipe($.map(function(error, seated, seats, up, undoable, setting, ready, wip, act, timeline){
+    return $.doto({...setting, ...timeline, error, seated, seats, up, undoable, ready, wip, act}, fetchPerspectives);
+  }, $error, $seated, $seats, $up, $undoable, $setting, $ready, $wip, $act, $tl), _.filter(_.isSome));
   const $feed = $.pipe($base, _.filter(_.and(_.isSome, function({cursor, perspective}){
     return !!(cursor && perspective && cursor.at && cursor.at === perspective?.event?.id) || !cursor.at;
   })), _.map(_.pipe(
@@ -242,12 +243,46 @@ export function reel(tableId, seat = null, accessToken = null){
     }, _));
   }
 
+  function toGui(now, past){
+    const curr = now?.perspective ?? null;
+    const prior = past?.perspective ?? null;
+    const frame = now;
+    const motion = curr && prior && now?.cursor?.pos !== past?.cursor?.pos;
+    const step = motion ? now?.cursor?.pos - past?.cursor?.pos : 0;
+    const offset = now?.cursor ? now?.cursor?.pos - now?.cursor?.max : null;
+    const touch = now?.cursor?.at;
+    const last_acting_seat = now?.last_acting_seat;
+    const seated = now?.seated;
+    const seat = now?.seat; //TODO
+    const undoable = now?.undoable;
+    const undoer = seat === _.detectIndex(_.comp(_.eq(last_acting_seat, _), _.get(_, "seat_id")), seated);
+    const player = curr?.actor;
+    const game = curr?.game;
+    const { cursor } = now ?? {};
+    const { max, pos } = cursor ?? {};
+    const present = isPresent(pos, max);
+    const which = now?.wip === past?.wip ? 0 : 1;
+    const wip = now?.wip;
+    const bwd =  now?.cursor?.direction <= 0;
+    const time = {
+      bwd,
+      touch,
+      step,
+      offset,
+      motion,
+      present
+    }
+    return {wip, which, game, seat, undoable, undoer, player, time};
+  }
+
   const $hist = $.hist($feed);
-  const $diff = $.map(function(h){
+  const $diff = $.pipe($.map(function(h){
     const hist = h ?? [];
+    const [curr, prior] = hist;
     const diff = _.seq(d.diff(...hist));
-    return {hist, diff};
-  }, $hist);
+    const gui = toGui(curr, prior);
+    return {hist, diff, gui};
+  }, $hist), _.filter(_.get(_, "diff")));
   const $updated = $.map(_.pipe(_.get(_, "diff"), _.mapa(_.get(_, "path"), _)), $diff);
 
   const $less = $.pipe($diff,
@@ -262,7 +297,6 @@ export function reel(tableId, seat = null, accessToken = null){
       return curr;
     }), _.dedupe());
 
-  const $sink = $.atom(null);
   $.sub($less, $.reset($sink, _));
   const $state = $.map(_.identity, $sink);
 

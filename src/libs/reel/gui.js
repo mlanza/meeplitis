@@ -10,6 +10,7 @@ import { $online, session, getfn } from "/libs/session.js";
 import { relink } from "/libs/links.js";
 import { rankings } from "/components/table/ui.js";
 import "/libs/dummy.js";
+import { guids } from "https://meeplitis.com/libs/atomic/core.js";
 
 const params = new URLSearchParams(location.search);
 const tableId = params.get('id');
@@ -59,7 +60,6 @@ export async function gui(describe, desc, template) {
   const $wip = $.chan($reel, "wip");
   const $error = $.chan($reel, "error");
   const $queue = $.chan($reel, "queue");
-  const $hist = $.chan($reel, "hist");
   const $setting = $.chan($reel, "setting");
   const $updated = $.chan($reel, "updated");
   const $cursor = $.map(_.get(_, "cursor"), $reel);
@@ -86,38 +86,15 @@ export async function gui(describe, desc, template) {
       _.unique,
       _.toArray));
 
-  const $gui = $.pipe($.map(function([now, past], wip){
+  const $gui = $.pipe($.map(function(d){
+    const {diff, gui} = d;
+    const [now, past] = d.hist;
     const curr = now?.perspective ?? null;
     const prior = past?.perspective ?? null;
     const frame = now;
     const hist = [curr, prior];
-    const diff = _.chain(d.diff(curr, prior), _.seq);
-    const motion = curr && prior && now?.cursor?.pos !== past?.cursor?.pos;
-    const step = motion ? now?.cursor?.pos - past?.cursor?.pos : 0;
-    const offset = now?.cursor ? now?.cursor?.pos - now?.cursor?.max : null;
-    const touch = now?.cursor?.at;
-    const last_acting_seat = now?.last_acting_seat;
-    const seated = now?.seated;
-    const seat = now?.seat; //TODO
-    const undoable = now?.undoable;
-    const undoer = seat === _.detectIndex(_.comp(_.eq(last_acting_seat, _), _.get(_, "seat_id")), seated);
-    const player = curr?.actor;
-    const game = curr?.game;
-    const { cursor } = now ?? {};
-    const { max, pos } = cursor ?? {};
-    const present = isPresent(pos, max);
-    const which = now?.scratch === past?.scratch ? 0 : 1;
-    const bwd =  now?.cursor?.direction <= 0;
-    const time = {
-      bwd,
-      touch,
-      step,
-      offset,
-      motion,
-      present
-    }
-    return {hist, diff, frame, wip, which, game, seat, undoable, undoer, player, time};
-  }, $hist, $wip), _.filter(function({hist}){ return _.getIn(_.first(hist), ["state"]); }));
+    return {hist, diff, frame, ...gui};
+  }, $diff), _.filter(function({hist}){ return _.getIn(_.first(hist), ["state"]); }));
 
   const title = _.chain(ttl, dom.text, _.split(_, "|"), _.first, _.trim);
   dom.text(ttl, `${title} #${tableId}`);
@@ -300,7 +277,7 @@ export async function gui(describe, desc, template) {
     exec({type: "at", details: {touch}});
   }));
 
-  return $.doto({seat, seats, seated, exec, $reel, $setting, $queue, $ready, $working, $act, $wip, $gui, $table, $touch, $hist, $diff, $updated}, reg);
+  return $.doto({seat, seats, seated, exec, $reel, $setting, $queue, $ready, $working, $act, $wip, $gui, $table, $touch, $diff, $updated}, reg);
 }
 
 export function player(username, avatar_url, seat, ...contents){

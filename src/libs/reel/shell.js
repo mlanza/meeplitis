@@ -182,7 +182,7 @@ export function reel(tableId, seat = null, accessToken = null){
   });
   const $error = $.atom(null);
   const $queue = $.atom({});
-  const $ready = $.map(isReady, $queue);
+  const $ready = _.chain($.map(isReady, $queue), s => throttledOn(s, value => value === true));
   const $working = $.map(isWorking, $queue);
 
   function spectator(){
@@ -204,7 +204,7 @@ export function reel(tableId, seat = null, accessToken = null){
   wb.register("move", move, true);
   wb.register("do-over", undoMove, true);
 
-  const $act = _.chain($.map(function(timeline, table, ready){
+  const $act = $.map(function(timeline, table, ready){
     if (!table || !ready) return false;
     const {cursor, perspectives} = timeline;
     const {at, pos, max} = cursor;
@@ -215,7 +215,7 @@ export function reel(tableId, seat = null, accessToken = null){
     if (!perspective) return false;
     const {actionable} = perspective;
     return present && actionable && ready && started;
-  }, $timeline, $table, $ready), s => throttledOn(s, value => value === true));
+  }, $timeline, $table, $ready);
 
   const $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table);
   const $seated = $.fromPromise(getSeated(tableId, accessToken));   //seated is everyone's info.

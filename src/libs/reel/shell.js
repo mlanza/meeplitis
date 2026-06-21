@@ -6,6 +6,58 @@ import { timer } from "./timer.js";
 import * as d from  "./diff.js";
 import { Workboard } from "./workboard.js";
 
+function throttledOn(source, pred, ms = 1000){
+  const initial = _.deref(source);
+  const sink = $.atom(initial);
+
+  let id = null;
+  let current = initial;
+  let pending = null;
+
+  function clear(){
+    if (id != null) {
+      clearTimeout(id);
+      id = null;
+    }
+  }
+
+  function release(){
+    id = null;
+
+    if (_.eq(pending, current) && pred(current)) {
+      $.reset(sink, pending);
+    }
+
+    pending = null;
+  }
+
+  const unsub = $.sub(source, function(value){
+    current = value;
+
+    if (pred(value)) {
+      pending = value;
+
+      clear();
+
+      id = setTimeout(release, ms);
+    } else {
+      clear();
+
+      pending = null;
+
+      $.reset(sink, value);
+    }
+  });
+
+  return _.doto(sink, _.specify(_.IDisposable, {
+    dispose: function(){
+      clear();
+      unsub();
+      _.dispose(sink);
+    }
+  }));
+}
+
 export function getfn(name, params, accessToken){
   const apikey = supabase.supabaseKey;
   const headers = {
@@ -152,7 +204,7 @@ export function reel(tableId, seat = null, accessToken = null){
   wb.register("move", move, true);
   wb.register("do-over", undoMove, true);
 
-  const $act = $.map(function(timeline, table, ready){
+  const $act = _.chain($.map(function(timeline, table, ready){
     if (!table || !ready) return false;
     const {cursor, perspectives} = timeline;
     const {at, pos, max} = cursor;
@@ -163,7 +215,8 @@ export function reel(tableId, seat = null, accessToken = null){
     if (!perspective) return false;
     const {actionable} = perspective;
     return present && actionable && ready && started;
-  }, $timeline, $table, $ready);
+  }, $timeline, $table, $ready), s => throttledOn(s, value => value === true));
+
   const $up = $.map(_.pipe(_.get(_, "up"), _.includes(_, seat)), $table);
   const $seated = $.fromPromise(getSeated(tableId, accessToken));   //seated is everyone's info.
   const $seats = $.fromPromise(getSeats(tableId, accessToken)); //seats answers which seats are yours? (1 seat per player, except at dummy tables)
@@ -189,9 +242,9 @@ export function reel(tableId, seat = null, accessToken = null){
   }, $timeline);
   const $perspective = $.map(r.perspective, $timeline);
   const $tl = $.map(_.merge, $timeline, $.pipe($perspective, _.map(_.assoc(null, "perspective", _))));
-  const $base = $.pipe($.map(function(error, seated, seats, up, undoable, setting, ready, wip, act, timeline){
-    return $.doto({...setting, ...timeline, error, seated, seats, up, undoable, ready, wip, act}, fetchPerspectives);
-  }, $error, $seated, $seats, $up, $undoable, $setting, $ready, $wip, $act, $tl), _.filter(_.isSome));
+  const $base = $.pipe($.map(function(error, seated, seats, up, undoable, setting, wip, timeline){
+    return $.doto({...setting, ...timeline, error, seated, seats, up, undoable, wip}, fetchPerspectives);
+  }, $error, $seated, $seats, $up, $undoable, $setting, $wip, $tl), _.filter(_.isSome));
   const $feed = $.pipe($base, _.filter(_.and(_.isSome, function({cursor, perspective}){
     return !!(cursor && perspective && cursor.at && cursor.at === perspective?.event?.id) || !cursor.at;
   })), _.map(_.pipe(
@@ -280,32 +333,32 @@ export function reel(tableId, seat = null, accessToken = null){
     const hist = h ?? [];
     const [curr, prior] = hist;
     const diff = _.seq(d.diff(...hist));
+    const props = _.chain(diff, _.map(_.pipe(_.get(_, "path"), _.first), _), _.unique, _.compact, _.toArray);
     const gui = toGui(curr, prior);
-    return {hist, diff, gui};
-  }, $hist), _.filter(_.get(_, "diff")));
+    return {hist, diff, props, gui};
+  }, $hist));
   const $updated = $.map(_.pipe(_.get(_, "diff"), _.mapa(_.get(_, "path"), _)), $diff);
 
-  const $less = $.pipe($diff,
-    _.filter(function({diff}){
-      return _.reduce(function(memo, {path}){
+  const $change = $.pipe($diff,
+    _.filter(_.get(_, "diff")),
+    _.filter(function({diff, props}){
+      return !_.eq(props, []) && !_.eq(props, ["cursor"]) && _.reduce(function(memo, {path}){
         const [prop] = path;
-        const suppress = _.includes(["perspectives", "touches", "undoables", "undoable"], prop);
+        const suppress = _.eq(path, ["perspective", "game"]) || _.includes(["perspectives", "touches", "undoables", "undoable"], prop);
         return memo || !suppress;
       }, false, diff);
     }),
-    _.map(function({hist: [curr]}){
-      return curr;
-    }), _.dedupe());
+    _.dedupe());
 
-  $.sub($less, $.reset($sink, _));
+  $.sub($change, _.map(({hist: [curr]}) => curr), $.reset($sink, _));
   const $state = $.map(_.identity, $sink);
 
-  const self = new Reel($timeline, $setting, $table, $touch, $cursor, $error, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $working, $timer, $scratch, $wip, $queue, wb, accessToken);
+  const self = new Reel($timeline, $setting, $table, $touch, $cursor, $error, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $change, $updated, $working, $timer, $scratch, $wip, $queue, wb, accessToken);
 
   return self;
 }
 
-function Reel($timeline, $setting, $table, $touch, $cursor, $error, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $updated, $working, $timer, $scratch, $wip, $queue, workboard, accessToken){
+function Reel($timeline, $setting, $table, $touch, $cursor, $error, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $change, $updated, $working, $timer, $scratch, $wip, $queue, workboard, accessToken){
   this.$timeline = $timeline;
   this.$setting = $setting;
   this.$table = $table;
@@ -321,6 +374,7 @@ function Reel($timeline, $setting, $table, $touch, $cursor, $error, $ready, $act
   this.$state = $state;
   this.$hist = $hist;
   this.$diff = $diff,
+  this.$change = $change;
   this.$updated = $updated;
   this.$timer = $timer;
   this.$scratch = $scratch;

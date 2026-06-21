@@ -64,12 +64,13 @@ export async function gui(describe, desc, template) {
   const $updated = $.chan($reel, "updated");
   const $cursor = $.map(_.get(_, "cursor"), $reel);
   const $act = $.chan($reel, "act");
-  const $up = $.map(_.get(_, "up"), $reel);
-  const $ready = $.map(_.get(_, "ready"), $reel);
+  const $up = $.chan($reel, "up");
+  const $ready = $.chan($reel, "ready");
   const $working = $.chan($reel, "working");
   const $table = $.chan($reel, "table");
   const $touch = $.chan($reel, "touch");
   const $diff = $.chan($reel, "diff");
+  const $change = $.chan($reel, "change");
   const $status = $.map(_.get(_, "status"), $table);
   const $present = $.pipe($.map(function(cursor){
     const {pos, max} = cursor ?? {};
@@ -94,7 +95,7 @@ export async function gui(describe, desc, template) {
     const frame = now;
     const hist = [curr, prior];
     return {hist, diff, frame, ...gui};
-  }, $diff), _.filter(function({hist}){ return _.getIn(_.first(hist), ["state"]); }));
+  }, $change), _.filter(function({hist}){ return _.getIn(_.first(hist), ["state"]); }));
 
   const title = _.chain(ttl, dom.text, _.split(_, "|"), _.first, _.trim);
   dom.text(ttl, `${title} #${tableId}`);
@@ -277,7 +278,7 @@ export async function gui(describe, desc, template) {
     exec({type: "at", details: {touch}});
   }));
 
-  return $.doto({seat, seats, seated, exec, $reel, $setting, $queue, $ready, $working, $act, $wip, $gui, $table, $touch, $diff, $updated}, reg);
+  return $.doto({seat, seats, seated, exec, $reel, $setting, $queue, $ready, $working, $act, $wip, $gui, $table, $touch, $diff, $change, $updated}, reg);
 }
 
 export function player(username, avatar_url, seat, ...contents){

@@ -265,11 +265,11 @@ export function reel(tableId, seat = null, accessToken = null){
   const $inner = $.pipe($.map(function(error, seated, seats, up, undoable, setting, wip, timeline){
     return $.doto({...setting, ...timeline, error, seated, seats, up, undoable, wip}, fetchPerspectives);
   }, $error, $seated, $seats, $up, $undoable, $setting, $wip, $tl), _.filter(_.isSome));
-  const $base = $.map(function(state){
+  const $base = $.pipe($.map(function(state){
     const {cursor} = state;
     const resolved = isResolved(state);
     return {...state, resolved};
-  }, $inner);
+  }, $inner), _.filter(_.isSome));
 
   const $act = $.map(function(ready, started, blocking, {perspective, cursor: {present}, resolved}){
     return ready && resolved && present && started && !blocking && perspective?.actionable;

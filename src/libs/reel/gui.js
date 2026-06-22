@@ -42,7 +42,10 @@ const els = {
 
 function later($what){
   return new Promise(function(resolve){
-    $.sub($what, _.filter(_.isSome), resolve);
+    const unsub = $.sub($what, _.filter(_.isSome), function(value){
+      resolve(value);
+      unsub();
+    });
   });
 }
 
@@ -76,11 +79,13 @@ export async function gui(describe, desc, template) {
   const $change = $.chan($reel, "change");
   const $status = $.map(_.get(_, "status"), $table);
   const $present = $.pipe($.map(_.get(_, "present"), $cursor), _.filter(_.isSome));
+  const $seated = $.chan($reel, "seated");
   //const $scored = $.map(_.get(_, "scored"), $table);
   const $remarks = $.map(_.get(_, "remark"), $table);
   const $described = $.map(_.pipe(_.get(_, "config"), describe), $table);
-  const seated = await later($.map(_.get(_, "seated"), $reel));
   //const seats = await later($.map(_.get(_, "seats"), $reel));
+  const seated = await later($seated);
+
   const $presence = presence($online,
     _.chain(seated,
       _.mapa(_.get(_, "username"), _),

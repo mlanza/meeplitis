@@ -59,7 +59,7 @@ export async function gui(describe, desc, template) {
   }
 
   const $reel = reel(tableId, seat, session?.accessToken);
-  const exec = $.dispatch($reel, _);
+  const $seated = $.chan($reel, "seated");
   const $wip = $.chan($reel, "wip");
   const $error = $.chan($reel, "error");
   const $queue = $.chan($reel, "queue");
@@ -79,7 +79,6 @@ export async function gui(describe, desc, template) {
   const $change = $.chan($reel, "change");
   const $status = $.map(_.get(_, "status"), $table);
   const $present = $.pipe($.map(_.get(_, "present"), $cursor), _.filter(_.isSome));
-  const $seated = $.chan($reel, "seated");
   //const $scored = $.map(_.get(_, "scored"), $table);
   const $remarks = $.map(_.get(_, "remark"), $table);
   const $described = $.map(_.pipe(_.get(_, "config"), describe), $table);
@@ -101,6 +100,8 @@ export async function gui(describe, desc, template) {
     const hist = [curr, prior];
     return {hist, diff, frame, ...gui};
   }), _.filter(function({hist}){ return _.getIn(_.first(hist), ["state"]); }));
+
+  const exec = $.dispatch($reel, _);
 
   const title = _.chain(ttl, dom.text, _.split(_, "|"), _.first, _.trim);
   dom.text(ttl, `${title} #${tableId}`);

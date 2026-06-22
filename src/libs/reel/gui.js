@@ -62,7 +62,7 @@ export async function gui(describe, desc, template) {
   const $queue = $.chan($reel, "queue");
   const $setting = $.chan($reel, "setting");
   const $updated = $.chan($reel, "updated");
-  const $cursor = $.map(_.get(_, "cursor"), $reel);
+  const $cursor = $.chan($reel, "cursor");
   const $act = $.chan($reel, "act");
   const $blocking = $.chan($reel, "blocking");
   const $up = $.chan($reel, "up");

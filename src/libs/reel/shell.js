@@ -3,62 +3,8 @@ import $ from "../atomic_/shell.js";
 import * as r from "./core.js";
 import supabase from "../supabase.js";
 import { timer } from "./timer.js";
+import { workboard } from "./workboard.js";
 import * as d from  "./diff.js";
-import { Workboard } from "./workboard.js";
-
-function throttledOn(source, pred, ms = 1000){
-  const initial = _.deref(source);
-  const sink = $.atom(initial);
-
-  let id = null;
-  let current = initial;
-  let pending = null;
-
-  function clear(){
-    if (id != null) {
-      clearTimeout(id);
-      id = null;
-    }
-  }
-
-  function release(){
-    id = null;
-
-    if (_.eq(pending, current) && pred(current)) {
-      $.reset(sink, pending);
-    }
-
-    pending = null;
-  }
-
-  const unsub = $.sub(source, function(value){
-    current = value;
-
-    if (pred(value)) {
-      pending = value;
-
-      clear();
-
-      id = setTimeout(release, ms);
-    } else {
-      clear();
-
-      pending = null;
-
-      $.reset(sink, value);
-    }
-  });
-
-  return _.doto(sink, _.specify(_.IDisposable, {
-    dispose: function(){
-      clear();
-      unsub();
-      _.dispose(sink);
-    }
-  }));
-}
-
-const throttedBool = s => throttledOn(s, value => value === true);
 
 export function getfn(name, params, accessToken){
   const apikey = supabase.supabaseKey;
@@ -234,7 +180,7 @@ export function reel(tableId, seat = null, accessToken = null){
     $.reset($error, error);
   }
 
-  const wb = new Workboard(spectator, ready, reject, $queue);
+  const wb = workboard(spectator, ready, reject, $queue);
   wb.register("getTouches", getTouches);
   wb.register("getPerspective", getPerspective);
   wb.register("move", move, true);

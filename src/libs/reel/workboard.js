@@ -1,6 +1,10 @@
 import _ from "../atomic_/core.js";
 import $ from "../atomic_/shell.js";
 
+export function workboard(spectator, ready, reject, $queue) {
+  return new Workboard(spectator, ready, reject, $queue);
+}
+
 export class Workboard {
   constructor(spectator, ready, reject, $queue) {
     this.spectator = spectator;

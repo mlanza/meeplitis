@@ -71,7 +71,7 @@ await new Command()
   .option("--at <eventId:string>", "Navigate to moment in timeline")
   .option("--elide", "Hide extraneous data")
   .action(function (opts, tableId){
-    const $source = reel(tableId, opts.seat ?? null, opts.at ?? null, opts.token ?? null);
+    const $source = reel(tableId, _.maybe(opts.seat, parseInt), opts.at ?? null, opts.token ?? null);
     const $reel = opts.elide ? $.map(elide, $source) : $source;
     const $state = $.chan($source, "state");
     const $wip = $.chan($source, "wip");

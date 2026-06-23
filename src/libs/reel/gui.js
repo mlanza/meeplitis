@@ -10,7 +10,6 @@ import { $online, session, getfn } from "/libs/session.js";
 import { relink } from "/libs/links.js";
 import { rankings } from "/components/table/ui.js";
 import "/libs/dummy.js";
-import { guids } from "https://meeplitis.com/libs/atomic/core.js";
 
 const params = new URLSearchParams(location.search);
 const tableId = params.get('id');
@@ -19,7 +18,15 @@ if (!tableId) {
   location.href = "../../";
 }
 
-const selectedSeat = _.maybe(params.get("seat"), parseInt) ?? null;
+const seats = await getSeats(tableId, session?.accessToken);
+const selectedSeat = _.maybe(params.get("seat"), parseInt);
+const seat = selectedSeat === null ? _.first(seats) : _.detect(s => s === selectedSeat, seats);
+
+if (selectedSeat !== null && seat == null) {
+  params.delete("seat");
+  location.href = `${location.origin}${location.pathname}?${params.toString()}${location.hash}`;
+}
+
 const ttl = dom.sel1("head title");
 
 const {div, h1, a, span, img, ol, ul, li, sup} = dom.tags(['div', 'h1', 'a', 'span', 'img', 'ol', 'ul', 'li', 'sup']);
@@ -50,14 +57,6 @@ function later($what){
 }
 
 export async function gui(describe, desc, template) {
-  const seats = await getSeats(tableId, session?.accessToken);
-  const seat = selectedSeat === null ? _.first(seats) : _.detect(s => s === selectedSeat, seats) || _.first(seats);
-  const misselected = seat !== selectedSeat;
-  if (misselected) {
-    params.delete("seat");
-    //location.href = `${location.origin}${location.pathname}?${params.toString()}${location.hash}`;
-  }
-
   const $reel = reel(tableId, seat, location.hash.substring(1) || null, session?.accessToken);
   const $seated = $.chan($reel, "seated");
   const $wip = $.chan($reel, "wip");

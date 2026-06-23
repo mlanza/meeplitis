@@ -19,7 +19,7 @@ if (!tableId) {
 }
 
 const seats = await getSeats(tableId, session?.accessToken);
-//TODO add this? const seated = await getSeated(tableId, session?.accessToken);
+const seated = await getSeated(tableId, session?.accessToken);
 const selectedSeat = _.maybe(params.get("seat"), parseInt);
 const seat = selectedSeat === null ? _.first(seats) : _.detect(s => s === selectedSeat, seats);
 
@@ -100,9 +100,9 @@ $.doto(GUI,
   _.implement($.ISubscribe, {sub}),
   _.implement(_.IDeref, {deref}));
 
-export async function gui(describe, desc, template) {
+export function gui(describe, desc, template) {
   const $reel = reel(tableId, seat, location.hash.substring(1) || null, session?.accessToken);
-  const $seated = $.chan($reel, "seated");
+  //TODO ? const $seated = $.chan($reel, "seated");
   const $wip = $.chan($reel, "wip");
   const $error = $.chan($reel, "error");
   const $queue = $.chan($reel, "queue");
@@ -126,7 +126,7 @@ export async function gui(describe, desc, template) {
   const $remarks = $.map(_.get(_, "remark"), $table);
   const $described = $.map(_.pipe(_.get(_, "config"), describe), $table);
   //const seats = await later($.map(_.get(_, "seats"), $reel));
-  const seated = await later($seated);
+  //const seated = await later($seated);
 
   const $presence = presence($online,
     _.chain(seated,
@@ -261,7 +261,7 @@ export async function gui(describe, desc, template) {
     dom.attr(el, "data-event-type", event.type);
     dom.attr(el, "data-undoable", undoable == touch ? "1" : undoable ? "0" : null);
     dom.attr(el, "data-undoer", undoer);
-    dom.html(dom.sel1("p", els.event), desc(event, seated));
+    dom.html(dom.sel1("p", els.event), desc(event));
     dom.text(dom.sel1("span.seat", els.event), event.seat);
     dom.toggleClass(els.event, "automatic", !player);
     dom.toggleClass(el, "bwd", bwd);
@@ -342,11 +342,9 @@ export async function gui(describe, desc, template) {
     dom.addClass(el, "ack");
   });
 
-  const channels = {$reel, $setting, $queue, $ready, $working, $blocking, $resolved, $act, $wip, $gui, $table, $touch, $diff, $timer, $change, $updated};
+  reg({$gui, $reel});
 
-  reg(_.dissoc(channels, "$gui"));
-
-  return new GUI(seat, seats, seated, channels);
+  return new GUI(seat, seats, seated, {$reel, $setting, $queue, $ready, $working, $blocking, $resolved, $act, $wip, $gui, $table, $touch, $diff, $timer, $change, $updated});
 }
 
 export function player(username, avatar_url, seat, ...contents){

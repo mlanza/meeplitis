@@ -3,8 +3,8 @@ import $ from "/libs/atomic_/shell.js";
 import dom from "/libs/atomic_/dom.js";
 import * as c from "./core.js";
 import * as g from "/libs/game.js";
-import {describe} from "./ancillary.js";
-import {el, gui, outcome, retainAttr} from "/libs/reel/gui.js";
+import { describe } from "./ancillary.js";
+import { el, gui, outcome, retainAttr } from "/libs/reel/gui.js";
 import { reg } from "/libs/cmd.js";
 
 const {img, div, span} = dom.tags(['img', 'div', 'span']);
@@ -52,7 +52,7 @@ function relativeRank(seat, details){
   return {...details, from, to};
 }
 
-function desc({type, details, seat}, seated){
+function desc({type, details, seat}){
   switch(type) {
     case "rolled": {
       const {dice} = details;
@@ -308,11 +308,11 @@ function getMove({from, to}, seat) {
   }, g.moves(game, { type: ["move", "enter", "bear-off"], seat }));
 }
 
-const $gui = await gui(describe, desc, template);
+const $gui = gui(describe, desc, template);
 const $wip = $.chan($gui, "wip");
-const {seat} = $gui;
+const { seat, seated } = $gui;
 
-reg({$gui});
+reg({ $gui, $wip });
 
 $.sub($gui, function ({ changed, perspective: { up, state, state: { status, dice, off, stakes, holdsCube } }, wip, game, seat, time: { present } }) {
   const moves = g.moves(game, { type: ["move", "enter", "bear-off"], seat });

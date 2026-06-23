@@ -266,7 +266,7 @@ export function reel(tableId, seat = null, at = null, accessToken = null){
   $.sub($change, _.map(({hist: [curr]}) => curr), $.reset($sink, _));
   const $state = $.map(_.identity, $sink);
 
-  const self = new Reel(wb, accessToken, {$timeline, $setting, $table, $touch, $cursor, $blocking, $error, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $change, $updated, $working, $timer, $scratch, $wip, $queue});
+  const self = new Reel(wb, accessToken, $.doto({$timeline, $setting, $table, $touch, $cursor, $blocking, $error, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $change, $updated, $working, $timer, $scratch, $wip, $queue}, reg));
 
   at && $.sub($timeline, _.filter(_.get(_, "touches")), _.once(function(){
     $.dispatch(self, {type: "at", details: {touch: at}});

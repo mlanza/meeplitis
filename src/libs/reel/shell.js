@@ -111,8 +111,6 @@ function undoThru(undoables, touch){
   }, undoables);
 }
 
-const properties = _.pipe(_.map(_.pipe(_.get(_, "path"), _.first), _), _.unique, _.compact, _.toArray);
-
 function isResolved({cursor, perspective}){
   return !!(cursor && perspective && cursor.at && cursor.at === perspective?.event?.id);
 }
@@ -275,10 +273,10 @@ export function reel(tableId, seat = null, at = null, accessToken = null){
     const hist = h ?? [];
     const [curr, prior] = hist;
     const diff = _.seq(d.diff(...hist));
-    const props = properties(diff);
+    const changed = d.changed(curr, prior);
     const gui = toGui(curr, prior);
-    return {hist, diff, props, gui};
-  }, $hist));
+    return {hist, diff, changed, gui};
+  }, $hist), _.filter(_.get(_, "changed")));
   const $updated = $.map(_.pipe(_.get(_, "diff"), _.mapa(_.get(_, "path"), _)), $diff);
 
   $.sub($diff, function({diff}){
@@ -289,8 +287,8 @@ export function reel(tableId, seat = null, at = null, accessToken = null){
 
   const $change = $.pipe($diff,
     _.filter(_.get(_, "diff")),
-    _.filter(function({diff, props}){
-      return !_.eq(props, []) && !_.eq(props, ["cursor"]) && _.reduce(function(memo, {path}){
+    _.filter(function({diff}){
+      return _.reduce(function(memo, {path}){
         const [prop] = path;
         const suppress = _.eq(path, ["perspective", "game"]) || _.includes(["perspectives", "touches", "undoables", "undoable"], prop);
         return memo || !suppress;

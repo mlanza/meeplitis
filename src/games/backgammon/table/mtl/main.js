@@ -309,8 +309,15 @@ function getMove({from, to}, seat) {
 
 const {seat, exec, $gui, $wip} = await gui(describe, desc, template);
 
-$.sub($gui, function ({ hist: [curr, prior], hist: [{ up, state, state: { status, dice, off, stakes, holdsCube } }], wip, which, game, seat, time: { present } }) {
-  if (which !== 1) {
+$.sub($gui, function ({ changed, perspective: { up, state, state: { status, dice, off, stakes, holdsCube } }, wip, game, seat, time: { present } }) {
+  const moves = g.moves(game, { type: ["move", "enter", "bear-off"], seat });
+
+  if (changed.wip) {
+    return present ? workingCommand(wip, seat, state, game, el, moves) : null;
+  }
+
+  if (changed.perspective) {
+    const [curr, prior] = changed.perspective;
     const checkers = getCheckers(curr.state);
     $.eachIndexed(function(seat, off){
       dom.text(dom.sel1(`[data-seat="${seat}"] span.off`, el), off);
@@ -326,8 +333,6 @@ $.sub($gui, function ({ hist: [curr, prior], hist: [{ up, state, state: { status
   dom.text(dom.sel1("#cube", el), _.clamp(stakes, 2, 64));
   dom.attr(el, "data-up", up);
   dom.attr(el, "data-holds-cube", holdsCube);
-
-  const moves = g.moves(game, { type: ["move", "enter", "bear-off"], seat });
 
   _.chain(g.moves(game, { type: ["roll", "commit", "propose-double", "accept", "concede"], seat }),
     _.map(_.get(_, "type"), _),
@@ -352,10 +357,6 @@ $.sub($gui, function ({ hist: [curr, prior], hist: [{ up, state, state: { status
 
   dom.attr(el, "data-status", status);
   dom.removeClass(el, "error");
-
-  if (which === 1) {
-    return present ? workingCommand(wip, seat, state, game, el, moves) : null;
-  }
 });
 
 $.each(function(type){

@@ -90,15 +90,36 @@ export async function gui(describe, desc, template) {
       _.unique,
       _.toArray));
 
-  const $gui = $.pipe($change, _.map(function(d){
-    const {diff, gui} = d;
-    const [now, past] = d.hist;
+  const $gui = $.pipe($change, _.map(function(state){ //enrich with useful diff calculations
+    const { hist } = state;
+    const [ now, past ] = hist;
     const curr = now?.perspective ?? null;
     const prior = past?.perspective ?? null;
-    const frame = now;
-    const hist = [curr, prior];
-    return {hist, diff, frame, ...gui};
-  }), _.filter(function({hist}){ return _.getIn(_.first(hist), ["state"]); }));
+    const perspective = curr;
+    const motion = curr && prior && now?.cursor?.pos !== past?.cursor?.pos;
+    const step = motion ? now?.cursor?.pos - past?.cursor?.pos : 0;
+    const offset = now?.cursor ? now?.cursor?.pos - now?.cursor?.max : null;
+    const touch = now?.cursor?.at;
+    const last_acting_seat = now?.last_acting_seat;
+    const seated = now?.seated;
+    const seat = now?.seat; //TODO
+    const undoable = now?.undoable;
+    const undoer = seat === _.detectIndex(_.comp(_.eq(last_acting_seat, _), _.get(_, "seat_id")), seated);
+    const player = curr?.actor;
+    const game = curr?.game;
+    const present = now?.cursor?.present;
+    const wip = now?.wip;
+    const bwd =  now?.cursor?.direction <= 0;
+    const time = {
+      bwd,
+      touch,
+      step,
+      offset,
+      motion,
+      present
+    }
+    return {...state, wip, perspective, game, seat, undoable, undoer, player, time};
+  }), _.filter(_.get(_, "perspective")), _.filter(({changed}) => changed.perspective || changed.wip));
 
   const exec = $.dispatch($reel, _);
 
@@ -156,7 +177,7 @@ export async function gui(describe, desc, template) {
     location.hash = touch;
   });
 
-  $.sub($gui, function({hist: [{up, may}]}){
+  $.sub($gui, function({perspective: {up, may}}){
     $.eachIndexed(function(seat){
       dom.attr(dom.sel1(`[data-seat="${seat}"] [data-action]`, els.players), "data-action", _.includes(up, seat) ? "must" : (_.includes(may, seat) ? "may" : ""));
     }, seated);
@@ -180,7 +201,7 @@ export async function gui(describe, desc, template) {
   const $depressed = $.map(_.pipe(_.join(" ", _), _.lowerCase), dom.depressed(document.body));
   $.sub($depressed, dom.attr(el, "data-depressed", _));
 
-  $.sub($gui, function({hist: [{event}], undoer, undoable, player, time: {bwd, touch}}){
+  $.sub($gui, function({perspective: {event}, undoer, undoable, player, time: {bwd, touch}}){
     dom.removeClass(el, "ack");
     dom.removeClass(el, "error");
 

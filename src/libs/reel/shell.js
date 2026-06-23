@@ -115,37 +115,6 @@ function isResolved({cursor, perspective}){
   return !!(cursor && perspective && cursor.at && cursor.at === perspective?.event?.id);
 }
 
-function toGui(now, past){
-  const curr = now?.perspective ?? null;
-  const prior = past?.perspective ?? null;
-  const frame = now;
-  const motion = curr && prior && now?.cursor?.pos !== past?.cursor?.pos;
-  const step = motion ? now?.cursor?.pos - past?.cursor?.pos : 0;
-  const offset = now?.cursor ? now?.cursor?.pos - now?.cursor?.max : null;
-  const touch = now?.cursor?.at;
-  const last_acting_seat = now?.last_acting_seat;
-  const seated = now?.seated;
-  const seat = now?.seat; //TODO
-  const undoable = now?.undoable;
-  const undoer = seat === _.detectIndex(_.comp(_.eq(last_acting_seat, _), _.get(_, "seat_id")), seated);
-  const player = curr?.actor;
-  const game = curr?.game;
-  const { cursor } = now ?? {};
-  const { max, pos, present } = cursor ?? {};
-  const which = now?.wip === past?.wip ? 0 : 1;
-  const wip = now?.wip;
-  const bwd =  now?.cursor?.direction <= 0;
-  const time = {
-    bwd,
-    touch,
-    step,
-    offset,
-    motion,
-    present
-  }
-  return {wip, which, game, seat, undoable, undoer, player, time};
-}
-
 export const path = _.pipe(_.deref, _.getIn(_, ["cursor", "at"]), _.otherwise(_, "^^^^^"), _.array);
 
 export function reel(tableId, seat = null, at = null, accessToken = null){
@@ -274,8 +243,7 @@ export function reel(tableId, seat = null, at = null, accessToken = null){
     const [curr, prior] = hist;
     const diff = _.seq(d.diff(...hist));
     const changed = d.changed(curr, prior);
-    const gui = toGui(curr, prior);
-    return {hist, diff, changed, gui};
+    return {hist, diff, changed};
   }, $hist), _.filter(_.get(_, "changed")));
   const $updated = $.map(_.pipe(_.get(_, "diff"), _.mapa(_.get(_, "path"), _)), $diff);
 

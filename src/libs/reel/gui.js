@@ -151,7 +151,7 @@ export function gui(describe, desc, template) {
     const undoable = now?.undoable;
     const undoer = seat === _.detectIndex(_.comp(_.eq(last_acting_seat, _), _.get(_, "seat_id")), seated);
     const player = curr?.actor;
-    const game = curr?.game;
+    const game = curr?.args ? now.make(...curr?.args) : null;
     const present = now?.cursor?.present;
     const wip = now?.wip;
     const bwd =  now?.cursor?.direction <= 0;

@@ -230,9 +230,9 @@ export function reel(tableId, seat = null, at = null, accessToken = null){
       _.fmap(wb.request("getPerspective", tableId, at, seat, seatId, accessToken), function(perspective){
         const {up, may, event, event: {seat}, state} = perspective;
         const actionable = _.includes(up, player) || _.includes(may, player);
-        const game = make(seated, config, [event], state);
+        const args = [seated, config, [event], state];
         const actor = _.get(seated, seat);
-        $.swap($timeline, r.addPerspective(at, _.assoc(perspective, "actionable", actionable, "game", game, "actor", actor)));
+        $.swap($timeline, r.addPerspective(at, _.assoc(perspective, "actionable", actionable, "args", args, "actor", actor)));
       });
     }, _));
   }
@@ -255,10 +255,10 @@ export function reel(tableId, seat = null, at = null, accessToken = null){
 
   const $change = $.pipe($diff,
     _.filter(_.get(_, "diff")),
-    _.filter(function({diff}){
+    _.filter(function({diff, changed}){
       return _.reduce(function(memo, {path}){
         const [prop] = path;
-        const suppress = _.eq(path, ["perspective", "game"]) || _.includes(["perspectives", "touches", "undoables", "undoable"], prop);
+        const suppress = _.includes(["perspectives", "touches", "undoables", "undoable"], prop);
         return memo || !suppress;
       }, false, diff);
     }),

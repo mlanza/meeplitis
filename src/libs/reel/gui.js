@@ -4,7 +4,7 @@ import dom from "../atomic_/dom.js";
 import { reg } from "../cmd.js";
 import * as d from "./diff.js";
 import supabase from "/libs/supabase.js";
-import {reel, getSeats} from "./shell.js";
+import { reel, getSeats, getSeated } from "./shell.js";
 import { presence } from "/libs/online.js";
 import { $online, session, getfn } from "/libs/session.js";
 import { relink } from "/libs/links.js";
@@ -19,6 +19,7 @@ if (!tableId) {
 }
 
 const seats = await getSeats(tableId, session?.accessToken);
+//TODO add this? const seated = await getSeated(tableId, session?.accessToken);
 const selectedSeat = _.maybe(params.get("seat"), parseInt);
 const seat = selectedSeat === null ? _.first(seats) : _.detect(s => s === selectedSeat, seats);
 

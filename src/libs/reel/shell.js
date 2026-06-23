@@ -20,6 +20,22 @@ export function getfn(name, params, accessToken){
   }).then(resp => resp.json());
 }
 
+function one3($source, xf, f) {
+  const unsub = $.sub($source, _.comp(xf, _.take(1)), function(){
+    f();
+    unsub();
+  });
+}
+
+function one2($source, f) {
+  const unsub = $.sub($source, _.take(1), function(){
+    f();
+    unsub();
+  });
+}
+
+const one = _.overload(null, null, one2, one3);
+
 export function getSeated(_table_id, accessToken = null){
   return getfn("seated", {_table_id}, accessToken);
 }
@@ -269,9 +285,7 @@ export function reel(tableId, seat = null, at = null, accessToken = null){
 
   const self = new Reel(wb, accessToken, $.doto({$timeline, $setting, $table, $touch, $cursor, $blocking, $error, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $change, $updated, $working, $timer, $scratch, $wip, $queue}, reg));
 
-  at && $.sub($timeline, _.filter(_.get(_, "touches")), _.once(function(){
-    $.dispatch(self, {type: "at", details: {touch: at}});
-  }));
+  at && one($timeline, _.filter(_.get(_, "touches")), () => $.dispatch(self, {type: "at", details: {touch: at}}));
 
   return self;
 }

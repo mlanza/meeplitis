@@ -5,6 +5,7 @@ import * as c from "./core.js";
 import * as g from "/libs/game.js";
 import {describe} from "./ancillary.js";
 import {el, gui, outcome, retainAttr} from "/libs/reel/gui.js";
+import { reg } from "/libs/cmd.js";
 
 const {img, div, span} = dom.tags(['img', 'div', 'span']);
 
@@ -307,7 +308,11 @@ function getMove({from, to}, seat) {
   }, g.moves(game, { type: ["move", "enter", "bear-off"], seat }));
 }
 
-const {seat, exec, $gui, $wip} = await gui(describe, desc, template);
+const $gui = await gui(describe, desc, template);
+const $wip = $.chan($gui, "wip");
+const {seat} = $gui;
+
+reg({$gui});
 
 $.sub($gui, function ({ changed, perspective: { up, state, state: { status, dice, off, stakes, holdsCube } }, wip, game, seat, time: { present } }) {
   const moves = g.moves(game, { type: ["move", "enter", "bear-off"], seat });
@@ -361,12 +366,12 @@ $.sub($gui, function ({ changed, perspective: { up, state, state: { status, dice
 
 $.each(function(type){
   $.on(el, "click", `#table.act button[data-type="${type}"]`, function(e){
-    exec({type});
+    $.dispatch($gui, {type});
   });
 }, ["roll", "commit", "propose-double", "accept", "concede"]);
 
 $.on(el, "click", `#table.act[data-allow-commands~="propose-double"] #cube`, function(e){
-  exec({type: "propose-double"});
+  $.dispatch($gui, {type: "propose-double"});
 });
 
 $.on(el, "click", `#table.act[data-from] .off-board`, function(e){
@@ -379,7 +384,7 @@ $.on(el, "click", `#table.act[data-from] .off-board`, function(e){
     _.detect(function(cmd){
       return cmd.type === 'bear-off' && cmd?.details?.from === from;
     }, _),
-    exec);
+    $.dispatch($gui, _));
 
   $.reset($wip, null);
 });
@@ -389,7 +394,7 @@ $.on(el, "click", `#table.act[data-from] .point path:nth-child(2)`, function(e){
   const from = _.chain($wip, _.deref, _.getIn(_, ["details", "from"]), asPoint);
   const move = getMove({from, to}, seat);
   if (move) {
-    exec(move);
+    $.dispatch($gui, move);
     $.reset($wip, null);
   }
 });

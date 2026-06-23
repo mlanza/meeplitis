@@ -64,6 +64,42 @@ function caching($source) { //TODO consider
   return $.pipe($sink, _.filter(_.isSome));
 }
 
+function GUI(seat, seats, seated, channels){
+  this.seat = seat;
+  this.seats = seats;
+  this.seated = seated;
+  this.channels = channels;
+}
+
+function chan(self, key){
+  return self.channels[`$${key}`];
+}
+
+function on(self, key, callback){
+  return $.sub($.chan(self, key), callback);
+}
+
+function dispatch(self, command){
+  const {$reel} = self.channels;
+  $.dispatch($reel, command);
+}
+
+function sub(self, callback) {
+  const {$gui} = self.channels;
+  return $.sub($gui, callback);
+}
+
+function deref(self){
+  const {$gui} = self.channels;
+  return _.deref($gui);
+}
+
+$.doto(GUI,
+  _.implement($.IEvented, {on, chan}),
+  _.implement($.IDispatch, {dispatch}),
+  _.implement($.ISubscribe, {sub}),
+  _.implement(_.IDeref, {deref}));
+
 export async function gui(describe, desc, template) {
   const $reel = reel(tableId, seat, location.hash.substring(1) || null, session?.accessToken);
   const $seated = $.chan($reel, "seated");
@@ -306,7 +342,11 @@ export async function gui(describe, desc, template) {
     dom.addClass(el, "ack");
   });
 
-  return $.doto({seat, seats, seated, exec, $reel, $setting, $queue, $ready, $working, $blocking, $resolved, $act, $wip, $gui, $table, $touch, $diff, $timer, $change, $updated}, reg);
+  const channels = {$reel, $setting, $queue, $ready, $working, $blocking, $resolved, $act, $wip, $gui, $table, $touch, $diff, $timer, $change, $updated};
+
+  reg(_.dissoc(channels, "$gui"));
+
+  return new GUI(seat, seats, seated, channels);
 }
 
 export function player(username, avatar_url, seat, ...contents){

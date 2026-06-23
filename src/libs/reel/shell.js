@@ -150,7 +150,7 @@ function toGui(now, past){
 
 export const path = _.pipe(_.deref, _.getIn(_, ["cursor", "at"]), _.otherwise(_, "^^^^^"), _.array);
 
-export function reel(tableId, seat = null, accessToken = null){
+export function reel(tableId, seat = null, at = null, accessToken = null){
   const $timeline = $.atom(r.init(tableId, seat));
   const $cursor = $.map(_.get(_, "cursor"), $timeline);
   const $table = table(tableId);
@@ -302,6 +302,10 @@ export function reel(tableId, seat = null, accessToken = null){
   const $state = $.map(_.identity, $sink);
 
   const self = new Reel($timeline, $setting, $table, $touch, $cursor, $blocking, $error, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $change, $updated, $working, $timer, $scratch, $wip, $queue, wb, accessToken);
+
+  at && $.sub($timeline, _.filter(_.get(_, "touches")), _.once(function(){
+    $.dispatch(self, {type: "at", details: {touch: at}});
+  }));
 
   return self;
 }

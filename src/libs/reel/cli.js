@@ -71,7 +71,7 @@ await new Command()
   .option("--at <eventId:string>", "Navigate to moment in timeline")
   .option("--elide", "Hide extraneous data")
   .action(function (opts, tableId){
-    const $source = reel(tableId, opts.seat ?? null, opts.token ?? null);
+    const $source = reel(tableId, opts.seat ?? null, opts.at ?? null, opts.token ?? null);
     const $reel = opts.elide ? $.map(elide, $source) : $source;
     const $state = $.chan($source, "state");
     const $wip = $.chan($source, "wip");
@@ -85,11 +85,6 @@ await new Command()
     const exec = $.dispatch($source, _);
     const queue = enqueues(exec);
     const commands = _.mapa(type => queue({type}), opts?.command ?? []);
-
-    if (opts.at) {
-      const touch = opts.at;
-      commands.unshift(queue({type: "at", details: {touch}}));
-    }
 
     commands.push(async function(){
       if (opts.interactive) {

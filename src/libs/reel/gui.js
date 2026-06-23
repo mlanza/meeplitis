@@ -58,7 +58,7 @@ export async function gui(describe, desc, template) {
     //location.href = `${location.origin}${location.pathname}?${params.toString()}${location.hash}`;
   }
 
-  const $reel = reel(tableId, seat, session?.accessToken);
+  const $reel = reel(tableId, seat, location.hash.substring(1) || null, session?.accessToken);
   const $seated = $.chan($reel, "seated");
   const $wip = $.chan($reel, "wip");
   const $error = $.chan($reel, "error");
@@ -277,12 +277,6 @@ export async function gui(describe, desc, template) {
   $.on(el, "click", ".message", function(e){
     dom.addClass(el, "ack");
   });
-
-  //reposition the game according to the hash
-  location.hash && $.sub($reel, _.filter(_.get(_, "touches")), _.once(function(){
-    const touch = location.hash.substring(1);
-    exec({type: "at", details: {touch}});
-  }));
 
   return $.doto({seat, seats, seated, exec, $reel, $setting, $queue, $ready, $working, $blocking, $resolved, $act, $wip, $gui, $table, $touch, $diff, $timer, $change, $updated}, reg);
 }

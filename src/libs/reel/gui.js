@@ -64,7 +64,8 @@ function caching($source) { //TODO consider
   return $.pipe($sink, _.filter(_.isSome));
 }
 
-function GUI(seat, seats, seated, channels){
+function GUI(tableId, seat, seats, seated, channels){
+  this.tableId = tableId;
   this.seat = seat;
   this.seats = seats;
   this.seated = seated;
@@ -134,7 +135,7 @@ export function gui(describe, desc, template) {
       _.unique,
       _.toArray));
 
-  const $gui = $.pipe($change, _.map(function(state){ //enrich with useful diff calculations
+  const $gui = caching($.pipe($change, _.map(function(state){ //enrich with useful diff calculations
     const { hist } = state;
     const [ now, past ] = hist;
     const curr = now?.perspective ?? null;
@@ -163,7 +164,7 @@ export function gui(describe, desc, template) {
       present
     }
     return {...state, wip, perspective, game, seat, undoable, undoer, player, time};
-  }), _.filter(_.get(_, "perspective")), _.filter(({changed}) => changed.perspective || changed.wip));
+  }), _.filter(_.get(_, "perspective")), _.filter(({changed}) => changed.perspective || changed.wip)));
 
   const exec = $.dispatch($reel, _);
 
@@ -344,7 +345,7 @@ export function gui(describe, desc, template) {
 
   reg({$reel});
 
-  return new GUI(seat, seats, seated, {$reel, $setting, $queue, $ready, $working, $blocking, $resolved, $act, $wip, $gui, $table, $touch, $diff, $timer, $change, $updated});
+  return new GUI(tableId, seat, seats, seated, {$reel, $setting, $queue, $ready, $working, $blocking, $resolved, $act, $wip, $gui, $table, $touch, $diff, $timer, $change, $updated});
 }
 
 export function player(username, avatar_url, seat, ...contents){

@@ -57,6 +57,13 @@ function later($what){
   });
 }
 
+//provided to guarantee `deref` on an observable
+function caching($source) { //TODO consider
+  const $sink = $.atom(null);
+  $.sub($source, $.reset($sink, _));
+  return $.pipe($sink, _.filter(_.isSome));
+}
+
 export async function gui(describe, desc, template) {
   const $reel = reel(tableId, seat, location.hash.substring(1) || null, session?.accessToken);
   const $seated = $.chan($reel, "seated");
@@ -91,7 +98,7 @@ export async function gui(describe, desc, template) {
       _.unique,
       _.toArray));
 
-  const $gui = $.pipe($change, _.map(function(state){ //enrich with useful diff calculations
+  const $gui = caching($.pipe($change, _.map(function(state){ //enrich with useful diff calculations
     const { hist } = state;
     const [ now, past ] = hist;
     const curr = now?.perspective ?? null;
@@ -120,7 +127,7 @@ export async function gui(describe, desc, template) {
       present
     }
     return {...state, wip, perspective, game, seat, undoable, undoer, player, time};
-  }), _.filter(_.get(_, "perspective")), _.filter(({changed}) => changed.perspective || changed.wip));
+  }), _.filter(_.get(_, "perspective")), _.filter(({changed}) => changed.perspective || changed.wip)));
 
   const exec = $.dispatch($reel, _);
 

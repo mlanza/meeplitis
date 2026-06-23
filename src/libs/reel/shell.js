@@ -21,15 +21,15 @@ export function getfn(name, params, accessToken){
 }
 
 function one3($source, xf, f) {
-  const unsub = $.sub($source, _.comp(xf, _.take(1)), function(){
-    f();
+  const unsub = $.sub($source, _.comp(xf, _.take(1)), function(value){
+    f(value);
     unsub();
   });
 }
 
 function one2($source, f) {
-  const unsub = $.sub($source, _.take(1), function(){
-    f();
+  const unsub = $.sub($source, _.take(1), function(value){
+    f(value);
     unsub();
   });
 }

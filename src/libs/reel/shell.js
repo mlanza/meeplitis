@@ -242,7 +242,8 @@ export function reel(tableId, seat = null, at = null, accessToken = null){
     const hist = h ?? [];
     const diff = _.seq(d.diff(...hist));
     const changed = d.changed(...hist);
-    return {hist, diff, changed};
+    const uid = _.str(_.uid());
+    return {hist, diff, changed, uid};
   }, $hist), _.filter(_.get(_, "changed")));
   const $updated = $.map(_.pipe(_.get(_, "diff"), _.mapa(_.get(_, "path"), _)), $diff);
 

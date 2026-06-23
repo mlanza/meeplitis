@@ -134,7 +134,7 @@ export function gui(describe, desc, template) {
       _.unique,
       _.toArray));
 
-  const $gui = caching($.pipe($change, _.map(function(state){ //enrich with useful diff calculations
+  const $gui = $.pipe($change, _.map(function(state){ //enrich with useful diff calculations
     const { hist } = state;
     const [ now, past ] = hist;
     const curr = now?.perspective ?? null;
@@ -163,7 +163,7 @@ export function gui(describe, desc, template) {
       present
     }
     return {...state, wip, perspective, game, seat, undoable, undoer, player, time};
-  }), _.filter(_.get(_, "perspective")), _.filter(({changed}) => changed.perspective || changed.wip)));
+  }), _.filter(_.get(_, "perspective")), _.filter(({changed}) => changed.perspective || changed.wip));
 
   const exec = $.dispatch($reel, _);
 
@@ -342,7 +342,7 @@ export function gui(describe, desc, template) {
     dom.addClass(el, "ack");
   });
 
-  reg({$gui, $reel});
+  reg({$reel});
 
   return new GUI(seat, seats, seated, {$reel, $setting, $queue, $ready, $working, $blocking, $resolved, $act, $wip, $gui, $table, $touch, $diff, $timer, $change, $updated});
 }

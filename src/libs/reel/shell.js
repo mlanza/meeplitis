@@ -240,9 +240,8 @@ export function reel(tableId, seat = null, at = null, accessToken = null){
   const $hist = $.hist($feed);
   const $diff = $.pipe($.map(function(h){
     const hist = h ?? [];
-    const [curr, prior] = hist;
     const diff = _.seq(d.diff(...hist));
-    const changed = d.changed(curr, prior);
+    const changed = d.changed(...hist);
     return {hist, diff, changed};
   }, $hist), _.filter(_.get(_, "changed")));
   const $updated = $.map(_.pipe(_.get(_, "diff"), _.mapa(_.get(_, "path"), _)), $diff);
@@ -267,7 +266,7 @@ export function reel(tableId, seat = null, at = null, accessToken = null){
   $.sub($change, _.map(({hist: [curr]}) => curr), $.reset($sink, _));
   const $state = $.map(_.identity, $sink);
 
-  const self = new Reel($timeline, $setting, $table, $touch, $cursor, $blocking, $error, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $change, $updated, $working, $timer, $scratch, $wip, $queue, wb, accessToken);
+  const self = new Reel(wb, accessToken, {$timeline, $setting, $table, $touch, $cursor, $blocking, $error, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $change, $updated, $working, $timer, $scratch, $wip, $queue});
 
   at && $.sub($timeline, _.filter(_.get(_, "touches")), _.once(function(){
     $.dispatch(self, {type: "at", details: {touch: at}});
@@ -276,36 +275,14 @@ export function reel(tableId, seat = null, at = null, accessToken = null){
   return self;
 }
 
-function Reel($timeline, $setting, $table, $touch, $cursor, $blocking, $error, $ready, $act, $up, $seated, $seats, $undoable, $state, $hist, $diff, $change, $updated, $working, $timer, $scratch, $wip, $queue, workboard, accessToken){
-  this.$timeline = $timeline;
-  this.$setting = $setting;
-  this.$table = $table;
-  this.$touch = $touch;
-  this.$cursor = $cursor;
-  this.$blocking = $blocking;
-  this.$error = $error;
-  this.$ready = $ready;
-  this.$act = $act;
-  this.$up = $up;
-  this.$seated = $seated;
-  this.$seats = $seats;
-  this.$undoable = $undoable;
-  this.$state = $state;
-  this.$hist = $hist;
-  this.$diff = $diff,
-  this.$change = $change;
-  this.$updated = $updated;
-  this.$timer = $timer;
-  this.$scratch = $scratch;
-  this.$working = $working;
-  this.$wip = $wip;
-  this.$queue = $queue;
+function Reel(workboard, accessToken, channels){
   this.workboard = workboard;
   this.accessToken = accessToken;
+  this.channels = channels;
 }
 
 function chan(self, key){
-  return self[`$${key}`];
+  return self.channels[`$${key}`];
 }
 
 function on(self, key, callback){
@@ -313,39 +290,40 @@ function on(self, key, callback){
 }
 
 function dispatch(self, command){
-  const {type, details} = command;
+  const { type, details } = command;
+  const { $timer, $timeline, $blocking, $error } = self.channels;
 
   //whenever direct action is taken, the timer stops
-  self.$timer.stop();
+  $timer.stop();
 
   switch (type) {
     case "at":
-      $.swap(self.$timeline, r.at(details.touch));
+      $.swap($timeline, r.at(details.touch));
       break;
 
     case "backward":
     case "back":
-      $.swap(self.$timeline, r.backward);
+      $.swap($timeline, r.backward);
       break;
 
     case "forward":
-      $.swap(self.$timeline, r.forward);
+      $.swap($timeline, r.forward);
       break;
 
     case "inception":
-      $.swap(self.$timeline, r.inception);
+      $.swap($timeline, r.inception);
       break;
 
     case "present":
-      $.swap(self.$timeline, r.present);
+      $.swap($timeline, r.present);
       break;
 
     case "last-move":
-      $.swap(self.$timeline, r.toLastMove);
+      $.swap($timeline, r.toLastMove);
       break;
 
     case "ffwd":
-      self.$timer.start();
+      $timer.start();
       break;
 
     case "do-over": {
@@ -359,11 +337,11 @@ function dispatch(self, command){
     }
 
     default: {
-      $.reset(self.$blocking, true);
+      $.reset($blocking, true);
       const {id, seat} = _.deref(self); //TODO diagnose Observable deref workaround
       _.fmap(self.workboard.request("move", id, seat, [command], self.accessToken), function({data, error, status}) {
-        error && $.reset($.chan(self, "error"), new Error(`Move failed.`));
-        error && $.reset(self.$blocking, false);
+        error && $.reset($error, new Error(`Move failed.`));
+        error && $.reset($blocking, false);
         console.log({status, data, error});
       });
       break;
@@ -372,11 +350,11 @@ function dispatch(self, command){
 }
 
 function sub(self, callback){
-  return $.sub(self.$state, callback);
+  return $.sub(self.channels.$state, callback);
 }
 
 function deref(self){
-  return _.deref(self.$state);
+  return _.deref(self.channels.$state);
 }
 
 $.doto(Reel,

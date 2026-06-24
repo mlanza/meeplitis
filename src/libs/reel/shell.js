@@ -222,12 +222,13 @@ export function reel(tableId, seat = null, at = null, accessToken = null){
       present ? () => $timer.start() : _.noop); //if already in the present when the game is touched, catch things up.
   });
 
-  function fetchPerspectives({make, seat, seated, config, cursor, cursor: {pos, at, direction, max}, touches, perspectives}){
+  function fetchPerspectives({seat, seated, config, cursor, cursor: {pos, at, direction, max}, touches, perspectives}){
     const nextAt = _.maybe(pos + direction, _.clamp(_, 0, max), _.get(touches, _));
     const player = seat;
     const seatId = _.getIn(seated, [seat, "seat_id"]);
     _.chain([at, nextAt], _.compact, _.unique, _.remove(_.get(perspectives, _), _), _.seq, $.each(function(at){
       _.fmap(wb.request("getPerspective", tableId, at, seat, seatId, accessToken), function(perspective){
+        if (!perspective) return;
         const {up, may, event, event: {seat}, state} = perspective;
         const actionable = _.includes(up, player) || _.includes(may, player);
         const args = [seated, config, [event], state];

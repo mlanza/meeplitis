@@ -36,9 +36,15 @@ export class Workboard {
     }
 
     const {blocking} = entry;
+    const hashed = _.hash([key, ...args]); //TODO memoize?
+    const dupe = _.chain(this.$queue, _.deref, _.vals, _.map(_.get(_, "hashed"), _), _.detect(_.eq(hashed, _), _));
+    if (dupe) {
+      return Promise.resolve(null);
+    }
+
     const ticketId = `${this._nextTicket++}`;
 
-    this._addTicket(ticketId, {key, args, blocking});
+    this._addTicket(ticketId, {key, args, blocking, hashed});
 
     let result;
     try {

@@ -5,9 +5,10 @@ import * as c from "./core.js";
 import * as g from "/libs/game.js";
 import {moment} from "/libs/story.js";
 import {describe} from "./ancillary.js";
-import {clear, closestAttr, retainAttr} from "/libs/wip.js";
+import {clear} from "/libs/wip.js";
 import {el, seated, seats, seat, ui, scored, outcome, diff, which} from "/libs/table.js";
-import {reg} from "/libs/cmd.js";
+import { el, gui, outcome, retainAttr, closestAttr } from "/libs/reel/gui.js";
+import { reg } from "/libs/cmd.js";
 
 const {img, ol, li, div, kbd, span} = dom.tags(['img', 'ol', 'li', 'div', 'kbd', 'span']);
 

@@ -407,6 +407,10 @@ export const retainAttr = _.partly(function retainAttr(el, key, value){
   value == null ? dom.removeAttr(el, key) : dom.attr(el, key, value);
 });
 
+export function closestAttr(el, attr){
+  return _.maybe(el, _.closest(_, `[${attr}]`), dom.attr(_, attr));
+}
+
 export function subject({username, avatar_url}){
   return span({class: "subject avatar"}, img({alt: username, src: avatar_url}));
 }

@@ -36,10 +36,10 @@ export class Workboard {
     }
 
     const {blocking} = entry;
-    const hashed = _.hash([key, ...args]); //TODO memoize?
-    const dupe = _.chain(this.$queue, _.deref, _.vals, _.map(_.get(_, "hashed"), _), _.detect(_.eq(hashed, _), _));
-    if (dupe) {
-      return Promise.resolve(null);
+    const hashed = _.hash([key, ...args]);
+    const queued = _.chain(this.$queue, _.deref, _.vals, _.map(_.get(_, "hashed"), _), _.detect(_.eq(hashed, _), _));
+    if (queued) {
+      return Promise.resolve(null); //debounce
     }
 
     const ticketId = `${this._nextTicket++}`;

@@ -161,7 +161,7 @@ ol.scored, table.rankings {
 .beige {
   fill: #d2cbb8;
 }
-.point:hover, .off-board:hover, .bar:hover {
+#table:not(.wait) :is(.point:hover, .off-board:hover, .bar:hover) {
   cursor: pointer;
 }
 .point:hover .beige {

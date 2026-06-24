@@ -556,7 +556,7 @@ function actuate(self, event) {
   }
 }
 
-function perspective(self, seen, reality){
+function perspective(_self, _seen, reality){
   return reality; //no hidden info.
 }
 

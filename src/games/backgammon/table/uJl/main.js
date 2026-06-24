@@ -3,11 +3,9 @@ import $ from "/libs/atomic_/shell.js";
 import dom from "/libs/atomic_/dom.js";
 import * as c from "./core.js";
 import * as g from "/libs/game.js";
-import {moment} from "/libs/story.js";
-import {describe} from "./ancillary.js";
-import {retainAttr} from "/libs/wip.js";
-import {el, seated, seats, seat, ui, scored, outcome, diff, which} from "/libs/table.js";
-import {reg} from "/libs/cmd.js";
+import { describe } from "./ancillary.js";
+import { el, gui, outcome, retainAttr } from "/libs/reel/gui.js";
+import { reg } from "/libs/cmd.js";
 
 const {img, div, span} = dom.tags(['img', 'div', 'span']);
 
@@ -56,9 +54,10 @@ function relativeRank(seat, details){
 
 function desc({type, details, seat}){
   switch(type) {
-    case "rolled":
+    case "rolled": {
       const {dice} = details;
       return dice[0] == dice[1] ? [`Rolls double `, die(dice[0]), `s!`] : [`Rolls `, die(dice[0]), die(dice[1]), `.`];
+    }
 
     case "moved": {
       const {from, to} = relativeRank(seat, details);
@@ -107,18 +106,17 @@ function template(seat){
   };
 }
 
-function workingCommand([curr, prior], seat, state, game, el, moves){ //implements multi-step commands
-  const type = curr?.type;
+function workingCommand(wip, seat, state, game, el, moves){ //implements multi-step commands
   const attrs = {
-    "data-command-type": type,
+    "data-command-type": wip?.type,
     "data-from": null,
     "data-tos": null
   };
-  switch (type) {
+  switch (wip?.type) {
     case "enter":
     case "move":
     case "bear-off":{
-      const from = curr.details.from;
+      const from = wip?.details.from;
       const tos = _.chain(
         moves,
         _.filter(function(cmd){
@@ -304,31 +302,32 @@ function asPoint(position){
 }
 
 function getMove({from, to}, seat) {
-  const game = moment($story);
+  const game = _.chain($gui, _.deref, _.get(_, "game"));
   return _.detect(function(cmd){
     return cmd.seat == seat && cmd?.details?.from == from && (to == null || cmd?.details?.to == to);
   }, g.moves(game, { type: ["move", "enter", "bear-off"], seat }));
 }
 
-const {$ready, $error, $story, $hist, $snapshot, $wip} =
-  ui(c.make, describe, desc, template);
+const $gui = gui(describe, desc, template);
+const $wip = $.chan($gui, "wip");
+const { seat, seated } = $gui;
 
-const $both = which($.latest([$hist, $wip]));
+reg({ $gui, $wip });
 
-reg({ $both, g });
+$.sub($gui, function ({ changed, perspective: { up, state, state: { status, dice, off, stakes, holdsCube } }, wip, game, seat, time: { present } }) {
+  const moves = g.moves(game, { type: ["move", "enter", "bear-off"], seat });
 
-$.sub($both, function ([[curr, prior, motion, game], wip, which]) {
-  const { state, up } = curr;
-  if (!state) return;
-  const { status, dice, off, stakes, holdsCube } = state;
-  const { present } = motion;
+  if (changed.wip) {
+    return present ? workingCommand(wip, seat, state, game, el, moves) : null;
+  }
 
-  if (which !== 1) {
+  if (changed.perspective) {
+    const [curr, prior] = changed.perspective;
     const checkers = getCheckers(curr.state);
+    $.eachIndexed(function(seat, off){
+      dom.text(dom.sel1(`[data-seat="${seat}"] span.off`, el), off);
+    }, off);
     if (prior) {
-      $.eachIndexed(function(seat, off){
-        dom.text(dom.sel1(`[data-seat="${seat}"] span.off`, el), off);
-      }, off);
       updatePositioning(diffCheckers(checkers, getCheckers(prior.state)));
     } else {
       initialPositioning(checkers);
@@ -339,8 +338,6 @@ $.sub($both, function ([[curr, prior, motion, game], wip, which]) {
   dom.text(dom.sel1("#cube", el), _.clamp(stakes, 2, 64));
   dom.attr(el, "data-up", up);
   dom.attr(el, "data-holds-cube", holdsCube);
-
-  const moves = g.moves(game, { type: ["move", "enter", "bear-off"], seat });
 
   _.chain(g.moves(game, { type: ["roll", "commit", "propose-double", "accept", "concede"], seat }),
     _.map(_.get(_, "type"), _),
@@ -365,25 +362,21 @@ $.sub($both, function ([[curr, prior, motion, game], wip, which]) {
 
   dom.attr(el, "data-status", status);
   dom.removeClass(el, "error");
-
-  if (which === 1) {
-    return present ? workingCommand(wip, seat, state, game, el, moves) : null;
-  }
 });
 
 $.each(function(type){
   $.on(el, "click", `#table.act button[data-type="${type}"]`, function(e){
-    $.dispatch($story, {type});
+    $.dispatch($gui, {type});
   });
 }, ["roll", "commit", "propose-double", "accept", "concede"]);
 
 $.on(el, "click", `#table.act[data-allow-commands~="propose-double"] #cube`, function(e){
-  $.dispatch($story, {type: "propose-double"});
+  $.dispatch($gui, {type: "propose-double"});
 });
 
 $.on(el, "click", `#table.act[data-from] .off-board`, function(e){
   const from = _.chain($wip, _.deref, _.getIn(_, ["details", "from"]), asPoint);
-  const game = moment($story);
+  const game = _.chain($gui, _.deref, _.get(_, "game"));
   const seat = g.up(game)[0];
 
   _.maybe(
@@ -391,7 +384,7 @@ $.on(el, "click", `#table.act[data-from] .off-board`, function(e){
     _.detect(function(cmd){
       return cmd.type === 'bear-off' && cmd?.details?.from === from;
     }, _),
-    $.dispatch($story, _));
+    $.dispatch($gui, _));
 
   $.reset($wip, null);
 });
@@ -401,7 +394,7 @@ $.on(el, "click", `#table.act[data-from] .point path:nth-child(2)`, function(e){
   const from = _.chain($wip, _.deref, _.getIn(_, ["details", "from"]), asPoint);
   const move = getMove({from, to}, seat);
   if (move) {
-    $.dispatch($story, move);
+    $.dispatch($gui, move);
     $.reset($wip, null);
   }
 });

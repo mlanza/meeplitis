@@ -14,3 +14,4 @@ deno.lock
 table-*.json
 .temp
 *.temp.*
+.DS_Store

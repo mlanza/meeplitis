@@ -343,7 +343,7 @@ export function gui(describe, desc, template) {
     dom.addClass(el, "ack");
   });
 
-  reg({$reel});
+  reg({$reel, $gui});
 
   return new GUI(tableId, seat, seats, seated, {$reel, $setting, $queue, $ready, $working, $blocking, $resolved, $act, $wip, $gui, $table, $touch, $diff, $timer, $change, $updated});
 }

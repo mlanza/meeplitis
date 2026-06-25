@@ -312,8 +312,6 @@ const $gui = gui(describe, desc, template);
 const $wip = $.chan($gui, "wip");
 const { seat, seated } = $gui;
 
-reg({ $gui, $wip });
-
 $.sub($gui, function ({ changed, perspective: { up, state, state: { status, dice, off, stakes, holdsCube } }, wip, game, seat, time: { present } }) {
   const moves = g.moves(game, { type: ["move", "enter", "bear-off"], seat });
 

@@ -3,9 +3,8 @@ import $ from "/libs/atomic_/shell.js";
 import dom from "/libs/atomic_/dom.js";
 import * as c from "./core.js";
 import * as g from "/libs/game.js";
-import { describe } from "./ancillary.js";
-import { el, gui, outcome, retainAttr, scored, diff } from "/libs/reel/gui.js";
-import { reg } from "/libs/cmd.js";
+import {describe} from "./ancillary.js";
+import {el, seated, seats, seat, ui, scored, outcome, diff} from "/libs/table.js";
 
 const {img, li, div, span, sup} = dom.tags(['img', 'li', 'div', 'span', 'sup']);
 
@@ -93,12 +92,12 @@ function cardSrc({suit, rank}){
   return `/images/deck/${rank}${suits[suit]}.svg`;
 }
 
-const $gui = gui(describe, desc, template);
-const  { seat, seated } = $gui;
+const {$story, $hist} =
+  ui(c.make, describe, desc, template);
 
-$.sub($gui, function ({ changed, perspective: { up, seen, metrics, event, state, state: {trump, round, status, seated, deck, lead, broke, deals} }, game, seat, time: { step, offset, present } }) {
-  const [curr, prior] = changed.perspective || [];
-  const { hand, bid } = _.nth(seated, seat) || {hand: null, bid: -1};
+$.sub($hist, function([curr, prior, {step, offset}, game]){
+  const {seen, event, metrics, state, state: {trump, round, status, seated, deck, lead, broke, deals}} = curr;
+  const {hand, bid} = _.nth(seated, seat) || {hand: null, bid: -1};
   const moves = g.moves(game);
   const cnt = _.count(seated);
   const awarded = event.type == "awarded" ? _.toArray(_.take(cnt, _.drop(cnt - event.details.lead, _.cycle(event.details.trick)))) : null;
@@ -148,16 +147,16 @@ $.sub($gui, function ({ changed, perspective: { up, seen, metrics, event, state,
 
 $.on(el, "click", '#table.present:not(.wait) .moves button[data-type="bid"]', function(e){
   const bid = _.maybe(e.target, dom.attr(_, "data-bid"), _.blot, parseInt);
-  $.dispatch($gui, {type: "bid", "details": {bid}});
+  $.dispatch($story, {type: "bid", "details": {bid}});
 });
 
 $.on(el, "click", '#table.present:not(.wait) .moves button[data-type="commit"]', function(e){
   const type = dom.attr(e.target, "data-type");
-  $.dispatch($gui, {type});
+  $.dispatch($story, {type});
 });
 
 $.on(el, "click", '#table.present:not(.wait) .hand img', function(e){
   const suit = dom.attr(this, "data-suit"),
         rank = dom.attr(this, "data-rank");
-  $.dispatch($gui, {type: "play", details: {card: {suit, rank}}});
+  $.dispatch($story, {type: "play", details: {card: {suit, rank}}});
 });

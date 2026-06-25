@@ -1,0 +1,118 @@
+#table .leads {
+  visibility: hidden;
+}
+#table[data-lead="0"] [data-seat="0"] .leads,
+#table[data-lead="1"] [data-seat="1"] .leads,
+#table[data-lead="2"] [data-seat="2"] .leads,
+#table[data-lead="3"] [data-seat="3"] .leads,
+#table[data-lead="4"] [data-seat="4"] .leads,
+#table[data-lead="5"] [data-seat="5"] .leads,
+#table[data-lead="6"] [data-seat="6"] .leads {
+  visibility: visible;
+}
+#table.act button:is(.active, .selected) {
+  display: initial;
+}
+#table:is([data-seats='5'],[data-seats='6'],[data-seats='7']) #event[data-type='scored'] {
+  width: 30em;
+  left: calc(50% - 15em);
+}
+#table .hand {
+  position: fixed;
+  right: 1em;
+  bottom: -11em;
+  height: 17.5em;
+  width: 30em;
+  transition: bottom .5s;
+  padding: 0;
+  list-style: none;
+  display: inline-flex;
+  z-index: 99;
+}
+#event sup {
+  display: none;
+}
+#table.multi-seated #event sup {
+  display: inline;
+}
+#table:not(.bwd) {
+  &[data-played="0"] [data-seat="0"] .area img,
+  &[data-played="1"] [data-seat="1"] .area img,
+  &[data-played="2"] [data-seat="2"] .area img,
+  &[data-played="3"] [data-seat="3"] .area img,
+  &[data-played="4"] [data-seat="4"] .area img,
+  &[data-played="5"] [data-seat="5"] .area img,
+  &[data-played="6"] [data-seat="6"] .area img {
+    animation: play .8s;
+  }
+  &[data-event-type="awarded"] .area img {
+    transform: translateX(-80em);
+    animation: award .8s ease-in !important;
+  }
+  &[data-event-type="awarded"] :is(.area, .zone) {
+    overflow: visible !important;
+  }
+  &[data-event-winner='0'] .zone[data-seat='0'] .player,
+  &[data-event-winner='1'] .zone[data-seat='1'] .player,
+  &[data-event-winner='2'] .zone[data-seat='2'] .player,
+  &[data-event-winner='3'] .zone[data-seat='3'] .player,
+  &[data-event-winner='4'] .zone[data-seat='4'] .player,
+  &[data-event-winner='5'] .zone[data-seat='5'] .player,
+  &[data-event-winner='6'] .zone[data-seat='6'] .player {
+    animation: bump .25s ease-in;
+  }
+  &[data-event-type='scored'] .zone {
+    animation: bump .25s ease-in;
+  }
+}
+#table.present[data-status="playing"] .hand:hover {
+  bottom: -8em;
+}
+#table .hand li {
+  transition: padding-top .25s;
+  margin-right: -8.5em;
+  height: 18em;
+  padding-top: 2em;
+}
+#table .hand li,
+#table .hand li img {
+  width: 10em;
+  height: 16em;
+}
+#table.act.present[data-status="playing"] .hand li img {
+  cursor: pointer;
+}
+#table.act.present[data-status="playing"] .hand li:hover {
+  padding-top: 0;
+}
+#table .trump,
+#table.deck {
+  min-height: 14em;
+}
+#table .deck img,
+#table .trump img {
+  width: 9em;
+  margin: 5px;
+}
+#table .broke {
+  visibility: hidden;
+  margin-top: -.8em;
+  margin-bottom: 1em;
+}
+#table[data-broke="true"] .broke {
+  visibility: visible;
+}
+#table .upkeep {
+  width: 10em;
+  position: absolute;
+  right: 0;
+  text-align: center;
+}
+#table .cards {
+  text-align: center;
+  display: block;
+  margin: .5em auto 0;
+}
+#table #event[data-type='scored'] {
+  height: 7.5em;
+}

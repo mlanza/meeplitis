@@ -209,8 +209,6 @@ const $wip = $.chan($gui, "wip");
 const $error = $.chan($gui, "error");
 const { seat, seated } = $gui;
 
-reg({ $gui, $wip });
-
 $.sub($gui, _.map(_.get(_, "game")), function(game){
   const {seats} = game;
   const pilli = _.chain(seats, _.nth(_, seat), _.get(_, "pilli"));

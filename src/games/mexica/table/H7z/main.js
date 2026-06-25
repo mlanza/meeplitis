@@ -3,11 +3,8 @@ import $ from "/libs/atomic_/shell.js";
 import dom from "/libs/atomic_/dom.js";
 import * as c from "./core.js";
 import * as g from "/libs/game.js";
-import {moment} from "/libs/story.js";
-import {describe} from "./ancillary.js";
-import {clear} from "/libs/wip.js";
-import {el, seated, seats, seat, ui, scored, outcome, diff, which} from "/libs/table.js";
-import { el, gui, outcome, retainAttr, closestAttr } from "/libs/reel/gui.js";
+import { describe } from "./ancillary.js";
+import { el, gui, diff, outcome, retainAttr, closestAttr } from "/libs/reel/gui.js";
 import { reg } from "/libs/cmd.js";
 
 const {img, ol, li, div, kbd, span} = dom.tags(['img', 'ol', 'li', 'div', 'kbd', 'span']);
@@ -43,9 +40,9 @@ function emperor(){
   const el = parser.parseFromString(_emperor, "image/svg+xml").childNodes[0];
   dom.attr(el, "data-piece", "emperor");
   return el; //TODO need next bit?
-  return $.doto(pilli({seat: -1}),
+  /*return $.doto(pilli({seat: -1}),
     dom.removeAttr(_, "data-seat"),
-    dom.attr(_, "data-piece", "emperor"));
+    dom.attr(_, "data-piece", "emperor"));*/
 }
 
 function canal({size, orientation}){
@@ -173,7 +170,8 @@ function desc({type, details}){
     case "committed":
       return "I'm done.";
     case "scored-grandeur":
-      const game = _.chain($story, moment);
+      const game = _.chain($gui, _.deref, _.get(_, "game"));
+      debugger
       return [
         "Emperor awards spiritual grandeur!",
         scores(g.seats(game), details, _.deref(game))
@@ -206,20 +204,20 @@ function desc({type, details}){
   }
 }
 
-const {$ready, $error, $story, $hist, $snapshot, $wip} =
-  ui(c.make, describe, desc, template);
+const $gui = gui(describe, desc, template);
+const $wip = $.chan($gui, "wip");
+const $error = $.chan($gui, "error");
+const { seat, seated } = $gui;
 
-const $both = which($.latest([$hist, $wip]));
+reg({ $gui, $wip });
 
-$.sub($snapshot, function(game){
-  const {seated} = _.deref(game);
-  const pilli = _.chain(seated, _.nth(_, seat), _.get(_, "pilli"));
+$.sub($gui, _.map(_.get(_, "game")), function(game){
+  const {seats} = game;
+  const pilli = _.chain(seats, _.nth(_, seat), _.get(_, "pilli"));
   if (_.isSome(seat) && _.isNil(pilli) && _.includes(g.up(game), seat)) {
     $.reset($wip, placePilli);
   }
 });
-
-reg({$both});
 
 function remaining(slots){
   return _.count(_.filter(_.isNil, slots));
@@ -264,7 +262,7 @@ function phase(status){
   }
 }
 
-function workingCommand([curr, prior], seat, {contents}, game, el){
+function workingCommand(curr, seat, {contents}, game, el){
   const type = curr?.type;
   const attrs = {
     "data-command-type": type,
@@ -330,18 +328,16 @@ function workingCommand([curr, prior], seat, {contents}, game, el){
   $.eachkv(retainAttr(el, _, _), attrs);
 }
 
-$.sub($both, function([[curr, prior, motion, game], wip, which]){
-  const {state, up} = curr;
-  const {seated, tokens, canal1, canal2, bridges, period, contents, status, round, spent} = state;
-  const {step, present} = motion;
+$.sub($gui, function ({ changed, perspective: { up, state, state: {seated, tokens, canal1, canal2, bridges, period, contents, status, round, spent} }, wip, game, seat, time: { step, present } }) {
   const moves = present ? g.moves(game, {type: ["pass", "commit", "propose-unfoundables", "answer-proposal"], seat}) : null;
   const foundables = present ? g.moves(game, {type: "found-district", seat}) : null;
+  const [curr, prior] = changed.perspective || [];
 
   dom.attr(el, "data-status", status);
   dom.attr(el, "data-period", period);
   dom.removeClass(el, "error");
 
-  if (which === 1) {
+  if (changed.wip) {
     return present ? workingCommand(wip, seat, state, game, el) : null;
   }
 
@@ -558,27 +554,27 @@ $.on(el, "click", `#table.act[data-foundable]:not([data-command-type]) div[data-
         size  = _.maybe(dom.attr(el, "data-foundable"), _.blot, parseInt),
         spots = _.chain(dom.attr(el, "data-found-at"), _.split(_, " "));
   if (size && _.includes(spots, at)) {
-    $.dispatch($story, {type, details: {size, at}});
+    $.dispatch($gui, {type, details: {size, at}});
   }
 });
 
 $.on(el, "click", `#table.act button[data-answer]`, function(e){
   const type = "answer-proposal",
         answer = _.maybe(this, dom.attr(_, "data-answer"), _.blot);
-  $.dispatch($story, {type, details: {answer}});
+  $.dispatch($gui, {type, details: {answer}});
 });
 
 $.on(el, "click", `#table.act[data-command-type="move"][data-command-from] div[data-spot]`, function(e){
   const type = "move",
         from = closestAttr(this, "data-command-from"),
         to   = closestAttr(this, "data-spot"),
-        game = moment($story),
+        game = _.chain($gui, _.deref, _.get(_, "game")),
         moves = g.moves(game, {type, seat}),
         move = _.maybe(moves, _.detect(function({details}){
           return (details.from === from && details.to === to) || details.by === "teleport"
         }, _), _.update(_, "details", _.merge(_, {from, to}))); //merge completes teleport
   if (move) {
-    $.dispatch($story, move);
+    $.dispatch($gui, move);
   }
 });
 
@@ -592,25 +588,25 @@ $.on(el, "click", `#table.act[data-status='actions'][data-command-type="build-te
   const type = "build-temple",
         at   = closestAttr(this, "data-spot"),
         level = parseInt(closestAttr(this, "data-command-size"));
-  $.dispatch($story, {type, details: {level, at}});
+  $.dispatch($gui, {type, details: {level, at}});
 });
 
 $.on(el, "click", `#table.act[data-status='actions'][data-command-type="relocate-bridge"][data-command-from] div[data-spot]`, function(e){
   const type = "relocate-bridge",
         from = closestAttr(this, "data-command-from"),
         to   = closestAttr(this, "data-spot");
-  $.dispatch($story, {type, details: {from, to}});
+  $.dispatch($gui, {type, details: {from, to}});
 });
 
 $.on(el, "click", `#table.act[data-status='placing-pilli'][data-command-type="place-pilli"][data-command-at~="H6"] div[data-spot="H6"] div.propose, #table.act[data-command-type="place-pilli"][data-command-at~="H8"] div[data-spot="H8"] div.propose, #table.act[data-command-type="place-pilli"][data-command-at~="I7"] div[data-spot="I7"] div.propose, #table.act[data-command-type="place-pilli"][data-command-at~="G7"] div[data-spot="G7"] div.propose`, function(e){
   const type = "place-pilli",
         at = closestAttr(this, "data-spot");
-  $.dispatch($story, {type, details: {at}});
+  $.dispatch($gui, {type, details: {at}});
 });
 
 $.on(el, "click", `#table.act .moves button[data-type="commit"], #table.act .moves button[data-type="pass"]`, function(e){
   const type = dom.attr(this, "data-type");
-  $.dispatch($story, {type});
+  $.dispatch($gui, {type});
 });
 
 $.on(el, "click", `#table.act .moves button[data-type="propose-unfoundables"]`, function(e){
@@ -623,9 +619,9 @@ $.on(el, "click", `#table.act .moves button[data-type="done-proposing"]`, functi
   const command = _.deref($wip);
   const calpulli = _.seq(_.getIn(command, ["details", "calpulli"]));
   if (calpulli) {
-    $.dispatch($story, command);
+    $.dispatch($gui, command);
   } else {
-    clear($wip);
+    $.reset($wip, null);
   }
 });
 
@@ -638,13 +634,13 @@ $.on(el, "click", `#table.act #demands li:has(img)`, function(e){
 });
 
 $.on(el, "click", `#table.act[data-status='actions'] #supplies div.tokens`, function(e){
-  $.dispatch($story, {type: "bank"});
+  $.dispatch($gui, {type: "bank"});
 });
 
 $.on(el, "click", `#table.act[data-status='actions'][data-command-type="construct-bridge"] div[data-spot]`, function(e){
   const type = "construct-bridge",
         at   = closestAttr(this, "data-spot");
-  $.dispatch($story, {type, details: {at}});
+  $.dispatch($gui, {type, details: {at}});
 });
 
 $.on(el, "click", `#table.act[data-status='actions'] #supplies div.bridges`, function(e){
@@ -654,7 +650,7 @@ $.on(el, "click", `#table.act[data-status='actions'] #supplies div.bridges`, fun
 $.on(el, "click", `#table.act[data-status='actions'][data-command-type="construct-canal"][data-command-size="1"] div[data-spot]`, function(e){
   const type = "construct-canal",
         at   = closestAttr(this, "data-spot");
-  $.dispatch($story, {type, details: {at: [at]}});
+  $.dispatch($gui, {type, details: {at: [at]}});
 });
 
 $.on(el, "click", `#table.act[data-status='actions'][data-command-type="construct-canal"][data-command-size="2"] div[data-spot]`, function(e){
@@ -662,7 +658,7 @@ $.on(el, "click", `#table.act[data-status='actions'][data-command-type="construc
         at   = _.chain(_.compact([closestAttr(this, "data-command-at"), closestAttr(this, "data-spot")]), _.distinct, _.toArray),
         size = parseInt(closestAttr(this, "data-command-size"));
   if(_.count(at) == 2) {
-    $.dispatch($story, {type, details: {at}});
+    $.dispatch($gui, {type, details: {at}});
   } else {
     $.reset($wip, {type, details: {size: 2, at}});
   }

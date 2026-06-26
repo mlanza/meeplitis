@@ -38,6 +38,8 @@ export class Workboard {
     const {blocking} = entry;
     const hashed = _.hash([key, ...args]);
     const queued = _.chain(this.$queue, _.deref, _.vals, _.map(_.get(_, "hashed"), _), _.detect(_.eq(hashed, _), _));
+    console.log({key, args, queued});
+
     if (queued) {
       return Promise.resolve(null); //debounce
     }

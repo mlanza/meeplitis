@@ -4,7 +4,7 @@ import dom from "../atomic_/dom.js";
 import { reg } from "../cmd.js";
 import * as d from "./diff.js";
 import supabase from "/libs/supabase.js";
-import { reel, getSeats, getSeated } from "./shell.js";
+import { tabletop, getSeats, getSeated } from "./shell.js";
 import { presence } from "/libs/online.js";
 import { $online, session, getfn } from "/libs/session.js";
 import { relink } from "/libs/links.js";
@@ -81,8 +81,8 @@ function on(self, key, callback){
 }
 
 function dispatch(self, command){
-  const {$reel} = self.channels;
-  $.dispatch($reel, command);
+  const {$tt} = self.channels;
+  $.dispatch($tt, command);
 }
 
 function sub(self, callback) {
@@ -102,31 +102,31 @@ $.doto(GUI,
   _.implement(_.IDeref, {deref}));
 
 export function gui(describe, desc, template) {
-  const $reel = reel(tableId, seat, location.hash.substring(1) || null, session?.accessToken);
-  //TODO ? const $seated = $.chan($reel, "seated");
-  const $wip = $.chan($reel, "wip");
-  const $error = $.chan($reel, "error");
-  const $queue = $.chan($reel, "queue");
-  const $setting = $.chan($reel, "setting");
-  const $updated = $.chan($reel, "updated");
-  const $cursor = $.chan($reel, "cursor");
-  const $act = $.chan($reel, "act");
-  const $blocking = $.chan($reel, "blocking");
-  const $up = $.chan($reel, "up");
-  const $ready = $.chan($reel, "ready");
-  const $working = $.chan($reel, "working");
-  const $resolved = $.chan($reel, "resolved");
-  const $table = $.chan($reel, "table");
-  const $timer = $.chan($reel, "timer");
-  const $touch = $.chan($reel, "touch");
-  const $diff = $.chan($reel, "diff");
-  const $change = $.chan($reel, "change");
+  const $tt = tabletop(tableId, seat, location.hash.substring(1) || null, session?.accessToken);
+  //TODO ? const $seated = $.chan($tt, "seated");
+  const $wip = $.chan($tt, "wip");
+  const $error = $.chan($tt, "error");
+  const $queue = $.chan($tt, "queue");
+  const $setting = $.chan($tt, "setting");
+  const $updated = $.chan($tt, "updated");
+  const $cursor = $.chan($tt, "cursor");
+  const $act = $.chan($tt, "act");
+  const $blocking = $.chan($tt, "blocking");
+  const $up = $.chan($tt, "up");
+  const $ready = $.chan($tt, "ready");
+  const $working = $.chan($tt, "working");
+  const $resolved = $.chan($tt, "resolved");
+  const $table = $.chan($tt, "table");
+  const $timer = $.chan($tt, "timer");
+  const $touch = $.chan($tt, "touch");
+  const $diff = $.chan($tt, "diff");
+  const $change = $.chan($tt, "change");
   const $status = $.map(_.get(_, "status"), $table);
   const $present = $.pipe($.map(_.get(_, "present"), $cursor), _.filter(_.isSome));
   //const $scored = $.map(_.get(_, "scored"), $table);
   const $remarks = $.map(_.get(_, "remark"), $table);
   const $described = $.map(_.pipe(_.get(_, "config"), describe), $table);
-  //const seats = await later($.map(_.get(_, "seats"), $reel));
+  //const seats = await later($.map(_.get(_, "seats"), $tt));
   //const seated = await later($seated);
 
   const $presence = presence($online,
@@ -166,7 +166,7 @@ export function gui(describe, desc, template) {
     return {...state, wip, perspective, game, seat, undoable, undoer, player, time};
   }), _.filter(_.get(_, "perspective")), _.filter(({changed}) => changed.perspective || changed.wip)));
 
-  const exec = $.dispatch($reel, _);
+  const exec = $.dispatch($tt, _);
 
   const title = _.chain(ttl, dom.text, _.split(_, "|"), _.first, _.trim);
   dom.text(ttl, `${title} #${tableId}`);
@@ -343,9 +343,9 @@ export function gui(describe, desc, template) {
     dom.addClass(el, "ack");
   });
 
-  reg({$reel, $gui});
+  reg({$tt, $gui});
 
-  return new GUI(tableId, seat, seats, seated, {$reel, $setting, $queue, $ready, $working, $blocking, $resolved, $act, $wip, $gui, $table, $touch, $diff, $timer, $change, $updated});
+  return new GUI(tableId, seat, seats, seated, {$tt, $setting, $queue, $ready, $working, $blocking, $resolved, $act, $wip, $gui, $table, $touch, $diff, $timer, $change, $updated});
 }
 
 export function player(username, avatar_url, seat, ...contents){

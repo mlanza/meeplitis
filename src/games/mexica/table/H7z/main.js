@@ -4,7 +4,7 @@ import dom from "/libs/atomic_/dom.js";
 import * as c from "./core.js";
 import * as g from "/libs/game.js";
 import { describe } from "./ancillary.js";
-import { el, gui, diff, outcome, retainAttr, closestAttr } from "/libs/reel/gui.js";
+import { el, gui, diff, outcome, retainAttr, closestAttr } from "/libs/tt/gui.js";
 import { reg } from "/libs/cmd.js";
 
 const {img, ol, li, div, kbd, span} = dom.tags(['img', 'ol', 'li', 'div', 'kbd', 'span']);

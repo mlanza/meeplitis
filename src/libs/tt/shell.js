@@ -117,7 +117,7 @@ function isResolved({cursor, perspective}){
 
 export const path = _.pipe(_.deref, _.getIn(_, ["cursor", "at"]), _.otherwise(_, "^^^^^"), _.array);
 
-export function reel(tableId, seat = null, at = null, accessToken = null){
+export function tabletop(tableId, seat = null, at = null, accessToken = null){
   const $timeline = $.atom(r.init(tableId, seat));
   const $cursor = $.map(_.get(_, "cursor"), $timeline);
   const $table = table(tableId);

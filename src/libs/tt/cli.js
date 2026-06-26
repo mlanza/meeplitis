@@ -2,7 +2,7 @@
 
 import _ from "../atomic_/core.js";
 import $ from "../atomic_/shell.js";
-import { reel } from "./shell.js";
+import { tabletop } from "./shell.js";
 import { reg } from "../cmd.js";
 import { Command } from "@cliffy/command";
 import { keypress } from "@cliffy/keypress";
@@ -60,7 +60,7 @@ const elide = _.pipe(
   _.assocIn(_, ["perspective", "actor"], "<hidden>"));
 
 await new Command()
-  .name("reel")
+  .name("tt")
   .description("Navigate and append to board game timeline")
   .arguments("<table:string>")
   .option("--seat <seat:number>", "Seat number (integer)")
@@ -71,8 +71,8 @@ await new Command()
   .option("--at <eventId:string>", "Navigate to moment in timeline")
   .option("--elide", "Hide extraneous data")
   .action(function (opts, tableId){
-    const $source = reel(tableId, _.maybe(opts.seat, parseInt), opts.at ?? null, opts.token ?? null);
-    const $reel = opts.elide ? $.map(elide, $source) : $source;
+    const $source = tabletop(tableId, _.maybe(opts.seat, parseInt), opts.at ?? null, opts.token ?? null);
+    const $tt = opts.elide ? $.map(elide, $source) : $source;
     const $state = $.chan($source, "state");
     const $wip = $.chan($source, "wip");
     const $ready = $.chan($source, "ready");
@@ -94,7 +94,7 @@ await new Command()
       Deno.exit(0);
     });
 
-    reg({$reel, $state, $wip, $diff, $updated, $queue, $act, $ready, $working, $timer}, logs);
+    reg({$tt, $state, $wip, $diff, $updated, $queue, $act, $ready, $working, $timer}, logs);
 
     const iv = setInterval(function(){
       if (!_.deref($working) && _.seq(commands)) {

@@ -1,10 +1,10 @@
-# TODO: Reel request coordination
+# TODO: Tabletop request coordination
 
 - [ ] 1. Track outstanding asynchronous work for long-term proofs
   - Enumerate every async touch point (`getTouches`, `getPerspective`, `move`, `undo`, timer updates, etc.) and describe how each wakes the table/timeline/perspective resolution cycle.
   - Introduce a shared counter or registry that increments before sending each request, decrements in a `finally`-style handler no matter the outcome, and guards against double-counting when rapid repeats fire (timer ticks, duplicate table touches, etc.).
   - Surface the counter (or a derived "no outstanding work" flag) inside the derived state so both internal validators and external callers can read whether the system is still busy.
-  - Expose the tracker to the CLI (`src/libs/reel/cli.js`) so it can pause or exit only when the register reports zero in-flight work; log the register alongside the usual `$reel` snapshot for proof.
+  - Expose the tracker to the CLI (`src/libs/tt/cli.js`) so it can pause or exit only when the register reports zero in-flight work; log the register alongside the usual `$tt` snapshot for proof.
   - Document how consumers should interact with the tracker so future async touch points (perspective refreshes, undo chains, move batches) can participate safely.
 
 - [ ] 2. Build the Workboard class and wiring
@@ -17,7 +17,7 @@
   - Update documentation/specs to describe the Workboard-class contract and how new async actors register themselves.
 
 See supporting details:
-- [ax/reel/spec.md](ax/reel/spec.md)
-- [src/libs/reel/shell.js](src/libs/reel/shell.js)
-- [src/libs/reel/core.js](src/libs/reel/core.js)
-- [src/libs/reel/cli.js](src/libs/reel/cli.js)
+- [ax/tt/spec.md](ax/tt/spec.md)
+- [src/libs/tt/shell.js](src/libs/tt/shell.js)
+- [src/libs/tt/core.js](src/libs/tt/core.js)
+- [src/libs/tt/cli.js](src/libs/tt/cli.js)

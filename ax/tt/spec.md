@@ -1,7 +1,7 @@
 # Spec: Tracking outstanding asynchronous work for Reel
 
 ## Context
-The `reel` CLI and the browser UI both observe the ever-shifting signal that represents the backgammon timeline. The signal convulses whenever the table is touched, the cursor crawls through new touches, the perspective cache resolves, or timer-driven catch-up loops fire. We already filtered the noisy emissions so downstream subscribers no longer see every internal stumbling step. A second problem remains: even after the noise is tamed, observers still cannot tell whether any work is outstanding. We now need a manager that keeps tabs on every request so that once the register reads empty, anyone using the signal—especially `src/libs/reel/cli.js`—knows the world has truly stopped moving.
+The `tt` CLI and the browser UI both observe the ever-shifting signal that represents the backgammon timeline. The signal convulses whenever the table is touched, the cursor crawls through new touches, the perspective cache resolves, or timer-driven catch-up loops fire. We already filtered the noisy emissions so downstream subscribers no longer see every internal stumbling step. A second problem remains: even after the noise is tamed, observers still cannot tell whether any work is outstanding. We now need a manager that keeps tabs on every request so that once the register reads empty, anyone using the signal—especially `src/libs/tt/cli.js`—knows the world has truly stopped moving.
 
 ## Mental model
 1. **Table subscription & touches:** The shell seeds `$table` from Supabase and subscribes to table updates over `supabase.channel('db-messages')`. Each change causes `getTouches` to fetch the latest touches and updates the timeline via `r.addTouches`, which recalculates cursor and refreshes the derived state.
@@ -24,7 +24,7 @@ The `reel` CLI and the browser UI both observe the ever-shifting signal that rep
 2. **Build the request tracker.** Introduce a counter/registry that increments before launching each request and decrements in a `finally`-style handler so that success, failure, or cancellation all return the counter to the correct value.
 3. **Expose the tracker state.** Surface the counter (or a derived boolean like `noOutstandingRequests`) inside the derived `$state` so external consumers and CLI instrumentation can read it without probing the internals.
 4. **Protect against rapid repeats.** Ensure the tracker cannot be fooled by timer ticks or overlapping wake-ups—if a timer tick fires while the previous tick’s work is still running, the counter must not momentarily jump or leak (use idempotent guards or dedupe keys if necessary).
-5. **Validate via CLI.** Instrument `src/libs/reel/cli.js` so it observes the tracker, logs its value alongside `$reel` snapshots, and only considers the system ready to exit when the register reaches zero. That logging will prove the tracker and the CLI heuristics agree.
+5. **Validate via CLI.** Instrument `src/libs/tt/cli.js` so it observes the tracker, logs its value alongside `$tt` snapshots, and only considers the system ready to exit when the register reaches zero. That logging will prove the tracker and the CLI heuristics agree.
 6. **Make `$ready` a derived signal from `$workboard`.** The existing `can` helper demonstrates the shape the Workboard must support: wrap async actors in a block that requests work at the start and clears the ticket in a `finally`-style handler regardless of resolve or reject. `$workboard` tracks requests from table touches, user commands, timer ticks, and chained dominoes, while `$ready` simply mirrors whether the Workboard is empty. `$error` continues to capture the most recent failure so even rejected work can settle the Workboard without being retried automatically.
 
 ## Workboard class blueprint
@@ -39,4 +39,4 @@ We are merging the earlier ideas into a single Workboard abstraction anchored by
 We are delivering this as a baby step by also exposing a derived `$altReady` signal from `$queue`. Nothing consumes `$altReady` yet, but it mirrors the readiness we eventually care about while the rest of the system continues to behave exactly as it does today.
 
 ## Next steps
-See `ax/reel/TODO.md` for the concrete action list derived from this spec and the discussion above.
+See `ax/tt/TODO.md` for the concrete action list derived from this spec and the discussion above.

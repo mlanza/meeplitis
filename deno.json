@@ -11,7 +11,7 @@
     "lume": "deno run --import-map=import_map.json -A lume/cli.ts",
     "build": "deno task lume",
     "serve": "deno task lume -s",
-    "reel": "deno run -A --location 'https://meetlitis.com?monitor=$reel,$updated' ./src/libs/reel/cli.js QDaitfgARpk -i"
+    "tt": "deno run -A --location 'https://meetlitis.com?monitor=$tt' ./src/libs/tt/cli.js QDaitfgARpk -i"
   },
   "lint": {
     "rules": {
